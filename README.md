@@ -1,6 +1,6 @@
 # Bugger
 
-A website that provides bug tracking capabilities.
+The one and only legendary weißwurscht bug-tracking system.
 
 ```
   ____
@@ -15,11 +15,11 @@ A website that provides bug tracking capabilities.
 
 ## Team
 
-| Project phase | Person in charge | E-mail |
+| Project Phase | Person in Charge | E-mail |
 | ---- | ---- | ---- |
-| Specification | Benjamin Huber | [huberb@fim.uni-passau.de](mailto:huberb@fim.uni-passau.de) |
-| Draft | Nico Mexis | [mexis@fim.uni-passau.de](mailto:mexis@fim.uni-passau.de) |
-| Fine specification | Peter Mader | [maderp@fim.uni-passau.de](mailto:maderp@fim.uni-passau.de) |
+| Requirements | Benjamin Huber | [huberb@fim.uni-passau.de](mailto:huberb@fim.uni-passau.de) |
+| Design | Nico Mexis | [mexis@fim.uni-passau.de](mailto:mexis@fim.uni-passau.de) |
+| Specification | Peter Mader | [maderp@fim.uni-passau.de](mailto:maderp@fim.uni-passau.de) |
 | Implementation | Nikolas Kirschstein | [kirschstei@fim.uni-passau.de](mailto:kirschstei@fim.uni-passau.de) |
 | Validation | Laura Caspari | [casparil@fim.uni-passau.de](mailto:casparil@fim.uni-passau.de) |
 | Presentation | Markus Brune | [brunemarkus@fim.uni-passau.de](mailto:brunemarkus@fim.uni-passau.de) |
