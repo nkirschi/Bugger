@@ -1,0 +1,64 @@
+stages:
+  - validate
+  - build
+  - test
+
+cache:
+  key: "$CI_PROJECT_ID"
+  paths:
+    - .m2/repository
+
+variables:
+  MAVEN_OPTS: -Dmaven.repo.local=.m2/repository
+  MAVEN_ARGS: "--batch-mode --threads 4"
+  EXTERNAL_DATA: "/external_data"
+  SCRIPTS: "/external_data/scripts"
+  TESTS: "/external_data/tests"
+  GIT_SSL_NO_VERIFY: "true"
+
+image: hyperspeeed/sep2021:1.1
+
+before_script:
+  - python3 -V
+  - mvn -v
+  - mvn dependency:resolve -B
+
+############################### JOBS ###############################
+
+Validate:
+  stage: validate
+  script: "mvn $MAVEN_ARGS validate"
+
+Checkstyle:
+  stage: validate
+  allow_failure: true
+  script:
+    - "mvn $MAVEN_ARGS checkstyle:check"
+
+Compile:
+  stage: build
+  script:
+    - "mvn $MAVEN_ARGS compile"
+    - "mvn $MAVEN_ARGS war:war"
+  artifacts:
+    expire_in: 1 week
+    name: "Artifact"
+    paths:
+      - "target/*.war"
+
+Unit-Tests:
+  stage: test
+  allow_failure: true
+  script:
+    - "wget http://femtopedia.de/cover2cover.py"
+    - "mvn $MAVEN_ARGS test"
+    - "python3 cover2cover.py target/site/jacoco/jacoco.xml src/main/java > cobertura-coverage.xml"
+    - "cat target/site/jacoco/index.html | grep -o '<tfoot>.*</tfoot>'"
+  artifacts:
+    expire_in: 1 week
+    name: "Test Report"
+    paths:
+      - "target/site/jacoco"
+    reports:
+      junit: "target/*-reports/TEST-*.xml"
+      cobertura: "cobertura-coverage.xml"
