@@ -25,6 +25,7 @@
         <postgresql.version>42.2.18</postgresql.version>
         <lombok.version>1.18.16</lombok.version>
         <checkstyle.version>8.37</checkstyle.version>
+        <junit.version>5.7.0</junit.version>
     </properties>
 
     <dependencies>
@@ -73,6 +74,14 @@
             <scope>compile</scope>
         </dependency>
         -->
+
+        <!-- JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -121,6 +130,28 @@
                         https://femtopedia.de/checkstyle_new_nodoc.xml
                     </configLocation>
                 </configuration>
+            </plugin>
+
+            <!-- JaCoCo Test report -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.6</version>
+                <executions>
+                    <execution>
+                        <id>pre-unit-test</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
