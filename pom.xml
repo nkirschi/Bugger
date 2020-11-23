@@ -125,10 +125,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <configLocation>
-                        <!-- TODO: Change me -->
-                        https://femtopedia.de/checkstyle_new_nodoc.xml
-                    </configLocation>
+                    <configLocation>checkstyle.xml</configLocation>
                 </configuration>
             </plugin>
 
