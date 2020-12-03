@@ -12,13 +12,14 @@
 
     <properties>
         <!-- Compiler and Source settings -->
-        <java.version>14</java.version>
+        <java.version>11</java.version>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Library versions -->
         <jakartafaces.version>2.3.14</jakartafaces.version>
+        <jstl.version>1.2</jstl.version>
         <weldservlet.version>3.1.5.SP1</weldservlet.version>
         <jakartamail.version>1.6.5</jakartamail.version>
         <commonmark.version>0.15.2</commonmark.version>
@@ -34,6 +35,12 @@
             <groupId>org.glassfish</groupId>
             <artifactId>jakarta.faces</artifactId>
             <version>${jakartafaces.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>${jstl.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -86,7 +93,7 @@
 
     <build>
         <plugins>
-            <!-- Compile using Java 14 -->
+            <!-- Compile using custom Java version -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
