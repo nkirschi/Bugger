@@ -19,14 +19,16 @@
 
         <!-- Library versions -->
         <jakartafaces.version>2.3.14</jakartafaces.version>
-        <jstl.version>1.2</jstl.version>
+        <jstl.version>1.2.5</jstl.version>
         <weldservlet.version>3.1.5.SP1</weldservlet.version>
         <jakartamail.version>1.6.5</jakartamail.version>
+        <rewrite.version>3.4.4.Final</rewrite.version>
+        <jandex.version>2.2.2.Final</jandex.version>
         <commonmark.version>0.15.2</commonmark.version>
         <postgresql.version>42.2.18</postgresql.version>
-        <lombok.version>1.18.16</lombok.version>
         <checkstyle.version>8.37</checkstyle.version>
         <junit.version>5.7.0</junit.version>
+        <mockito.version>3.6.28</mockito.version>
     </properties>
 
     <dependencies>
@@ -38,8 +40,8 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>jstl</artifactId>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>javax.servlet.jsp.jstl</artifactId>
             <version>${jstl.version}</version>
             <scope>compile</scope>
         </dependency>
@@ -53,6 +55,21 @@
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
             <version>${jakartamail.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- URL Rewriter -->
+        <dependency>
+            <groupId>org.ocpsoft.rewrite</groupId>
+            <artifactId>rewrite-servlet</artifactId>
+            <version>${rewrite.version}</version>
+        </dependency>
+
+        <!-- Annotation Indexer -->
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jandex</artifactId>
+            <version>${jandex.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -72,21 +89,19 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- Lombok -->
-        <!--
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        -->
-
         <!-- JUnit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito 3 -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
