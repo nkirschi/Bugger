@@ -45,12 +45,6 @@
     <!-- See https://checkstyle.org/config_filefilters.html -->
     <module name="BeforeExecutionExclusionFileFilter">
         <property name="fileNamePattern" value="module\-info\.java$"/>
-        <module name="SuppressionCommentFilter">
-            <property name="offCommentFormat" value="CHECKSTYLE OFF\: ([\w\|]+)"/>
-            <property name="onCommentFormat" value="CHECKSTYLE ON\: ([\w\|]+)"/>
-            <property name="checkFormat" value="$1"/>
-        </module>
-        <module name="SuppressWithNearbyCommentFilter"/>
     </module>
 
     <!-- Checks whether files end with a new line.                        -->
@@ -72,7 +66,6 @@
     <!-- Checks for whitespace                               -->
     <!-- See https://checkstyle.org/config_whitespace.html -->
     <module name="FileTabCharacter"/>
-
 
     <!-- Miscellaneous other checks.                   -->
     <!-- See https://checkstyle.org/config_misc.html -->
@@ -175,6 +168,15 @@
         <module name="InterfaceIsType"/>
         <module name="OneStatementPerLine"/>
         <module name="VisibilityModifier"/>
+
+        <!-- Suppression filters                              -->
+        <!-- See https://checkstyle.org/config_filters.html -->
+        <module name="SuppressionCommentFilter">
+            <property name="offCommentFormat" value="CHECKSTYLE OFF\: ([\w\|]+)"/>
+            <property name="onCommentFormat" value="CHECKSTYLE ON\: ([\w\|]+)"/>
+            <property name="checkFormat" value="$1"/>
+        </module>
+        <module name="SuppressWithNearbyCommentFilter"/>
 
         <!-- Miscellaneous other checks.                   -->
         <!-- See https://checkstyle.org/config_misc.html -->
