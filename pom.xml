@@ -39,12 +39,14 @@
             <version>${jakartafaces.version}</version>
             <scope>compile</scope>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.glassfish.web</groupId>
             <artifactId>javax.servlet.jsp.jstl</artifactId>
             <version>${jstl.version}</version>
             <scope>compile</scope>
         </dependency>
+        -->
         <dependency>
             <groupId>org.jboss.weld.servlet</groupId>
             <artifactId>weld-servlet-shaded</artifactId>
