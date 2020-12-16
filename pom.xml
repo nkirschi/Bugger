@@ -12,7 +12,7 @@
 
     <properties>
         <!-- Compiler and Source settings -->
-        <java.version>11</java.version>
+        <java.version>14</java.version>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

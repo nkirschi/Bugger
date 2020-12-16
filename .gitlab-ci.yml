@@ -16,7 +16,7 @@ variables:
   TESTS: "/external_data/tests"
   GIT_SSL_NO_VERIFY: "true"
 
-image: hyperspeeed/sep2021:1.1
+image: hyperspeeed/sep2021:1.0.2
 
 before_script:
   - python3 -V
