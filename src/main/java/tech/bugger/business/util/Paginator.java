@@ -35,6 +35,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     public Paginator(final String sortedBy, final int itemsPerPage) {
         this.selection = new Selection(0, 0, itemsPerPage, sortedBy, true);
         update();
+        log.debug("Paginator with " + selection + " initialized.");
     }
 
     /**
@@ -69,6 +70,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     public void setCurrentPage(final int currentPage) {
         // User interaction: Subtract 1 for convenience (1-indexed)
         selection.setCurrentPage(currentPage - 1);
+        log.debug("Paginator updated through setCurrentPage to " + selection + ".");
     }
 
     /**
@@ -77,6 +79,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     public void prevPage() {
         selection.setCurrentPage(selection.getCurrentPage() - 1);
         update();
+        log.debug("Paginator updated through prevPage to " + selection + ".");
     }
 
     /**
@@ -85,6 +88,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     public void nextPage() {
         selection.setCurrentPage(selection.getCurrentPage() + 1);
         update();
+        log.debug("Paginator updated through nextPage to " + selection + ".");
     }
 
     /**
@@ -93,6 +97,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     public void firstPage() {
         selection.setCurrentPage(0);
         update();
+        log.debug("Paginator updated through firstPage to " + selection + ".");
     }
 
     /**
@@ -101,6 +106,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     public void lastPage() {
         selection.setCurrentPage(getLastPage());
         update();
+        log.debug("Paginator updated through lastPage to " + selection + ".");
     }
 
     /**
@@ -143,6 +149,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
             selection.setAscending(true);
         }
         updateReset();
+        log.debug("Paginator updated through sortBy to " + selection + ".");
     }
 
     /**
