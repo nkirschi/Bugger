@@ -73,8 +73,16 @@ public class MarkdownTest {
         String keyword = "hyperspeeed";
         String md = "@" + keyword;
         String html = MarkdownHandler.toHtml(md);
-        assertEquals("<p><a href=\"/user/" + keyword + "\" title=\"User " + keyword + "\">"
+        assertEquals("<p><a href=\"/user/" + keyword + "\" title=\"" + keyword + "\">"
                 + "@" + keyword + "</a></p>\n", html);
+    }
+
+    @Test
+    public void testInvalidUserString() {
+        String keyword = "+dhas";
+        String md = "@" + keyword;
+        String html = MarkdownHandler.toHtml(md);
+        assertEquals("<p>@" + keyword + "</p>\n", html);
     }
 
     @Test
@@ -82,7 +90,7 @@ public class MarkdownTest {
         String keyword = "456";
         String md = "#" + keyword;
         String html = MarkdownHandler.toHtml(md);
-        assertEquals("<p><a href=\"/report/" + keyword + "\" title=\"Report " + keyword + "\">"
+        assertEquals("<p><a href=\"/report/" + keyword + "\" title=\"" + keyword + "\">"
                 + "#" + keyword + "</a></p>\n", html);
     }
 
@@ -91,7 +99,7 @@ public class MarkdownTest {
         String keyword = "456";
         String md = "##" + keyword;
         String html = MarkdownHandler.toHtml(md);
-        assertEquals("<p><a href=\"/post/" + keyword + "\" title=\"Post " + keyword + "\">"
+        assertEquals("<p><a href=\"/post/" + keyword + "\" title=\"" + keyword + "\">"
                 + "##" + keyword + "</a></p>\n", html);
     }
 
@@ -109,7 +117,7 @@ public class MarkdownTest {
         String postfix = ", hhh";
         String md = "@" + keyword + postfix;
         String html = MarkdownHandler.toHtml(md);
-        assertEquals("<p><a href=\"/user/" + keyword + "\" title=\"User " + keyword + "\">@" + keyword + "</a>"
+        assertEquals("<p><a href=\"/user/" + keyword + "\" title=\"" + keyword + "\">@" + keyword + "</a>"
                 + postfix + "</p>\n", html);
     }
 
@@ -118,7 +126,7 @@ public class MarkdownTest {
         String md = "Hello there! General Kenobi!";
         Text text = new Text(md);
         ReferenceVisitor visitor = new ReferenceVisitor();
-        visitor.parseText(text, "@", "/user/", "User ");
+        visitor.parseText(text, "@", "/user/");
         assertAll(() -> assertNull(text.getNext()), () -> assertNull(text.getPrevious()));
     }
 
