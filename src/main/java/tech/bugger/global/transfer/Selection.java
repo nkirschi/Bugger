@@ -1,18 +1,40 @@
 package tech.bugger.global.transfer;
 
+import java.io.Serial;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * DTO representing pagination selection data.
  */
 public class Selection implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -4984947542876923184L;
 
+    /**
+     * The total number of entries.
+     */
     private int totalSize;
+
+    /**
+     * The currently shown page.
+     */
     private int currentPage;
+
+    /**
+     * The maximum number of entries per page.
+     */
     private int pageSize;
+
+    /**
+     * The key of the column to sort by.
+     */
     private String sortedBy;
+
+    /**
+     * Whether to sort in ascending or descending order.
+     */
     private boolean ascending;
 
     /**
@@ -24,7 +46,8 @@ public class Selection implements Serializable {
      * @param sortedBy    The column to be sorted by.
      * @param ascending   Whether to sort in ascending order.
      */
-    public Selection(int totalSize, int currentPage, int pageSize, String sortedBy, boolean ascending) {
+    public Selection(final int totalSize, final int currentPage, final int pageSize, final String sortedBy,
+                     final boolean ascending) {
         this.totalSize = totalSize;
         this.currentPage = currentPage;
         this.pageSize = pageSize;
@@ -46,7 +69,7 @@ public class Selection implements Serializable {
      *
      * @param totalSize The total data length to be set.
      */
-    public void setTotalSize(int totalSize) {
+    public void setTotalSize(final int totalSize) {
         this.totalSize = totalSize;
     }
 
@@ -64,7 +87,7 @@ public class Selection implements Serializable {
      *
      * @param currentPage The current page to be set.
      */
-    public void setCurrentPage(int currentPage) {
+    public void setCurrentPage(final int currentPage) {
         this.currentPage = currentPage;
     }
 
@@ -82,7 +105,7 @@ public class Selection implements Serializable {
      *
      * @param pageSize The selection page size to be set.
      */
-    public void setPageSize(int pageSize) {
+    public void setPageSize(final int pageSize) {
         this.pageSize = pageSize;
     }
 
@@ -100,7 +123,7 @@ public class Selection implements Serializable {
      *
      * @param sortedBy The selection sort column identifier to be set.
      */
-    public void setSortedBy(String sortedBy) {
+    public void setSortedBy(final String sortedBy) {
         this.sortedBy = sortedBy;
     }
 
@@ -118,7 +141,7 @@ public class Selection implements Serializable {
      *
      * @param ascending Whether to sort ascending.
      */
-    public void setAscending(boolean ascending) {
+    public void setAscending(final boolean ascending) {
         this.ascending = ascending;
     }
 
@@ -129,8 +152,17 @@ public class Selection implements Serializable {
      * @return {@code true} iff {@code other} is a semantically equivalent selection.
      */
     @Override
-    public boolean equals(Object other) {
-        return false;
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof Selection)) {
+            return false;
+        }
+        Selection sel = (Selection) other;
+        return totalSize == sel.totalSize && currentPage == sel.currentPage && pageSize == sel.pageSize
+                && ascending == sel.ascending && Objects.equals(sortedBy, sel.sortedBy);
     }
 
     /**
@@ -141,7 +173,7 @@ public class Selection implements Serializable {
      */
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(totalSize, currentPage, pageSize, sortedBy, ascending);
     }
 
     /**
@@ -151,8 +183,13 @@ public class Selection implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "Selection{"
+                + "totalSize=" + totalSize
+                + ", currentPage=" + currentPage
+                + ", pageSize=" + pageSize
+                + ", sortedBy='" + sortedBy + '\''
+                + ", ascending=" + ascending
+                + '}';
     }
 
 }
