@@ -11,14 +11,14 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PaginatorTest {
+public class PaginatorTest {
 
     private List<Integer> testData;
     private Paginator<Integer> paginator;
     private Paginator<Integer> paginatorEmpty;
 
     @BeforeEach
-    void init() {
+    public void init() {
         testData = IntStream.range(1, 50).boxed().collect(Collectors.toList());
 
         paginator = new Paginator<>("id", 20) {
@@ -57,97 +57,98 @@ class PaginatorTest {
     }
 
     @Test
-    void testInitialPage() {
+    public void testInitialPage() {
         assertEquals(1, paginator.getCurrentPage());
     }
 
     @Test
-    void testInitialPageIsFirst() {
+    public void testInitialPageIsFirst() {
         assertTrue(paginator.isFirstPage());
     }
 
     @Test
-    void testInitialFirstPage() {
+    public void testInitialFirstPage() {
         assertEquals(1, paginator.iterator().next());
     }
 
     @Test
-    void testFirstPage() {
+    public void testFirstPage() {
         paginator.setCurrentPage(3);
         paginator.firstPage();
         assertEquals(1, paginator.iterator().next());
     }
 
     @Test
-    void testNextPage() {
+    public void testNextPage() {
         paginator.setCurrentPage(1);
         paginator.nextPage();
         assertEquals(21, paginator.iterator().next());
     }
 
     @Test
-    void testPrevPage() {
+    public void testPrevPage() {
         paginator.setCurrentPage(2);
         paginator.prevPage();
         assertEquals(1, paginator.iterator().next());
     }
 
     @Test
-    void testLastPage() {
+    public void testLastPage() {
         paginator.setCurrentPage(1);
         paginator.lastPage();
         assertEquals(41, paginator.iterator().next());
     }
 
     @Test
-    void testIsFirstPageWhileFirstPage() {
+    public void testIsFirstPageWhileFirstPage() {
         paginator.firstPage();
         assertTrue(paginator.isFirstPage());
     }
 
     @Test
-    void testIsFirstPageWhileNotFirstPage() {
+    public void testIsFirstPageWhileNotFirstPage() {
         paginator.setCurrentPage(2);
         assertFalse(paginator.isFirstPage());
     }
 
     @Test
-    void testIsLastPageWhileLastPage() {
+    public void testIsLastPageWhileLastPage() {
         paginator.lastPage();
         assertTrue(paginator.isLastPage());
     }
 
     @Test
-    void testIsLastPageWhileNotLastPage() {
+    public void testIsLastPageWhileNotLastPage() {
         paginator.firstPage();
         assertFalse(paginator.isLastPage());
     }
 
     @Test
-    void testPageSizeValues() {
+    public void testPageSizeValues() {
         assertArrayEquals(new int[]{10, 20, 50, 100}, paginator.pageSizeValues());
     }
 
     @Test
-    void testIsEmptyWhileFull() {
+    public void testIsEmptyWhileFull() {
         assertFalse(paginator.isEmpty());
     }
 
     @Test
-    void testIsEmptyWhileEmpty() {
+    public void testIsEmptyWhileEmpty() {
         paginator.setWrappedData(new ArrayList<>());
         assertTrue(paginatorEmpty.isEmpty());
     }
 
     @Test
-    void testUpdateReset() {
+    public void testUpdateReset() {
+        System.out.println(paginator);
         paginator.setCurrentPage(5);
         paginator.updateReset();
         assertEquals(1, paginator.iterator().next());
     }
 
     @Test
-    void testSortByAscending() {
+    public void testSortByAscending() {
         List<Integer> sorted = new ArrayList<>();
         paginator.forEach(sorted::add);
         Collections.sort(sorted);
@@ -155,7 +156,7 @@ class PaginatorTest {
     }
 
     @Test
-    void testSortByDescending() {
+    public void testSortByDescending() {
         paginator.sortBy("id");
         List<Integer> sorted = new ArrayList<>();
         paginator.forEach(sorted::add);
@@ -164,7 +165,7 @@ class PaginatorTest {
     }
 
     @Test
-    void testSortByAscendingByToggle() {
+    public void testSortByAscendingByToggle() {
         paginator.sortBy("id");
         paginator.sortBy("id");
         List<Integer> sorted = new ArrayList<>();
@@ -174,7 +175,7 @@ class PaginatorTest {
     }
 
     @Test
-    void testSortByAscendingBySwitch() {
+    public void testSortByAscendingBySwitch() {
         paginator.sortBy("otherKey");
         paginator.sortBy("id");
         List<Integer> sorted = new ArrayList<>();
@@ -184,7 +185,7 @@ class PaginatorTest {
     }
 
     @Test
-    void testOtherPageSize() {
+    public void testOtherPageSize() {
         paginator.getSelection().setPageSize(50);
         assertTrue(paginator.isLastPage());
     }
