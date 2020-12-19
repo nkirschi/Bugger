@@ -9,14 +9,24 @@ import tech.bugger.global.util.Log;
  */
 public class ReferencePostProcessor implements PostProcessor {
 
+    /**
+     * The {@link Log} to log errors, warnings and other debug information to.
+     */
     private static final Log log = Log.forClass(ReferencePostProcessor.class);
+
+    /**
+     * The {@link ReferenceVisitor} to use when parsing.
+     */
+    private final ReferenceVisitor visitor = new ReferenceVisitor();
 
     /**
      * Processes the given node in the markdown syntax tree.
      */
     @Override
-    public Node process(Node node) {
-        return null;
+    public Node process(final Node node) {
+        log.debug("Parsing node " + node + " with reference support.");
+        node.accept(visitor);
+        return node;
     }
 
 }
