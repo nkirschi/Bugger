@@ -34,7 +34,8 @@
             <h:commandButton id="cb_prevPage" value="&lt;" disabled="#{cc.attrs.paginator.isFirstPage()}"
                              action="#{cc.attrs.paginator.prevPage}">
             </h:commandButton>
-            <h:inputText id="i_currPage" value="#{cc.attrs.paginator.currentPage}" rendered="#{not cc.attrs.simple}">
+            <h:inputText id="i_currPage" value="#{cc.attrs.paginator.currentPage}" rendered="#{not cc.attrs.simple}"
+                         validatorMessage="#{messages['paginator.not_in_range']}">
                 <f:validateLongRange minimum="1" maximum="#{cc.attrs.paginator.getLastPage() + 1}"/>
             </h:inputText>
             <h:commandButton id="cb_nextPage" value="&gt;" disabled="#{cc.attrs.paginator.isLastPage()}"
