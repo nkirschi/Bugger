@@ -141,7 +141,6 @@ public class PaginatorTest {
 
     @Test
     public void testUpdateReset() {
-        System.out.println(paginator);
         paginator.setCurrentPage(5);
         paginator.updateReset();
         assertEquals(1, paginator.iterator().next());
