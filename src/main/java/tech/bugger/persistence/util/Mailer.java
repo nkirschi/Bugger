@@ -2,15 +2,29 @@ package tech.bugger.persistence.util;
 
 import tech.bugger.global.util.Log;
 
-import javax.mail.*;
+import javax.mail.Address;
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Properties;
 
 /**
  * Basic e-mail sender singleton.
  *
- * This is a facade for any mailing API, currently Jakarta Mail.
+ * This is a facade for any mailing API (currently Jakarta Mail), adapted to our needs.
  */
 public final class Mailer {
 
@@ -50,20 +64,19 @@ public final class Mailer {
     /**
      * Configures the fundamental e-mailing parameters. This has to happen before any mail can be sent.
      *
-     * @param host     The SMTP server host name.
-     * @param port     The SMTP server TCP port.
-     * @param username The SMTP server login username.
-     * @param password The SMTP server login password.
-     * @param starttls Whether to use a secure TLS connection.
-     * @param sender   The sender e-mail address to include in each mail.
+     * @param is       Stream of mail configuration settings. The format and valid entries are specified in the
+     *                 <a href="https://eclipse-ee4j.github.io/mail/docs/api/">Jakarta Mail API Docs</a>.
+     * @param username The authentication username.
+     * @param password The authentication password.
      */
-    public void configure(String host, int port, String username, String password, boolean starttls, String sender) {
+    public void configure(InputStream is, String username, String password) throws IOException {
         configuration.clear();
-        configuration.put("mail.smtp.auth", Boolean.toString(starttls));
-        configuration.put("mail.smtp.starttls.enable", Boolean.toString(starttls));
-        configuration.put("mail.smtp.host", host);
-        configuration.put("mail.smtp.port", port);
-        configuration.put("sender", sender);
+        try {
+            configuration.load(is);
+        } catch (IOException e) {
+            log.warning("Mailing configuration could not be loaded.");
+            throw new IOException("Mailing configuration could not be loaded.", e);
+        }
         authenticator = new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -73,27 +86,85 @@ public final class Mailer {
     }
 
     /**
-     * Sends an e-mail with the specified properties.
+     * Sends a basic e-mail.
      *
      * @param recipient The recipient e-mail address of the e-mail to be sent.
      * @param subject   The subject of the e-mail to be sent.
-     * @param msg       The content of the e-mail to be sent.
-     * @throws IllegalStateException if called without the mailer being configured via {@link #configure}.
+     * @param content   The content of the e-mail to be sent.
+     * @throws IllegalStateException if called without the mailer being configured beforehand via {@link #configure}.
      */
-    public void sendMail(String recipient, String subject, String msg) {
+    public void send(String recipient, String subject, String content) {
+        send(recipient, Collections.emptyList(), subject, content);
+    }
+
+    /**
+     * Sends a basic e-mail with BCC recipients.
+     *
+     * @param recipient The recipient e-mail address of the e-mail to be sent.
+     * @param bcc       The blind carbon copy recipients of the e-mail.
+     * @param subject   The subject of the e-mail to be sent.
+     * @param content   The content of the e-mail to be sent.
+     */
+    public void send(String recipient, Collection<String> bcc, String subject, String content) {
+        send(Collections.singleton(recipient), Collections.emptyList(), bcc, Collections.emptyList(), subject, content);
+    }
+
+    /**
+     * Sends a full-featured e-mail.
+     *
+     * @param to      The primary recipients of the e-mail.
+     * @param cc      The carbon copy recipients of the e-mail.
+     * @param bcc     The blind carbon copy recipients of the e-mail.
+     * @param replyto The reply-to addresses of the e-mail.
+     * @param subject The subject of the e-mail to be sent.
+     * @param content The content of the e-mail to be sent.
+     * @throws IllegalStateException if called without the mailer being configured beforehand via {@link #configure}.
+     */
+    public void send(Collection<String> to, Collection<String> cc, Collection<String> bcc,
+                     Collection<String> replyto, String subject, String content) {
         if (configuration.isEmpty()) {
             throw new IllegalStateException("Mailer has not yet been configured!");
         }
-        Session mailSession = Session.getDefaultInstance(configuration, authenticator);
+        send(parseAddresses(to), parseAddresses(cc), parseAddresses(bcc), parseAddresses(replyto), subject, content);
+    }
+
+    private void send(Address[] to, Address[] cc, Address[] bcc, Address[] replyto, String subject, String content) {
         try {
+            Session mailSession = Session.getDefaultInstance(configuration, authenticator);
             MimeMessage message = new MimeMessage(mailSession);
-            message.setFrom(new InternetAddress(configuration.getProperty("sender")));
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
+            message.addRecipients(Message.RecipientType.TO, to);
+            message.addRecipients(Message.RecipientType.CC, cc);
+            message.addRecipients(Message.RecipientType.BCC, bcc);
+            message.setReplyTo(replyto);
             message.setSubject(subject);
-            message.setText(msg);
+            message.setText(content);
             Transport.send(message);
         } catch (MessagingException e) {
-            e.printStackTrace();
+            log.warning("Could not send mail with subject \"" + subject + "\".");
         }
+    }
+
+    private Address[] parseAddresses(Collection<String> addresses) {
+        Collection<Address> validAddresses = new ArrayList<>();
+        for (String address : addresses) {
+            try {
+                validAddresses.add(new InternetAddress(address));
+            } catch (AddressException e) {
+                log.warning("Invalid e-mail address " + address + ".", e);
+            }
+        }
+        return validAddresses.toArray(new Address[]{});
+    }
+
+    public static void main(String[] args) throws Exception {
+        String config = "mail.smtp.auth = true\n"
+                + "mail.smtp.starttls.enable = true\n"
+                + "mail.smtp.host = smtp.mail.de\n"
+                + "mail.smtp.port = 587\n"
+                + "mail.debug = false\n"
+                + "mail.from = bugger@mail.de";
+        Mailer.getInstance().configure(new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8)), "bugger",
+                "BuggerFahrenMachtSpass42");
+        Mailer.getInstance().send("nikolas.kirschstein@gmail.com", "Application", "I apply.");
     }
 }
