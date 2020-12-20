@@ -1,12 +1,14 @@
 package tech.bugger.persistence.util;
 
 import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.ConfigFileException;
+import tech.bugger.persistence.exception.ConfigException;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * Reader for contents of a configuration file held in <code>key = value</code> format.
+ * Reader for contents of a configuration source held in <code>key = value</code> format.
  */
 public final class ConfigReader {
     private static final Log log = Log.forClass(ConfigReader.class);
@@ -26,16 +28,24 @@ public final class ConfigReader {
      * @return The one and only instance of the configuration reader.
      */
     public static ConfigReader getInstance() {
-        return null;
+        if (instance == null) {
+            instance = new ConfigReader();
+        }
+        return instance;
     }
 
     /**
-     * Loads the configuration from the given file path.
+     * Loads the configuration from the given input stream.
      *
-     * @param configFile Path to the configuration file relative to the classpath.
+     * @param is Stream of configuration data.
      */
-    public void load(String configFile) {
-
+    public void load(InputStream is) throws IOException {
+        try {
+            configuration.load(is);
+            loaded = true;
+        } catch (IOException e) {
+            throw new IOException("Config source could not be loaded!", e);
+        }
     }
 
     /**
@@ -43,11 +53,17 @@ public final class ConfigReader {
      *
      * @param key The key of the desired property.
      * @return The string property associated with {@code key}
-     * @throws ConfigFileException   if {@code key} is not associated with a property.
+     * @throws ConfigException       if {@code key} is not associated with a property.
      * @throws IllegalStateException if no configuration has been loaded yet.
      */
     public String getString(String key) {
-        return null;
+        if (!loaded) {
+            throw new IllegalStateException("Configuration has not been loaded!");
+        }
+        if (!configuration.containsKey(key)) {
+            throw new ConfigException("Invalid key!");
+        }
+        return configuration.getProperty(key);
     }
 
     /**
@@ -55,11 +71,16 @@ public final class ConfigReader {
      *
      * @param key The key of the desired property.
      * @return The integer property associated with {@code key}
-     * @throws ConfigFileException   if {@code key} is not associated with a property or the property is no integer.
+     * @throws ConfigException       if {@code key} is not associated with a property or the property is no integer.
      * @throws IllegalStateException if no configuration has been loaded yet.
      */
     public int getInt(String key) {
-        return 0;
+        String value = getString(key);
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new ConfigException("Value " + value + " is not an integer!", e);
+        }
     }
 
     /**
@@ -67,10 +88,10 @@ public final class ConfigReader {
      *
      * @param key The key of the desired property.
      * @return The boolean property associated with {@code key}
-     * @throws ConfigFileException   if {@code key} is not associated with a property.
+     * @throws ConfigException       if {@code key} is not associated with a property.
      * @throws IllegalStateException if no configuration has been loaded yet.
      */
     public boolean getBoolean(String key) {
-        return false;
+        return Boolean.parseBoolean(getString(key));
     }
 }
