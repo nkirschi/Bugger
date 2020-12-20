@@ -6,12 +6,25 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 
+import java.sql.Connection;
+
 /**
  * Subscription gateway that gives access to subscription relationships stored in a database.
  */
 public class SubscriptionDBGateway implements SubscriptionGateway {
 
     private static final Log log = Log.forClass(SubscriptionDBGateway.class);
+
+    private Connection conn;
+
+    /**
+     * Constructs a new subscription gateway with the given database connection.
+     *
+     * @param conn The database connection to use for the gateway.
+     */
+    public SubscriptionDBGateway(Connection conn) {
+        this.conn = conn;
+    }
 
     /**
      * {@inheritDoc}

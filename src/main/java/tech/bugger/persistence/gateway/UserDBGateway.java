@@ -6,6 +6,7 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
+import java.sql.Connection;
 import java.util.List;
 
 /**
@@ -14,6 +15,17 @@ import java.util.List;
 public class UserDBGateway implements UserGateway {
 
     private static final Log log = Log.forClass(UserDBGateway.class);
+
+    private Connection conn;
+
+    /**
+     * Constructs a new user gateway with the given database connection.
+     *
+     * @param conn The database connection to use for the gateway.
+     */
+    public UserDBGateway(Connection conn) {
+        this.conn = conn;
+    }
 
     /**
      * {@inheritDoc}
