@@ -1,8 +1,31 @@
 package tech.bugger.persistence.util;
 
-import tech.bugger.persistence.gateway.*;
+import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.gateway.AttachmentDBGateway;
+import tech.bugger.persistence.gateway.AttachmentGateway;
+import tech.bugger.persistence.gateway.NotificationDBGateway;
+import tech.bugger.persistence.gateway.NotificationGateway;
+import tech.bugger.persistence.gateway.PostDBGateway;
+import tech.bugger.persistence.gateway.PostGateway;
+import tech.bugger.persistence.gateway.ReportDBGateway;
+import tech.bugger.persistence.gateway.ReportGateway;
+import tech.bugger.persistence.gateway.SearchDBGateway;
+import tech.bugger.persistence.gateway.SearchGateway;
+import tech.bugger.persistence.gateway.SettingsDBGateway;
+import tech.bugger.persistence.gateway.SettingsGateway;
+import tech.bugger.persistence.gateway.StatisticsDBGateway;
+import tech.bugger.persistence.gateway.StatisticsGateway;
+import tech.bugger.persistence.gateway.SubscriptionDBGateway;
+import tech.bugger.persistence.gateway.SubscriptionGateway;
+import tech.bugger.persistence.gateway.TokenDBGateway;
+import tech.bugger.persistence.gateway.TokenGateway;
+import tech.bugger.persistence.gateway.TopicDBGateway;
+import tech.bugger.persistence.gateway.TopicGateway;
+import tech.bugger.persistence.gateway.UserDBGateway;
+import tech.bugger.persistence.gateway.UserGateway;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * Database Transaction implementation.
@@ -16,105 +39,36 @@ class DBTransaction implements Transaction {
      */
     private Connection connection;
 
+    private final ConnectionPool connectionPool;
+
+    private boolean completed; // either committed or aborted
+
     /**
      * Constructs a new transaction with its own database connection.
      */
-    public DBTransaction() {
+    public DBTransaction(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
+        this.connection = connectionPool.getConnection();
+        completed = false;
+        try {
+            connection.setAutoCommit(false);
+        } catch (SQLException e) {
+            throw new InternalError("Cannot disable auto-commit.", e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public AttachmentGateway newAttachmentGateway() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NotificationGateway newNotificationGateway() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PostGateway newPostGateway() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ReportGateway newReportGateway() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SearchGateway newSearchGateway() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SettingsGateway newSettingsGateway() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StatisticsGateway newStatisticsGateway() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SubscriptionGateway newSubscriptionGateway() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public TokenGateway newTokenGateway() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public TopicGateway newTopicGateway() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public UserGateway newUserGateway() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void commit() {
+    public void commit() throws TransactionException {
+        checkState();
+        try {
+            connection.commit();
+            completed = true;
+        } catch (SQLException e) {
+            throw new TransactionException("Transaction commit failed.", e);
+        }
     }
 
     /**
@@ -122,5 +76,133 @@ class DBTransaction implements Transaction {
      */
     @Override
     public void abort() {
+        checkState();
+        try {
+            connection.rollback();
+            completed = true;
+        } catch (SQLException e) {
+            throw new InternalError("Transaction rollback failed.", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() {
+        if (!completed) {
+            abort();
+        }
+        connectionPool.releaseConnection(connection);
+        connection = null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AttachmentGateway newAttachmentGateway() {
+        checkState();
+        return new AttachmentDBGateway(connection);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NotificationGateway newNotificationGateway() {
+        checkState();
+        return new NotificationDBGateway(connection);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PostGateway newPostGateway() {
+        checkState();
+        return new PostDBGateway(connection);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ReportGateway newReportGateway() {
+        checkState();
+        return new ReportDBGateway(connection);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SearchGateway newSearchGateway() {
+        checkState();
+        return new SearchDBGateway(connection);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SettingsGateway newSettingsGateway() {
+        checkState();
+        return new SettingsDBGateway(connection);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StatisticsGateway newStatisticsGateway() {
+        checkState();
+        return new StatisticsDBGateway(connection);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SubscriptionGateway newSubscriptionGateway() {
+        checkState();
+        return new SubscriptionDBGateway(connection);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public TokenGateway newTokenGateway() {
+        checkState();
+        return new TokenDBGateway(connection);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public TopicGateway newTopicGateway() {
+        checkState();
+        return new TopicDBGateway(connection);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UserGateway newUserGateway() {
+        checkState();
+        return new UserDBGateway(connection);
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    private void checkState() {
+        if (connection == null) {
+            throw new IllegalStateException("Transaction cannot be reused.");
+        }
     }
 }

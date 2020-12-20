@@ -7,9 +7,10 @@ public class TransactionManager {
 
     /**
      * Yields a new transaction ready for use.
+     *
      * @return The fresh transaction.
      */
     public static Transaction begin() {
-        return new DBTransaction();
+        return new DBTransaction(ConnectionPool.getInstance());
     }
 }

@@ -1,19 +1,30 @@
 package tech.bugger.persistence.util;
 
-import tech.bugger.persistence.gateway.*;
+import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.gateway.AttachmentGateway;
+import tech.bugger.persistence.gateway.NotificationGateway;
+import tech.bugger.persistence.gateway.PostGateway;
+import tech.bugger.persistence.gateway.ReportGateway;
+import tech.bugger.persistence.gateway.SearchGateway;
+import tech.bugger.persistence.gateway.SettingsGateway;
+import tech.bugger.persistence.gateway.StatisticsGateway;
+import tech.bugger.persistence.gateway.SubscriptionGateway;
+import tech.bugger.persistence.gateway.TokenGateway;
+import tech.bugger.persistence.gateway.TopicGateway;
+import tech.bugger.persistence.gateway.UserGateway;
 
 /**
- * Transaction to combine multiply data access operations into a single work unit.
+ * Transaction to combine multiple data access operations into a single work unit.
  *
  * Once created, a transaction object provides factory methods for all available data gateways that can be used to add
  * actions to the current transaction.
  */
-public interface Transaction {
+public interface Transaction extends ExceptionlessAutoCloseable {
 
     /**
      * Commits the current transaction. Changes are applied as single work unit.
      */
-    public void commit();
+    public void commit() throws TransactionException;
 
     /**
      * Aborts the current transaction. Any changes made are reverted.
