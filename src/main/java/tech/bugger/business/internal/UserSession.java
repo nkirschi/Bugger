@@ -3,7 +3,9 @@ package tech.bugger.business.internal;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.context.FacesContext;
 import javax.inject.Named;
 import java.io.Serializable;
 import java.util.Locale;
@@ -19,6 +21,11 @@ public class UserSession implements Serializable {
     private static final Log log = Log.forClass(UserSession.class);
     private User user;
     private Locale locale;
+
+    @PostConstruct
+    public void init() {
+        locale = FacesContext.getCurrentInstance().getExternalContext().getRequestLocale();
+    }
 
     /**
      * Invalidates the session.
