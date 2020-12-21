@@ -65,7 +65,7 @@ public class ConnectionPool {
      * @param jdbcDvr   The fully qualified class name of the JDBC database driver to use.
      * @param jdbcURL   The DBMS-specific JDBC URL for connecting to the database. For a list, see
      *                  https://vladmihalcea.com/jdbc-driver-connection-url-strings.
-     * @param jdbcProps The DMBS-specific JDBC connection properties containing at least credentials.
+     * @param jdbcProps The DBMS-specific JDBC connection properties containing at least credentials.
      * @param minConns  The minimum amount of database connections to maintain.
      * @param maxConns  The maximum amount of database connections to maintain.
      * @param timeoutMs The maximum time in milliseconds to wait for receiving a connection.

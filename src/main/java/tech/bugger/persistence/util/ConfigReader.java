@@ -84,7 +84,7 @@ public final class ConfigReader {
     }
 
     /**
-     * Retrieves a booolean property from the configuration by the given key.
+     * Retrieves a boolean property from the configuration by the given key.
      *
      * @param key The key of the desired property.
      * @return The boolean property associated with {@code key}

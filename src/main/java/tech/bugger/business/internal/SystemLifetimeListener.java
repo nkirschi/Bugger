@@ -104,4 +104,3 @@ public class SystemLifetimeListener implements ServletContextListener {
         ConnectionPool.getInstance().shutdown();
     }
 }
-

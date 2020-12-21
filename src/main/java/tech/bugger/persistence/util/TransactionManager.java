@@ -3,7 +3,11 @@ package tech.bugger.persistence.util;
 /**
  * Factory for transactions.
  */
-public class TransactionManager {
+public final class TransactionManager {
+
+    private TransactionManager() {
+        // utility class
+    }
 
     /**
      * Yields a new transaction ready for use.

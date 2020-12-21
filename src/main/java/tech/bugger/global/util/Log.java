@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  * Facade for a logging API. Currently: {@link java.util.logging}.
@@ -13,10 +14,10 @@ import java.util.logging.LogManager;
 public final class Log {
     private static final Map<String, Log> logMap = new HashMap<>();
 
-    private final java.util.logging.Logger logger;
+    private final Logger logger;
 
     private Log(final String name) {
-        logger = java.util.logging.Logger.getLogger(name);
+        logger = Logger.getLogger(name);
     }
 
     /**

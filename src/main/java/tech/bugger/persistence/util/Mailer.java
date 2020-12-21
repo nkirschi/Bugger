@@ -12,10 +12,8 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -154,17 +152,5 @@ public final class Mailer {
             }
         }
         return validAddresses.toArray(new Address[]{});
-    }
-
-    public static void main(String[] args) throws Exception {
-        String config = "mail.smtp.auth = true\n"
-                + "mail.smtp.starttls.enable = true\n"
-                + "mail.smtp.host = smtp.mail.de\n"
-                + "mail.smtp.port = 587\n"
-                + "mail.debug = false\n"
-                + "mail.from = bugger@mail.de";
-        Mailer.getInstance().configure(new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8)), "bugger",
-                "BuggerFahrenMachtSpass42");
-        Mailer.getInstance().send("nikolas.kirschstein@gmail.com", "Application", "I apply.");
     }
 }
