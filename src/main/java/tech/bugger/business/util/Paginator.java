@@ -39,7 +39,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     }
 
     /**
-     * Fetches a slice of data specified by {@code pagination}.
+     * Fetches a slice of data specified by {@link #getSelection()}.
      *
      * @return The data chunk characterized by the current parameters.
      */
@@ -110,7 +110,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     }
 
     /**
-     * Check whether the current page is the first page of the considered data.
+     * Checks whether the current page is the first page of the considered data.
      *
      * @return Whether the current page is the first page.
      */
@@ -128,7 +128,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     }
 
     /**
-     * Check whether the current page is the last page of the considered data.
+     * Checks whether the current page is the last page of the considered data.
      *
      * @return Whether the current page is the last page.
      */
@@ -137,7 +137,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     }
 
     /**
-     * Sort by the given column key.
+     * Sorts by the given column key.
      *
      * @param sortKey The key of the column to sort by.
      */
@@ -153,7 +153,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     }
 
     /**
-     * Update the paginated data model using the current parameters in {@code pagination}.
+     * Updates the paginated data model using the current parameters in {@code pagination}.
      */
     public void update() {
         setWrappedData(fetch());
@@ -161,7 +161,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     }
 
     /**
-     * Update the paginated data model while returning to the first page.
+     * Updates the paginated data model while returning to the first page.
      */
     public void updateReset() {
         selection.setCurrentPage(0);
