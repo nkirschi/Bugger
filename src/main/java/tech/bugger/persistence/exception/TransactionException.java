@@ -1,10 +1,12 @@
 package tech.bugger.persistence.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating that a transaction was not executed successfully.
  */
 public class TransactionException extends Exception {
-
+    @Serial
     private static final long serialVersionUID = 7666151903503703118L;
 
     /**

@@ -1,12 +1,13 @@
 package tech.bugger.global.transfer;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * DTO representing pagination selection data.
  */
 public class Selection implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = -4984947542876923184L;
 
     private int totalSize;

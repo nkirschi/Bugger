@@ -1,10 +1,12 @@
 package tech.bugger.persistence.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating something was not there.
  */
 public class NotFoundException extends Exception {
-
+    @Serial
     private static final long serialVersionUID = 6292170139373814152L;
 
     /**

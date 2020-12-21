@@ -1,10 +1,12 @@
 package tech.bugger.business.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating cryptography is not possible.
  */
 public class CryptographyImpossibleException extends RuntimeException {
-
+    @Serial
     private static final long serialVersionUID = -693190241209319033L;
 
     /**

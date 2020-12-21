@@ -2,13 +2,14 @@ package tech.bugger.global.transfer;
 
 import tech.bugger.global.util.Lazy;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * DTO representing a post attachment.
  */
 public class Attachment implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = -2716524830405709705L;
 
     private int id;

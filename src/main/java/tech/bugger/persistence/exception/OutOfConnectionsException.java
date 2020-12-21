@@ -1,10 +1,12 @@
 package tech.bugger.persistence.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating there are not enough connections available.
  */
 public class OutOfConnectionsException extends RuntimeException {
-
+    @Serial
     private static final long serialVersionUID = -9055935003841723321L;
 
     /**

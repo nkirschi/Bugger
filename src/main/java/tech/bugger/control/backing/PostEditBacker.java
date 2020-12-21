@@ -17,6 +17,7 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -28,6 +29,7 @@ import java.util.List;
 public class PostEditBacker implements Serializable {
 
     private static final Log log = Log.forClass(PostEditBacker.class);
+    @Serial
     private static final long serialVersionUID = -973315118868047411L;
 
     private Integer postID;

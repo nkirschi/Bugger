@@ -1,10 +1,12 @@
 package tech.bugger.persistence.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating a race condition while editing some content.
  */
 public class ConcurrentModificationException extends Exception {
-
+    @Serial
     private static final long serialVersionUID = -7858198918413564101L;
 
     /**

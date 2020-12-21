@@ -1,5 +1,6 @@
 package tech.bugger.global.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.function.Supplier;
 
@@ -9,6 +10,7 @@ import java.util.function.Supplier;
  * @param <T> The type of the wrapped object.
  */
 public class Lazy<T> implements Serializable {
+    @Serial
     private static final long serialVersionUID = -7848504462864860011L;
 
     /**

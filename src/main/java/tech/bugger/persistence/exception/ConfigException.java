@@ -1,10 +1,12 @@
 package tech.bugger.persistence.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating something went wrong with the config file.
  */
 public class ConfigException extends RuntimeException {
-
+    @Serial
     private static final long serialVersionUID = -7813119346738971512L;
 
     /**
