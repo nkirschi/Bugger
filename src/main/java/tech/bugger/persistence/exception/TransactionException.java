@@ -25,7 +25,7 @@ public class TransactionException extends Exception {
      * @param message The detail message describing this particular exception.
      * @param cause   The cause for this particular exception.
      */
-    public TransactionException(String message, Throwable cause) {
+    public TransactionException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
@@ -34,7 +34,7 @@ public class TransactionException extends Exception {
      *
      * @param message The detail message describing this particular exception.
      */
-    public TransactionException(String message) {
+    public TransactionException(final String message) {
         super(message);
     }
 
@@ -44,7 +44,7 @@ public class TransactionException extends Exception {
      *
      * @param cause The cause for this particular exception.
      */
-    public TransactionException(Throwable cause) {
+    public TransactionException(final Throwable cause) {
         super(cause);
     }
 }

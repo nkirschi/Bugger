@@ -14,7 +14,7 @@ public class ConfigException extends RuntimeException {
      *
      * @param message The detail message describing this particular exception.
      */
-    public ConfigException(String message) {
+    public ConfigException(final String message) {
         super(message);
     }
 
@@ -27,7 +27,7 @@ public class ConfigException extends RuntimeException {
      * @param message The detail message describing this particular exception.
      * @param cause   The cause for this particular exception.
      */
-    public ConfigException(String message, Throwable cause) {
+    public ConfigException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
@@ -45,7 +45,7 @@ public class ConfigException extends RuntimeException {
      *
      * @param cause The cause for this particular exception.
      */
-    public ConfigException(Throwable cause) {
+    public ConfigException(final Throwable cause) {
         super(cause);
         // TODO Auto-generated constructor stub
     }

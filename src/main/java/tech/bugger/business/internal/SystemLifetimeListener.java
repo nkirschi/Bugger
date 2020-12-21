@@ -18,17 +18,36 @@ import java.util.Properties;
 @WebListener
 public class SystemLifetimeListener implements ServletContextListener {
 
+    /**
+     * Log instance for logging in this class.
+     */
     private static final Log log = Log.forClass(SystemLifetimeListener.class);
 
+    /**
+     * Path to the application configuration relative to the application root.
+     */
     private static final String APP_CONFIG = "/WEB-INF/config.properties";
+
+    /**
+     * Path to the JDBC configuration relative to the application root.
+     */
     private static final String JDBC_CONFIG = "/WEB-INF/jdbc.properties";
+
+    /**
+     * Path to the logging configuration relative to the application root.
+     */
     private static final String LOGGING_CONFIG = "/WEB-INF/logging.properties";
+
+    /**
+     * Path to the mailing configuration relative to the application root.
+     */
+    private static final String MAILING_CONFIG = "/WEB-INF/mailing.properties";
 
     /**
      * Initializes necessary dependencies for the application to run.
      */
     @Override
-    public void contextInitialized(ServletContextEvent sce) {
+    public void contextInitialized(final ServletContextEvent sce) {
         ServletContext sctx = sce.getServletContext();
 
         initializeLogging(sctx);
@@ -44,12 +63,12 @@ public class SystemLifetimeListener implements ServletContextListener {
      * Terminates all permanent dependencies in order not to leave behind unclosed resources.
      */
     @Override
-    public void contextDestroyed(ServletContextEvent sce) {
+    public void contextDestroyed(final ServletContextEvent sce) {
         cleanUp();
         log.info("Application shutdown completed.");
     }
 
-    private void initializeLogging(ServletContext sctx) {
+    private void initializeLogging(final ServletContext sctx) {
         try {
             Log.init(sctx.getResourceAsStream(LOGGING_CONFIG));
         } catch (IOException e) {
@@ -57,7 +76,7 @@ public class SystemLifetimeListener implements ServletContextListener {
         }
     }
 
-    private void initializeAppConfig(ServletContext sctx) {
+    private void initializeAppConfig(final ServletContext sctx) {
         ConfigReader configReader = ConfigReader.getInstance();
         try {
             configReader.load(sctx.getResourceAsStream(APP_CONFIG));
@@ -67,7 +86,7 @@ public class SystemLifetimeListener implements ServletContextListener {
         }
     }
 
-    private void initializeConnectionPool(ServletContext sctx) {
+    private void initializeConnectionPool(final ServletContext sctx) {
         Properties jdbcProperties = new Properties();
         try {
             jdbcProperties.load(sctx.getResourceAsStream(JDBC_CONFIG));
@@ -84,10 +103,10 @@ public class SystemLifetimeListener implements ServletContextListener {
         );
     }
 
-    private void initializeMailing(ServletContext sctx) {
+    private void initializeMailing(final ServletContext sctx) {
         try {
             Mailer.getInstance().configure(
-                    sctx.getResourceAsStream("/WEB-INF/mailing.properties"),
+                    sctx.getResourceAsStream(MAILING_CONFIG),
                     ConfigReader.getInstance().getString("MAIL_USER"),
                     ConfigReader.getInstance().getString("MAIL_PASS")
             );

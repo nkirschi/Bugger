@@ -10,10 +10,18 @@ import java.util.ResourceBundle;
  * CDI producer for convenient access to resource bundles.
  */
 public class BundleProducer {
+    /**
+     * The current user session.
+     */
     private final UserSession userSession;
 
+    /**
+     * Constructs a new bundle producer with the given {@link UserSession} for locale access.
+     *
+     * @param userSession The current user session.
+     */
     @Inject
-    public BundleProducer(UserSession userSession) {
+    public BundleProducer(final UserSession userSession) {
         this.userSession = userSession;
     }
 

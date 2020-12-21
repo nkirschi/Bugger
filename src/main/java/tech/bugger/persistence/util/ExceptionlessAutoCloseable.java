@@ -1,6 +1,12 @@
 package tech.bugger.persistence.util;
 
-public interface ExceptionlessAutoCloseable extends AutoCloseable {
+/**
+ * Modification of {@link AutoCloseable} without the need to throw an exception in {@link #close()}.
+ */
+interface ExceptionlessAutoCloseable extends AutoCloseable {
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void close();
+    void close();
 }

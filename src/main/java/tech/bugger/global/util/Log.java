@@ -12,10 +12,26 @@ import java.util.logging.Logger;
  * Facade for a logging API. Currently: {@link java.util.logging}.
  */
 public final class Log {
+    /**
+     * The depth of method calls starting from the client until reaching {@link #log(Level, String, Throwable)}.
+     */
+    private static final int CALL_DEPTH = 3;
+
+    /**
+     * Cache of loggers for their associated classes for performance.
+     */
     private static final Map<String, Log> logMap = new HashMap<>();
 
+    /**
+     * {@link Logger} proxied by this instance.
+     */
     private final Logger logger;
 
+    /**
+     * Constructs a new Log proxying a logger for the given class.
+     *
+     * @param name Fully-qualified name of the class the new Log is associated with.
+     */
     private Log(final String name) {
         logger = Logger.getLogger(name);
     }
@@ -26,9 +42,9 @@ public final class Log {
      * @param is An input stream yielding access to the configuration.
      * @throws IOException if the input stream {@code is} could not be read.
      */
-    public static void init(InputStream is) throws IOException {
+    public static void init(final InputStream is) throws IOException {
         if (is == null) {
-            throw new IllegalArgumentException("Initalization stream must not be null.");
+            throw new IllegalArgumentException("Initialization stream must not be null.");
         }
         try {
             LogManager.getLogManager().readConfiguration(is);
@@ -139,8 +155,8 @@ public final class Log {
      */
     private void log(final Level level, final String msg, final Throwable cause) {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        if (stackTrace.length > 3) {
-            StackTraceElement e = Thread.currentThread().getStackTrace()[3]; // caller
+        if (stackTrace.length > CALL_DEPTH) {
+            StackTraceElement e = Thread.currentThread().getStackTrace()[CALL_DEPTH]; // caller
             logger.logp(level, e.getClassName(), e.getMethodName(), msg, cause);
         } else { // should never happen
             logger.log(level, msg, cause);

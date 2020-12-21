@@ -5,6 +5,9 @@ package tech.bugger.persistence.util;
  */
 public final class TransactionManager {
 
+    /**
+     * Private constructor to prevent initialization of this utility class.
+     */
     private TransactionManager() {
         // utility class
     }

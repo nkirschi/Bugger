@@ -18,27 +18,85 @@ import java.util.Set;
  * The pool dynamically manages a set of database connections that can be borrowed and returned by callers. Before being
  * used, the pool must be initialized with technical parameters for the database connection and performance aspects.
  */
-public class ConnectionPool {
+public final class ConnectionPool {
+    /**
+     * Log instance for logging in this class.
+     */
     private static final Log log = Log.forClass(ConnectionPool.class);
+
+    /**
+     * Percentage of used connections below which the load is considered low.
+     */
     private static final double DECREASE_THRESH = 0.7;
 
+    /**
+     * Singleton instance of this connection pool.
+     */
     private static ConnectionPool instance;
 
+    /**
+     * The connections available for usage.
+     */
     private final Deque<Connection> availableConnections;
+
+    /**
+     * The connections currently in use.
+     */
     private final Set<Connection> usedConnections;
 
-    private int minConns;
-    private int maxConns;
-    private int timeout;
+    /**
+     * The minimum total number of connections to maintain.
+     */
+    private int minConnections;
 
+    /**
+     * The maximum allowed total number of connections.
+     */
+    private int maxConnections;
+
+    /**
+     * Maximum time in milliseconds to wait on receiving a connection.
+     */
+    private int timeoutMillis;
+
+    /**
+     * The DBMS-specific JDBC URL for connecting to the database.
+     */
     private String jdbcURL;
-    private Properties jdbcProps;
+
+    /**
+     * The DBMS-specific JDBC connection properties containing at least the credentials.
+     */
+    private Properties jdbcProperties;
+
+    /**
+     * The {@link State} the connection pool is currently in.
+     */
     private State state;
 
+    /**
+     * Possible states of the connection pool.
+     */
     private enum State {
-        UNINITIALIZED, INITIALIZED, SHUT_DOWN
+        /**
+         * State when not yet having been initialized.
+         */
+        UNINITIALIZED,
+
+        /**
+         * State when initialized and available for use.
+         */
+        INITIALIZED,
+
+        /**
+         * State when terminated and not available for use anymore.
+         */
+        SHUT_DOWN
     }
 
+    /**
+     * Constructs a new connection pool.
+     */
     private ConnectionPool() {
         availableConnections = new ArrayDeque<>();
         usedConnections = new HashSet<>();
@@ -62,50 +120,51 @@ public class ConnectionPool {
      *
      * This initialization has to occur before any other method calls and can only be executed exactly once.
      *
-     * @param jdbcDvr   The fully qualified class name of the JDBC database driver to use.
-     * @param jdbcURL   The DBMS-specific JDBC URL for connecting to the database. For a list, see
-     *                  https://vladmihalcea.com/jdbc-driver-connection-url-strings.
-     * @param jdbcProps The DBMS-specific JDBC connection properties containing at least credentials.
-     * @param minConns  The minimum amount of database connections to maintain.
-     * @param maxConns  The maximum amount of database connections to maintain.
-     * @param timeoutMs The maximum time in milliseconds to wait for receiving a connection.
+     * @param jdbcDriver     The fully qualified class name of the JDBC database driver to use.
+     * @param jdbcURL        The DBMS-specific JDBC URL for connecting to the database. For a list, see
+     *                       https://vladmihalcea.com/jdbc-driver-connection-url-strings.
+     * @param jdbcProperties The DBMS-specific JDBC connection properties containing at least the credentials.
+     * @param minConnections The minimum amount of database connections to maintain.
+     * @param maxConnections The maximum amount of database connections to maintain.
+     * @param timeoutMillis  The maximum time in milliseconds to wait for receiving a connection.
      * @throws IllegalStateException if the connection pool has already been initialized.
      * @see <a href="https://docs.oracle.com/javase/tutorial/jdbc/basics/connecting.html">Connecting with JDBC</a>
      */
-    public void init(String jdbcDvr, String jdbcURL, Properties jdbcProps, int minConns, int maxConns, int timeoutMs) {
+    public void init(final String jdbcDriver, final String jdbcURL, final Properties jdbcProperties,
+                     final int minConnections, final int maxConnections, final int timeoutMillis) {
         if (state == State.INITIALIZED) {
             throw new IllegalStateException("Connection Pool has already been initialized.");
         } else if (state == State.SHUT_DOWN) {
             throw new IllegalStateException("Connection pool has already been shut down.");
-        } else if (jdbcDvr == null) {
+        } else if (jdbcDriver == null) {
             throw new IllegalArgumentException("Driver class must not be null.");
         } else if (jdbcURL == null) {
             throw new IllegalArgumentException("Database URL must not be null.");
-        } else if (jdbcProps == null) {
+        } else if (jdbcProperties == null) {
             throw new IllegalArgumentException("Connection properties must not be null.");
-        } else if (minConns < 1) {
+        } else if (minConnections < 1) {
             throw new IllegalArgumentException("Minimum number of connections must be a positive integer.");
-        } else if (minConns > maxConns) {
+        } else if (minConnections > maxConnections) {
             throw new IllegalArgumentException("Minimum number of connections must be leq maximum number.");
-        } else if (timeoutMs < 0) {
+        } else if (timeoutMillis < 0) {
             throw new IllegalArgumentException("Timeout cannot be negative.");
         }
 
         try {
-            Class.forName(jdbcDvr); // explicitly load the driver class
+            Class.forName(jdbcDriver); // explicitly load the driver class
         } catch (ClassNotFoundException e) {
-            log.error("JDBC Driver " + jdbcDvr + " not found.", e);
+            log.error("JDBC Driver " + jdbcDriver + " not found.", e);
             throw new InternalError(e);
         }
 
-        this.minConns = minConns;
-        this.maxConns = maxConns;
-        this.timeout = timeoutMs;
+        this.minConnections = minConnections;
+        this.maxConnections = maxConnections;
+        this.timeoutMillis = timeoutMillis;
         this.jdbcURL = jdbcURL;
-        this.jdbcProps = jdbcProps;
+        this.jdbcProperties = jdbcProperties;
         this.state = State.INITIALIZED;
 
-        increaseConnections(minConns);
+        increaseConnections(minConnections);
     }
 
     /**
@@ -125,7 +184,7 @@ public class ConnectionPool {
         }
 
         if (availableConnections.isEmpty()) {
-            int increasePotential = maxConns - usedConnections.size();
+            int increasePotential = maxConnections - usedConnections.size();
             if (increasePotential > 0) {
                 increaseConnections(Math.min(usedConnections.size(), increasePotential));
             } else {
@@ -142,7 +201,7 @@ public class ConnectionPool {
         while (availableConnections.isEmpty()) {
             long t = System.currentTimeMillis();
             try {
-                wait(timeout);
+                wait(timeoutMillis);
             } catch (InterruptedException e) {
                 log.warning("Interrupted while waiting for a database connection.", e);
             }
@@ -150,7 +209,7 @@ public class ConnectionPool {
             /*
              * Check for timeout. This is necessary as the thread might be awakened spuriously!
              */
-            if (System.currentTimeMillis() - t >= timeout) { // timeout?
+            if (System.currentTimeMillis() - t >= timeoutMillis) { // timeout?
                 log.error("Timeout while waiting for a database connection.");
                 throw new OutOfConnectionsException("Out of database connections.");
             }
@@ -186,7 +245,7 @@ public class ConnectionPool {
         notifyAll();
     }
 
-    private boolean isClosed(Connection connection) {
+    private boolean isClosed(final Connection connection) {
         try {
             return connection.isClosed();
         } catch (SQLException e) {
@@ -198,7 +257,7 @@ public class ConnectionPool {
     private void balanceConnections() {
         int used = usedConnections.size();
         int total = availableConnections.size() + used;
-        if (total > minConns && (double) used / total < DECREASE_THRESH) {
+        if (total > minConnections && (double) used / total < DECREASE_THRESH) {
             int decreaseAmount = availableConnections.size() / 2;
             decreaseConnections(decreaseAmount);
             log.debug("Decreased available connections by " + decreaseAmount + " due to low load.");
@@ -219,10 +278,10 @@ public class ConnectionPool {
         state = State.SHUT_DOWN;
     }
 
-    private void increaseConnections(int increaseAmount) {
+    private void increaseConnections(final int increaseAmount) {
         for (int i = 0; i < increaseAmount; i++) {
             try {
-                availableConnections.add(DriverManager.getConnection(jdbcURL, jdbcProps));
+                availableConnections.add(DriverManager.getConnection(jdbcURL, jdbcProperties));
                 log.debug("Incrementing available database connections.");
             } catch (SQLException e) {
                 log.error("Could not acquire a database connection.", e);
@@ -231,7 +290,7 @@ public class ConnectionPool {
         }
     }
 
-    private void decreaseConnections(int decreaseAmount) {
+    private void decreaseConnections(final int decreaseAmount) {
         if (decreaseAmount > availableConnections.size()) {
             throw new IllegalArgumentException("Decrease amount must not be greater than number of connections.");
         }

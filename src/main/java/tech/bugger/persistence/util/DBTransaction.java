@@ -32,21 +32,29 @@ import java.sql.SQLException;
  *
  * {@inheritDoc}
  */
-class DBTransaction implements Transaction {
+public class DBTransaction implements Transaction {
 
     /**
      * Database connection reserved for this transaction.
      */
     private Connection connection;
 
+    /**
+     * Connection pool to borrow connections from.
+     */
     private final ConnectionPool connectionPool;
 
-    private boolean completed; // either committed or aborted
+    /**
+     * Whether this transaction has been completed, i.e. committed or aborted.
+     */
+    private boolean completed;
 
     /**
-     * Constructs a new transaction with its own database connection.
+     * Constructs a new transaction with a connection pool to use.
+     *
+     * @param connectionPool The connection pool to borrow connections from.
      */
-    public DBTransaction(ConnectionPool connectionPool) {
+    public DBTransaction(final ConnectionPool connectionPool) {
         this.connectionPool = connectionPool;
         this.connection = connectionPool.getConnection();
         completed = false;
@@ -196,6 +204,11 @@ class DBTransaction implements Transaction {
         return new UserDBGateway(connection);
     }
 
+    /**
+     * Returns whether this transaction is completed.
+     *
+     * @return {@code true} iff this transaction has been committed or aborted.
+     */
     public boolean isCompleted() {
         return completed;
     }

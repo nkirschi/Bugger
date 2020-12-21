@@ -11,13 +11,29 @@ import java.util.Properties;
  * Reader for contents of a configuration source held in <code>key = value</code> format.
  */
 public final class ConfigReader {
+    /**
+     * Log instance for logging in this class.
+     */
     private static final Log log = Log.forClass(ConfigReader.class);
 
+    /**
+     * Singleton instance of this configuration reader.
+     */
     private static ConfigReader instance;
 
+    /**
+     * The configuration properties managed by this configuration reader.
+     */
     private final Properties configuration;
+
+    /**
+     * Flag indicating whether the configuration has been loaded yet.
+     */
     private boolean loaded;
 
+    /**
+     * Constructs a new configuration reader.
+     */
     private ConfigReader() {
         configuration = new Properties();
     }
@@ -39,7 +55,7 @@ public final class ConfigReader {
      *
      * @param is Stream of configuration data.
      */
-    public void load(InputStream is) throws IOException {
+    public void load(final InputStream is) throws IOException {
         try {
             configuration.load(is);
             loaded = true;
@@ -56,7 +72,7 @@ public final class ConfigReader {
      * @throws ConfigException       if {@code key} is not associated with a property.
      * @throws IllegalStateException if no configuration has been loaded yet.
      */
-    public String getString(String key) {
+    public String getString(final String key) {
         if (!loaded) {
             throw new IllegalStateException("Configuration has not been loaded!");
         }
@@ -74,7 +90,7 @@ public final class ConfigReader {
      * @throws ConfigException       if {@code key} is not associated with a property or the property is no integer.
      * @throws IllegalStateException if no configuration has been loaded yet.
      */
-    public int getInt(String key) {
+    public int getInt(final String key) {
         String value = getString(key);
         try {
             return Integer.parseInt(value);
@@ -91,7 +107,7 @@ public final class ConfigReader {
      * @throws ConfigException       if {@code key} is not associated with a property.
      * @throws IllegalStateException if no configuration has been loaded yet.
      */
-    public boolean getBoolean(String key) {
+    public boolean getBoolean(final String key) {
         return Boolean.parseBoolean(getString(key));
     }
 }
