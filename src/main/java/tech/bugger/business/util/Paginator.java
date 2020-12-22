@@ -39,9 +39,9 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     }
 
     /**
-     * Fetches a slice of data specified by {@link #getSelection()}.
+     * Fetches a slice of data specified by the current paginator state given by {@link #getSelection()}.
      *
-     * @return The data chunk characterized by the current parameters.
+     * @return The data chunk characterized by the current paginator state.
      */
     protected abstract Iterable<T> fetch();
 
@@ -77,6 +77,10 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      * Loads the data chunk for the previous page.
      */
     public void prevPage() {
+        if (isFirstPage()) {
+            throw new IllegalStateException("Already on first page!");
+        }
+
         selection.setCurrentPage(selection.getCurrentPage() - 1);
         update();
         log.debug("Paginator updated through prevPage to " + selection + ".");
@@ -86,6 +90,10 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      * Loads the data chunk for the next page.
      */
     public void nextPage() {
+        if (isLastPage()) {
+            throw new IllegalStateException("Already on last page!");
+        }
+
         selection.setCurrentPage(selection.getCurrentPage() + 1);
         update();
         log.debug("Paginator updated through nextPage to " + selection + ".");
@@ -104,7 +112,8 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      * Loads the data chunk for the last page.
      */
     public void lastPage() {
-        selection.setCurrentPage(getLastPage());
+        // User interaction: Subtract 1 for convenience (1-indexed)
+        selection.setCurrentPage(determineLastPageIndex() - 1);
         update();
         log.debug("Paginator updated through lastPage to " + selection + ".");
     }
@@ -123,8 +132,9 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      *
      * @return The index of the last page.
      */
-    public int getLastPage() {
-        return (totalSize() - 1) / selection.getPageSize();
+    public int determineLastPageIndex() {
+        // User interaction: Add 1 for convenience (1-indexed)
+        return Math.max(1, (totalSize() - 1) / selection.getPageSize() + 1);
     }
 
     /**
