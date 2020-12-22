@@ -13,7 +13,7 @@ import tech.bugger.global.util.Log;
 public final class MarkdownHandler {
 
     /**
-     * The {@link Log} to log errors, warnings and other debug information to.
+     * The {@link Log} instance associated with this class for logging purposes.
      */
     private static final Log log = Log.forClass(MarkdownHandler.class);
 
