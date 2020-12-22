@@ -23,7 +23,6 @@ public final class ReferenceExtension implements Parser.ParserExtension {
      * @return A registrable instance of this extension.
      */
     public static Extension create() {
-        log.debug("Initialized reference support for Markdown.");
         return new ReferenceExtension();
     }
 
