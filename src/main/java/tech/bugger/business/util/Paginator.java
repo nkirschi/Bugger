@@ -35,7 +35,6 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     public Paginator(final String sortedBy, final int itemsPerPage) {
         this.selection = new Selection(0, 0, itemsPerPage, sortedBy, true);
         update();
-        log.debug("Paginator with " + selection + " initialized.");
     }
 
     /**
