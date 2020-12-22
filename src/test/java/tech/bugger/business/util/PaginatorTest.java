@@ -86,10 +86,22 @@ public class PaginatorTest {
     }
 
     @Test
+    public void testInvalidPrevPage() {
+        paginator.setCurrentPage(1);
+        assertThrows(IllegalStateException.class, () -> paginator.prevPage());
+    }
+
+    @Test
     public void testPrevPage() {
         paginator.setCurrentPage(2);
         paginator.prevPage();
         assertEquals(1, paginator.iterator().next());
+    }
+
+    @Test
+    public void testInvalidLastPage() {
+        paginator.setCurrentPage(paginator.determineLastPageIndex());
+        assertThrows(IllegalStateException.class, () -> paginator.nextPage());
     }
 
     @Test
