@@ -10,8 +10,7 @@
         <!--@elvariable id="paginator" type="tech.bugger.business.util.Paginator"-->
         <!--@elvariable id="key" type="java.lang.String"-->
         <f:facet name="header">
-            <h:commandButton value="#{title}"
-                             action="#{paginator.sortBy(key)}"/>
+            <h:commandButton value="#{title}" action="#{paginator.sortBy(key)}"/>
         </f:facet>
         <ui:insert/>
     </h:column>
