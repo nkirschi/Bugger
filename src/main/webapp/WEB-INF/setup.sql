@@ -51,7 +51,7 @@ CREATE TABLE "user" (
     password_salt VARCHAR NOT NULL,
     hashing_algorithm VARCHAR NOT NULL,
 
-    email_address VARCHAR NOT NULL,
+    email_address VARCHAR UNIQUE NOT NULL,
     first_name VARCHAR NOT NULL,
     last_name VARCHAR NOT NULL,
     avatar BYTEA,
@@ -65,7 +65,7 @@ CREATE TABLE "user" (
 
     CONSTRAINT user_first_name_non_empty CHECK (length(first_name) >= 1),
     CONSTRAINT user_last_name_non_empty CHECK (length(last_name) >= 1),
-    CONSTRAINT user_email_address_valid CHECK (email_address LIKE '_%@_%._%')
+    CONSTRAINT user_email_address_lower_case CHECK (LOWER(email_address) = email_address)
 );
 
 -- Insert the first admin with the password 'BuggerFahrenMachtSpass42'
