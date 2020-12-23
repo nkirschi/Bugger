@@ -7,12 +7,13 @@
  * that might exist in the database, run the attached SQL script 'erase.sql'.
  */
 
-CREATE TABLE version (
-    version VARCHAR NOT NULL PRIMARY KEY DEFAULT '1.0',
-    CONSTRAINT version_only_one_row CHECK (version = '1.0')
+CREATE TABLE metadata (
+    id INTEGER NOT NULL PRIMARY KEY DEFAULT 0,
+    version VARCHAR DEFAULT '1.0',
+    CONSTRAINT metadata_only_one_row CHECK (id = 0)
 );
 
-INSERT INTO version DEFAULT VALUES;
+INSERT INTO metadata DEFAULT VALUES;
 
 
 CREATE TABLE system_settings (
@@ -21,13 +22,13 @@ CREATE TABLE system_settings (
     organization_name VARCHAR NOT NULL DEFAULT 'Bugger',
     organization_logo BYTEA DEFAULT '',
     organization_theme VARCHAR NOT NULL DEFAULT 'light.css',
-    privacy_policy VARCHAR NOT NULL DEFAULT '',
-    imprint VARCHAR NOT NULL DEFAULT '',
+    organization_privacy_policy VARCHAR NOT NULL DEFAULT '',
+    organization_imprint VARCHAR NOT NULL DEFAULT '',
 
-    guest_reading_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    guest_reading BOOLEAN NOT NULL DEFAULT TRUE,
     closed_report_posting BOOLEAN NOT NULL DEFAULT FALSE,
-    user_email_regex VARCHAR NOT NULL DEFAULT '.*',
-    allowed_file_extensions VARCHAR NOT NULL DEFAULT '.txt, .pdf, .jpg, .png, .gif, .tif, .bmp, .svg, .webp, .wav, .m4a, .flac, .mp3, .mp4, .ogg',
+    user_email_format VARCHAR NOT NULL DEFAULT '.*',
+    allowed_file_extensions VARCHAR NOT NULL DEFAULT '.txt,.pdf,.jpg,.png,.gif,.tif,.bmp,.svg,.webp,.wav,.m4a,.flac,.mp3,.mp4,.ogg',
     max_attachments_per_post INTEGER NOT NULL DEFAULT 5,
     voting_weight_definition VARCHAR NOT NULL DEFAULT '0,10,25,50,100,200,400,600,800,1000',
 
@@ -37,7 +38,7 @@ CREATE TABLE system_settings (
 INSERT INTO system_settings DEFAULT VALUES;
 
 
-CREATE TYPE profile_visibility_degree AS ENUM (
+CREATE TYPE user_profile_visibility AS ENUM (
     'FULL',
     'MINIMAL'
 );
@@ -57,18 +58,14 @@ CREATE TABLE "user" (
     avatar_thumbnail BYTEA,
     biography VARCHAR,
     preferred_language VARCHAR,
-    profile_visibility profile_visibility_degree,
+    profile_visibility user_profile_visibility,
     registered_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    is_admin BOOLEAN,
     forced_voting_weight INTEGER,
+    is_admin BOOLEAN,
 
     CONSTRAINT user_first_name_non_empty CHECK (length(first_name) >= 1),
     CONSTRAINT user_last_name_non_empty CHECK (length(last_name) >= 1),
     CONSTRAINT user_email_address_valid CHECK (email_address LIKE '_%@_%._%')
-);
-
-CREATE UNIQUE INDEX user_email_unique_up_to_case_index ON "user" (
-    LOWER(email_address)
 );
 
 -- Insert the first admin with the password 'BuggerFahrenMachtSpass42'
@@ -78,7 +75,7 @@ INSERT INTO "user" (username, password_hash, password_salt, hashing_algorithm,
 VALUES ('admin',
     '883bc9078ea1301487ebce02190104a482ecd33492eaf3b806db6f093ec02c08443ec942863a1d19ab629436d7ad1f052ecfd7c4d25f1eacf65b66ba426870ad',
     'c03fce2b5a5dcdf4d05c8138d15bdaa7a481964d24d2462330073966221d6963c086b327f6ca7c8b71541c9c70d3ae8e527af8e019d05dfb47854ad0949053f7',
-    'SHA3-512', 'admin@example.org', 'Admin', 'Istrator', '', '', '', '', 'MINIMAL', TRUE, NULL
+    'SHA3-512', '', 'Admin', 'Istrator', '', '', '', '', 'MINIMAL', TRUE, NULL
 );
 
 
@@ -129,8 +126,8 @@ CREATE TABLE report (
     last_modified_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     last_modified_by INTEGER REFERENCES "user" (id) ON DELETE SET NULL,
     closed_at TIMESTAMP WITH TIME ZONE,
-    forced_relevance INTEGER,
     duplicate_of INTEGER REFERENCES report (id) ON DELETE SET NULL,
+    forced_relevance INTEGER,
 
     topic INTEGER NOT NULL REFERENCES topic (id) ON DELETE CASCADE,
 
@@ -141,13 +138,14 @@ CREATE TABLE report (
 
 CREATE TABLE post (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 10000),
-    report INTEGER NOT NULL REFERENCES report (id) ON DELETE CASCADE,
     content VARCHAR NOT NULL,
 
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     created_by INTEGER REFERENCES "user" (id) ON DELETE SET NULL,
     last_modified_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     last_modified_by INTEGER REFERENCES "user" (id) ON DELETE SET NULL,
+
+    report INTEGER NOT NULL REFERENCES report (id) ON DELETE CASCADE,
 
     CONSTRAINT post_content_non_empty CHECK (length(content) >= 1)
 );
@@ -158,9 +156,11 @@ CREATE TABLE attachment (
     name VARCHAR NOT NULL,
     content BYTEA NOT NULL,
     mimetype VARCHAR NOT NULL,
+
     post INTEGER NOT NULL REFERENCES post (id) ON DELETE CASCADE,
 
-    CONSTRAINT attachment_name_non_empty CHECK (length(name) >= 1)
+    CONSTRAINT attachment_name_non_empty CHECK (length(name) >= 1),
+    CONSTRAINT attachment_name_unique_in_post UNIQUE (name, post)
 );
 
 
@@ -179,12 +179,12 @@ CREATE TABLE notification (
     type notification_type NOT NULL,
 
     recipient INTEGER NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
-    actuator INTEGER REFERENCES "user" (id),
+    causer INTEGER REFERENCES "user" (id),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
-    topic INTEGER NOT NULL REFERENCES topic (id) ON DELETE CASCADE,
-    report INTEGER NOT NULL REFERENCES report (id) ON DELETE CASCADE,
-    post INTEGER NOT NULL REFERENCES post (id) ON DELETE CASCADE
+    topic INTEGER REFERENCES topic (id) ON DELETE CASCADE,
+    report INTEGER REFERENCES report (id) ON DELETE CASCADE,
+    post INTEGER REFERENCES post (id) ON DELETE CASCADE
 );
 
 
@@ -192,8 +192,7 @@ CREATE TABLE user_subscription (
     subscriber INTEGER NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
     subscribee INTEGER NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
     CONSTRAINT user_subscription_pkey PRIMARY KEY (subscriber, subscribee),
-    CONSTRAINT user_subscription_no_self_subscription CHECK (
-        subscriber <> subscribee)
+    CONSTRAINT user_subscription_no_self_subscription CHECK (subscriber <> subscribee)
 );
 
 CREATE TABLE topic_subscription (
@@ -209,60 +208,24 @@ CREATE TABLE report_subscription (
 );
 
 CREATE TABLE topic_moderation (
-    subscriber INTEGER NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
+    moderator INTEGER NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
     topic INTEGER NOT NULL REFERENCES topic (id) ON DELETE CASCADE,
-    CONSTRAINT topic_moderation_pkey PRIMARY KEY (subscriber, topic)
+    CONSTRAINT topic_moderation_pkey PRIMARY KEY (moderator, topic)
 );
 
 CREATE TABLE topic_ban (
-    subscriber INTEGER NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
+    outcast INTEGER NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
     topic INTEGER NOT NULL REFERENCES topic (id) ON DELETE CASCADE,
-    CONSTRAINT topic_ban_pkey PRIMARY KEY (subscriber, topic)
+    CONSTRAINT topic_ban_pkey PRIMARY KEY (outcast, topic)
 );
 
 CREATE TABLE relevance_vote (
     voter INTEGER NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
     report INTEGER NOT NULL REFERENCES report (id) ON DELETE CASCADE,
     voted_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    voting_weight INTEGER NOT NULL,
+    weight INTEGER NOT NULL,
     CONSTRAINT relevance_vote_pkey PRIMARY KEY (voter, report)
 );
-
-
-CREATE FUNCTION validate_new_attachment() RETURNS TRIGGER AS
-$$
-DECLARE max_attachments_per_post INTEGER;
-BEGIN
-    SELECT system_settings.max_attachments_per_post
-    INTO max_attachments_per_post FROM system_settings
-    WHERE id = 0;
-
-    IF (SELECT COUNT(*)
-        FROM attachment
-        WHERE attachment.post = NEW.post) >= max_attachments_per_post
-        THEN
-        RAISE EXCEPTION 'No more than % attachments allowed per post', max_attachments_per_post;
-    END IF;
-
-    IF (SELECT COUNT(*)
-        FROM attachment, post
-        WHERE attachment.post = post.id
-        AND attachment.name = NEW.name
-        ) > 0
-        THEN
-        RAISE EXCEPTION 'Attachment must be unique within post';
-    END IF;
-
-    RETURN NEW;
-END;
-$$
-LANGUAGE plpgsql;
-
-CREATE TRIGGER new_attachment
-BEFORE INSERT
-ON attachment
-FOR EACH ROW
-    EXECUTE PROCEDURE validate_new_attachment();
 
 
 CREATE VIEW report_last_activity (report, last_activity) AS
@@ -282,7 +245,7 @@ CREATE VIEW topic_last_activity (topic, last_activity) AS
     GROUP BY t.id;
 
 CREATE VIEW report_relevance (report, relevance) AS
-    SELECT r.id, SUM(v.voting_weight)
+    SELECT r.id, SUM(v.weight)
     FROM report AS r
     LEFT OUTER JOIN relevance_vote AS v
     ON r.id = v.report
@@ -295,12 +258,11 @@ CREATE VIEW user_num_posts (author, num_posts) AS
     ON u.id = p.created_by
     GROUP BY u.id;
 
-CREATE VIEW top_ten_reports (report, recent_relevance_gain) AS
-    SELECT r.id, SUM(v.voting_weight)
+CREATE VIEW top_reports (report, recent_relevance_gain) AS
+    SELECT r.id, SUM(v.weight)
     FROM report AS r
     LEFT OUTER JOIN relevance_vote AS v
     ON r.id = v.report
     WHERE v.voted_at > NOW() - '24 hours'::interval
     GROUP BY r.id
-    ORDER BY SUM(v.voting_weight) DESC, r.id ASC
-    LIMIT 10;
+    ORDER BY SUM(v.weight) DESC, r.id ASC;

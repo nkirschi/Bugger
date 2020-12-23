@@ -4,11 +4,8 @@
  * Use with caution! All data concerning Bugger will be irreversibly deleted.
  */
 
-DROP TRIGGER IF EXISTS new_attachment ON attachment;
-DROP FUNCTION IF EXISTS validate_new_attachment;
-
-DROP VIEW IF EXISTS top_ten_reports;
-DROP VIEW IF EXISTS user_num_reports;
+DROP VIEW IF EXISTS top_reports;
+DROP VIEW IF EXISTS user_num_posts;
 DROP VIEW IF EXISTS report_relevance;
 DROP VIEW IF EXISTS topic_last_activity;
 DROP VIEW IF EXISTS report_last_activity;
@@ -31,7 +28,7 @@ DROP TABLE IF EXISTS topic;
 DROP TABLE IF EXISTS token;
 DROP TYPE IF EXISTS token_type;
 DROP TABLE IF EXISTS "user";
-DROP TYPE IF EXISTS profile_visibility_degree;
+DROP TYPE IF EXISTS user_profile_visibility;
 
-DROP TABLE IF EXISTS version;
 DROP TABLE IF EXISTS system_settings;
+DROP TABLE IF EXISTS metadata;
