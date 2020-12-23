@@ -288,11 +288,11 @@ CREATE VIEW report_relevance (report, relevance) AS
     ON r.id = v.report
     GROUP BY r.id;
 
-CREATE VIEW user_num_reports (author, num_reports) AS
-    SELECT u.id, COUNT(r.created_by)
+CREATE VIEW user_num_posts (author, num_posts) AS
+    SELECT u.id, COUNT(p.created_by)
     FROM "user" AS u
-    LEFT OUTER JOIN report AS r
-    ON u.id = r.created_by
+    LEFT OUTER JOIN post AS p
+    ON u.id = p.created_by
     GROUP BY u.id;
 
 CREATE VIEW top_ten_reports (report, recent_relevance_gain) AS
