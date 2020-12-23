@@ -73,8 +73,8 @@ INSERT INTO "user" (username, password_hash, password_salt, hashing_algorithm,
     email_address, first_name, last_name, avatar, avatar_thumbnail, biography,
     preferred_language, profile_visibility, is_admin, forced_voting_weight)
 VALUES ('admin',
-    '883bc9078ea1301487ebce02190104a482ecd33492eaf3b806db6f093ec02c08443ec942863a1d19ab629436d7ad1f052ecfd7c4d25f1eacf65b66ba426870ad',
-    'c03fce2b5a5dcdf4d05c8138d15bdaa7a481964d24d2462330073966221d6963c086b327f6ca7c8b71541c9c70d3ae8e527af8e019d05dfb47854ad0949053f7',
+    'e89145f887a95e5b16b0be34cd1d7bceee6979a4d605fe1abe6ab46aa0b7b19fefbedfc0c8ed3276008afc4c34eed192103bb7e5d44dc0fb5e7e3cf3a624db27',
+    'd44ea8f71e157cb57583f1f9daa2b02e53678a1a2c67eb46d196b28f4895454089e025654cdebec359a45763d99ce2c8516fe320ac4d2a5e57aacbef8fb36e2b'
     'SHA3-512', '', 'Admin', 'Istrator', '', '', '', '', 'MINIMAL', TRUE, NULL
 );
 
