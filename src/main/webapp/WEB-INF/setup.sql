@@ -7,6 +7,11 @@
  * that might exist in the database, run the attached SQL script 'erase.sql'.
  */
 
+
+/**************************************************************************
+ *  Definition of tables for entities and associated enumerations types.  *
+ **************************************************************************/
+
 CREATE TABLE metadata (
     id INTEGER NOT NULL PRIMARY KEY DEFAULT 0,
     version VARCHAR DEFAULT '1.0',
@@ -188,6 +193,10 @@ CREATE TABLE notification (
 );
 
 
+/**********************************************************
+ *  Definition of tables for many-to-many relationships.  *
+ **********************************************************/
+
 CREATE TABLE user_subscription (
     subscriber INTEGER NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
     subscribee INTEGER NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
@@ -227,6 +236,11 @@ CREATE TABLE relevance_vote (
     CONSTRAINT relevance_vote_pkey PRIMARY KEY (voter, report)
 );
 
+
+
+/**************************
+ *  Definition of views.  *
+ **************************/
 
 CREATE VIEW report_last_activity (report, last_activity) AS
     SELECT r.id, GREATEST(MAX(p.last_modified_at), r.last_modified_at)
