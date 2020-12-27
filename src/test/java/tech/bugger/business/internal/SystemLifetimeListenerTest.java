@@ -29,6 +29,7 @@ import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -70,7 +71,7 @@ public class SystemLifetimeListenerTest {
     }
 
     @BeforeEach
-    public void setUp() {
+    public void setUp()throws Exception {
         logStaticMock = mockStatic(Log.class);
         Log log = mock(Log.class);
         doNothing().when(log).debug(any());
@@ -110,7 +111,7 @@ public class SystemLifetimeListenerTest {
         when(connectionPoolRegistryMock.get(any())).thenReturn(connectionPoolMock);
 
         priorityExecutorMock = mock(PriorityExecutor.class);
-        doNothing().when(priorityExecutorMock).shutdown();
+        doNothing().when(priorityExecutorMock).shutdown(anyInt());
         when(priorityExecutorRegistryMock.get(any())).thenReturn(priorityExecutorMock);
 
         transactionMock = mock(Transaction.class);
@@ -244,10 +245,10 @@ public class SystemLifetimeListenerTest {
     }
 
     @Test
-    public void testContextDestroyedShutsDownPriorityExecutor() {
+    public void testContextDestroyedShutsDownPriorityExecutor()throws Exception {
         systemLifetimeListenerMock.contextInitialized(sceMock);
         systemLifetimeListenerMock.contextDestroyed(sceMock);
-        verify(priorityExecutorMock).shutdown();
+        verify(priorityExecutorMock).shutdown(anyInt());
     }
 
     @Test

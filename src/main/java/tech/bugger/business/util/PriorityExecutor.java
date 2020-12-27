@@ -2,7 +2,6 @@ package tech.bugger.business.util;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -19,7 +18,7 @@ public final class PriorityExecutor {
     private final ExecutorService executorService;
 
     /**
-     * Constructs a new priority task executor.
+     * Constructs a new priority task executor with the given technical parameters.
      *
      * @param initialCap  Initial capacity of the underlying task queue.
      * @param coreThreads Target number of threads to use for task execution.
@@ -28,12 +27,9 @@ public final class PriorityExecutor {
      */
     public PriorityExecutor(final int initialCap, final int coreThreads, final int maxThreads, final int timeoutSecs) {
         BlockingQueue<Runnable> queue = new PriorityBlockingQueue<>(initialCap, (r1, r2) -> {
-            if (!(r1 instanceof PriorityFuture<?>)) {
-                return 1;
-            } else if (!(r2 instanceof PriorityFuture<?>)) {
-                return -1;
+            if (!(r1 instanceof PriorityFuture<?> && r2 instanceof PriorityFuture<?>)) {
+                throw new InternalError("Foreign tasks in priority queue. This should never happen!");
             }
-
             PriorityFuture<?> t1 = (PriorityFuture<?>) r1;
             PriorityFuture<?> t2 = (PriorityFuture<?>) r2;
             return t1.getTask().getPriority().compareTo(t2.getTask().getPriority());
@@ -42,11 +38,6 @@ public final class PriorityExecutor {
             @Override
             protected <V> RunnableFuture<V> newTaskFor(final Runnable r, final V v) {
                 return new PriorityFuture<>(super.newTaskFor(r, v), (PriorityTask) r);
-            }
-
-            @Override
-            public Future<?> submit(final Runnable task) {
-                return super.submit(task);
             }
         };
     }
@@ -57,20 +48,31 @@ public final class PriorityExecutor {
      * @param priorityTask The task to be enqueued.
      */
     public void enqueue(final PriorityTask priorityTask) {
+        if (executorService.isTerminated()) {
+            throw new IllegalStateException("Priority executor has already been shut down.");
+        }
         executorService.submit(priorityTask);
     }
 
     /**
      * Shuts down the executor gracefully by not accepting any new tasks and finishing the remaining ones.
+     *
+     * @param timeoutMillis The maximum time in milliseconds to wait for remaining task execution completion.
+     * @throws InterruptedException if interrupted whilst awaiting termination.
      */
-    public void shutdown() {
+    public void shutdown(final int timeoutMillis) throws InterruptedException {
         executorService.shutdown();
+        executorService.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
-     * Shuts down the executor immediately by aborting any running tasks forcefully.
+     * Shuts down the executor immediately by discarding any waiting tasks and only finishing the running ones.
+     *
+     * @param timeoutMillis The maximum time in milliseconds to wait for remaining task execution completion.
+     * @throws InterruptedException if interrupted whilst awaiting termination.
      */
-    public void kill() {
+    public void kill(final int timeoutMillis) throws InterruptedException {
         executorService.shutdownNow();
+        executorService.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
     }
 }

@@ -60,6 +60,11 @@ public class SystemLifetimeListener implements ServletContextListener {
     private static final String DB_SETUP_SCRIPT = "/WEB-INF/setup.sql";
 
     /**
+     * Maximum time in ms to wait for remaining mailing task execution completion.
+     */
+    public static final int TASK_TERMINATION_TIMEOUT_MILLIS = 5000;
+
+    /**
      * Properties reader registry to be maintained.
      */
     private PropertiesReaderRegistry propertiesReaderRegistry;
@@ -118,8 +123,10 @@ public class SystemLifetimeListener implements ServletContextListener {
     @Override
     public void contextDestroyed(final ServletContextEvent sce) {
         deregisterShutdownHooks(); // not needed due to regular shutdown
-        priorityExecutorRegistry.get("mails").shutdown();
+
         cleanUpDatabaseConnections();
+        terminateMailingTasks(false);
+
         log.info("Application shutdown completed.");
     }
 
@@ -212,7 +219,7 @@ public class SystemLifetimeListener implements ServletContextListener {
         databaseShutdownHook = new Thread(this::cleanUpDatabaseConnections);
         Runtime.getRuntime().addShutdownHook(databaseShutdownHook);
 
-        mailQueueShutdownHook = new Thread(() -> priorityExecutorRegistry.get("mails").kill());
+        mailQueueShutdownHook = new Thread(() -> terminateMailingTasks(true));
         Runtime.getRuntime().addShutdownHook(mailQueueShutdownHook);
     }
 
@@ -225,6 +232,19 @@ public class SystemLifetimeListener implements ServletContextListener {
         ConnectionPool dbPool = connectionPoolRegistry.get("db");
         if (!dbPool.isShutDown()) {
             dbPool.shutdown();
+        }
+    }
+
+    private void terminateMailingTasks(final boolean immediately) {
+        PriorityExecutor mailingExecutor = priorityExecutorRegistry.get("mails");
+        try {
+            if (immediately) {
+                mailingExecutor.kill(TASK_TERMINATION_TIMEOUT_MILLIS);
+            } else {
+                mailingExecutor.shutdown(TASK_TERMINATION_TIMEOUT_MILLIS);
+            }
+        } catch (InterruptedException e) {
+            log.warning("Interrupted while waiting for mailing tasks to finish.");
         }
     }
 
