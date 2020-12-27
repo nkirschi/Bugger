@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentDBGateway;
+import tech.bugger.persistence.gateway.MetadataDBGateway;
 import tech.bugger.persistence.gateway.NotificationDBGateway;
 import tech.bugger.persistence.gateway.PostDBGateway;
 import tech.bugger.persistence.gateway.ReportDBGateway;
@@ -34,7 +35,7 @@ public class DBTransactionTest {
     private ConnectionPool connectionPoolMock;
 
     @BeforeEach
-    public void setup() throws SQLException {
+    public void setup() throws Exception {
         connectionMock = mock(Connection.class);
         doNothing().when(connectionMock).commit();
         doNothing().when(connectionMock).rollback();
@@ -44,7 +45,7 @@ public class DBTransactionTest {
     }
 
     @Test
-    public void testConstructorAutoCommitFails() throws SQLException {
+    public void testConstructorAutoCommitFails() throws Exception {
         doThrow(SQLException.class).when(connectionMock).setAutoCommit(anyBoolean());
         assertThrows(InternalError.class, () -> new DBTransaction(connectionPoolMock));
     }
@@ -56,7 +57,7 @@ public class DBTransactionTest {
     }
 
     @Test
-    public void testCommitFails() throws SQLException, TransactionException {
+    public void testCommitFails() throws Exception {
         doThrow(SQLException.class).when(connectionMock).commit();
         assertThrows(TransactionException.class, () -> tx.commit());
     }
@@ -68,19 +69,20 @@ public class DBTransactionTest {
     }
 
     @Test
-    public void testAbortFails() throws SQLException {
+    public void testAbortFails() throws Exception {
         doThrow(SQLException.class).when(connectionMock).rollback();
         assertThrows(InternalError.class, () -> tx.abort());
     }
 
     @Test
-    public void testCloseWhenCompleted() {
+    public void testCloseWhenCompleted() throws Exception {
+        tx.commit();
         tx.close();
         verify(connectionPoolMock).releaseConnection(any());
     }
 
     @Test
-    public void testCloseWhenNotCompleted() throws SQLException {
+    public void testCloseWhenNotCompleted() throws Exception {
         tx.close();
         verify(connectionMock).rollback();
         verify(connectionPoolMock).releaseConnection(any());
@@ -95,6 +97,11 @@ public class DBTransactionTest {
     @Test
     public void testNewAttachmentGateway() {
         assertTrue(tx.newAttachmentGateway() instanceof AttachmentDBGateway);
+    }
+
+    @Test
+    public void testNewMetadataGateway() {
+        assertTrue(tx.newMetadataGateway() instanceof MetadataDBGateway);
     }
 
     @Test

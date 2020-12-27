@@ -2,6 +2,7 @@ package tech.bugger.persistence.util;
 
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentGateway;
+import tech.bugger.persistence.gateway.MetadataGateway;
 import tech.bugger.persistence.gateway.NotificationGateway;
 import tech.bugger.persistence.gateway.PostGateway;
 import tech.bugger.persistence.gateway.ReportGateway;
@@ -19,7 +20,7 @@ import tech.bugger.persistence.gateway.UserGateway;
  * Once created, a transaction object provides factory methods for all available data gateways that can be used to add
  * actions to the current transaction.
  */
-interface Transaction extends ExceptionlessAutoCloseable {
+public interface Transaction extends ExceptionlessAutoCloseable {
 
     /**
      * Commits the current transaction. Changes are applied as single work unit.
@@ -37,6 +38,13 @@ interface Transaction extends ExceptionlessAutoCloseable {
      * @return A brand-new attachment gateway tied to this transaction's connection.
      */
     AttachmentGateway newAttachmentGateway();
+
+    /**
+     * Fabricates a metadata gateway to use with this transaction.
+     *
+     * @return A brand-new metadata gateway tied to this transaction's connection.
+     */
+    MetadataGateway newMetadataGateway();
 
     /**
      * Fabricates a notification gateway to use with this transaction.

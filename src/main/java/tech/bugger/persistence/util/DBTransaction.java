@@ -3,6 +3,8 @@ package tech.bugger.persistence.util;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentDBGateway;
 import tech.bugger.persistence.gateway.AttachmentGateway;
+import tech.bugger.persistence.gateway.MetadataDBGateway;
+import tech.bugger.persistence.gateway.MetadataGateway;
 import tech.bugger.persistence.gateway.NotificationDBGateway;
 import tech.bugger.persistence.gateway.NotificationGateway;
 import tech.bugger.persistence.gateway.PostDBGateway;
@@ -112,6 +114,12 @@ public class DBTransaction implements Transaction {
     public AttachmentGateway newAttachmentGateway() {
         checkState();
         return new AttachmentDBGateway(connection);
+    }
+
+    @Override
+    public MetadataGateway newMetadataGateway() {
+        checkState();
+        return new MetadataDBGateway(connection);
     }
 
     /**
