@@ -15,138 +15,109 @@ import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Properties;
 
 /**
- * Basic e-mail sender singleton.
+ * Basic e-mail sender.
  *
  * This is a facade for any mailing API (currently Jakarta Mail), adapted to our needs.
  */
 public final class Mailer {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(Mailer.class);
 
-    private static Mailer instance;
-
     /**
-     * Configuration of the mailer.
+     * E-mail session used by this mailer throughout its lifetime.
      */
-    private final Properties configuration;
+    private final Session session;
 
     /**
-     * Authentication information for the mailer.
-     */
-    private Authenticator authenticator;
-
-    /**
-     * Constructs a mailer and initializes an empty configuration.
-     */
-    private Mailer() {
-        configuration = new Properties();
-    }
-
-    /**
-     * Retrieves the singleton mailer object.
+     * Constructs a new mailer without authentication.
      *
-     * @return The one and only instance of the mailer.
+     * @param is Stream of mail configuration settings. The format and valid entries are specified in the
+     *           <a href="https://eclipse-ee4j.github.io/mail/docs/api/">Jakarta Mail API Docs</a>.
+     * @throws IOException if the configuration could not be read.
      */
-    public static Mailer getInstance() {
-        if (instance == null) {
-            instance = new Mailer();
-        }
-        return instance;
+    public Mailer(final InputStream is) throws IOException {
+        session = Session.getInstance(loadConfiguration(is));
     }
 
     /**
-     * Configures the fundamental e-mailing parameters. This has to happen before any mail can be sent.
+     * Constructs a new mailer with authentication parameters.
      *
      * @param is       Stream of mail configuration settings. The format and valid entries are specified in the
      *                 <a href="https://eclipse-ee4j.github.io/mail/docs/api/">Jakarta Mail API Docs</a>.
-     * @param username The authentication username.
-     * @param password The authentication password.
+     * @param username The username needed for authentication.
+     * @param password The password needed for authentication.
+     * @throws IOException if the configuration could not be read.
      */
-    public void configure(InputStream is, String username, String password) throws IOException {
-        configuration.clear();
+    public Mailer(final InputStream is, final String username, final String password) throws IOException {
+        session = Session.getInstance(loadConfiguration(is), new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(username, password);
+            }
+        });
+    }
+
+    private Properties loadConfiguration(final InputStream is) throws IOException {
+        Properties configuration = new Properties();
         try {
             configuration.load(is);
         } catch (IOException e) {
             log.warning("Mailing configuration could not be loaded.");
             throw new IOException("Mailing configuration could not be loaded.", e);
         }
-        authenticator = new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(username, password);
-            }
-        };
+        return configuration;
     }
 
     /**
-     * Sends a basic e-mail.
+     * Sends the given {@link Mail)}.
      *
-     * @param recipient The recipient e-mail address of the e-mail to be sent.
-     * @param subject   The subject of the e-mail to be sent.
-     * @param content   The content of the e-mail to be sent.
-     * @throws IllegalStateException if called without the mailer being configured beforehand via {@link #configure}.
+     * @param mail The e-mail to be sent.
+     * @return Whether {@code mail} has been successfully sent.
      */
-    public void send(String recipient, String subject, String content) {
-        send(recipient, Collections.emptyList(), subject, content);
+    public boolean send(final Mail mail) {
+        return send(
+                addressify(mail.getTo()),
+                addressify(mail.getCc()),
+                addressify(mail.getBcc()),
+                addressify(mail.getReplyto()),
+                mail.getSubject(),
+                mail.getContent()
+        );
     }
 
-    /**
-     * Sends a basic e-mail with BCC recipients.
-     *
-     * @param recipient The recipient e-mail address of the e-mail to be sent.
-     * @param bcc       The blind carbon copy recipients of the e-mail.
-     * @param subject   The subject of the e-mail to be sent.
-     * @param content   The content of the e-mail to be sent.
-     */
-    public void send(String recipient, Collection<String> bcc, String subject, String content) {
-        send(Collections.singleton(recipient), Collections.emptyList(), bcc, Collections.emptyList(), subject, content);
-    }
-
-    /**
-     * Sends a full-featured e-mail.
-     *
-     * @param to      The primary recipients of the e-mail.
-     * @param cc      The carbon copy recipients of the e-mail.
-     * @param bcc     The blind carbon copy recipients of the e-mail.
-     * @param replyto The reply-to addresses of the e-mail.
-     * @param subject The subject of the e-mail to be sent.
-     * @param content The content of the e-mail to be sent.
-     * @throws IllegalStateException if called without the mailer being configured beforehand via {@link #configure}.
-     */
-    public void send(Collection<String> to, Collection<String> cc, Collection<String> bcc,
-                     Collection<String> replyto, String subject, String content) {
-        if (configuration.isEmpty()) {
-            throw new IllegalStateException("Mailer has not yet been configured!");
-        }
-        send(parseAddresses(to), parseAddresses(cc), parseAddresses(bcc), parseAddresses(replyto), subject, content);
-    }
-
-    private void send(Address[] to, Address[] cc, Address[] bcc, Address[] replyto, String subject, String content) {
+    private boolean send(final Address[] to, final Address[] cc, final Address[] bcc, final Address[] replyto,
+                         final String subject, final String content) {
+        log.debug(String.format("Sending mail to %s with cc %s, bcc %s, replyto %s and subject '%s'.",
+                Arrays.toString(to), Arrays.toString(cc), Arrays.toString(bcc), Arrays.toString(replyto), subject));
         try {
-            Session mailSession = Session.getDefaultInstance(configuration, authenticator);
-            MimeMessage message = new MimeMessage(mailSession);
-            message.addRecipients(Message.RecipientType.TO, to);
-            message.addRecipients(Message.RecipientType.CC, cc);
-            message.addRecipients(Message.RecipientType.BCC, bcc);
+            MimeMessage message = new MimeMessage(session);
+            message.setRecipients(Message.RecipientType.TO, to);
+            message.setRecipients(Message.RecipientType.CC, cc);
+            message.setRecipients(Message.RecipientType.BCC, bcc);
             message.setReplyTo(replyto);
             message.setSubject(subject);
             message.setText(content);
             Transport.send(message);
+            return true;
         } catch (MessagingException e) {
-            log.warning("Could not send mail with subject \"" + subject + "\".");
+            log.warning("Could not send mail with subject \"" + subject + "\".", e);
+            return false;
         }
     }
 
-    private Address[] parseAddresses(Collection<String> addresses) {
-        Collection<Address> validAddresses = new ArrayList<>();
+    private Address[] addressify(final Collection<String> addresses) {
+        Collection<Address> validAddresses = new ArrayList<>(addresses.size());
         for (String address : addresses) {
             try {
-                validAddresses.add(new InternetAddress(address));
+                validAddresses.add(new InternetAddress(address, true));
             } catch (AddressException e) {
                 log.warning("Invalid e-mail address " + address + ".", e);
             }
