@@ -107,14 +107,17 @@ public final class ConnectionPool {
             log.error("JDBC Driver " + jdbcDriver + " not found.", e);
             throw new InternalError(e);
         }
+
         this.minConnections = minConnections;
         this.maxConnections = maxConnections;
         this.timeoutMillis = timeoutMillis;
         this.jdbcURL = jdbcURL;
         this.jdbcProperties = jdbcProperties;
 
-        availableConnections = new ArrayDeque<>();
-        usedConnections = new HashSet<>();
+        int meanConnections = (int) Math.sqrt(minConnections * maxConnections);
+        availableConnections = new ArrayDeque<>(meanConnections);
+        usedConnections = new HashSet<>(meanConnections);
+
         increaseConnections(minConnections);
     }
 
@@ -178,6 +181,8 @@ public final class ConnectionPool {
             throw new IllegalStateException("Connection pool has already been shut down.");
         } else if (connection == null) {
             throw new IllegalArgumentException("Connection to release must not be null.");
+        } else if (!usedConnections.contains(connection)) {
+            throw new IllegalArgumentException("Connection does not belong to this pool.");
         }
 
         usedConnections.remove(connection);
@@ -263,4 +268,5 @@ public final class ConnectionPool {
             }
         }
     }
+
 }

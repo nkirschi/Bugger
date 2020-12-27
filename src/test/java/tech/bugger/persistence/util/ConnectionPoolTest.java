@@ -233,6 +233,12 @@ public class ConnectionPoolTest {
         }
 
         @Test
+        public void testReleaseConnectionWhenConnectionIsForeign() {
+            Connection connection = mock(Connection.class);
+            assertThrows(IllegalArgumentException.class, () -> connectionPool.releaseConnection(connection));
+        }
+
+        @Test
         public void testReleaseConnectionWhenConnectionIsClosed() throws Exception {
             Connection connection = connectionPool.getConnection();
             connection.close();
@@ -240,6 +246,19 @@ public class ConnectionPoolTest {
             assertAll(
                     () -> assertEquals(0, usedConnections.size()),
                     () -> assertEquals(MIN_CONNS, availableConnections.size()),
+                    () -> assertFalse(availableConnections.contains(connection))
+            );
+        }
+
+        @Test
+        public void testReleaseConnectionWhenConnectionIsCorrupt() throws Exception {
+            Connection connection = mock(Connection.class);
+            doThrow(SQLException.class).when(connection).isClosed();
+            usedConnections.add(connection);
+            connectionPool.releaseConnection(connection);
+            assertAll(
+                    () -> assertEquals(0, usedConnections.size()),
+                    () -> assertEquals(2, availableConnections.size()),
                     () -> assertFalse(availableConnections.contains(connection))
             );
         }
@@ -266,18 +285,6 @@ public class ConnectionPoolTest {
                     () -> assertEquals(2, usedConnections.size()),
                     () -> assertEquals(1, availableConnections.size()),
                     () -> assertTrue(availableConnections.contains(connection))
-            );
-        }
-
-        @Test
-        public void testReleaseConnectionWhenConnectionCorrupt() throws Exception {
-            Connection connection = mock(Connection.class);
-            doThrow(SQLException.class).when(connection).isClosed();
-            connectionPool.releaseConnection(connection);
-            assertAll(
-                    () -> assertEquals(0, usedConnections.size()),
-                    () -> assertEquals(2, availableConnections.size()),
-                    () -> assertFalse(availableConnections.contains(connection))
             );
         }
 
