@@ -57,22 +57,29 @@ public final class PriorityExecutor {
     /**
      * Shuts down the executor gracefully by not accepting any new tasks and finishing the remaining ones.
      *
+     * Calling this method blocks until either all tasks have been terminated or the given timeout has been reached.
+     *
      * @param timeoutMillis The maximum time in milliseconds to wait for remaining task execution completion.
+     * @return {@code} true iff all remaining tasks have been completed without timeout.
      * @throws InterruptedException if interrupted whilst awaiting termination.
      */
-    public void shutdown(final int timeoutMillis) throws InterruptedException {
+    public boolean shutdown(final int timeoutMillis) throws InterruptedException {
         executorService.shutdown();
-        executorService.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
+        return executorService.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
      * Shuts down the executor immediately by discarding any waiting tasks and only finishing the running ones.
      *
+     * Calling this method blocks until either all tasks have been terminated or the given timeout has been reached.
+     *
      * @param timeoutMillis The maximum time in milliseconds to wait for remaining task execution completion.
+     * @return {@code} true iff all remaining tasks have been completed without timeout.
      * @throws InterruptedException if interrupted whilst awaiting termination.
      */
-    public void kill(final int timeoutMillis) throws InterruptedException {
+    public boolean kill(final int timeoutMillis) throws InterruptedException {
         executorService.shutdownNow();
-        executorService.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
+        return executorService.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
     }
+
 }

@@ -111,7 +111,7 @@ public class SystemLifetimeListenerTest {
         when(connectionPoolRegistryMock.get(any())).thenReturn(connectionPoolMock);
 
         priorityExecutorMock = mock(PriorityExecutor.class);
-        doNothing().when(priorityExecutorMock).shutdown(anyInt());
+        when(priorityExecutorMock.shutdown(anyInt())).thenReturn(true);
         when(priorityExecutorRegistryMock.get(any())).thenReturn(priorityExecutorMock);
 
         transactionMock = mock(Transaction.class);

@@ -238,13 +238,17 @@ public class SystemLifetimeListener implements ServletContextListener {
     private void terminateMailingTasks(final boolean immediately) {
         PriorityExecutor mailingExecutor = priorityExecutorRegistry.get("mails");
         try {
-            if (immediately) {
-                mailingExecutor.kill(TASK_TERMINATION_TIMEOUT_MILLIS);
+            boolean completed = immediately
+                ? mailingExecutor.kill(TASK_TERMINATION_TIMEOUT_MILLIS)
+                : mailingExecutor.shutdown(TASK_TERMINATION_TIMEOUT_MILLIS);
+
+            if (completed) {
+                log.info("Successfully terminated all running and queued mailing tasks.");
             } else {
-                mailingExecutor.shutdown(TASK_TERMINATION_TIMEOUT_MILLIS);
+                log.warning("Timeout while terminating mailing tasks.");
             }
         } catch (InterruptedException e) {
-            log.warning("Interrupted while waiting for mailing tasks to finish.");
+            log.error("Interrupted while waiting for mailing tasks to finish.", e);
         }
     }
 
