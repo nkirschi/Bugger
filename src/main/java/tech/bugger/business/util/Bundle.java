@@ -9,7 +9,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Annotation specifying a certain resource bundle by name.
+ * Qualifier annotation specifying a certain resource bundle by name.
  */
 @Qualifier
 @Retention(RUNTIME)

@@ -12,6 +12,7 @@ import java.util.logging.Logger;
  * Facade for a logging API. Currently: {@link java.util.logging}.
  */
 public final class Log {
+
     /**
      * The depth of method calls starting from the client until reaching {@link #log(Level, String, Throwable)}.
      */
