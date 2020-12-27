@@ -6,6 +6,7 @@ import java.io.Serial;
  * Exception indicating a race condition while editing some content.
  */
 public class ConcurrentModificationException extends Exception {
+
     @Serial
     private static final long serialVersionUID = -7858198918413564101L;
 
@@ -21,7 +22,7 @@ public class ConcurrentModificationException extends Exception {
      *
      * @param message The detail message describing this particular exception.
      */
-    public ConcurrentModificationException(String message) {
+    public ConcurrentModificationException(final String message) {
         super(message);
     }
 
@@ -31,7 +32,7 @@ public class ConcurrentModificationException extends Exception {
      *
      * @param cause The cause for this particular exception.
      */
-    public ConcurrentModificationException(Throwable cause) {
+    public ConcurrentModificationException(final Throwable cause) {
         super(cause);
     }
 
@@ -44,7 +45,8 @@ public class ConcurrentModificationException extends Exception {
      * @param message The detail message describing this particular exception.
      * @param cause   The cause for this particular exception.
      */
-    public ConcurrentModificationException(String message, Throwable cause) {
+    public ConcurrentModificationException(final String message, final Throwable cause) {
         super(message, cause);
     }
+
 }

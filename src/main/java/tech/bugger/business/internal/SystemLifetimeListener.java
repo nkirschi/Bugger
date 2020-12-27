@@ -301,4 +301,5 @@ public class SystemLifetimeListener implements ServletContextListener {
     public void setTransactionManager(final TransactionManager transactionManager) {
         this.transactionManager = transactionManager;
     }
+
 }
