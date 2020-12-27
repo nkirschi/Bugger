@@ -4,15 +4,23 @@ package tech.bugger.business.util;
  * Task augmented with an associated priority.
  */
 public class PriorityTask implements Runnable {
-    private Priority priority;
-    private Runnable action;
+
+    /**
+     * {@link Priority} level of this task.
+     */
+    private final Priority priority;
+
+    /**
+     * Action to invoke when this task is executed.
+     */
+    private final Runnable action;
 
     /**
      * Available task priority levels.
      */
-    public enum Priority { // the order defines the importance!
+    public enum Priority { // The order defines the importance. Do not change!
         /**
-         * High priotiy.
+         * High priority.
          */
         HIGH,
 
@@ -23,12 +31,12 @@ public class PriorityTask implements Runnable {
     }
 
     /**
-     * Constructs a new task with the speicified priority and action.
+     * Constructs a new task with the specified priority and action.
      *
      * @param priority The task priority level.
      * @param action   The action to invoke upon task execution.
      */
-    public PriorityTask(Priority priority, Runnable action) {
+    public PriorityTask(final Priority priority, final Runnable action) {
         this.priority = priority;
         this.action = action;
     }
