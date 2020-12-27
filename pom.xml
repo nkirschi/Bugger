@@ -29,6 +29,8 @@
         <checkstyle.version>8.37</checkstyle.version>
         <junit.version>5.7.0</junit.version>
         <mockito.version>3.6.28</mockito.version>
+        <dumbster.version>1.7.1</dumbster.version>
+        <embeddedpostgres.version>1.2.9</embeddedpostgres.version>
     </properties>
 
     <dependencies>
@@ -115,6 +117,22 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
             <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Dumbster Fake SMTP Server -->
+        <dependency>
+            <groupId>com.github.kirviq</groupId>
+            <artifactId>dumbster</artifactId>
+            <version>${dumbster.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Embedded in-memory PostgreSQL server -->
+        <dependency>
+            <groupId>io.zonky.test</groupId>
+            <artifactId>embedded-postgres</artifactId>
+            <version>${embeddedpostgres.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
