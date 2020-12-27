@@ -1,12 +1,14 @@
 package tech.bugger.persistence.util;
 
+import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import tech.bugger.persistence.exception.OutOfConnectionsException;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -20,7 +22,6 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
@@ -28,11 +29,85 @@ import static org.mockito.Mockito.mock;
 
 public class ConnectionPoolTest {
     private static final String DVR = "org.postgresql.Driver";
-    private static final String URL = "jdbc:postgresql://bueno.fim.uni-passau.de:5432/sep20g02t";
+    private static final String URL = "jdbc:postgresql://localhost:42424/postgres";
     private static final Properties PROPS = new Properties();
     private static final int MIN_CONNS = 2;
     private static final int MAX_CONNS = 5;
-    private static final int TIMEOUT = 5000;
+    private static final int TIMEOUT = 1000; // should not cause trouble with in-memory DB ;-)
+    private static EmbeddedPostgres pg;
+
+    @BeforeAll
+    public static void setUp() throws Exception {
+        pg = EmbeddedPostgres.builder().setPort(42424).start();
+        PROPS.load(ClassLoader.getSystemResourceAsStream("jdbc.properties"));
+    }
+
+    @AfterAll
+    public static void tearDown() throws Exception {
+        pg.close();
+    }
+
+    @Nested
+    public class ConnectionPoolInitializationTest {
+
+        @Test
+        public void testConstructorWhenDvrNull() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> new ConnectionPool(null, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
+        }
+
+        @Test
+        public void testConstructorWhenUrlNull() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> new ConnectionPool(DVR, null, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
+        }
+
+        @Test
+        public void testConstructorWhenUrlInvalid() {
+            assertThrows(InternalError.class,
+                    () -> new ConnectionPool(DVR, "invalid", PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
+        }
+
+        @Test
+        public void testConstructorWhenPropsNull() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> new ConnectionPool(DVR, URL, null, MIN_CONNS, MAX_CONNS, TIMEOUT));
+        }
+
+        @Test
+        public void testConstructorWhenMinConnsNotPositive() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> new ConnectionPool(DVR, URL, PROPS, 0, MAX_CONNS, TIMEOUT));
+        }
+
+        @Test
+        public void testConstructorWhenMaxConnsNotPositive() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, 0, TIMEOUT));
+        }
+
+        @Test
+        public void testConstructorWhenTimeoutNegative() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, -42));
+        }
+
+        @Test
+        public void testConstructorWhenDriverNotExisting() {
+            assertThrows(InternalError.class,
+                    () -> new ConnectionPool("nodriver", URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
+        }
+
+        @Test
+        public void testConstructorSetsUpConnections() throws IllegalAccessException, NoSuchFieldException {
+            ConnectionPool connectionPool = new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT);
+            Field field = ConnectionPool.class.getDeclaredField("availableConnections");
+            field.setAccessible(true);
+            Collection<Connection> availableConnections = (Collection<Connection>) field.get(connectionPool);
+            assertEquals(2, availableConnections.size());
+            connectionPool.shutdown();
+        }
+    }
 
     @Nested
     public class ConnectionPoolShutdownTest {
@@ -41,29 +116,16 @@ public class ConnectionPoolTest {
         private Collection<Connection> usedConnections;
 
         @BeforeEach
-        public void init() throws IOException, NoSuchFieldException, IllegalAccessException {
-            connectionPool = ConnectionPool.getInstance();
-            PROPS.load(ClassLoader.getSystemResourceAsStream("jdbc-test.properties"));
+        public void setUp() throws Exception {
+            connectionPool = new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT);
+
             Field field = ConnectionPool.class.getDeclaredField("availableConnections");
             field.setAccessible(true);
             availableConnections = (Collection<Connection>) field.get(connectionPool);
+
             field = ConnectionPool.class.getDeclaredField("usedConnections");
             field.setAccessible(true);
             usedConnections = (Collection<Connection>) field.get(connectionPool);
-        }
-
-        @AfterEach
-        public void reset() throws IllegalAccessException, NoSuchFieldException {
-            Field instance = ConnectionPool.class.getDeclaredField("instance");
-            instance.setAccessible(true);
-            instance.set(null, null);
-        }
-
-        @Test
-        public void testInitWhenAlreadyShutDown() {
-            connectionPool.shutdown();
-            assertThrows(IllegalStateException.class,
-                    () -> connectionPool.init(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
         }
 
         @Test
@@ -88,7 +150,7 @@ public class ConnectionPoolTest {
         }
 
         @Test
-        public void testShutdownWhenConnectionsCorrupt() throws SQLException {
+        public void testShutdownWhenConnectionsCorrupt() throws Exception {
             availableConnections.clear();
             usedConnections.clear();
             Connection connection = mock(Connection.class);
@@ -102,116 +164,6 @@ public class ConnectionPoolTest {
         }
     }
 
-    static {
-        try {
-            PROPS.load(ClassLoader.getSystemResourceAsStream("jdbc-test.properties"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void testGetInstance() {
-        ConnectionPool po = ConnectionPool.getInstance();
-        ConnectionPool ol = ConnectionPool.getInstance();
-        assertSame(po, ol, "Should always return the same singleton instance.");
-    }
-
-    @Nested
-    public class ConnectionPoolInitializationTest {
-
-        private ConnectionPool connectionPool;
-
-        @BeforeEach
-        public void init() throws IOException {
-            connectionPool = ConnectionPool.getInstance();
-            PROPS.load(ClassLoader.getSystemResourceAsStream("jdbc-test.properties"));
-        }
-
-        @AfterEach
-        public void reset() throws IllegalAccessException, NoSuchFieldException {
-            connectionPool.shutdown();
-            Field instance = ConnectionPool.class.getDeclaredField("instance");
-            instance.setAccessible(true);
-            instance.set(null, null);
-        }
-
-        @Test
-        public void testInitWhenAlreadyInitialized() {
-            connectionPool.init(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT);
-            assertThrows(IllegalStateException.class,
-                    () -> connectionPool.init(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
-        }
-
-        @Test
-        public void testInitWhenDvrNull() {
-            assertThrows(IllegalArgumentException.class,
-                    () -> connectionPool.init(null, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
-        }
-
-        @Test
-        public void testInitWhenUrlNull() {
-            assertThrows(IllegalArgumentException.class,
-                    () -> connectionPool.init(DVR, null, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
-        }
-
-        @Test
-        public void testInitWhenUrlInvalid() {
-            assertThrows(InternalError.class,
-                    () -> connectionPool.init(DVR, "invalid", PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
-        }
-
-        @Test
-        public void testInitWhenPropsNull() {
-            assertThrows(IllegalArgumentException.class,
-                    () -> connectionPool.init(DVR, URL, null, MIN_CONNS, MAX_CONNS, TIMEOUT));
-        }
-
-        @Test
-        public void testInitWhenMinConnsNotPositive() {
-            assertThrows(IllegalArgumentException.class,
-                    () -> connectionPool.init(DVR, URL, PROPS, 0, MAX_CONNS, TIMEOUT));
-        }
-
-        @Test
-        public void testInitWhenMaxConnsNotPositive() {
-            assertThrows(IllegalArgumentException.class,
-                    () -> connectionPool.init(DVR, URL, PROPS, MIN_CONNS, 0, TIMEOUT));
-        }
-
-        @Test
-        public void testInitWhenTimeoutNegative() {
-            assertThrows(IllegalArgumentException.class,
-                    () -> connectionPool.init(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, -42));
-        }
-
-        @Test
-        public void testInitWhenDriverNotExisting() {
-            assertThrows(InternalError.class,
-                    () -> connectionPool.init("nodriver", URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
-        }
-
-        @Test
-        public void testInitSetsUpConnections() throws IllegalAccessException, NoSuchFieldException {
-            connectionPool.init(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT);
-            Field field = ConnectionPool.class.getDeclaredField("availableConnections");
-            field.setAccessible(true);
-            Collection<Connection> availableConnections = (Collection<Connection>) field.get(connectionPool);
-            assertEquals(2, availableConnections.size());
-        }
-
-        @Test
-        public void testGetConnectionIfNotInitialized() {
-            assertThrows(IllegalStateException.class, () -> connectionPool.getConnection());
-        }
-
-        @Test
-        public void testReleaseConnectionIfNotInitialized() {
-            assertThrows(IllegalStateException.class, () -> connectionPool.releaseConnection(null));
-        }
-    }
-
-
     @Nested
     public class ConnectionPoolUsageTest {
         private ConnectionPool connectionPool;
@@ -219,23 +171,21 @@ public class ConnectionPoolTest {
         private Collection<Connection> usedConnections;
 
         @BeforeEach
-        public void init() throws IllegalAccessException, NoSuchFieldException {
-            connectionPool = ConnectionPool.getInstance();
-            connectionPool.init(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT);
+        public void setUp() throws Exception {
+            connectionPool = new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT);
+
             Field field = ConnectionPool.class.getDeclaredField("availableConnections");
             field.setAccessible(true);
             availableConnections = (Collection<Connection>) field.get(connectionPool);
+
             field = ConnectionPool.class.getDeclaredField("usedConnections");
             field.setAccessible(true);
             usedConnections = (Collection<Connection>) field.get(connectionPool);
         }
 
         @AfterEach
-        public void reset() throws IllegalAccessException, NoSuchFieldException {
-            ConnectionPool.getInstance().shutdown();
-            Field instance = ConnectionPool.class.getDeclaredField("instance");
-            instance.setAccessible(true);
-            instance.set(null, null);
+        public void tearDown() {
+            connectionPool.shutdown();
         }
 
         @Test
@@ -270,7 +220,7 @@ public class ConnectionPoolTest {
         }
 
         @Test
-        public void testGetConnectionWhenTimeout() throws InterruptedException {
+        public void testGetConnectionWhenTimeout() {
             for (int i = 0; i < MAX_CONNS; i++) {
                 connectionPool.getConnection();
             }
@@ -283,7 +233,7 @@ public class ConnectionPoolTest {
         }
 
         @Test
-        public void testReleaseConnectionWhenConnectionIsClosed() throws SQLException {
+        public void testReleaseConnectionWhenConnectionIsClosed() throws Exception {
             Connection connection = connectionPool.getConnection();
             connection.close();
             connectionPool.releaseConnection(connection);
@@ -320,7 +270,7 @@ public class ConnectionPoolTest {
         }
 
         @Test
-        public void testReleaseConnectionWhenConnectionCorrupt() throws SQLException {
+        public void testReleaseConnectionWhenConnectionCorrupt() throws Exception {
             Connection connection = mock(Connection.class);
             doThrow(SQLException.class).when(connection).isClosed();
             connectionPool.releaseConnection(connection);
@@ -332,7 +282,7 @@ public class ConnectionPoolTest {
         }
 
         @Test
-        public void testScenarioWithWaitAndAllFine() throws InterruptedException {
+        public void testScenarioWithWait() throws Exception {
             List<Thread> threads = new ArrayList<>();
             for (int i = 0; i < MAX_CONNS; i++) {
                 Thread thread = new Thread(() -> {
@@ -374,7 +324,7 @@ public class ConnectionPoolTest {
         }
 
         @Test
-        public void testDecreaseConnectionsJustForBranchCoverage() throws NoSuchMethodException {
+        public void testDecreaseConnectionsJustForBranchCoverage() throws Exception {
             Method method = connectionPool.getClass().getDeclaredMethod("decreaseConnections", int.class);
             method.setAccessible(true);
             assertThrows(InvocationTargetException.class, () -> method.invoke(connectionPool, 3));

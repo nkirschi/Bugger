@@ -13,12 +13,13 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * Thread-safe singleton object pool of database connections.
+ * Thread-safe object pool of database connections.
  *
  * The pool dynamically manages a set of database connections that can be borrowed and returned by callers. Before being
  * used, the pool must be initialized with technical parameters for the database connection and performance aspects.
  */
 public final class ConnectionPool {
+
     /**
      * Log instance for logging in this class.
      */
@@ -28,11 +29,6 @@ public final class ConnectionPool {
      * Percentage of used connections below which the load is considered low.
      */
     private static final double DECREASE_THRESH = 0.7;
-
-    /**
-     * Singleton instance of this connection pool.
-     */
-    private static ConnectionPool instance;
 
     /**
      * The connections available for usage.
@@ -47,76 +43,35 @@ public final class ConnectionPool {
     /**
      * The minimum total number of connections to maintain.
      */
-    private int minConnections;
+    private final int minConnections;
 
     /**
      * The maximum allowed total number of connections.
      */
-    private int maxConnections;
+    private final int maxConnections;
 
     /**
      * Maximum time in milliseconds to wait on receiving a connection.
      */
-    private int timeoutMillis;
+    private final int timeoutMillis;
 
     /**
      * The DBMS-specific JDBC URL for connecting to the database.
      */
-    private String jdbcURL;
+    private final String jdbcURL;
 
     /**
      * The DBMS-specific JDBC connection properties containing at least the credentials.
      */
-    private Properties jdbcProperties;
+    private final Properties jdbcProperties;
 
     /**
-     * The {@link State} the connection pool is currently in.
+     * Flag indicating whether the connection pool is shut down and not available for use anymore.
      */
-    private State state;
+    private boolean shutDown;
 
     /**
-     * Possible states of the connection pool.
-     */
-    private enum State {
-        /**
-         * State when not yet having been initialized.
-         */
-        UNINITIALIZED,
-
-        /**
-         * State when initialized and available for use.
-         */
-        INITIALIZED,
-
-        /**
-         * State when terminated and not available for use anymore.
-         */
-        SHUT_DOWN
-    }
-
-    /**
-     * Constructs a new connection pool.
-     */
-    private ConnectionPool() {
-        availableConnections = new ArrayDeque<>();
-        usedConnections = new HashSet<>();
-        state = State.UNINITIALIZED;
-    }
-
-    /**
-     * Supplies the singleton connection pool object.
-     *
-     * @return The one and only instance of the connection pool.
-     */
-    public static ConnectionPool getInstance() {
-        if (instance == null) {
-            instance = new ConnectionPool();
-        }
-        return instance;
-    }
-
-    /**
-     * Initializes the connection pool with technical parameters and sets up the initial connections.
+     * Constructs a connection pool with the given technical parameters and sets up the initial connections.
      *
      * This initialization has to occur before any other method calls and can only be executed exactly once.
      *
@@ -130,13 +85,9 @@ public final class ConnectionPool {
      * @throws IllegalStateException if the connection pool has already been initialized.
      * @see <a href="https://docs.oracle.com/javase/tutorial/jdbc/basics/connecting.html">Connecting with JDBC</a>
      */
-    public void init(final String jdbcDriver, final String jdbcURL, final Properties jdbcProperties,
-                     final int minConnections, final int maxConnections, final int timeoutMillis) {
-        if (state == State.INITIALIZED) {
-            throw new IllegalStateException("Connection Pool has already been initialized.");
-        } else if (state == State.SHUT_DOWN) {
-            throw new IllegalStateException("Connection pool has already been shut down.");
-        } else if (jdbcDriver == null) {
+    public ConnectionPool(final String jdbcDriver, final String jdbcURL, final Properties jdbcProperties,
+                          final int minConnections, final int maxConnections, final int timeoutMillis) {
+        if (jdbcDriver == null) {
             throw new IllegalArgumentException("Driver class must not be null.");
         } else if (jdbcURL == null) {
             throw new IllegalArgumentException("Database URL must not be null.");
@@ -145,7 +96,7 @@ public final class ConnectionPool {
         } else if (minConnections < 1) {
             throw new IllegalArgumentException("Minimum number of connections must be a positive integer.");
         } else if (minConnections > maxConnections) {
-            throw new IllegalArgumentException("Minimum number of connections must be leq maximum number.");
+            throw new IllegalArgumentException("Minimum number of connections must be <= maximum number.");
         } else if (timeoutMillis < 0) {
             throw new IllegalArgumentException("Timeout cannot be negative.");
         }
@@ -156,14 +107,14 @@ public final class ConnectionPool {
             log.error("JDBC Driver " + jdbcDriver + " not found.", e);
             throw new InternalError(e);
         }
-
         this.minConnections = minConnections;
         this.maxConnections = maxConnections;
         this.timeoutMillis = timeoutMillis;
         this.jdbcURL = jdbcURL;
         this.jdbcProperties = jdbcProperties;
-        this.state = State.INITIALIZED;
 
+        availableConnections = new ArrayDeque<>();
+        usedConnections = new HashSet<>();
         increaseConnections(minConnections);
     }
 
@@ -174,12 +125,10 @@ public final class ConnectionPool {
      * received connections should be returned soon
      *
      * @return A free database connection that is ready to be used.
-     * @throws IllegalStateException if the connection pool has not been initialized yet.
+     * @throws IllegalStateException if the connection pool has already been shut down.
      */
     public synchronized Connection getConnection() {
-        if (state == State.UNINITIALIZED) {
-            throw new IllegalStateException("Connection pool has not yet been initialized.");
-        } else if (state == State.SHUT_DOWN) {
+        if (isShutDown()) {
             throw new IllegalStateException("Connection pool has already been shut down.");
         }
 
@@ -222,12 +171,10 @@ public final class ConnectionPool {
      * This enables a potential thread waiting for free connections to proceed.
      *
      * @param connection The connection to be reintegrated.
-     * @throws IllegalStateException if the connection pool has not been initialized yet.
+     * @throws IllegalStateException if the connection pool has already been shut down.
      */
     public synchronized void releaseConnection(final Connection connection) {
-        if (state == State.UNINITIALIZED) {
-            throw new IllegalStateException("Connection pool has not yet been initialized.");
-        } else if (state == State.SHUT_DOWN) {
+        if (isShutDown()) {
             throw new IllegalStateException("Connection pool has already been shut down.");
         } else if (connection == null) {
             throw new IllegalArgumentException("Connection to release must not be null.");
@@ -266,23 +213,34 @@ public final class ConnectionPool {
 
     /**
      * Shuts down the connection pool by releasing all resources.
+     *
+     * @throws IllegalStateException if the connection pool has already been shut down.
      */
     public void shutdown() {
-        if (state == State.SHUT_DOWN) {
+        if (isShutDown()) {
             throw new IllegalStateException("Connection pool has already been shut down.");
         }
 
         log.debug("Shutting down connection pool.");
         availableConnections.addAll(usedConnections);
         decreaseConnections(availableConnections.size());
-        state = State.SHUT_DOWN;
+        shutDown = true;
+    }
+
+    /**
+     * Returns whether the connection pool is shut down and not available for use anymore.
+     *
+     * @return {@code true} iff the connection pool has been already shut down.
+     */
+    public boolean isShutDown() {
+        return shutDown;
     }
 
     private void increaseConnections(final int increaseAmount) {
+        log.debug("Increasing available database connections by " + increaseAmount + ".");
         for (int i = 0; i < increaseAmount; i++) {
             try {
                 availableConnections.add(DriverManager.getConnection(jdbcURL, jdbcProperties));
-                log.debug("Incrementing available database connections.");
             } catch (SQLException e) {
                 log.error("Could not acquire a database connection.", e);
                 throw new InternalError(e);
@@ -295,6 +253,7 @@ public final class ConnectionPool {
             throw new IllegalArgumentException("Decrease amount must not be greater than number of connections.");
         }
 
+        log.debug("Decreasing available database connections by " + decreaseAmount + ".");
         for (int i = 0; i < decreaseAmount; i++) {
             Connection conn = availableConnections.remove();
             try {
