@@ -12,11 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HasherTest {
+    
     private static final String INPUT = "Hash my darling, don't fear my darling.";
     private static final String SALT = "2f73616c7421"; // equals "/salt!" in UTF-8
     private static final String ALGO = "SHA3-512";
     public static final int NUM_BYTES = 42;
-
 
     @Test
     public void testConstructorAccess() throws NoSuchMethodException {

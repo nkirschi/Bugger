@@ -76,4 +76,5 @@ public final class PropertiesReader {
     public boolean getBoolean(final String key) {
         return Boolean.parseBoolean(getString(key));
     }
+
 }

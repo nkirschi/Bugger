@@ -54,9 +54,10 @@ public final class Hasher {
      *
      * @param input The string to be hashed and salted.
      * @param salt  The salt to be appended before hashing as hexadecimal string of format {@code ([0-9a-f]{2})*}.
-     * @param algo  The hashing algorithm to use. Available algorithms are described in the <a href=
-     *              "https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#MessageDigest">
-     *              MessageDigest section</a> of the Java Security API documentation.
+     * @param algo  The hashing algorithm to use. Available algorithms are described in the
+     *              <a href="https://docs.oracle.com/en/java/javase/14/docs/specs/security/standard-names.html">
+     *              Standard Algorithm Names Section</a> of the Java Security API documentation in the subsection
+     *              "{@code MessageDigest} algorithms".
      * @return The hash value of {@code input} as hexadecimal string of format {@code ([0-9a-f]{2})*}.
      */
     public static String hash(final String input, final String salt, final String algo) {
@@ -123,4 +124,5 @@ public final class Hasher {
         }
         return bytes;
     }
+
 }

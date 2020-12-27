@@ -163,4 +163,5 @@ public final class Log {
             logger.log(level, msg, cause);
         }
     }
+
 }

@@ -44,4 +44,5 @@ public class PropertiesReaderRegistry {
     public void register(final String key, final PropertiesReader propertiesReader) {
         propertiesReaders.put(key, propertiesReader);
     }
+
 }

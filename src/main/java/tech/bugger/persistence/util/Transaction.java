@@ -115,5 +115,6 @@ public interface Transaction extends ExceptionlessAutoCloseable {
      * @return A brand-new user gateway tied to this transaction's connection.
      */
     UserGateway newUserGateway();
+
 }
 

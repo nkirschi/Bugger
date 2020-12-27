@@ -59,4 +59,5 @@ public class PriorityTask implements Runnable {
     public Priority getPriority() {
         return priority;
     }
+
 }

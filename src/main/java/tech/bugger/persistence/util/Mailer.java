@@ -124,4 +124,5 @@ public final class Mailer {
         }
         return validAddresses.toArray(new Address[]{});
     }
+
 }

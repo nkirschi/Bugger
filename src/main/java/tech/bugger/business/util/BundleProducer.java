@@ -10,6 +10,7 @@ import java.util.ResourceBundle;
  * CDI producer for convenient access to resource bundles.
  */
 public class BundleProducer {
+
     /**
      * The current user session.
      */
@@ -58,4 +59,5 @@ public class BundleProducer {
     public ResourceBundle getMessages() {
         return ResourceBundle.getBundle("tech.bugger.i18n.messages", userSession.getLocale());
     }
+
 }

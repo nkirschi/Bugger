@@ -116,6 +116,9 @@ public class DBTransaction implements Transaction {
         return new AttachmentDBGateway(connection);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public MetadataGateway newMetadataGateway() {
         checkState();
@@ -226,4 +229,5 @@ public class DBTransaction implements Transaction {
             throw new IllegalStateException("Transaction cannot be reused.");
         }
     }
+
 }

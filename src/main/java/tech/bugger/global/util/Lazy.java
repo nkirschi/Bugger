@@ -10,6 +10,7 @@ import java.util.function.Supplier;
  * @param <T> The type of the wrapped object.
  */
 public class Lazy<T> implements Serializable {
+
     @Serial
     private static final long serialVersionUID = -7848504462864860011L;
 
@@ -67,4 +68,5 @@ public class Lazy<T> implements Serializable {
     public boolean isPresent() {
         return value != null;
     }
+
 }

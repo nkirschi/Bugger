@@ -24,7 +24,7 @@ public class MetadataDBGateway implements MetadataGateway {
     /**
      * Database connection used by this gateway.
      */
-    private Connection conn;
+    private final Connection conn;
 
     /**
      * Constructs a new metadata gateway with the given database connection.
@@ -74,4 +74,5 @@ public class MetadataDBGateway implements MetadataGateway {
             throw new StoreException("Schema initialization failed.", e);
         }
     }
+
 }

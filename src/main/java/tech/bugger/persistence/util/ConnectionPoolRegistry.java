@@ -44,4 +44,5 @@ public class ConnectionPoolRegistry {
     public void register(final String key, final ConnectionPool connectionPool) {
         connectionPools.put(key, connectionPool);
     }
+
 }

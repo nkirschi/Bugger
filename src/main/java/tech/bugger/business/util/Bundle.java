@@ -15,10 +15,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target({FIELD, METHOD})
 public @interface Bundle {
+
     /**
      * The name of the resource bundle being referenced.
      *
      * @return The resource bundle name.
      */
     String value();
+
 }

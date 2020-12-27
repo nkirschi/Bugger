@@ -6,6 +6,7 @@ import java.io.Serial;
  * Exception indicating there are not enough connections available.
  */
 public class OutOfConnectionsException extends RuntimeException {
+
     @Serial
     private static final long serialVersionUID = -9055935003841723321L;
 
@@ -51,6 +52,5 @@ public class OutOfConnectionsException extends RuntimeException {
         super(cause);
         // TODO Auto-generated constructor stub
     }
-
 
 }

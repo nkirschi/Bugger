@@ -6,6 +6,7 @@ import java.io.Serial;
  * Exception indicating something went wrong with the config file.
  */
 public class ConfigException extends RuntimeException {
+
     @Serial
     private static final long serialVersionUID = -7813119346738971512L;
 
@@ -49,4 +50,5 @@ public class ConfigException extends RuntimeException {
         super(cause);
         // TODO Auto-generated constructor stub
     }
+
 }

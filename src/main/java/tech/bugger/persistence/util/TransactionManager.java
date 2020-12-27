@@ -33,4 +33,5 @@ public final class TransactionManager {
     public Transaction begin() {
         return new DBTransaction(connectionPoolRegistry.get("db"));
     }
+
 }

@@ -44,4 +44,5 @@ public class MailerRegistry {
     public void register(final String key, final Mailer mailer) {
         mailers.put(key, mailer);
     }
+
 }

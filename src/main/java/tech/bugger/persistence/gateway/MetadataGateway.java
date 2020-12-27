@@ -20,4 +20,5 @@ public interface MetadataGateway {
      * @param is Stream of instructions for setting up the schema.
      */
     void initializeSchema(InputStream is);
+
 }
