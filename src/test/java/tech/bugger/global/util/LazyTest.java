@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2020. SEParatisten
- */
-
 package tech.bugger.global.util;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,12 +21,12 @@ public class LazyTest {
     }
 
     @Test
-    public void testLazyConsructorWhenNull() {
+    public void testLazyConstructorWhenNull() {
         assertThrows(IllegalArgumentException.class, () -> new Lazy<>((Supplier<String>) null));
     }
 
     @Test
-    public void testEagerConsructorWhenNull() {
+    public void testEagerConstructorWhenNull() {
         assertThrows(IllegalArgumentException.class, () -> new Lazy<>((String) null));
     }
 

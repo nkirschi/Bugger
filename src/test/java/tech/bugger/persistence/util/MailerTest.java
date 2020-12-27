@@ -108,7 +108,6 @@ public class MailerTest {
 
     @Test
     public void testFullConstructorWhenAllFine() {
-        InputStream is = ClassLoader.getSystemResourceAsStream("mailing.properties");
         assertDoesNotThrow(() -> new Mailer(ClassLoader.getSystemResourceAsStream("mailing.properties"), null, null));
     }
 
