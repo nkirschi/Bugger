@@ -2,18 +2,40 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * DTO representing an organization.
  */
 public class Organization implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 2775773770560723398L;
 
+    /**
+     * Organization name.
+     */
     private String name;
+
+    /**
+     * Organization logo.
+     */
     private byte[] logo;
+
+    /**
+     * Organization theme.
+     */
     private String theme;
+
+    /**
+     * Organization imprint.
+     */
     private String imprint;
+
+    /**
+     * Organization privacy policy.
+     */
     private String privacyPolicy;
 
     /**
@@ -25,7 +47,8 @@ public class Organization implements Serializable {
      * @param imprint       The organization imprint.
      * @param privacyPolicy The organization privacy policy.
      */
-    public Organization(String name, byte[] logo, String theme, String imprint, String privacyPolicy) {
+    public Organization(final String name, final byte[] logo, final String theme,
+                        final String imprint, final String privacyPolicy) {
         this.name = name;
         this.logo = logo;
         this.theme = theme;
@@ -47,7 +70,7 @@ public class Organization implements Serializable {
      *
      * @param name The organization name to be set.
      */
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -65,7 +88,7 @@ public class Organization implements Serializable {
      *
      * @param logo The organization logo to be set.
      */
-    public void setLogo(byte[] logo) {
+    public void setLogo(final byte[] logo) {
         this.logo = logo;
     }
 
@@ -83,7 +106,7 @@ public class Organization implements Serializable {
      *
      * @param theme The organization theme to be set.
      */
-    public void setTheme(String theme) {
+    public void setTheme(final String theme) {
         this.theme = theme;
     }
 
@@ -101,7 +124,7 @@ public class Organization implements Serializable {
      *
      * @param imprint The organization imprint to be set.
      */
-    public void setImprint(String imprint) {
+    public void setImprint(final String imprint) {
         this.imprint = imprint;
     }
 
@@ -119,7 +142,7 @@ public class Organization implements Serializable {
      *
      * @param privacyPolicy The organization privacy policy to be set.
      */
-    public void setPrivacyPolicy(String privacyPolicy) {
+    public void setPrivacyPolicy(final String privacyPolicy) {
         this.privacyPolicy = privacyPolicy;
     }
 
@@ -130,9 +153,19 @@ public class Organization implements Serializable {
      * @return {@code true} iff {@code other} is a semantically equivalent organization.
      */
     @Override
-    public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Organization)) {
+            return false;
+        }
+        Organization that = (Organization) other;
+        return name.equals(that.name)
+                && Arrays.equals(logo, that.logo)
+                && theme.equals(that.theme)
+                && imprint.equals(that.imprint)
+                && privacyPolicy.equals(that.privacyPolicy);
     }
 
     /**
@@ -143,8 +176,9 @@ public class Organization implements Serializable {
      */
     @Override
     public int hashCode() {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        int result = Objects.hash(name, theme, imprint, privacyPolicy);
+        result = 31 * result + Arrays.hashCode(logo);
+        return result;
     }
 
     /**
@@ -154,8 +188,13 @@ public class Organization implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "Organization{"
+                + "name='" + name + '\''
+                + ", logo=" + Arrays.toString(logo)
+                + ", theme='" + theme + '\''
+                + ", imprint='" + imprint + '\''
+                + ", privacyPolicy='" + privacyPolicy + '\''
+                + '}';
     }
 
 }
