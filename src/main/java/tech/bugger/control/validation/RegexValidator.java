@@ -39,7 +39,7 @@ public class RegexValidator implements Validator<String> {
         try {
             Pattern.compile(regex);
         } catch (PatternSyntaxException e) {
-            FacesMessage message = new FacesMessage(resourceBundle.getString("validation.invalid_regex"));
+            FacesMessage message = new FacesMessage(resourceBundle.getString("invalid_regex"));
             throw new ValidatorException(message, e);
         }
     }

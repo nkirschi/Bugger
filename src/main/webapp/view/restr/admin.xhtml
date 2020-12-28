@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<f:view locale="#{userSession.locale}">
+    <h2>#{labels.user_management}</h2>
+    <h:form>
+        <h:panelGroup>
+            <h:commandButton value="#{labels.browse}" action="#{adminBacker.browseUsers}"/>
+            <h:commandButton value="#{labels.create}" action="#{adminBacker.createUser}"/>
+        </h:panelGroup>
+    </h:form>
+
+    <h2>#{labels.organization_settings}</h2>
+    <h:form id="f_organisation" enctype="multipart/form-data">
+        <h:panelGrid columns="2">
+            <h:outputLabel id="o_name" for="it_name" value="#{labels.name}"/>
+            <h:inputText id="it_name" value="#{adminBacker.organization.name}"/>
+            <h:panelGroup/>
+            <h:message for="it_name"/>
+
+            <h:outputLabel id="o_logo" for="g_logo" value="#{labels.logo}"/>
+            <h:panelGroup layout="block">
+                <!-- TODO upgrade to real image from DB -->
+                <h:graphicImage id="g_logo" library="images" name="bugger.png" width="100" height="100"/>
+                <h:inputFile id="i_logo" validator="imageValidator" valueChangeListener="#{adminBacker.uploadLogo}"/>
+            </h:panelGroup>
+            <h:panelGroup/>
+            <h:message for="i_logo"/>
+
+            <h:outputLabel id="o_theme" for="s_theme" value="#{labels.theme}"/>
+            <h:selectOneMenu id="s_theme" value="#{adminBacker.organization.theme}">
+                <f:selectItems value="#{adminBacker.availableThemes}"/>
+            </h:selectOneMenu>
+            <h:panelGroup/>
+            <h:message for="s_theme"/>
+
+            <h:outputLabel id="o_imprint" for="it_imprint" value="#{labels.imprint}"/>
+            <h:inputTextarea id="it_imprint" value="#{adminBacker.organization.imprint}"/>
+            <h:panelGroup/>
+            <h:message for="it_imprint"/>
+
+            <h:outputLabel id="o_privacy-policy" for="it_privacy-policy" value="#{labels.privacy_policy}"/>
+            <h:inputTextarea id="it_privacy-policy" value="#{adminBacker.organization.privacyPolicy}"/>
+            <h:panelGroup/>
+            <h:message for="it_privacy-policy"/>
+        </h:panelGrid>
+        <h:commandButton value="#{labels.save}" action="#{adminBacker.saveOrganization}"/>
+    </h:form>
+
+    <h2>#{labels.configuration_settings}</h2>
+    <h:form id="f_configuration">
+        <h:panelGrid columns="2">
+            <h:outputLabel id="o_guest-reading" for="s_guest-reading" value="#{labels.guest_reading}"/>
+            <h:selectBooleanCheckbox id="s_guest-reading" value="#{adminBacker.configuration.guestReading}"/>
+            <h:panelGroup/>
+            <h:message for="s_guest-reading"/>
+
+            <h:outputLabel id="o_closed-report-posting" for="s_closed-report-posting"
+                           value="#{labels.closed_report_posting}"/>
+            <h:selectBooleanCheckbox id="s_closed-report-posting"
+                                     value="#{adminBacker.configuration.closedReportPosting}"/>
+            <h:panelGroup/>
+            <h:message for="s_closed-report-posting"/>
+
+            <h:outputLabel id="o_user-email-format" for="s_user-email-format" value="#{labels.user_email_format}"/>
+            <h:inputText id="s_user-email-format" value="#{adminBacker.configuration.userEmailFormat}"
+                         validator="regexValidator"/>
+            <h:panelGroup/>
+            <h:message for="s_user-email-format"/>
+
+            <h:outputLabel id="o_allowed-file-extensions" for="it_allowed-file-extensions"
+                           value="#{labels.allowed_file_extensions}"/>
+            <h:inputTextarea id="it_allowed-file-extensions"
+                             value="#{adminBacker.configuration.allowedFileExtensions}"/>
+            <h:panelGroup/>
+            <h:message for="it_allowed-file-extensions"/>
+
+            <h:outputLabel id="o_max-attachments-per-post" for="it_max-attachments-per-post"
+                           value="#{labels.max_attachments_per_post}"/>
+            <h:inputText id="it_max-attachments-per-post" value="#{adminBacker.configuration.maxAttachmentsPerPost}"/>
+            <h:panelGroup/>
+            <h:message for="it_max-attachments-per-post"/>
+
+            <h:outputLabel id="o_voting-weight-definition" for="it_voting-weight-definition"
+                           value="#{labels.voting_weight_definition}"/>
+            <h:inputText id="it_voting-weight-definition" value="#{adminBacker.configuration.votingWeightDefinition}"/>
+        </h:panelGrid>
+        <h:commandButton value="#{labels.save}" action="#{adminBacker.saveConfiguration}"/>
+    </h:form>
+</f:view>
+</html>
