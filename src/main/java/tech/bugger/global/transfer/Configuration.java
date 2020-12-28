@@ -65,6 +65,17 @@ public class Configuration implements Serializable {
     }
 
     /**
+     * Constructs a new configuration data object from the given configuration.
+     *
+     * @param configuration The configuration to clone.
+     */
+    public Configuration(final Configuration configuration) {
+        this(configuration.isGuestReading(), configuration.isClosedReportPosting(),
+                configuration.getUserEmailFormat(), configuration.getAllowedFileExtensions(),
+                configuration.getMaxAttachmentsPerPost(), configuration.getVotingWeightDefinition());
+    }
+
+    /**
      * Returns whether guests are granted reading privileges.
      *
      * @return Whether guests have reading permissions.
@@ -132,7 +143,7 @@ public class Configuration implements Serializable {
      *
      * @param allowedFiletypes The allowed file extensions as comma-separated list.
      */
-    public void setAllowedFileExtension(final String allowedFiletypes) {
+    public void setAllowedFileExtensions(final String allowedFiletypes) {
         this.allowedFileExtensions = allowedFiletypes;
     }
 
