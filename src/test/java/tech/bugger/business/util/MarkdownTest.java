@@ -4,9 +4,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import org.commonmark.node.Text;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(LogExtension.class)
 public class MarkdownTest {
 
     @Test
