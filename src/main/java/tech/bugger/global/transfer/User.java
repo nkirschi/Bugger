@@ -5,11 +5,14 @@ import tech.bugger.global.util.Lazy;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * DTO representing a user.
  */
 public class User implements Serializable {
+
     @Serial
     private static final long serialVersionUID = -5091686502934907535L;
 
@@ -40,7 +43,7 @@ public class User implements Serializable {
     private String lastName;
     private Lazy<byte[]> avatar;
     private byte[] avatarThumbnail;
-    private String bigraphy;
+    private String biography;
     private Language preferredLanguage;
     private ProfileVisibility profileVisibility;
 
@@ -233,17 +236,17 @@ public class User implements Serializable {
      *
      * @return The user's biography.
      */
-    public String getBigraphy() {
-        return bigraphy;
+    public String getBiography() {
+        return biography;
     }
 
     /**
      * Returns the biography of this user.
      *
-     * @param bigraphy The user's biography to be set.
+     * @param biography The user's biography to be set.
      */
-    public void setBigraphy(String bigraphy) {
-        this.bigraphy = bigraphy;
+    public void setBiography(String biography) {
+        this.biography = biography;
     }
 
     /**
@@ -344,8 +347,21 @@ public class User implements Serializable {
      */
     @Override
     public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+        if (this == other) {
+            return true;
+        }
+        if ((other == null) || (getClass() != other.getClass())) {
+            return false;
+        }
+        User user = (User) other;
+        return (id == user.id) && (administrator == user.administrator) && (username.equals(user.username))
+                && (passwordHash.equals(user.passwordHash)) && (passwordSalt.equals(user.passwordSalt))
+                && (hashingAlgorithm.equals(user.hashingAlgorithm)) && (emailAddress.equals(user.emailAddress))
+                && (firstName.equals(user.firstName)) && (lastName.equals(user.lastName))
+                && (Objects.equals(avatar, user.avatar)) && (Arrays.equals(avatarThumbnail, user.avatarThumbnail))
+                && (Objects.equals(biography, user.biography)) && (preferredLanguage == user.preferredLanguage)
+                && (profileVisibility == user.profileVisibility) && (registrationDate.equals(user.registrationDate))
+                && (Objects.equals(forcedVotingWeight, user.forcedVotingWeight));
     }
 
     /**
@@ -356,8 +372,11 @@ public class User implements Serializable {
      */
     @Override
     public int hashCode() {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        int result = Objects.hash(id, username, passwordHash, passwordSalt, hashingAlgorithm, emailAddress, firstName,
+                lastName, avatar, biography, preferredLanguage, profileVisibility, registrationDate, forcedVotingWeight,
+                administrator);
+        result = 31 * result + Arrays.hashCode(avatarThumbnail);
+        return result;
     }
 
     /**
@@ -367,7 +386,23 @@ public class User implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "User{"
+                + "id=" + id
+                + ", username='" + username + '\''
+                + ", passwordHash='" + passwordHash + '\''
+                + ", passwordSalt='" + passwordSalt + '\''
+                + ", hashingAlgorithm='" + hashingAlgorithm + '\''
+                + ", emailAddress='" + emailAddress + '\''
+                + ", firstName='" + firstName + '\''
+                + ", lastName='" + lastName + '\''
+                + ", avatar=" + avatar
+                + ", avatarThumbnail=" + Arrays.toString(avatarThumbnail)
+                + ", biography='" + biography + '\''
+                + ", preferredLanguage=" + preferredLanguage
+                + ", profileVisibility=" + profileVisibility
+                + ", registrationDate=" + registrationDate
+                + ", forcedVotingWeight=" + forcedVotingWeight
+                + ", administrator=" + administrator
+                + '}';
     }
 }
