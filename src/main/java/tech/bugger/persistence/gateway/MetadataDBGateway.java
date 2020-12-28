@@ -38,8 +38,6 @@ public class MetadataDBGateway implements MetadataGateway {
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public Metadata retrieveMetadata() {
