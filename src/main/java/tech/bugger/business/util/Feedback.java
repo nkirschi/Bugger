@@ -15,6 +15,11 @@ public class Feedback {
         INFO,
 
         /**
+         * A warning message.
+         */
+        WARNING,
+
+        /**
          * An error message.
          */
         ERROR
