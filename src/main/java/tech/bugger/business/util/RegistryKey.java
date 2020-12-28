@@ -1,5 +1,6 @@
 package tech.bugger.business.util;
 
+import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -9,18 +10,18 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Qualifier annotation specifying a certain resource bundle by name.
+ * Qualifier annotation specifying a registry key.
  */
 @Qualifier
 @Retention(RUNTIME)
 @Target({FIELD, METHOD})
-public @interface Bundle {
+public @interface RegistryKey {
 
     /**
-     * The name of the resource bundle being referenced.
+     * The registry key.
      *
-     * @return The resource bundle name.
+     * @return The registry key.
      */
-    String value();
+    @Nonbinding String value() default "";
 
 }

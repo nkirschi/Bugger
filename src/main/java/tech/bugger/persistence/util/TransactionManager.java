@@ -1,5 +1,7 @@
 package tech.bugger.persistence.util;
 
+import tech.bugger.business.util.Registry;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -12,18 +14,17 @@ public final class TransactionManager {
     /**
      * The connection pool registry of the application.
      */
-    private final ConnectionPoolRegistry connectionPoolRegistry;
+    private final Registry registry;
 
     /**
      * Constructs a transaction manager with the given connection pool registry.
      *
-     * @param connectionPoolRegistry The connection pool registry to use for transaction management.
+     * @param registry The registry to use for transaction management.
      */
     @Inject
-    public TransactionManager(final ConnectionPoolRegistry connectionPoolRegistry) {
-        this.connectionPoolRegistry = connectionPoolRegistry;
+    public TransactionManager(final Registry registry) {
+        this.registry = registry;
     }
-
 
     /**
      * Yields a new transaction ready for use.
@@ -31,7 +32,7 @@ public final class TransactionManager {
      * @return The fresh transaction.
      */
     public Transaction begin() {
-        return new DBTransaction(connectionPoolRegistry.get("db"));
+        return new DBTransaction(registry.getConnectionPool("db"));
     }
 
 }

@@ -6,17 +6,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
+import tech.bugger.LogExtension;
 import tech.bugger.business.util.PriorityExecutor;
-import tech.bugger.business.util.PriorityExecutorRegistry;
+import tech.bugger.business.util.Registry;
+import tech.bugger.global.transfer.Metadata;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.MetadataGateway;
 import tech.bugger.persistence.util.ConnectionPool;
-import tech.bugger.persistence.util.ConnectionPoolRegistry;
-import tech.bugger.persistence.util.MailerRegistry;
 import tech.bugger.persistence.util.PropertiesReader;
-import tech.bugger.persistence.util.PropertiesReaderRegistry;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
@@ -30,6 +30,7 @@ import java.io.InputStream;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -38,16 +39,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(LogExtension.class)
 public class SystemLifetimeListenerTest {
     private SystemLifetimeListener systemLifetimeListenerMock;
 
     private MockedStatic<Log> logStaticMock;
     private MockedStatic<Runtime> runtimeStaticMock;
 
-    private PropertiesReaderRegistry propertiesReaderRegistryMock;
-    private ConnectionPoolRegistry connectionPoolRegistryMock;
-    private MailerRegistry mailerRegistryMock;
-    private PriorityExecutorRegistry priorityExecutorRegistryMock;
+    private Registry registry;
     private TransactionManager transactionManagerMock;
     private ConnectionPool connectionPoolMock;
     private PriorityExecutor priorityExecutorMock;
@@ -84,18 +83,12 @@ public class SystemLifetimeListenerTest {
         doNothing().when(log).error(any(), any());
         logStaticMock.when(() -> Log.forClass(any())).thenReturn(log);
 
-        propertiesReaderRegistryMock = mock(PropertiesReaderRegistry.class);
-        connectionPoolRegistryMock = mock(ConnectionPoolRegistry.class);
-        mailerRegistryMock = mock(MailerRegistry.class);
+        registry = mock(Registry.class);
         transactionManagerMock = mock(TransactionManager.class);
-        priorityExecutorRegistryMock = mock(PriorityExecutorRegistry.class);
 
         systemLifetimeListenerMock = new SystemLifetimeListener();
-        systemLifetimeListenerMock.setPropertiesReaderRegistry(propertiesReaderRegistryMock);
-        systemLifetimeListenerMock.setConnectionPoolRegistry(connectionPoolRegistryMock);
-        systemLifetimeListenerMock.setMailerRegistry(mailerRegistryMock);
+        systemLifetimeListenerMock.setRegistry(registry);
         systemLifetimeListenerMock.setTransactionManager(transactionManagerMock);
-        systemLifetimeListenerMock.setPriorityExecutorRegistry(priorityExecutorRegistryMock);
 
         PropertiesReader propertiesReader = mock(PropertiesReader.class);
         when(propertiesReader.getString(any())).thenReturn("");
@@ -103,20 +96,20 @@ public class SystemLifetimeListenerTest {
         when(propertiesReader.getString("DB_URL")).thenReturn("jdbc:postgresql://localhost:42424/postgres");
         when(propertiesReader.getInt(any())).thenReturn(1);
         when(propertiesReader.getBoolean(any())).thenReturn(false);
-        when(propertiesReaderRegistryMock.get(any())).thenReturn(propertiesReader);
+        when(registry.getPropertiesReader(anyString())).thenReturn(propertiesReader);
 
         connectionPoolMock = mock(ConnectionPool.class);
         doNothing().when(connectionPoolMock).shutdown();
         when(connectionPoolMock.isShutDown()).thenReturn(false);
-        when(connectionPoolRegistryMock.get(any())).thenReturn(connectionPoolMock);
+        when(registry.getConnectionPool(anyString())).thenReturn(connectionPoolMock);
 
         priorityExecutorMock = mock(PriorityExecutor.class);
         when(priorityExecutorMock.shutdown(anyInt())).thenReturn(true);
-        when(priorityExecutorRegistryMock.get(any())).thenReturn(priorityExecutorMock);
+        when(registry.getPriorityExecutor(anyString())).thenReturn(priorityExecutorMock);
 
         transactionMock = mock(Transaction.class);
         metadataGatewayMock = mock(MetadataGateway.class);
-        when(metadataGatewayMock.retrieveVersion()).thenReturn(null);
+        when(metadataGatewayMock.retrieveMetadata()).thenReturn(null);
         when(transactionMock.newMetadataGateway()).thenReturn(metadataGatewayMock);
         when(transactionManagerMock.begin()).thenReturn(transactionMock);
 
@@ -153,7 +146,7 @@ public class SystemLifetimeListenerTest {
     @Test
     public void testContextInitializedInitializesConfigReader() {
         systemLifetimeListenerMock.contextInitialized(sceMock);
-        verify(propertiesReaderRegistryMock).register(any(), any());
+        verify(registry).registerPropertiesReader(any(), any());
     }
 
     @Test
@@ -167,7 +160,7 @@ public class SystemLifetimeListenerTest {
     @Test
     public void testContextInitializedInitializesConnectionPool() {
         systemLifetimeListenerMock.contextInitialized(sceMock);
-        verify(connectionPoolRegistryMock).register(any(), any());
+        verify(registry).registerConnectionPool(any(), any());
     }
 
     @Test
@@ -183,10 +176,11 @@ public class SystemLifetimeListenerTest {
         systemLifetimeListenerMock.contextInitialized(sceMock);
         verify(metadataGatewayMock).initializeSchema(any());
     }
-    
+
     @Test
     public void testContextInitializedWhenSchemaAlreadyPresent() {
-        when(metadataGatewayMock.retrieveVersion()).thenReturn("1.0");
+        Metadata metadataMock = mock(Metadata.class);
+        when(metadataGatewayMock.retrieveMetadata()).thenReturn(metadataMock);
         systemLifetimeListenerMock.contextInitialized(sceMock);
         verify(metadataGatewayMock, times(0)).initializeSchema(any());
     }
@@ -206,7 +200,7 @@ public class SystemLifetimeListenerTest {
     @Test
     public void testContextInitializedInitializesMailer() {
         systemLifetimeListenerMock.contextInitialized(sceMock);
-        verify(mailerRegistryMock).register(any(), any());
+        verify(registry).registerMailer(any(), any());
     }
 
     @Test
@@ -220,7 +214,7 @@ public class SystemLifetimeListenerTest {
     @Test
     public void testContextInitializedInitializesPriorityExecutor() {
         systemLifetimeListenerMock.contextInitialized(sceMock);
-        verify(priorityExecutorRegistryMock).register(any(), any());
+        verify(registry).registerPriorityExecutor(any(), any());
     }
 
     @Test

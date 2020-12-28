@@ -1,16 +1,14 @@
 package tech.bugger.business.internal;
 
 import tech.bugger.business.util.PriorityExecutor;
-import tech.bugger.business.util.PriorityExecutorRegistry;
+import tech.bugger.business.util.Registry;
+import tech.bugger.global.transfer.Metadata;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.MetadataGateway;
 import tech.bugger.persistence.util.ConnectionPool;
-import tech.bugger.persistence.util.ConnectionPoolRegistry;
 import tech.bugger.persistence.util.Mailer;
-import tech.bugger.persistence.util.MailerRegistry;
 import tech.bugger.persistence.util.PropertiesReader;
-import tech.bugger.persistence.util.PropertiesReaderRegistry;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
@@ -28,11 +26,6 @@ import java.util.Properties;
  */
 @WebListener
 public class SystemLifetimeListener implements ServletContextListener {
-
-    /**
-     * The {@link Log} instance associated with this class for logging purposes.
-     */
-    private Log log;
 
     /**
      * Path to the application configuration relative to the application root.
@@ -65,24 +58,14 @@ public class SystemLifetimeListener implements ServletContextListener {
     public static final int TASK_TERMINATION_TIMEOUT_MILLIS = 5000;
 
     /**
-     * Properties reader registry to be maintained.
+     * The {@link Log} instance associated with this class for logging purposes.
      */
-    private PropertiesReaderRegistry propertiesReaderRegistry;
+    private Log log;
 
     /**
-     * Connection pool registry to be maintained.
+     * Registry to be maintained.
      */
-    private ConnectionPoolRegistry connectionPoolRegistry;
-
-    /**
-     * Mailer registry to be maintained.
-     */
-    private MailerRegistry mailerRegistry;
-
-    /**
-     * Priority executor registry to be maintained.
-     */
-    private PriorityExecutorRegistry priorityExecutorRegistry;
+    private Registry registry;
 
     /**
      * Transaction manager for issuing transactions.
@@ -141,7 +124,7 @@ public class SystemLifetimeListener implements ServletContextListener {
 
     private void initializeAppConfig(final ServletContext sctx) {
         try {
-            propertiesReaderRegistry.register("config", new PropertiesReader(sctx.getResourceAsStream(APP_CONFIG)));
+            registry.registerPropertiesReader("config", new PropertiesReader(sctx.getResourceAsStream(APP_CONFIG)));
         } catch (IOException e) {
             log.error("Config file could not be loaded.", e);
             throw new InternalError("Failed to load app configuration file.", e);
@@ -155,8 +138,8 @@ public class SystemLifetimeListener implements ServletContextListener {
         } catch (IOException e) {
             throw new InternalError("Failed to load JDBC properties file.", e);
         }
-        PropertiesReader configReader = propertiesReaderRegistry.get("config");
-        connectionPoolRegistry.register("db", new ConnectionPool(
+        PropertiesReader configReader = registry.getPropertiesReader("config");
+        registry.registerConnectionPool("db", new ConnectionPool(
                 configReader.getString("DB_DRIVER"),
                 configReader.getString("DB_URL"),
                 jdbcProperties,
@@ -174,11 +157,12 @@ public class SystemLifetimeListener implements ServletContextListener {
         Transaction tx = transactionManager.begin();
         try (tx) {
             MetadataGateway mg = tx.newMetadataGateway();
-            String version = mg.retrieveVersion();
-            if (version == null) { // no schema present
+            Metadata metadata = mg.retrieveMetadata();
+            if (metadata == null) { // no schema present
                 mg.initializeSchema(is);
                 log.info("Installed database schema.");
             } else {
+                String version = metadata.getVersion();
                 log.info("Found database schema version: " + version);
                 // if (version.equals("1.0")) {
                 //     for future versions: update schema here
@@ -194,8 +178,8 @@ public class SystemLifetimeListener implements ServletContextListener {
 
     private void initializeMailing(final ServletContext sctx) {
         try {
-            PropertiesReader configReader = propertiesReaderRegistry.get("config");
-            mailerRegistry.register("main", new Mailer(
+            PropertiesReader configReader = registry.getPropertiesReader("config");
+            registry.registerMailer("main", new Mailer(
                     sctx.getResourceAsStream(MAILING_CONFIG),
                     configReader.getString("MAIL_USER"),
                     configReader.getString("MAIL_PASS")
@@ -206,8 +190,8 @@ public class SystemLifetimeListener implements ServletContextListener {
     }
 
     private void registerPriorityExecutors() {
-        PropertiesReader configReader = propertiesReaderRegistry.get("config");
-        priorityExecutorRegistry.register("mails", new PriorityExecutor(
+        PropertiesReader configReader = registry.getPropertiesReader("config");
+        registry.registerPriorityExecutor("mails", new PriorityExecutor(
                 configReader.getInt("MAIL_INITIAL_CAP"),
                 configReader.getInt("MAIL_CORE_THREADS"),
                 configReader.getInt("MAIL_MAX_THREADS"),
@@ -229,18 +213,18 @@ public class SystemLifetimeListener implements ServletContextListener {
     }
 
     private void cleanUpDatabaseConnections() {
-        ConnectionPool dbPool = connectionPoolRegistry.get("db");
+        ConnectionPool dbPool = registry.getConnectionPool("db");
         if (!dbPool.isShutDown()) {
             dbPool.shutdown();
         }
     }
 
     private void terminateMailingTasks(final boolean immediately) {
-        PriorityExecutor mailingExecutor = priorityExecutorRegistry.get("mails");
+        PriorityExecutor mailingExecutor = registry.getPriorityExecutor("mails");
         try {
             boolean completed = immediately
-                ? mailingExecutor.kill(TASK_TERMINATION_TIMEOUT_MILLIS)
-                : mailingExecutor.shutdown(TASK_TERMINATION_TIMEOUT_MILLIS);
+                    ? mailingExecutor.kill(TASK_TERMINATION_TIMEOUT_MILLIS)
+                    : mailingExecutor.shutdown(TASK_TERMINATION_TIMEOUT_MILLIS);
 
             if (completed) {
                 log.info("Successfully terminated all running and queued mailing tasks.");
@@ -253,43 +237,13 @@ public class SystemLifetimeListener implements ServletContextListener {
     }
 
     /**
-     * Sets the properties reader registry for the whole application.
+     * Sets the registry for the whole application.
      *
-     * @param propertiesReaderRegistry The properties reader registry to set.
+     * @param registry The registry to set.
      */
     @Inject
-    public void setPropertiesReaderRegistry(final PropertiesReaderRegistry propertiesReaderRegistry) {
-        this.propertiesReaderRegistry = propertiesReaderRegistry;
-    }
-
-    /**
-     * Sets the connection pool registry for the whole application.
-     *
-     * @param connectionPoolRegistry The connection pool registry to set.
-     */
-    @Inject
-    public void setConnectionPoolRegistry(final ConnectionPoolRegistry connectionPoolRegistry) {
-        this.connectionPoolRegistry = connectionPoolRegistry;
-    }
-
-    /**
-     * Sets the mailer registry for the whole application.
-     *
-     * @param mailerRegistry The mailer registry to set.
-     */
-    @Inject
-    public void setMailerRegistry(final MailerRegistry mailerRegistry) {
-        this.mailerRegistry = mailerRegistry;
-    }
-
-    /**
-     * Sets the priority executor registry for the whole application.
-     *
-     * @param priorityExecutorRegistry The priority executor registry to set.
-     */
-    @Inject
-    public void setPriorityExecutorRegistry(final PriorityExecutorRegistry priorityExecutorRegistry) {
-        this.priorityExecutorRegistry = priorityExecutorRegistry;
+    public void setRegistry(final Registry registry) {
+        this.registry = registry;
     }
 
     /**
