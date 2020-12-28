@@ -14,6 +14,9 @@ public final class ReferenceExtension implements Parser.ParserExtension {
      */
     private static final Log log = Log.forClass(ReferenceExtension.class);
 
+    /**
+     * Only the builder may legitimately create an instance of this class.
+     */
     private ReferenceExtension() {
     }
 

@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ConstantsTest {
 
     @Test
-    public void testHandlerConstructorAccess() throws NoSuchMethodException {
+    public void testConstructorAccess() throws NoSuchMethodException {
         Constructor<Constants> constructor = Constants.class.getDeclaredConstructor();
         constructor.setAccessible(true);
         Throwable e = assertThrows(InvocationTargetException.class, constructor::newInstance);

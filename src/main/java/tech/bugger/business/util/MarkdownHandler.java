@@ -32,7 +32,11 @@ public final class MarkdownHandler {
      */
     private static final HtmlRenderer RENDERER = HtmlRenderer.builder().escapeHtml(true).extensions(EXTENSIONS).build();
 
+    /**
+     * Prevents instantiation of this utility class.
+     */
     private MarkdownHandler() {
+        throw new UnsupportedOperationException(); // for reflection abusers
     }
 
     /**
