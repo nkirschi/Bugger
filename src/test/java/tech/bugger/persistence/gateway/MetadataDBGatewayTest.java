@@ -1,12 +1,10 @@
 package tech.bugger.persistence.gateway;
 
-import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.persistence.exception.StoreException;
 
@@ -15,13 +13,13 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -30,25 +28,15 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(LogExtension.class)
+@ExtendWith(DBExtension.class)
 public class MetadataDBGatewayTest {
-    private static EmbeddedPostgres pg;
 
     private MetadataDBGateway gateway;
     private Connection connection;
 
-    @BeforeAll
-    public static void setUpAll() throws Exception {
-        pg = EmbeddedPostgres.builder().setPort(42424).start();
-    }
-
-    @AfterAll
-    public static void tearDownAll() throws Exception {
-        pg.close();
-    }
-
     @BeforeEach
     public void setUp() throws Exception {
-        connection = pg.getPostgresDatabase().getConnection();
+        connection = DBExtension.getConnection();
         gateway = new MetadataDBGateway(connection);
     }
 
@@ -57,52 +45,25 @@ public class MetadataDBGatewayTest {
         connection.close();
     }
 
-    private void createTable() {
-        try (Statement stmt = connection.createStatement()) {
-            stmt.execute("CREATE TABLE metadata ("
-                    + "    id INTEGER NOT NULL PRIMARY KEY DEFAULT 0,"
-                    + "    version VARCHAR DEFAULT '1.0',\n"
-                    + "    CONSTRAINT metadata_only_one_row CHECK (id = 0)"
-                    + ");");
-        } catch (SQLException e) {
-            fail(e);
-        }
-    }
-
-    private void dropTable() {
+    @Test
+    public void testRetrieveMetadataWhenTableDoesNotExist() throws Exception {
         try (Statement stmt = connection.createStatement()) {
             stmt.execute("DROP TABLE IF EXISTS metadata;");
-        } catch (SQLException e) {
-            fail(e);
         }
+        assertNull(gateway.retrieveMetadata());
     }
 
-    private void insertDefaults() {
+    @Test
+    public void testRetrieveMetadataWhenTableExistsButEntryDoesNot() throws Exception {
         try (Statement stmt = connection.createStatement()) {
-            stmt.execute("INSERT INTO metadata DEFAULT VALUES;");
-        } catch (SQLException e) {
-            fail(e);
+            stmt.execute("DELETE FROM metadata;");
         }
-    }
-
-    @Test
-    public void testRetrieveMetadataWhenTableDoesNotExist() {
         assertNull(gateway.retrieveMetadata());
-    }
-
-    @Test
-    public void testRetrieveMetadataWhenTableExistsButEntryDoesNot() {
-        createTable();
-        assertNull(gateway.retrieveMetadata());
-        dropTable();
     }
 
     @Test
     public void testRetrieveMetadataWhenTableAndEntryExist() {
-        createTable();
-        insertDefaults();
-        assertEquals("1.0", gateway.retrieveMetadata().getVersion());
-        dropTable();
+        assertNotNull(gateway.retrieveMetadata().getVersion());
     }
 
     @Test
@@ -117,6 +78,17 @@ public class MetadataDBGatewayTest {
         Connection connectionSpy = spy(connection);
         PreparedStatement preparedStatementMock = mock(PreparedStatement.class);
         doThrow(SQLException.class).when(preparedStatementMock).close();
+        ResultSet rsMock = mock(ResultSet.class);
+        doReturn(rsMock).when(preparedStatementMock).executeQuery();
+        doReturn(preparedStatementMock).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new MetadataDBGateway(connectionSpy).retrieveMetadata());
+    }
+
+    @Test
+    public void testRetrieveMetadataWhenDatabaseErrorOnExecute() throws Exception {
+        Connection connectionSpy = spy(connection);
+        PreparedStatement preparedStatementMock = mock(PreparedStatement.class);
+        doThrow(SQLException.class).when(preparedStatementMock).executeQuery();
         doReturn(preparedStatementMock).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class, () -> new MetadataDBGateway(connectionSpy).retrieveMetadata());
     }
