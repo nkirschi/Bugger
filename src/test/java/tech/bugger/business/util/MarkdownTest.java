@@ -1,11 +1,21 @@
 package tech.bugger.business.util;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import org.commonmark.node.Text;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MarkdownTest {
+
+    @Test
+    public void testHandlerConstructorAccess() throws NoSuchMethodException {
+        Constructor<MarkdownHandler> constructor = MarkdownHandler.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        Throwable e = assertThrows(InvocationTargetException.class, constructor::newInstance);
+        assertEquals(UnsupportedOperationException.class, e.getCause().getClass());
+    }
 
     @Test
     public void testNull() {
