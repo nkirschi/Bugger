@@ -2,6 +2,8 @@ package tech.bugger.global.util;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
 
 import java.util.function.Supplier;
 
@@ -10,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(LogExtension.class)
 public class LazyTest {
     private Lazy<String> lazyString;
     private Lazy<String> eagerString;

@@ -2,6 +2,8 @@ package tech.bugger.business.util;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
 
 import java.util.concurrent.RunnableFuture;
 
@@ -12,6 +14,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(LogExtension.class)
 public class PriorityFutureTest {
     private PriorityFuture<Runnable> priorityFuture;
 

@@ -1,6 +1,8 @@
 package tech.bugger.business.util;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
 import tech.bugger.business.exception.CryptographyImpossibleException;
 
 import java.lang.reflect.Constructor;
@@ -11,8 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(LogExtension.class)
 public class HasherTest {
-    
+
     private static final String INPUT = "Hash my darling, don't fear my darling.";
     private static final String SALT = "2f73616c7421"; // equals "/salt!" in UTF-8
     private static final String ALGO = "SHA3-512";

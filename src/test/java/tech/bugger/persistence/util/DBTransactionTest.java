@@ -2,6 +2,8 @@ package tech.bugger.persistence.util;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentDBGateway;
 import tech.bugger.persistence.gateway.MetadataDBGateway;
@@ -29,6 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(LogExtension.class)
 public class DBTransactionTest {
     private DBTransaction tx;
     private Connection connectionMock;

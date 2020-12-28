@@ -2,6 +2,8 @@ package tech.bugger.persistence.util;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
 import tech.bugger.persistence.exception.ConfigException;
 
 import java.io.BufferedInputStream;
@@ -13,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(LogExtension.class)
 public class PropertiesReaderTest {
 
     private PropertiesReader propertiesReader;

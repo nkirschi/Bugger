@@ -3,6 +3,8 @@ package tech.bugger.business.util;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
 
 import java.lang.reflect.Field;
 import java.util.Comparator;
@@ -17,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@ExtendWith(LogExtension.class)
 public class PriorityExecutorTest {
 
     private PriorityExecutor priorityExecutor;
