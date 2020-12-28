@@ -48,7 +48,7 @@ public class MetadataDBGateway implements MetadataGateway {
                 log.debug("Found metadata table in database.");
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    new Metadata(rs.getString("version"));
+                    return new Metadata(rs.getString("version"));
                 }
             } else {
                 log.debug("Metadata table does not exist.");
