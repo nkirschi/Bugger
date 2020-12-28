@@ -1,20 +1,15 @@
 package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.ApplicationSettings;
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.service.SettingsService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Organization;
-import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
 import javax.faces.context.FacesContext;
+import javax.faces.event.ValueChangeEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
@@ -27,28 +22,50 @@ import java.util.List;
 @Named
 public class AdminBacker {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(AdminBacker.class);
 
-    private User user;
-    private Part tempLogo;
-    private Organization organization;
+    /**
+     * Temporary configuration until submit.
+     */
     private Configuration configuration;
-    private List<String> availableThemes;
 
-    @Inject
+    /**
+     * Temporary organization until submit.
+     */
+    private Organization organization;
+
+    /**
+     * The application settings cache.
+     */
     private ApplicationSettings applicationSettings;
 
-    @Inject
+    /**
+     * The settings service providing logic.
+     */
     private SettingsService settingsService;
 
-    @Inject
-    private ProfileService profileService;
-
-    @Inject
-    private UserSession session;
-
-    @Inject
+    /**
+     * Reference to the current {@link FacesContext}.
+     */
     private FacesContext fctx;
+
+    /**
+     * Constructs a new admin page backing bean with the necessary dependencies.
+     *
+     * @param applicationSettings The application settings cache.
+     * @param settingsService     The settings service to use.
+     * @param fctx                The current {@link FacesContext} of the application.
+     */
+    @Inject
+    public AdminBacker(final ApplicationSettings applicationSettings, final SettingsService settingsService,
+                       final FacesContext fctx) {
+        this.applicationSettings = applicationSettings;
+        this.settingsService = settingsService;
+        this.fctx = fctx;
+    }
 
     /**
      * Initializes the admin page. Checks if the user is allowed to access the page. If not, acts as if the page did not
@@ -56,93 +73,72 @@ public class AdminBacker {
      */
     @PostConstruct
     public void init() {
-
+        configuration = new Configuration(applicationSettings.getConfiguration());
+        organization = new Organization(applicationSettings.getOrganization());
     }
 
     /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
+     * Redirects to the place where to browse users.
      *
-     * @param feedback The feedback with details on what to display.
+     * @return The direction.
      */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
-
+    public String browseUsers() {
+        // TODO redirect to search page on users tab with no filters
+        System.out.println("braus");
+        return null;
     }
 
     /**
-     * Creates a new user.
-     */
-    public void createUser() {
-
-    }
-
-    /**
-     * Converts the uploaded logo in {@code tempLogo} into a {@code byte[]} and puts it into {@code organization}.
-     */
-    public void uploadLogo() {
-
-    }
-
-    /**
-     * Saves and applies the changes made.
-     */
-    public void saveSettings() {
-
-    }
-
-    /**
-     * {@code user} holds data for a new user an administrator wants to create.
+     * Redirects to the place where to create a new user.
      *
-     * @return The user.
+     * @return The direction.
      */
-    public User getUser() {
-        return user;
+    public String createUser() {
+        // TODO redirect to edit-user.xhtml with parameters
+        System.out.println("kriäit");
+        return null;
     }
 
     /**
-     * {@code user} holds data for a new user an administrator wants to create.
+     * Converts the uploaded logo into a {@code byte[]} and puts it into the temporary configuration.
      *
-     * @param user The user to set.
+     * This method is only called when the uploaded file actually changes.
+     *
+     * @param vce The event fired upon change in uploaded file.
      */
-    public void setUser(User user) {
-        this.user = user;
+    public void uploadLogo(final ValueChangeEvent vce) {
+        Part upload = (Part) vce.getNewValue();
+        byte[] logo = settingsService.convertLogo(upload);
+        if (logo != null) {
+            organization.setLogo(logo);
+        }
     }
 
     /**
-     * {@code tempLogo} temporarily holds an uploaded logo. This needs to be converted to something actually usable.
-     *
-     * @return The tempLogo.
+     * Saves and applies the changes made to the application configuration.
      */
-    public Part getTempLogo() {
-        return tempLogo;
+    public void saveConfiguration() {
+        if (settingsService.updateConfiguration(configuration)) {
+            applicationSettings.setConfiguration(configuration);
+        }
     }
 
     /**
-     * {@code tempLogo} temporarily holds an uploaded logo. This needs to be converted to something actually usable.
-     *
-     * @param tempLogo The tempLogo to set.
+     * Saves and applies the changes made to the organization data.
      */
-    public void setTempLogo(Part tempLogo) {
-        this.tempLogo = tempLogo;
+    public void saveOrganization() {
+        if (settingsService.updateOrganization(organization)) {
+            applicationSettings.setOrganization(organization);
+        }
     }
 
     /**
-     * {@code organization} holds details for modifying things like the appearance of the front end without those
-     * options being already effective.
+     * {@code availableThemes} holds information about which themes can be selected.
      *
-     * @return The organization.
+     * @return The availableThemes.
      */
-    public Organization getOrganization() {
-        return organization;
-    }
-
-    /**
-     * {@code organization} holds details for modifying things like the appearance of the front end without those
-     * options being already effective.
-     *
-     * @param organization The organization to set.
-     */
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
+    public List<String> getAvailableThemes() {
+        return settingsService.discoverThemes();
     }
 
     /**
@@ -161,26 +157,28 @@ public class AdminBacker {
      *
      * @param configuration The configuration to set.
      */
-    public void setConfiguration(Configuration configuration) {
+    public void setConfiguration(final Configuration configuration) {
         this.configuration = configuration;
     }
 
     /**
-     * {@code availableThemes} holds information about which themes can be selected.
+     * {@code organization} holds details for modifying things like the appearance of the front end without those
+     * options being already effective.
      *
-     * @return The availableThemes.
+     * @return The organization.
      */
-    public List<String> getAvailableThemes() {
-        return availableThemes;
+    public Organization getOrganization() {
+        return organization;
     }
 
     /**
-     * {@code availableThemes} holds information about which themes can be selected.
+     * {@code organization} holds details for modifying things like the appearance of the front end without those
+     * options being already effective.
      *
-     * @param availableThemes The availableThemes to set.
+     * @param organization The organization to set.
      */
-    public void setAvailableThemes(List<String> availableThemes) {
-        this.availableThemes = availableThemes;
+    public void setOrganization(final Organization organization) {
+        this.organization = organization;
     }
 
 }
