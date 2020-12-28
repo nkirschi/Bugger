@@ -2,6 +2,7 @@ package tech.bugger.persistence.gateway;
 
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Organization;
+import tech.bugger.persistence.exception.NotFoundException;
 
 /**
  * A settings gateway allows to query and modify persistently stored application configuration and organization
@@ -14,26 +15,27 @@ public interface SettingsGateway {
      *
      * @return The current application configuration.
      */
-    public Configuration getAppConfig();
+    Configuration getConfiguration() throws NotFoundException;
 
     /**
      * Retrieves the current organization settings.
      *
      * @return The current organization settings.
      */
-    public Organization getOrganization();
+    Organization getOrganization() throws NotFoundException;
 
     /**
      * Persistently updates the application configuration.
      *
      * @param config The new application configuration.
      */
-    public void setAppConfig(Configuration config);
+    void setConfiguration(Configuration config);
 
     /**
      * Persistently updates the organization settings.
      *
      * @param org The new organization settings.
      */
-    public void setOrganization(Organization org);
+    void setOrganization(Organization org);
+
 }
