@@ -1,5 +1,6 @@
 package tech.bugger.global.transfer;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
@@ -9,7 +10,7 @@ import java.time.ZonedDateTime;
  * Instances are indented to be standalone objects but rather thought of to be associated with some content object.
  */
 public class Authorship implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = -1621253242478497728L;
 
     private User creator;

@@ -1,6 +1,10 @@
 package tech.bugger.business.util;
 
-import java.util.concurrent.*;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Decorator empowering Java Concurrent API tasks with prioritized execution.
@@ -8,8 +12,16 @@ import java.util.concurrent.*;
  * @param <T> The type of result this task can yield.
  */
 public class PriorityFuture<T> implements RunnableFuture<T> {
-    private RunnableFuture<T> action;
-    private PriorityTask task;
+
+    /**
+     * Action to be decorated with a priority.
+     */
+    private final RunnableFuture<T> action;
+
+    /**
+     * Priority associated with {@code action}.
+     */
+    private final PriorityTask task;
 
     /**
      * Construct a new priority task decorator with the specified original API action and prioritized task.
@@ -17,7 +29,7 @@ public class PriorityFuture<T> implements RunnableFuture<T> {
      * @param action The original API action to be wrapped.
      * @param task   The prioritized task to be executed.
      */
-    public PriorityFuture(RunnableFuture<T> action, PriorityTask task) {
+    public PriorityFuture(final RunnableFuture<T> action, final PriorityTask task) {
         this.task = task;
         this.action = action;
     }
@@ -52,7 +64,7 @@ public class PriorityFuture<T> implements RunnableFuture<T> {
      *         {@code true} otherwise
      */
     @Override
-    public boolean cancel(boolean mayInterruptIfRunning) {
+    public boolean cancel(final boolean mayInterruptIfRunning) {
         return action.cancel(mayInterruptIfRunning);
     }
 
@@ -88,7 +100,7 @@ public class PriorityFuture<T> implements RunnableFuture<T> {
      * @throws InterruptedException  if the current thread was interrupted while waiting
      */
     @Override
-    public T get() throws InterruptedException, ExecutionException {
+    public T get() throws InterruptedException, ExecutionException, CancellationException {
         return action.get();
     }
 
@@ -105,7 +117,8 @@ public class PriorityFuture<T> implements RunnableFuture<T> {
      * @throws TimeoutException      if the wait timed out
      */
     @Override
-    public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public T get(final long timeout, final TimeUnit unit)
+            throws InterruptedException, ExecutionException, TimeoutException, CancellationException {
         return action.get(timeout, unit);
     }
 
@@ -117,4 +130,5 @@ public class PriorityFuture<T> implements RunnableFuture<T> {
     public PriorityTask getTask() {
         return task;
     }
+
 }

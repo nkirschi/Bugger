@@ -1,10 +1,12 @@
 package tech.bugger.business.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating something was not found.
  */
 public class NotFoundException extends Exception {
-
+    @Serial
     private static final long serialVersionUID = 5750740601752548729L;
 
     /**

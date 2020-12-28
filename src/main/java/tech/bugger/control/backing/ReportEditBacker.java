@@ -13,6 +13,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -23,6 +24,7 @@ import java.io.Serializable;
 public class ReportEditBacker implements Serializable {
 
     private static final Log log = Log.forClass(ReportEditBacker.class);
+    @Serial
     private static final long serialVersionUID = -1310546265441099227L;
 
     private int reportID;

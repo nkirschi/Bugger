@@ -76,6 +76,22 @@
         <property name="message" value="Line has trailing spaces."/>
     </module>
 
+    <module name="RegexpMultiline">
+        <property name="id" value="RegexpMultilineEmptyRowAfterClassDef"/>
+        <property name="format" value="^([^\r\n ]+ )*(class|interface|@interface|enum) [^{]*\{[\r]?\n[^\r\n}]"/>
+        <property name="message" value="Leave empty row after class/interface/@interface/enum definition!"/>
+        <property name="severity" value="error"/>
+        <property name="fileExtensions" value="groovy,java"/>
+    </module>
+
+    <module name="RegexpMultiline">
+        <property name="id" value="RegexpMultilineEmptyRowBeforeClassEnd"/>
+        <property name="format" value="[^\r\n{][\r]?\n\}[\r]?\n"/>
+        <property name="message" value="Leave empty row before end of class/interface/@interface/enum!"/>
+        <property name="severity" value="error"/>
+        <property name="fileExtensions" value="groovy,java"/>
+    </module>
+
     <!-- Checks for Headers                                -->
     <!-- See https://checkstyle.org/config_header.html   -->
     <!-- <module name="Header"> -->
@@ -96,8 +112,7 @@
         <!-- Checks for Naming Conventions.                  -->
         <!-- See https://checkstyle.org/config_naming.html -->
         <module name="ConstantName">
-            <property name="format"
-                      value="^log(ger)?$|^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"/>
+            <property name="format" value="^log.*?$|random|algorithms|^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"/>
         </module>
         <module name="LocalFinalVariableName"/>
         <module name="LocalVariableName"/>

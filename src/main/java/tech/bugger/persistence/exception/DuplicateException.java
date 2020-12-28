@@ -1,10 +1,12 @@
 package tech.bugger.persistence.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating something already was there unexpectedly.
  */
 public class DuplicateException extends Exception {
-
+    @Serial
     private static final long serialVersionUID = 2481138688747787858L;
 
     /**

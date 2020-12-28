@@ -5,6 +5,7 @@ import tech.bugger.global.util.Log;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.Serial;
 
 /**
  * Custom servlet that serves avatars and avatar thumbnails.
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 public class AvatarServlet extends HttpServlet {
 
     private static final Log log = Log.forClass(AvatarServlet.class);
+    @Serial
     private static final long serialVersionUID = 3230525044134835918L;
 
     /**

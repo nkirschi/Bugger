@@ -1,5 +1,6 @@
 package tech.bugger.global.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.function.Supplier;
 
@@ -9,6 +10,8 @@ import java.util.function.Supplier;
  * @param <T> The type of the wrapped object.
  */
 public class Lazy<T> implements Serializable {
+
+    @Serial
     private static final long serialVersionUID = -7848504462864860011L;
 
     /**
@@ -26,7 +29,10 @@ public class Lazy<T> implements Serializable {
      *
      * @param retrieval The instructions for acquiring the wrapped object.
      */
-    public Lazy(Supplier<T> retrieval) {
+    public Lazy(final Supplier<T> retrieval) {
+        if (retrieval == null) {
+            throw new IllegalArgumentException("Retrieval function must not be null!");
+        }
         this.retrieval = retrieval;
     }
 
@@ -35,7 +41,10 @@ public class Lazy<T> implements Serializable {
      *
      * @param value The object to be immediately wrapped.
      */
-    public Lazy(T value) {
+    public Lazy(final T value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Wrapped value must not be null!");
+        }
         this.value = value;
     }
 
@@ -59,4 +68,5 @@ public class Lazy<T> implements Serializable {
     public boolean isPresent() {
         return value != null;
     }
+
 }

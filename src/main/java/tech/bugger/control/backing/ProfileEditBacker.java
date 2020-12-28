@@ -14,6 +14,7 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -24,6 +25,7 @@ import java.io.Serializable;
 public class ProfileEditBacker implements Serializable {
 
     private static final Log log = Log.forClass(ProfileEditBacker.class);
+    @Serial
     private static final long serialVersionUID = 8894621041245160359L;
 
     private User user;

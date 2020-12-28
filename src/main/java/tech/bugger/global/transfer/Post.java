@@ -2,6 +2,7 @@ package tech.bugger.global.transfer;
 
 import tech.bugger.global.util.Lazy;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import java.util.List;
  * DTO representing a post.
  */
 public class Post implements Serializable {
+    @Serial
     private static final long serialVersionUID = -4665707287087752126L;
 
     private int id;
