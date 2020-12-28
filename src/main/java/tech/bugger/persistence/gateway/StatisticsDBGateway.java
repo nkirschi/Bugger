@@ -5,6 +5,7 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
+import java.sql.Connection;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -15,6 +16,17 @@ import java.util.List;
 public class StatisticsDBGateway implements StatisticsGateway {
 
     private static final Log log = Log.forClass(StatisticsDBGateway.class);
+
+    private Connection conn;
+
+    /**
+     * Constructs a new statistics gateway with the given database connection.
+     *
+     * @param conn The database connection to use for the gateway.
+     */
+    public StatisticsDBGateway(Connection conn) {
+        this.conn = conn;
+    }
 
     /**
      * {@inheritDoc}

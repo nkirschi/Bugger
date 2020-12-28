@@ -18,6 +18,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.List;
 public class TopicBacker implements Serializable {
 
     private static final Log log = Log.forClass(TopicBacker.class);
+    @Serial
     private static final long serialVersionUID = 6893463272223847178L;
 
     private int topicID;

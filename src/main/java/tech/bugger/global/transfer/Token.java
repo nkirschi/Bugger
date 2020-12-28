@@ -1,5 +1,6 @@
 package tech.bugger.global.transfer;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
@@ -7,7 +8,7 @@ import java.time.ZonedDateTime;
  * DTO representing a verification token.
  */
 public class Token implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = -8499689805678436803L;
 
     /**

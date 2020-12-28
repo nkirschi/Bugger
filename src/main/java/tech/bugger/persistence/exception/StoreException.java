@@ -1,10 +1,12 @@
 package tech.bugger.persistence.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating something went wrong when trying to store something in the database.
  */
 public class StoreException extends RuntimeException {
-
+    @Serial
     private static final long serialVersionUID = -1850502033299171433L;
 
     /**

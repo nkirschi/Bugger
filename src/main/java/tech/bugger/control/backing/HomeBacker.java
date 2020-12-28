@@ -15,6 +15,7 @@ import javax.enterprise.inject.Any;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
@@ -24,7 +25,7 @@ import java.time.ZonedDateTime;
 @ViewScoped
 @Named
 public class HomeBacker implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = -6982333692294902179L;
     private static final Log log = Log.forClass(HomeBacker.class);
 

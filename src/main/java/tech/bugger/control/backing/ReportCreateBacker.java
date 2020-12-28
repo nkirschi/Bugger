@@ -16,6 +16,7 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import java.util.List;
 public class ReportCreateBacker implements Serializable {
 
     private static final Log log = Log.forClass(ReportCreateBacker.class);
+    @Serial
     private static final long serialVersionUID = 6375834226080077144L;
 
     private int topicID;

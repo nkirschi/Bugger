@@ -6,6 +6,7 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
+import java.sql.Connection;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +17,17 @@ import java.util.List;
 public class SearchDBGateway implements SearchGateway {
 
     private static final Log log = Log.forClass(SearchDBGateway.class);
+
+    private Connection conn;
+
+    /**
+     * Constructs a new search gateway with the given database connection.
+     *
+     * @param conn The database connection to use for the gateway.
+     */
+    public SearchDBGateway(Connection conn) {
+        this.conn = conn;
+    }
 
     /**
      * {@inheritDoc}

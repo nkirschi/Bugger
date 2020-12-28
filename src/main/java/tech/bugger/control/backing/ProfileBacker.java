@@ -15,6 +15,7 @@ import javax.enterprise.inject.Any;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
@@ -26,6 +27,7 @@ import java.time.ZonedDateTime;
 public class ProfileBacker implements Serializable {
 
     private static final Log log = Log.forClass(ProfileBacker.class);
+    @Serial
     private static final long serialVersionUID = -4606230292807293380L;
 
     private int userID;

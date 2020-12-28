@@ -1,10 +1,12 @@
 package tech.bugger.persistence.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating something is incorrectly referencing itself.
  */
 public class SelfReferenceException extends Exception {
-
+    @Serial
     private static final long serialVersionUID = -7793828426342576821L;
 
     /**

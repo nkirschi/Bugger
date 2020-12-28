@@ -1,38 +1,41 @@
 package tech.bugger.persistence.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating something went wrong with the config file.
  */
-public class ConfigFileException extends RuntimeException {
+public class ConfigException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = -7813119346738971512L;
 
     /**
-     * Constructs a {@link ConfigFileException} with the specified detail message.
+     * Constructs a {@link ConfigException} with the specified detail message.
      *
      * @param message The detail message describing this particular exception.
      */
-    public ConfigFileException(String message) {
+    public ConfigException(final String message) {
         super(message);
     }
 
     /**
-     * Constructs a {@link ConfigFileException} with the specified detail message and cause.
+     * Constructs a {@link ConfigException} with the specified detail message and cause.
      *
      * Note that the detail message associated with {@code cause} is <i>not</i> automatically incorporated in this
      * exception's detail message.
      *
      * @param message The detail message describing this particular exception.
-     * @param cause The cause for this particular exception.
+     * @param cause   The cause for this particular exception.
      */
-    public ConfigFileException(String message, Throwable cause) {
+    public ConfigException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
     /**
-     * Constructs a {@link ConfigFileException} with no detail message.
+     * Constructs a {@link ConfigException} with no detail message.
      */
-    public ConfigFileException() {
+    public ConfigException() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -43,8 +46,9 @@ public class ConfigFileException extends RuntimeException {
      *
      * @param cause The cause for this particular exception.
      */
-    public ConfigFileException(Throwable cause) {
+    public ConfigException(final Throwable cause) {
         super(cause);
         // TODO Auto-generated constructor stub
     }
+
 }

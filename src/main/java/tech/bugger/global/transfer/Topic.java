@@ -1,11 +1,13 @@
 package tech.bugger.global.transfer;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * DTO representing a topic.
  */
 public class Topic implements Serializable {
+    @Serial
     private static final long serialVersionUID = 6600990552933685863L;
 
     private int id;

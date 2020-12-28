@@ -1,10 +1,13 @@
 package tech.bugger.persistence.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating there are not enough connections available.
  */
 public class OutOfConnectionsException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = -9055935003841723321L;
 
     /**
@@ -24,7 +27,7 @@ public class OutOfConnectionsException extends RuntimeException {
      * @param message The detail message describing this particular exception.
      * @param cause The cause for this particular exception.
      */
-    public OutOfConnectionsException(String message, Throwable cause) {
+    public OutOfConnectionsException(final String message, final Throwable cause) {
         super(message, cause);
         // TODO Auto-generated constructor stub
     }
@@ -34,7 +37,7 @@ public class OutOfConnectionsException extends RuntimeException {
      *
      * @param message The detail message describing this particular exception.
      */
-    public OutOfConnectionsException(String message) {
+    public OutOfConnectionsException(final String message) {
         super(message);
         // TODO Auto-generated constructor stub
     }
@@ -45,10 +48,9 @@ public class OutOfConnectionsException extends RuntimeException {
      *
      * @param cause The cause for this particular exception.
      */
-    public OutOfConnectionsException(Throwable cause) {
+    public OutOfConnectionsException(final Throwable cause) {
         super(cause);
         // TODO Auto-generated constructor stub
     }
-
 
 }

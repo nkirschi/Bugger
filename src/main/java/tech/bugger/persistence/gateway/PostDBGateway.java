@@ -5,6 +5,7 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.util.Log;
 
+import java.sql.Connection;
 import java.util.List;
 
 /**
@@ -13,6 +14,17 @@ import java.util.List;
 public class PostDBGateway implements PostGateway {
 
     private static final Log log = Log.forClass(PostDBGateway.class);
+
+    private Connection conn;
+
+    /**
+     * Constructs a new post gateway with the given database connection.
+     *
+     * @param conn The database connection to use for the gateway.
+     */
+    public PostDBGateway(Connection conn) {
+        this.conn = conn;
+    }
 
     /**
      * {@inheritDoc}

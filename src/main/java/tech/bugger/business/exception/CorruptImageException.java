@@ -1,10 +1,12 @@
 package tech.bugger.business.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating an image is corrupted.
  */
 public class CorruptImageException extends Exception {
-
+    @Serial
     private static final long serialVersionUID = 1900286228042129388L;
 
     /**

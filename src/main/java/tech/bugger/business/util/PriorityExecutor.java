@@ -1,30 +1,45 @@
 package tech.bugger.business.util;
 
-import tech.bugger.global.util.Log;
-
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Singleton executor for processing prioritized tasks on separate threads.
+ * Executor for processing prioritized tasks on separate threads.
  */
-public class PriorityExecutor {
-    private static final Log log = Log.forClass(PriorityExecutor.class);
-
-    private static PriorityExecutor instance;
-
-    private final ExecutorService executorService;
-
-    private PriorityExecutor() {
-        executorService = null;
-    }
+public final class PriorityExecutor {
 
     /**
-     * Supplies the singleton task queue object.
-     *
-     * @return The one and only instance of the task queue.
+     * Underlying executor service handling most of the work.
      */
-    public static PriorityExecutor getInstance() {
-        return null;
+    private final ExecutorService executorService;
+
+    /**
+     * Constructs a new priority task executor with the given technical parameters.
+     *
+     * @param initialCap  Initial capacity of the underlying task queue.
+     * @param coreThreads Target number of threads to use for task execution.
+     * @param maxThreads  Maximum number of threads to use for task execution.
+     * @param timeoutSecs Idle time after which a thread is terminated.
+     */
+    public PriorityExecutor(final int initialCap, final int coreThreads, final int maxThreads, final int timeoutSecs) {
+        BlockingQueue<Runnable> queue = new PriorityBlockingQueue<>(initialCap, (r1, r2) -> {
+            if (!(r1 instanceof PriorityFuture<?> && r2 instanceof PriorityFuture<?>)) {
+                throw new InternalError("Foreign tasks in priority queue. This should never happen!");
+            }
+            PriorityFuture<?> t1 = (PriorityFuture<?>) r1;
+            PriorityFuture<?> t2 = (PriorityFuture<?>) r2;
+            return t1.getTask().getPriority().compareTo(t2.getTask().getPriority());
+        });
+        executorService = new ThreadPoolExecutor(coreThreads, maxThreads, timeoutSecs, TimeUnit.SECONDS, queue) {
+            @Override
+            protected <V> RunnableFuture<V> newTaskFor(final Runnable r, final V v) {
+                return new PriorityFuture<>(super.newTaskFor(r, v), (PriorityTask) r);
+            }
+        };
     }
 
     /**
@@ -32,21 +47,39 @@ public class PriorityExecutor {
      *
      * @param priorityTask The task to be enqueued.
      */
-    public void enqueue(PriorityTask priorityTask) {
-
+    public void enqueue(final PriorityTask priorityTask) {
+        if (executorService.isTerminated()) {
+            throw new IllegalStateException("Priority executor has already been shut down.");
+        }
+        executorService.submit(priorityTask);
     }
 
     /**
-     * Shuts down the executor gracefully by not accepting any new tasks and executing the remaining ones.
+     * Shuts down the executor gracefully by not accepting any new tasks and finishing the remaining ones.
+     *
+     * Calling this method blocks until either all tasks have been terminated or the given timeout has been reached.
+     *
+     * @param timeoutMillis The maximum time in milliseconds to wait for remaining task execution completion.
+     * @return {@code} true iff all remaining tasks have been completed without timeout.
+     * @throws InterruptedException if interrupted whilst awaiting termination.
      */
-    public void shutdown() {
-
+    public boolean shutdown(final int timeoutMillis) throws InterruptedException {
+        executorService.shutdown();
+        return executorService.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
-     * Shuts down the executor immediately by aborting any running tasks forcefully.
+     * Shuts down the executor immediately by discarding any waiting tasks and only finishing the running ones.
+     *
+     * Calling this method blocks until either all tasks have been terminated or the given timeout has been reached.
+     *
+     * @param timeoutMillis The maximum time in milliseconds to wait for remaining task execution completion.
+     * @return {@code} true iff all remaining tasks have been completed without timeout.
+     * @throws InterruptedException if interrupted whilst awaiting termination.
      */
-    public void kill() {
-
+    public boolean kill(final int timeoutMillis) throws InterruptedException {
+        executorService.shutdownNow();
+        return executorService.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
     }
+
 }
