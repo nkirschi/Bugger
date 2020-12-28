@@ -1,5 +1,6 @@
 package tech.bugger.persistence.gateway;
 
+import tech.bugger.global.transfer.Metadata;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.StoreException;
 
@@ -37,15 +38,17 @@ public class MetadataDBGateway implements MetadataGateway {
 
     /**
      * {@inheritDoc}
+     *
+     * @return
      */
     @Override
-    public String retrieveVersion() {
+    public Metadata retrieveMetadata() {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT version FROM metadata;")) {
             if (conn.getMetaData().getTables(null, null, "metadata", new String[]{"TABLE"}).next()) {
                 log.debug("Found metadata table in database.");
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    return rs.getString("version");
+                    new Metadata(rs.getString("version"));
                 }
             } else {
                 log.debug("Metadata table does not exist.");

@@ -1,5 +1,7 @@
 package tech.bugger.persistence.gateway;
 
+import tech.bugger.global.transfer.Metadata;
+
 import java.io.InputStream;
 
 /**
@@ -8,11 +10,11 @@ import java.io.InputStream;
 public interface MetadataGateway {
 
     /**
-     * Retrieves the application version persisted in the data source.
+     * Retrieves the application metadata persisted in the data source.
      *
-     * @return The application version, being {@code null} iff it is not present.
+     * @return The application metadata, being {@code null} iff it is not present.
      */
-    String retrieveVersion();
+    Metadata retrieveMetadata();
 
     /**
      * Initializes the data source schema using the given setup stream.
