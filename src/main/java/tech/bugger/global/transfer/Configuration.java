@@ -1,5 +1,6 @@
 package tech.bugger.global.transfer;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -7,7 +8,7 @@ import java.util.Map;
  * DTO representing application configuration data.
  */
 public class Configuration implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = -8910178508236757385L;
 
     private boolean guestMode;

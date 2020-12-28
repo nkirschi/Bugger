@@ -5,6 +5,7 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
+import java.sql.Connection;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -14,6 +15,17 @@ import java.util.List;
 public class TopicDBGateway implements TopicGateway {
 
     private static final Log log = Log.forClass(TopicDBGateway.class);
+
+    private Connection conn;
+
+    /**
+     * Constructs a new topic gateway with the given database connection.
+     *
+     * @param conn The database connection to use for the gateway.
+     */
+    public TopicDBGateway(Connection conn) {
+        this.conn = conn;
+    }
 
     /**
      * {@inheritDoc}

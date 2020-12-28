@@ -1,5 +1,6 @@
 package tech.bugger.global.transfer;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
@@ -7,6 +8,7 @@ import java.time.ZonedDateTime;
  * DTO representing a notification.
  */
 public class Notification implements Serializable {
+    @Serial
     private static final long serialVersionUID = 3155085031027042714L;
 
     /**

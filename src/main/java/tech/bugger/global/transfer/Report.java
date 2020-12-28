@@ -2,6 +2,7 @@ package tech.bugger.global.transfer;
 
 import tech.bugger.global.util.Lazy;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
@@ -9,6 +10,7 @@ import java.time.ZonedDateTime;
  * DTO representing a report.
  */
 public class Report implements Serializable {
+    @Serial
     private static final long serialVersionUID = -8063035819918388897L;
 
     /**

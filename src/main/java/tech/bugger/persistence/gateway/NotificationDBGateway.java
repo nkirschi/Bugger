@@ -5,6 +5,7 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
+import java.sql.Connection;
 import java.util.List;
 
 /**
@@ -13,6 +14,17 @@ import java.util.List;
 public class NotificationDBGateway implements NotificationGateway {
 
     private static final Log log = Log.forClass(NotificationDBGateway.class);
+
+    private Connection conn;
+
+    /**
+     * Constructs a new notification gateway with the given database connection.
+     *
+     * @param conn The database connection to use for the gateway.
+     */
+    public NotificationDBGateway(Connection conn) {
+        this.conn = conn;
+    }
 
     /**
      * {@inheritDoc}

@@ -6,6 +6,7 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,17 @@ import java.util.Optional;
 public class ReportDBGateway implements ReportGateway {
 
     private static final Log log = Log.forClass(ReportDBGateway.class);
+
+    private Connection conn;
+
+    /**
+     * Constructs a new report gateway with the given database connection.
+     *
+     * @param conn The database connection to use for the gateway.
+     */
+    public ReportDBGateway(Connection conn) {
+        this.conn = conn;
+    }
 
     /**
      * {@inheritDoc}

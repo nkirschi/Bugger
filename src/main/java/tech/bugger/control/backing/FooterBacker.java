@@ -7,6 +7,7 @@ import tech.bugger.global.util.Log;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -15,7 +16,7 @@ import java.io.Serializable;
 @SessionScoped
 @Named
 public class FooterBacker implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = 4849101262721339096L;
 
     private static final Log log = Log.forClass(FooterBacker.class);

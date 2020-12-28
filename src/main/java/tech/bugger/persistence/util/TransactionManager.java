@@ -1,15 +1,38 @@
 package tech.bugger.persistence.util;
 
+import tech.bugger.business.util.Registry;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Factory for transactions.
  */
-public class TransactionManager {
+@Singleton
+public final class TransactionManager {
+
+    /**
+     * The connection pool registry of the application.
+     */
+    private final Registry registry;
+
+    /**
+     * Constructs a transaction manager with the given connection pool registry.
+     *
+     * @param registry The registry to use for transaction management.
+     */
+    @Inject
+    public TransactionManager(final Registry registry) {
+        this.registry = registry;
+    }
 
     /**
      * Yields a new transaction ready for use.
+     *
      * @return The fresh transaction.
      */
-    public static Transaction begin() {
-        return new DBTransaction();
+    public Transaction begin() {
+        return new DBTransaction(registry.getConnectionPool("db"));
     }
+
 }

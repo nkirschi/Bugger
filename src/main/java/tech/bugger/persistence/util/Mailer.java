@@ -2,98 +2,127 @@ package tech.bugger.persistence.util;
 
 import tech.bugger.global.util.Log;
 
-import javax.mail.*;
+import javax.mail.Address;
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Properties;
 
 /**
- * Basic e-mail sender singleton.
+ * Basic e-mail sender.
  *
- * This is a facade for any mailing API, currently Jakarta Mail.
+ * This is a facade for any mailing API (currently Jakarta Mail), adapted to our needs.
  */
 public final class Mailer {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(Mailer.class);
 
-    private static Mailer instance;
+    /**
+     * E-mail session used by this mailer throughout its lifetime.
+     */
+    private final Session session;
 
     /**
-     * Configuration of the mailer.
+     * Constructs a new mailer without authentication.
+     *
+     * @param is Stream of mail configuration settings. The format and valid entries are specified in the
+     *           <a href="https://eclipse-ee4j.github.io/mail/docs/api/">Jakarta Mail API Docs</a>.
+     * @throws IOException if the configuration could not be read.
      */
-    private final Properties configuration;
-
-    /**
-     * Authentication information for the mailer.
-     */
-    private Authenticator authenticator;
-
-    /**
-     * Constructs a mailer and initializes an empty configuration.
-     */
-    private Mailer() {
-        configuration = new Properties();
+    public Mailer(final InputStream is) throws IOException {
+        session = Session.getInstance(loadConfiguration(is));
     }
 
     /**
-     * Retrieves the singleton mailer object.
+     * Constructs a new mailer with authentication parameters.
      *
-     * @return The one and only instance of the mailer.
+     * @param is       Stream of mail configuration settings. The format and valid entries are specified in the
+     *                 <a href="https://eclipse-ee4j.github.io/mail/docs/api/">Jakarta Mail API Docs</a>.
+     * @param username The username needed for authentication.
+     * @param password The password needed for authentication.
+     * @throws IOException if the configuration could not be read.
      */
-    public static Mailer getInstance() {
-        if (instance == null) {
-            instance = new Mailer();
-        }
-        return instance;
-    }
-
-    /**
-     * Configures the fundamental e-mailing parameters. This has to happen before any mail can be sent.
-     *
-     * @param host     The SMTP server host name.
-     * @param port     The SMTP server TCP port.
-     * @param username The SMTP server login username.
-     * @param password The SMTP server login password.
-     * @param starttls Whether to use a secure TLS connection.
-     * @param sender   The sender e-mail address to include in each mail.
-     */
-    public void configure(String host, int port, String username, String password, boolean starttls, String sender) {
-        configuration.clear();
-        configuration.put("mail.smtp.auth", Boolean.toString(starttls));
-        configuration.put("mail.smtp.starttls.enable", Boolean.toString(starttls));
-        configuration.put("mail.smtp.host", host);
-        configuration.put("mail.smtp.port", port);
-        configuration.put("sender", sender);
-        authenticator = new Authenticator() {
+    public Mailer(final InputStream is, final String username, final String password) throws IOException {
+        session = Session.getInstance(loadConfiguration(is), new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(username, password);
             }
-        };
+        });
+    }
+
+    private Properties loadConfiguration(final InputStream is) throws IOException {
+        Properties configuration = new Properties();
+        try {
+            configuration.load(is);
+        } catch (IOException e) {
+            log.warning("Mailing configuration could not be loaded.");
+            throw new IOException("Mailing configuration could not be loaded.", e);
+        }
+        return configuration;
     }
 
     /**
-     * Sends an e-mail with the specified properties.
+     * Sends the given {@link Mail)}.
      *
-     * @param recipient The recipient e-mail address of the e-mail to be sent.
-     * @param subject   The subject of the e-mail to be sent.
-     * @param msg       The content of the e-mail to be sent.
-     * @throws IllegalStateException if called without the mailer being configured via {@link #configure}.
+     * @param mail The e-mail to be sent.
+     * @return Whether {@code mail} has been successfully sent.
      */
-    public void sendMail(String recipient, String subject, String msg) {
-        if (configuration.isEmpty()) {
-            throw new IllegalStateException("Mailer has not yet been configured!");
-        }
-        Session mailSession = Session.getDefaultInstance(configuration, authenticator);
+    public boolean send(final Mail mail) {
+        return send(
+                addressify(mail.getTo()),
+                addressify(mail.getCc()),
+                addressify(mail.getBcc()),
+                addressify(mail.getReplyto()),
+                mail.getSubject(),
+                mail.getContent()
+        );
+    }
+
+    private boolean send(final Address[] to, final Address[] cc, final Address[] bcc, final Address[] replyto,
+                         final String subject, final String content) {
+        log.debug(String.format("Sending mail to %s with cc %s, bcc %s, replyto %s and subject '%s'.",
+                Arrays.toString(to), Arrays.toString(cc), Arrays.toString(bcc), Arrays.toString(replyto), subject));
         try {
-            MimeMessage message = new MimeMessage(mailSession);
-            message.setFrom(new InternetAddress(configuration.getProperty("sender")));
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
+            MimeMessage message = new MimeMessage(session);
+            message.setRecipients(Message.RecipientType.TO, to);
+            message.setRecipients(Message.RecipientType.CC, cc);
+            message.setRecipients(Message.RecipientType.BCC, bcc);
+            message.setReplyTo(replyto);
             message.setSubject(subject);
-            message.setText(msg);
+            message.setText(content);
             Transport.send(message);
+            return true;
         } catch (MessagingException e) {
-            e.printStackTrace();
+            log.warning("Could not send mail with subject \"" + subject + "\".", e);
+            return false;
         }
     }
+
+    private Address[] addressify(final Collection<String> addresses) {
+        Collection<Address> validAddresses = new ArrayList<>(addresses.size());
+        for (String address : addresses) {
+            try {
+                validAddresses.add(new InternetAddress(address, true));
+            } catch (AddressException e) {
+                log.warning("Invalid e-mail address " + address + ".", e);
+            }
+        }
+        return validAddresses.toArray(new Address[]{});
+    }
+
 }

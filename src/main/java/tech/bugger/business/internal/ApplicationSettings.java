@@ -6,6 +6,7 @@ import tech.bugger.global.util.Log;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -14,7 +15,7 @@ import java.io.Serializable;
 @ApplicationScoped
 @Named
 public class ApplicationSettings implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = 215148767008692866L;
     private static final Log log = Log.forClass(ApplicationSettings.class);
     private Configuration configuration;

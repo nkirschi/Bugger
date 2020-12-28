@@ -4,6 +4,7 @@ import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.util.Log;
 
+import java.sql.Connection;
 import java.util.List;
 
 /**
@@ -12,6 +13,17 @@ import java.util.List;
 public class AttachmentDBGateway implements AttachmentGateway {
 
     private static final Log log = Log.forClass(AttachmentDBGateway.class);
+
+    private Connection conn;
+
+    /**
+     * Constructs a new attachment gateway with the given database connection.
+     *
+     * @param conn The database connection to use for the gateway.
+     */
+    public AttachmentDBGateway(Connection conn) {
+        //this.conn = conn;
+    }
 
     /**
      * {@inheritDoc}

@@ -11,6 +11,7 @@ import tech.bugger.global.util.Log;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -20,7 +21,7 @@ import java.util.List;
 @SessionScoped
 @Named
 public class HeaderBacker implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = 7342292657804667855L;
     private static final Log log = Log.forClass(HeaderBacker.class);
     private User user;

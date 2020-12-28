@@ -3,12 +3,13 @@ package tech.bugger.business.internal;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
+import java.io.Serial;
 
 /**
  * Checks requests on user authentication.
  */
 public class TrespassListener implements PhaseListener {
-
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

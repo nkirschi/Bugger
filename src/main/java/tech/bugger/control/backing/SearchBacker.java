@@ -17,6 +17,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -48,6 +49,7 @@ public class SearchBacker implements Serializable {
     }
 
     private static final Log log = Log.forClass(SearchBacker.class);
+    @Serial
     private static final long serialVersionUID = -1264737473650782156L;
 
     private String searchQuery;
