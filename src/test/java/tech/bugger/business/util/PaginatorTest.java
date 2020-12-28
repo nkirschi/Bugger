@@ -8,9 +8,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(LogExtension.class)
 public class PaginatorTest {
 
     private List<Integer> testData;
