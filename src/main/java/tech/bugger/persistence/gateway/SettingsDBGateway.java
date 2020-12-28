@@ -5,6 +5,7 @@ import tech.bugger.global.transfer.Organization;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,6 +60,30 @@ public class SettingsDBGateway implements SettingsGateway {
      * {@inheritDoc}
      */
     @Override
+    public void setConfiguration(final Configuration configuration) {
+        try (PreparedStatement stmt = conn.prepareStatement("UPDATE system_settings "
+                + "SET guest_reading = ?, closed_report_posting = ?, user_email_format = ?,"
+                + " allowed_file_extensions = ?, max_attachments_per_post = ?, voting_weight_definition = ?"
+                + "WHERE id = 0;")) {
+
+            new StatementParametrizer(stmt)
+                    .bool(configuration.isGuestReading())
+                    .bool(configuration.isClosedReportPosting())
+                    .string(configuration.getUserEmailFormat())
+                    .string(configuration.getAllowedFileExtensions())
+                    .integer(configuration.getMaxAttachmentsPerPost())
+                    .string(configuration.getVotingWeightDefinition())
+                    .toStatement().executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error while updating organization data.", e);
+            throw new StoreException("Error while updating organization data.", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Organization getOrganization() throws NotFoundException {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM system_settings;")) {
             ResultSet rs = stmt.executeQuery();
@@ -79,39 +104,19 @@ public class SettingsDBGateway implements SettingsGateway {
      * {@inheritDoc}
      */
     @Override
-    public void setConfiguration(final Configuration configuration) {
-        try (PreparedStatement stmt = conn.prepareStatement("UPDATE system_settings "
-                + "SET guest_reading = ?, closed_report_posting = ?, user_email_format = ?,"
-                + " allowed_file_extensions = ?, max_attachments_per_post = ?, voting_weight_definition = ?"
-                + "WHERE id = 0;")) {
-
-            stmt.setBoolean(1, configuration.isGuestReading());
-            stmt.setBoolean(2, configuration.isClosedReportPosting());
-            stmt.setString(3, configuration.getUserEmailFormat());
-            stmt.setString(4, configuration.getAllowedFileExtensions());
-            stmt.setInt(5, configuration.getMaxAttachmentsPerPost());
-            stmt.setString(6, configuration.getVotingWeightDefinition());
-        } catch (SQLException e) {
-            log.error("Error while updating organization data.", e);
-            throw new StoreException("Error while updating organization data.", e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void setOrganization(final Organization organization) {
         try (PreparedStatement stmt = conn.prepareStatement("UPDATE system_settings "
                 + "SET organization_name = ?, organization_logo = ?, organization_theme = ?, "
                 + "organization_privacy_policy = ?, organization_imprint = ?"
                 + "WHERE id = 0;")) {
 
-            stmt.setString(1, organization.getName());
-            stmt.setBytes(2, organization.getLogo());
-            stmt.setString(3, organization.getTheme());
-            stmt.setString(4, organization.getImprint());
-            stmt.setString(5, organization.getPrivacyPolicy());
+            new StatementParametrizer(stmt)
+                    .string(organization.getName())
+                    .bytes(organization.getLogo())
+                    .string(organization.getTheme())
+                    .string(organization.getImprint())
+                    .string(organization.getPrivacyPolicy())
+                    .toStatement().executeUpdate();
         } catch (SQLException e) {
             log.error("Error while updating organization data.", e);
             throw new StoreException("Error while updating organization data.", e);
