@@ -57,6 +57,16 @@ public class Organization implements Serializable {
     }
 
     /**
+     * Constructs a new organization from the given organization.
+     *
+     * @param organization The organization to clone.
+     */
+    public Organization(final Organization organization) {
+        this(organization.getName(), organization.getLogo().clone(), organization.getTheme(),
+                organization.getImprint(), organization.getPrivacyPolicy());
+    }
+
+    /**
      * Returns the name of this organization.
      *
      * @return The organization name.
@@ -190,7 +200,7 @@ public class Organization implements Serializable {
     public String toString() {
         return "Organization{"
                 + "name='" + name + '\''
-                + ", logo=" + Arrays.toString(logo)
+                + ", logo=byte[" + logo.length + "]"
                 + ", theme='" + theme + '\''
                 + ", imprint='" + imprint + '\''
                 + ", privacyPolicy='" + privacyPolicy + '\''
