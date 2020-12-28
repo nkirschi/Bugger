@@ -1,10 +1,10 @@
-package tech.bugger.control.backing;
+package tech.bugger.control.util;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.annotation.FacesConfig;
 
 /**
- * Enables JF 2.3 specific features. Necessary for versions &gt;= 3.0?
+ * Enables JF 2.3 specific features.
  */
 @FacesConfig
 @ApplicationScoped
