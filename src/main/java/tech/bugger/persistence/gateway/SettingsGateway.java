@@ -11,20 +11,6 @@ import tech.bugger.persistence.exception.NotFoundException;
 public interface SettingsGateway {
 
     /**
-     * Retrieves the current application configuration.
-     *
-     * @return The current application configuration.
-     */
-    Configuration getConfiguration() throws NotFoundException;
-
-    /**
-     * Retrieves the current organization settings.
-     *
-     * @return The current organization settings.
-     */
-    Organization getOrganization() throws NotFoundException;
-
-    /**
      * Persistently updates the application configuration.
      *
      * @param config The new application configuration.
@@ -37,5 +23,19 @@ public interface SettingsGateway {
      * @param org The new organization settings.
      */
     void setOrganization(Organization org);
+
+    /**
+     * Retrieves the current application configuration.
+     *
+     * @return The current application configuration.
+     */
+    Configuration getConfiguration() throws NotFoundException;
+
+    /**
+     * Retrieves the current organization settings.
+     *
+     * @return The current organization settings.
+     */
+    Organization getOrganization() throws NotFoundException;
 
 }
