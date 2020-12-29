@@ -37,7 +37,7 @@ public class ApplicationSettings implements Serializable {
     private transient SettingsService settingsService;
 
     /**
-     * Constructs a new application settings cache.
+     * Constructs a new application settings cache for proxying.
      */
     public ApplicationSettings() {
         // default constructor for CDI
