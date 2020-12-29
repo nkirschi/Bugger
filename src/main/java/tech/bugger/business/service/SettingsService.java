@@ -17,10 +17,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -144,12 +144,12 @@ public class SettingsService {
      * @param path The path of the directory to discover files in.
      * @return The filenames of the files in {@code path}.
      */
-    public List<String> discoverFiles(final Path path) {
-        List<String> filenames = Collections.emptyList();
-        try (Stream<Path> files = Files.list(path)) {
-            filenames = files.filter(Files::isRegularFile)
-                             .map(p -> p.getFileName().toString())
-                             .collect(Collectors.toList());
+    public List<String> discoverFiles(final String path) {
+        List<String> filenames = new ArrayList<>();
+        try (Stream<Path> files = Files.list(Paths.get(path))) {
+            files.filter(Files::isRegularFile)
+                 .map(p -> p.getFileName().toString())
+                 .forEach(filenames::add);
         } catch (IOException e) {
             log.error("Could not discover available themes on file system.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("themes_discovery_error"), Feedback.Type.WARNING));
@@ -158,7 +158,7 @@ public class SettingsService {
     }
 
     /**
-     * Reads the given upload to the internal format for further use.
+     * Reads the given input stream to the internal format for further use.
      *
      * @param is The uploaded file as input stream.
      * @return The fully read file as {@code byte[]} array or {@code null} iff reading failed.
