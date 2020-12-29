@@ -122,10 +122,22 @@ public class AdminBacker {
      * @param vce The event fired up change on the selection.
      */
     public void removeLogo(final ValueChangeEvent vce) {
-        log.debug("removeLogo: " + (boolean) vce.getNewValue());
         if ((boolean) vce.getNewValue()) {
             organization.setLogo(new byte[0]);
         }
+    }
+
+    /**
+     * Determines the available themes for skinning the application.
+     *
+     * @return The filenames of the available themes.
+     */
+    public List<String> getAvailableThemes() {
+        List<String> themes = settingsService.discoverFiles(ectx.getRealPath("/resources/design/themes"));
+        if (themes.isEmpty()) {
+            themes.add(organization.getTheme()); // at least current theme for displaying
+        }
+        return themes;
     }
 
     /**
@@ -144,19 +156,6 @@ public class AdminBacker {
         if (settingsService.updateOrganization(organization)) {
             applicationSettings.setOrganization(organization);
         }
-    }
-
-    /**
-     * Determines the available themes for skinning the application.
-     *
-     * @return The filenames of the available themes.
-     */
-    public List<String> getAvailableThemes() {
-        List<String> themes = settingsService.discoverFiles(ectx.getRealPath("/resources/design/themes"));
-        if (themes.isEmpty()) {
-            themes.add(organization.getTheme()); // at least current theme for displaying
-        }
-        return themes;
     }
 
     /**
