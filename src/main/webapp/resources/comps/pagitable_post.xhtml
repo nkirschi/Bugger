@@ -6,12 +6,12 @@
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 >
 
 <h:body>
     <cc:interface>
         <cc:attribute name="paginator" required="true" type="tech.bugger.business.util.Paginator"/>
-        <cc:attribute name="simple" required="false" type="java.lang.Boolean" default="false"/>
     </cc:interface>
 
     <cc:implementation>
@@ -19,9 +19,11 @@
                       rendered="#{cc.attrs.paginator.isEmpty()}"/>
 
         <h:form id="f_table" rendered="#{not cc.attrs.paginator.isEmpty()}">
-            <h:dataTable id="t_entries" var="var" value="#{cc.attrs.paginator}" paginator="true">
-                <cc:insertChildren/>
-            </h:dataTable>
+            <h:panelGrid id="t_entries">
+                <ui:repeat value="#{cc.attrs.paginator}" var="var">
+                    <cc:insertChildren/>
+                </ui:repeat>
+            </h:panelGrid>
         </h:form>
 
         <h:outputFormat id="ot_pagCount" value="#{cc.attrs.paginator.selection.totalSize == 1
@@ -33,12 +35,12 @@
         <h:form id="f_pagenav" rendered="#{not cc.attrs.paginator.isEmpty()}" style="display: inline;">
             <h:commandButton id="cb_submit" action="#{cc.attrs.paginator.update}" style="display: none"/>
             <h:commandButton id="cb_firstPage" value="&lt;&lt;" disabled="#{cc.attrs.paginator.isFirstPage()}"
-                             action="#{cc.attrs.paginator.firstPage}" rendered="#{not cc.attrs.simple}">
+                             action="#{cc.attrs.paginator.firstPage}">
             </h:commandButton>
             <h:commandButton id="cb_prevPage" value="&lt;" disabled="#{cc.attrs.paginator.isFirstPage()}"
                              action="#{cc.attrs.paginator.prevPage}">
             </h:commandButton>
-            <h:inputText id="i_currPage" value="#{cc.attrs.paginator.currentPage}" rendered="#{not cc.attrs.simple}"
+            <h:inputText id="i_currPage" value="#{cc.attrs.paginator.currentPage}"
                          validatorMessage="#{messages['paginator.not_in_range']}">
                 <f:validateLongRange minimum="1" maximum="#{cc.attrs.paginator.determineLastPageIndex()}"/>
             </h:inputText>
@@ -46,12 +48,11 @@
                              action="#{cc.attrs.paginator.nextPage}">
             </h:commandButton>
             <h:commandButton id="cb_lastPage" value="&gt;&gt;" disabled="#{cc.attrs.paginator.isLastPage()}"
-                             action="#{cc.attrs.paginator.lastPage}" rendered="#{not cc.attrs.simple}">
+                             action="#{cc.attrs.paginator.lastPage}">
             </h:commandButton>
         </h:form>
 
-        <h:form id="f_entries" style="display: inline;"
-                rendered="#{not cc.attrs.paginator.isEmpty() and not cc.attrs.simple}">
+        <h:form id="f_entries" rendered="#{not cc.attrs.paginator.isEmpty()}" style="display: inline;">
             <h:outputText id="ot_entriesPP" value="#{labels['paginator.entries_per_page']} "/>
             <h:selectOneMenu id="s_entriesPP" value="#{cc.attrs.paginator.selection.pageSize}"
                              onchange="document.getElementById('#{cc.id}:f_entries:cb_refresh').click()">
