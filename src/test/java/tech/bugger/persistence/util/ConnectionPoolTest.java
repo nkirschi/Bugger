@@ -56,49 +56,49 @@ public class ConnectionPoolTest {
         @Test
         public void testConstructorWhenDvrNull() {
             assertThrows(IllegalArgumentException.class,
-                    () -> new ConnectionPool(null, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
+                         () -> new ConnectionPool(null, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
         }
 
         @Test
         public void testConstructorWhenUrlNull() {
             assertThrows(IllegalArgumentException.class,
-                    () -> new ConnectionPool(DVR, null, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
+                         () -> new ConnectionPool(DVR, null, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
         }
 
         @Test
         public void testConstructorWhenUrlInvalid() {
             assertThrows(InternalError.class,
-                    () -> new ConnectionPool(DVR, "invalid", PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
+                         () -> new ConnectionPool(DVR, "invalid", PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
         }
 
         @Test
         public void testConstructorWhenPropsNull() {
             assertThrows(IllegalArgumentException.class,
-                    () -> new ConnectionPool(DVR, URL, null, MIN_CONNS, MAX_CONNS, TIMEOUT));
+                         () -> new ConnectionPool(DVR, URL, null, MIN_CONNS, MAX_CONNS, TIMEOUT));
         }
 
         @Test
         public void testConstructorWhenMinConnsNotPositive() {
             assertThrows(IllegalArgumentException.class,
-                    () -> new ConnectionPool(DVR, URL, PROPS, 0, MAX_CONNS, TIMEOUT));
+                         () -> new ConnectionPool(DVR, URL, PROPS, 0, MAX_CONNS, TIMEOUT));
         }
 
         @Test
         public void testConstructorWhenMaxConnsNotPositive() {
             assertThrows(IllegalArgumentException.class,
-                    () -> new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, 0, TIMEOUT));
+                         () -> new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, 0, TIMEOUT));
         }
 
         @Test
         public void testConstructorWhenTimeoutNegative() {
             assertThrows(IllegalArgumentException.class,
-                    () -> new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, -42));
+                         () -> new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, -42));
         }
 
         @Test
         public void testConstructorWhenDriverNotExisting() {
             assertThrows(InternalError.class,
-                    () -> new ConnectionPool("nodriver", URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
+                         () -> new ConnectionPool("nodriver", URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
         }
 
         @Test
@@ -135,21 +135,21 @@ public class ConnectionPoolTest {
         public void testGetConnectionWhenAlreadyShutDown() {
             connectionPool.shutdown();
             assertThrows(IllegalStateException.class,
-                    () -> connectionPool.getConnection());
+                         () -> connectionPool.getConnection());
         }
 
         @Test
         public void testReleaseConnectionWhenAlreadyShutDown() {
             connectionPool.shutdown();
             assertThrows(IllegalStateException.class,
-                    () -> connectionPool.releaseConnection(null));
+                         () -> connectionPool.releaseConnection(null));
         }
 
         @Test
         public void testShutdownWhenAlreadyShutDown() {
             connectionPool.shutdown();
             assertThrows(IllegalStateException.class,
-                    () -> connectionPool.shutdown());
+                         () -> connectionPool.shutdown());
         }
 
         @Test
@@ -337,7 +337,8 @@ public class ConnectionPoolTest {
         public void testDecreaseConnectionsJustForBranchCoverage() throws Exception {
             Method method = connectionPool.getClass().getDeclaredMethod("decreaseConnections", int.class);
             method.setAccessible(true);
-            assertThrows(InvocationTargetException.class, () -> method.invoke(connectionPool, 3));
+            Throwable e = assertThrows(InvocationTargetException.class, () -> method.invoke(connectionPool, MAX_CONNS));
+            assertEquals(IllegalArgumentException.class, e.getCause().getClass());
         }
     }
 }
