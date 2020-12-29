@@ -24,4 +24,7 @@
             <type>java.lang.String</type>
         </attribute>
     </tag>
+    <composite-library-name>
+        comps
+    </composite-library-name>
 </facelet-taglib>
