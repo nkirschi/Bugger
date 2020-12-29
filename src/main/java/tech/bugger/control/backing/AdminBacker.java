@@ -14,7 +14,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -70,8 +69,7 @@ public class AdminBacker {
     }
 
     /**
-     * Initializes the admin page. Checks if the user is allowed to access the page. If not, acts as if the page did not
-     * exist. Puts the names of the available CSS files into {@code availableThemes}.
+     * Initializes temporary data holders for the application configuration and organization data.
      */
     @PostConstruct
     public void init() {
@@ -119,6 +117,18 @@ public class AdminBacker {
     }
 
     /**
+     * Removes the current logo of the organization.
+     *
+     * @param vce The event fired up change on the selection.
+     */
+    public void removeLogo(final ValueChangeEvent vce) {
+        log.debug("removeLogo: " + (boolean) vce.getNewValue());
+        if ((boolean) vce.getNewValue()) {
+            organization.setLogo(new byte[0]);
+        }
+    }
+
+    /**
      * Saves and applies the changes made to the application configuration.
      */
     public void saveConfiguration() {
@@ -137,27 +147,29 @@ public class AdminBacker {
     }
 
     /**
-     * {@code availableThemes} holds information about which themes can be selected.
+     * Determines the available themes for skinning the application.
      *
-     * @return The availableThemes.
+     * @return The filenames of the available themes.
      */
     public List<String> getAvailableThemes() {
-        return settingsService.discoverFiles(Paths.get(ectx.getRealPath("/resources/design/themes")));
+        List<String> themes = settingsService.discoverFiles(ectx.getRealPath("/resources/design/themes"));
+        if (themes.isEmpty()) {
+            themes.add(organization.getTheme()); // at least current theme for displaying
+        }
+        return themes;
     }
 
     /**
-     * {@code configuration} holds information about system-wide moderation options without those options already being
-     * in effect.
+     * Returns the temporary application configuration until submit.
      *
-     * @return The configuration.
+     * @return The current configuration.
      */
     public Configuration getConfiguration() {
         return configuration;
     }
 
     /**
-     * {@code configuration} holds information about system-wide moderation options without those options already being
-     * in effect.
+     * Sets the temporary application configuration until submit.
      *
      * @param configuration The configuration to set.
      */
@@ -166,18 +178,16 @@ public class AdminBacker {
     }
 
     /**
-     * {@code organization} holds details for modifying things like the appearance of the front end without those
-     * options being already effective.
+     * Returns the temporary organization data until submit.
      *
-     * @return The organization.
+     * @return The current organization data.
      */
     public Organization getOrganization() {
         return organization;
     }
 
     /**
-     * {@code organization} holds details for modifying things like the appearance of the front end without those
-     * options being already effective.
+     * Sets the temporary organization data until submit.
      *
      * @param organization The organization to set.
      */
