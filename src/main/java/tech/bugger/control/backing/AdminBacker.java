@@ -8,11 +8,13 @@ import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
-import javax.faces.context.FacesContext;
+import javax.faces.context.ExternalContext;
 import javax.faces.event.ValueChangeEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -28,6 +30,16 @@ public class AdminBacker {
     private static final Log log = Log.forClass(AdminBacker.class);
 
     /**
+     * The application settings cache.
+     */
+    private final ApplicationSettings applicationSettings;
+
+    /**
+     * The settings service providing logic.
+     */
+    private final SettingsService settingsService;
+
+    /**
      * Temporary configuration until submit.
      */
     private Configuration configuration;
@@ -38,33 +50,23 @@ public class AdminBacker {
     private Organization organization;
 
     /**
-     * The application settings cache.
+     * Reference to the current {@link ExternalContext}.
      */
-    private ApplicationSettings applicationSettings;
-
-    /**
-     * The settings service providing logic.
-     */
-    private SettingsService settingsService;
-
-    /**
-     * Reference to the current {@link FacesContext}.
-     */
-    private FacesContext fctx;
+    private final ExternalContext ectx;
 
     /**
      * Constructs a new admin page backing bean with the necessary dependencies.
      *
      * @param applicationSettings The application settings cache.
      * @param settingsService     The settings service to use.
-     * @param fctx                The current {@link FacesContext} of the application.
+     * @param ectx                The current {@link ExternalContext} of the application.
      */
     @Inject
     public AdminBacker(final ApplicationSettings applicationSettings, final SettingsService settingsService,
-                       final FacesContext fctx) {
+                       final ExternalContext ectx) {
         this.applicationSettings = applicationSettings;
         this.settingsService = settingsService;
-        this.fctx = fctx;
+        this.ectx = ectx;
     }
 
     /**
@@ -84,7 +86,6 @@ public class AdminBacker {
      */
     public String browseUsers() {
         // TODO redirect to search page on users tab with no filters
-        System.out.println("braus");
         return null;
     }
 
@@ -95,7 +96,6 @@ public class AdminBacker {
      */
     public String createUser() {
         // TODO redirect to edit-user.xhtml with parameters
-        System.out.println("kriäit");
         return null;
     }
 
@@ -108,9 +108,13 @@ public class AdminBacker {
      */
     public void uploadLogo(final ValueChangeEvent vce) {
         Part upload = (Part) vce.getNewValue();
-        byte[] logo = settingsService.convertLogo(upload);
-        if (logo != null) {
-            organization.setLogo(logo);
+        try {
+            byte[] logo = settingsService.readFile(upload.getInputStream());
+            if (logo != null) {
+                organization.setLogo(logo);
+            }
+        } catch (IOException e) {
+            log.error("Could not fetch input stream from uploaded logo.", e);
         }
     }
 
@@ -138,7 +142,7 @@ public class AdminBacker {
      * @return The availableThemes.
      */
     public List<String> getAvailableThemes() {
-        return settingsService.discoverThemes();
+        return settingsService.discoverFiles(Paths.get(ectx.getRealPath("/resources/design/themes")));
     }
 
     /**
