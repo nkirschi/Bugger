@@ -42,12 +42,13 @@ public class MetadataDBGateway implements MetadataGateway {
      */
     @Override
     public Metadata retrieveMetadata() {
+        Metadata metadata = null;
         try (PreparedStatement stmt = conn.prepareStatement("SELECT version FROM metadata;")) {
             if (conn.getMetaData().getTables(null, null, "metadata", new String[]{"TABLE"}).next()) {
                 log.debug("Found metadata table in database.");
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    return new Metadata(rs.getString("version"));
+                    metadata = new Metadata(rs.getString("version"));
                 }
             } else {
                 log.debug("Metadata table does not exist.");
@@ -56,7 +57,7 @@ public class MetadataDBGateway implements MetadataGateway {
             log.error("Could not retrieve schema version from database.", e);
             throw new StoreException(e);
         }
-        return null;
+        return metadata;
     }
 
     /**
