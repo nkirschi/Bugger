@@ -28,12 +28,12 @@ public class DBExtension implements BeforeAllCallback, AfterAllCallback, BeforeE
     }
 
     @Override
-    public void beforeEach(ExtensionContext extensionContext) throws Exception {
+    public void beforeEach(ExtensionContext extensionContext) {
         applyScript(setupSQL);
     }
 
     @Override
-    public void afterEach(ExtensionContext extensionContext) throws Exception {
+    public void afterEach(ExtensionContext extensionContext) {
         applyScript(eraseSQL);
     }
 
