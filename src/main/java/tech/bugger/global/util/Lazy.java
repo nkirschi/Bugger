@@ -22,7 +22,7 @@ public class Lazy<T> implements Serializable {
     /**
      * The instructions for acquiring the wrapped object.
      */
-    private Supplier<T> retrieval;
+    private transient Supplier<T> retrieval;
 
     /**
      * Constructs a new lazy wrapper with a specified retrieval method.

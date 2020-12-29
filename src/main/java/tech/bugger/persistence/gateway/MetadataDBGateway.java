@@ -5,6 +5,7 @@ import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.StoreException;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,7 +64,7 @@ public class MetadataDBGateway implements MetadataGateway {
      */
     @Override
     public void initializeSchema(final InputStream is) {
-        Scanner scanner = new Scanner(is);
+        Scanner scanner = new Scanner(is, StandardCharsets.UTF_8);
         scanner.useDelimiter(";(?=(?:[^$]*\\$\\$[^$]*\\$\\$)*[^$]*\\Z)");
         try (Statement stmt = conn.createStatement()) {
             while (scanner.hasNext()) {
