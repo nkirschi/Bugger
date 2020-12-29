@@ -10,8 +10,9 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:b="http://tech.bugger/tags">
 
-<ui:composition template="/WEB-INF/include/main.xhtml">
-    <ui:define name="title">Profile</ui:define>
+<!-- TODO include real main template -->
+<ui:composition template="">
+    <ui:define name="title">#{messages.profile}</ui:define>
     <ui:define name="content">
         <h:panelGroup class="row" layout="block">
             <h:panelGroup class="col-sm-2" layout="block"/>
@@ -143,14 +144,14 @@
                             <h:graphicImage id="g-rem-admin" value="/resources/images/delete.png"
                                             alt="Button to remove admin"/>
                         </h:commandLink>
-                        <h:button id="b-edit" value="#{messages.edit}" outcome="/view/public/home.xhtml"
+                        <!-- TODO change outcome to profile-edit.xhtml -->
+                        <h:button id="b-edit" value="#{messages.edit}" outcome=""
                                   rendered="#{profileBacker.privileged}" styleClass="button"/>
                     </h:panelGroup>
 
                     <!-- The profile owner's user information -->
                     <h:panelGroup class="row" layout="block" id="p-avatar" styleClass="p-avatar">
-                        <!-- TODO change this to user avatar when implementing avatar functionality -->
-                        <h:graphicImage id="g-avatar" value="/resources/images/bugger.png" styleClass="g-avatar"
+                        <h:graphicImage id="g-avatar" value="#{profileBacker.user.avatar}" styleClass="g-avatar"
                                         alt="The user's avatar"/>
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block" id="p-username">
