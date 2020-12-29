@@ -45,6 +45,7 @@ public class StatementParametrizer {
      * @param integer The integer to set as parameter.
      * @return {@code this} builder for further use.
      * @throws SQLException if substituting {@code integer} for the next parameter is not possible.
+     * @see PreparedStatement#setInt(int, int)
      */
     public StatementParametrizer integer(final int integer) throws SQLException {
         stmt.setInt(counter++, integer);
@@ -57,6 +58,7 @@ public class StatementParametrizer {
      * @param bool The boolean to set as parameter.
      * @return {@code this} builder for further use.
      * @throws SQLException if substituting {@code bool} for the next parameter is not possible.
+     * @see PreparedStatement#setBoolean(int, boolean)
      */
     public StatementParametrizer bool(final boolean bool) throws SQLException {
         stmt.setBoolean(counter++, bool);
@@ -69,6 +71,7 @@ public class StatementParametrizer {
      * @param bytes The byte array to set as parameter.
      * @return {@code this} builder for further use.
      * @throws SQLException if substituting {@code bytes} for the next parameter is not possible.
+     * @see PreparedStatement#setBytes(int, byte[])
      */
     public StatementParametrizer bytes(final byte[] bytes) throws SQLException {
         stmt.setBytes(counter++, bytes);
@@ -81,6 +84,7 @@ public class StatementParametrizer {
      * @param string The string to set as parameter.
      * @return {@code this} builder for further use.
      * @throws SQLException if substituting {@code string} for the next parameter is not possible.
+     * @see PreparedStatement#setString(int, String)
      */
     public StatementParametrizer string(final String string) throws SQLException {
         stmt.setString(counter++, string);
@@ -90,12 +94,27 @@ public class StatementParametrizer {
     /**
      * Substitutes the next parameter in the statement with a general object.
      *
-     * @param object The boolean to set as parameter.
+     * @param object The object to set as parameter.
      * @return {@code this} builder for further use.
      * @throws SQLException if substituting {@code object} for the next parameter is not possible.
+     * @see PreparedStatement#setObject(int, Object)
      */
     public StatementParametrizer object(final Object object) throws SQLException {
         stmt.setObject(counter++, object);
+        return this;
+    }
+
+    /**
+     * Substitutes the next parameter in the statement with a general object of specified type.
+     *
+     * @param object The boolean to set as parameter.
+     * @param type   The SQL type to interpret {@code object} as.
+     * @return {@code this} builder for further use.
+     * @throws SQLException if substituting {@code object} for the next parameter is not possible.
+     * @see PreparedStatement#setObject(int, Object, int)
+     */
+    public StatementParametrizer object(final Object object, final int type) throws SQLException {
+        stmt.setObject(counter++, object, type);
         return this;
     }
 
