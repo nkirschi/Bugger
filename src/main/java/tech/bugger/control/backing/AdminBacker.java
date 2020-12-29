@@ -39,12 +39,12 @@ public class AdminBacker {
     private final SettingsService settingsService;
 
     /**
-     * Temporary configuration until submit.
+     * Temporary configuration being filled with user input.
      */
     private Configuration configuration;
 
     /**
-     * Temporary organization until submit.
+     * Temporary organization being filled with user input.
      */
     private Organization organization;
 
@@ -119,7 +119,7 @@ public class AdminBacker {
     /**
      * Removes the current logo of the organization.
      *
-     * @param vce The event fired up change on the selection.
+     * @param vce The event fired upon change on the selection.
      */
     public void removeLogo(final ValueChangeEvent vce) {
         if ((boolean) vce.getNewValue()) {
@@ -159,7 +159,7 @@ public class AdminBacker {
     }
 
     /**
-     * Returns the temporary application configuration until submit.
+     * Returns the temporary application configuration.
      *
      * @return The current configuration.
      */
@@ -168,7 +168,7 @@ public class AdminBacker {
     }
 
     /**
-     * Sets the temporary application configuration until submit.
+     * Sets the temporary application configuration.
      *
      * @param configuration The configuration to set.
      */
@@ -177,7 +177,7 @@ public class AdminBacker {
     }
 
     /**
-     * Returns the temporary organization data until submit.
+     * Returns the temporary organization data.
      *
      * @return The current organization data.
      */
@@ -186,7 +186,7 @@ public class AdminBacker {
     }
 
     /**
-     * Sets the temporary organization data until submit.
+     * Sets the temporary organization data.
      *
      * @param organization The organization to set.
      */
