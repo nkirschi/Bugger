@@ -25,7 +25,14 @@ public class Feedback {
         ERROR
     }
 
+    /**
+     * The message text.
+     */
     private final String message;
+
+    /**
+     * The message type.
+     */
     private final Type type;
 
     /**
@@ -34,7 +41,7 @@ public class Feedback {
      * @param message The text of the feedback message.
      * @param type    The type of the feedback message.
      */
-    public Feedback(String message, Type type) {
+    public Feedback(final String message, final Type type) {
         this.message = message;
         this.type = type;
     }
@@ -56,4 +63,5 @@ public class Feedback {
     public Type getType() {
         return type;
     }
+
 }
