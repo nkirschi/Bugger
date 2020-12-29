@@ -22,9 +22,12 @@ public class RegexValidator implements Validator<String> {
     /**
      * Resource bundle for feedback messages.
      */
+    private final ResourceBundle messagesBundle;
+
     @Inject
-    @RegistryKey("messages")
-    private ResourceBundle resourceBundle;
+    public RegexValidator(@RegistryKey("messages") ResourceBundle messagesBundle) {
+        this.messagesBundle = messagesBundle;
+    }
 
     /**
      * Validates the given {@code regex}.
@@ -39,7 +42,7 @@ public class RegexValidator implements Validator<String> {
         try {
             Pattern.compile(regex);
         } catch (PatternSyntaxException e) {
-            FacesMessage message = new FacesMessage(resourceBundle.getString("invalid_regex"));
+            FacesMessage message = new FacesMessage(messagesBundle.getString("invalid_regex"));
             throw new ValidatorException(message, e);
         }
     }
