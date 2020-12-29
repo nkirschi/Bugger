@@ -5,17 +5,11 @@ import java.util.List;
 import org.commonmark.Extension;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
-import tech.bugger.global.util.Log;
 
 /**
  * Utility class for converting Markdown to HTML.
  */
 public final class MarkdownHandler {
-
-    /**
-     * The {@link Log} instance associated with this class for logging purposes.
-     */
-    private static final Log log = Log.forClass(MarkdownHandler.class);
 
     /**
      * All {@link Extension}s to load for the commonmark-java library.
@@ -47,7 +41,7 @@ public final class MarkdownHandler {
      */
     public static String toHtml(final String md) {
         if (md == null) {
-            return "";
+            throw new IllegalArgumentException("Invalid String for Markdown parsing!");
         }
         return RENDERER.render(PARSER.parse(md));
     }

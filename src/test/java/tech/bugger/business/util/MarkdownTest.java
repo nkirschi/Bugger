@@ -22,8 +22,7 @@ public class MarkdownTest {
 
     @Test
     public void testNull() {
-        String html = MarkdownHandler.toHtml(null);
-        assertEquals("", html);
+        assertThrows(IllegalArgumentException.class, () -> MarkdownHandler.toHtml(null));
     }
 
     @Test
