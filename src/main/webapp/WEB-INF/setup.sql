@@ -22,23 +22,23 @@ INSERT INTO metadata DEFAULT VALUES;
 
 
 CREATE TABLE system_settings(
-                                id                          INTEGER NOT NULL PRIMARY KEY DEFAULT 0,
+    id INTEGER NOT NULL PRIMARY KEY DEFAULT 0,
 
-                                organization_name           VARCHAR NOT NULL             DEFAULT 'Bugger',
-                                organization_logo           BYTEA                        DEFAULT '',
-                                organization_theme          VARCHAR NOT NULL             DEFAULT 'light.css',
-                                organization_privacy_policy VARCHAR NOT NULL             DEFAULT '',
-                                organization_imprint        VARCHAR NOT NULL             DEFAULT '',
-                                organization_support_info   VARCHAR NOT NULL             DEFAULT '',
+    organization_name VARCHAR NOT NULL DEFAULT 'Bugger',
+    organization_logo BYTEA DEFAULT '',
+    organization_theme VARCHAR NOT NULL DEFAULT 'light.css',
+    organization_privacy_policy VARCHAR NOT NULL DEFAULT '',
+    organization_imprint VARCHAR NOT NULL DEFAULT '',
+    organization_support_info VARCHAR NOT NULL DEFAULT '',
 
-                                guest_reading               BOOLEAN NOT NULL             DEFAULT TRUE,
-                                closed_report_posting       BOOLEAN NOT NULL             DEFAULT FALSE,
-                                user_email_format           VARCHAR NOT NULL             DEFAULT '+*@+*',
-                                voting_weight_definition    VARCHAR NOT NULL             DEFAULT '0,10,25,50,100,200,400,600,800,1000',
-                                allowed_file_extensions     VARCHAR NOT NULL             DEFAULT '.txt,.pdf,.jpg,.png,.gif,.tif,.bmp,.svg,.webp,.wav,.m4a,.flac,.mp3,.mp4,.ogg',
-                                max_attachments_per_post    INTEGER NOT NULL             DEFAULT 5,
+    guest_reading BOOLEAN NOT NULL DEFAULT TRUE,
+    closed_report_posting BOOLEAN NOT NULL DEFAULT FALSE,
+    user_email_format VARCHAR NOT NULL DEFAULT '+*@+*',
+    voting_weight_definition VARCHAR NOT NULL DEFAULT '0,10,25,50,100,200,400,600,800,1000',
+    allowed_file_extensions VARCHAR NOT NULL DEFAULT '.txt,.pdf,.jpg,.png,.gif,.tif,.bmp,.svg,.webp,.wav,.m4a,.flac,.mp3,.mp4,.ogg',
+    max_attachments_per_post INTEGER NOT NULL DEFAULT 5,
 
-                                CONSTRAINT system_settings_only_one_row CHECK (id = 0)
+    CONSTRAINT system_settings_only_one_row CHECK (id = 0)
 );
 
 INSERT INTO system_settings DEFAULT VALUES;
