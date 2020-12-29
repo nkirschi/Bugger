@@ -26,7 +26,11 @@ import java.time.ZonedDateTime;
 @Named
 public class ProfileBacker implements Serializable {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(ProfileBacker.class);
+
     @Serial
     private static final long serialVersionUID = -4606230292807293380L;
 
@@ -43,18 +47,30 @@ public class ProfileBacker implements Serializable {
     private boolean displayDeleteAllReportSubscriptionsDialog;
     private boolean displayDeleteAllUserSubscriptionsDialog;
 
-    @Inject
+    /**
+     * The current user session.
+     */
     private UserSession session;
 
-    @Inject
+    /**
+     * The profile service providing the business logic.
+     */
     private transient ProfileService profileService;
+
+    @Inject
+    public ProfileBacker(final UserSession session, final ProfileService profileService) {
+        this.session = session;
+        this.profileService = profileService;
+    }
 
     /**
      * Initializes the profile page. Checks whether this is the user's own profile page.
      */
     @PostConstruct
     private void init() {
-
+        // The initialization of the subscriptions will be implemented in the subscriptions feature.
+        user = profileService.getUser(userID);
+        closeDialogs();
     }
 
     /**
@@ -73,6 +89,8 @@ public class ProfileBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openPromoteDemoteAdminDialog() {
+        closeDialogs();
+        displayPromoteDemoteAdminDialog = true;
         return null;
     }
 
@@ -82,6 +100,7 @@ public class ProfileBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String closePromoteDemoteAdminDialog() {
+        displayPromoteDemoteAdminDialog = false;
         return null;
     }
 
@@ -140,6 +159,16 @@ public class ProfileBacker implements Serializable {
     }
 
     /**
+     * Closes the administrator promotion/demotion dialog and all delete subscriptions dialogs.
+     */
+    private void closeDialogs() {
+        displayPromoteDemoteAdminDialog = false;
+        displayDeleteAllTopicSubscriptionsDialog = false;
+        displayDeleteAllReportSubscriptionsDialog = false;
+        displayDeleteAllUserSubscriptionsDialog = false;
+    }
+
+    /**
      * Returns the timestamp of the last action in one particular topic. Creating, editing and moving a report as well
      * as creating and editing posts count as actions. Moving a report is an action in the destination topic only.
      *
@@ -168,7 +197,7 @@ public class ProfileBacker implements Serializable {
      * @return The voting weight.
      */
     public int getVotingWeight() {
-        return 0;
+        return profileService.getVotingWeightForUser(user);
     }
 
     /**
@@ -178,7 +207,7 @@ public class ProfileBacker implements Serializable {
      * @return The number of posts.
      */
     public int getNumberOfPosts() {
-        return 0;
+        return profileService.getNumberOfPostsForUser(user);
     }
 
     /**
@@ -242,7 +271,7 @@ public class ProfileBacker implements Serializable {
      * @return Whether the user is privileged.
      */
     public boolean isPrivileged() {
-        return false;
+        return session.getUser().isAdministrator() || session.getUser().equals(user);
     }
 
     /**
@@ -251,22 +280,7 @@ public class ProfileBacker implements Serializable {
      * displayed instead.
      */
     public void toggleAdmin() {
-
-    }
-
-    /**
-     * Promotes the user whose profile is being viewed to an administrator.
-     */
-    private void promoteAdmin() {
-
-    }
-
-    /**
-     * Demotes the user whose profile is being viewed if they are an administrator. However, if they are the last
-     * remaining administrator, an error message is displayed instead.
-     */
-    private void demoteAdmin() {
-        // DO NOT DEMOTE LAST ADMIN!!!1!!eleven!!
+        profileService.toggleAdmin(user);
     }
 
     /**
@@ -344,6 +358,13 @@ public class ProfileBacker implements Serializable {
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    /**
+     * @return The session
+     */
+    public UserSession getSession() {
+        return session;
     }
 
     /**
