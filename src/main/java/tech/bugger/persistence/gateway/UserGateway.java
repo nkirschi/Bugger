@@ -52,11 +52,10 @@ public interface UserGateway {
     public int getVotingWeight(User user) throws NotFoundException;
 
     /**
-     * Retrieves the list of email addresses of all administrators.
-     *
-     * @return The list of email addresses of all administrators.
+     * Retrieves the current number of administrators.
+     * @return The number of administrators.
      */
-    public List<String> getAdminEmails();
+    public int getNumberOfAdmins() throws NotFoundException;
 
     /**
      * Retrieves a user by their ID.
