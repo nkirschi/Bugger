@@ -25,21 +25,50 @@ import java.time.ZonedDateTime;
 @ViewScoped
 @Named
 public class HomeBacker implements Serializable {
-    @Serial
-    private static final long serialVersionUID = -6982333692294902179L;
+
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(HomeBacker.class);
 
+    @Serial
+    private static final long serialVersionUID = -6982333692294902179L;
+
+    /**
+     * The paginated inbox containing all notifications for the user.
+     */
     private Paginator<Notification> inbox;
+
+    /**
+     * The paginated list of all topics.
+     */
     private Paginator<Topic> topics;
+
+    /**
+     * The notification to be deleted.
+     */
     private Notification notificationToBeDeleted;
+
+    /**
+     * The notification to be marked as read.
+     */
     private Notification notificationRead;
 
+    /**
+     * The session containing the currently logged in user.
+     */
     @Inject
     private UserSession session;
 
+    /**
+     * The service performing tasks concerning notifications.
+     */
     @Inject
     private transient NotificationService notificationService;
 
+    /**
+     * The service performing tasks concerning topics.
+     */
     @Inject
     private transient TopicService topicService;
 
@@ -48,7 +77,17 @@ public class HomeBacker implements Serializable {
      */
     @PostConstruct
     public void init() {
+        topics = new Paginator<Topic>("", 20) {
+            @Override
+            protected Iterable<Topic> fetch() {
+                return topicService.getSelectedTopics(getSelection());
+            }
 
+            @Override
+            protected int totalSize() {
+                return topicService.getNumberOfTopics();
+            }
+        };
     }
 
     /**
@@ -121,7 +160,7 @@ public class HomeBacker implements Serializable {
     /**
      * @param notificationToBeDeleted The notificationToBeDeleted to set.
      */
-    public void setNotificationToBeDeleted(Notification notificationToBeDeleted) {
+    public void setNotificationToBeDeleted(final Notification notificationToBeDeleted) {
         this.notificationToBeDeleted = notificationToBeDeleted;
     }
 
@@ -135,7 +174,8 @@ public class HomeBacker implements Serializable {
     /**
      * @param notificationRead The notificationRead to set.
      */
-    public void setNotificationRead(Notification notificationRead) {
+    public void setNotificationRead(final Notification notificationRead) {
         this.notificationRead = notificationRead;
     }
+
 }
