@@ -15,7 +15,8 @@
     </cc:interface>
 
     <cc:implementation>
-        <h:outputText id="ot_noEntry" value="No items here!" rendered="#{cc.attrs.paginator.isEmpty()}"/>
+        <h:outputText id="ot_noEntry" value="#{labels['paginator.empty']}"
+                      rendered="#{cc.attrs.paginator.isEmpty()}"/>
 
         <h:form id="f_table" rendered="#{not cc.attrs.paginator.isEmpty()}">
             <h:panelGrid id="t_entries">
@@ -25,7 +26,11 @@
             </h:panelGrid>
         </h:form>
 
-        <h:outputText id="ot_pagCount" value="#{cc.attrs.paginator.selection.totalSize} entries"/>
+        <h:outputFormat id="ot_pagCount" value="#{cc.attrs.paginator.selection.totalSize == 1
+                      ? labels['paginator.entry']
+                      : labels['paginator.entries']}">
+            <f:param value="#{cc.attrs.paginator.selection.totalSize}"/>
+        </h:outputFormat>
 
         <h:form id="f_pagenav" rendered="#{not cc.attrs.paginator.isEmpty()}" style="display: inline;">
             <h:commandButton id="cb_submit" action="#{cc.attrs.paginator.update}" style="display: none"/>
@@ -48,7 +53,7 @@
         </h:form>
 
         <h:form id="f_entries" rendered="#{not cc.attrs.paginator.isEmpty()}" style="display: inline;">
-            <h:outputText id="ot_entriesPP" value="Entries per Page: "/>
+            <h:outputText id="ot_entriesPP" value="#{labels['paginator.entries_per_page']} "/>
             <h:selectOneMenu id="s_entriesPP" value="#{cc.attrs.paginator.selection.pageSize}"
                              onchange="document.getElementById('#{cc.id}:f_entries:cb_refresh').click()">
                 <f:selectItems value="#{cc.attrs.paginator.pageSizeValues()}"/>
