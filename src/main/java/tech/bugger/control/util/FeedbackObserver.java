@@ -34,12 +34,19 @@ public class FeedbackObserver {
      * @param feedback The feedback with details on what to display.
      */
     public void displayFeedback(final @Observes @Any Feedback feedback) {
-        FacesMessage.Severity severity = switch (feedback.getType()) {
+        FacesMessage.Severity severity = parseSeverity(feedback.getType());
+        if (severity == null) {
+            throw new IllegalArgumentException("Unknown severity '" + feedback.getType() + "'.");
+        }
+        fctx.addMessage(null, new FacesMessage(severity, feedback.getMessage(), null));
+    }
+
+    private FacesMessage.Severity parseSeverity(final Feedback.Type type) {
+        return switch (type) {
             case ERROR -> FacesMessage.SEVERITY_ERROR;
             case WARNING -> FacesMessage.SEVERITY_WARN;
             case INFO -> FacesMessage.SEVERITY_INFO;
         };
-        fctx.addMessage(null, new FacesMessage(severity, feedback.getMessage(), null));
     }
 
 }
