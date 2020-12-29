@@ -156,7 +156,7 @@ public class PaginatorTest {
 
     @Test
     public void testUpdateReset() {
-        paginator.setCurrentPage(5);
+        paginator.setCurrentPage(2);
         paginator.updateReset();
         assertEquals(1, paginator.iterator().next());
     }
@@ -202,6 +202,16 @@ public class PaginatorTest {
     public void testOtherPageSize() {
         paginator.getSelection().setPageSize(50);
         assertTrue(paginator.isLastPage());
+    }
+
+    @Test
+    public void testInvalidPage1() {
+        assertThrows(IllegalArgumentException.class, () -> paginator.setCurrentPage(0));
+    }
+
+    @Test
+    public void testInvalidPage2() {
+        assertThrows(IllegalArgumentException.class, () -> paginator.setCurrentPage(5));
     }
 
 }

@@ -160,9 +160,13 @@ public class Selection implements Serializable {
         if (!(other instanceof Selection)) {
             return false;
         }
+
         Selection sel = (Selection) other;
-        return totalSize == sel.totalSize && currentPage == sel.currentPage && pageSize == sel.pageSize
-                && ascending == sel.ascending && Objects.equals(sortedBy, sel.sortedBy);
+        return totalSize == sel.totalSize
+                && currentPage == sel.currentPage
+                && pageSize == sel.pageSize
+                && ascending == sel.ascending
+                && Objects.equals(sortedBy, sel.sortedBy);
     }
 
     /**

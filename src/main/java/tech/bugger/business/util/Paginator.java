@@ -68,6 +68,10 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      */
     public void setCurrentPage(final int currentPage) {
         // User interaction: Subtract 1 for convenience (1-indexed)
+        if (currentPage < 1 || currentPage > determineLastPageIndex()) {
+            throw new IllegalArgumentException("Page out of range!");
+        }
+
         selection.setCurrentPage(currentPage - 1);
         log.debug("Paginator updated through setCurrentPage to " + selection + ".");
     }
@@ -157,7 +161,9 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
             selection.setSortedBy(sortKey);
             selection.setAscending(true);
         }
-        updateReset();
+
+        selection.setCurrentPage(0);
+        update();
         log.debug("Paginator updated through sortBy to " + selection + ".");
     }
 
@@ -178,9 +184,9 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     }
 
     /**
-     * Checks whether the current slice of data has no items.
+     * Checks whether the currently fetched data is empty, i.e. contains no items.
      *
-     * @return Whether the current chunk is empty.
+     * @return Whether the currently fetched data is empty.
      */
     public boolean isEmpty() {
         return selection.getTotalSize() == 0;
