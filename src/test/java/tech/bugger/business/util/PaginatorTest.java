@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import tech.bugger.LogExtension;
+import tech.bugger.global.transfer.Selection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,7 +25,7 @@ public class PaginatorTest {
     public void init() {
         testData = IntStream.range(1, 50).boxed().collect(Collectors.toList());
 
-        paginator = new Paginator<>("id", 20) {
+        paginator = new Paginator<>("id", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Integer> fetch() {
                 Comparator<Integer> comp = Integer::compareTo;
@@ -33,9 +34,9 @@ public class PaginatorTest {
                 }
                 testData.sort(comp);
 
-                return testData.subList(getSelection().getCurrentPage() * getSelection().getPageSize(),
-                        Math.min((getSelection().getCurrentPage() + 1) * getSelection().getPageSize(),
-                                testData.size()));
+                int size = getSelection().getPageSize().getSize();
+                return testData.subList(getSelection().getCurrentPage() * size,
+                        Math.min((getSelection().getCurrentPage() + 1) * size, testData.size()));
             }
 
             @Override
@@ -44,7 +45,7 @@ public class PaginatorTest {
             }
         };
 
-        paginatorEmpty = new Paginator<>("id", 20) {
+        paginatorEmpty = new Paginator<>("id", Selection.PageSize.NORMAL) {
             private final List<Integer> EMPTY_LIST = new ArrayList<>();
 
             @Override
@@ -140,7 +141,7 @@ public class PaginatorTest {
 
     @Test
     public void testPageSizeValues() {
-        assertArrayEquals(new int[]{10, 20, 50, 100}, paginator.pageSizeValues());
+        assertArrayEquals(Selection.PageSize.values(), paginator.pageSizeValues());
     }
 
     @Test
@@ -200,7 +201,7 @@ public class PaginatorTest {
 
     @Test
     public void testOtherPageSize() {
-        paginator.getSelection().setPageSize(50);
+        paginator.getSelection().setPageSize(Selection.PageSize.LARGE);
         assertTrue(paginator.isLastPage());
     }
 

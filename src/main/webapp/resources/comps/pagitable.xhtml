@@ -55,7 +55,8 @@
             <h:outputText id="ot_entriesPP" value="#{labels['paginator.entries_per_page']} "/>
             <h:selectOneMenu id="s_entriesPP" value="#{cc.attrs.paginator.selection.pageSize}"
                              onchange="document.getElementById('#{cc.id}:f_entries:cb_refresh').click()">
-                <f:selectItems value="#{cc.attrs.paginator.pageSizeValues()}"/>
+                <f:selectItems value="#{cc.attrs.paginator.pageSizeValues()}"
+                               var="item" itemValue="#{item}" itemLabel="#{item.size}"/>
             </h:selectOneMenu>
             <h:commandButton id="cb_refresh" action="#{cc.attrs.paginator.updateReset}" value="&#x27f3;" type="submit"/>
         </h:form>

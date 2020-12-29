@@ -12,6 +12,53 @@ public class Selection implements Serializable {
     @Serial
     private static final long serialVersionUID = -4984947542876923184L;
 
+    public enum PageSize {
+
+        /**
+         * A small amount of entries per page.
+         */
+        SMALL(10),
+
+        /**
+         * A normal amount of entries per page (could be considered as default value in most cases).
+         */
+        NORMAL(20),
+
+        /**
+         * A large amount of entries per page.
+         */
+        LARGE(50),
+
+        /**
+         * A huge amount of entries per page.
+         */
+        HUGE(100);
+
+        /**
+         * The amount of entries per page.
+         */
+        private final int size;
+
+        /**
+         * Constructs a new enum representing a valid setting for entries per page.
+         *
+         * @param size The amount of entries per page.
+         */
+        PageSize(final int size) {
+            this.size = size;
+        }
+
+        /**
+         * Returns the amount of entries per page.
+         *
+         * @return The amount of entries per page.
+         */
+        public int getSize() {
+            return size;
+        }
+
+    }
+
     /**
      * The total number of entries.
      */
@@ -25,7 +72,7 @@ public class Selection implements Serializable {
     /**
      * The maximum number of entries per page.
      */
-    private int pageSize;
+    private PageSize pageSize;
 
     /**
      * The key of the column to sort by.
@@ -46,7 +93,7 @@ public class Selection implements Serializable {
      * @param sortedBy    The column to be sorted by.
      * @param ascending   Whether to sort in ascending order.
      */
-    public Selection(final int totalSize, final int currentPage, final int pageSize, final String sortedBy,
+    public Selection(final int totalSize, final int currentPage, final PageSize pageSize, final String sortedBy,
                      final boolean ascending) {
         this.totalSize = totalSize;
         this.currentPage = currentPage;
@@ -96,7 +143,7 @@ public class Selection implements Serializable {
      *
      * @return The selection page size.
      */
-    public int getPageSize() {
+    public PageSize getPageSize() {
         return pageSize;
     }
 
@@ -105,7 +152,7 @@ public class Selection implements Serializable {
      *
      * @param pageSize The selection page size to be set.
      */
-    public void setPageSize(final int pageSize) {
+    public void setPageSize(final PageSize pageSize) {
         this.pageSize = pageSize;
     }
 

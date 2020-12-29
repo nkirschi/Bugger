@@ -17,11 +17,6 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     private static final Log log = Log.forClass(Paginator.class);
 
     /**
-     * The possible values for the "items per page" feature of a paginator.
-     */
-    private static final int[] ITEMS_PER_PAGE = new int[]{10, 20, 50, 100};
-
-    /**
      * The current {@link Selection}, representing the state of this paginator.
      */
     private final Selection selection;
@@ -32,7 +27,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      * @param sortedBy     Key of the column to initially sort by.
      * @param itemsPerPage Number of items per page to display.
      */
-    public Paginator(final String sortedBy, final int itemsPerPage) {
+    public Paginator(final String sortedBy, final Selection.PageSize itemsPerPage) {
         this.selection = new Selection(0, 0, itemsPerPage, sortedBy, true);
         update();
     }
@@ -137,7 +132,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      */
     public int determineLastPageIndex() {
         // User interaction: Add 1 for convenience (1-indexed)
-        return Math.max(1, (totalSize() - 1) / selection.getPageSize() + 1);
+        return Math.max(1, (totalSize() - 1) / selection.getPageSize().getSize() + 1);
     }
 
     /**
@@ -146,7 +141,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      * @return Whether the current page is the last page.
      */
     public boolean isLastPage() {
-        return selection.getTotalSize() <= (selection.getCurrentPage() + 1) * selection.getPageSize();
+        return selection.getTotalSize() <= (selection.getCurrentPage() + 1) * selection.getPageSize().getSize();
     }
 
     /**
@@ -197,8 +192,8 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      *
      * @return The possible page size values.
      */
-    public int[] pageSizeValues() {
-        return ITEMS_PER_PAGE;
+    public Selection.PageSize[] pageSizeValues() {
+        return Selection.PageSize.values();
     }
 
     /**
