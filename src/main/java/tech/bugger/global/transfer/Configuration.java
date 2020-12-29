@@ -70,9 +70,9 @@ public class Configuration implements Serializable {
      * @param configuration The configuration to clone.
      */
     public Configuration(final Configuration configuration) {
-        this(configuration.isGuestReading(), configuration.isClosedReportPosting(),
-                configuration.getUserEmailFormat(), configuration.getAllowedFileExtensions(),
-                configuration.getMaxAttachmentsPerPost(), configuration.getVotingWeightDefinition());
+        this(configuration.guestReading, configuration.closedReportPosting,
+             configuration.userEmailFormat, configuration.allowedFileExtensions,
+             configuration.maxAttachmentsPerPost, configuration.votingWeightDefinition);
     }
 
     /**
@@ -217,7 +217,7 @@ public class Configuration implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(guestReading, closedReportPosting, userEmailFormat, allowedFileExtensions,
-                maxAttachmentsPerPost, votingWeightDefinition);
+                            maxAttachmentsPerPost, votingWeightDefinition);
     }
 
     /**

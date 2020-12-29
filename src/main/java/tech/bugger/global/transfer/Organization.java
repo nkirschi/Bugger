@@ -62,8 +62,8 @@ public class Organization implements Serializable {
      * @param organization The organization to clone.
      */
     public Organization(final Organization organization) {
-        this(organization.getName(), organization.getLogo().clone(), organization.getTheme(),
-                organization.getImprint(), organization.getPrivacyPolicy());
+        this(organization.name, organization.logo.clone(), organization.theme,
+             organization.imprint, organization.privacyPolicy);
     }
 
     /**
