@@ -2,15 +2,15 @@ package tech.bugger.business.util;
 
 import org.commonmark.Extension;
 import org.commonmark.parser.Parser;
-import tech.bugger.global.util.Log;
 
 /**
  * Registrable extension for parsing custom Markdown reference syntax.
  */
-public class ReferenceExtension implements Parser.ParserExtension {
+public final class ReferenceExtension implements Parser.ParserExtension {
 
-    private static final Log log = Log.forClass(ReferenceExtension.class);
-
+    /**
+     * Only the builder may legitimately create an instance of this class.
+     */
     private ReferenceExtension() {
     }
 
@@ -27,7 +27,8 @@ public class ReferenceExtension implements Parser.ParserExtension {
      * {@inheritDoc}
      */
     @Override
-    public void extend(Parser.Builder parserBuilder) {
-
+    public void extend(final Parser.Builder parserBuilder) {
+        parserBuilder.postProcessor(new ReferencePostProcessor());
     }
+
 }

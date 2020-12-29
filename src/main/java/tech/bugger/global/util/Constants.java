@@ -5,7 +5,11 @@ package tech.bugger.global.util;
  */
 public final class Constants {
 
+    /**
+     * Prevents instantiation of this utility class.
+     */
     private Constants() {
+        throw new UnsupportedOperationException(); // for reflection abusers
     }
 
     /**
