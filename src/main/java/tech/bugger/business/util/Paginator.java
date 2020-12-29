@@ -179,9 +179,9 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     }
 
     /**
-     * Checks whether the currently fetched data is empty, i.e. contains no items.
+     * Checks whether the total base data is empty, i.e. contains no items.
      *
-     * @return Whether the currently fetched data is empty.
+     * @return Whether the total base data is empty.
      */
     public boolean isEmpty() {
         return selection.getTotalSize() == 0;
