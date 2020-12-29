@@ -57,6 +57,11 @@
                 <h:inputTextarea id="it_privacy-policy" value="#{adminBacker.organization.privacyPolicy}"/>
                 <h:panelGroup/>
                 <h:message for="it_privacy-policy"/>
+
+                <h:outputLabel id="o_support-info" for="it_support-info" value="#{labels.support_info}"/>
+                <h:inputTextarea id="it_support-info" value="#{adminBacker.organization.supportInfo}"/>
+                <h:panelGroup/>
+                <h:message for="it_support-info"/>
             </h:panelGrid>
             <h:commandButton value="#{labels.save}" action="#{adminBacker.saveOrganization}"/>
         </h:form>

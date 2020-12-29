@@ -89,8 +89,8 @@ public class SettingsDBGateway implements SettingsGateway {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 return new Organization(rs.getString("organization_name"), rs.getBytes("organization_logo"),
-                        rs.getString("organization_theme"), rs.getString("organization_privacy_policy"),
-                        rs.getString("organization_imprint"));
+                                        rs.getString("organization_theme"), rs.getString("organization_privacy_policy"),
+                                        rs.getString("organization_imprint"), rs.getString("organization_support_info"));
             } else {
                 throw new NotFoundException("Organization data not found in database.");
             }
@@ -106,9 +106,12 @@ public class SettingsDBGateway implements SettingsGateway {
     @Override
     public void setOrganization(final Organization organization) {
         try (PreparedStatement stmt = conn.prepareStatement("UPDATE system_settings "
-                + "SET organization_name = ?, organization_logo = ?, organization_theme = ?, "
-                + "organization_privacy_policy = ?, organization_imprint = ?"
-                + "WHERE id = 0;")) {
+                                                                    + "SET organization_name = ?, organization_logo ="
+                                                                    + " ?, organization_theme = ?, "
+                                                                    + "organization_privacy_policy = ?, "
+                                                                    + "organization_imprint = ?, "
+                                                                    + "organization_support_info = ? "
+                                                                    + "WHERE id = 0;")) {
 
             new StatementParametrizer(stmt)
                     .string(organization.getName())
@@ -116,6 +119,7 @@ public class SettingsDBGateway implements SettingsGateway {
                     .string(organization.getTheme())
                     .string(organization.getImprint())
                     .string(organization.getPrivacyPolicy())
+                    .string(organization.getSupportInfo())
                     .toStatement().executeUpdate();
         } catch (SQLException e) {
             log.error("Error while updating organization data.", e);
