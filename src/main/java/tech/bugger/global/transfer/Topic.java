@@ -2,16 +2,29 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * DTO representing a topic.
  */
 public class Topic implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 6600990552933685863L;
 
+    /**
+     * The unique ID of a topic.
+     */
     private int id;
+
+    /**
+     * The title.
+     */
     private String title;
+
+    /**
+     * The description.
+     */
     private String description;
 
     /**
@@ -21,7 +34,7 @@ public class Topic implements Serializable {
      * @param title       The topic title.
      * @param description The topic description.
      */
-    public Topic(int id, String title, String description) {
+    public Topic(final int id, final String title, final String description) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -41,7 +54,7 @@ public class Topic implements Serializable {
      *
      * @param id The topic ID to be set.
      */
-    public void setId(int id) {
+    public void setId(final int id) {
         this.id = id;
     }
 
@@ -59,7 +72,7 @@ public class Topic implements Serializable {
      *
      * @param title The topic title to be set.
      */
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -77,20 +90,26 @@ public class Topic implements Serializable {
      *
      * @param description The topic description to be set.
      */
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
     /**
      * Indicates whether some {@code other} topic is semantically equal to this topic.
      *
-     * @param other The object to compare this topic to.
+     * @param that The object to compare this topic to.
      * @return {@code true} iff {@code other} is a semantically equivalent topic.
      */
     @Override
-    public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+    public boolean equals(final Object that) {
+        if (this == that) {
+            return true;
+        }
+        if (!(that instanceof Topic)) {
+            return false;
+        }
+        Topic topic = (Topic) that;
+        return this.id == topic.id;
     }
 
     /**
@@ -101,8 +120,7 @@ public class Topic implements Serializable {
      */
     @Override
     public int hashCode() {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        return Objects.hash(id);
     }
 
     /**
@@ -112,8 +130,7 @@ public class Topic implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "Topic{" + "ID = " + id + ", title = " + title + "}";
     }
 
 }
