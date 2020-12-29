@@ -28,6 +28,11 @@ public class Configuration implements Serializable {
     private String userEmailFormat;
 
     /**
+     * Definition of user voting weights as comma-separated list.
+     */
+    private String votingWeightDefinition;
+
+    /**
      * Allowed extensions for uploaded files as comma-separated list.
      */
     private String allowedFileExtensions;
@@ -38,11 +43,6 @@ public class Configuration implements Serializable {
     private int maxAttachmentsPerPost;
 
     /**
-     * Definition of user voting weights as comma-separated list.
-     */
-    private String votingWeightDefinition;
-
-    /**
      * Constructs a new configuration data object from the specified parameters.
      *
      * @param guestReading           Whether guests have reading permissions.
@@ -50,8 +50,7 @@ public class Configuration implements Serializable {
      * @param userEmailFormat        The required format of email addresses.
      * @param allowedFileExtensions  The allowed file extensions as comma-separated list.
      * @param maxAttachmentsPerPost  The maximum allowed number of post attachments.
-     * @param votingWeightDefinition The definition of a user's voting weight as map giving the minimally required
-     *                               total
+     * @param votingWeightDefinition The definition of a user's voting weight as comma-separated list.
      */
     public Configuration(final boolean guestReading, final boolean closedReportPosting, final String userEmailFormat,
                          final String allowedFileExtensions, final int maxAttachmentsPerPost,
@@ -130,6 +129,26 @@ public class Configuration implements Serializable {
     }
 
     /**
+     * Returns the definition of a user's voting weight.
+     *
+     * @return The voting weight definition as map giving the minimally required total number of posts for a certain
+     *         voting power level.
+     */
+    public String getVotingWeightDefinition() {
+        return votingWeightDefinition;
+    }
+
+    /**
+     * Sets the definition of a user's voting weight.
+     *
+     * @param votingWeightDefinition The voting weight definition as map giving the minimally required total number of
+     *                               posts for a certain voting power level.
+     */
+    public void setVotingWeightDefinition(final String votingWeightDefinition) {
+        this.votingWeightDefinition = votingWeightDefinition;
+    }
+
+    /**
      * Returns the possible file extensions uploaded files may have.
      *
      * @return The allowed file extensions as comma-separated list.
@@ -163,26 +182,6 @@ public class Configuration implements Serializable {
      */
     public void setMaxAttachmentsPerPost(final int maxAttachmentsPerPost) {
         this.maxAttachmentsPerPost = maxAttachmentsPerPost;
-    }
-
-    /**
-     * Returns the definition of a user's voting weight.
-     *
-     * @return The voting weight definition as map giving the minimally required total number of posts for a certain
-     *         voting power level.
-     */
-    public String getVotingWeightDefinition() {
-        return votingWeightDefinition;
-    }
-
-    /**
-     * Sets the definition of a user's voting weight.
-     *
-     * @param votingWeightDefinition The voting weight definition as map giving the minimally required total number of
-     *                               posts for a certain voting power level.
-     */
-    public void setVotingWeightDefinition(final String votingWeightDefinition) {
-        this.votingWeightDefinition = votingWeightDefinition;
     }
 
     /**
