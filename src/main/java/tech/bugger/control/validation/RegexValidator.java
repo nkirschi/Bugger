@@ -24,8 +24,13 @@ public class RegexValidator implements Validator<String> {
      */
     private final ResourceBundle messagesBundle;
 
+    /**
+     * Constructs a new regex validator with the necessary dependencies.
+     *
+     * @param messagesBundle The resource bundle for feedback messages.
+     */
     @Inject
-    public RegexValidator(@RegistryKey("messages") ResourceBundle messagesBundle) {
+    public RegexValidator(@RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.messagesBundle = messagesBundle;
     }
 
