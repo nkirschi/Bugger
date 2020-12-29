@@ -12,13 +12,11 @@ import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
-import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
-import javax.servlet.http.Part;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -39,22 +37,17 @@ public class SettingsService {
     /**
      * Transaction manager used for creating transactions.
      */
-    private TransactionManager transactionManager;
+    private final TransactionManager transactionManager;
 
     /**
      * Feedback Event for user feedback.
      */
-    private Event<Feedback> feedbackEvent;
+    private final Event<Feedback> feedbackEvent;
 
     /**
      * Resource bundle for feedback messages.
      */
-    private ResourceBundle messagesBundle;
-
-    /**
-     * Reference to the current {@link ExternalContext}.
-     */
-    private ExternalContext ectx;
+    private final ResourceBundle messagesBundle;
 
     /**
      * Constructs a new settings service with the given dependencies.
@@ -62,15 +55,13 @@ public class SettingsService {
      * @param transactionManager The transaction manager to use for creating transactions.
      * @param feedbackEvent      The feedback event to use for user feedback.
      * @param messagesBundle     The resource bundle for feedback messages.
-     * @param ectx               The current {@link ExternalContext} of the application.
      */
     @Inject
     public SettingsService(final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
-                           final @RegistryKey("messages") ResourceBundle messagesBundle, final ExternalContext ectx) {
+                           final @RegistryKey("messages") ResourceBundle messagesBundle) {
         this.transactionManager = transactionManager;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;
-        this.ectx = ectx;
     }
 
     /**
@@ -148,37 +139,39 @@ public class SettingsService {
     }
 
     /**
-     * Discovers the available themes in the corresponding directory.
+     * Discovers all regular files non-recursively in the given directory.
      *
-     * @return The filenames of the available themes.
+     * @param path The path of the directory to discover files in.
+     * @return The filenames of the files in {@code path}.
      */
-    public List<String> discoverThemes() {
-        List<String> themes = Collections.emptyList();
-        try (Stream<Path> files = Files.list(Paths.get(ectx.getRealPath("/resources/design/themes")))) {
-            themes = files.filter(Files::isRegularFile)
-                          .map(p -> p.getFileName().toString())
-                          .collect(Collectors.toList());
+    public List<String> discoverFiles(final Path path) {
+        List<String> filenames = Collections.emptyList();
+        try (Stream<Path> files = Files.list(path)) {
+            filenames = files.filter(Files::isRegularFile)
+                             .map(p -> p.getFileName().toString())
+                             .collect(Collectors.toList());
         } catch (IOException e) {
             log.error("Could not discover available themes on file system.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("themes_discovery_error"), Feedback.Type.WARNING));
         }
-        return themes;
+        return filenames;
     }
 
     /**
-     * Converts the given logo to the internal format for further use.
+     * Reads the given upload to the internal format for further use.
      *
-     * @param upload The uploaded logo in {@link Part} format}.
-     * @return The converted logo as {@code byte[]} array.
+     * @param is The uploaded file as input stream.
+     * @return The fully read file as {@code byte[]} array or {@code null} iff reading failed.
      */
-    public byte[] convertLogo(final Part upload) {
+    public byte[] readFile(final InputStream is) {
+        byte[] bytes = null;
         try {
-            return upload.getInputStream().readAllBytes();
+            bytes = is.readAllBytes();
         } catch (IOException e) {
-            log.warning("Could not read uploaded logo.", e);
+            log.warning("Could not read uploaded file.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("logo_conversion_error"), Feedback.Type.ERROR));
-            return null;
         }
+        return bytes;
     }
 
 }
