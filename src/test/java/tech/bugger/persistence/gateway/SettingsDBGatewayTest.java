@@ -101,7 +101,7 @@ public class SettingsDBGatewayTest {
 
     @Test
     public void testSetOrganization() throws Exception {
-        Organization organization = new Organization("orga", new byte[0], "???", "jura", "gaudi");
+        Organization organization = new Organization("orga", new byte[0], "???", "jura", "gaudi", "supp");
         gateway.setOrganization(organization);
         assertEquals(organization, gateway.getOrganization());
     }

@@ -39,6 +39,11 @@ public class Organization implements Serializable {
     private String privacyPolicy;
 
     /**
+     * Organization support information.
+     */
+    private String supportInfo;
+
+    /**
      * Constructs a new organization from the specified parameters.
      *
      * @param name          The organization name.
@@ -46,14 +51,16 @@ public class Organization implements Serializable {
      * @param theme         The organization theme.
      * @param imprint       The organization imprint.
      * @param privacyPolicy The organization privacy policy.
+     * @param supportInfo   The organization support information.
      */
     public Organization(final String name, final byte[] logo, final String theme,
-                        final String imprint, final String privacyPolicy) {
+                        final String imprint, final String privacyPolicy, final String supportInfo) {
         this.name = name;
         this.logo = logo;
         this.theme = theme;
         this.imprint = imprint;
         this.privacyPolicy = privacyPolicy;
+        this.supportInfo = supportInfo;
     }
 
     /**
@@ -63,7 +70,7 @@ public class Organization implements Serializable {
      */
     public Organization(final Organization organization) {
         this(organization.name, organization.logo.clone(), organization.theme,
-             organization.imprint, organization.privacyPolicy);
+             organization.imprint, organization.privacyPolicy, organization.supportInfo);
     }
 
     /**
@@ -157,6 +164,24 @@ public class Organization implements Serializable {
     }
 
     /**
+     * Returns the support contact information of the organization.
+     *
+     * @return The organization support information.
+     */
+    public String getSupportInfo() {
+        return supportInfo;
+    }
+
+    /**
+     * Sets the support contact information of the organization.
+     *
+     * @param supportInfo The organization support information to be set.
+     */
+    public void setSupportInfo(final String supportInfo) {
+        this.supportInfo = supportInfo;
+    }
+
+    /**
      * Indicates whether some {@code other} organization is semantically equal to this organization.
      *
      * @param other The object to compare this organization to.
@@ -175,7 +200,8 @@ public class Organization implements Serializable {
                 && Arrays.equals(logo, that.logo)
                 && theme.equals(that.theme)
                 && imprint.equals(that.imprint)
-                && privacyPolicy.equals(that.privacyPolicy);
+                && privacyPolicy.equals(that.privacyPolicy)
+                && supportInfo.equals(that.supportInfo);
     }
 
     /**
@@ -186,7 +212,7 @@ public class Organization implements Serializable {
      */
     @Override
     public int hashCode() {
-        int result = Objects.hash(name, theme, imprint, privacyPolicy);
+        int result = Objects.hash(name, theme, imprint, privacyPolicy, supportInfo);
         result = 31 * result + Arrays.hashCode(logo);
         return result;
     }

@@ -56,7 +56,7 @@ public class SettingsServiceTest {
     public void setUp() {
         service = new SettingsService(transactionManager, feedbackEvent, ResourceBundleMocker.mock(""));
         testConfiguration = new Configuration(true, false, "abc", ".x,.y,.z", 42, "0,1,2");
-        testOrganization = new Organization("orga", new byte[0], "???", "jura", "gaudi");
+        testOrganization = new Organization("orga", new byte[0], "???", "jura", "gaudi", "supp");
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(settingsGateway).when(tx).newSettingsGateway();
     }
