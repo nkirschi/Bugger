@@ -153,4 +153,12 @@ public interface UserGateway {
      */
     boolean isEmailAssigned(String emailAddress);
 
+    /**
+     * Checks whether the given {@code username} is already assigned to any user.
+     *
+     * @param username The username to check.
+     * @return Whether the given {@code username} is already assigned to any user.
+     */
+    boolean isUsernameAssigned(String username);
+
 }

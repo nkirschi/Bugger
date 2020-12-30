@@ -61,7 +61,7 @@ public class EmailValidator implements Validator<String> {
     public void validate(final FacesContext fctx, final UIComponent component, final String email) {
         Pattern pattern = Pattern.compile(applicationSettings.getConfiguration().getUserEmailFormat());
         if (!pattern.matcher(email).matches()) {
-            FacesMessage message = new FacesMessage(messagesBundle.getString("email_validator.email_format_wrong"));
+            FacesMessage message = new FacesMessage(messagesBundle.getString("email_validator.format_wrong"));
             throw new ValidatorException(message);
         } else if (profileService.isEmailAssigned(email)) {
             FacesMessage message = new FacesMessage(messagesBundle.getString("email_validator.already_exists"));

@@ -174,6 +174,27 @@ public class ProfileService {
         return assigned;
     }
 
+    /**
+     * Checks whether the given {@code username} is already assigned to any user.
+     *
+     * @param username The username to check.
+     * @return Whether the given {@code username} is already assigned to any user.
+     */
+    public boolean isUsernameAssigned(final String username) {
+        boolean assigned = false;
+
+        Transaction tx = transactionManager.begin();
+        try (tx) {
+            assigned = tx.newUserGateway().isUsernameAssigned(username);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while searching for username.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return assigned;
+    }
+
     private byte[] generateThumbnail(final byte[] image) {
         return null;
     }

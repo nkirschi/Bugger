@@ -85,8 +85,8 @@ public class UserDBGateway implements UserGateway {
                 throw new NotFoundException("No user could be found in the database.");
             }
         } catch (SQLException e) {
-            log.error("Error while searching for user", e);
-            throw new StoreException("Error while searching for user", e);
+            log.error("Error while searching for user by ID.", e);
+            throw new StoreException("Error while searching for user by ID.", e);
         }
     }
 
@@ -281,8 +281,23 @@ public class UserDBGateway implements UserGateway {
             ResultSet rs = stmt.executeQuery();
             return rs.next();
         } catch (SQLException e) {
-            log.error("Error while searching for user", e);
-            throw new StoreException("Error while searching for user", e);
+            log.error("Error while searching for user by e-mail.", e);
+            throw new StoreException("Error while searching for user by e-mail.", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isUsernameAssigned(final String username) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE username = ?")) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            log.error("Error while searching for user by username.", e);
+            throw new StoreException("Error while searching for user by username.", e);
         }
     }
 
