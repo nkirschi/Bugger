@@ -29,18 +29,38 @@ public class ProfileService {
      */
     private static final Log log = Log.forClass(ProfileService.class);
 
-    private Event<Feedback> feedback;
+    /**
+     * Feedback event for user feedback.
+     */
+    private final Event<Feedback> feedback;
 
-    private TransactionManager transactionManager;
+    /**
+     * The transaction manager used for creating transactions.
+     */
+    private final TransactionManager transactionManager;
 
-    private ApplicationSettings applicationSettings;
+    /**
+     * The application settings holding the current settings information.
+     */
+    private final ApplicationSettings applicationSettings;
 
-    @RegistryKey("messages")
-    private ResourceBundle messages;
+    /**
+     * The resource bundle for feedback messages.
+     */
+    private final ResourceBundle messages;
 
+    /**
+     * Constructs a new profile service with the given dependencies.
+     *
+     * @param feedback The feedback event to be used for user feedback.
+     * @param transactionManager The transaction manager to be used for creating transactions.
+     * @param applicationSettings The current application settings.
+     * @param messages The resource bundle to look up feedback messages.
+     */
     @Inject
     public ProfileService(final Event<Feedback> feedback, final TransactionManager transactionManager,
-                          final ApplicationSettings applicationSettings, final ResourceBundle messages) {
+                          final ApplicationSettings applicationSettings,
+                          final @RegistryKey("messages") ResourceBundle messages) {
         this.feedback = feedback;
         this.transactionManager = transactionManager;
         this.applicationSettings = applicationSettings;
@@ -53,16 +73,16 @@ public class ProfileService {
      * @param id The ID of the user to return.
      * @return The user, if they exist, {@code null} if no user with that ID exists.
      */
-    public User getUser(int id) {
+    public User getUser(final int id) {
         User user = null;
-        try(Transaction transaction = transactionManager.begin()) {
+        try (Transaction transaction = transactionManager.begin()) {
             user = transaction.newUserGateway().getUserByID(id);
             transaction.commit();
         } catch (NotFoundException e) {
-            log.error("The user could not be found.", e);
+            log.error("The user with id " + id + " could not be found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
-            log.error("Error while loading the user.", e);
+            log.error("Error while loading the user with id " + id, e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return user;
@@ -73,7 +93,7 @@ public class ProfileService {
      *
      * @param user The user to be created.
      */
-    public void createUser(User user) {
+    public void createUser(final User user) {
     }
 
     /**
@@ -81,7 +101,7 @@ public class ProfileService {
      *
      * @param user The user to be deleted.
      */
-    public void deleteUser(User user) {
+    public void deleteUser(final User user) {
 
     }
 
@@ -90,15 +110,15 @@ public class ProfileService {
      *
      * @param user The user to update.
      */
-    public void updateUser(User user) {
-        try(Transaction transaction = transactionManager.begin()) {
+    public void updateUser(final User user) {
+        try (Transaction transaction = transactionManager.begin()) {
             transaction.newUserGateway().updateUser(user);
             transaction.commit();
         } catch (NotFoundException e) {
-            log.error("The user could not be found.", e);
+            log.error("The user with id " + user.getId() + "could not be found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
-            log.error("Error while updating the user.", e);
+            log.error("Error while updating the user with id " + user.getId(), e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
     }
@@ -109,7 +129,7 @@ public class ProfileService {
      * @param subscriber The user subscribed to the topic.
      * @param topic      The topic of which the subscription to is to be removed.
      */
-    public void deleteTopicSubscription(User subscriber, Topic topic) {
+    public void deleteTopicSubscription(final User subscriber, final Topic topic) {
     }
 
     /**
@@ -118,7 +138,7 @@ public class ProfileService {
      * @param subscriber The user subscribed to the report.
      * @param report     The report of which the subscription to is to be removed.
      */
-    public void deleteReportSubscription(User subscriber, Report report) {
+    public void deleteReportSubscription(final User subscriber, final Report report) {
 
     }
 
@@ -128,7 +148,7 @@ public class ProfileService {
      * @param subscriber The user subscribed to the other user.
      * @param user       The user of which the subscription to is to be removed.
      */
-    public void deleteUserSubscription(User subscriber, User user) {
+    public void deleteUserSubscription(final User subscriber, final User user) {
 
     }
 
@@ -137,7 +157,7 @@ public class ProfileService {
      *
      * @param user The user whose topic subscriptions are to be deleted.
      */
-    public void deleteAllTopicSubscriptions(User user) {
+    public void deleteAllTopicSubscriptions(final User user) {
 
     }
 
@@ -146,7 +166,7 @@ public class ProfileService {
      *
      * @param user The user whose report subscriptions are to be deleted.
      */
-    public void deleteAllReportSubscriptions(User user) {
+    public void deleteAllReportSubscriptions(final User user) {
 
     }
 
@@ -155,7 +175,7 @@ public class ProfileService {
      *
      * @param user The user whose user subscriptions are to be deleted.
      */
-    public void deleteAllUserSubscriptions(User user) {
+    public void deleteAllUserSubscriptions(final User user) {
 
     }
 
@@ -165,7 +185,7 @@ public class ProfileService {
      * @param subscriber   The user who will subscribe to the other user.
      * @param subscribedTo The user who will receive a subscription.
      */
-    public void subscribeToUser(User subscriber, User subscribedTo) {
+    public void subscribeToUser(final User subscriber, final User subscribedTo) {
     }
 
     /**
@@ -173,7 +193,7 @@ public class ProfileService {
      *
      * @param user The user with a new avatar.
      */
-    public void updateAvatar(User user) {
+    public void updateAvatar(final User user) {
     }
 
     /**
@@ -182,11 +202,17 @@ public class ProfileService {
      * @param user The user in question.
      * @return The voting weight as an {@code int}.
      */
-    public int getVotingWeightForUser(User user) {
+    public int getVotingWeightForUser(final User user) {
         int votingWeight = 0;
-        try(Transaction transaction = transactionManager.begin()) {
-            int numPosts = transaction.newUserGateway().getNumberOfPosts(user);
-            transaction.commit();
+        if (user.getForcedVotingWeight() != null) {
+            return user.getForcedVotingWeight();
+        }
+        int numPosts = getNumberOfPostsForUser(user);
+        if (numPosts == 0) {
+            log.error("No voting weight could be calculated for the user with id " + user.getId()
+                    + "as the number of posts could not be calculated");
+            return votingWeight;
+        } else {
             String[] votingDef = applicationSettings.getConfiguration().getVotingWeightDefinition().split(",");
             try {
                 votingWeight = calculateVotingWeight(numPosts, votingDef);
@@ -194,12 +220,6 @@ public class ProfileService {
                 log.error("The voting weight definition could not be parsed to a number");
                 feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
             }
-        } catch (NotFoundException e) {
-            log.error("The user could not be found.", e);
-            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
-        } catch (TransactionException e) {
-            log.error("Error while calculating the user's voting weight.", e);
-            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return votingWeight;
     }
@@ -211,7 +231,7 @@ public class ProfileService {
      * @return The calculated voting weight.
      * @throws NumberFormatException The voting weight definition could not be parsed to a number.
      */
-    private int calculateVotingWeight(int numPosts, String[] votingWeightDef) throws NumberFormatException {
+    private int calculateVotingWeight(final int numPosts, final String[] votingWeightDef) throws NumberFormatException {
         for (int i = 0; i < votingWeightDef.length; i++) {
             int boundary = Integer.parseInt(votingWeightDef[i]);
             if (numPosts < boundary) {
@@ -227,16 +247,17 @@ public class ProfileService {
      * @param user The user in question.
      * @return The number of posts as an {@code int}.
      */
-    public int getNumberOfPostsForUser(User user) {
+    public int getNumberOfPostsForUser(final User user) {
         int numPosts = 0;
-        try(Transaction transaction = transactionManager.begin()) {
+        try (Transaction transaction = transactionManager.begin()) {
             numPosts = transaction.newUserGateway().getNumberOfPosts(user);
             transaction.commit();
-        } catch (NotFoundException e) {
-            log.error("The user could not be found.", e);
-            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+            if (numPosts == 0) {
+                log.error("The number of posts could not be calculated for the user with id " + user.getId());
+                feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+            }
         } catch (TransactionException e) {
-            log.error("Error while calculating the user's voting weight.", e);
+            log.error("Error while loading the number of posts for the user with id " + user.getId(), e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return numPosts;
@@ -246,73 +267,56 @@ public class ProfileService {
      * Promotes the user whose profile is being viewed to an administrator or demotes the user whose profile is being
      * viewed if they are an administrator. However, if they are the last remaining administrator, a feedback event is
      * fired instead.
+     *
      * @param user The user to be promoted/demoted.
      */
-    public void toggleAdmin(User user) {
+    public void toggleAdmin(final User user) {
         if (user.isAdministrator()) {
             try (Transaction transaction = transactionManager.begin()) {
                 int admins = transaction.newUserGateway().getNumberOfAdmins();
                 transaction.commit();
-                transaction.close();
-                if (admins > 1) {
-                    demoteAdmin(user);
-                } else {
+                if (admins == 0) {
+                    log.error("No administrators could be found in the database");
+                    throw new InternalError("No administrators could be found in the database");
+                } else if (admins == 1) {
                     log.error("The last administrator cannot be deleted");
                     feedback.fire(new Feedback(messages.getString("delete_last_admin"), Feedback.Type.ERROR));
+                } else {
+                    changeAdminStatus(user, false);
                 }
-            } catch (NotFoundException e) {
-                log.error("No administrators could be found.", e);
-                feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
             } catch (TransactionException e) {
                 log.error("Error while counting the number of administrators.", e);
                 feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
             }
         } else {
-            promoteAdmin(user);
+            changeAdminStatus(user, true);
         }
     }
 
     /**
-     * Promotes the given user to an administrator.
+     * Changes the given user's administrator status based on the given boolean.
+     *
      * @param user The user to be promoted.
+     * @param admin The administration status to change to.
      */
-    private void promoteAdmin(User user) {
-        try(Transaction transaction = transactionManager.begin()) {
-            user.setAdministrator(true);
+    private void changeAdminStatus(final User user, final boolean admin) {
+        try (Transaction transaction = transactionManager.begin()) {
+            user.setAdministrator(admin);
             transaction.newUserGateway().updateUser(user);
             transaction.commit();
         } catch (NotFoundException e) {
-            user.setAdministrator(false);
-            log.error("The user could not be found.", e);
+            user.setAdministrator(!admin);
+            log.error("The user with id " + user.getId() + "could not be found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
-            user.setAdministrator(false);
-            log.error("Error while updating the user.", e);
+            user.setAdministrator(!admin);
+            log.error("Error while updating the user with id " + user.getId(), e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
     }
 
-    /**
-     * Deprives the given user of his administrator status.
-     * @param user The user to be demoted.
-     */
-    private void demoteAdmin(User user) {
-        try(Transaction transaction = transactionManager.begin()) {
-            user.setAdministrator(false);
-            transaction.newUserGateway().updateUser(user);
-            transaction.commit();
-        } catch (NotFoundException e) {
-            user.setAdministrator(true);
-            log.error("The user could not be found.", e);
-            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
-        } catch (TransactionException e) {
-            user.setAdministrator(true);
-            log.error("Error while updating the user.", e);
-            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
-        }
-    }
-
-    private byte[] generateThumbnail(byte[] image) {
+    private byte[] generateThumbnail(final byte[] image) {
         return null;
     }
+
 }

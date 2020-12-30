@@ -31,25 +31,140 @@ public class User implements Serializable {
         MINIMAL
     }
 
+    /**
+     * The user's unique id.
+     */
     private int id;
 
+    /**
+     * The user's username.
+     */
     private String username;
+
+    /**
+     * The user's hashed password.
+     */
     private String passwordHash;
+
+    /**
+     * The salt used for hashing.
+     */
     private String passwordSalt;
+
+    /**
+     * The used hashing algorithm.
+     */
     private String hashingAlgorithm;
 
+    /**
+     * The user's email address.
+     */
     private String emailAddress;
+
+    /**
+     * The user's first name.
+     */
     private String firstName;
+
+    /**
+     * The user's last name.
+     */
     private String lastName;
+
+    /**
+     * The user's avatar.
+     */
     private Lazy<byte[]> avatar;
+
+    /**
+     * The user's avatar thumbnail.
+     */
     private byte[] avatarThumbnail;
+
+    /**
+     * The user's biography.
+     */
     private String biography;
+
+    /**
+     * The user's preferred language.
+     */
     private Language preferredLanguage;
+
+    /**
+     * The user's profile visibility limiting what normal users can see on the user's profile page.
+     */
     private ProfileVisibility profileVisibility;
 
+    /**
+     * The date of registration.
+     */
     private ZonedDateTime registrationDate;
+
+    /**
+     * The overwritten voting weight set by an administrator.
+     */
     private Integer forcedVotingWeight;
+
+    /**
+     * The user's administrator status.
+     */
     private boolean administrator;
+
+    /**
+     * Constructs a new User with the given parameters.
+     *
+     * @param id The user's id.
+     * @param username The username.
+     * @param passwordHash The hashed password.
+     * @param passwordSalt The salt used for hashing.
+     * @param hashingAlgorithm The hashing algorithm.
+     * @param emailAddress The user's email address.
+     * @param firstName The user's first name.
+     * @param lastName The user's last name.
+     * @param avatar The user's avatar.
+     * @param avatarThumbnail The avatar thumbnail.
+     * @param biography The user's biography.
+     * @param preferredLanguage The user's preferred language.
+     * @param profileVisibility The user's profile visibility.
+     * @param registrationDate The user's registration date.
+     * @param forcedVotingWeight The overwritten voting weight.
+     * @param administrator The user's administrator status.
+     */
+    public User(final int id, final String username, final String passwordHash, final String passwordSalt,
+                final String hashingAlgorithm, final String emailAddress, final String firstName, final String lastName,
+                final Lazy<byte[]> avatar, final byte[] avatarThumbnail, final String biography,
+                final Language preferredLanguage, final ProfileVisibility profileVisibility,
+                final ZonedDateTime registrationDate, final Integer forcedVotingWeight, final boolean administrator) {
+        this.id = id;
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.passwordSalt = passwordSalt;
+        this.hashingAlgorithm = hashingAlgorithm;
+        this.emailAddress = emailAddress;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.avatar = avatar;
+        this.avatarThumbnail = avatarThumbnail;
+        this.biography = biography;
+        this.preferredLanguage = preferredLanguage;
+        this.profileVisibility = profileVisibility;
+        this.registrationDate = registrationDate;
+        this.forcedVotingWeight = forcedVotingWeight;
+        this.administrator = administrator;
+    }
+
+    /**
+     * Constructs a new user from the given user.
+     *
+     * @param user The user to clone.
+     */
+    public User(final User user) {
+        this(user.id, user.username, user.passwordHash, user.passwordSalt, user.hashingAlgorithm, user.emailAddress,
+                user.firstName, user.lastName, user.avatar, user.avatarThumbnail, user.biography,
+                user.preferredLanguage, user.profileVisibility, user.registrationDate, user.forcedVotingWeight,
+                user.administrator);
+    }
 
     /**
      * Returns the ID of this user.
@@ -65,7 +180,7 @@ public class User implements Serializable {
      *
      * @param id The user ID to be set.
      */
-    public void setId(int id) {
+    public void setId(final int id) {
         this.id = id;
     }
 
@@ -83,7 +198,7 @@ public class User implements Serializable {
      *
      * @param username The username to be set.
      */
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
@@ -101,7 +216,7 @@ public class User implements Serializable {
      *
      * @param passwordHash The user password hash to be set.
      */
-    public void setPasswordHash(String passwordHash) {
+    public void setPasswordHash(final String passwordHash) {
         this.passwordHash = passwordHash;
     }
 
@@ -119,7 +234,7 @@ public class User implements Serializable {
      *
      * @param passwordSalt The user password salt to be set.
      */
-    public void setPasswordSalt(String passwordSalt) {
+    public void setPasswordSalt(final String passwordSalt) {
         this.passwordSalt = passwordSalt;
     }
 
@@ -137,7 +252,7 @@ public class User implements Serializable {
      *
      * @param hashingAlgorithm The user password hashing algorithm to be set.
      */
-    public void setHashingAlgorithm(String hashingAlgorithm) {
+    public void setHashingAlgorithm(final String hashingAlgorithm) {
         this.hashingAlgorithm = hashingAlgorithm;
     }
 
@@ -155,7 +270,7 @@ public class User implements Serializable {
      *
      * @param emailAddress The user e-mail address to be set.
      */
-    public void setEmailAddress(String emailAddress) {
+    public void setEmailAddress(final String emailAddress) {
         this.emailAddress = emailAddress;
     }
 
@@ -173,7 +288,7 @@ public class User implements Serializable {
      *
      * @param firstName The user's first name to be set.
      */
-    public void setFirstName(String firstName) {
+    public void setFirstName(final String firstName) {
         this.firstName = firstName;
     }
 
@@ -191,7 +306,7 @@ public class User implements Serializable {
      *
      * @param lastName The user's last name to be set.
      */
-    public void setLastName(String lastName) {
+    public void setLastName(final String lastName) {
         this.lastName = lastName;
     }
 
@@ -209,7 +324,7 @@ public class User implements Serializable {
      *
      * @param avatar The user's avatar to be set.
      */
-    public void setAvatar(Lazy<byte[]> avatar) {
+    public void setAvatar(final Lazy<byte[]> avatar) {
         this.avatar = avatar;
     }
 
@@ -227,7 +342,7 @@ public class User implements Serializable {
      *
      * @param avatarThumbnail The user's avatar thumbnail to be set.
      */
-    public void setAvatarThumbnail(byte[] avatarThumbnail) {
+    public void setAvatarThumbnail(final byte[] avatarThumbnail) {
         this.avatarThumbnail = avatarThumbnail;
     }
 
@@ -245,7 +360,7 @@ public class User implements Serializable {
      *
      * @param biography The user's biography to be set.
      */
-    public void setBiography(String biography) {
+    public void setBiography(final String biography) {
         this.biography = biography;
     }
 
@@ -263,7 +378,7 @@ public class User implements Serializable {
      *
      * @param preferredLanguage The user's preferred language to be set.
      */
-    public void setPreferredLanguage(Language preferredLanguage) {
+    public void setPreferredLanguage(final Language preferredLanguage) {
         this.preferredLanguage = preferredLanguage;
     }
 
@@ -281,7 +396,7 @@ public class User implements Serializable {
      *
      * @param profileVisibility The user's profile visibility to be set.
      */
-    public void setProfileVisibility(ProfileVisibility profileVisibility) {
+    public void setProfileVisibility(final ProfileVisibility profileVisibility) {
         this.profileVisibility = profileVisibility;
     }
 
@@ -299,7 +414,7 @@ public class User implements Serializable {
      *
      * @param registrationDate The user's registration date to be set.
      */
-    public void setRegistrationDate(ZonedDateTime registrationDate) {
+    public void setRegistrationDate(final ZonedDateTime registrationDate) {
         this.registrationDate = registrationDate;
     }
 
@@ -317,7 +432,7 @@ public class User implements Serializable {
      *
      * @param forcedVotingWeight The forced voting weight to be set.
      */
-    public void setForcedVotingWeight(Integer forcedVotingWeight) {
+    public void setForcedVotingWeight(final Integer forcedVotingWeight) {
         this.forcedVotingWeight = forcedVotingWeight;
     }
 
@@ -335,7 +450,7 @@ public class User implements Serializable {
      *
      * @param administrator This user's administrator status to be set.
      */
-    public void setAdministrator(boolean administrator) {
+    public void setAdministrator(final boolean administrator) {
         this.administrator = administrator;
     }
 
@@ -346,11 +461,11 @@ public class User implements Serializable {
      * @return {@code true} iff {@code other} is a semantically equivalent user.
      */
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(final Object other) {
         if (this == other) {
             return true;
         }
-        if ((other == null) || (getClass() != other.getClass())) {
+        if (!(other instanceof User)) {
             return false;
         }
         User user = (User) other;
@@ -358,7 +473,8 @@ public class User implements Serializable {
                 && (passwordHash.equals(user.passwordHash)) && (passwordSalt.equals(user.passwordSalt))
                 && (hashingAlgorithm.equals(user.hashingAlgorithm)) && (emailAddress.equals(user.emailAddress))
                 && (firstName.equals(user.firstName)) && (lastName.equals(user.lastName))
-                && (Objects.equals(avatar, user.avatar)) && (Arrays.equals(avatarThumbnail, user.avatarThumbnail))
+                && (Arrays.equals(avatar.get(), user.avatar.get()))
+                && (Arrays.equals(avatarThumbnail, user.avatarThumbnail))
                 && (Objects.equals(biography, user.biography)) && (preferredLanguage == user.preferredLanguage)
                 && (profileVisibility == user.profileVisibility) && (registrationDate.equals(user.registrationDate))
                 && (Objects.equals(forcedVotingWeight, user.forcedVotingWeight));
@@ -405,4 +521,5 @@ public class User implements Serializable {
                 + ", administrator=" + administrator
                 + '}';
     }
+
 }

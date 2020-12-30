@@ -108,6 +108,12 @@ public class UserDBGatewayTest {
         }
     }
 
+    private void deleteAllUsers() throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("DELETE FROM \"user\";");
+        }
+    }
+
     @Test
     public void testGetNumberOfAdmins() throws NotFoundException {
         //Two inserted admins plus default admin.
@@ -116,12 +122,8 @@ public class UserDBGatewayTest {
 
     @Test
     public void testGetNumberOfAdminsNoAdmins() throws SQLException {
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute("DELETE FROM \"user\";");
-            assertThrows(NotFoundException.class,
-                    () -> gateway.getNumberOfAdmins()
-            );
-        }
+        deleteAllUsers();
+        assertEquals(0, gateway.getNumberOfAdmins());
     }
 
     @Test
@@ -173,6 +175,13 @@ public class UserDBGatewayTest {
     }
 
     @Test
+    public void testUpdateUserInternalError() {
+        assertThrows(InternalError.class,
+                () -> gateway.updateUser(admin1)
+        );
+    }
+
+    @Test
     public void testUpdateUserDatabaseError() throws SQLException {
         Connection connSpy = spy(conn);
         doThrow(SQLException.class).when(connSpy).prepareStatement(any());
@@ -187,11 +196,9 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testGetNumberOfPostsNotFound() {
+    public void testGetNumberOfPostNoEntries() {
         user.setId(2222);
-        assertThrows(NotFoundException.class,
-                () -> gateway.getNumberOfPosts(user)
-        );
+        assertEquals(0, gateway.getNumberOfPosts(user));
     }
 
     @Test

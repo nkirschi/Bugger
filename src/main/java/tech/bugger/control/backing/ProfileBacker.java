@@ -2,7 +2,6 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
@@ -10,8 +9,6 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -34,54 +31,82 @@ public class ProfileBacker implements Serializable {
     @Serial
     private static final long serialVersionUID = -4606230292807293380L;
 
+    /**
+     * The id of the profile owner.
+     */
     private int userID;
+
+    /**
+     * The profile owner's user information.
+     */
     private User user;
+
+    /**
+     * The password entered to confirm changes.
+     */
     private String password;
+
+    /**
+     * The profile owner's topic subscriptions.
+     */
     private Paginator<Topic> topicSubscriptions;
+
+    /**
+     * The profile owner's report subscriptions.
+     */
     private Paginator<Report> reportSubscriptions;
+
+    /**
+     * The profile owner's user subscriptions.
+     */
     private Paginator<User> userSubscriptions;
+
+    /**
+     * The profile owner's moderated topics.
+     */
     private Paginator<Topic> moderatedTopics;
 
+    /**
+     * The boolean determining if the promote/demote popup is to be rendered.
+     */
     private boolean displayPromoteDemoteAdminDialog;
+
+    /**
+     * The boolean determining whether the popup for deleting all topic subscriptions is to be rendered.
+     */
     private boolean displayDeleteAllTopicSubscriptionsDialog;
+
+    /**
+     * The boolean determining whether the popup for deleting all report subscriptions is to be rendered.
+     */
     private boolean displayDeleteAllReportSubscriptionsDialog;
+
+    /**
+     * The boolean determining whether the popup for deleting all user subscriptions is to be rendered.
+     */
     private boolean displayDeleteAllUserSubscriptionsDialog;
 
     /**
      * The current user session.
      */
+    @Inject
     private UserSession session;
 
     /**
      * The profile service providing the business logic.
      */
-    private transient ProfileService profileService;
-
     @Inject
-    public ProfileBacker(final UserSession session, final ProfileService profileService) {
-        this.session = session;
-        this.profileService = profileService;
-    }
+    private transient ProfileService profileService;
 
     /**
      * Initializes the profile page. Checks whether this is the user's own profile page.
      */
     @PostConstruct
-    private void init() {
+    void init() {
         // The initialization of the subscriptions will be implemented in the subscriptions feature.
         user = profileService.getUser(userID);
         closeDialogs();
     }
-
-    /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
-     *
-     * @param feedback The feedback with details on what to display.
-     */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
-
-    }
-
 
     /**
      * Opens the administrator promotion/demotion dialog.
@@ -175,7 +200,7 @@ public class ProfileBacker implements Serializable {
      * @param topic The topic in question.
      * @return The timestamp of the last action as a {@code ZonedDateTime}.
      */
-    public ZonedDateTime lastChanged(Topic topic) {
+    public ZonedDateTime lastChanged(final Topic topic) {
         return null;
     }
 
@@ -186,7 +211,7 @@ public class ProfileBacker implements Serializable {
      * @param report The report in question.
      * @return The timestamp of the last action as a {@code ZonedDateTime}.
      */
-    public ZonedDateTime lastChanged(Report report) {
+    public ZonedDateTime lastChanged(final Report report) {
         return null;
     }
 
@@ -215,7 +240,7 @@ public class ProfileBacker implements Serializable {
      *
      * @param topic The topic of which the subscription to should be removed.
      */
-    public void deleteTopicSubscription(Topic topic) {
+    public void deleteTopicSubscription(final Topic topic) {
 
     }
 
@@ -224,7 +249,7 @@ public class ProfileBacker implements Serializable {
      *
      * @param report The report of which the subscription to should be removed.
      */
-    public void deleteReportSubscription(Report report) {
+    public void deleteReportSubscription(final Report report) {
 
     }
 
@@ -233,7 +258,7 @@ public class ProfileBacker implements Serializable {
      *
      * @param subscribee The user of which the subscription to should be removed.
      */
-    public void deleteUserSubscription(User subscribee) {
+    public void deleteUserSubscription(final User subscribee) {
 
     }
 
@@ -294,7 +319,7 @@ public class ProfileBacker implements Serializable {
     /**
      * @param userID The userID to set.
      */
-    public void setUserID(int userID) {
+    public void setUserID(final int userID) {
         this.userID = userID;
     }
 
@@ -308,7 +333,7 @@ public class ProfileBacker implements Serializable {
     /**
      * @param user The user to set.
      */
-    public void setUser(User user) {
+    public void setUser(final User user) {
         this.user = user;
     }
 
@@ -357,15 +382,8 @@ public class ProfileBacker implements Serializable {
     /**
      * @param password The password to set.
      */
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
-    }
-
-    /**
-     * @return The session
-     */
-    public UserSession getSession() {
-        return session;
     }
 
     /**

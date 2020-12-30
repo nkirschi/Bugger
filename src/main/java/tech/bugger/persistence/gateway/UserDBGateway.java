@@ -56,18 +56,13 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfAdmins() throws NotFoundException {
+    public int getNumberOfAdmins() {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(u.id) AS num_admins FROM \"user\" AS u "
                 + "WHERE u.is_admin = true;")) {
             ResultSet resultSet = stmt.executeQuery();
-            stmt.close();
             int numAdmins = 0;
             if (resultSet.next()) {
                 numAdmins = resultSet.getInt("num_admins");
-            }
-            if (numAdmins == 0) {
-                log.error("No administrators could be found in the database");
-                throw new NotFoundException("No administrators could be found in the database.");
             }
             return numAdmins;
         } catch (SQLException e) {
@@ -85,7 +80,6 @@ public class UserDBGateway implements UserGateway {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(id)
                     .toStatement().executeQuery();
-            stmt.close();
             if (rs.next()) {
                 return new User(rs.getInt("id"), rs.getString("username"),
                         rs.getString("password_hash"), rs.getString("password_salt"),
@@ -96,14 +90,14 @@ public class UserDBGateway implements UserGateway {
                         Language.valueOf(rs.getString("preferred_language").toUpperCase()),
                         User.ProfileVisibility.valueOf(rs.getString("profile_visibility").toUpperCase()),
                         rs.getTimestamp("registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
-                        (Integer) rs.getObject("forced_voting_weight"), rs.getBoolean("is_admin"));
+                        rs.getObject("forced_voting_weight", Integer.class), rs.getBoolean("is_admin"));
             } else {
-                log.error("No user could be found in the database");
-                throw new NotFoundException("No user could be found in the database.");
+                log.error("No user with id " + id + " could be found in the database");
+                throw new NotFoundException("No user with id " + id + " could be found in the database.");
             }
         } catch (SQLException e) {
-            log.error("Error while searching for user", e);
-            throw new StoreException("Error while searching for user", e);
+            log.error("Error while searching for user with id " + id, e);
+            throw new StoreException("Error while searching for user with id " + id, e);
         }
     }
 
@@ -149,13 +143,17 @@ public class UserDBGateway implements UserGateway {
     @Override
     public void updateUser(final User user) throws NotFoundException {
         Lazy<byte[]> avatar = user.getAvatar();
+
+        if (avatar == null) {
+            throw new InternalError("The user's avatar should not be null!");
+        }
+
         try (PreparedStatement stmt = conn.prepareStatement("UPDATE \"user\" SET "
                 + "username = ?, password_hash = ?, password_salt = ?, hashing_algorithm = ?, "
                 + "email_address = ?, first_name = ?, last_name = ?, avatar_thumbnail = ?, "
                 + "biography = ?, preferred_language = ?, profile_visibility = ?, "
-                + "forced_voting_weight = ?, is_admin = ? " + (avatar.isPresent() ? ", avatar = ? " : "")
-                + "WHERE id = ?;")) {
-            StatementParametrizer pmt = new StatementParametrizer(stmt)
+                + "forced_voting_weight = ?, is_admin = ?, avatar = ? WHERE id = ?;")) {
+            int modified = new StatementParametrizer(stmt)
                     .string(user.getUsername())
                     .string(user.getPasswordHash())
                     .string(user.getPasswordSalt())
@@ -168,22 +166,18 @@ public class UserDBGateway implements UserGateway {
                     .string(user.getPreferredLanguage().name())
                     .object(user.getProfileVisibility(), Types.OTHER)
                     .object(user.getForcedVotingWeight(), Types.INTEGER)
-                    .bool(user.isAdministrator());
-
-            if (avatar.isPresent()) {
-                pmt.bytes(avatar.get());
-            }
-
-            int modified = pmt.integer(user.getId()).toStatement().executeUpdate();
-            stmt.close();
+                    .bool(user.isAdministrator())
+                    .bytes(avatar.get())
+                    .integer(user.getId())
+                    .toStatement().executeUpdate();
 
             if (modified == 0) {
-                log.error("No user could be found in the database.");
-                throw new NotFoundException("No user could be found in the database.");
+                log.error("No user with id " + user.getId() + " could be found in the database");
+                throw new NotFoundException("No user with id " + user.getId() + " could be found in the database.");
             }
         } catch (SQLException e) {
-            log.error("Error while updating user.", e);
-            throw new StoreException("Error while updating user.", e);
+            log.error("Error while updating the user with id " + user.getId(), e);
+            throw new StoreException("Error while updating user with id " + user.getId(), e);
         }
     }
 
@@ -227,22 +221,21 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfPosts(final User user) throws NotFoundException {
+    public int getNumberOfPosts(final User user) {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT num_posts FROM user_num_posts WHERE "
                 + "author = ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(user.getId())
                     .toStatement().executeQuery();
-            stmt.close();
             if (rs.next()) {
                 return rs.getInt("num_posts");
             } else {
-                getUserByID(user.getId());
                 return 0;
             }
         } catch (SQLException e) {
-            log.error("Error while searching for number of posts.", e);
-            throw new StoreException("Error while searching for number of posts.", e);
+            log.error("Error while searching for number of posts of the user with id " + user.getId(), e);
+            throw new StoreException("Error while searching for number of posts of the user with id "
+                    + user.getId(), e);
         }
     }
 

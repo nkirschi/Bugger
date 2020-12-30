@@ -9,6 +9,7 @@ import tech.bugger.LogExtension;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Configuration;
+import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
@@ -57,22 +58,15 @@ public class ProfileServiceTest {
 
     private User user;
     private final int theAnswer = 42;
+    private final int manyPosts = 1500;
     private final String votingWeightDef = "0,10,25,50,100,200,400,600,800,1000";
 
     @BeforeEach
     public void setup()
     {
-        user = new User();
-        user.setId(12345);
-        user.setUsername("Helgi");
-        user.setPasswordHash("v3ry_s3cur3");
-        user.setEmailAddress("helga@web.de");
-        user.setFirstName("Helga");
-        user.setLastName("Brötchen");
-        user.setBiography("Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement)");
-        user.setProfileVisibility(User.ProfileVisibility.MINIMAL);
-        user.setRegistrationDate(ZonedDateTime.now());
-        user.setAdministrator(false);
+        user = new User(12345, "Helgi", "v3ry_s3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen", null,
+                null, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
+                Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         MockitoAnnotations.openMocks(this);
         profileService = new ProfileService(feedback, transactionManager, applicationSettings, messages);
         when(transactionManager.begin()).thenReturn(transaction);
@@ -135,61 +129,58 @@ public class ProfileServiceTest {
 
     @Test
     public void testGetVotingWeight() {
-        try {
-            when(gateway.getNumberOfPosts(user)).thenReturn(theAnswer);
-            when(applicationSettings.getConfiguration()).thenReturn(config);
-            when(config.getVotingWeightDefinition()).thenReturn(votingWeightDef);
-            assertEquals(3, profileService.getVotingWeightForUser(user));
-            verify(gateway, times(1)).getNumberOfPosts(user);
-        } catch (NotFoundException e) {
-            fail("The gateway has falsely thrown a NotFoundException!");
-        }
+        when(gateway.getNumberOfPosts(user)).thenReturn(theAnswer);
+        when(applicationSettings.getConfiguration()).thenReturn(config);
+        when(config.getVotingWeightDefinition()).thenReturn(votingWeightDef);
+        assertEquals(3, profileService.getVotingWeightForUser(user));
+        verify(gateway, times(1)).getNumberOfPosts(user);
+    }
+
+    @Test
+    public void testGetVotingWeightMaxWeight() {
+        when(gateway.getNumberOfPosts(user)).thenReturn(manyPosts);
+        when(applicationSettings.getConfiguration()).thenReturn(config);
+        when(config.getVotingWeightDefinition()).thenReturn(votingWeightDef);
+        assertEquals(10, profileService.getVotingWeightForUser(user));
+        verify(gateway, times(1)).getNumberOfPosts(user);
+    }
+
+    @Test
+    public void testGetVotingWeightOverwritten() {
+        user.setForcedVotingWeight(100);
+        assertEquals(100, profileService.getVotingWeightForUser(user));
     }
 
     @Test
     public void testGetVotingWeightNumberFormatException() {
-        try {
-            when(gateway.getNumberOfPosts(user)).thenReturn(theAnswer);
-            when(applicationSettings.getConfiguration()).thenReturn(config);
-            when(config.getVotingWeightDefinition()).thenReturn("a, b");
-            profileService.getVotingWeightForUser(user);
-            verify(gateway, times(1)).getNumberOfPosts(user);
-            verify(feedback, times(1)).fire(any());
-        } catch (NotFoundException e) {
-            fail("The gateway has falsely thrown a NotFoundException!");
-        }
+        when(gateway.getNumberOfPosts(user)).thenReturn(theAnswer);
+        when(applicationSettings.getConfiguration()).thenReturn(config);
+        when(config.getVotingWeightDefinition()).thenReturn("a, b");
+        profileService.getVotingWeightForUser(user);
+        verify(gateway, times(1)).getNumberOfPosts(user);
+        verify(feedback, times(1)).fire(any());
     }
 
     @Test
-    public void testGetVotingWeightNotFound() throws NotFoundException {
-        when(gateway.getNumberOfPosts(user)).thenThrow(NotFoundException.class);
+    public void testGetVotingWeightNoPosts() {
+        when(gateway.getNumberOfPosts(user)).thenReturn(0);
+        when(applicationSettings.getConfiguration()).thenReturn(config);
+        when(config.getVotingWeightDefinition()).thenReturn(votingWeightDef);
         assertEquals(0, profileService.getVotingWeightForUser(user));
         verify(gateway, times(1)).getNumberOfPosts(user);
         verify(feedback, times(1)).fire(any());
     }
 
     @Test
-    public void testGetVotingWeightTransactionException() throws TransactionException {
-        doThrow(TransactionException.class).when(transaction).commit();
-        assertEquals(0, profileService.getVotingWeightForUser(user));
-        verify(transaction, times(1)).commit();
-        verify(feedback, times(1)).fire(any());
-    }
-
-    @Test
     public void testGetNumberOfPosts() {
-        try {
-            when(gateway.getNumberOfPosts(user)).thenReturn(theAnswer);
-            assertEquals(42, profileService.getNumberOfPostsForUser(user));
-            verify(gateway, times(1)).getNumberOfPosts(user);
-        } catch (NotFoundException e) {
-            fail("The gateway has falsely thrown a NotFoundException!");
-        }
+        when(gateway.getNumberOfPosts(user)).thenReturn(theAnswer);
+        assertEquals(42, profileService.getNumberOfPostsForUser(user));
+        verify(gateway, times(1)).getNumberOfPosts(user);
     }
 
     @Test
-    public void testGetNumberOfPostsNotFound() throws NotFoundException {
-        when(gateway.getNumberOfPosts(user)).thenThrow(NotFoundException.class);
+    public void testGetNumberOfPostsNoPosts() {
+        when(gateway.getNumberOfPosts(user)).thenReturn(0);
         assertEquals(0, profileService.getNumberOfPostsForUser(user));
         verify(gateway, times(1)).getNumberOfPosts(user);
         verify(feedback, times(1)).fire(any());
@@ -277,26 +268,23 @@ public class ProfileServiceTest {
 
     @Test
     public void testToggleAdminLastAdmin() {
-        try {
-            user.setAdministrator(true);
-            when(gateway.getNumberOfAdmins()).thenReturn(1);
-            profileService.toggleAdmin(user);
-            assertTrue(user.isAdministrator());
-            verify(gateway, times(1)).getNumberOfAdmins();
-            verify(feedback, times(1)).fire(any());
-        } catch (NotFoundException e) {
-            fail("The gateway has falsely thrown a NotFoundException!");
-        }
-    }
-
-    @Test
-    public void testToggleAdminNotFound() throws NotFoundException {
         user.setAdministrator(true);
-        doThrow(NotFoundException.class).when(gateway).getNumberOfAdmins();
+        when(gateway.getNumberOfAdmins()).thenReturn(1);
         profileService.toggleAdmin(user);
         assertTrue(user.isAdministrator());
         verify(gateway, times(1)).getNumberOfAdmins();
         verify(feedback, times(1)).fire(any());
+    }
+
+    @Test
+    public void testToggleAdminNoAdmins() {
+        user.setAdministrator(true);
+        when(gateway.getNumberOfAdmins()).thenReturn(0);
+        assertThrows(InternalError.class,
+                () -> profileService.toggleAdmin(user)
+        );
+        assertTrue(user.isAdministrator());
+        verify(gateway, times(1)).getNumberOfAdmins();
     }
 
     @Test

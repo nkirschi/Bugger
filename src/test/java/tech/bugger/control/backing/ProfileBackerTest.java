@@ -9,6 +9,7 @@ import org.mockito.MockitoAnnotations;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
+import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 
 import java.time.ZonedDateTime;
@@ -40,18 +41,24 @@ public class ProfileBackerTest {
     @BeforeEach
     public void setup()
     {
-        user = new User();
-        user.setId(12345);
-        user.setUsername("Helgi");
-        user.setPasswordHash("v3ry_s3cur3");
-        user.setEmailAddress("helga@web.de");
-        user.setFirstName("Helga");
-        user.setLastName("Brötchen");
-        user.setBiography("Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement)");
-        user.setProfileVisibility(User.ProfileVisibility.MINIMAL);
-        user.setRegistrationDate(ZonedDateTime.now());
-        user.setAdministrator(false);
+        user = new User(12345, "Helgi", "v3ry_s3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen", null,
+                null, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
+                Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testInit() throws Exception {
+        profileBacker.setUserID(user.getId());
+        when(profileService.getUser(user.getId())).thenReturn(user);
+        profileBacker.init();
+        assertAll(
+                () -> assertEquals(user, profileBacker.getUser()),
+                () -> assertFalse(profileBacker.isDisplayPromoteDemoteAdminDialog()),
+                () -> assertFalse(profileBacker.isDisplayDeleteAllUserSubscriptionsDialog()),
+                () -> assertFalse(profileBacker.isDisplayDeleteAllReportSubscriptionsDialog()),
+                () -> assertFalse(profileBacker.isDisplayDeleteAllUserSubscriptionsDialog())
+        );
     }
 
     @Test
@@ -117,17 +124,8 @@ public class ProfileBackerTest {
     @Test
     public void testIsPrivilegedFalse() {
         profileBacker.setUser(user);
-        User owner = new User();
+        User owner = new User(user);
         owner.setId(45678);
-        owner.setUsername(user.getUsername());
-        owner.setPasswordHash(user.getPasswordHash());
-        owner.setEmailAddress(user.getEmailAddress());
-        owner.setFirstName(user.getFirstName());
-        owner.setLastName(user.getLastName());
-        owner.setBiography(user.getBiography());
-        owner.setProfileVisibility(user.getProfileVisibility());
-        owner.setRegistrationDate(user.getRegistrationDate());
-        owner.setAdministrator(user.isAdministrator());
         when(session.getUser()).thenReturn(owner);
         assertFalse(profileBacker.isPrivileged());
         verify(session, times(2)).getUser();
