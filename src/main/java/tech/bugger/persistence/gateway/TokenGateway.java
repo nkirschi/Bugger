@@ -17,20 +17,21 @@ public interface TokenGateway {
      * @return The newly generated token.
      * @throws NotFoundException The user could not be found.
      */
-    public Token generateToken(User user, Token.Type type) throws NotFoundException;
+    Token generateToken(User user, Token.Type type) throws NotFoundException;
 
     /**
-     * Checks whether a token is exists and is still valid.
+     * Checks whether a token exists and is still valid.
      *
-     * @param token The token whose validity to check.
+     * @param token The token whose validity is to check.
      * @return Whether {@code token} exists and is valid.
      */
-    public boolean isValid(String token);
+    boolean isValid(String token);
 
     /**
      * Deletes expired verification tokens and unverified users that lack a valid verification token.
      *
      * @param expirationAge The maximum number of seconds a verification token is to be considered valid.
      */
-    public void cleanUp(int expirationAge);
+    void cleanUp(int expirationAge);
+
 }

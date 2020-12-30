@@ -1,26 +1,45 @@
 package tech.bugger.persistence.gateway;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import tech.bugger.business.util.Hasher;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import java.sql.Connection;
+import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
 
 /**
  * Token gateway that gives access to verification tokens stored in a database.
  */
 public class TokenDBGateway implements TokenGateway {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(TokenDBGateway.class);
 
-    private Connection conn;
+    /**
+     * The length of a generated token.
+     */
+    private static final int TOKEN_LENGTH = 32;
+
+    /**
+     * Database connection used by this gateway.
+     */
+    private final Connection conn;
 
     /**
      * Constructs a new token gateway with the given database connection.
      *
      * @param conn The database connection to use for the gateway.
      */
-    public TokenDBGateway(Connection conn) {
+    public TokenDBGateway(final Connection conn) {
         this.conn = conn;
     }
 
@@ -28,8 +47,35 @@ public class TokenDBGateway implements TokenGateway {
      * {@inheritDoc}
      */
     @Override
-    public Token generateToken(User user, Token.Type type) {
-        // TODO Auto-generated method stub
+    public Token generateToken(final User user, final Token.Type type) {
+        if (user.getId() == null) {
+            throw new IllegalArgumentException("User ID may not be null!");
+        }
+
+        String token;
+        do {
+            token = Hasher.generateRandomBytes(TOKEN_LENGTH);
+        } while (isValid(token));
+
+        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO token (value, type, verifies) "
+                + "VALUES (?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+            new StatementParametrizer(stmt)
+                    .string(token)
+                    .object(type, Types.OTHER)
+                    .integer(user.getId())
+                    .toStatement().executeUpdate();
+
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    LocalDateTime timestamp = rs.getTimestamp("timestamp").toLocalDateTime();
+                    return new Token(token, type, timestamp.atZone(ZoneId.systemDefault()), user);
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Couldn't insert token into database.", e);
+            throw new StoreException(e);
+        }
         return null;
     }
 
@@ -37,15 +83,23 @@ public class TokenDBGateway implements TokenGateway {
      * {@inheritDoc}
      */
     @Override
-    public boolean isValid(String token) {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean isValid(final String token) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM token WHERE value = ?")) {
+            stmt.setString(1, token);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            log.error("Couldn't verify the token's validity due to a database error.", e);
+            throw new StoreException(e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    public void cleanUp(int expirationAge) {
-        // TODO Auto-generated method stub
+    public void cleanUp(final int expirationAge) {
     }
+
 }
