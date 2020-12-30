@@ -16,6 +16,7 @@ import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,6 +76,20 @@ public class TokenDBGatewayTest {
     }
 
     @Test
+    public void testGenerateTokenUserSearchWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(matches("SELECT \\* FROM \"user\".*"));
+        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).generateToken(admin, Token.Type.CHANGE_EMAIL));
+    }
+
+    @Test
+    public void testGenerateTokenUserNotExists() {
+        User copy = new User(admin);
+        copy.setId(45);
+        assertThrows(NotFoundException.class, () -> gateway.generateToken(copy, Token.Type.CHANGE_EMAIL));
+    }
+
+    @Test
     public void testGenerateTokenInsertedNothing() throws Exception {
         TokenDBGateway gatewaySpy = spy(gateway);
         ResultSet resultSetMock = mock(ResultSet.class);
@@ -101,7 +116,7 @@ public class TokenDBGatewayTest {
     }
 
     @Test
-    public void testValidTokenIsValid() {
+    public void testValidTokenIsValid() throws Exception {
         Token token = gateway.generateToken(admin, Token.Type.CHANGE_EMAIL);
         boolean isValid = gateway.isValid(token.getValue());
         assertTrue(isValid);
