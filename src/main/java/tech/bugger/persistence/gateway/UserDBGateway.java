@@ -271,4 +271,19 @@ public class UserDBGateway implements UserGateway {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isEmailAssigned(final String emailAddress) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE email_address = ?")) {
+            stmt.setString(1, emailAddress);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            log.error("Error while searching for user", e);
+            throw new StoreException("Error while searching for user", e);
+        }
+    }
+
 }

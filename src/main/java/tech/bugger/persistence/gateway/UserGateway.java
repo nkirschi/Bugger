@@ -145,4 +145,12 @@ public interface UserGateway {
      */
     void deleteUser(User user) throws NotFoundException;
 
+    /**
+     * Checks whether the given {@code emailAddress} is already assigned to any user.
+     *
+     * @param emailAddress The e-mail address to check.
+     * @return Whether the given {@code emailAddress} is already assigned to any user.
+     */
+    boolean isEmailAssigned(String emailAddress);
+
 }

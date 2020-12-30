@@ -153,7 +153,29 @@ public class ProfileService {
         return 0;
     }
 
-    private byte[] generateThumbnail(byte[] image) {
+    /**
+     * Checks whether the given {@code emailAddress} is already assigned to any user.
+     *
+     * @param emailAddress The e-mail address to check.
+     * @return Whether the given {@code emailAddress} is already assigned to any user.
+     */
+    public boolean isEmailAssigned(final String emailAddress) {
+        boolean assigned = false;
+
+        Transaction tx = transactionManager.begin();
+        try (tx) {
+            assigned = tx.newUserGateway().isEmailAssigned(emailAddress);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while searching for email.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return assigned;
+    }
+
+    private byte[] generateThumbnail(final byte[] image) {
         return null;
     }
+
 }
