@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="#{userSession.locale.language}"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<h:head>
+    <title>Bugger</title>
+    <h:outputStylesheet library = "design" name = "themes/#{headerBacker.applicationSettings.organization.theme}" />
+    <h:outputStylesheet library = "design" name = "style.css" />
+</h:head>
+
+<body background="black">
+    <h:panelGroup class="row">
+        <ui:include src= "/view/public/header.xhtml" />
+    </h:panelGroup>
+    <h:panelGroup class="row" layout="block">
+        <h:panelGroup class="col-lg-2" layout="block" styleClass="background"/>
+        <h:panelGroup class="col-lg-8" layout="block" styleClass="content">
+            <ui:insert name= "pageTitle" layout="block"/>
+            <h:messages id= "m_global" layout="block"/>
+            <ui:insert name= "content" layout="block"/>
+        </h:panelGroup>
+        <h:panelGroup class="col-lg-2" layout="block" styleClass="background"/>
+    </h:panelGroup>
+    <h:panelGroup class="row" layout="block">
+        <ui:include src= "/view/public/footer.xhtml" layout="block"/>
+    </h:panelGroup>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" type="javascript"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" type="javascript"></script>
+</body>
+
+</html>
