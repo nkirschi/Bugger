@@ -138,7 +138,6 @@ public class UserDBGatewayTest {
     public void testIsEmailAssignedYes() {
         User copy = new User(user);
         gateway.createUser(copy);
-        System.out.println(copy);
         assertTrue(() -> gateway.isEmailAssigned("test@test.de"));
     }
 
@@ -147,6 +146,25 @@ public class UserDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).isEmailAssigned("t@t.tk"));
+    }
+
+    @Test
+    public void testIsUsernameAssignedNo() {
+        assertFalse(() -> gateway.isUsernameAssigned("testuser"));
+    }
+
+    @Test
+    public void testIsUsernameAssignedYes() {
+        User copy = new User(user);
+        gateway.createUser(copy);
+        assertTrue(() -> gateway.isUsernameAssigned("testuser"));
+    }
+
+    @Test
+    public void testIsUsernameAssignedWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).isUsernameAssigned("testuser"));
     }
 
 }
