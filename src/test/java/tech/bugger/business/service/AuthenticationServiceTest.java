@@ -224,4 +224,27 @@ public class AuthenticationServiceTest {
         verify(feedbackEvent).fire(any());
     }
 
+    @Test
+    public void testGetUserIdForToken() throws Exception {
+        doReturn(1).when(tokenGateway).getUserIdForToken("0123456789abcdef");
+
+        int id = service.getUserIdForToken("0123456789abcdef");
+        assertEquals(1, id);
+        verify(tokenGateway).getUserIdForToken("0123456789abcdef");
+    }
+
+    @Test
+    public void testGetUserIdForTokenWhenNotFound() throws Exception {
+        doThrow(NotFoundException.class).when(tokenGateway).getUserIdForToken("0123456789abcdef");
+        service.getUserIdForToken("0123456789abcdef");
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetUserIdForTokenWhenCommitFails() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        service.getUserIdForToken("0123456789abcdef");
+        verify(feedbackEvent).fire(any());
+    }
+
 }

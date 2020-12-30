@@ -129,4 +129,29 @@ public class TokenDBGatewayTest {
         assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).isValid("doesn't matter"));
     }
 
+    @Test
+    public void testGetUserIdForToken() throws Exception {
+        Token token = gateway.generateToken(admin, Token.Type.CHANGE_EMAIL);
+
+        int id = 0;
+        try {
+            id = gateway.getUserIdForToken(token.getValue());
+        } catch (NotFoundException e) {
+            fail();
+        }
+        assertEquals(admin.getId(), id);
+    }
+
+    @Test
+    public void testGetUserIdForTokenNotFound() {
+        assertThrows(NotFoundException.class, () -> gateway.getUserIdForToken("0123456789abcdef"));
+    }
+
+    @Test
+    public void testGetUserIdForTokenWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).getUserIdForToken("0123456789abcdef"));
+    }
+
 }

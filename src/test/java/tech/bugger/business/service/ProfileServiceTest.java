@@ -136,4 +136,26 @@ public class ProfileServiceTest {
         verify(feedbackEvent).fire(any());
     }
 
+    @Test
+    public void testGetUser() throws Exception {
+        User copy = new User(testUser);
+        service.getUser(copy.getId());
+        assertEquals(1, copy.getId());
+        verify(userGateway).getUserByID(1);
+    }
+
+    @Test
+    public void testGetUserWhenNotFound() throws Exception {
+        doThrow(NotFoundException.class).when(userGateway).getUserByID(1);
+        service.getUser(1);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetUserWhenCommitFails() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        service.getUser(1);
+        verify(feedbackEvent).fire(any());
+    }
+
 }

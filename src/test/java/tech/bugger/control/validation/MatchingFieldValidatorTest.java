@@ -67,4 +67,14 @@ public class MatchingFieldValidatorTest {
         assertDoesNotThrow(() -> matchingFieldValidator.validate(fctx, comp, "test"));
     }
 
+    @Test
+    public void testValidateValueNotLocally() {
+        doReturn(null).when(otherInputMock).getValue();
+        doReturn("test").when(otherInputMock).getSubmittedValue();
+        doReturn(otherInputMock).when(uiViewRootMock).findComponent(matches("validId"));
+        Map<String, Object> attributes = Map.of("otherId", "validId");
+        doReturn(attributes).when(comp).getAttributes();
+        assertDoesNotThrow(() -> matchingFieldValidator.validate(fctx, comp, "test"));
+    }
+
 }
