@@ -280,6 +280,7 @@ public class ProfileBacker implements Serializable {
      * displayed instead.
      */
     public void toggleAdmin() {
+        //TODO update user in session if session.getUser().equals(user)?
         profileService.toggleAdmin(user);
     }
 

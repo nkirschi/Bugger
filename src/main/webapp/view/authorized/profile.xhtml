@@ -38,8 +38,8 @@
                                 <h:panelGroup class="col-sm-6" id="p-user-password-input">
                                     <h:inputSecret id="i-user-password" value="#{profileBacker.password}"
                                                    validatorMessage="#{messages.password_not_in_range}">
-                                        <!-- TODO Import constants to reference min/max -->
-                                        <f:validateLength minimum="8" maximum="128"/>
+                                        <!-- TODO Import constants to reference min/max and add PasswordValidator -->
+                                        <f:validateLength minimum="#{C.PASSWORD_MIN}" maximum="#{C.PASSWORD_MAX}"/>
                                     </h:inputSecret>
                                 </h:panelGroup>
                                 <h:panelGroup class="col-sm-3" id="p-user-password-message">
