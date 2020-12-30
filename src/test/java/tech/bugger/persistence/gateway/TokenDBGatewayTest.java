@@ -60,7 +60,7 @@ public class TokenDBGatewayTest {
     }
 
     @Test
-    public void testGenerateTokenWithUserIdNull() throws Exception {
+    public void testGenerateTokenWithUserIdNull() {
         User incompleteUser = new User(admin);
         incompleteUser.setId(null);
         assertThrows(IllegalArgumentException.class,
@@ -89,19 +89,19 @@ public class TokenDBGatewayTest {
     }
 
     @Test
-    public void testDefinitelyInvalidTokenIsValid() throws Exception {
+    public void testDefinitelyInvalidTokenIsValid() {
         boolean isValid = gateway.isValid("i am an invalid token");
         assertFalse(isValid);
     }
 
     @Test
-    public void testCrackedInvalidTokenIsValid() throws Exception {
+    public void testCrackedInvalidTokenIsValid() {
         boolean isValid = gateway.isValid("db2b0333a72d2388e42eb772f90f309f7ed5ed5c8b02201392abff9a4509e660");
         assertFalse(isValid);
     }
 
     @Test
-    public void testValidTokenIsValid() throws Exception {
+    public void testValidTokenIsValid() {
         Token token = gateway.generateToken(admin, Token.Type.CHANGE_EMAIL);
         boolean isValid = gateway.isValid(token.getValue());
         assertTrue(isValid);
