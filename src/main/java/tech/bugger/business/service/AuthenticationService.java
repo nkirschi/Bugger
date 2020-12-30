@@ -5,6 +5,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.Hasher;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
 import tech.bugger.business.util.RegistryKey;
@@ -16,6 +17,7 @@ import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Mail;
 import tech.bugger.persistence.util.MailBuilder;
 import tech.bugger.persistence.util.Mailer;
+import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
@@ -35,6 +37,11 @@ public class AuthenticationService {
      * Maximum amount of times an email should be tried to resend.
      */
     private static final int MAX_EMAIL_TRIES = 3;
+
+    /**
+     * Salt length to use when hashing passwords.
+     */
+    private static final int SALT_LENGTH = 16;
 
     /**
      * Transaction manager used for creating transactions.
@@ -62,6 +69,11 @@ public class AuthenticationService {
     private final Mailer mailer;
 
     /**
+     * The {@link PropertiesReader} instance to use when reading the current configuration.
+     */
+    private final PropertiesReader configReader;
+
+    /**
      * Constructs a new authentication service with the given dependencies.
      *
      * @param transactionManager The transaction manager to use for creating transactions.
@@ -69,17 +81,20 @@ public class AuthenticationService {
      * @param messagesBundle     The resource bundle for feedback messages.
      * @param priorityExecutor   The priority executor to use when sending e-mails.
      * @param mailer             The mailer to use.
+     * @param configReader       The configuration reader to use.
      */
     @Inject
     public AuthenticationService(final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
                                  @RegistryKey("messages") final ResourceBundle messagesBundle,
                                  @RegistryKey("mails") final PriorityExecutor priorityExecutor,
-                                 @RegistryKey("main") final Mailer mailer) {
+                                 @RegistryKey("main") final Mailer mailer,
+                                 @RegistryKey("config") final PropertiesReader configReader) {
         this.transactionManager = transactionManager;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;
         this.priorityExecutor = priorityExecutor;
         this.mailer = mailer;
+        this.configReader = configReader;
     }
 
 
@@ -134,8 +149,35 @@ public class AuthenticationService {
      * @param user     The {@link User} whose password should be set.
      * @param password The password to set.
      * @param token    The used authentication token.
+     * @return Whether the action was successful or not.
      */
-    public void setPassword(final User user, final String password, final String token) {
+    public boolean setPassword(final User user, final String password, final String token) {
+        if (!isValid(token)) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("token_invalid"), Feedback.Type.INFO));
+            return false;
+        }
+
+        String salt = Hasher.generateRandomBytes(SALT_LENGTH);
+        String algorithm = configReader.getString("HASH_ALGO");
+        String hashed = Hasher.hash(password, salt, algorithm);
+
+        user.setPasswordSalt(salt);
+        user.setHashingAlgorithm(algorithm);
+        user.setPasswordHash(hashed);
+
+        Transaction tx = transactionManager.begin();
+        try (tx) {
+            tx.newUserGateway().updateUser(user);
+            tx.commit();
+            return true;
+        } catch (NotFoundException e) {
+            log.error("The user couldn't be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("User could not be updated.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return false;
     }
 
     /**
