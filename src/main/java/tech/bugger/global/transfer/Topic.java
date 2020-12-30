@@ -130,7 +130,12 @@ public class Topic implements Serializable {
      */
     @Override
     public String toString() {
-        return "Topic{" + "ID = " + id + ", title = " + title + "}";
+        String s = "Topic{" + "ID = " + id + ", title = " + title + ", description = ";
+        if (description.length() <= 100) {
+            return s + description + '}';
+        } else {
+            return s + description.substring(0, 100) + "...}";
+        }
     }
 
 }
