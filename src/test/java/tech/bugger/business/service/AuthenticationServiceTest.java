@@ -1,5 +1,6 @@
 package tech.bugger.business.service;
 
+import java.lang.reflect.Field;
 import javax.enterprise.event.Event;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +20,9 @@ import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.TokenDBGateway;
+import tech.bugger.persistence.gateway.UserDBGateway;
 import tech.bugger.persistence.util.Mailer;
+import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
@@ -46,6 +49,9 @@ public class AuthenticationServiceTest {
     private TokenDBGateway tokenGateway;
 
     @Mock
+    private UserDBGateway userGateway;
+
+    @Mock
     private Event<Feedback> feedbackEvent;
 
     @Mock
@@ -53,6 +59,9 @@ public class AuthenticationServiceTest {
 
     @Mock
     private PriorityExecutor priorityExecutor;
+
+    @Mock
+    private PropertiesReader configReader;
 
     @BeforeEach
     public void setUp() {
@@ -62,11 +71,13 @@ public class AuthenticationServiceTest {
             return null;
         }).when(priorityExecutor).enqueue(any());
 
-        service = new AuthenticationService(transactionManager, feedbackEvent,
-                ResourceBundleMocker.mock(""), priorityExecutor, mailer);
+        service = new AuthenticationService(transactionManager, feedbackEvent, ResourceBundleMocker.mock(""),
+                priorityExecutor, mailer, configReader);
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(tokenGateway).when(tx).newTokenGateway();
+        lenient().doReturn(userGateway).when(tx).newUserGateway();
+        lenient().doReturn("SHA3-512").when(configReader).getString("HASH_ALGO");
 
         testUser = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, null, 3, false);
@@ -132,6 +143,84 @@ public class AuthenticationServiceTest {
     public void testIsValidWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
         service.isValid("0123456789abcdef");
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSetPassword() throws Exception {
+        User copy = new User(testUser);
+        doNothing().when(userGateway).updateUser(any());
+        doReturn(true).when(tokenGateway).isValid(any());
+
+        boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
+        assertAll(() -> assertTrue(res),
+                () -> assertNotEquals("", copy.getPasswordHash()),
+                () -> assertNotNull(copy.getPasswordHash()),
+                () -> assertNotEquals("", copy.getPasswordSalt()),
+                () -> assertNotNull(copy.getPasswordSalt()),
+                () -> assertNotEquals("", copy.getHashingAlgorithm()),
+                () -> assertNotNull(copy.getHashingAlgorithm()));
+    }
+
+    @Test
+    public void testSetPasswordNotValid() {
+        User copy = new User(testUser);
+
+        doReturn(false).when(tokenGateway).isValid(any());
+        boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
+        assertFalse(res);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSetPasswordWhenCommitInIsValidFails() throws Exception {
+        User copy = new User(testUser);
+
+        doThrow(TransactionException.class).when(tx).commit();
+        boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
+        assertFalse(res);
+        // As it is only a query, we can still recover and use the real values.
+        verify(feedbackEvent, times(2)).fire(any());
+    }
+
+    @Test
+    public void testSetPasswordWhenCommitFails() throws Exception {
+        AuthenticationService service = mock(AuthenticationService.class);
+        User copy = new User(testUser);
+
+        doCallRealMethod().when(service).setPassword(any(), any(), any());
+        doReturn(true).when(service).isValid(any());
+        doThrow(TransactionException.class).when(tx).commit();
+
+        Field f = AuthenticationService.class.getDeclaredField("transactionManager");
+        f.setAccessible(true);
+        f.set(service, transactionManager);
+
+        f = AuthenticationService.class.getDeclaredField("configReader");
+        f.setAccessible(true);
+        f.set(service, configReader);
+
+        f = AuthenticationService.class.getDeclaredField("feedbackEvent");
+        f.setAccessible(true);
+        f.set(service, feedbackEvent);
+
+        f = AuthenticationService.class.getDeclaredField("messagesBundle");
+        f.setAccessible(true);
+        f.set(service, ResourceBundleMocker.mock(""));
+
+        boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
+        assertFalse(res);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSetPasswordWhenUserNotFound() throws Exception {
+        User copy = new User(testUser);
+
+        doReturn(true).when(tokenGateway).isValid(any());
+        doThrow(NotFoundException.class).when(userGateway).updateUser(any());
+        boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
+        assertFalse(res);
         verify(feedbackEvent).fire(any());
     }
 
