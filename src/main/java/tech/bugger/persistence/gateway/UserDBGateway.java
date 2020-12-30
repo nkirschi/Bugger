@@ -9,12 +9,14 @@ import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.ZonedDateTime;
+import java.sql.Types;
+import java.time.ZoneId;
 import java.util.List;
 
 /**
@@ -22,16 +24,22 @@ import java.util.List;
  */
 public class UserDBGateway implements UserGateway {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(UserDBGateway.class);
 
-    private Connection conn;
+    /**
+     * The database connection used by this gateway.
+     */
+    private final Connection conn;
 
     /**
      * Constructs a new user gateway with the given database connection.
      *
      * @param conn The database connection to use for the gateway.
      */
-    public UserDBGateway(Connection conn) {
+    public UserDBGateway(final Connection conn) {
         this.conn = conn;
     }
 
@@ -39,7 +47,7 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public boolean isModerator(User user, Topic topic) {
+    public boolean isModerator(final User user, final Topic topic) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -50,10 +58,13 @@ public class UserDBGateway implements UserGateway {
     @Override
     public int getNumberOfAdmins() throws NotFoundException {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(u.id) AS num_admins FROM \"user\" AS u "
-                + "WHERE u.is_administrator = true")) {
+                + "WHERE u.is_admin = true;")) {
             ResultSet resultSet = stmt.executeQuery();
             stmt.close();
-            int numAdmins = resultSet.getInt("num_admins");
+            int numAdmins = 0;
+            if (resultSet.next()) {
+                numAdmins = resultSet.getInt("num_admins");
+            }
             if (numAdmins == 0) {
                 log.error("No administrators could be found in the database");
                 throw new NotFoundException("No administrators could be found in the database.");
@@ -69,44 +80,23 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public User getUserByID(int id) throws NotFoundException {
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" AS u WHERE u.id = ?")) {
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
+    public User getUserByID(final int id) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE id = ?;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(id)
+                    .toStatement().executeQuery();
             stmt.close();
             if (rs.next()) {
-                String prefLanguage = rs.getString("preferred_language");
-                String visibility = rs.getString("profile_visibility");
-
-                User user = new User();
-                user.setId(rs.getInt("id"));
-                user.setUsername(rs.getString("username"));
-                user.setPasswordHash(rs.getString("password_hash"));
-                user.setPasswordSalt(rs.getString("password_salt"));
-                user.setHashingAlgorithm(rs.getString("hashing_algorithm"));
-                user.setEmailAddress(rs.getString("email_address"));
-                user.setFirstName(rs.getString("first_name"));
-                user.setLastName(rs.getString("last_name"));
-                user.setAvatar(new Lazy<>(rs.getBytes("avatar")));
-                user.setAvatarThumbnail(rs.getBytes("avatar_thumbnail"));
-                user.setBiography(rs.getString("biography"));
-                user.setRegistrationDate((ZonedDateTime) rs.getObject("registered_at"));
-                user.setForcedVotingWeight(rs.getInt("forced_voting_weight"));
-                user.setAdministrator(rs.getBoolean("is_admin"));
-
-                if (prefLanguage.equalsIgnoreCase("german")) {
-                    user.setPreferredLanguage(Language.GERMAN);
-                } else {
-                    user.setPreferredLanguage(Language.ENGLISH);
-                }
-
-                if (visibility.equalsIgnoreCase("full")) {
-                    user.setProfileVisibility(User.ProfileVisibility.FULL);
-                } else {
-                    user.setProfileVisibility(User.ProfileVisibility.MINIMAL);
-                }
-
-                return user;
+                return new User(rs.getInt("id"), rs.getString("username"),
+                        rs.getString("password_hash"), rs.getString("password_salt"),
+                        rs.getString("hashing_algorithm"), rs.getString("email_address"),
+                        rs.getString("first_name"), rs.getString("last_name"),
+                        new Lazy<>(rs.getBytes("avatar")), rs.getBytes("avatar_thumbnail"),
+                        rs.getString("biography"),
+                        Language.valueOf(rs.getString("preferred_language").toUpperCase()),
+                        User.ProfileVisibility.valueOf(rs.getString("profile_visibility").toUpperCase()),
+                        rs.getTimestamp("registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
+                        (Integer) rs.getObject("forced_voting_weight"), rs.getBoolean("is_admin"));
             } else {
                 log.error("No user could be found in the database");
                 throw new NotFoundException("No user could be found in the database.");
@@ -121,7 +111,7 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public User getUserByUsername(String username) {
+    public User getUserByUsername(final String username) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -130,7 +120,7 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<User> getSelectedModerators(Topic topic, Selection selection) {
+    public List<User> getSelectedModerators(final Topic topic, final Selection selection) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -139,7 +129,7 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<User> getSelectedBannedUsers(Topic topic, Selection selection) {
+    public List<User> getSelectedBannedUsers(final Topic topic, final Selection selection) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -148,7 +138,7 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public void createUser(User user) {
+    public void createUser(final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -157,30 +147,36 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public void updateUser(User user) throws NotFoundException {
-        try (PreparedStatement stmt = conn.prepareStatement("UPDATE \"user\" SET id = ?, username = ?, "
-                + "password_hash = ?, password_salt = ?, hashing_algorithm = ?, email_address = ?, first_name = ?, "
-                + "last_name = ?, avatar = ?, avatar_thumbnail = ?, biography = ?, preferred_language = ?, "
-                + "profile_visibility = ?, registered_at = ?, forced_voting_weight = ?, is_admin = ? WHERE id = ?;")) {
-            stmt.setInt(1, user.getId());
-            stmt.setString(2, user.getUsername());
-            stmt.setString(3, user.getPasswordHash());
-            stmt.setString(4, user.getPasswordSalt());
-            stmt.setString(5, user.getHashingAlgorithm());
-            stmt.setString(6, user.getFirstName());
-            stmt.setString(7, user.getEmailAddress());
-            stmt.setString(8, user.getLastName());
-            stmt.setBytes(9, user.getAvatar().get());
-            stmt.setBytes(10, user.getAvatarThumbnail());
-            stmt.setString(11, user.getBiography());
-            stmt.setString(12, user.getPreferredLanguage().name());
-            stmt.setString(13, user.getProfileVisibility().name());
-            stmt.setObject(14, user.getRegistrationDate());
-            stmt.setInt(15, user.getForcedVotingWeight());
-            stmt.setBoolean(16, user.isAdministrator());
-            stmt.setInt(17, user.getId());
-            int modified = stmt.executeUpdate();
+    public void updateUser(final User user) throws NotFoundException {
+        Lazy<byte[]> avatar = user.getAvatar();
+        try (PreparedStatement stmt = conn.prepareStatement("UPDATE \"user\" SET "
+                + "username = ?, password_hash = ?, password_salt = ?, hashing_algorithm = ?, "
+                + "email_address = ?, first_name = ?, last_name = ?, avatar_thumbnail = ?, "
+                + "biography = ?, preferred_language = ?, profile_visibility = ?, "
+                + "forced_voting_weight = ?, is_admin = ? " + (avatar.isPresent() ? ", avatar = ? " : "")
+                + "WHERE id = ?;")) {
+            StatementParametrizer pmt = new StatementParametrizer(stmt)
+                    .string(user.getUsername())
+                    .string(user.getPasswordHash())
+                    .string(user.getPasswordSalt())
+                    .string(user.getHashingAlgorithm())
+                    .string(user.getEmailAddress())
+                    .string(user.getFirstName())
+                    .string(user.getLastName())
+                    .bytes(user.getAvatarThumbnail())
+                    .string(user.getBiography())
+                    .string(user.getPreferredLanguage().name())
+                    .object(user.getProfileVisibility(), Types.OTHER)
+                    .object(user.getForcedVotingWeight(), Types.INTEGER)
+                    .bool(user.isAdministrator());
+
+            if (avatar.isPresent()) {
+                pmt.bytes(avatar.get());
+            }
+
+            int modified = pmt.integer(user.getId()).toStatement().executeUpdate();
             stmt.close();
+
             if (modified == 0) {
                 log.error("No user could be found in the database.");
                 throw new NotFoundException("No user could be found in the database.");
@@ -195,7 +191,7 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public void deleteUser(User user) {
+    public void deleteUser(final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -204,16 +200,7 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<User> getSubscribersOf(User user) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<User> getSubscribersOf(Report report) {
+    public List<User> getSubscribersOf(final User user) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -222,7 +209,7 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<User> getSubscribersOf(Topic topic) {
+    public List<User> getSubscribersOf(final Report report) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -231,11 +218,21 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfPosts(User user) throws NotFoundException {
+    public List<User> getSubscribersOf(final Topic topic) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getNumberOfPosts(final User user) throws NotFoundException {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT num_posts FROM user_num_posts WHERE "
                 + "author = ?;")) {
-            stmt.setInt(1, user.getId());
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .toStatement().executeQuery();
             stmt.close();
             if (rs.next()) {
                 return rs.getInt("num_posts");
@@ -253,7 +250,7 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public boolean isBanned(User user, Topic topic) {
+    public boolean isBanned(final User user, final Topic topic) {
         // TODO Auto-generated method stub
         return false;
     }
