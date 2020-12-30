@@ -1,5 +1,6 @@
 package tech.bugger.business.service;
 
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Report;
@@ -32,14 +33,17 @@ public class ProfileService {
 
     private TransactionManager transactionManager;
 
+    private ApplicationSettings applicationSettings;
+
     @RegistryKey("messages")
     private ResourceBundle messages;
 
     @Inject
     public ProfileService(final Event<Feedback> feedback, final TransactionManager transactionManager,
-                          final ResourceBundle messages) {
+                          final ApplicationSettings applicationSettings, final ResourceBundle messages) {
         this.feedback = feedback;
         this.transactionManager = transactionManager;
+        this.applicationSettings = applicationSettings;
         this.messages = messages;
     }
 
@@ -181,8 +185,15 @@ public class ProfileService {
     public int getVotingWeightForUser(User user) {
         int votingWeight = 0;
         try(Transaction transaction = transactionManager.begin()) {
-            votingWeight = transaction.newUserGateway().getVotingWeight(user);
+            int numPosts = transaction.newUserGateway().getNumberOfPosts(user);
             transaction.commit();
+            String[] votingDef = applicationSettings.getConfiguration().getVotingWeightDefinition().split(",");
+            try {
+                votingWeight = calculateVotingWeight(numPosts, votingDef);
+            } catch (NumberFormatException e) {
+                log.error("The voting weight definition could not be parsed to a number");
+                feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
+            }
         } catch (NotFoundException e) {
             log.error("The user could not be found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
@@ -191,6 +202,23 @@ public class ProfileService {
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return votingWeight;
+    }
+
+    /**
+     * Calculates the voting weight from the given number of posts and the voting weight definition.
+     * @param numPosts The number of posts.
+     * @param votingWeightDef The voting weight definition.
+     * @return The calculated voting weight.
+     * @throws NumberFormatException The voting weight definition could not be parsed to a number.
+     */
+    private int calculateVotingWeight(int numPosts, String[] votingWeightDef) throws NumberFormatException {
+        for (int i = 0; i < votingWeightDef.length; i++) {
+            int boundary = Integer.parseInt(votingWeightDef[i]);
+            if (numPosts < boundary) {
+                return i;
+            }
+        }
+        return votingWeightDef.length;
     }
 
     /**

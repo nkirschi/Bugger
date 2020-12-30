@@ -6,7 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import tech.bugger.LogExtension;
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
@@ -18,11 +20,7 @@ import javax.enterprise.event.Event;
 import java.time.ZonedDateTime;
 import java.util.ResourceBundle;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,6 +38,9 @@ public class ProfileServiceTest {
     private TransactionManager transactionManager;
 
     @Mock
+    private ApplicationSettings applicationSettings;
+
+    @Mock
     ResourceBundle messages;
 
     @Mock
@@ -48,10 +49,15 @@ public class ProfileServiceTest {
     @Mock
     private UserDBGateway gateway;
 
+    @Mock
+    private Configuration config;
+
+
     private ProfileService profileService;
 
     private User user;
     private final int theAnswer = 42;
+    private final String votingWeightDef = "0,10,25,50,100,200,400,600,800,1000";
 
     @BeforeEach
     public void setup()
@@ -68,7 +74,7 @@ public class ProfileServiceTest {
         user.setRegistrationDate(ZonedDateTime.now());
         user.setAdministrator(false);
         MockitoAnnotations.openMocks(this);
-        profileService = new ProfileService(feedback, transactionManager, messages);
+        profileService = new ProfileService(feedback, transactionManager, applicationSettings, messages);
         when(transactionManager.begin()).thenReturn(transaction);
         when(transaction.newUserGateway()).thenReturn(gateway);
     }
@@ -130,9 +136,25 @@ public class ProfileServiceTest {
     @Test
     public void testGetVotingWeight() {
         try {
-            when(gateway.getVotingWeight(user)).thenReturn(theAnswer);
-            assertEquals(42, profileService.getVotingWeightForUser(user));
-            verify(gateway, times(1)).getVotingWeight(user);
+            when(gateway.getNumberOfPosts(user)).thenReturn(theAnswer);
+            when(applicationSettings.getConfiguration()).thenReturn(config);
+            when(config.getVotingWeightDefinition()).thenReturn(votingWeightDef);
+            assertEquals(3, profileService.getVotingWeightForUser(user));
+            verify(gateway, times(1)).getNumberOfPosts(user);
+        } catch (NotFoundException e) {
+            fail("The gateway has falsely thrown a NotFoundException!");
+        }
+    }
+
+    @Test
+    public void testGetVotingWeightNumberFormatException() {
+        try {
+            when(gateway.getNumberOfPosts(user)).thenReturn(theAnswer);
+            when(applicationSettings.getConfiguration()).thenReturn(config);
+            when(config.getVotingWeightDefinition()).thenReturn("a, b");
+            profileService.getVotingWeightForUser(user);
+            verify(gateway, times(1)).getNumberOfPosts(user);
+            verify(feedback, times(1)).fire(any());
         } catch (NotFoundException e) {
             fail("The gateway has falsely thrown a NotFoundException!");
         }
@@ -140,9 +162,9 @@ public class ProfileServiceTest {
 
     @Test
     public void testGetVotingWeightNotFound() throws NotFoundException {
-        when(gateway.getVotingWeight(user)).thenThrow(NotFoundException.class);
+        when(gateway.getNumberOfPosts(user)).thenThrow(NotFoundException.class);
         assertEquals(0, profileService.getVotingWeightForUser(user));
-        verify(gateway, times(1)).getVotingWeight(user);
+        verify(gateway, times(1)).getNumberOfPosts(user);
         verify(feedback, times(1)).fire(any());
     }
 

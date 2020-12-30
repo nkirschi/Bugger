@@ -52,6 +52,7 @@ public class UserDBGateway implements UserGateway {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(u.id) AS num_admins FROM \"user\" AS u "
                 + "WHERE u.is_administrator = true")) {
             ResultSet resultSet = stmt.executeQuery();
+            stmt.close();
             int numAdmins = resultSet.getInt("num_admins");
             if (numAdmins == 0) {
                 log.error("No administrators could be found in the database");
@@ -72,6 +73,7 @@ public class UserDBGateway implements UserGateway {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" AS u WHERE u.id = ?")) {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
+            stmt.close();
             if (rs.next()) {
                 String prefLanguage = rs.getString("preferred_language");
                 String visibility = rs.getString("profile_visibility");
@@ -159,7 +161,7 @@ public class UserDBGateway implements UserGateway {
         try (PreparedStatement stmt = conn.prepareStatement("UPDATE \"user\" SET id = ?, username = ?, "
                 + "password_hash = ?, password_salt = ?, hashing_algorithm = ?, email_address = ?, first_name = ?, "
                 + "last_name = ?, avatar = ?, avatar_thumbnail = ?, biography = ?, preferred_language = ?, "
-                + "profile_visibility = ?, registered_at = ?, forced_voting_weight = ?, is_admin = ?;")) {
+                + "profile_visibility = ?, registered_at = ?, forced_voting_weight = ?, is_admin = ? WHERE id = ?;")) {
             stmt.setInt(1, user.getId());
             stmt.setString(2, user.getUsername());
             stmt.setString(3, user.getPasswordHash());
@@ -176,7 +178,9 @@ public class UserDBGateway implements UserGateway {
             stmt.setObject(14, user.getRegistrationDate());
             stmt.setInt(15, user.getForcedVotingWeight());
             stmt.setBoolean(16, user.isAdministrator());
+            stmt.setInt(17, user.getId());
             int modified = stmt.executeUpdate();
+            stmt.close();
             if (modified == 0) {
                 log.error("No user could be found in the database.");
                 throw new NotFoundException("No user could be found in the database.");
@@ -232,6 +236,7 @@ public class UserDBGateway implements UserGateway {
                 + "author = ?;")) {
             stmt.setInt(1, user.getId());
             ResultSet rs = stmt.executeQuery();
+            stmt.close();
             if (rs.next()) {
                 return rs.getInt("num_posts");
             } else {
@@ -241,39 +246,6 @@ public class UserDBGateway implements UserGateway {
         } catch (SQLException e) {
             log.error("Error while searching for number of posts.", e);
             throw new StoreException("Error while searching for number of posts.", e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getVotingWeight(User user) throws NotFoundException {
-        int numPosts = getNumberOfPosts(user);
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT voting_weight_definition FROM "
-                + "system_settings;")) {
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                String[] votingWeight = rs.getString("voting_weight_definition").split(",");
-                for (int i = 0; i < votingWeight.length; i++) {
-                    try {
-                        int boundary = Integer.parseInt(votingWeight[i]);
-                        if (numPosts <= boundary) {
-                            return i;
-                        }
-                    } catch (NumberFormatException e) {
-                        log.error("The voting weight definition could not be parsed to a number");
-                        throw new InternalError("The voting weight definition could not be parsed to a number");
-                    }
-                }
-                return votingWeight.length;
-            } else {
-                log.error("The voting weight definition could not be found in the database.");
-                throw new NotFoundException("The voting weight definition could not be found in the database.");
-            }
-        } catch (SQLException e) {
-            log.error("Error while loading the voting weight definition.", e);
-            throw new StoreException("Error while loading the voting weight definition.", e);
         }
     }
 
