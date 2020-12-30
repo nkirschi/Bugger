@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      lang="#{userSession.locale.language}" xml:lang="#{userSession.locale.language}">
+
+<h:head>
+    <title>Register</title>
+</h:head>
+<h:body>
+    <f:view locale="#{userSession.locale}">
+        <h2><h:outputText value="Register"/></h2>
+
+        <h:form id="f-register">
+            <h:panelGrid columns="2">
+                <h:outputLabel id="o-username" for="it-username" value="Username:"/>
+                <h:inputText id="it-username" value="#{registerBacker.username}">
+                    <f:validator validatorId="usernameValidator"/>
+                </h:inputText>
+                <h:panelGroup/>
+                <h:message for="it-username"/>
+
+                <h:outputLabel id="o-email" for="it-email" value="Email:"/>
+                <h:inputText id="it-email" value="#{registerBacker.emailAddress}">
+                    <f:validator validatorId="emailValidator"/>
+                </h:inputText>
+                <h:panelGroup/>
+                <h:message for="it-email"/>
+
+                <h:outputLabel id="o-first-name" for="it-first-name" value="First name:"/>
+                <h:inputText id="it-first-name" value="#{registerBacker.firstName}"/>
+                <h:panelGroup/>
+                <h:message for="it-first-name"/>
+
+                <h:outputLabel id="o-last-name" for="it-last-name" value="Last name:"/>
+                <h:inputText id="it-last-name" value="#{registerBacker.lastName}"/>
+                <h:panelGroup/>
+                <h:message for="it-last-name"/>
+            </h:panelGrid>
+            <h:commandButton value="Register" action="#{registerBacker.register}"/>
+        </h:form>
+    </f:view>
+</h:body>
+</html>
