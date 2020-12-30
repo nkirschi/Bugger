@@ -6,6 +6,7 @@ import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Notification;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
 
@@ -73,11 +74,25 @@ public class HomeBacker implements Serializable {
     private transient TopicService topicService;
 
     /**
+     * Constructs a new home page backing bean.
+     *
+     * @param session The current user session.
+     * @param notificationService The notification service to use.
+     * @param topicService The topic service to use.
+     */
+    public HomeBacker(final UserSession session, final NotificationService notificationService,
+                      final TopicService topicService) {
+        this.session = session;
+        this.notificationService = notificationService;
+        this.topicService = topicService;
+    }
+
+    /**
      * Initializes the paginators for notifications and topics as inner classes.
      */
     @PostConstruct
     public void init() {
-        topics = new Paginator<Topic>("", 20) {
+        topics = new Paginator<Topic>("", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Topic> fetch() {
                 return topicService.getSelectedTopics(getSelection());
@@ -132,8 +147,8 @@ public class HomeBacker implements Serializable {
      * @param topic The topic in question.
      * @return The time stamp of the last action as a {@code ZonedDateTime}.
      */
-    public ZonedDateTime lastChange(Topic topic) {
-        return null;
+    public ZonedDateTime lastChange(final Topic topic) {
+        return topicService.lastChange(topic);
     }
 
     /**
