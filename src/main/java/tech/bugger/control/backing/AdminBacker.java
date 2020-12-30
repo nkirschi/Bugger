@@ -1,23 +1,19 @@
 package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.ApplicationSettings;
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.service.SettingsService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Organization;
-import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
-import javax.faces.context.FacesContext;
+import javax.faces.context.ExternalContext;
+import javax.faces.event.ValueChangeEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -27,160 +23,175 @@ import java.util.List;
 @Named
 public class AdminBacker {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(AdminBacker.class);
 
-    private User user;
-    private Part tempLogo;
-    private Organization organization;
-    private Configuration configuration;
-    private List<String> availableThemes;
-
-    @Inject
-    private ApplicationSettings applicationSettings;
-
-    @Inject
-    private SettingsService settingsService;
-
-    @Inject
-    private ProfileService profileService;
-
-    @Inject
-    private UserSession session;
-
-    @Inject
-    private FacesContext fctx;
+    /**
+     * The application settings cache.
+     */
+    private final ApplicationSettings applicationSettings;
 
     /**
-     * Initializes the admin page. Checks if the user is allowed to access the page. If not, acts as if the page did not
-     * exist. Puts the names of the available CSS files into {@code availableThemes}.
+     * The settings service providing logic.
+     */
+    private final SettingsService settingsService;
+
+    /**
+     * Temporary configuration being filled with user input.
+     */
+    private Configuration configuration;
+
+    /**
+     * Temporary organization being filled with user input.
+     */
+    private Organization organization;
+
+    /**
+     * Reference to the current {@link ExternalContext}.
+     */
+    private final ExternalContext ectx;
+
+    /**
+     * Constructs a new admin page backing bean with the necessary dependencies.
+     *
+     * @param applicationSettings The application settings cache.
+     * @param settingsService     The settings service to use.
+     * @param ectx                The current {@link ExternalContext} of the application.
+     */
+    @Inject
+    public AdminBacker(final ApplicationSettings applicationSettings, final SettingsService settingsService,
+                       final ExternalContext ectx) {
+        this.applicationSettings = applicationSettings;
+        this.settingsService = settingsService;
+        this.ectx = ectx;
+    }
+
+    /**
+     * Initializes temporary data holders for the application configuration and organization data.
      */
     @PostConstruct
     public void init() {
-
+        configuration = new Configuration(applicationSettings.getConfiguration());
+        organization = new Organization(applicationSettings.getOrganization());
     }
 
     /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
+     * Redirects to the place where to browse users.
      *
-     * @param feedback The feedback with details on what to display.
+     * @return The direction.
      */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
-
+    public String browseUsers() {
+        // TODO redirect to search page on users tab with no filters
+        return null;
     }
 
     /**
-     * Creates a new user.
-     */
-    public void createUser() {
-
-    }
-
-    /**
-     * Converts the uploaded logo in {@code tempLogo} into a {@code byte[]} and puts it into {@code organization}.
-     */
-    public void uploadLogo() {
-
-    }
-
-    /**
-     * Saves and applies the changes made.
-     */
-    public void saveSettings() {
-
-    }
-
-    /**
-     * {@code user} holds data for a new user an administrator wants to create.
+     * Redirects to the place where to create a new user.
      *
-     * @return The user.
+     * @return The direction.
      */
-    public User getUser() {
-        return user;
+    public String createUser() {
+        // TODO redirect to edit-user.xhtml with parameters
+        return null;
     }
 
     /**
-     * {@code user} holds data for a new user an administrator wants to create.
+     * Converts the uploaded logo into a {@code byte[]} and puts it into the temporary configuration.
      *
-     * @param user The user to set.
+     * This method is only called when the uploaded file actually changes.
+     *
+     * @param vce The event fired upon change in uploaded file.
      */
-    public void setUser(User user) {
-        this.user = user;
+    public void uploadLogo(final ValueChangeEvent vce) {
+        Part upload = (Part) vce.getNewValue();
+        try {
+            byte[] logo = settingsService.readFile(upload.getInputStream());
+            if (logo != null) {
+                organization.setLogo(logo);
+            }
+        } catch (IOException e) {
+            log.error("Could not fetch input stream from uploaded logo.", e);
+        }
     }
 
     /**
-     * {@code tempLogo} temporarily holds an uploaded logo. This needs to be converted to something actually usable.
+     * Removes the current logo of the organization.
      *
-     * @return The tempLogo.
+     * @param vce The event fired upon change on the selection.
      */
-    public Part getTempLogo() {
-        return tempLogo;
+    public void removeLogo(final ValueChangeEvent vce) {
+        if ((boolean) vce.getNewValue()) {
+            organization.setLogo(new byte[0]);
+        }
     }
 
     /**
-     * {@code tempLogo} temporarily holds an uploaded logo. This needs to be converted to something actually usable.
+     * Determines the available themes for skinning the application.
      *
-     * @param tempLogo The tempLogo to set.
+     * @return The filenames of the available themes.
      */
-    public void setTempLogo(Part tempLogo) {
-        this.tempLogo = tempLogo;
+    public List<String> getAvailableThemes() {
+        List<String> themes = settingsService.discoverFiles(ectx.getRealPath("/resources/design/themes"));
+        if (themes.isEmpty()) {
+            themes.add(organization.getTheme()); // at least current theme for displaying
+        }
+        return themes;
     }
 
     /**
-     * {@code organization} holds details for modifying things like the appearance of the front end without those
-     * options being already effective.
-     *
-     * @return The organization.
+     * Saves and applies the changes made to the application configuration.
      */
-    public Organization getOrganization() {
-        return organization;
+    public void saveConfiguration() {
+        if (settingsService.updateConfiguration(configuration)) {
+            applicationSettings.setConfiguration(configuration);
+        }
     }
 
     /**
-     * {@code organization} holds details for modifying things like the appearance of the front end without those
-     * options being already effective.
-     *
-     * @param organization The organization to set.
+     * Saves and applies the changes made to the organization data.
      */
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
+    public void saveOrganization() {
+        if (settingsService.updateOrganization(organization)) {
+            applicationSettings.setOrganization(organization);
+        }
     }
 
     /**
-     * {@code configuration} holds information about system-wide moderation options without those options already being
-     * in effect.
+     * Returns the temporary application configuration.
      *
-     * @return The configuration.
+     * @return The current configuration.
      */
     public Configuration getConfiguration() {
         return configuration;
     }
 
     /**
-     * {@code configuration} holds information about system-wide moderation options without those options already being
-     * in effect.
+     * Sets the temporary application configuration.
      *
      * @param configuration The configuration to set.
      */
-    public void setConfiguration(Configuration configuration) {
+    public void setConfiguration(final Configuration configuration) {
         this.configuration = configuration;
     }
 
     /**
-     * {@code availableThemes} holds information about which themes can be selected.
+     * Returns the temporary organization data.
      *
-     * @return The availableThemes.
+     * @return The current organization data.
      */
-    public List<String> getAvailableThemes() {
-        return availableThemes;
+    public Organization getOrganization() {
+        return organization;
     }
 
     /**
-     * {@code availableThemes} holds information about which themes can be selected.
+     * Sets the temporary organization data.
      *
-     * @param availableThemes The availableThemes to set.
+     * @param organization The organization to set.
      */
-    public void setAvailableThemes(List<String> availableThemes) {
-        this.availableThemes = availableThemes;
+    public void setOrganization(final Organization organization) {
+        this.organization = organization;
     }
 
 }

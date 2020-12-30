@@ -2,49 +2,76 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Map;
+import java.util.Objects;
 
 /**
  * DTO representing application configuration data.
  */
 public class Configuration implements Serializable {
+
     @Serial
     private static final long serialVersionUID = -8910178508236757385L;
 
-    private boolean guestMode;
-    private boolean closedReportPosting;
-    private String emailFormat;
-    private String allowedFileExtensions;
-    private int maxAllowedAttachments;
-    private Map<Integer, Integer> votingWeightDefinition;
+    /**
+     * Whether guests are granted reading permissions.
+     */
+    private boolean guestReading;
 
     /**
-     * Constructs an empty configuration object.
+     * Whether posting in closed reports is permitted.
      */
-    public Configuration() {
+    private boolean closedReportPosting;
 
-    }
+    /**
+     * Mandatory format regex for user e-mails.
+     */
+    private String userEmailFormat;
+
+    /**
+     * Definition of user voting weights as comma-separated list.
+     */
+    private String votingWeightDefinition;
+
+    /**
+     * Allowed extensions for uploaded files as comma-separated list.
+     */
+    private String allowedFileExtensions;
+
+    /**
+     * Maximum allowed number of post attachments.
+     */
+    private int maxAttachmentsPerPost;
 
     /**
      * Constructs a new configuration data object from the specified parameters.
      *
-     * @param guestMode              Whether guests have reading permissions.
+     * @param guestReading           Whether guests have reading permissions.
      * @param closedReportPosting    Whether posting in closed reports is allowed.
-     * @param emailFormat            The required format of email addresses.
+     * @param userEmailFormat        The required format of email addresses.
      * @param allowedFileExtensions  The allowed file extensions as comma-separated list.
-     * @param maxAllowedAttachments  The maximum allowed number of post attachments.
-     * @param votingWeightDefinition The definition of a user's voting weight as map giving the minimally required total
-     *                               number of posts for a certain voting power level.
+     * @param maxAttachmentsPerPost  The maximum allowed number of post attachments.
+     * @param votingWeightDefinition The definition of a user's voting weight as comma-separated list.
      */
-    public Configuration(boolean guestMode, boolean closedReportPosting, String emailFormat,
-                         String allowedFileExtensions, int maxAllowedAttachments,
-                         Map<Integer, Integer> votingWeightDefinition) {
-        this.guestMode = guestMode;
+    public Configuration(final boolean guestReading, final boolean closedReportPosting, final String userEmailFormat,
+                         final String allowedFileExtensions, final int maxAttachmentsPerPost,
+                         final String votingWeightDefinition) {
+        this.guestReading = guestReading;
         this.closedReportPosting = closedReportPosting;
-        this.emailFormat = emailFormat;
+        this.userEmailFormat = userEmailFormat;
         this.allowedFileExtensions = allowedFileExtensions;
-        this.maxAllowedAttachments = maxAllowedAttachments;
+        this.maxAttachmentsPerPost = maxAttachmentsPerPost;
         this.votingWeightDefinition = votingWeightDefinition;
+    }
+
+    /**
+     * Constructs a new configuration data object from the given configuration.
+     *
+     * @param configuration The configuration to clone.
+     */
+    public Configuration(final Configuration configuration) {
+        this(configuration.guestReading, configuration.closedReportPosting,
+             configuration.userEmailFormat, configuration.allowedFileExtensions,
+             configuration.maxAttachmentsPerPost, configuration.votingWeightDefinition);
     }
 
     /**
@@ -52,17 +79,17 @@ public class Configuration implements Serializable {
      *
      * @return Whether guests have reading permissions.
      */
-    public boolean isGuestMode() {
-        return guestMode;
+    public boolean isGuestReading() {
+        return guestReading;
     }
 
     /**
      * Sets whether guests are granted reading privileges.
      *
-     * @param guestMode Whether guests have reading permissions.
+     * @param guestReading Whether guests have reading permissions.
      */
-    public void setGuestMode(boolean guestMode) {
-        this.guestMode = guestMode;
+    public void setGuestReading(final boolean guestReading) {
+        this.guestReading = guestReading;
     }
 
     /**
@@ -79,7 +106,7 @@ public class Configuration implements Serializable {
      *
      * @param closedReportPosting Whether posting in closed reports is allowed.
      */
-    public void setClosedReportPosting(boolean closedReportPosting) {
+    public void setClosedReportPosting(final boolean closedReportPosting) {
         this.closedReportPosting = closedReportPosting;
     }
 
@@ -88,17 +115,37 @@ public class Configuration implements Serializable {
      *
      * @return The required format of email addresses.
      */
-    public String getEmailFormat() {
-        return emailFormat;
+    public String getUserEmailFormat() {
+        return userEmailFormat;
     }
 
     /**
      * Sets the mandatory format email addresses of users must have.
      *
-     * @param emailFormat The required format of email addresses.
+     * @param userEmailFormat The required format of email addresses.
      */
-    public void setEmailFormat(String emailFormat) {
-        this.emailFormat = emailFormat;
+    public void setUserEmailFormat(final String userEmailFormat) {
+        this.userEmailFormat = userEmailFormat;
+    }
+
+    /**
+     * Returns the definition of a user's voting weight.
+     *
+     * @return The voting weight definition as map giving the minimally required total number of posts for a certain
+     *         voting power level.
+     */
+    public String getVotingWeightDefinition() {
+        return votingWeightDefinition;
+    }
+
+    /**
+     * Sets the definition of a user's voting weight.
+     *
+     * @param votingWeightDefinition The voting weight definition as map giving the minimally required total number of
+     *                               posts for a certain voting power level.
+     */
+    public void setVotingWeightDefinition(final String votingWeightDefinition) {
+        this.votingWeightDefinition = votingWeightDefinition;
     }
 
     /**
@@ -115,7 +162,7 @@ public class Configuration implements Serializable {
      *
      * @param allowedFiletypes The allowed file extensions as comma-separated list.
      */
-    public void setAllowedFileExtension(String allowedFiletypes) {
+    public void setAllowedFileExtensions(final String allowedFiletypes) {
         this.allowedFileExtensions = allowedFiletypes;
     }
 
@@ -124,37 +171,17 @@ public class Configuration implements Serializable {
      *
      * @return The maximum allowed number of post attachments.
      */
-    public int getMaxAllowedAttachments() {
-        return maxAllowedAttachments;
+    public int getMaxAttachmentsPerPost() {
+        return maxAttachmentsPerPost;
     }
 
     /**
      * Sets the maximum number of attachments a post might have.
      *
-     * @param maxAllowedAttachments The maximum allowed number of post attachments.
+     * @param maxAttachmentsPerPost The maximum allowed number of post attachments.
      */
-    public void setMaxAllowedAttachments(int maxAllowedAttachments) {
-        this.maxAllowedAttachments = maxAllowedAttachments;
-    }
-
-    /**
-     * Returns the definition of a user's voting weight.
-     *
-     * @return The voting weight definition as map giving the minimally required total number of posts for a certain
-     *         voting power level.
-     */
-    public Map<Integer, Integer> getVotingWeightDefinition() {
-        return votingWeightDefinition;
-    }
-
-    /**
-     * Sets the definition of a user's voting weight.
-     *
-     * @param votingWeightDefinition The voting weight definition as map giving the minimally required total number of
-     *                               posts for a certain voting power level.
-     */
-    public void setVotingWeightDefinition(Map<Integer, Integer> votingWeightDefinition) {
-        this.votingWeightDefinition = votingWeightDefinition;
+    public void setMaxAttachmentsPerPost(final int maxAttachmentsPerPost) {
+        this.maxAttachmentsPerPost = maxAttachmentsPerPost;
     }
 
     /**
@@ -164,11 +191,21 @@ public class Configuration implements Serializable {
      * @return {@code true} iff {@code other} is a semantically equivalent configuration.
      */
     @Override
-    public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Configuration)) {
+            return false;
+        }
+        Configuration that = (Configuration) other;
+        return guestReading == that.guestReading
+                && closedReportPosting == that.closedReportPosting
+                && maxAttachmentsPerPost == that.maxAttachmentsPerPost
+                && userEmailFormat.equals(that.userEmailFormat)
+                && allowedFileExtensions.equals(that.allowedFileExtensions)
+                && votingWeightDefinition.equals(that.votingWeightDefinition);
     }
-
 
     /**
      * Calculates a hash code for this configuration for hashing purposes, and to fulfil the {@link
@@ -178,8 +215,8 @@ public class Configuration implements Serializable {
      */
     @Override
     public int hashCode() {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        return Objects.hash(guestReading, closedReportPosting, userEmailFormat, allowedFileExtensions,
+                            maxAttachmentsPerPost, votingWeightDefinition);
     }
 
     /**
@@ -189,8 +226,14 @@ public class Configuration implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "Configuration{"
+                + "guestMode=" + guestReading
+                + ", closedReportPosting=" + closedReportPosting
+                + ", emailFormat='" + userEmailFormat + "'"
+                + ", allowedFileExtensions='" + allowedFileExtensions + "'"
+                + ", maxAttachmentsPerPost=" + maxAttachmentsPerPost
+                + ", votingWeightDefinition=" + votingWeightDefinition
+                + '}';
     }
 
 }

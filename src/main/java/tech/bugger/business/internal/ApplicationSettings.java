@@ -1,25 +1,66 @@
 package tech.bugger.business.internal;
 
+import tech.bugger.business.service.SettingsService;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Organization;
-import tech.bugger.global.util.Log;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * Internal bean holding application-wide settings.
+ * Cache of application-wide settings.
  */
 @ApplicationScoped
 @Named
 public class ApplicationSettings implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 215148767008692866L;
-    private static final Log log = Log.forClass(ApplicationSettings.class);
+
+    /**
+     * The cached application configuration.
+     */
     private Configuration configuration;
+
+    /**
+     * The cached organization data.
+     */
     private Organization organization;
+
+    /**
+     * Settings service providing logic.
+     */
+    private transient SettingsService settingsService;
+
+    /**
+     * Constructs a new application settings cache for proxying.
+     */
+    public ApplicationSettings() {
+        // default constructor for CDI
+    }
+
+    /**
+     * Constructs a new application settings cache with the necessary dependencies.
+     *
+     * @param settingsService The settings service to use.
+     */
+    @Inject
+    public ApplicationSettings(final SettingsService settingsService) {
+        this.settingsService = settingsService;
+    }
+
+    /**
+     * Loads the application settings from the data store.
+     */
+    @PostConstruct
+    public void loadSettings() {
+        configuration = settingsService.loadConfiguration();
+        organization = settingsService.loadOrganization();
+    }
 
     /**
      * Gets the configuration.
@@ -35,7 +76,7 @@ public class ApplicationSettings implements Serializable {
      *
      * @param configuration The configuration to set.
      */
-    public void setConfiguration(Configuration configuration) {
+    public void setConfiguration(final Configuration configuration) {
         this.configuration = configuration;
     }
 
@@ -53,7 +94,7 @@ public class ApplicationSettings implements Serializable {
      *
      * @param organization The organization settings to set.
      */
-    public void setOrganization(Organization organization) {
+    public void setOrganization(final Organization organization) {
         this.organization = organization;
     }
 

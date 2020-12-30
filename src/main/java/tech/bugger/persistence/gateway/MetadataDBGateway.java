@@ -5,6 +5,7 @@ import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.StoreException;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,17 +39,16 @@ public class MetadataDBGateway implements MetadataGateway {
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public Metadata retrieveMetadata() {
+        Metadata metadata = null;
         try (PreparedStatement stmt = conn.prepareStatement("SELECT version FROM metadata;")) {
             if (conn.getMetaData().getTables(null, null, "metadata", new String[]{"TABLE"}).next()) {
                 log.debug("Found metadata table in database.");
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    return new Metadata(rs.getString("version"));
+                    metadata = new Metadata(rs.getString("version"));
                 }
             } else {
                 log.debug("Metadata table does not exist.");
@@ -57,7 +57,7 @@ public class MetadataDBGateway implements MetadataGateway {
             log.error("Could not retrieve schema version from database.", e);
             throw new StoreException(e);
         }
-        return null;
+        return metadata;
     }
 
     /**
@@ -65,7 +65,7 @@ public class MetadataDBGateway implements MetadataGateway {
      */
     @Override
     public void initializeSchema(final InputStream is) {
-        Scanner scanner = new Scanner(is);
+        Scanner scanner = new Scanner(is, StandardCharsets.UTF_8);
         scanner.useDelimiter(";(?=(?:[^$]*\\$\\$[^$]*\\$\\$)*[^$]*\\Z)");
         try (Statement stmt = conn.createStatement()) {
             while (scanner.hasNext()) {
