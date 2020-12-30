@@ -1,18 +1,15 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.AuthenticationService;
-import tech.bugger.business.util.Feedback;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
-import javax.faces.context.FacesContext;
+import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.service.AuthenticationService;
+import tech.bugger.business.service.ProfileService;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
 
 /**
  * Backing Bean for the password set page.
@@ -21,20 +18,67 @@ import javax.inject.Named;
 @Named
 public class PasswordSetBacker {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(PasswordSetBacker.class);
 
+    /**
+     * The {@link User} whose password should get set.
+     */
     private User user;
+
+    /**
+     * The currently typed password.
+     */
     private String password;
+
+    /**
+     * The currently typed repeated password.
+     */
+    private String passwordRepeat;
+
+    /**
+     * The token being used to set a password.
+     */
     private String token;
 
-    @Inject
-    private AuthenticationService authenticationService;
+    /**
+     * The service providing access methods for authentication related procedures.
+     */
+    private final AuthenticationService authenticationService;
 
-    @Inject
-    private UserSession session;
+    /**
+     * The service providing access methods for profile and user related procedures.
+     */
+    private final ProfileService profileService;
 
+    /**
+     * The current user session.
+     */
+    private final UserSession session;
+
+    /**
+     * The current external context.
+     */
+    private final ExternalContext ectx;
+
+    /**
+     * Constructs a new register page backing bean with the necessary dependencies.
+     *
+     * @param authenticationService The authentication service to use.
+     * @param profileService        The profile service to use.
+     * @param session               The current {@link UserSession}.
+     * @param ectx                  The current external context.
+     */
     @Inject
-    private FacesContext fctx;
+    public PasswordSetBacker(final AuthenticationService authenticationService, final ProfileService profileService,
+                             final UserSession session, final ExternalContext ectx) {
+        this.authenticationService = authenticationService;
+        this.profileService = profileService;
+        this.session = session;
+        this.ectx = ectx;
+    }
 
     /**
      * Initializes the page for setting a new password. Checks if the token for setting a new password is still valid.
@@ -42,40 +86,30 @@ public class PasswordSetBacker {
      */
     @PostConstruct
     public void init() {
+        token = ectx.getRequestParameterMap().get("token");
+        Integer userId = authenticationService.getUserIdForToken(token);
+        log.debug("Showing Password-Set page with token '" + token + "' for user ID #" + userId + '.');
 
-    }
-
-    /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
-     *
-     * @param feedback The feedback with details on what to display.
-     */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
-
+        if (userId != null) {
+            user = profileService.getUser(userId);
+        }
     }
 
     /**
      * Sets the user's password to the new value in {@code password}.
+     *
+     * @return The site to redirect to or {@code null}.
      */
-    public void setUserPassword() {
-
+    public String setUserPassword() {
+        if (authenticationService.setPassword(user, password, token)) {
+            return "home.xhtml";
+        }
+        return null;
     }
 
     /**
-     * @return The user.
-     */
-    public User getUser() {
-        return user;
-    }
-
-    /**
-     * @param user The user to set.
-     */
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    /**
+     * Returns the current password.
+     *
      * @return The password.
      */
     public String getPassword() {
@@ -83,13 +117,35 @@ public class PasswordSetBacker {
     }
 
     /**
+     * Sets a new password.
+     *
      * @param password The password to set.
      */
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
     /**
+     * Returns the current repeated password.
+     *
+     * @return The repeated password.
+     */
+    public String getPasswordRepeat() {
+        return passwordRepeat;
+    }
+
+    /**
+     * Sets a new repeated password.
+     *
+     * @param passwordRepeat The repeated password to set.
+     */
+    public void setPasswordRepeat(final String passwordRepeat) {
+        this.passwordRepeat = passwordRepeat;
+    }
+
+    /**
+     * Returns the current token.
+     *
      * @return The token.
      */
     public String getToken() {
@@ -97,10 +153,21 @@ public class PasswordSetBacker {
     }
 
     /**
+     * Sets a new token.
+     *
      * @param token The token to set.
      */
-    public void setToken(String token) {
+    public void setToken(final String token) {
         this.token = token;
+    }
+
+    /**
+     * Returns whether the supplied token is valid.
+     *
+     * @return Whether the supplied token is valid.
+     */
+    public boolean isValidToken() {
+        return user != null;
     }
 
 }
