@@ -64,7 +64,19 @@ public class ProfileService {
      * @return The user, if they exist, {@code null} if no user with that ID exists.
      */
     public User getUser(final int id) {
-        return null;
+        User user = null;
+        Transaction tx = transactionManager.begin();
+        try (tx) {
+            user = tx.newUserGateway().getUserByID(id);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("User could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("User could not be created.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return user;
     }
 
     /**

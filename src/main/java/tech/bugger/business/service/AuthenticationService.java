@@ -133,7 +133,7 @@ public class AuthenticationService {
         Mail mail = new MailBuilder()
                 .to(user.getEmailAddress())
                 .subject("Omae wa mou shindeiru.")
-                .content("NANI?! " + token.getValue())
+                .content("NANI?! http://localhost:8080/faces/view/public/password-set.xhtml?token=" + token.getValue())
                 .envelop();
         priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.HIGH, () -> {
             int tries = 1;
@@ -178,6 +178,28 @@ public class AuthenticationService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return false;
+    }
+
+    /**
+     * Returns the associated user ID for the token.
+     *
+     * @param token The token to find the associated user for.
+     * @return The associated user's ID or {@code null} if it's invalid not associated with any user.
+     */
+    public Integer getUserIdForToken(final String token) {
+        Integer userId = null;
+        Transaction tx = transactionManager.begin();
+        try (tx) {
+            userId = tx.newTokenGateway().getUserIdForToken(token);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("No user associated with this token.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("User could not be fetched.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return userId;
     }
 
     /**

@@ -28,6 +28,15 @@ public interface TokenGateway {
     boolean isValid(String token);
 
     /**
+     * Returns the associated user ID for the token.
+     *
+     * @param token The token to find the associated user for.
+     * @return The associated user's ID.
+     * @throws NotFoundException The token could not be found.
+     */
+    int getUserIdForToken(String token) throws NotFoundException;
+
+    /**
      * Deletes expired verification tokens and unverified users that lack a valid verification token.
      *
      * @param expirationAge The maximum number of seconds a verification token is to be considered valid.

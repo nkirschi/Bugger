@@ -110,6 +110,27 @@ public class TokenDBGateway implements TokenGateway {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public int getUserIdForToken(final String token) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM token WHERE value = ?")) {
+            stmt.setString(1, token);
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("verifies");
+            } else {
+                log.error("No associated user found.");
+                throw new NotFoundException("Associated user couldn't be found!");
+            }
+        } catch (SQLException e) {
+            log.error("Couldn't verify the token's validity due to a database error.", e);
+            throw new StoreException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void cleanUp(final int expirationAge) {
     }
 
