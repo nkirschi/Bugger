@@ -8,7 +8,9 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
@@ -30,14 +32,34 @@ public class HeaderBacker implements Serializable {
     private List<Report> reportSuggestions;
     private List<User> userSuggestions;
 
-    @Inject
-    private transient SearchService searchService;
-
-    @Inject
     private UserSession session;
-
-    @Inject
     private ApplicationSettings applicationSettings;
+
+    private boolean displayMenu;
+
+    /**
+     * Constructs a new header backing bean with the necessary dependencies.
+     *
+     * @param session             The current user session.
+     * @param applicationSettings The application settings cache.
+     */
+    @Inject
+    public HeaderBacker(final UserSession session, final ApplicationSettings applicationSettings) {
+        this.session = session;
+        this.applicationSettings = applicationSettings;
+    }
+
+    @PostConstruct
+    private void init() {
+        //session.getUser();
+        // TODO
+        user = new User();
+        user.setAdministrator(true);
+        user.setUsername("321NiceGuy123");
+        user.setFirstName("Barack");
+        user.setLastName("Obama");
+        closeMenu();
+    }
 
     /**
      * Takes the user to the search page with the current {@code searchQuery} already typed in.
@@ -125,5 +147,36 @@ public class HeaderBacker implements Serializable {
      */
     public void setUserSuggestions(List<User> userSuggestions) {
         this.userSuggestions = userSuggestions;
+    }
+
+    public ApplicationSettings getApplicationSettings() {
+        return applicationSettings;
+    }
+
+    public UserSession getSession() {
+        return session;
+    }
+
+    public String toggleMenu() {
+        log.debug("displayMenu war " + displayMenu);
+        if (displayMenu) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+        log.debug("displayMenu ist " + displayMenu);
+        return null;
+    }
+
+    public boolean getDisplayMenu() {
+        return displayMenu;
+    }
+
+    public void closeMenu() {
+        displayMenu=false;
+    }
+
+    public void openMenu() {
+        displayMenu=true;
     }
 }
