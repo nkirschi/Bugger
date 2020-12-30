@@ -1,26 +1,87 @@
 package tech.bugger.business.service;
 
-import tech.bugger.business.util.Feedback;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-
+import java.util.ResourceBundle;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
-import javax.enterprise.inject.Any;
 import javax.inject.Inject;
+import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.PriorityExecutor;
+import tech.bugger.business.util.PriorityTask;
+import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.transfer.Token;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.util.Mail;
+import tech.bugger.persistence.util.MailBuilder;
+import tech.bugger.persistence.util.Mailer;
+import tech.bugger.persistence.util.Transaction;
+import tech.bugger.persistence.util.TransactionManager;
 
 /**
- * Service providing methods related to authentication. A {@code Feedback} event is fired, if unexpected circumstances
+ * Service providing methods related to authentication. A {@link Feedback} event is fired, if unexpected circumstances
  * occur.
  */
 @Dependent
 public class AuthenticationService {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(AuthenticationService.class);
 
+    /**
+     * Maximum amount of times an email should be tried to resend.
+     */
+    private static final int MAX_EMAIL_TRIES = 3;
+
+    /**
+     * Transaction manager used for creating transactions.
+     */
+    private final TransactionManager transactionManager;
+
+    /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Resource bundle for feedback messages.
+     */
+    private final ResourceBundle messagesBundle;
+
+    /**
+     * The {@link PriorityExecutor} instance to use when sending e-mails.
+     */
+    private final PriorityExecutor priorityExecutor;
+
+    /**
+     * The {@link Mailer} instance to use when sending e-mails.
+     */
+    private final Mailer mailer;
+
+    /**
+     * Constructs a new authentication service with the given dependencies.
+     *
+     * @param transactionManager The transaction manager to use for creating transactions.
+     * @param feedbackEvent      The feedback event to use for user feedback.
+     * @param messagesBundle     The resource bundle for feedback messages.
+     * @param priorityExecutor   The priority executor to use when sending e-mails.
+     * @param mailer             The mailer to use.
+     */
     @Inject
-    @Any
-    Event<Feedback> feedback;
+    public AuthenticationService(final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
+                                 @RegistryKey("messages") final ResourceBundle messagesBundle,
+                                 @RegistryKey("mails") final PriorityExecutor priorityExecutor,
+                                 @RegistryKey("main") final Mailer mailer) {
+        this.transactionManager = transactionManager;
+        this.feedbackEvent = feedbackEvent;
+        this.messagesBundle = messagesBundle;
+        this.priorityExecutor = priorityExecutor;
+        this.mailer = mailer;
+    }
+
 
     /**
      * Authenticates a user, e.g. when logging in.
@@ -29,20 +90,54 @@ public class AuthenticationService {
      * @param password The password.
      * @return The user with all their data.
      */
-    public User authenticate(String username, String password) {
+    public User authenticate(final String username, final String password) {
         return null;
     }
 
     /**
-     * Registers a new user.
+     * Registers a new user by generating a {@link Token} and sending a confirmation email to the new user.
      *
      * @param user The user to be registered.
      */
-    public void register(User user) {
+    public void register(final User user) {
+        Token token;
+        Transaction tx = transactionManager.begin();
+        try (tx) {
+            token = tx.newTokenGateway().generateToken(user, Token.Type.REGISTER);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("The user couldn't be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            return;
+        } catch (TransactionException e) {
+            log.error("Token could not be generated.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            return;
+        }
+
+        if (token != null) {
+            Mail mail = new MailBuilder()
+                    .to(user.getEmailAddress())
+                    .subject("Omae wa mou shindeiru.")
+                    .content("NANI?! " + token.getValue())
+                    .envelop();
+            priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.HIGH, () -> {
+                int tries = 1;
+                while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
+                    log.warning("Trying to send e-mail again. Try #" + tries + '.');
+                }
+            }));
+        }
     }
 
-    public void setPassword(User user, String password, String token) {
-
+    /**
+     * Sets the password for the given user using the given token in the process.
+     *
+     * @param user     The {@link User} whose password should be set.
+     * @param password The password to set.
+     * @param token    The used authentication token.
+     */
+    public void setPassword(final User user, final String password, final String token) {
     }
 
     /**
@@ -51,7 +146,7 @@ public class AuthenticationService {
      *
      * @param user The user who forgot their password.
      */
-    public void forgotPassword(User user) {
+    public void forgotPassword(final User user) {
     }
 
     /**
@@ -60,7 +155,17 @@ public class AuthenticationService {
      * @param token The unique String identifying the token.
      * @return {@code true} if the token is valid, {@code false} otherwise.
      */
-    public boolean isValid(String token) {
-        return false;
+    public boolean isValid(final String token) {
+        boolean valid = false;
+        Transaction tx = transactionManager.begin();
+        try (tx) {
+            valid = tx.newTokenGateway().isValid(token);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Token status could not be checked.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return valid;
     }
+
 }
