@@ -49,8 +49,7 @@ public class MatchingFieldValidator implements Validator<String> {
      * @throws ValidatorException If validation fails.
      */
     @Override
-    public void validate(final FacesContext fctx, final UIComponent component, final String value)
-            throws ValidatorException {
+    public void validate(final FacesContext fctx, final UIComponent component, final String value) {
         // Obtain the client ID of the other field from f:attribute.
         String otherId = (String) component.getAttributes().get("otherId");
         log.debug("Checking text in '" + otherId + "' for equality.");
