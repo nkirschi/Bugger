@@ -129,4 +129,24 @@ public class UserDBGatewayTest {
         assertThrows(IllegalArgumentException.class, () -> gateway.updateUser(copy));
     }
 
+    @Test
+    public void testIsEmailAssignedNo() {
+        assertFalse(() -> gateway.isEmailAssigned("t@t.tk"));
+    }
+
+    @Test
+    public void testIsEmailAssignedYes() {
+        User copy = new User(user);
+        gateway.createUser(copy);
+        System.out.println(copy);
+        assertTrue(() -> gateway.isEmailAssigned("test@test.de"));
+    }
+
+    @Test
+    public void testIsEmailAssignedWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).isEmailAssigned("t@t.tk"));
+    }
+
 }
