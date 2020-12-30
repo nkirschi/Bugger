@@ -115,19 +115,17 @@ public class AuthenticationService {
             return;
         }
 
-        if (token != null) {
-            Mail mail = new MailBuilder()
-                    .to(user.getEmailAddress())
-                    .subject("Omae wa mou shindeiru.")
-                    .content("NANI?! " + token.getValue())
-                    .envelop();
-            priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.HIGH, () -> {
-                int tries = 1;
-                while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
-                    log.warning("Trying to send e-mail again. Try #" + tries + '.');
-                }
-            }));
-        }
+        Mail mail = new MailBuilder()
+                .to(user.getEmailAddress())
+                .subject("Omae wa mou shindeiru.")
+                .content("NANI?! " + token.getValue())
+                .envelop();
+        priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.HIGH, () -> {
+            int tries = 1;
+            while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
+                log.warning("Trying to send e-mail again. Try #" + tries + '.');
+            }
+        }));
     }
 
     /**
