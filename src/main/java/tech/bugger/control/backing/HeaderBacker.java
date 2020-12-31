@@ -51,13 +51,7 @@ public class HeaderBacker implements Serializable {
 
     @PostConstruct
     private void init() {
-        //session.getUser();
-        // TODO
-        user = new User();
-        user.setAdministrator(true);
-        user.setUsername("321NiceGuy123");
-        user.setFirstName("Barack");
-        user.setLastName("Obama");
+        user = session.getUser();
         closeMenu();
     }
 
@@ -147,14 +141,6 @@ public class HeaderBacker implements Serializable {
      */
     public void setUserSuggestions(List<User> userSuggestions) {
         this.userSuggestions = userSuggestions;
-    }
-
-    public ApplicationSettings getApplicationSettings() {
-        return applicationSettings;
-    }
-
-    public UserSession getSession() {
-        return session;
     }
 
     public String toggleMenu() {

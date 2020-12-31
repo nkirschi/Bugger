@@ -9,30 +9,25 @@
       xmlns:ui="http://java.sun.com/jsf/facelets">
 
 <h:head>
-    <title>Bugger</title>
-    <h:outputStylesheet library = "design" name = "themes/#{headerBacker.applicationSettings.organization.theme}" />
+    <title> Bugger: #{title} </title>
     <h:outputStylesheet library = "design" name = "style.css" />
+    <h:outputStylesheet library = "design" name = "themes/#{applicationSettings.organization.theme}" />
 </h:head>
 
-<body background="black">
-    <h:panelGroup class="row">
+<h:body>
+    <h:panelGroup layout="block">
         <ui:include src= "/view/public/header.xhtml" />
-    </h:panelGroup>
-    <h:panelGroup class="row" layout="block">
-        <h:panelGroup class="col-lg-2" layout="block" styleClass="background"/>
-        <h:panelGroup class="col-lg-8" layout="block" styleClass="content">
-            <ui:insert name= "pageTitle" layout="block"/>
-            <h:messages id= "m_global" layout="block"/>
-            <ui:insert name= "content" layout="block"/>
+        <h:panelGroup styleClass="titlebar">
+            <h:outputLabel value="#{title}" styleClass="h2"/>
         </h:panelGroup>
-        <h:panelGroup class="col-lg-2" layout="block" styleClass="background"/>
+        <h:panelGroup layout="block">
+            <h:messages id= "m_global"/>
+        </h:panelGroup>
+        <h:panelGroup styleClass="content" layout="block">
+            <ui:insert name= "content"/>
+        </h:panelGroup>
+        <ui:include  src= "/view/public/footer.xhtml"/>
     </h:panelGroup>
-    <h:panelGroup class="row" layout="block">
-        <ui:include src= "/view/public/footer.xhtml" layout="block"/>
-    </h:panelGroup>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js" type="javascript"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" type="javascript"></script>
-</body>
+</h:body>
 
 </html>

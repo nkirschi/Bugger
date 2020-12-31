@@ -5,30 +5,79 @@
     font-weight: bold;
 }
 
-.left {
-    text-align: left;
-}
-
-.center {
-    text-align: center;
-}
-
-.right {
-    text-align: right;
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background-color: aqua;
 }
 
 .header {
+    position: absolute;
+    height: 80px;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background-color: gold;
+}
+
+.footer {
+    position: absolute;
+    height: 45px;
+    bottom: 0;
+    padding-top: 10px;
+    left: 0;
+    right: 0;
     text-align: center;
-    width: 95%;
-    margin: 0 auto;
+    background-color: crimson;
+}
+
+.footerElement {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.organizationName {
+    font-size: 18px;
+}
+
+.headerMenu {
+    display: inline-block;
+    margin-right: 50px;
+    margin-top: 30px;
+    float: right;
+}
+
+.dropdown {
+    z-index: 2;
+    position: absolute;
+    text-align: left;
+    padding: 10px;
+    background-color: cornflowerblue;
+    right: 60px;
+    top: 80px;
+}
+
+.titlebar {
+    background-color: darkorange;
+    display: inline-block;
+    padding: 5px;
+    left: 5%;
+    right: 5%;
+    top: 130px;
+    height: 40px;
+    position: absolute;
 }
 
 .content {
-    margin: 20px auto;
-}
-
-.background {
-    background: #ffe275
+    background-color: lawngreen;
+    overflow: auto;
+    padding: 10px;
+    left: 5%;
+    right: 5%;
+    top: 195px;
+    bottom: 65px;
+    position: absolute;
 }
 
 .h2 {
