@@ -78,6 +78,7 @@ public class AuthenticationServiceTest {
         lenient().doReturn(tokenGateway).when(tx).newTokenGateway();
         lenient().doReturn(userGateway).when(tx).newUserGateway();
         lenient().doReturn("SHA3-512").when(configReader).getString("HASH_ALGO");
+        lenient().doReturn(16).when(configReader).getInt("SALT_LENGTH");
 
         testUser = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, null, 3, false);

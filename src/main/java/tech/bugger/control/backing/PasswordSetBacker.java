@@ -82,14 +82,21 @@ public class PasswordSetBacker {
     /**
      * Initializes the page for setting a new password. Checks if the token for setting a new password is still valid.
      * If the user is already logged in, they are redirected to the home page.
+     *
+     * @return The site to redirect to.
      */
-    public void init() {
+    public String init() {
+        if (session.getUser() != null) {
+            return "home.xhtml";
+        }
+
         Integer userId = authenticationService.getUserIdForToken(token);
         log.debug("Showing Password-Set page with token '" + token + "' for user ID #" + userId + '.');
 
         if (userId != null) {
             user = profileService.getUser(userId);
         }
+        return null;
     }
 
     /**

@@ -3,7 +3,6 @@ package tech.bugger.control.validation;
 import java.util.Map;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
-import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
 import javax.faces.validator.ValidatorException;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,19 +31,14 @@ public class MatchingFieldValidatorTest {
     @Mock
     private UIInput otherInputMock;
 
-    @Mock
-    private UIViewRoot uiViewRootMock;
-
     @BeforeEach
     public void setUp() {
         matchingFieldValidator = new MatchingFieldValidator(ResourceBundleMocker.mock(""));
-        doReturn(uiViewRootMock).when(fctx).getViewRoot();
     }
 
     @Test
-    public void testValidateOnInvalidFieldId() {
-        doReturn(null).when(uiViewRootMock).findComponent(matches("invalidId"));
-        Map<String, Object> attributes = Map.of("otherId", "invalidId");
+    public void testValidateOnNoField() {
+        Map<String, Object> attributes = Map.of();
         doReturn(attributes).when(comp).getAttributes();
         assertThrows(IllegalArgumentException.class, () -> matchingFieldValidator.validate(fctx, comp, "test"));
     }
@@ -52,8 +46,7 @@ public class MatchingFieldValidatorTest {
     @Test
     public void testValidateNotEqual() {
         doReturn("test").when(otherInputMock).getValue();
-        doReturn(otherInputMock).when(uiViewRootMock).findComponent(matches("validId"));
-        Map<String, Object> attributes = Map.of("otherId", "validId");
+        Map<String, Object> attributes = Map.of("otherInput", otherInputMock);
         doReturn(attributes).when(comp).getAttributes();
         assertThrows(ValidatorException.class, () -> matchingFieldValidator.validate(fctx, comp, "tat"));
     }
@@ -61,8 +54,7 @@ public class MatchingFieldValidatorTest {
     @Test
     public void testValidateEqual() {
         doReturn("test").when(otherInputMock).getValue();
-        doReturn(otherInputMock).when(uiViewRootMock).findComponent(matches("validId"));
-        Map<String, Object> attributes = Map.of("otherId", "validId");
+        Map<String, Object> attributes = Map.of("otherInput", otherInputMock);
         doReturn(attributes).when(comp).getAttributes();
         assertDoesNotThrow(() -> matchingFieldValidator.validate(fctx, comp, "test"));
     }
@@ -71,8 +63,7 @@ public class MatchingFieldValidatorTest {
     public void testValidateValueNotLocally() {
         doReturn(null).when(otherInputMock).getValue();
         doReturn("test").when(otherInputMock).getSubmittedValue();
-        doReturn(otherInputMock).when(uiViewRootMock).findComponent(matches("validId"));
-        Map<String, Object> attributes = Map.of("otherId", "validId");
+        Map<String, Object> attributes = Map.of("otherInput", otherInputMock);
         doReturn(attributes).when(comp).getAttributes();
         assertDoesNotThrow(() -> matchingFieldValidator.validate(fctx, comp, "test"));
     }

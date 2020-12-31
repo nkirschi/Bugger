@@ -1,15 +1,21 @@
 package tech.bugger.control.util;
 
+import java.io.Serial;
+import java.io.Serializable;
+import javax.enterprise.context.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
-import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.global.util.Log;
 
-@WebListener
-public class UserSessionListener implements HttpSessionListener {
+@Eager
+@SessionScoped
+public class UserSessionListener implements HttpSessionListener, Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 6264897807639983293L;
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.
@@ -31,6 +37,7 @@ public class UserSessionListener implements HttpSessionListener {
      *
      * @param event The event being handled.
      */
+    @Override
     public void sessionCreated(final HttpSessionEvent event) {
         userSession.setLocale(ectx.getRequestLocale());
     }

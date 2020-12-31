@@ -1,7 +1,6 @@
 package tech.bugger.control.backing;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Locale;
 import javax.faces.context.ExternalContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,16 +11,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class RegisterBackerTest {
+public class PasswordSetBackerTest {
 
-    private RegisterBacker registerBacker;
+    private PasswordSetBacker passwordSetBacker;
 
     private User testUser;
 
@@ -40,31 +38,18 @@ public class RegisterBackerTest {
     @BeforeEach
     public void setUp() throws Exception {
         lenient().doReturn(Locale.GERMAN).when(userSession).getLocale();
-        registerBacker = new RegisterBacker(authenticationService, profileService, userSession, ectx);
+        passwordSetBacker = new PasswordSetBacker(authenticationService, profileService, userSession, ectx);
         testUser = new User();
     }
 
     @Test
     public void testInit() throws Exception {
-        registerBacker.init();
-
-        Field f = RegisterBacker.class.getDeclaredField("user");
-        f.setAccessible(true);
-        User internalUser = (User) f.get(registerBacker);
-
-        assertAll(() -> assertEquals(Language.GERMAN, internalUser.getPreferredLanguage()),
-                () -> assertEquals("", registerBacker.getUser().getUsername()),
-                () -> assertEquals("", registerBacker.getUser().getEmailAddress()),
-                () -> assertEquals("", registerBacker.getUser().getFirstName()),
-                () -> assertEquals("", registerBacker.getUser().getLastName()));
+        passwordSetBacker.init();
     }
 
     @Test
-    public void testInitNoAccess() throws Exception {
-        User copy = new User(testUser);
-        doReturn(copy).when(userSession).getUser();
-        registerBacker.init();
-        verify(ectx).redirect(any());
+    public void testInitLoggedIn() throws Exception {
+        passwordSetBacker.init();
     }
 
     @Test
@@ -72,14 +57,7 @@ public class RegisterBackerTest {
         User copy = new User(testUser);
         doReturn(copy).when(userSession).getUser();
         doThrow(IOException.class).when(ectx).redirect(any());
-        assertThrows(InternalError.class, () -> registerBacker.init());
-    }
-
-    @Test
-    public void testRegister() {
-        registerBacker.register();
-        verify(profileService).createUser(any());
-        verify(authenticationService).register(any());
+        assertThrows(InternalError.class, () -> passwordSetBacker.init());
     }
 
 }

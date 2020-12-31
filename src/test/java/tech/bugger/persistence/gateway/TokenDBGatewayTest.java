@@ -35,6 +35,7 @@ public class TokenDBGatewayTest {
 
         // Only the ID 1 is important as this user always already exists in the Database.
         admin = new User();
+        admin.setId(1);
     }
 
     @AfterEach
