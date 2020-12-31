@@ -53,7 +53,7 @@ public class TopicDBGateway implements TopicGateway {
      */
     @Override
     public int getNumberOfTopics() {
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(id) FROM topic")) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM topic")) {
             ResultSet rs = stmt.executeQuery();
             rs.next();
             return rs.getInt(1);
