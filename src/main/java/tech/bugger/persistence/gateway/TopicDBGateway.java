@@ -4,6 +4,7 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
 
 import java.sql.Connection;
 import java.time.ZonedDateTime;
@@ -76,7 +77,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<Topic> getSelectedTopics(Selection selection) {
+    public List<Topic> getSelectedTopics(Selection selection) throws NotFoundException {
         // TODO Auto-generated method stub
         return null;
     }
