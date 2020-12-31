@@ -3,7 +3,9 @@ package tech.bugger.business.internal;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Locale;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.context.FacesContext;
 import javax.inject.Named;
 import tech.bugger.global.transfer.User;
 
@@ -26,6 +28,14 @@ public class UserSession implements Serializable {
      * The currently selected locale.
      */
     private Locale locale;
+
+    /**
+     * Initializes this user session by setting a preferred locale.
+     */
+    @PostConstruct
+    public void init() {
+        locale = FacesContext.getCurrentInstance().getExternalContext().getRequestLocale();
+    }
 
     /**
      * Returns the currently logged in user, being {@code null} iff the user is not logged in.
