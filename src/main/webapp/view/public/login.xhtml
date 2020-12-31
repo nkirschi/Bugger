@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      lang="#{userSession.locale.language}" xml:lang="#{userSession.locale.language}">
+
+<h:head>
+    <title>Login</title>
+    <f:metadata>
+        <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
+    </f:metadata>
+</h:head>
+<h:body>
+    <!-- TODO add labels, validator messages, and refactor once template has been merged. -->
+    <f:view locale="#{userSession.locale}">
+        <!-- TODO add styleClass h1 -->
+        <h:outputText id="ot-page-title" value="Login"/>
+
+        <h:form id="f-login" rendered="#{userSession.user == null}">
+            <h:panelGrid columns="3">
+                <h:outputLabel id="o-username" value="Username" for="it-username"/>
+                <h:inputText id="it-username" value="#{loginBacker.username}" required="true"
+                             maxlength="#{C.SMALL_FIELD}">
+                    <!--<f:validator validatorId="usernameValidator"/>-->
+                </h:inputText>
+                <h:message for="it-username"/>
+
+                <h:outputLabel id="o-password" value="Password" for="it-password"/>
+                <h:inputSecret id="it-password" value="#{loginBacker.password}" required="true">
+                    <f:validateLength minimum="#{C.PASSWORD_MIN}" maximum="#{C.PASSWORD_MAX}"/>
+                </h:inputSecret>
+                <h:message for="it-password"/>
+            </h:panelGrid>
+            <!-- TODO add styleClass button and outcome -->
+            <h:button id="b-forgot" value="Forgot Password" outcome="password-forgot.xhtml"/>
+            <!-- TODO add styleClass and outcome register.xhtml -->
+            <h:button id="b-regiser" value="Register" outcome="home.xhtml"/>
+            <h:commandButton id="cb-login" value="Login" action="#{loginBacker.login}"/>
+        </h:form>
+    </f:view>
+</h:body>
+</html>
