@@ -1,6 +1,5 @@
 package tech.bugger.control.backing;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
@@ -84,9 +83,7 @@ public class PasswordSetBacker {
      * Initializes the page for setting a new password. Checks if the token for setting a new password is still valid.
      * If the user is already logged in, they are redirected to the home page.
      */
-    @PostConstruct
     public void init() {
-        token = ectx.getRequestParameterMap().get("token");
         Integer userId = authenticationService.getUserIdForToken(token);
         log.debug("Showing Password-Set page with token '" + token + "' for user ID #" + userId + '.');
 
