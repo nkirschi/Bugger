@@ -6,7 +6,6 @@ import java.util.Locale;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
 
 /**
  * Internal bean holding details of the session of a user.
@@ -19,11 +18,6 @@ public class UserSession implements Serializable {
     private static final long serialVersionUID = 8943571923172893158L;
 
     /**
-     * The {@link Log} instance associated with this class for logging purposes.
-     */
-    private static final Log log = Log.forClass(UserSession.class);
-
-    /**
      * The currently logged in user.
      */
     private User user;
@@ -34,9 +28,9 @@ public class UserSession implements Serializable {
     private Locale locale;
 
     /**
-     * Gets the user or {@code null} if he is not logged in.
+     * Returns the currently logged in user, being {@code null} iff the user is not logged in.
      *
-     * @return The user or {@code null} if he is not logged in.
+     * @return The user or {@code null} iff the user is not logged in.
      */
     public User getUser() {
         return user;

@@ -11,7 +11,6 @@ import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 
 /**
@@ -81,8 +80,8 @@ public class RegisterBacker {
             }
         }
 
-        user = new User(null, "", "", "", "", "", "", "", new Lazy<>(new byte[0]), new byte[0], "",
-                Language.getLanguage(session.getLocale()), User.ProfileVisibility.FULL, null, null, false);
+        user = new User();
+        user.setPreferredLanguage(Language.getLanguage(session.getLocale()));
     }
 
     /**
@@ -94,75 +93,21 @@ public class RegisterBacker {
     }
 
     /**
-     * Sets a new username.
+     * Returns the current {@link User} to register.
      *
-     * @param username The new username.
+     * @return The current {@link User} to register.
      */
-    public void setUsername(final String username) {
-        user.setUsername(username);
+    public User getUser() {
+        return user;
     }
 
     /**
-     * Returns the current username.
+     * Sets a new {@link User} to register.
      *
-     * @return The current username.
+     * @param user The new {@link User} to register.
      */
-    public String getUsername() {
-        return user.getUsername();
-    }
-
-    /**
-     * Sets a new e-mail address.
-     *
-     * @param emailAddress The new e-mail address.
-     */
-    public void setEmailAddress(final String emailAddress) {
-        user.setEmailAddress(emailAddress);
-    }
-
-    /**
-     * Returns the current e-mail address.
-     *
-     * @return The current e-mail address.
-     */
-    public String getEmailAddress() {
-        return user.getEmailAddress();
-    }
-
-    /**
-     * Sets a new first name.
-     *
-     * @param firstName The new first name.
-     */
-    public void setFirstName(final String firstName) {
-        user.setFirstName(firstName);
-    }
-
-    /**
-     * Returns the current first name.
-     *
-     * @return The current first name.
-     */
-    public String getFirstName() {
-        return user.getFirstName();
-    }
-
-    /**
-     * Sets a new last name.
-     *
-     * @param lastName The new last name.
-     */
-    public void setLastName(final String lastName) {
-        user.setLastName(lastName);
-    }
-
-    /**
-     * Returns the current last name.
-     *
-     * @return The current last name.
-     */
-    public String getLastName() {
-        return user.getLastName();
+    public void setUser(final User user) {
+        this.user = user;
     }
 
 }

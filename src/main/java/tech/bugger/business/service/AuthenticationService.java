@@ -22,8 +22,7 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 /**
- * Service providing methods related to authentication. A {@link Feedback} event is fired, if unexpected circumstances
- * occur.
+ * Service for user authentication. A {@link Feedback} {@link Event} is fired, if unexpected circumstances occur.
  */
 @Dependent
 public class AuthenticationService {
@@ -37,11 +36,6 @@ public class AuthenticationService {
      * Maximum amount of times an email should be tried to resend.
      */
     private static final int MAX_EMAIL_TRIES = 3;
-
-    /**
-     * Salt length to use when hashing passwords.
-     */
-    private static final int SALT_LENGTH = 16;
 
     /**
      * Transaction manager used for creating transactions.
@@ -116,8 +110,8 @@ public class AuthenticationService {
      */
     public void register(final User user) {
         Token token;
-        Transaction tx = transactionManager.begin();
-        try (tx) {
+
+        try (Transaction tx = transactionManager.begin()) {
             token = tx.newTokenGateway().generateToken(user, Token.Type.REGISTER);
             tx.commit();
         } catch (NotFoundException e) {
@@ -157,7 +151,7 @@ public class AuthenticationService {
             return false;
         }
 
-        String salt = Hasher.generateRandomBytes(SALT_LENGTH);
+        String salt = Hasher.generateRandomBytes(configReader.getInt("SALT_LENGTH"));
         String algorithm = configReader.getString("HASH_ALGO");
         String hashed = Hasher.hash(password, salt, algorithm);
 
@@ -165,8 +159,7 @@ public class AuthenticationService {
         user.setHashingAlgorithm(algorithm);
         user.setPasswordHash(hashed);
 
-        Transaction tx = transactionManager.begin();
-        try (tx) {
+        try (Transaction tx = transactionManager.begin()) {
             tx.newUserGateway().updateUser(user);
             tx.commit();
             return true;
@@ -177,6 +170,7 @@ public class AuthenticationService {
             log.error("User could not be updated.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return false;
     }
 
@@ -188,8 +182,8 @@ public class AuthenticationService {
      */
     public Integer getUserIdForToken(final String token) {
         Integer userId = null;
-        Transaction tx = transactionManager.begin();
-        try (tx) {
+
+        try (Transaction tx = transactionManager.begin()) {
             userId = tx.newTokenGateway().getUserIdForToken(token);
             tx.commit();
         } catch (NotFoundException e) {
@@ -199,6 +193,7 @@ public class AuthenticationService {
             log.error("User could not be fetched.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return userId;
     }
 
@@ -219,14 +214,15 @@ public class AuthenticationService {
      */
     public boolean isValid(final String token) {
         boolean valid = false;
-        Transaction tx = transactionManager.begin();
-        try (tx) {
+
+        try (Transaction tx = transactionManager.begin()) {
             valid = tx.newTokenGateway().isValid(token);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Token status could not be checked.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return valid;
     }
 

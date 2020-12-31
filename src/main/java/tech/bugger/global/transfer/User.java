@@ -111,6 +111,14 @@ public class User implements Serializable {
     private boolean administrator;
 
     /**
+     * Constructs an empty user.
+     */
+    public User() {
+        this(null, "", "", "", "", "", "", "", new Lazy<>(new byte[0]), new byte[0],
+                "", Language.ENGLISH, User.ProfileVisibility.FULL, null, null, false);
+    }
+
+    /**
      * Constructs a new user from the specified parameters.
      *
      * @param id                 The ID of the user.

@@ -6,31 +6,25 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 import tech.bugger.business.internal.UserSession;
+import tech.bugger.global.util.Log;
 
 @WebListener
 public class UserSessionListener implements HttpSessionListener {
 
     /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
+    private static final Log log = Log.forClass(UserSessionListener.class);
+
+    /**
      * The {@link UserSession} to manage.
      */
-    private final UserSession userSession;
+    private UserSession userSession;
 
     /**
      * The current {@link ExternalContext}.
      */
-    private final ExternalContext ectx;
-
-    /**
-     * Constructs a new user session listener managing the current {@link UserSession}.
-     *
-     * @param userSession The {@link UserSession} to manage.
-     * @param ectx        The current {@link ExternalContext}.
-     */
-    @Inject
-    public UserSessionListener(final UserSession userSession, final ExternalContext ectx) {
-        this.userSession = userSession;
-        this.ectx = ectx;
-    }
+    private ExternalContext ectx;
 
     /**
      * Initializes a new user session by setting a default locale.
@@ -42,11 +36,23 @@ public class UserSessionListener implements HttpSessionListener {
     }
 
     /**
-     * Discards the currently managed user session.
+     * Sets a new {@link ExternalContext} for reference.
      *
-     * @param event The event being handled.
+     * @param ectx The {@link ExternalContext} to set.
      */
-    public void sessionDestroyed(final HttpSessionEvent event) {
+    @Inject
+    public void setExternalContext(final ExternalContext ectx) {
+        this.ectx = ectx;
+    }
+
+    /**
+     * Sets a new {@link UserSession} that should be managed.
+     *
+     * @param userSession The new {@link UserSession} to set.
+     */
+    @Inject
+    public void setUserSession(final UserSession userSession) {
+        this.userSession = userSession;
     }
 
 }

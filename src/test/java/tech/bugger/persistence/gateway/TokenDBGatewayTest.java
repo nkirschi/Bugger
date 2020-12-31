@@ -12,10 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
@@ -36,8 +34,7 @@ public class TokenDBGatewayTest {
         gateway = new TokenDBGateway(connection);
 
         // Only the ID 1 is important as this user always already exists in the Database.
-        admin = new User(1, "", "", "", "", "", "", "", new Lazy<>(new byte[0]), new byte[0], "",
-                Language.ENGLISH, User.ProfileVisibility.FULL, null, null, false);
+        admin = new User();
     }
 
     @AfterEach

@@ -54,8 +54,7 @@ public class TokenDBGateway implements TokenGateway {
         }
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE id = ?")) {
-            stmt.setInt(1, user.getId());
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = new StatementParametrizer(stmt).integer(user.getId()).toStatement().executeQuery();
 
             if (!rs.next()) {
                 throw new NotFoundException("User doesn't exist.");
@@ -97,9 +96,7 @@ public class TokenDBGateway implements TokenGateway {
     @Override
     public boolean isValid(final String token) {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM token WHERE value = ?")) {
-            stmt.setString(1, token);
-
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = new StatementParametrizer(stmt).string(token).toStatement().executeQuery();
             return rs.next();
         } catch (SQLException e) {
             log.error("Couldn't verify the token's validity due to a database error.", e);
@@ -113,9 +110,7 @@ public class TokenDBGateway implements TokenGateway {
     @Override
     public int getUserIdForToken(final String token) throws NotFoundException {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM token WHERE value = ?")) {
-            stmt.setString(1, token);
-
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = new StatementParametrizer(stmt).string(token).toStatement().executeQuery();
             if (rs.next()) {
                 return rs.getInt("verifies");
             } else {

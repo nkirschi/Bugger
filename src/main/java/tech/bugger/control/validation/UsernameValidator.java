@@ -21,7 +21,7 @@ public class UsernameValidator implements Validator<String> {
     /**
      * The RegEx to use when validating a username.
      */
-    private static final Pattern REGEX = Pattern.compile("^([a-zA-Z0-9_äöüÄÖÜ])+$");
+    private static final Pattern REGEX = Pattern.compile("^([a-zA-Z0-9_äöüÄÖÜ]){4,16}$");
 
     /**
      * The profile service for user interactions.

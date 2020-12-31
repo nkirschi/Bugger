@@ -14,7 +14,6 @@ import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -44,8 +43,7 @@ public class RegisterBackerTest {
         registerBacker = new RegisterBacker(authenticationService, profileService, userSession, ectx);
 
 
-        testUser = new User(null, "", "", "", "", "", "", "", new Lazy<>(new byte[0]), new byte[0], "",
-                Language.ENGLISH, User.ProfileVisibility.FULL, null, null, false);
+        testUser = new User();
     }
 
     @Test
@@ -57,10 +55,10 @@ public class RegisterBackerTest {
         User internalUser = (User) f.get(registerBacker);
 
         assertAll(() -> assertEquals(Language.GERMAN, internalUser.getPreferredLanguage()),
-                () -> assertEquals("", registerBacker.getUsername()),
-                () -> assertEquals("", registerBacker.getEmailAddress()),
-                () -> assertEquals("", registerBacker.getFirstName()),
-                () -> assertEquals("", registerBacker.getLastName()));
+                () -> assertEquals("", registerBacker.getUser().getUsername()),
+                () -> assertEquals("", registerBacker.getUser().getEmailAddress()),
+                () -> assertEquals("", registerBacker.getUser().getFirstName()),
+                () -> assertEquals("", registerBacker.getUser().getLastName()));
     }
 
     @Test

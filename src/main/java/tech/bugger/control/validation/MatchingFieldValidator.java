@@ -40,8 +40,8 @@ public class MatchingFieldValidator implements Validator<String> {
     }
 
     /**
-     * Validates if the given value is equal to a value passed through as {@code <f:attribute>}
-     * with name {@code otherId}.
+     * Validates if the given value is equal to a value inside the component passed through as {@code <f:attribute>}
+     * with name {@code otherInput}.
      *
      * @param fctx      The current {@link FacesContext}.
      * @param component The affected input {@link UIComponent}
@@ -50,15 +50,11 @@ public class MatchingFieldValidator implements Validator<String> {
      */
     @Override
     public void validate(final FacesContext fctx, final UIComponent component, final String value) {
-        // Obtain the client ID of the other field from f:attribute.
-        String otherId = (String) component.getAttributes().get("otherId");
-        log.debug("Checking text in '" + otherId + "' for equality.");
-
         // Find the actual JSF component with the ID.
-        UIInput otherInput = (UIInput) fctx.getViewRoot().findComponent(otherId);
+        UIInput otherInput = (UIInput) component.getAttributes().get("otherInput");
         if (otherInput == null) {
-            log.error("Field with ID " + otherId + " couldn't be found!");
-            throw new IllegalArgumentException(String.format("Unable to find component with id %s", otherId));
+            log.error("Attribute 'otherInput' couldn't be found!");
+            throw new IllegalArgumentException("Unable to find other component to validate.");
         }
 
         // Get its value, i.e. the entered text of the other field.

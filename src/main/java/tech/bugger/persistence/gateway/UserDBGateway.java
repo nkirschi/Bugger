@@ -66,12 +66,12 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public User getUserByID(final int id) throws NotFoundException {
+        User user;
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE id = ?")) {
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = new StatementParametrizer(stmt).integer(id).toStatement().executeQuery();
 
             if (rs.next()) {
-                return new User(rs.getInt("id"), rs.getString("username"),
+                user = new User(rs.getInt("id"), rs.getString("username"),
                         rs.getString("password_hash"), rs.getString("password_salt"),
                         rs.getString("hashing_algorithm"), rs.getString("email_address"),
                         rs.getString("first_name"), rs.getString("last_name"),
@@ -88,6 +88,7 @@ public class UserDBGateway implements UserGateway {
             log.error("Error while searching for user by ID.", e);
             throw new StoreException("Error while searching for user by ID.", e);
         }
+        return user;
     }
 
     /**
@@ -277,8 +278,7 @@ public class UserDBGateway implements UserGateway {
     @Override
     public boolean isEmailAssigned(final String emailAddress) {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE email_address = ?")) {
-            stmt.setString(1, emailAddress);
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = new StatementParametrizer(stmt).string(emailAddress).toStatement().executeQuery();
             return rs.next();
         } catch (SQLException e) {
             log.error("Error while searching for user by e-mail.", e);
@@ -292,8 +292,7 @@ public class UserDBGateway implements UserGateway {
     @Override
     public boolean isUsernameAssigned(final String username) {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE username = ?")) {
-            stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = new StatementParametrizer(stmt).string(username).toStatement().executeQuery();
             return rs.next();
         } catch (SQLException e) {
             log.error("Error while searching for user by username.", e);

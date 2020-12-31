@@ -65,8 +65,7 @@ public class ProfileService {
      */
     public User getUser(final int id) {
         User user = null;
-        Transaction tx = transactionManager.begin();
-        try (tx) {
+        try (Transaction tx = transactionManager.begin()) {
             user = tx.newUserGateway().getUserByID(id);
             tx.commit();
         } catch (NotFoundException e) {
@@ -86,8 +85,7 @@ public class ProfileService {
      * @param user The user to be created.
      */
     public void createUser(final User user) {
-        Transaction tx = transactionManager.begin();
-        try (tx) {
+        try (Transaction tx = transactionManager.begin()) {
             tx.newUserGateway().createUser(user);
             tx.commit();
         } catch (TransactionException e) {
@@ -110,8 +108,7 @@ public class ProfileService {
      * @param user The user to update.
      */
     public void updateUser(final User user) {
-        Transaction tx = transactionManager.begin();
-        try (tx) {
+        try (Transaction tx = transactionManager.begin()) {
             tx.newUserGateway().updateUser(user);
             tx.commit();
         } catch (NotFoundException e) {
@@ -220,8 +217,7 @@ public class ProfileService {
     public boolean isEmailAssigned(final String emailAddress) {
         boolean assigned = false;
 
-        Transaction tx = transactionManager.begin();
-        try (tx) {
+        try (Transaction tx = transactionManager.begin()) {
             assigned = tx.newUserGateway().isEmailAssigned(emailAddress);
             tx.commit();
         } catch (TransactionException e) {
@@ -241,8 +237,7 @@ public class ProfileService {
     public boolean isUsernameAssigned(final String username) {
         boolean assigned = false;
 
-        Transaction tx = transactionManager.begin();
-        try (tx) {
+        try (Transaction tx = transactionManager.begin()) {
             assigned = tx.newUserGateway().isUsernameAssigned(username);
             tx.commit();
         } catch (TransactionException e) {
