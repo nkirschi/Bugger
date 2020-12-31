@@ -92,7 +92,7 @@ public interface TopicGateway {
      * @param selection The search criteria to apply.
      * @return The list of topics, filtered accordingly.
      */
-    public List<Topic> getSelectedTopics(Selection selection);
+    public List<Topic> getSelectedTopics(Selection selection) throws NotFoundException;
 
     /**
      * Inserts a topic into the topic storage.

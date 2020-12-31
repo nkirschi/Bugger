@@ -7,6 +7,9 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.Dependent;
@@ -158,8 +161,27 @@ public class TopicService {
      * @param selection Information on which part of the topic results to get.
      * @return A list of topics containing the selected results.
      */
-    public List<Topic> getSelectedTopics(Selection selection) {
-        return null;
+    public List<Topic> getSelectedTopics(final Selection selection) {
+        if (selection == null) {
+            IllegalArgumentException e = new IllegalArgumentException("Selection cannot be null.");
+            log.error("Error when loading topics with Selection null.", e);
+            throw e;
+        }
+
+        List<Topic> selectedTopics = null;
+        try (Transaction tx = transactionManager.begin()) {
+            selectedTopics = tx.newTopicGateway().getSelectedTopics(selection);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when loading selected topics.", e);
+            // TODO: put in the actual message keys
+            feedbackEvent.fire(new Feedback(messagesBundle.getString(""), Feedback.Type.ERROR));
+        } catch (NotFoundException e) {
+            log.error("Selected topics with Selection " + selection + " not found.", e);
+            // TODO: put in the actual message keys
+            feedbackEvent.fire(new Feedback(messagesBundle.getString(""), Feedback.Type.ERROR));
+        }
+        return selectedTopics;
     }
 
     /**
@@ -256,7 +278,16 @@ public class TopicService {
      * @return The number of topics.
      */
     public int getNumberOfTopics() {
-        return 0;
+        int numberOfTopics = 0;
+        try (Transaction tx = transactionManager.begin()) {
+            numberOfTopics = tx.newTopicGateway().getNumberOfTopics();
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when loading number of topics.", e);
+            // TODO: put in actual message key
+            feedbackEvent.fire(new Feedback(messagesBundle.getString(""), Feedback.Type.ERROR));
+        }
+        return numberOfTopics;
     }
 
     /**
