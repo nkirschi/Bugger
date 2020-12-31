@@ -7,6 +7,9 @@ import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -15,8 +18,14 @@ import java.util.List;
  */
 public class TopicDBGateway implements TopicGateway {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(TopicDBGateway.class);
 
+    /**
+     * Database connection used by this gateway.
+     */
     private Connection conn;
 
     /**
@@ -24,7 +33,7 @@ public class TopicDBGateway implements TopicGateway {
      *
      * @param conn The database connection to use for the gateway.
      */
-    public TopicDBGateway(Connection conn) {
+    public TopicDBGateway(final Connection conn) {
         this.conn = conn;
     }
 
@@ -42,7 +51,13 @@ public class TopicDBGateway implements TopicGateway {
      */
     @Override
     public int getNumberOfTopics() {
-        // TODO Auto-generated method stub
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(id) FROM topic")) {
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
         return 0;
     }
 
