@@ -59,7 +59,7 @@ public class ProfileServiceTest {
     private User user;
     private final int theAnswer = 42;
     private final int manyPosts = 1500;
-    private final String votingWeightDef = "0,10,25,50,100,200,400,600,800,1000";
+    private final String votingWeightDef = "1000,0,200,50,100,25,400,600,800,10";
 
     @BeforeEach
     public void setup()
@@ -88,9 +88,10 @@ public class ProfileServiceTest {
     @Test
     public void testGetUserNotFound() throws NotFoundException {
         when(gateway.getUserByID(user.getId())).thenThrow(NotFoundException.class);
-        assertNull(profileService.getUser(user.getId()));
+        assertThrows(tech.bugger.business.exception.NotFoundException.class,
+                () -> profileService.getUser(user.getId())
+        );
         verify(gateway, times(1)).getUserByID(user.getId());
-        verify(feedback, times(1)).fire(any());
     }
 
     @Test
@@ -114,9 +115,10 @@ public class ProfileServiceTest {
     @Test
     public void testUpdateUserNotFound() throws NotFoundException {
         doThrow(NotFoundException.class).when(gateway).updateUser(user);
-        profileService.updateUser(user);
+        assertThrows(tech.bugger.business.exception.NotFoundException.class,
+                () -> profileService.updateUser(user)
+        );
         verify(gateway, times(1)).updateUser(user);
-        verify(feedback, times(1)).fire(any());
     }
 
     @Test
@@ -152,6 +154,16 @@ public class ProfileServiceTest {
     }
 
     @Test
+    public void testGetVotingWeightEmpty() {
+        when(gateway.getNumberOfPosts(user)).thenReturn(theAnswer);
+        when(applicationSettings.getConfiguration()).thenReturn(config);
+        when(config.getVotingWeightDefinition()).thenReturn(",");
+        profileService.getVotingWeightForUser(user);
+        verify(gateway, times(1)).getNumberOfPosts(user);
+        verify(feedback, times(1)).fire(any());
+    }
+
+    @Test
     public void testGetVotingWeightNumberFormatException() {
         when(gateway.getNumberOfPosts(user)).thenReturn(theAnswer);
         when(applicationSettings.getConfiguration()).thenReturn(config);
@@ -167,6 +179,16 @@ public class ProfileServiceTest {
         when(applicationSettings.getConfiguration()).thenReturn(config);
         when(config.getVotingWeightDefinition()).thenReturn(votingWeightDef);
         assertEquals(0, profileService.getVotingWeightForUser(user));
+        verify(gateway, times(1)).getNumberOfPosts(user);
+        verify(feedback, times(1)).fire(any());
+    }
+
+    @Test
+    public void testGetVotingWeightContainsNoZero() {
+        when(gateway.getNumberOfPosts(user)).thenReturn(theAnswer);
+        when(applicationSettings.getConfiguration()).thenReturn(config);
+        when(config.getVotingWeightDefinition()).thenReturn("100,200");
+        profileService.getVotingWeightForUser(user);
         verify(gateway, times(1)).getNumberOfPosts(user);
         verify(feedback, times(1)).fire(any());
     }

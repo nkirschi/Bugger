@@ -12,9 +12,11 @@ import tech.bugger.business.service.ProfileService;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 
+import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -48,16 +50,41 @@ public class ProfileBackerTest {
     }
 
     @Test
-    public void testInit() throws Exception {
+    public void testInit() throws NoSuchFieldException {
         profileBacker.setUserID(user.getId());
         when(profileService.getUser(user.getId())).thenReturn(user);
+        Field dialog = ProfileBacker.class.getDeclaredField("displayDialog");
+        dialog.setAccessible(true);
         profileBacker.init();
         assertAll(
                 () -> assertEquals(user, profileBacker.getUser()),
-                () -> assertFalse(profileBacker.isDisplayPromoteDemoteAdminDialog()),
-                () -> assertFalse(profileBacker.isDisplayDeleteAllUserSubscriptionsDialog()),
-                () -> assertFalse(profileBacker.isDisplayDeleteAllReportSubscriptionsDialog()),
-                () -> assertFalse(profileBacker.isDisplayDeleteAllUserSubscriptionsDialog())
+                () -> assertEquals(dialog.get(profileBacker), ProfileBacker.DialogType.NONE)
+        );
+    }
+
+    @Test
+    public void testInitEqualUser() {
+        profileBacker.setUserID(user.getId());
+        when(profileService.getUser(user.getId())).thenReturn(user);
+        when(session.getUser()).thenReturn(user);
+        profileBacker.init();
+        assertAll(
+                () -> assertEquals(user, profileBacker.getUser()),
+                () -> assertEquals(session.getUser(), profileBacker.getUser())
+        );
+    }
+
+    @Test
+    public void testInitNotEqualUser() {
+        profileBacker.setUserID(user.getId());
+        User sessionUser = new User(user);
+        sessionUser.setId(23456);
+        when(profileService.getUser(user.getId())).thenReturn(user);
+        when(session.getUser()).thenReturn(sessionUser);
+        profileBacker.init();
+        assertAll(
+                () -> assertEquals(user, profileBacker.getUser()),
+                () -> assertNotEquals(session.getUser(), profileBacker.getUser())
         );
     }
 
@@ -65,25 +92,18 @@ public class ProfileBackerTest {
     public void testOpenPromoteDemoteAdminDialog() {
         assertAll("Should return null and set the boolean to true!",
                 () -> assertNull(profileBacker.openPromoteDemoteAdminDialog()),
-                () -> assertTrue(profileBacker.isDisplayPromoteDemoteAdminDialog())
+                () -> assertTrue(profileBacker.isAdminDialog())
         );
     }
 
     @Test
-    public void testOpenPromoteDemoteAdminDialogClosesOtherDialogs() {
-        profileBacker.openPromoteDemoteAdminDialog();
-        assertAll("All other dialogs should be closed!",
-                () -> assertFalse(profileBacker.isDisplayDeleteAllTopicSubscriptionsDialog()),
-                () -> assertFalse(profileBacker.isDisplayDeleteAllReportSubscriptionsDialog()),
-                () -> assertFalse(profileBacker.isDisplayDeleteAllUserSubscriptionsDialog())
-        );
-    }
-
-    @Test
-    public void testClosePromoteDemoteAdminDialog() {
+    public void testClosePromoteDemoteAdminDialog() throws NoSuchFieldException {
+        Field dialog = ProfileBacker.class.getDeclaredField("displayDialog");
+        dialog.setAccessible(true);
         assertAll("Should return null and set the boolean to false",
                 () -> assertNull(profileBacker.closePromoteDemoteAdminDialog()),
-                () -> assertFalse(profileBacker.isDisplayPromoteDemoteAdminDialog())
+                () -> assertFalse(profileBacker.isAdminDialog()),
+                () -> assertEquals(dialog.get(profileBacker), ProfileBacker.DialogType.NONE)
         );
     }
 
@@ -110,7 +130,7 @@ public class ProfileBackerTest {
         profileBacker.setUser(user);
         when(session.getUser()).thenReturn(profileBacker.getUser());
         assertTrue(profileBacker.isPrivileged());
-        verify(session, times(2)).getUser();
+        verify(session, times(3)).getUser();
     }
 
     @Test
@@ -118,7 +138,7 @@ public class ProfileBackerTest {
         user.setAdministrator(true);
         when(session.getUser()).thenReturn(user);
         assertTrue(profileBacker.isPrivileged());
-        verify(session, times(1)).getUser();
+        verify(session, times(2)).getUser();
     }
 
     @Test
@@ -128,7 +148,14 @@ public class ProfileBackerTest {
         owner.setId(45678);
         when(session.getUser()).thenReturn(owner);
         assertFalse(profileBacker.isPrivileged());
-        verify(session, times(2)).getUser();
+        verify(session, times(3)).getUser();
+    }
+
+    @Test
+    public void testIsPrivilegedNoSessionUser() {
+        profileBacker.setUser(user);
+        assertFalse(profileBacker.isPrivileged());
+        verify(session, times(1)).getUser();
     }
 
     @Test

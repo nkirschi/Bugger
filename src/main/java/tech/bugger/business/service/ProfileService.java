@@ -7,7 +7,7 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.business.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
@@ -15,6 +15,7 @@ import tech.bugger.persistence.util.TransactionManager;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
 /**
@@ -78,9 +79,9 @@ public class ProfileService {
         try (Transaction transaction = transactionManager.begin()) {
             user = transaction.newUserGateway().getUserByID(id);
             transaction.commit();
-        } catch (NotFoundException e) {
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The user with id " + id + " could not be found.", e);
-            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+            throw new NotFoundException(messages.getString("not_found_error"), e);
         } catch (TransactionException e) {
             log.error("Error while loading the user with id " + id, e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
@@ -114,9 +115,9 @@ public class ProfileService {
         try (Transaction transaction = transactionManager.begin()) {
             transaction.newUserGateway().updateUser(user);
             transaction.commit();
-        } catch (NotFoundException e) {
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The user with id " + user.getId() + "could not be found.", e);
-            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+            throw new NotFoundException(messages.getString("not_found_error"), e);
         } catch (TransactionException e) {
             log.error("Error while updating the user with id " + user.getId(), e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
@@ -214,8 +215,14 @@ public class ProfileService {
             return votingWeight;
         } else {
             String[] votingDef = applicationSettings.getConfiguration().getVotingWeightDefinition().split(",");
+            if (votingDef.length == 0) {
+                log.error("The voting weight definition is empty");
+                feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
+                return votingWeight;
+            }
             try {
-                votingWeight = calculateVotingWeight(numPosts, votingDef);
+                int[] votingWeightDef = convertVotingWeight(votingDef);
+                votingWeight = calculateVotingWeight(numPosts, votingWeightDef);
             } catch (NumberFormatException e) {
                 log.error("The voting weight definition could not be parsed to a number");
                 feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
@@ -225,16 +232,36 @@ public class ProfileService {
     }
 
     /**
+     * Parses the given String array to an int array.
+     *
+     * @param votingWeightDef The voting weight definition.
+     * @return The int array.
+     * @throws NumberFormatException The voting weight definition could not be parsed to a number.
+     */
+    private int[] convertVotingWeight(final String[] votingWeightDef) throws NumberFormatException {
+        int[] votingWeight = new int[votingWeightDef.length];
+        for (int i = 0; i < votingWeightDef.length; i++) {
+            votingWeight[i] = Integer.parseInt(votingWeightDef[i]);
+        }
+        Arrays.sort(votingWeight);
+        return votingWeight;
+    }
+
+    /**
      * Calculates the voting weight from the given number of posts and the voting weight definition.
+     *
      * @param numPosts The number of posts.
      * @param votingWeightDef The voting weight definition.
      * @return The calculated voting weight.
-     * @throws NumberFormatException The voting weight definition could not be parsed to a number.
      */
-    private int calculateVotingWeight(final int numPosts, final String[] votingWeightDef) throws NumberFormatException {
-        for (int i = 0; i < votingWeightDef.length; i++) {
-            int boundary = Integer.parseInt(votingWeightDef[i]);
-            if (numPosts < boundary) {
+    private int calculateVotingWeight(final int numPosts, final int[] votingWeightDef) {
+        if (votingWeightDef[0] != 0) {
+            log.error("The voting weight definition needs to contain a 0.");
+            feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
+            return 0;
+        }
+        for (int i = 1; i < votingWeightDef.length; i++) {
+            if (numPosts < votingWeightDef[i]) {
                 return i;
             }
         }
@@ -304,7 +331,7 @@ public class ProfileService {
             user.setAdministrator(admin);
             transaction.newUserGateway().updateUser(user);
             transaction.commit();
-        } catch (NotFoundException e) {
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
             user.setAdministrator(!admin);
             log.error("The user with id " + user.getId() + "could not be found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));

@@ -21,7 +21,7 @@
                 <h:outputText id="ot-page-title" styleClass="h1" value="#{labels.profile_page}"/>
 
                 <!-- Renders the popup dialog for changing the profile owner's administrator status. -->
-                <h:form id="f-change-status" rendered="#{profileBacker.displayPromoteDemoteAdminDialog}">
+                <h:form id="f-change-status" rendered="#{profileBacker.isAdminDialog}">
                     <h:panelGroup class="row" layout="block">
                         <h:panelGroup class="col-sm-2" layout="block"/>
                         <h:panelGroup class="col-sm-8" layout="block">
@@ -39,7 +39,7 @@
                                     <h:inputSecret id="i-user-password" value="#{profileBacker.password}"
                                                    validatorMessage="#{messages.password_not_in_range}">
                                         <!-- TODO Import constants to reference min/max and add PasswordValidator -->
-                                        <f:validateLength minimum="#{C.PASSWORD_MIN}" maximum="#{C.PASSWORD_MAX}"/>
+                                        <f:validateLength minimum="8" maximum="16"/>
                                     </h:inputSecret>
                                 </h:panelGroup>
                                 <h:panelGroup class="col-sm-3" id="p-user-password-message">
@@ -58,7 +58,7 @@
                 </h:form>
 
                 <!-- Renders the popup dialog to unsubscribe all of the profile owner's subscribed topics. -->
-                <h:form id="f-really-unsub-topics" rendered="#{profileBacker.displayDeleteAllTopicSubscriptionsDialog}">
+                <h:form id="f-really-unsub-topics" rendered="#{profileBacker.isTopicDialog}">
                     <h:panelGroup class="row" layout="block">
                         <h:panelGroup class="col-sm-2" layout="block"/>
                         <h:panelGroup class="col-sm-8" layout="block">
@@ -80,7 +80,7 @@
                 </h:form>
 
                 <!-- Renders the popup dialog to unsubscribe all of the profile owner's subscribed reports. -->
-                <h:form id="f-really-unsub-reports" rendered="#{profileBacker.displayDeleteAllReportSubscriptionsDialog}">
+                <h:form id="f-really-unsub-reports" rendered="#{profileBacker.isReportDialog}">
                     <h:panelGroup class="row" layout="block">
                         <h:panelGroup class="col-sm-2" layout="block"/>
                         <h:panelGroup class="col-sm-8" layout="block">
@@ -102,7 +102,7 @@
                 </h:form>
 
                 <!-- Renders the popup dialog to unsubscribe all of the profile owner's subscribed users. -->
-                <h:form id="f-really-unsub-users" rendered="#{profileBacker.displayDeleteAllUserSubscriptionsDialog}">
+                <h:form id="f-really-unsub-users" rendered="#{profileBacker.isUserDialog}">
                     <h:panelGroup class="row" layout="block">
                         <h:panelGroup class="col-sm-2" layout="block"/>
                         <h:panelGroup class="col-sm-8" layout="block">

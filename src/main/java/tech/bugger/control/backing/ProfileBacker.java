@@ -32,6 +32,36 @@ public class ProfileBacker implements Serializable {
     private static final long serialVersionUID = -4606230292807293380L;
 
     /**
+     * The type of popup dialog to be rendered on the profile page.
+     */
+    enum DialogType {
+        /**
+         * No dialogs are to be rendered.
+         */
+        NONE,
+
+        /**
+         * The dialog to change the profile owner's administrator status is to be rendered.
+         */
+        ADMIN,
+
+        /**
+         * The dialog to delete all topic subscriptions is to be rendered.
+         */
+        TOPIC,
+
+        /**
+         * The dialog to delete all report subscriptions is to be rendered.
+         */
+        REPORT,
+
+        /**
+         * The dialog to delete all user subscriptions is to be rendered.
+         */
+        USER
+    }
+
+    /**
      * The id of the profile owner.
      */
     private int userID;
@@ -67,24 +97,9 @@ public class ProfileBacker implements Serializable {
     private Paginator<Topic> moderatedTopics;
 
     /**
-     * The boolean determining if the promote/demote popup is to be rendered.
+     * The type of popup dialog to be rendered.
      */
-    private boolean displayPromoteDemoteAdminDialog;
-
-    /**
-     * The boolean determining whether the popup for deleting all topic subscriptions is to be rendered.
-     */
-    private boolean displayDeleteAllTopicSubscriptionsDialog;
-
-    /**
-     * The boolean determining whether the popup for deleting all report subscriptions is to be rendered.
-     */
-    private boolean displayDeleteAllReportSubscriptionsDialog;
-
-    /**
-     * The boolean determining whether the popup for deleting all user subscriptions is to be rendered.
-     */
-    private boolean displayDeleteAllUserSubscriptionsDialog;
+    private DialogType displayDialog;
 
     /**
      * The current user session.
@@ -105,7 +120,10 @@ public class ProfileBacker implements Serializable {
     void init() {
         // The initialization of the subscriptions will be implemented in the subscriptions feature.
         user = profileService.getUser(userID);
-        closeDialogs();
+        if ((session.getUser() != null) && (session.getUser().equals(user))) {
+            session.setUser(user);
+        }
+        displayDialog = DialogType.NONE;
     }
 
     /**
@@ -114,8 +132,7 @@ public class ProfileBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openPromoteDemoteAdminDialog() {
-        closeDialogs();
-        displayPromoteDemoteAdminDialog = true;
+        displayDialog = DialogType.ADMIN;
         return null;
     }
 
@@ -125,7 +142,7 @@ public class ProfileBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String closePromoteDemoteAdminDialog() {
-        displayPromoteDemoteAdminDialog = false;
+        displayDialog = DialogType.NONE;
         return null;
     }
 
@@ -181,16 +198,6 @@ public class ProfileBacker implements Serializable {
      */
     public String closeDeleteAllUserSubscriptionsDialog() {
         return null;
-    }
-
-    /**
-     * Closes the administrator promotion/demotion dialog and all delete subscriptions dialogs.
-     */
-    private void closeDialogs() {
-        displayPromoteDemoteAdminDialog = false;
-        displayDeleteAllTopicSubscriptionsDialog = false;
-        displayDeleteAllReportSubscriptionsDialog = false;
-        displayDeleteAllUserSubscriptionsDialog = false;
     }
 
     /**
@@ -296,7 +303,8 @@ public class ProfileBacker implements Serializable {
      * @return Whether the user is privileged.
      */
     public boolean isPrivileged() {
-        return session.getUser().isAdministrator() || session.getUser().equals(user);
+        return (session.getUser() != null) && ((session.getUser().isAdministrator())
+                || (session.getUser().equals(user)));
     }
 
     /**
@@ -305,7 +313,6 @@ public class ProfileBacker implements Serializable {
      * displayed instead.
      */
     public void toggleAdmin() {
-        //TODO update user in session if session.getUser().equals(user)?
         profileService.toggleAdmin(user);
     }
 
@@ -366,13 +373,6 @@ public class ProfileBacker implements Serializable {
     }
 
     /**
-     * @return The displayPromoteDemoteAdminDialog.
-     */
-    public boolean isDisplayPromoteDemoteAdminDialog() {
-        return displayPromoteDemoteAdminDialog;
-    }
-
-    /**
      * @return The password.
      */
     public String getPassword() {
@@ -387,24 +387,31 @@ public class ProfileBacker implements Serializable {
     }
 
     /**
-     * @return The displayDeleteAllTopicSubscriptionsDialog.
+     * @return Whether the promote/demote administrator dialog is to be rendered.
      */
-    public boolean isDisplayDeleteAllTopicSubscriptionsDialog() {
-        return displayDeleteAllTopicSubscriptionsDialog;
+    public boolean isAdminDialog() {
+        return displayDialog.equals(DialogType.ADMIN);
     }
 
     /**
-     * @return The displayDeleteAllReportSubscriptionsDialog.
+     * @return Whether the delete all topic subscriptions dialog is to be rendered.
      */
-    public boolean isDisplayDeleteAllReportSubscriptionsDialog() {
-        return displayDeleteAllReportSubscriptionsDialog;
+    public boolean isTopicDialog() {
+        return displayDialog.equals(DialogType.TOPIC);
     }
 
     /**
-     * @return The displayDeleteAllUserSubscriptionsDialog.
+     * @return Whether the delete all report subscriptions dialog is to be rendered.
      */
-    public boolean isDisplayDeleteAllUserSubscriptionsDialog() {
-        return displayDeleteAllUserSubscriptionsDialog;
+    public boolean isReportDialog() {
+        return displayDialog.equals(DialogType.REPORT);
+    }
+
+    /**
+     * @return Whether the delete all user subscriptions dialog is to be rendered.
+     */
+    public boolean isUserDialog() {
+        return displayDialog.equals(DialogType.USER);
     }
 
 }

@@ -469,30 +469,18 @@ public class User implements Serializable {
             return false;
         }
         User user = (User) other;
-        return (id == user.id) && (administrator == user.administrator) && (username.equals(user.username))
-                && (passwordHash.equals(user.passwordHash)) && (passwordSalt.equals(user.passwordSalt))
-                && (hashingAlgorithm.equals(user.hashingAlgorithm)) && (emailAddress.equals(user.emailAddress))
-                && (firstName.equals(user.firstName)) && (lastName.equals(user.lastName))
-                && (Arrays.equals(avatar.get(), user.avatar.get()))
-                && (Arrays.equals(avatarThumbnail, user.avatarThumbnail))
-                && (Objects.equals(biography, user.biography)) && (preferredLanguage == user.preferredLanguage)
-                && (profileVisibility == user.profileVisibility) && (registrationDate.equals(user.registrationDate))
-                && (Objects.equals(forcedVotingWeight, user.forcedVotingWeight));
+        return id == user.id;
     }
 
     /**
-     * Calculates a hash code for this user for hashing purposes, and to fulfil the {@link Object#equals(Object)}
+     * Calculates a hash code for this user for hashing purposes, and to fulfill the {@link Object#equals(Object)}
      * contract.
      *
      * @return The hash code value of this user.
      */
     @Override
     public int hashCode() {
-        int result = Objects.hash(id, username, passwordHash, passwordSalt, hashingAlgorithm, emailAddress, firstName,
-                lastName, avatar, biography, preferredLanguage, profileVisibility, registrationDate, forcedVotingWeight,
-                administrator);
-        result = 31 * result + Arrays.hashCode(avatarThumbnail);
-        return result;
+        return Objects.hash(id);
     }
 
     /**
