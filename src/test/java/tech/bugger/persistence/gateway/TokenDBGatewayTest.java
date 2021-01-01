@@ -25,17 +25,16 @@ import static org.mockito.Mockito.*;
 public class TokenDBGatewayTest {
 
     private TokenDBGateway gateway;
+
     private Connection connection;
+
     private User admin;
 
     @BeforeEach
     public void setUp() throws Exception {
         connection = DBExtension.getConnection();
         gateway = new TokenDBGateway(connection);
-
-        // Only the ID 1 is important as this user always already exists in the Database.
-        admin = new User();
-        admin.setId(1);
+        admin = new UserDBGateway(connection).getUserByID(1);
     }
 
     @AfterEach
@@ -128,28 +127,28 @@ public class TokenDBGatewayTest {
     }
 
     @Test
-    public void testGetUserIdForToken() throws Exception {
+    public void testGetTokenByValue() throws Exception {
         Token token = gateway.generateToken(admin, Token.Type.CHANGE_EMAIL);
 
-        int id = 0;
+        Token fetched = null;
         try {
-            id = gateway.getUserIdForToken(token.getValue());
+            fetched = gateway.getTokenByValue(token.getValue());
         } catch (NotFoundException e) {
             fail();
         }
-        assertEquals(admin.getId(), id);
+        assertEquals(token, fetched);
     }
 
     @Test
-    public void testGetUserIdForTokenNotFound() {
-        assertThrows(NotFoundException.class, () -> gateway.getUserIdForToken("0123456789abcdef"));
+    public void testGetTokenByValueNotFound() {
+        assertThrows(NotFoundException.class, () -> gateway.getTokenByValue("0123456789abcdef"));
     }
 
     @Test
-    public void testGetUserIdForTokenWhenDatabaseError() throws Exception {
+    public void testGetTokenByValueWhenDatabaseError() throws Exception {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
-        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).getUserIdForToken("0123456789abcdef"));
+        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).getTokenByValue("0123456789abcdef"));
     }
 
 }

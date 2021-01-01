@@ -77,9 +77,36 @@ public class RegisterBackerTest {
 
     @Test
     public void testRegister() {
-        registerBacker.register();
+        doReturn(true).when(profileService).createUser(any());
+        doReturn(true).when(authenticationService).register(any());
+        assertNotNull(registerBacker.register());
         verify(profileService).createUser(any());
         verify(authenticationService).register(any());
+    }
+
+    @Test
+    public void testRegisterFailCreateUser() {
+        doReturn(false).when(profileService).createUser(any());
+        lenient().doReturn(true).when(authenticationService).register(any());
+        assertNull(registerBacker.register());
+        verify(profileService).createUser(any());
+    }
+
+    @Test
+    public void testRegisterFailRegister() {
+        doReturn(true).when(profileService).createUser(any());
+        doReturn(false).when(authenticationService).register(any());
+        assertNull(registerBacker.register());
+        verify(profileService).createUser(any());
+        verify(authenticationService).register(any());
+    }
+
+    @Test
+    public void testRegisterFailCreateUserAndRegister() {
+        doReturn(false).when(profileService).createUser(any());
+        lenient().doReturn(false).when(authenticationService).register(any());
+        assertNull(registerBacker.register());
+        verify(profileService).createUser(any());
     }
 
 }

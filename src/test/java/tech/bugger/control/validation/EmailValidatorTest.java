@@ -12,6 +12,7 @@ import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.global.transfer.Configuration;
+import tech.bugger.global.transfer.User;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -50,13 +51,13 @@ public class EmailValidatorTest {
 
     @Test
     public void testValidateOnEmailExists() {
-        doReturn(true).when(profileServiceMock).isEmailAssigned("test@test.de");
+        doReturn(new User()).when(profileServiceMock).getUserByEmail("test@test.de");
         assertThrows(ValidatorException.class, () -> emailValidator.validate(fctx, comp, "test@test.de"));
     }
 
     @Test
     public void testValidateOnEmailOkay() {
-        doReturn(false).when(profileServiceMock).isEmailAssigned("test@test.de");
+        doReturn(null).when(profileServiceMock).getUserByEmail("test@test.de");
         assertDoesNotThrow(() -> emailValidator.validate(fctx, comp, "test@test.de"));
     }
 

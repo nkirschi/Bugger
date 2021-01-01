@@ -226,25 +226,25 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void testGetUserIdForToken() throws Exception {
-        doReturn(1).when(tokenGateway).getUserIdForToken("0123456789abcdef");
+    public void testGetTokenByValue() throws Exception {
+        doReturn(testToken).when(tokenGateway).getTokenByValue("0123456789abcdef");
 
-        int id = service.getUserIdForToken("0123456789abcdef");
-        assertEquals(1, id);
-        verify(tokenGateway).getUserIdForToken("0123456789abcdef");
+        Token token = service.getTokenByValue("0123456789abcdef");
+        assertEquals(testToken, token);
+        verify(tokenGateway).getTokenByValue("0123456789abcdef");
     }
 
     @Test
-    public void testGetUserIdForTokenWhenNotFound() throws Exception {
-        doThrow(NotFoundException.class).when(tokenGateway).getUserIdForToken("0123456789abcdef");
-        service.getUserIdForToken("0123456789abcdef");
+    public void testGetTokenByValueWhenNotFound() throws Exception {
+        doThrow(NotFoundException.class).when(tokenGateway).getTokenByValue("0123456789abcdef");
+        service.getTokenByValue("0123456789abcdef");
         verify(feedbackEvent).fire(any());
     }
 
     @Test
-    public void testGetUserIdForTokenWhenCommitFails() throws Exception {
+    public void testGetTokenByValueWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        service.getUserIdForToken("0123456789abcdef");
+        service.getTokenByValue("0123456789abcdef");
         verify(feedbackEvent).fire(any());
     }
 

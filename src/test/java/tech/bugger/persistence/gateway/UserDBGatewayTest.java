@@ -130,41 +130,41 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testIsEmailAssignedNo() {
-        assertFalse(() -> gateway.isEmailAssigned("t@t.tk"));
+    public void testGetUserByEmailNotFound() {
+        assertThrows(NotFoundException.class, () -> gateway.getUserByEmail("t@t.tk"));
     }
 
     @Test
-    public void testIsEmailAssignedYes() {
+    public void testGetUserByEmailFound() throws Exception {
         User copy = new User(user);
         gateway.createUser(copy);
-        assertTrue(() -> gateway.isEmailAssigned("test@test.de"));
+        assertEquals(copy, gateway.getUserByEmail("test@test.de"));
     }
 
     @Test
-    public void testIsEmailAssignedWhenDatabaseError() throws Exception {
+    public void testGetUserByEmailWhenDatabaseError() throws Exception {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
-        assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).isEmailAssigned("t@t.tk"));
+        assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).getUserByEmail("t@t.tk"));
     }
 
     @Test
-    public void testIsUsernameAssignedNo() {
-        assertFalse(() -> gateway.isUsernameAssigned("testuser"));
+    public void testGetUserByUsernameNotFound() {
+        assertThrows(NotFoundException.class, () -> gateway.getUserByUsername("testuser"));
     }
 
     @Test
-    public void testIsUsernameAssignedYes() {
+    public void testGetUserByUsernameFound() throws Exception {
         User copy = new User(user);
         gateway.createUser(copy);
-        assertTrue(() -> gateway.isUsernameAssigned("testuser"));
+        assertEquals(copy, gateway.getUserByUsername("testuser"));
     }
 
     @Test
-    public void testIsUsernameAssignedWhenDatabaseError() throws Exception {
+    public void testGetUserByUsernameWhenDatabaseError() throws Exception {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
-        assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).isUsernameAssigned("testuser"));
+        assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).getUserByUsername("testuser"));
     }
 
 }

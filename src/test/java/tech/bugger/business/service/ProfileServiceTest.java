@@ -95,48 +95,6 @@ public class ProfileServiceTest {
     }
 
     @Test
-    public void testIsEmailAssignedYes() {
-        doReturn(true).when(userGateway).isEmailAssigned(any());
-        assertTrue(service.isEmailAssigned("test@test.de"));
-        verify(userGateway).isEmailAssigned(any());
-    }
-
-    @Test
-    public void testIsEmailAssignedNo() {
-        doReturn(false).when(userGateway).isEmailAssigned(any());
-        assertFalse(service.isEmailAssigned("test@test.de"));
-        verify(userGateway).isEmailAssigned(any());
-    }
-
-    @Test
-    public void testIsEmailAssignedWhenCommitFails() throws Exception {
-        doThrow(TransactionException.class).when(tx).commit();
-        service.isEmailAssigned("test@test.de");
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testIsUsernameAssignedYes() {
-        doReturn(true).when(userGateway).isUsernameAssigned(any());
-        assertTrue(service.isUsernameAssigned("test"));
-        verify(userGateway).isUsernameAssigned(any());
-    }
-
-    @Test
-    public void testIsUsernameAssignedNo() {
-        doReturn(false).when(userGateway).isUsernameAssigned(any());
-        assertFalse(service.isUsernameAssigned("test"));
-        verify(userGateway).isUsernameAssigned(any());
-    }
-
-    @Test
-    public void testIsUsernameAssignedWhenCommitFails() throws Exception {
-        doThrow(TransactionException.class).when(tx).commit();
-        service.isUsernameAssigned("test");
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
     public void testGetUser() throws Exception {
         User copy = new User(testUser);
         service.getUser(copy.getId());
@@ -155,6 +113,52 @@ public class ProfileServiceTest {
     public void testGetUserWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
         service.getUser(1);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetUserByEmail() throws Exception {
+        User copy = new User(testUser);
+        doReturn(copy).when(userGateway).getUserByEmail(copy.getEmailAddress());
+        User user = service.getUserByEmail(copy.getEmailAddress());
+        assertEquals(copy, user);
+        verify(userGateway).getUserByEmail(copy.getEmailAddress());
+    }
+
+    @Test
+    public void testGetUserByEmailWhenNotFound() throws Exception {
+        doThrow(NotFoundException.class).when(userGateway).getUserByEmail("test@test.de");
+        service.getUserByEmail("test@test.de");
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetUserByEmailWhenCommitFails() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        service.getUserByEmail("test@test.de");
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetUserByUsername() throws Exception {
+        User copy = new User(testUser);
+        doReturn(copy).when(userGateway).getUserByUsername(copy.getUsername());
+        User user = service.getUserByUsername(copy.getUsername());
+        assertEquals(copy, user);
+        verify(userGateway).getUserByUsername(copy.getUsername());
+    }
+
+    @Test
+    public void testGetUserByUsernameWhenNotFound() throws Exception {
+        doThrow(NotFoundException.class).when(userGateway).getUserByUsername("test");
+        service.getUserByUsername("test");
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetUserByUsernameWhenCommitFails() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        service.getUserByUsername("test");
         verify(feedbackEvent).fire(any());
     }
 

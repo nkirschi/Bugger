@@ -1,6 +1,7 @@
 package tech.bugger.control.backing;
 
-import java.lang.reflect.Field;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Locale;
 import javax.faces.context.ExternalContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
-import tech.bugger.business.service.ProfileService;
+import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,11 +26,10 @@ public class PasswordSetBackerTest {
 
     private User testUser;
 
-    @Mock
-    private AuthenticationService authenticationService;
+    private Token testToken;
 
     @Mock
-    private ProfileService profileService;
+    private AuthenticationService authenticationService;
 
     @Mock
     private UserSession userSession;
@@ -40,22 +40,18 @@ public class PasswordSetBackerTest {
     @BeforeEach
     public void setUp() throws Exception {
         lenient().doReturn(Locale.GERMAN).when(userSession).getLocale();
-        passwordSetBacker = new PasswordSetBacker(authenticationService, profileService, userSession, ectx);
+        passwordSetBacker = new PasswordSetBacker(authenticationService, userSession, ectx);
         testUser = new User();
+        testToken = new Token("0123456789abcdef", Token.Type.REGISTER,
+                ZonedDateTime.of(1999, 10, 3, 22, 13, 0, 0, ZoneId.systemDefault()), testUser);
     }
 
     @Test
     public void testInit() throws Exception {
-        doReturn(1).when(authenticationService).getUserIdForToken(any());
-        doReturn(testUser).when(profileService).getUser(anyInt());
+        doReturn(testToken).when(authenticationService).getTokenByValue(any());
         passwordSetBacker.init();
-
-        Field f = PasswordSetBacker.class.getDeclaredField("user");
-        f.setAccessible(true);
-        User user = (User) f.get(passwordSetBacker);
-
         verify(ectx, never()).redirect("home.xhtml");
-        assertEquals(testUser, user);
+        assertEquals(testToken, passwordSetBacker.getToken());
     }
 
     @Test
@@ -67,7 +63,7 @@ public class PasswordSetBackerTest {
 
     @Test
     public void testInitNoUserFound() throws Exception {
-        doReturn(null).when(authenticationService).getUserIdForToken(any());
+        doReturn(null).when(authenticationService).getTokenByValue(any());
         passwordSetBacker.init();
         verify(ectx, never()).redirect("home.xhtml");
     }
@@ -75,6 +71,7 @@ public class PasswordSetBackerTest {
     @Test
     public void testSetUserPasswordSuccess() {
         doReturn(true).when(authenticationService).setPassword(any(), any(), any());
+        passwordSetBacker.setToken(testToken);
         String redirect = passwordSetBacker.setUserPassword();
         assertEquals("home.xhtml", redirect);
     }
@@ -82,25 +79,20 @@ public class PasswordSetBackerTest {
     @Test
     public void testSetUserPasswordFail() {
         doReturn(false).when(authenticationService).setPassword(any(), any(), any());
+        passwordSetBacker.setToken(testToken);
         String redirect = passwordSetBacker.setUserPassword();
         assertNull(redirect);
     }
 
     @Test
-    public void testIsTokenValidYes() throws Exception {
-        Field f = PasswordSetBacker.class.getDeclaredField("user");
-        f.setAccessible(true);
-        f.set(passwordSetBacker, testUser);
-
+    public void testIsTokenValidYes() {
+        passwordSetBacker.setToken(testToken);
         assertTrue(passwordSetBacker.isValidToken());
     }
 
     @Test
-    public void testIsTokenValidNo() throws Exception {
-        Field f = PasswordSetBacker.class.getDeclaredField("user");
-        f.setAccessible(true);
-        f.set(passwordSetBacker, null);
-
+    public void testIsTokenValidNo() {
+        passwordSetBacker.setToken(null);
         assertFalse(passwordSetBacker.isValidToken());
     }
 

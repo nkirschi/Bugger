@@ -1,20 +1,18 @@
 package tech.bugger.global.util;
 
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import tech.bugger.LogExtension;
 
-import java.util.function.Supplier;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(LogExtension.class)
 public class LazyTest {
+
     private Lazy<String> lazyString;
+
     private Lazy<String> eagerString;
 
     @BeforeEach
@@ -58,4 +56,25 @@ public class LazyTest {
     public void testGetOnEager() {
         assertEquals("eager", eagerString.get());
     }
+
+    @Test
+    public void testToStringAbsent() {
+        assertEquals("Lazy{absent}", lazyString.toString());
+    }
+
+    @Test
+    public void testToStringPresent() {
+        assertEquals("Lazy{value=eager}", eagerString.toString());
+    }
+
+    @Test
+    public void testToStringCustomAbsent() {
+        assertEquals("Lazy{absent}", lazyString.toString(String::toUpperCase));
+    }
+
+    @Test
+    public void testToStringCustomPresent() {
+        assertEquals("Lazy{value=EAGER}", eagerString.toString(String::toUpperCase));
+    }
+
 }

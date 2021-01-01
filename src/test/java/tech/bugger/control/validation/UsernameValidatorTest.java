@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.service.ProfileService;
+import tech.bugger.global.transfer.User;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -40,13 +41,13 @@ public class UsernameValidatorTest {
 
     @Test
     public void testValidateOnUsernameExists() {
-        doReturn(true).when(profileServiceMock).isUsernameAssigned("hyperspeeed");
+        doReturn(new User()).when(profileServiceMock).getUserByUsername("hyperspeeed");
         assertThrows(ValidatorException.class, () -> usernameValidator.validate(fctx, comp, "hyperspeeed"));
     }
 
     @Test
     public void testValidateOnUsernameOkay() {
-        doReturn(false).when(profileServiceMock).isUsernameAssigned("hyperspeeed");
+        doReturn(null).when(profileServiceMock).getUserByUsername("hyperspeeed");
         assertDoesNotThrow(() -> usernameValidator.validate(fctx, comp, "hyperspeeed"));
     }
 
