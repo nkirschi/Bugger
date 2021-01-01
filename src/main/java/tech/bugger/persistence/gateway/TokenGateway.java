@@ -28,13 +28,13 @@ public interface TokenGateway {
     boolean isValid(String token);
 
     /**
-     * Returns the associated user ID for the token.
+     * Returns the complete {@link Token} DTO for the given value.
      *
-     * @param token The token to find the associated user for.
-     * @return The associated user's ID.
-     * @throws NotFoundException The token could not be found.
+     * @param value The token value to find the associated DTO for.
+     * @return The complete {@link Token}.
+     * @throws NotFoundException The token value could not be found.
      */
-    int getUserIdForToken(String token) throws NotFoundException;
+    Token getTokenByValue(String value) throws NotFoundException;
 
     /**
      * Deletes expired verification tokens and unverified users that lack a valid verification token.

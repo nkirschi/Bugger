@@ -107,9 +107,10 @@ public class AuthenticationService {
      * Registers a new user by generating a {@link Token} and sending a confirmation email to the new user.
      *
      * @param user The user to be registered.
+     * @return Whether the action was successful or not.
      */
-    public void register(final User user) {
-        Token token;
+    public boolean register(final User user) {
+        Token token = null;
 
         try (Transaction tx = transactionManager.begin()) {
             token = tx.newTokenGateway().generateToken(user, Token.Type.REGISTER);
@@ -117,11 +118,13 @@ public class AuthenticationService {
         } catch (NotFoundException e) {
             log.error("The user couldn't be found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
-            return;
         } catch (TransactionException e) {
             log.error("Token could not be generated.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
-            return;
+        }
+
+        if (token == null) {
+            return false;
         }
 
         Mail mail = new MailBuilder()
@@ -135,6 +138,7 @@ public class AuthenticationService {
                 log.warning("Trying to send e-mail again. Try #" + tries + '.');
             }
         }));
+        return true;
     }
 
     /**
@@ -175,16 +179,16 @@ public class AuthenticationService {
     }
 
     /**
-     * Returns the associated user ID for the token.
+     * Returns the complete {@link Token} DTO for the given value.
      *
-     * @param token The token to find the associated user for.
-     * @return The associated user's ID or {@code null} if it's invalid not associated with any user.
+     * @param value The token value to find the associated DTO for.
+     * @return The complete {@link Token} or {@code null} if the given {@code value} is invalid.
      */
-    public Integer getUserIdForToken(final String token) {
-        Integer userId = null;
+    public Token getTokenByValue(final String value) {
+        Token token = null;
 
         try (Transaction tx = transactionManager.begin()) {
-            userId = tx.newTokenGateway().getUserIdForToken(token);
+            token = tx.newTokenGateway().getTokenByValue(value);
             tx.commit();
         } catch (NotFoundException e) {
             log.error("No user associated with this token.", e);
@@ -194,7 +198,7 @@ public class AuthenticationService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
 
-        return userId;
+        return token;
     }
 
     /**

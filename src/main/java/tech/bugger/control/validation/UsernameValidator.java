@@ -59,7 +59,7 @@ public class UsernameValidator implements Validator<String> {
         if (!REGEX.matcher(username).matches()) {
             FacesMessage message = new FacesMessage(messagesBundle.getString("username_validator.format_wrong"));
             throw new ValidatorException(message);
-        } else if (profileService.isUsernameAssigned(username)) {
+        } else if (profileService.getUserByUsername(username) != null) {
             FacesMessage message = new FacesMessage(messagesBundle.getString("username_validator.already_exists"));
             throw new ValidatorException(message);
         }

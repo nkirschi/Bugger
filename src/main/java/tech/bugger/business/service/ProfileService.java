@@ -65,6 +65,7 @@ public class ProfileService {
      */
     public User getUser(final int id) {
         User user = null;
+
         try (Transaction tx = transactionManager.begin()) {
             user = tx.newUserGateway().getUserByID(id);
             tx.commit();
@@ -75,6 +76,7 @@ public class ProfileService {
             log.error("User could not be created.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return user;
     }
 
@@ -83,15 +85,18 @@ public class ProfileService {
      * Also generates and sets the internal user id inside the given {@code user} object.
      *
      * @param user The user to be created.
+     * @return Whether the action was successful or not.
      */
-    public void createUser(final User user) {
+    public boolean createUser(final User user) {
         try (Transaction tx = transactionManager.begin()) {
             tx.newUserGateway().createUser(user);
             tx.commit();
+            return true;
         } catch (TransactionException e) {
             log.error("User could not be created.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+        return false;
     }
 
     /**
@@ -103,14 +108,16 @@ public class ProfileService {
     }
 
     /**
-     * Updates an existing user.
+     * Updates an existing user and returns whether the action was successful.
      *
      * @param user The user to update.
+     * @return {@code true} iff the action was successful, {@code false} otherwise.
      */
-    public void updateUser(final User user) {
+    public boolean updateUser(final User user) {
         try (Transaction tx = transactionManager.begin()) {
             tx.newUserGateway().updateUser(user);
             tx.commit();
+            return true;
         } catch (NotFoundException e) {
             log.error("User could not be found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
@@ -118,6 +125,8 @@ public class ProfileService {
             log.error("Error while updating the user.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
+        return false;
     }
 
     /**
@@ -209,43 +218,49 @@ public class ProfileService {
     }
 
     /**
-     * Checks whether the given {@code emailAddress} is already assigned to any user.
+     * Searches and returns the {@link User} with the given {@code emailAddress}.
      *
-     * @param emailAddress The e-mail address to check.
-     * @return Whether the given {@code emailAddress} is already assigned to any user.
+     * @param emailAddress The e-mail address to search for.
+     * @return The complete {@link User} or {@code null} iff the {@code emailAddress} is not assigned to any user.
      */
-    public boolean isEmailAssigned(final String emailAddress) {
-        boolean assigned = false;
+    public User getUserByEmail(final String emailAddress) {
+        User user = null;
 
         try (Transaction tx = transactionManager.begin()) {
-            assigned = tx.newUserGateway().isEmailAssigned(emailAddress);
+            user = tx.newUserGateway().getUserByEmail(emailAddress);
             tx.commit();
+        } catch (NotFoundException e) {
+            log.error("User could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while searching for email.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
 
-        return assigned;
+        return user;
     }
 
     /**
-     * Checks whether the given {@code username} is already assigned to any user.
+     * Searches and returns the {@link User} with the given {@code username}.
      *
-     * @param username The username to check.
-     * @return Whether the given {@code username} is already assigned to any user.
+     * @param username The username to search for.
+     * @return The complete {@link User} or {@code null} iff the {@code username} is not assigned to any user.
      */
-    public boolean isUsernameAssigned(final String username) {
-        boolean assigned = false;
+    public User getUserByUsername(final String username) {
+        User user = null;
 
         try (Transaction tx = transactionManager.begin()) {
-            assigned = tx.newUserGateway().isUsernameAssigned(username);
+            user = tx.newUserGateway().getUserByUsername(username);
             tx.commit();
+        } catch (NotFoundException e) {
+            log.error("User could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while searching for username.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
 
-        return assigned;
+        return user;
     }
 
     private byte[] generateThumbnail(final byte[] image) {

@@ -108,11 +108,16 @@ public class TokenDBGateway implements TokenGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getUserIdForToken(final String token) throws NotFoundException {
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM token WHERE value = ?")) {
-            ResultSet rs = new StatementParametrizer(stmt).string(token).toStatement().executeQuery();
+    public Token getTokenByValue(final String value) throws NotFoundException {
+        Token token;
+
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM token t "
+                + "JOIN \"user\" u on t.verifies = u.id WHERE t.value = ?")) {
+            ResultSet rs = new StatementParametrizer(stmt).string(value).toStatement().executeQuery();
             if (rs.next()) {
-                return rs.getInt("verifies");
+                token = new Token(rs.getString("value"), Token.Type.valueOf(rs.getString("type")),
+                        rs.getTimestamp("timestamp").toLocalDateTime().atZone(ZoneId.systemDefault()),
+                        UserDBGateway.getUserFromResultSet(rs));
             } else {
                 log.error("No associated user found.");
                 throw new NotFoundException("Associated user couldn't be found!");
@@ -121,6 +126,8 @@ public class TokenDBGateway implements TokenGateway {
             log.error("Couldn't verify the token's validity due to a database error.", e);
             throw new StoreException(e);
         }
+
+        return token;
     }
 
     /**

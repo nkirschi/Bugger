@@ -8,8 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
-import tech.bugger.business.service.ProfileService;
-import tech.bugger.global.transfer.User;
+import tech.bugger.global.transfer.Token;
 import tech.bugger.global.util.Log;
 
 /**
@@ -25,11 +24,6 @@ public class PasswordSetBacker {
     private static final Log log = Log.forClass(PasswordSetBacker.class);
 
     /**
-     * The {@link User} whose password should get set.
-     */
-    private User user;
-
-    /**
      * The currently typed password.
      */
     private String password;
@@ -42,17 +36,12 @@ public class PasswordSetBacker {
     /**
      * The token being used to set a password.
      */
-    private String token;
+    private Token token;
 
     /**
      * The service providing access methods for authentication related procedures.
      */
     private final AuthenticationService authenticationService;
-
-    /**
-     * The service providing access methods for profile and user related procedures.
-     */
-    private final ProfileService profileService;
 
     /**
      * The current user session.
@@ -68,15 +57,13 @@ public class PasswordSetBacker {
      * Constructs a new register page backing bean with the necessary dependencies.
      *
      * @param authenticationService The authentication service to use.
-     * @param profileService        The profile service to use.
      * @param session               The current {@link UserSession}.
      * @param ectx                  The current external context.
      */
     @Inject
-    public PasswordSetBacker(final AuthenticationService authenticationService, final ProfileService profileService,
-                             final UserSession session, final ExternalContext ectx) {
+    public PasswordSetBacker(final AuthenticationService authenticationService, final UserSession session,
+                             final ExternalContext ectx) {
         this.authenticationService = authenticationService;
-        this.profileService = profileService;
         this.session = session;
         this.ectx = ectx;
     }
@@ -91,13 +78,8 @@ public class PasswordSetBacker {
             ectx.redirect("home.xhtml");
         }
 
-        token = ectx.getRequestParameterMap().get("token");
-        Integer userId = authenticationService.getUserIdForToken(token);
-        log.debug("Showing Password-Set page with token '" + token + "' for user ID #" + userId + '.');
-
-        if (userId != null) {
-            user = profileService.getUser(userId);
-        }
+        token = authenticationService.getTokenByValue(ectx.getRequestParameterMap().get("token"));
+        log.debug("Showing Password-Set page with token " + token + '.');
     }
 
     /**
@@ -106,7 +88,7 @@ public class PasswordSetBacker {
      * @return The site to redirect to or {@code null}.
      */
     public String setUserPassword() {
-        if (authenticationService.setPassword(user, password, token)) {
+        if (authenticationService.setPassword(token.getUser(), password, token.getValue())) {
             return "home.xhtml";
         }
         return null;
@@ -151,9 +133,9 @@ public class PasswordSetBacker {
     /**
      * Returns the current token.
      *
-     * @return The token.
+     * @return The current token.
      */
-    public String getToken() {
+    public Token getToken() {
         return token;
     }
 
@@ -162,7 +144,7 @@ public class PasswordSetBacker {
      *
      * @param token The token to set.
      */
-    public void setToken(final String token) {
+    public void setToken(final Token token) {
         this.token = token;
     }
 
@@ -172,7 +154,7 @@ public class PasswordSetBacker {
      * @return Whether the supplied token is valid.
      */
     public boolean isValidToken() {
-        return user != null;
+        return token != null;
     }
 
 }

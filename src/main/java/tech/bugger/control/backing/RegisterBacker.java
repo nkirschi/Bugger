@@ -86,10 +86,14 @@ public class RegisterBacker {
 
     /**
      * Registers a new user. An e-mail to finalize the process is sent to their address if the provided data checks out.
+     *
+     * @return The site to redirect to.
      */
-    public void register() {
-        profileService.createUser(user);
-        authenticationService.register(user);
+    public String register() {
+        if (profileService.createUser(user) && authenticationService.register(user)) {
+            return "home.xhtml";
+        }
+        return null;
     }
 
     /**

@@ -44,6 +44,32 @@ public class UserDBGateway implements UserGateway {
     }
 
     /**
+     * Parses the given {@link ResultSet} and returns the corresponding {@link User}.
+     *
+     * @param rs The {@link ResultSet} to parse.
+     * @return The parsed {@link User}.
+     * @throws SQLException Some parsing error occurred.
+     */
+    static User getUserFromResultSet(final ResultSet rs) throws SQLException {
+        String langStr = rs.getString("preferred_language").toUpperCase();
+        Language lang = null;
+
+        if (!langStr.isBlank()) {
+            lang = Language.valueOf(langStr);
+        }
+
+        return new User(rs.getInt("id"), rs.getString("username"),
+                rs.getString("password_hash"), rs.getString("password_salt"),
+                rs.getString("hashing_algorithm"), rs.getString("email_address"),
+                rs.getString("first_name"), rs.getString("last_name"),
+                new Lazy<>(rs.getBytes("avatar")), rs.getBytes("avatar_thumbnail"),
+                rs.getString("biography"), lang,
+                User.ProfileVisibility.valueOf(rs.getString("profile_visibility").toUpperCase()),
+                rs.getTimestamp("registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
+                rs.getInt("forced_voting_weight"), rs.getBoolean("is_admin"));
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -67,27 +93,21 @@ public class UserDBGateway implements UserGateway {
     @Override
     public User getUserByID(final int id) throws NotFoundException {
         User user;
+
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE id = ?")) {
             ResultSet rs = new StatementParametrizer(stmt).integer(id).toStatement().executeQuery();
 
             if (rs.next()) {
-                user = new User(rs.getInt("id"), rs.getString("username"),
-                        rs.getString("password_hash"), rs.getString("password_salt"),
-                        rs.getString("hashing_algorithm"), rs.getString("email_address"),
-                        rs.getString("first_name"), rs.getString("last_name"),
-                        new Lazy<>(rs.getBytes("avatar")), rs.getBytes("avatar_thumbnail"),
-                        rs.getString("biography"), Language.valueOf(rs.getString("preferred_language").toUpperCase()),
-                        User.ProfileVisibility.valueOf(rs.getString("profile_visibility").toUpperCase()),
-                        rs.getTimestamp("registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
-                        rs.getInt("forced_voting_weight"), rs.getBoolean("is_admin"));
+                user = getUserFromResultSet(rs);
             } else {
-                log.error("No user could be found in the database");
-                throw new NotFoundException("No user could be found in the database.");
+                log.error("No user with the given ID could be found in the database");
+                throw new NotFoundException("No user with the given ID could be found in the database.");
             }
         } catch (SQLException e) {
             log.error("Error while searching for user by ID.", e);
             throw new StoreException("Error while searching for user by ID.", e);
         }
+
         return user;
     }
 
@@ -95,9 +115,48 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public User getUserByUsername(final String username) {
-        // TODO Auto-generated method stub
-        return null;
+    public User getUserByUsername(final String username) throws NotFoundException {
+        User user;
+
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE username = ?")) {
+            ResultSet rs = new StatementParametrizer(stmt).string(username).toStatement().executeQuery();
+
+            if (rs.next()) {
+                user = getUserFromResultSet(rs);
+            } else {
+                log.error("No user with the given username could be found in the database");
+                throw new NotFoundException("No user with the given username could be found in the database.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while searching for user by username.", e);
+            throw new StoreException("Error while searching for user by username.", e);
+        }
+
+        return user;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public User getUserByEmail(final String emailAddress) throws NotFoundException {
+        User user;
+
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE email_address = ?")) {
+            ResultSet rs = new StatementParametrizer(stmt).string(emailAddress).toStatement().executeQuery();
+
+            if (rs.next()) {
+                user = getUserFromResultSet(rs);
+            } else {
+                log.error("No user with the given e-mail address could be found in the database");
+                throw new NotFoundException("No user with the given e-mail address could be found in the database.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while searching for user by e-mail address.", e);
+            throw new StoreException("Error while searching for user by e-mail address.", e);
+        }
+
+        return user;
     }
 
     /**
@@ -147,15 +206,14 @@ public class UserDBGateway implements UserGateway {
                     .bool(user.isAdministrator())
                     .toStatement().executeUpdate();
 
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    user.setId(rs.getInt("id"));
-                    user.setRegistrationDate(rs.getTimestamp("registered_at").toLocalDateTime()
-                            .atZone(ZoneId.systemDefault()));
-                }
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                user.setId(rs.getInt("id"));
+                user.setRegistrationDate(rs.getTimestamp("registered_at").toLocalDateTime()
+                        .atZone(ZoneId.systemDefault()));
             }
         } catch (SQLException e) {
-            log.error("Couldn't verify the token's validity due to a database error.", e);
+            log.error("Couldn't create the user due to a database error.", e);
             throw new StoreException(e);
         }
     }
@@ -200,11 +258,11 @@ public class UserDBGateway implements UserGateway {
                     .integer(user.getId())
                     .toStatement().executeUpdate();
             if (changedRows == 0) {
-                log.error("No user could be found in the database.");
-                throw new NotFoundException("No user could be found in the database.");
+                log.error("User to update couldn't be found in the database.");
+                throw new NotFoundException("User to update couldn't be found in the database.");
             }
         } catch (SQLException e) {
-            log.error("Couldn't verify the token's validity due to a database error.", e);
+            log.error("Couldn't update the user due to a database error.", e);
             throw new StoreException(e);
         }
     }
@@ -270,34 +328,6 @@ public class UserDBGateway implements UserGateway {
     public boolean isBanned(final User user, final Topic topic) {
         // TODO Auto-generated method stub
         return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isEmailAssigned(final String emailAddress) {
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE email_address = ?")) {
-            ResultSet rs = new StatementParametrizer(stmt).string(emailAddress).toStatement().executeQuery();
-            return rs.next();
-        } catch (SQLException e) {
-            log.error("Error while searching for user by e-mail.", e);
-            throw new StoreException("Error while searching for user by e-mail.", e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isUsernameAssigned(final String username) {
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE username = ?")) {
-            ResultSet rs = new StatementParametrizer(stmt).string(username).toStatement().executeQuery();
-            return rs.next();
-        } catch (SQLException e) {
-            log.error("Error while searching for user by username.", e);
-            throw new StoreException("Error while searching for user by username.", e);
-        }
     }
 
 }

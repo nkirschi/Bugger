@@ -492,7 +492,6 @@ public class User implements Serializable {
                 && preferredLanguage == user.preferredLanguage
                 && profileVisibility == user.profileVisibility
                 && Objects.equals(registrationDate, user.registrationDate)
-                && Objects.equals(avatar, user.avatar)
                 && Objects.equals(forcedVotingWeight, user.forcedVotingWeight);
     }
 

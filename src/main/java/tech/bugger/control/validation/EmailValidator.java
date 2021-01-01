@@ -63,7 +63,7 @@ public class EmailValidator implements Validator<String> {
         if (!pattern.matcher(email).matches()) {
             FacesMessage message = new FacesMessage(messagesBundle.getString("email_validator.format_wrong"));
             throw new ValidatorException(message);
-        } else if (profileService.isEmailAssigned(email)) {
+        } else if (profileService.getUserByEmail(email) != null) {
             FacesMessage message = new FacesMessage(messagesBundle.getString("email_validator.already_exists"));
             throw new ValidatorException(message);
         }

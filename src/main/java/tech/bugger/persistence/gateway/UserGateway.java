@@ -76,6 +76,15 @@ public interface UserGateway {
     User getUserByUsername(String username) throws NotFoundException;
 
     /**
+     * Retrieves a user by their e-mail address.
+     *
+     * @param emailAddress The username of the user to look for.
+     * @return The user identified by the given {@code emailAddress}.
+     * @throws NotFoundException The user could not be found.
+     */
+    User getUserByEmail(String emailAddress) throws NotFoundException;
+
+    /**
      * Retrieves a list of moderators for a topic that match the given selection criteria.
      *
      * @param topic     The topic whose moderators to list.
@@ -144,21 +153,5 @@ public interface UserGateway {
      * @throws NotFoundException The user could not be found.
      */
     void deleteUser(User user) throws NotFoundException;
-
-    /**
-     * Checks whether the given {@code emailAddress} is already assigned to any user.
-     *
-     * @param emailAddress The e-mail address to check.
-     * @return Whether the given {@code emailAddress} is already assigned to any user.
-     */
-    boolean isEmailAssigned(String emailAddress);
-
-    /**
-     * Checks whether the given {@code username} is already assigned to any user.
-     *
-     * @param username The username to check.
-     * @return Whether the given {@code username} is already assigned to any user.
-     */
-    boolean isUsernameAssigned(String username);
 
 }
