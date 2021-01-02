@@ -115,6 +115,7 @@ public class ProfileService {
         try (Transaction transaction = transactionManager.begin()) {
             transaction.newUserGateway().updateUser(user);
             transaction.commit();
+            feedback.fire(new Feedback(messages.getString("operation_successful"), Feedback.Type.INFO));
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The user with id " + user.getId() + "could not be found.", e);
             throw new NotFoundException(messages.getString("not_found_error"), e);
@@ -331,6 +332,7 @@ public class ProfileService {
             user.setAdministrator(admin);
             transaction.newUserGateway().updateUser(user);
             transaction.commit();
+            feedback.fire(new Feedback(messages.getString("operation_successful"), Feedback.Type.INFO));
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             user.setAdministrator(!admin);
             log.error("The user with id " + user.getId() + "could not be found.", e);

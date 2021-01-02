@@ -160,8 +160,40 @@ public class ProfileBackerTest {
 
     @Test
     public void testToggleAdmin() {
+        user.setAdministrator(true);
+        when(session.getUser()).thenReturn(user);
         profileBacker.setUser(user);
         profileBacker.toggleAdmin();
         verify(profileService, times(1)).toggleAdmin(user);
+        verify(session, times(4)).getUser();
+    }
+
+    @Test
+    public void testToggleAdminUserNotAdmin() {
+        when(session.getUser()).thenReturn(user);
+        profileBacker.setUser(user);
+        profileBacker.toggleAdmin();
+        verify(profileService, times(0)).toggleAdmin(user);
+        verify(session, times(2)).getUser();
+    }
+
+    @Test
+    public void testToggleAdminDifferentSessionUser() {
+        User sessionUser = new User(user);
+        sessionUser.setId(23456);
+        sessionUser.setAdministrator(true);
+        when(session.getUser()).thenReturn(sessionUser);
+        profileBacker.setUser(user);
+        profileBacker.toggleAdmin();
+        verify(profileService, times(1)).toggleAdmin(user);
+        verify(session, times(3)).getUser();
+    }
+
+    @Test
+    public void testToggleAdminNoSessionUser() {
+        profileBacker.setUser(user);
+        profileBacker.toggleAdmin();
+        verify(profileService, times(0)).toggleAdmin(user);
+        verify(session, times(1)).getUser();
     }
 }

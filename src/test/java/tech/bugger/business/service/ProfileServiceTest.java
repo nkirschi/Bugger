@@ -74,15 +74,11 @@ public class ProfileServiceTest {
     }
 
     @Test
-    public void testGetUser() {
-        try {
-            when(gateway.getUserByID(user.getId())).thenReturn(user);
-            User getUser = profileService.getUser(user.getId());
-            assertEquals(user.getId(), getUser.getId());
-            verify(gateway, times(1)).getUserByID(user.getId());
-        } catch (NotFoundException e) {
-            fail("The gateway has falsely thrown a NotFoundException!");
-        }
+    public void testGetUser() throws NotFoundException {
+        when(gateway.getUserByID(user.getId())).thenReturn(user);
+        User getUser = profileService.getUser(user.getId());
+        assertEquals(user.getId(), getUser.getId());
+        verify(gateway, times(1)).getUserByID(user.getId());
     }
 
     @Test
@@ -103,13 +99,10 @@ public class ProfileServiceTest {
     }
 
     @Test
-    public void testUpdateUser() {
-        try {
-            profileService.updateUser(user);
-            verify(gateway, times(1)).updateUser(user);
-        } catch (NotFoundException e) {
-            fail("The gateway has falsely thrown a NotFoundException!");
-        }
+    public void testUpdateUser() throws NotFoundException {
+        profileService.updateUser(user);
+        verify(gateway, times(1)).updateUser(user);
+        verify(feedback, times(1)).fire(any());
     }
 
     @Test
@@ -217,14 +210,11 @@ public class ProfileServiceTest {
     }
 
     @Test
-    public void testToggleAdminPromote() {
-        try {
-            profileService.toggleAdmin(user);
-            assertTrue(user.isAdministrator());
-            verify(gateway, times(1)).updateUser(user);
-        } catch (NotFoundException e) {
-            fail("The gateway has falsely thrown a NotFoundException!");
-        }
+    public void testToggleAdminPromote() throws NotFoundException {
+        profileService.toggleAdmin(user);
+        assertTrue(user.isAdministrator());
+        verify(gateway, times(1)).updateUser(user);
+        verify(feedback, times(1)).fire(any());
     }
 
     @Test
@@ -246,17 +236,14 @@ public class ProfileServiceTest {
     }
 
     @Test
-    public void testToggleAdminDemoteAdmin() {
-        try {
-            user.setAdministrator(true);
-            when(gateway.getNumberOfAdmins()).thenReturn(theAnswer);
-            profileService.toggleAdmin(user);
-            assertFalse(user.isAdministrator());
-            verify(gateway, times(1)).getNumberOfAdmins();
-            verify(gateway, times(1)).updateUser(user);
-        } catch (NotFoundException e) {
-            fail("The gateway has falsely thrown a NotFoundException!");
-        }
+    public void testToggleAdminDemoteAdmin() throws NotFoundException {
+        user.setAdministrator(true);
+        when(gateway.getNumberOfAdmins()).thenReturn(theAnswer);
+        profileService.toggleAdmin(user);
+        assertFalse(user.isAdministrator());
+        verify(gateway, times(1)).getNumberOfAdmins();
+        verify(gateway, times(1)).updateUser(user);
+        verify(feedback, times(1)).fire(any());
     }
 
     @Test
@@ -272,20 +259,16 @@ public class ProfileServiceTest {
     }
 
     @Test
-    public void testToggleAdminDemoteAdminTransactionException() throws TransactionException {
-        try {
-            user.setAdministrator(true);
-            when(gateway.getNumberOfAdmins()).thenReturn(theAnswer);
-            doNothing().doThrow(TransactionException.class).when(transaction).commit();
-            profileService.toggleAdmin(user);
-            assertTrue(user.isAdministrator());
-            verify(gateway, times(1)).getNumberOfAdmins();
-            verify(gateway, times(1)).updateUser(user);
-            verify(transaction, times(2)).commit();
-            verify(feedback, times(1)).fire(any());
-        } catch (NotFoundException e) {
-            fail("The gateway has falsely thrown a NotFoundException!");
-        }
+    public void testToggleAdminDemoteAdminTransactionException() throws TransactionException, NotFoundException {
+        user.setAdministrator(true);
+        when(gateway.getNumberOfAdmins()).thenReturn(theAnswer);
+        doNothing().doThrow(TransactionException.class).when(transaction).commit();
+        profileService.toggleAdmin(user);
+        assertTrue(user.isAdministrator());
+        verify(gateway, times(1)).getNumberOfAdmins();
+        verify(gateway, times(1)).updateUser(user);
+        verify(transaction, times(2)).commit();
+        verify(feedback, times(1)).fire(any());
     }
 
     @Test

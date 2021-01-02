@@ -121,7 +121,7 @@ public class ProfileBacker implements Serializable {
         // The initialization of the subscriptions will be implemented in the subscriptions feature.
         user = profileService.getUser(userID);
         if ((session.getUser() != null) && (session.getUser().equals(user))) {
-            session.setUser(user);
+            session.setUser(new User(user));
         }
         displayDialog = DialogType.NONE;
     }
@@ -313,7 +313,15 @@ public class ProfileBacker implements Serializable {
      * displayed instead.
      */
     public void toggleAdmin() {
+        if ((session.getUser() == null) || (!session.getUser().isAdministrator())) {
+            log.error("A user was able to to use the promote or demote administrator functionality even though "
+                    + "had no administrator status!");
+            return;
+        }
         profileService.toggleAdmin(user);
+        if (session.getUser().equals(user)) {
+            session.getUser().setAdministrator(user.isAdministrator());
+        }
     }
 
     /**
