@@ -42,25 +42,24 @@ public class UserDBGatewayTest {
 
     @Test
     public void testCreateUserAndGetUser() throws Exception {
-        User copy = new User(user);
-        gateway.createUser(copy);
+        gateway.createUser(user);
 
-        User copyFromDatabase = gateway.getUserByID(copy.getId());
-        assertAll(() -> assertNotNull(copy.getId()),
-                () -> assertEquals(copy.getId(), copyFromDatabase.getId()),
-                () -> assertEquals(copy.getUsername(), copyFromDatabase.getUsername()),
-                () -> assertEquals(copy.getPasswordHash(), copyFromDatabase.getPasswordHash()),
-                () -> assertEquals(copy.getPasswordSalt(), copyFromDatabase.getPasswordSalt()),
-                () -> assertEquals(copy.getHashingAlgorithm(), copyFromDatabase.getHashingAlgorithm()),
-                () -> assertEquals(copy.getEmailAddress(), copyFromDatabase.getEmailAddress()),
-                () -> assertEquals(copy.getFirstName(), copyFromDatabase.getFirstName()),
-                () -> assertEquals(copy.getLastName(), copyFromDatabase.getLastName()),
-                () -> assertArrayEquals(copy.getAvatarThumbnail(), copyFromDatabase.getAvatarThumbnail()),
-                () -> assertEquals(copy.getBiography(), copyFromDatabase.getBiography()),
-                () -> assertEquals(copy.getPreferredLanguage(), copyFromDatabase.getPreferredLanguage()),
-                () -> assertEquals(copy.getProfileVisibility(), copyFromDatabase.getProfileVisibility()),
-                () -> assertEquals(copy.getForcedVotingWeight(), copyFromDatabase.getForcedVotingWeight()),
-                () -> assertEquals(copy.isAdministrator(), copyFromDatabase.isAdministrator()));
+        User copyFromDatabase = gateway.getUserByID(user.getId());
+        assertAll(() -> assertNotNull(user.getId()),
+                () -> assertEquals(user.getId(), copyFromDatabase.getId()),
+                () -> assertEquals(user.getUsername(), copyFromDatabase.getUsername()),
+                () -> assertEquals(user.getPasswordHash(), copyFromDatabase.getPasswordHash()),
+                () -> assertEquals(user.getPasswordSalt(), copyFromDatabase.getPasswordSalt()),
+                () -> assertEquals(user.getHashingAlgorithm(), copyFromDatabase.getHashingAlgorithm()),
+                () -> assertEquals(user.getEmailAddress(), copyFromDatabase.getEmailAddress()),
+                () -> assertEquals(user.getFirstName(), copyFromDatabase.getFirstName()),
+                () -> assertEquals(user.getLastName(), copyFromDatabase.getLastName()),
+                () -> assertArrayEquals(user.getAvatarThumbnail(), copyFromDatabase.getAvatarThumbnail()),
+                () -> assertEquals(user.getBiography(), copyFromDatabase.getBiography()),
+                () -> assertEquals(user.getPreferredLanguage(), copyFromDatabase.getPreferredLanguage()),
+                () -> assertEquals(user.getProfileVisibility(), copyFromDatabase.getProfileVisibility()),
+                () -> assertEquals(user.getForcedVotingWeight(), copyFromDatabase.getForcedVotingWeight()),
+                () -> assertEquals(user.isAdministrator(), copyFromDatabase.isAdministrator()));
     }
 
     @Test
@@ -68,6 +67,12 @@ public class UserDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any(), anyInt());
         assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).createUser(new User(user)));
+    }
+
+    @Test
+    public void testCreateUserAbsentAvatar() {
+        user.setAvatar(new Lazy<>(() -> null));
+        assertThrows(IllegalArgumentException.class, () -> gateway.createUser(user));
     }
 
     @Test
@@ -84,49 +89,51 @@ public class UserDBGatewayTest {
 
     @Test
     public void testUpdateUser() throws Exception {
-        User copy = new User(user);
-        gateway.createUser(copy);
-        copy.setLastName("Heinrich");
-        gateway.updateUser(copy);
+        gateway.createUser(user);
+        user.setLastName("Heinrich");
+        gateway.updateUser(user);
 
-        User copyFromDatabase = gateway.getUserByID(copy.getId());
-        assertAll(() -> assertEquals(copy.getId(), copyFromDatabase.getId()),
-                () -> assertEquals(copy.getUsername(), copyFromDatabase.getUsername()),
-                () -> assertEquals(copy.getPasswordHash(), copyFromDatabase.getPasswordHash()),
-                () -> assertEquals(copy.getPasswordSalt(), copyFromDatabase.getPasswordSalt()),
-                () -> assertEquals(copy.getHashingAlgorithm(), copyFromDatabase.getHashingAlgorithm()),
-                () -> assertEquals(copy.getEmailAddress(), copyFromDatabase.getEmailAddress()),
-                () -> assertEquals(copy.getFirstName(), copyFromDatabase.getFirstName()),
-                () -> assertEquals(copy.getLastName(), copyFromDatabase.getLastName()),
-                () -> assertArrayEquals(copy.getAvatarThumbnail(), copyFromDatabase.getAvatarThumbnail()),
-                () -> assertEquals(copy.getBiography(), copyFromDatabase.getBiography()),
-                () -> assertEquals(copy.getRegistrationDate(), copyFromDatabase.getRegistrationDate()),
-                () -> assertEquals(copy.getPreferredLanguage(), copyFromDatabase.getPreferredLanguage()),
-                () -> assertEquals(copy.getProfileVisibility(), copyFromDatabase.getProfileVisibility()),
-                () -> assertEquals(copy.getForcedVotingWeight(), copyFromDatabase.getForcedVotingWeight()),
-                () -> assertEquals(copy.isAdministrator(), copyFromDatabase.isAdministrator()));
+        User copyFromDatabase = gateway.getUserByID(user.getId());
+        assertAll(() -> assertEquals(user.getId(), copyFromDatabase.getId()),
+                () -> assertEquals(user.getUsername(), copyFromDatabase.getUsername()),
+                () -> assertEquals(user.getPasswordHash(), copyFromDatabase.getPasswordHash()),
+                () -> assertEquals(user.getPasswordSalt(), copyFromDatabase.getPasswordSalt()),
+                () -> assertEquals(user.getHashingAlgorithm(), copyFromDatabase.getHashingAlgorithm()),
+                () -> assertEquals(user.getEmailAddress(), copyFromDatabase.getEmailAddress()),
+                () -> assertEquals(user.getFirstName(), copyFromDatabase.getFirstName()),
+                () -> assertEquals(user.getLastName(), copyFromDatabase.getLastName()),
+                () -> assertArrayEquals(user.getAvatarThumbnail(), copyFromDatabase.getAvatarThumbnail()),
+                () -> assertEquals(user.getBiography(), copyFromDatabase.getBiography()),
+                () -> assertEquals(user.getRegistrationDate(), copyFromDatabase.getRegistrationDate()),
+                () -> assertEquals(user.getPreferredLanguage(), copyFromDatabase.getPreferredLanguage()),
+                () -> assertEquals(user.getProfileVisibility(), copyFromDatabase.getProfileVisibility()),
+                () -> assertEquals(user.getForcedVotingWeight(), copyFromDatabase.getForcedVotingWeight()),
+                () -> assertEquals(user.isAdministrator(), copyFromDatabase.isAdministrator()));
     }
 
     @Test
     public void testUpdateUserWhenDatabaseError() throws Exception {
-        User copy = new User(user);
-        copy.setId(1);
+        user.setId(1);
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any(), anyInt());
-        assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).updateUser(copy));
+        assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).updateUser(user));
     }
 
     @Test
     public void testUpdateUserNotExists() {
-        User copy = new User(user);
-        copy.setId(42);
-        assertThrows(NotFoundException.class, () -> gateway.updateUser(copy));
+        user.setId(42);
+        assertThrows(NotFoundException.class, () -> gateway.updateUser(user));
     }
 
     @Test
     public void testUpdateUserNullId() {
-        User copy = new User(user);
-        assertThrows(IllegalArgumentException.class, () -> gateway.updateUser(copy));
+        assertThrows(IllegalArgumentException.class, () -> gateway.updateUser(user));
+    }
+
+    @Test
+    public void testUpdateUserAbsentAvatar() {
+        user.setAvatar(new Lazy<>(() -> null));
+        assertThrows(IllegalArgumentException.class, () -> gateway.updateUser(user));
     }
 
     @Test
@@ -136,9 +143,8 @@ public class UserDBGatewayTest {
 
     @Test
     public void testGetUserByEmailFound() throws Exception {
-        User copy = new User(user);
-        gateway.createUser(copy);
-        assertEquals(copy, gateway.getUserByEmail("test@test.de"));
+        gateway.createUser(user);
+        assertEquals(user, gateway.getUserByEmail("test@test.de"));
     }
 
     @Test
@@ -155,9 +161,8 @@ public class UserDBGatewayTest {
 
     @Test
     public void testGetUserByUsernameFound() throws Exception {
-        User copy = new User(user);
-        gateway.createUser(copy);
-        assertEquals(copy, gateway.getUserByUsername("testuser"));
+        gateway.createUser(user);
+        assertEquals(user, gateway.getUserByUsername("testuser"));
     }
 
     @Test
