@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -94,8 +95,41 @@ public class TopicDBGateway implements TopicGateway {
      */
     @Override
     public List<Topic> getSelectedTopics(final Selection selection) throws NotFoundException {
-        // TODO Auto-generated method stub
-        return null;
+        if (selection == null) {
+            log.error("Error when trying to get topics with selection null.");
+            throw new IllegalArgumentException("Selection cannot be null.");
+        }
+
+        StringBuilder sql = new StringBuilder("SELECT * FROM topic");
+        if (selection.getSortedBy() != null && !selection.getSortedBy().equals("")) {
+            sql.append(" ORDER BY " + selection.getSortedBy());
+            if (selection.isAscending()) {
+                sql.append(" ASC");
+            } else {
+                sql.append(" DESC");
+            }
+        }
+        sql.append(" LIMIT " + selection.getPageSize().getSize());
+        sql.append(" OFFSET " + selection.getCurrentPage() * selection.getPageSize().getSize() + ";");
+        // sql.append(" FETCH FIRST " + selection.getPageSize().getSize() + " ROWS ONLY;");
+
+        List<Topic> selectedTopics = new ArrayList<>(Math.max(0, selection.getTotalSize()));
+        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Topic topic = new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description"));
+                selectedTopics.add(topic);
+            }
+        } catch (SQLException e) {
+            log.error("Error while retrieving topics with " + selection + ".", e);
+            throw new StoreException("Error while retrieving topics with " + selection + ".", e);
+        }
+        if (selectedTopics.isEmpty()) {
+            log.error("Topics with " + selection + " not found.");
+            throw new NotFoundException("Topics with " + selection + " not found.");
+        } else {
+            return selectedTopics;
+        }
     }
 
     /**
