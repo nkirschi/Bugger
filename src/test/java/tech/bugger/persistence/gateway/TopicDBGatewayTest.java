@@ -6,11 +6,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
+import tech.bugger.persistence.exception.StoreException;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
@@ -46,13 +51,21 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void getNumberOfTopicsWhenThereAreSome() throws Exception {
+    public void testGetNumberOfTopicsWhenThereAreSome() throws Exception {
         addTopics();
         assertEquals(3, gateway.getNumberOfTopics());
     }
 
     @Test
-    public void getNumberOfTopicsWhenThereAreNone() {
+    public void testGetNumberOfTopicsWhenThereAreNone() {
         assertEquals(0, gateway.getNumberOfTopics());
     }
+
+    @Test
+    public void testGetNumberOfTopicsWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new TopicDBGateway(connectionSpy).getNumberOfTopics());
+    }
+
 }

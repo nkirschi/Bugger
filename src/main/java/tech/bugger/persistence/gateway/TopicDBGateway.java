@@ -5,6 +5,7 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.StoreException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,15 +51,15 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfTopics() {
+    public int getNumberOfTopics() throws StoreException {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(id) FROM topic")) {
             ResultSet rs = stmt.executeQuery();
             rs.next();
             return rs.getInt(1);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            log.error("Error while retrieving number of topics.", e);
+            throw new StoreException("Error while retrieving number of topics.", e);
         }
-        return 0;
     }
 
     /**
@@ -92,7 +93,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<Topic> getSelectedTopics(Selection selection) throws NotFoundException {
+    public List<Topic> getSelectedTopics(final Selection selection) throws NotFoundException {
         // TODO Auto-generated method stub
         return null;
     }
