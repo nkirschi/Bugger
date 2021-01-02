@@ -176,6 +176,7 @@ public class TopicService {
             log.error("Error when loading selected topics.", e);
             // TODO: put in the actual message keys
             feedbackEvent.fire(new Feedback(messagesBundle.getString(""), Feedback.Type.ERROR));
+            selectedTopics = null;
         } catch (NotFoundException e) {
             log.error("Selected topics with Selection " + selection + " not found.", e);
             // TODO: put in the actual message keys
