@@ -237,4 +237,12 @@ class TopicDBGatewayTest {
         Topic topic = makeTestTopic(42);
         assertThrows(NotFoundException.class, () -> gateway.determineLastActivity(topic));
     }
+
+    @Test
+    public void testGetNumberOfTopicsWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new TopicDBGateway(connectionSpy).getNumberOfTopics());
+    }
+
 }

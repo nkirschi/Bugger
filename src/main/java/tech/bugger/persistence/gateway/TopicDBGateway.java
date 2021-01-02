@@ -53,7 +53,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int countTopics() {
+    public int countTopics() throws StoreException {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM topic;")) {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
