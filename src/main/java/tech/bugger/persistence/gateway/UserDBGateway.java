@@ -44,6 +44,34 @@ public class UserDBGateway implements UserGateway {
     }
 
     /**
+     * Formats the given {@link StatementParametrizer} using the given {@link User} in the order specified in the file
+     * {@code setup.sql} (without the ID and registration date).
+     *
+     * @param parametrizer The {@link StatementParametrizer} to format.
+     * @param user         The {@link User} that should be written into the {@code parametrizer}.
+     * @return The parametrizer with the given {@code user} inserted.
+     * @throws SQLException Some parsing error occurred.
+     */
+    static StatementParametrizer storeUserInStatement(final StatementParametrizer parametrizer, final User user)
+            throws SQLException {
+        return parametrizer
+                .string(user.getUsername())
+                .string(user.getPasswordHash())
+                .string(user.getPasswordSalt())
+                .string(user.getHashingAlgorithm())
+                .string(user.getEmailAddress())
+                .string(user.getFirstName())
+                .string(user.getLastName())
+                .bytes(user.getAvatar().get())
+                .bytes(user.getAvatarThumbnail())
+                .string(user.getBiography())
+                .string(user.getPreferredLanguage().name())
+                .object(user.getProfileVisibility(), Types.OTHER)
+                .object(user.getForcedVotingWeight(), Types.INTEGER)
+                .bool(user.isAdministrator());
+    }
+
+    /**
      * Parses the given {@link ResultSet} and returns the corresponding {@link User}.
      *
      * @param rs The {@link ResultSet} to parse.
@@ -182,28 +210,17 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public void createUser(final User user) {
+        if (!user.getAvatar().isPresent()) {
+            throw new IllegalArgumentException("Avatar must be present!");
+        }
+
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO \"user\" "
                         + "(username, password_hash, password_salt, hashing_algorithm, email_address, first_name, "
                         + "last_name, avatar, avatar_thumbnail, biography, preferred_language, profile_visibility, "
                         + "forced_voting_weight, is_admin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS)) {
-            Lazy<byte[]> avatar = user.getAvatar();
 
-            new StatementParametrizer(stmt)
-                    .string(user.getUsername())
-                    .string(user.getPasswordHash())
-                    .string(user.getPasswordSalt())
-                    .string(user.getHashingAlgorithm())
-                    .string(user.getEmailAddress())
-                    .string(user.getFirstName())
-                    .string(user.getLastName())
-                    .bytes(avatar.isPresent() ? avatar.get() : new byte[0])
-                    .bytes(user.getAvatarThumbnail())
-                    .string(user.getBiography())
-                    .string(user.getPreferredLanguage().name())
-                    .object(user.getProfileVisibility(), Types.OTHER)
-                    .object(user.getForcedVotingWeight(), Types.INTEGER)
-                    .bool(user.isAdministrator())
+            storeUserInStatement(new StatementParametrizer(stmt), user)
                     .toStatement().executeUpdate();
 
             ResultSet rs = stmt.getGeneratedKeys();
@@ -225,38 +242,23 @@ public class UserDBGateway implements UserGateway {
     public void updateUser(final User user) throws NotFoundException {
         if (user.getId() == null) {
             throw new IllegalArgumentException("User ID may not be null!");
+        } else if (!user.getAvatar().isPresent()) {
+            throw new IllegalArgumentException("Avatar must be present!");
         }
 
-        Lazy<byte[]> avatar = user.getAvatar();
         try (PreparedStatement stmt = conn.prepareStatement("UPDATE \"user\" SET "
                         + "username = ?, password_hash = ?, password_salt = ?, hashing_algorithm = ?, "
-                        + "email_address = ?, first_name = ?, last_name = ?, avatar_thumbnail = ?, "
+                        + "email_address = ?, first_name = ?, last_name = ?, avatar = ?, avatar_thumbnail = ?, "
                         + "biography = ?, preferred_language = ?, profile_visibility = ?, "
-                        + "forced_voting_weight = ?, is_admin = ? " + (avatar.isPresent() ? ", avatar = ? " : "")
+                        + "forced_voting_weight = ?, is_admin = ? "
                         + "WHERE id = ?",
                 Statement.RETURN_GENERATED_KEYS)) {
-            StatementParametrizer statementParametrizer = new StatementParametrizer(stmt)
-                    .string(user.getUsername())
-                    .string(user.getPasswordHash())
-                    .string(user.getPasswordSalt())
-                    .string(user.getHashingAlgorithm())
-                    .string(user.getEmailAddress())
-                    .string(user.getFirstName())
-                    .string(user.getLastName())
-                    .bytes(user.getAvatarThumbnail())
-                    .string(user.getBiography())
-                    .string(user.getPreferredLanguage().name())
-                    .object(user.getProfileVisibility(), Types.OTHER)
-                    .object(user.getForcedVotingWeight(), Types.INTEGER)
-                    .bool(user.isAdministrator());
 
-            if (avatar.isPresent()) {
-                statementParametrizer.bytes(avatar.get());
-            }
-
-            int changedRows = statementParametrizer
+            StatementParametrizer parametrizer = storeUserInStatement(new StatementParametrizer(stmt), user);
+            int changedRows = parametrizer
                     .integer(user.getId())
                     .toStatement().executeUpdate();
+
             if (changedRows == 0) {
                 log.error("User to update couldn't be found in the database.");
                 throw new NotFoundException("User to update couldn't be found in the database.");
