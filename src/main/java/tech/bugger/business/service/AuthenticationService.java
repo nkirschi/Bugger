@@ -170,6 +170,9 @@ public class AuthenticationService {
             while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
                 log.warning("Trying to send e-mail again. Try #" + tries + '.');
             }
+            if (tries > MAX_EMAIL_TRIES) {
+                log.error("Couldn't send e-mail for more than " + MAX_EMAIL_TRIES + " times! Please investigate!");
+            }
         }));
         return true;
     }

@@ -51,6 +51,8 @@ public class TokenDBGateway implements TokenGateway {
             throw new IllegalArgumentException("Token type may not be null!");
         }
 
+        Token ret;
+
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE id = ?")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(token.getUser().getId())
@@ -75,13 +77,17 @@ public class TokenDBGateway implements TokenGateway {
 
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
-                return getTokenByValue(rs.getString("value"));
+                ret = getTokenByValue(rs.getString("value"));
+            } else {
+                log.error("Couldn't read new token data.");
+                throw new StoreException("Couldn't read new token data.");
             }
         } catch (SQLException e) {
             log.error("Couldn't insert token into database.", e);
             throw new StoreException(e);
         }
-        return null;
+
+        return ret;
     }
 
     /**

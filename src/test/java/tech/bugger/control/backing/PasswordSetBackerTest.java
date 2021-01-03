@@ -1,5 +1,6 @@
 package tech.bugger.control.backing;
 
+import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Locale;
@@ -59,6 +60,14 @@ public class PasswordSetBackerTest {
         doReturn(testUser).when(userSession).getUser();
         passwordSetBacker.init();
         verify(ectx).redirect("home.xhtml");
+    }
+
+    @Test
+    public void testInitLoggedInAndException() throws Exception {
+        User copy = new User(testUser);
+        doReturn(copy).when(userSession).getUser();
+        doThrow(IOException.class).when(ectx).redirect(any());
+        assertThrows(InternalError.class, () -> passwordSetBacker.init());
     }
 
     @Test

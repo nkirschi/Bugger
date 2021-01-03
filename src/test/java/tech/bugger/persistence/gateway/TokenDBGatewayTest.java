@@ -107,7 +107,6 @@ public class TokenDBGatewayTest {
 
     @Test
     public void testCreateTokenInsertedNothing() throws Exception {
-        TokenDBGateway gatewaySpy = spy(gateway);
         ResultSet resultSetMock = mock(ResultSet.class);
         PreparedStatement stmtMock = mock(PreparedStatement.class);
         Connection connectionSpy = spy(connection);
@@ -115,8 +114,8 @@ public class TokenDBGatewayTest {
         doReturn(resultSetMock).when(stmtMock).getGeneratedKeys();
         doReturn(stmtMock).when(connectionSpy).prepareStatement(any(), anyInt());
         Token token = new Token("0123456789abcdef", Token.Type.CHANGE_EMAIL, null, admin);
-        assertNull(new TokenDBGateway(connectionSpy).createToken(token));
-        reset(gatewaySpy, stmtMock);
+        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).createToken(token));
+        reset(connectionSpy, stmtMock);
     }
 
     @Test

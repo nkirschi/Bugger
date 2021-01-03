@@ -228,6 +228,9 @@ public class UserDBGateway implements UserGateway {
                 user.setId(rs.getInt("id"));
                 user.setRegistrationDate(rs.getTimestamp("registered_at").toLocalDateTime()
                         .atZone(ZoneId.systemDefault()));
+            } else {
+                log.error("Couldn't read new user data.");
+                throw new StoreException("Couldn't read new user data.");
             }
         } catch (SQLException e) {
             log.error("Couldn't create the user due to a database error.", e);
@@ -275,7 +278,6 @@ public class UserDBGateway implements UserGateway {
     @Override
     public void deleteUser(final User user) {
         // TODO Auto-generated method stub
-
     }
 
     /**

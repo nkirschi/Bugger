@@ -95,6 +95,7 @@ public class ProfileService {
             log.error("User could not be created.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return false;
     }
 

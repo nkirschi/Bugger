@@ -1,16 +1,19 @@
 package tech.bugger.business.service;
 
 import java.lang.reflect.Field;
+import java.util.logging.Logger;
 import javax.enterprise.event.Event;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.Hasher;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
 import tech.bugger.global.transfer.Language;
@@ -91,6 +94,28 @@ public class AuthenticationServiceTest {
     }
 
     @Test
+    public void testGenerateTokenFirstTry() throws Exception {
+        try (MockedStatic<Hasher> hasherMock = mockStatic(Hasher.class)) {
+            hasherMock.when(() -> Hasher.generateRandomBytes(anyInt())).thenReturn("0123456789abcdef");
+            doThrow(NotFoundException.class).when(tokenGateway).getTokenByValue(any());
+            String token = service.generateToken();
+            assertAll(() -> assertNotNull(token),
+                    () -> hasherMock.verify(() -> Hasher.generateRandomBytes(anyInt())));
+        }
+    }
+
+    @Test
+    public void testGenerateTokenSecondTry() throws Exception {
+        try (MockedStatic<Hasher> hasherMock = mockStatic(Hasher.class)) {
+            hasherMock.when(() -> Hasher.generateRandomBytes(anyInt())).thenReturn("0123456789abcdef");
+            doReturn(testToken).doThrow(NotFoundException.class).when(tokenGateway).getTokenByValue(any());
+            String token = service.generateToken();
+            assertAll(() -> assertNotNull(token),
+                    () -> hasherMock.verify(times(2), () -> Hasher.generateRandomBytes(anyInt())));
+        }
+    }
+
+    @Test
     public void testRegister() throws Exception {
         User copy = new User(testUser);
         doReturn(testToken).when(tokenGateway).createToken(any());
@@ -108,6 +133,16 @@ public class AuthenticationServiceTest {
         service.register(copy, "http://test.de");
         verify(tokenGateway).createToken(any());
         verify(mailer, times(2)).send(any());
+    }
+
+    @Test
+    public void testRegisterMailOnTooManyTries() throws Exception {
+        User copy = new User(testUser);
+        doReturn(testToken).when(tokenGateway).createToken(any());
+        doReturn(false).when(mailer).send(any());
+        service.register(copy, "http://test.de");
+        verify(tokenGateway).createToken(any());
+        verify(mailer, times(4)).send(any());
     }
 
     @Test

@@ -1,6 +1,8 @@
 package tech.bugger.persistence.gateway;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +25,9 @@ import static org.mockito.Mockito.*;
 public class UserDBGatewayTest {
 
     private UserDBGateway gateway;
+
     private Connection connection;
+
     private User user;
 
     @BeforeEach
@@ -73,6 +77,18 @@ public class UserDBGatewayTest {
     public void testCreateUserAbsentAvatar() {
         user.setAvatar(new Lazy<>(() -> null));
         assertThrows(IllegalArgumentException.class, () -> gateway.createUser(user));
+    }
+
+    @Test
+    public void testCreateUserNotAdded() throws Exception {
+        ResultSet resultSetMock = mock(ResultSet.class);
+        PreparedStatement stmtMock = mock(PreparedStatement.class);
+        Connection connectionSpy = spy(connection);
+        doReturn(false).when(resultSetMock).next();
+        doReturn(resultSetMock).when(stmtMock).getGeneratedKeys();
+        doReturn(stmtMock).when(connectionSpy).prepareStatement(any(), anyInt());
+        assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).createUser(user));
+        reset(connectionSpy, stmtMock);
     }
 
     @Test
@@ -132,6 +148,7 @@ public class UserDBGatewayTest {
 
     @Test
     public void testUpdateUserAbsentAvatar() {
+        user.setId(1);
         user.setAvatar(new Lazy<>(() -> null));
         assertThrows(IllegalArgumentException.class, () -> gateway.updateUser(user));
     }
