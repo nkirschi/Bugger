@@ -5,18 +5,39 @@ import tech.bugger.global.util.Lazy;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * DTO representing a post.
  */
 public class Post implements Serializable {
+
     @Serial
     private static final long serialVersionUID = -4665707287087752126L;
 
+    /**
+     * The ID of the post.
+     */
     private int id;
+
+    /**
+     * The content of the post.
+     */
     private String content;
+
+    /**
+     * The report the post belongs to, loaded lazily.
+     */
     private Lazy<Report> report;
+
+    /**
+     * Authorship metadata about the post.
+     */
     private Authorship authorship;
+
+    /**
+     * The list of attachments of the post.
+     */
     private List<Attachment> attachments;
 
     /**
@@ -28,7 +49,8 @@ public class Post implements Serializable {
      * @param authorship  The manipulation metadata.
      * @param attachments The post attachments.
      */
-    public Post(int id, String content, Lazy<Report> report, Authorship authorship, List<Attachment> attachments) {
+    public Post(final int id, final String content, final Lazy<Report> report, final Authorship authorship,
+                final List<Attachment> attachments) {
         this.id = id;
         this.content = content;
         this.report = report;
@@ -50,7 +72,7 @@ public class Post implements Serializable {
      *
      * @param id The post ID to be set.
      */
-    public void setId(int id) {
+    public void setId(final int id) {
         this.id = id;
     }
 
@@ -68,7 +90,7 @@ public class Post implements Serializable {
      *
      * @param content The post content to be set.
      */
-    public void setContent(String content) {
+    public void setContent(final String content) {
         this.content = content;
     }
 
@@ -86,7 +108,7 @@ public class Post implements Serializable {
      *
      * @param report The associated report to be set.
      */
-    public void setReport(Lazy<Report> report) {
+    public void setReport(final Lazy<Report> report) {
         this.report = report;
     }
 
@@ -104,7 +126,7 @@ public class Post implements Serializable {
      *
      * @param authorship The post authorship metadata to be set.
      */
-    public void setAuthorship(Authorship authorship) {
+    public void setAuthorship(final Authorship authorship) {
         this.authorship = authorship;
     }
 
@@ -122,7 +144,7 @@ public class Post implements Serializable {
      *
      * @param attachments The post attachments to be set.
      */
-    public void setAttachments(List<Attachment> attachments) {
+    public void setAttachments(final List<Attachment> attachments) {
         this.attachments = attachments;
     }
 
@@ -133,9 +155,15 @@ public class Post implements Serializable {
      * @return {@code true} iff {@code other} is a semantically equivalent post.
      */
     @Override
-    public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Post)) {
+            return false;
+        }
+        Post that = (Post) other;
+        return id == that.id;
     }
 
     /**
@@ -146,8 +174,7 @@ public class Post implements Serializable {
      */
     @Override
     public int hashCode() {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        return Objects.hash(id);
     }
 
     /**
@@ -157,8 +184,13 @@ public class Post implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "Post{"
+                + "id='" + id + '\''
+                + ", content='" + content + '\''
+                + ", report='#" + report.get().getId() + '\''
+                + ", authorship='" + authorship + '\''
+                + ", attachments='" + attachments + '\''
+                + '}';
     }
 
 }
