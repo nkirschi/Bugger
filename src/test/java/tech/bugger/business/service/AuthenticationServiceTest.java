@@ -237,14 +237,13 @@ public class AuthenticationServiceTest {
     @Test
     public void testGetTokenByValueWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(tokenGateway).getTokenByValue("0123456789abcdef");
-        service.getTokenByValue("0123456789abcdef");
-        verify(feedbackEvent).fire(any());
+        assertNull(service.getTokenByValue("0123456789abcdef"));
     }
 
     @Test
     public void testGetTokenByValueWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        service.getTokenByValue("0123456789abcdef");
+        assertNull(service.getTokenByValue("0123456789abcdef"));
         verify(feedbackEvent).fire(any());
     }
 

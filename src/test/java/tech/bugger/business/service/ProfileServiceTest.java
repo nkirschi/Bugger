@@ -57,8 +57,8 @@ public class ProfileServiceTest {
             invocation.getArgument(0, User.class).setId(1);
             return null;
         }).when(userGateway).createUser(any());
-        service.createUser(copy);
-        assertEquals(1, copy.getId());
+        assertAll(() -> assertTrue(service.createUser(copy)),
+                () -> assertEquals(1, copy.getId()));
         verify(userGateway).createUser(any());
     }
 
@@ -66,15 +66,15 @@ public class ProfileServiceTest {
     public void testCreateUserWhenCommitFails() throws Exception {
         User copy = new User(testUser);
         doThrow(TransactionException.class).when(tx).commit();
-        service.createUser(copy);
+        assertFalse(service.createUser(copy));
         verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void testUpdateUser() throws Exception {
         User copy = new User(testUser);
-        service.updateUser(copy);
-        assertEquals(1, copy.getId());
+        assertAll(() -> assertTrue(service.updateUser(copy)),
+                () -> assertEquals(1, copy.getId()));
         verify(userGateway).updateUser(any());
     }
 
@@ -82,7 +82,7 @@ public class ProfileServiceTest {
     public void testUpdateWhenNotFound() throws Exception {
         User copy = new User(testUser);
         doThrow(NotFoundException.class).when(userGateway).updateUser(any());
-        service.updateUser(copy);
+        assertFalse(service.updateUser(copy));
         verify(feedbackEvent).fire(any());
     }
 
@@ -90,7 +90,7 @@ public class ProfileServiceTest {
     public void testUpdateWhenCommitFails() throws Exception {
         User copy = new User(testUser);
         doThrow(TransactionException.class).when(tx).commit();
-        service.updateUser(copy);
+        assertFalse(service.updateUser(copy));
         verify(feedbackEvent).fire(any());
     }
 
@@ -105,14 +105,13 @@ public class ProfileServiceTest {
     @Test
     public void testGetUserWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(userGateway).getUserByID(1);
-        service.getUser(1);
-        verify(feedbackEvent).fire(any());
+        assertNull(service.getUser(1));
     }
 
     @Test
     public void testGetUserWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        service.getUser(1);
+        assertNull(service.getUser(1));
         verify(feedbackEvent).fire(any());
     }
 
@@ -128,14 +127,13 @@ public class ProfileServiceTest {
     @Test
     public void testGetUserByEmailWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(userGateway).getUserByEmail("test@test.de");
-        service.getUserByEmail("test@test.de");
-        verify(feedbackEvent).fire(any());
+        assertNull(service.getUserByEmail("test@test.de"));
     }
 
     @Test
     public void testGetUserByEmailWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        service.getUserByEmail("test@test.de");
+        assertNull(service.getUserByEmail("test@test.de"));
         verify(feedbackEvent).fire(any());
     }
 
@@ -151,14 +149,13 @@ public class ProfileServiceTest {
     @Test
     public void testGetUserByUsernameWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(userGateway).getUserByUsername("test");
-        service.getUserByUsername("test");
-        verify(feedbackEvent).fire(any());
+        assertNull(service.getUserByUsername("test"));
     }
 
     @Test
     public void testGetUserByUsernameWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        service.getUserByUsername("test");
+        assertNull(service.getUserByUsername("test"));
         verify(feedbackEvent).fire(any());
     }
 
