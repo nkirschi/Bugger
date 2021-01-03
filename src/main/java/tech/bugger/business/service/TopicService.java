@@ -174,13 +174,11 @@ public class TopicService {
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error when loading selected topics.", e);
-            // TODO: put in the actual message keys
-            feedbackEvent.fire(new Feedback(messagesBundle.getString(""), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
             selectedTopics = null;
         } catch (NotFoundException e) {
             log.error("Selected topics with Selection " + selection + " not found.", e);
-            // TODO: put in the actual message keys
-            feedbackEvent.fire(new Feedback(messagesBundle.getString(""), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         }
         return selectedTopics;
     }
@@ -285,7 +283,6 @@ public class TopicService {
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error when loading number of topics.", e);
-            // TODO: put in actual message key
             feedbackEvent.fire(new Feedback(messagesBundle.getString(""), Feedback.Type.ERROR));
         }
         return numberOfTopics;
