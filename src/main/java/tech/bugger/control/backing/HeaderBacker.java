@@ -69,7 +69,7 @@ public class HeaderBacker implements Serializable {
     public HeaderBacker() { }
 
     @PostConstruct
-    private void init() {
+    void init() {
         user = session.getUser();
         closeMenu();
     }
