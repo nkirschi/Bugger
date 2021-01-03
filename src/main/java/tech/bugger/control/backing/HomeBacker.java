@@ -58,19 +58,16 @@ public class HomeBacker implements Serializable {
     /**
      * The session containing the currently logged in user.
      */
-    @Inject
     private UserSession session;
 
     /**
      * The service performing tasks concerning notifications.
      */
-    @Inject
     private transient NotificationService notificationService;
 
     /**
      * The service performing tasks concerning topics.
      */
-    @Inject
     private transient TopicService topicService;
 
     /**
@@ -80,6 +77,7 @@ public class HomeBacker implements Serializable {
      * @param notificationService The notification service to use.
      * @param topicService The topic service to use.
      */
+    @Inject
     public HomeBacker(final UserSession session, final NotificationService notificationService,
                       final TopicService topicService) {
         this.session = session;
@@ -91,7 +89,7 @@ public class HomeBacker implements Serializable {
      * Initializes the paginators for notifications and topics as inner classes.
      */
     @PostConstruct
-    public void init() {
+    void init() {
         topics = new Paginator<Topic>("", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Topic> fetch() {
