@@ -7,39 +7,39 @@
       lang="#{userSession.locale.language}" xml:lang="#{userSession.locale.language}">
 
 <h:head>
-    <title>Register</title>
+    <title>${labels['register.title']}</title>
 </h:head>
 <h:body>
     <f:view locale="#{userSession.locale}">
-        <h2><h:outputText value="Register"/></h2>
+        <h2><h:outputText value="#{labels['register.title']}"/></h2>
 
         <h:form id="f-register">
             <h:panelGrid columns="2">
-                <h:outputLabel id="o-username" for="it-username" value="Username:"/>
+                <h:outputLabel id="o-username" for="it-username" value="#{labels['register.username']}"/>
                 <h:inputText id="it-username" value="#{registerBacker.user.username}" required="true">
                     <f:validator validatorId="usernameValidator"/>
                 </h:inputText>
                 <h:panelGroup/>
                 <h:message for="it-username"/>
 
-                <h:outputLabel id="o-email" for="it-email" value="Email:"/>
+                <h:outputLabel id="o-email" for="it-email" value="#{labels['register.email']}"/>
                 <h:inputText id="it-email" value="#{registerBacker.user.emailAddress}" required="true">
                     <f:validator validatorId="emailValidator"/>
                 </h:inputText>
                 <h:panelGroup/>
                 <h:message for="it-email"/>
 
-                <h:outputLabel id="o-first-name" for="it-first-name" value="First name:"/>
+                <h:outputLabel id="o-first-name" for="it-first-name" value="#{labels['register.first_name']}"/>
                 <h:inputText id="it-first-name" value="#{registerBacker.user.firstName}" required="true"/>
                 <h:panelGroup/>
                 <h:message for="it-first-name"/>
 
-                <h:outputLabel id="o-last-name" for="it-last-name" value="Last name:"/>
+                <h:outputLabel id="o-last-name" for="it-last-name" value="#{labels['register.last_name']}"/>
                 <h:inputText id="it-last-name" value="#{registerBacker.user.lastName}" required="true"/>
                 <h:panelGroup/>
                 <h:message for="it-last-name"/>
             </h:panelGrid>
-            <h:commandButton value="Register" action="#{registerBacker.register}"/>
+            <h:commandButton value="#{labels['register.submit']}" action="#{registerBacker.register}"/>
         </h:form>
     </f:view>
 </h:body>
