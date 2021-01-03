@@ -73,20 +73,6 @@ public class HomeBacker implements Serializable {
     }
 
     /**
-     * Constructs a new home page backing bean.
-     *
-     * @param session The current user session.
-     * @param notificationService The notification service to use.
-     * @param topicService The topic service to use.
-     */
-    public HomeBacker(final UserSession session, final NotificationService notificationService,
-                      final TopicService topicService) {
-        this.session = session;
-        this.notificationService = notificationService;
-        this.topicService = topicService;
-    }
-
-    /**
      * Initializes the paginators for notifications and topics as inner classes.
      */
     @PostConstruct
