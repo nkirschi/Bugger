@@ -1,7 +1,6 @@
 package tech.bugger.persistence.gateway;
 
 import tech.bugger.global.transfer.Token;
-import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
 
 /**
@@ -10,22 +9,13 @@ import tech.bugger.persistence.exception.NotFoundException;
 public interface TokenGateway {
 
     /**
-     * Generates and stores a token for a user action.
+     * Stores a given {@link Token} for a user action (at least a value, type, and user ID is required).
      *
-     * @param user The user to generate a token for.
-     * @param type The type of user action the token should verify.
-     * @return The newly generated token.
+     * @param token The {@link Token} to store.
+     * @return The newly stored {@link Token} with valid additional metadata (at least a timestamp is generated).
      * @throws NotFoundException The user could not be found.
      */
-    Token generateToken(User user, Token.Type type) throws NotFoundException;
-
-    /**
-     * Checks whether a token exists and is still valid.
-     *
-     * @param token The token whose validity is to check.
-     * @return Whether {@code token} exists and is valid.
-     */
-    boolean isValid(String token);
+    Token createToken(Token token) throws NotFoundException;
 
     /**
      * Returns the complete {@link Token} DTO for the given value.

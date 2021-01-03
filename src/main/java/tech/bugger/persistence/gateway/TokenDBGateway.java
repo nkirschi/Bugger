@@ -5,11 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import tech.bugger.business.util.Hasher;
 import tech.bugger.global.transfer.Token;
-import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
@@ -24,11 +21,6 @@ public class TokenDBGateway implements TokenGateway {
      * The {@link Log} instance associated with this class for logging purposes.
      */
     private static final Log log = Log.forClass(TokenDBGateway.class);
-
-    /**
-     * The length of a generated token.
-     */
-    private static final int TOKEN_LENGTH = 32;
 
     /**
      * Database connection used by this gateway.
@@ -48,13 +40,21 @@ public class TokenDBGateway implements TokenGateway {
      * {@inheritDoc}
      */
     @Override
-    public Token generateToken(final User user, final Token.Type type) throws NotFoundException {
-        if (user.getId() == null) {
+    public Token createToken(final Token token) throws NotFoundException {
+        if (token.getUser() == null) {
+            throw new IllegalArgumentException("User may not be null!");
+        } else if (token.getUser().getId() == null) {
             throw new IllegalArgumentException("User ID may not be null!");
+        } else if (token.getValue() == null) {
+            throw new IllegalArgumentException("Token value may not be null!");
+        } else if (token.getType() == null) {
+            throw new IllegalArgumentException("Token type may not be null!");
         }
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE id = ?")) {
-            ResultSet rs = new StatementParametrizer(stmt).integer(user.getId()).toStatement().executeQuery();
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(token.getUser().getId())
+                    .toStatement().executeQuery();
 
             if (!rs.next()) {
                 throw new NotFoundException("User doesn't exist.");
@@ -64,44 +64,24 @@ public class TokenDBGateway implements TokenGateway {
             throw new StoreException(e);
         }
 
-        String token;
-        do {
-            token = Hasher.generateRandomBytes(TOKEN_LENGTH);
-        } while (isValid(token));
-
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO token (value, type, verifies) "
                 + "VALUES (?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS)) {
 
             new StatementParametrizer(stmt)
-                    .string(token)
-                    .object(type, Types.OTHER)
-                    .integer(user.getId())
+                    .string(token.getValue())
+                    .object(token.getType(), Types.OTHER)
+                    .integer(token.getUser().getId())
                     .toStatement().executeUpdate();
 
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
-                LocalDateTime timestamp = rs.getTimestamp("timestamp").toLocalDateTime();
-                return new Token(token, type, timestamp.atZone(ZoneId.systemDefault()), user);
+                return getTokenByValue(rs.getString("value"));
             }
         } catch (SQLException e) {
             log.error("Couldn't insert token into database.", e);
             throw new StoreException(e);
         }
         return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isValid(final String token) {
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM token WHERE value = ?")) {
-            ResultSet rs = new StatementParametrizer(stmt).string(token).toStatement().executeQuery();
-            return rs.next();
-        } catch (SQLException e) {
-            log.error("Couldn't verify the token's validity due to a database error.", e);
-            throw new StoreException(e);
-        }
     }
 
     /**
@@ -119,11 +99,11 @@ public class TokenDBGateway implements TokenGateway {
                         rs.getTimestamp("timestamp").toLocalDateTime().atZone(ZoneId.systemDefault()),
                         UserDBGateway.getUserFromResultSet(rs));
             } else {
-                log.error("No associated user found.");
-                throw new NotFoundException("Associated user couldn't be found!");
+                log.error("Searched token by value could not be found.");
+                throw new NotFoundException("Searched token by value could not be found!");
             }
         } catch (SQLException e) {
-            log.error("Couldn't verify the token's validity due to a database error.", e);
+            log.error("Couldn't search the token by value due to a database error.", e);
             throw new StoreException(e);
         }
 

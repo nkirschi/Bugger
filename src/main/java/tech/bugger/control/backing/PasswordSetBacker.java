@@ -73,9 +73,13 @@ public class PasswordSetBacker {
      * If the user is already logged in, they are redirected to the home page.
      */
     @PostConstruct
-    public void init() throws IOException {
+    public void init() {
         if (session.getUser() != null) {
-            ectx.redirect("home.xhtml");
+            try {
+                ectx.redirect("home.xhtml");
+            } catch (IOException e) {
+                throw new InternalError("Error while redirecting.", e);
+            }
         }
 
         token = authenticationService.getTokenByValue(ectx.getRequestParameterMap().get("token"));

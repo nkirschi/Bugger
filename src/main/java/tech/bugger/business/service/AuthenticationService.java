@@ -1,5 +1,6 @@
 package tech.bugger.business.service;
 
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
@@ -33,6 +34,11 @@ public class AuthenticationService {
     private static final Log log = Log.forClass(AuthenticationService.class);
 
     /**
+     * The length of a generated token.
+     */
+    private static final int TOKEN_LENGTH = 32;
+
+    /**
      * Maximum amount of times an email should be tried to resend.
      */
     private static final int MAX_EMAIL_TRIES = 3;
@@ -51,6 +57,11 @@ public class AuthenticationService {
      * Resource bundle for feedback messages.
      */
     private final ResourceBundle messagesBundle;
+
+    /**
+     * Resource bundle for interaction messages.
+     */
+    private final ResourceBundle interactionsBundle;
 
     /**
      * The {@link PriorityExecutor} instance to use when sending e-mails.
@@ -73,6 +84,7 @@ public class AuthenticationService {
      * @param transactionManager The transaction manager to use for creating transactions.
      * @param feedbackEvent      The feedback event to use for user feedback.
      * @param messagesBundle     The resource bundle for feedback messages.
+     * @param interactionsBundle The resource bundle for interaction messages.
      * @param priorityExecutor   The priority executor to use when sending e-mails.
      * @param mailer             The mailer to use.
      * @param configReader       The configuration reader to use.
@@ -80,12 +92,14 @@ public class AuthenticationService {
     @Inject
     public AuthenticationService(final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
                                  @RegistryKey("messages") final ResourceBundle messagesBundle,
+                                 @RegistryKey("interactions") final ResourceBundle interactionsBundle,
                                  @RegistryKey("mails") final PriorityExecutor priorityExecutor,
                                  @RegistryKey("main") final Mailer mailer,
                                  @RegistryKey("config") final PropertiesReader configReader) {
         this.transactionManager = transactionManager;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;
+        this.interactionsBundle = interactionsBundle;
         this.priorityExecutor = priorityExecutor;
         this.mailer = mailer;
         this.configReader = configReader;
@@ -104,20 +118,35 @@ public class AuthenticationService {
     }
 
     /**
+     * Generates a token value for verification of a user action.
+     *
+     * @return The newly generated token value.
+     */
+    public String generateToken() {
+        String value;
+        do {
+            value = Hasher.generateRandomBytes(TOKEN_LENGTH);
+        } while (isValid(value));
+        return value;
+    }
+
+    /**
      * Registers a new user by generating a {@link Token} and sending a confirmation email to the new user.
      *
-     * @param user The user to be registered.
+     * @param user   The user to be registered.
+     * @param domain The current domain of this web application.
      * @return Whether the action was successful or not.
      */
-    public boolean register(final User user) {
+    public boolean register(final User user, final String domain) {
         Token token = null;
 
         try (Transaction tx = transactionManager.begin()) {
-            token = tx.newTokenGateway().generateToken(user, Token.Type.REGISTER);
+            Token toInsert = new Token(generateToken(), Token.Type.REGISTER, null, user);
+            token = tx.newTokenGateway().createToken(toInsert);
             tx.commit();
         } catch (NotFoundException e) {
             log.error("The user couldn't be found.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Token could not be generated.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
@@ -127,10 +156,12 @@ public class AuthenticationService {
             return false;
         }
 
+        String link = domain + "/faces/view/public/password-set.xhtml?token=" + token.getValue();
         Mail mail = new MailBuilder()
                 .to(user.getEmailAddress())
-                .subject("Omae wa mou shindeiru.")
-                .content("NANI?! http://localhost:8080/faces/view/public/password-set.xhtml?token=" + token.getValue())
+                .subject(interactionsBundle.getString("email_register_subject"))
+                .content(new MessageFormat(interactionsBundle.getString("email_register_content"))
+                        .format(new String[]{token.getUser().getFirstName(), token.getUser().getLastName(), link}))
                 .envelop();
         priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.HIGH, () -> {
             int tries = 1;
@@ -217,17 +248,7 @@ public class AuthenticationService {
      * @return {@code true} if the token is valid, {@code false} otherwise.
      */
     public boolean isValid(final String token) {
-        boolean valid = false;
-
-        try (Transaction tx = transactionManager.begin()) {
-            valid = tx.newTokenGateway().isValid(token);
-            tx.commit();
-        } catch (TransactionException e) {
-            log.error("Token status could not be checked.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
-        }
-
-        return valid;
+        return getTokenByValue(token) != null;
     }
 
 }

@@ -5,8 +5,7 @@ import java.io.Serializable;
 import java.util.Locale;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
+import javax.faces.context.FacesContext;
 import javax.inject.Named;
 import tech.bugger.global.transfer.User;
 
@@ -21,11 +20,6 @@ public class UserSession implements Serializable {
     private static final long serialVersionUID = 8943571923172893158L;
 
     /**
-     * The current external context.
-     */
-    private final ExternalContext ectx;
-
-    /**
      * The currently logged in user.
      */
     private User user;
@@ -36,21 +30,17 @@ public class UserSession implements Serializable {
     private Locale locale;
 
     /**
-     * Constructs a new user session using the given external context.
-     *
-     * @param ectx The external context to use.
-     */
-    @Inject
-    public UserSession(final ExternalContext ectx) {
-        this.ectx = ectx;
-    }
-
-    /**
      * Initializes this user session by setting a preferred locale.
      */
     @PostConstruct
     public void init() {
-        locale = ectx.getRequestLocale();
+        locale = FacesContext.getCurrentInstance().getExternalContext().getRequestLocale();
+    }
+
+    /**
+     * Invalidates the Session.
+     */
+    public void invalidateSession() {
     }
 
     /**

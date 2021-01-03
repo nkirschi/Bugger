@@ -1,11 +1,14 @@
 package tech.bugger.control.backing;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
@@ -43,7 +46,7 @@ public class RegisterBacker {
     /**
      * The current external context.
      */
-    private final ExternalContext externalContext;
+    private final ExternalContext ectx;
 
     /**
      * The user that is being created.
@@ -56,15 +59,15 @@ public class RegisterBacker {
      * @param authenticationService The authentication service to use.
      * @param profileService        The profile service to use.
      * @param session               The current {@link UserSession}.
-     * @param externalContext       The current external context.
+     * @param ectx                  The current external context.
      */
     @Inject
     public RegisterBacker(final AuthenticationService authenticationService, final ProfileService profileService,
-                          final UserSession session, final ExternalContext externalContext) {
+                          final UserSession session, final ExternalContext ectx) {
         this.authenticationService = authenticationService;
         this.profileService = profileService;
         this.session = session;
-        this.externalContext = externalContext;
+        this.ectx = ectx;
     }
 
     /**
@@ -74,7 +77,7 @@ public class RegisterBacker {
     public void init() {
         if (session.getUser() != null) {
             try {
-                externalContext.redirect("home.xhtml");
+                ectx.redirect("home.xhtml");
             } catch (IOException e) {
                 throw new InternalError("Error while redirecting.", e);
             }
@@ -90,7 +93,15 @@ public class RegisterBacker {
      * @return The site to redirect to.
      */
     public String register() {
-        if (profileService.createUser(user) && authenticationService.register(user)) {
+        URL currentUrl;
+        try {
+            currentUrl = new URL(((HttpServletRequest) ectx.getRequest()).getRequestURL().toString());
+        } catch (MalformedURLException e) {
+            throw new InternalError("URL is invalid.", e);
+        }
+
+        String domain = String.format("%s://%s", currentUrl.getProtocol(), currentUrl.getAuthority());
+        if (profileService.createUser(user) && authenticationService.register(user, domain)) {
             return "home.xhtml";
         }
         return null;
