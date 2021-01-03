@@ -5,9 +5,14 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.StoreException;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,8 +20,14 @@ import java.util.List;
  */
 public class TopicDBGateway implements TopicGateway {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(TopicDBGateway.class);
 
+    /**
+     * Database connection used by this gateway.
+     */
     private Connection conn;
 
     /**
@@ -24,7 +35,7 @@ public class TopicDBGateway implements TopicGateway {
      *
      * @param conn The database connection to use for the gateway.
      */
-    public TopicDBGateway(Connection conn) {
+    public TopicDBGateway(final Connection conn) {
         this.conn = conn;
     }
 
@@ -42,8 +53,14 @@ public class TopicDBGateway implements TopicGateway {
      */
     @Override
     public int getNumberOfTopics() {
-        // TODO Auto-generated method stub
-        return 0;
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(id) FROM topic")) {
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            log.error("Error while retrieving number of topics.", e);
+            throw new StoreException("Error while retrieving number of topics.", e);
+        }
     }
 
     /**
@@ -77,9 +94,41 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<Topic> getSelectedTopics(Selection selection) throws NotFoundException {
-        // TODO Auto-generated method stub
-        return null;
+    public List<Topic> getSelectedTopics(final Selection selection) throws NotFoundException {
+        if (selection == null) {
+            log.error("Error when trying to get topics with selection null.");
+            throw new IllegalArgumentException("Selection cannot be null.");
+        }
+
+        StringBuilder sql = new StringBuilder("SELECT * FROM topic");
+        if (selection.getSortedBy() != null && !selection.getSortedBy().equals("")) {
+            sql.append(" ORDER BY ").append(selection.getSortedBy());
+            if (selection.isAscending()) {
+                sql.append(" ASC");
+            } else {
+                sql.append(" DESC");
+            }
+        }
+        sql.append(" LIMIT ").append(selection.getPageSize().getSize());
+        sql.append(" OFFSET ").append(selection.getCurrentPage() * selection.getPageSize().getSize()).append(";");
+
+        List<Topic> selectedTopics = new ArrayList<>(Math.max(0, selection.getTotalSize()));
+        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Topic topic = new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description"));
+                selectedTopics.add(topic);
+            }
+        } catch (SQLException e) {
+            log.error("Error while retrieving topics with " + selection + ".", e);
+            throw new StoreException("Error while retrieving topics with " + selection + ".", e);
+        }
+        if (selectedTopics.isEmpty()) {
+            log.error("Topics with " + selection + " not found.");
+            throw new NotFoundException("Topics with " + selection + " not found.");
+        } else {
+            return selectedTopics;
+        }
     }
 
     /**
