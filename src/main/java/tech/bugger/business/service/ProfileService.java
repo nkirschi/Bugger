@@ -70,8 +70,7 @@ public class ProfileService {
             user = tx.newUserGateway().getUserByID(id);
             tx.commit();
         } catch (NotFoundException e) {
-            log.error("User could not be found.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            log.debug("User in search for ID could not be found.");
         } catch (TransactionException e) {
             log.error("User could not be created.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
@@ -230,10 +229,9 @@ public class ProfileService {
             user = tx.newUserGateway().getUserByEmail(emailAddress);
             tx.commit();
         } catch (NotFoundException e) {
-            log.error("User could not be found.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            log.debug("User in search for e-mail could not be found.");
         } catch (TransactionException e) {
-            log.error("Error while searching for email.", e);
+            log.error("Error while searching for e-mail.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
 
@@ -253,8 +251,7 @@ public class ProfileService {
             user = tx.newUserGateway().getUserByUsername(username);
             tx.commit();
         } catch (NotFoundException e) {
-            log.error("User could not be found.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            log.debug("User in search for username could not be found.");
         } catch (TransactionException e) {
             log.error("Error while searching for username.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));

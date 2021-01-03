@@ -124,9 +124,11 @@ public class AuthenticationService {
      */
     public String generateToken() {
         String value;
+
         do {
             value = Hasher.generateRandomBytes(TOKEN_LENGTH);
         } while (isValid(value));
+
         return value;
     }
 
@@ -200,7 +202,7 @@ public class AuthenticationService {
             return true;
         } catch (NotFoundException e) {
             log.error("The user couldn't be found.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("User could not be updated.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
@@ -222,10 +224,9 @@ public class AuthenticationService {
             token = tx.newTokenGateway().getTokenByValue(value);
             tx.commit();
         } catch (NotFoundException e) {
-            log.error("No user associated with this token.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            log.debug("Token by value could not be found.");
         } catch (TransactionException e) {
-            log.error("User could not be fetched.", e);
+            log.error("Token by value could not be fetched.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
 
