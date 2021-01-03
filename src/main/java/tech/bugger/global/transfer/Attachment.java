@@ -4,18 +4,39 @@ import tech.bugger.global.util.Lazy;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * DTO representing a post attachment.
  */
 public class Attachment implements Serializable {
+
     @Serial
     private static final long serialVersionUID = -2716524830405709705L;
 
+    /**
+     * The ID of the attachment.
+     */
     private int id;
+
+    /**
+     * The filename of the attachment.
+     */
     private String name;
+
+    /**
+     * The content of the attachment, loaded lazily.
+     */
     private Lazy<byte[]> content;
+
+    /**
+     * The media type (MIME type) of the attachment.
+     */
     private String mimetype;
+
+    /**
+     * The post of the attachment, loaded lazily.
+     */
     private Lazy<Post> post;
 
     /**
@@ -29,14 +50,15 @@ public class Attachment implements Serializable {
      * Constructs a new attachment from the specified parameters.
      *
      * @param id       The ID of the attachment.
-     * @param title    The title of the attachment.
+     * @param name     The filename of the attachment.
      * @param content  The data of the attachment.
      * @param mimetype The MIME type of the attachment.
      * @param post     The post the attachment belongs to.
      */
-    public Attachment(int id, String title, Lazy<byte[]> content, String mimetype, Lazy<Post> post) {
+    public Attachment(final int id, final String name, final Lazy<byte[]> content, final String mimetype,
+                      final Lazy<Post> post) {
         this.id = id;
-        this.name = title;
+        this.name = name;
         this.content = content;
         this.mimetype = mimetype;
         this.post = post;
@@ -56,7 +78,7 @@ public class Attachment implements Serializable {
      *
      * @param id The ID to be set.
      */
-    public void setId(int id) {
+    public void setId(final int id) {
         this.id = id;
     }
 
@@ -74,7 +96,7 @@ public class Attachment implements Serializable {
      *
      * @param name The title to be set.
      */
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -92,7 +114,7 @@ public class Attachment implements Serializable {
      *
      * @param content The data to be set.
      */
-    public void setContent(Lazy<byte[]> content) {
+    public void setContent(final Lazy<byte[]> content) {
         this.content = content;
     }
 
@@ -110,7 +132,7 @@ public class Attachment implements Serializable {
      *
      * @param mimetype The attachment MIME type to be set.
      */
-    public void setMimetype(String mimetype) {
+    public void setMimetype(final String mimetype) {
         this.mimetype = mimetype;
     }
 
@@ -128,7 +150,7 @@ public class Attachment implements Serializable {
      *
      * @param post The post to be set.
      */
-    public void setPost(Lazy<Post> post) {
+    public void setPost(final Lazy<Post> post) {
         this.post = post;
     }
 
@@ -139,9 +161,15 @@ public class Attachment implements Serializable {
      * @return {@code true} iff {@code other} is a semantically equivalent attachment.
      */
     @Override
-    public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Attachment)) {
+            return false;
+        }
+        Attachment that = (Attachment) other;
+        return id == that.id;
     }
 
     /**
@@ -152,8 +180,7 @@ public class Attachment implements Serializable {
      */
     @Override
     public int hashCode() {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        return Objects.hash(id);
     }
 
     /**
@@ -163,7 +190,14 @@ public class Attachment implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "Attachment{"
+                + "id='" + id + '\''
+                + "name='" + name + '\''
+                + ", content=byte[" + content.get().length + "]" // TODO: Really fetch the content just for toString?
+                + ", mimetype='" + mimetype + '\''
+                + ", post='##" + post.get().getId() + '\''       // TODO same
+                + '}';
+
     }
+
 }
