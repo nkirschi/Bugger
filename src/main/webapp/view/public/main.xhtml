@@ -6,28 +6,34 @@
 <html lang="#{userSession.locale.language}"
       xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:ui="http://java.sun.com/jsf/facelets">
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:f="http://java.sun.com/jsf/core">
 
-<h:head>
-    <title> Bugger: #{title} </title>
-    <h:outputStylesheet library = "design" name = "style.css" />
-    <h:outputStylesheet library = "design" name = "themes/#{applicationSettings.organization.theme}" />
-</h:head>
+<f:view locale="#{userSession.locale}">
+    <h:head>
+        <title> Bugger: #{title} </title>
+        <h:outputStylesheet library = "design" name = "style.css" />
+        <h:outputStylesheet library = "design" name = "themes/#{applicationSettings.organization.theme}" />
+        <h:outputStylesheet library = "design" name = "bootstrap.min.css" />
+    </h:head>
 
-<h:body>
-    <h:panelGroup layout="block">
-        <ui:include src= "/view/public/header.xhtml" />
-        <h:panelGroup styleClass="titlebar">
-            <h:outputLabel value="#{title}" styleClass="h2"/>
-        </h:panelGroup>
+    <h:body>
         <h:panelGroup layout="block">
-            <h:messages id= "m_global"/>
+            <ui:include src= "/view/public/header.xhtml" id="header" />
+            <h:panelGroup styleClass="titlebar" id="titlebar">
+                <h:outputLabel value="#{title}" styleClass="h1" id="title"/>
+            </h:panelGroup>
+            <h:panelGroup layout="block" id="messagesArea">
+                <h:messages id= "m_global"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="content" layout="block" id="contentPanel">
+                <ui:insert name= "content"/>
+            </h:panelGroup>
+            <ui:include  src= "/view/public/footer.xhtml" id="footer">
+                <ui:param name="helpKey" value="#{title}"/>
+            </ui:include>
         </h:panelGroup>
-        <h:panelGroup styleClass="content" layout="block">
-            <ui:insert name= "content"/>
-        </h:panelGroup>
-        <ui:include  src= "/view/public/footer.xhtml"/>
-    </h:panelGroup>
-</h:body>
+    </h:body>
+
+</f:view>
 
 </html>

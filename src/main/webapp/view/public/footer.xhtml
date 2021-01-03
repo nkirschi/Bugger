@@ -2,13 +2,18 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html">
-<h:panelGroup layout="block" class="footer">
-    <h:link outcome="/view/public/home" value="#{labels.copyright}" styleClass="footerElement"/>
-    <h:link outcome="/view/public/home" value="#{labels.statistics}" styleClass="footerElement"/>
-    <h:link outcome="/view/public/home" value="#{labels.imprint}" styleClass="footerElement"/>
-    <h:link outcome="/view/public/home" value="#{labels.privacy}" styleClass="footerElement"/>
-    <h:link outcome="/view/public/home" value="#{labels.help}" styleClass="footerElement"/>
-    <!-- Language -->
-</h:panelGroup>
+      xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<ui:composition>
+    <h:panelGroup layout="block" styleClass="footer">
+        <h:link outcome="/view/public/home" value="#{labels.copyright}" styleClass="footerElement"/>
+        <h:link outcome="/view/public/home" value="#{labels.statistics}" styleClass="footerElement"/>
+        <h:link outcome="/view/public/home" value="#{labels.imprint}" styleClass="footerElement"/>
+        <h:link outcome="/view/public/home" value="#{labels.privacy}" styleClass="footerElement"/>
+        <h:link outcome="/view/public/home" value="#{labels.help}" styleClass="footerElement">
+            <f:param name="helpKey" value="#{helpKey}"/>
+        </h:link>
+        <!-- Language -->
+    </h:panelGroup>
+</ui:composition>
 </html>

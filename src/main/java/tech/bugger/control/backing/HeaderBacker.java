@@ -1,16 +1,11 @@
 package tech.bugger.control.backing;
-
-import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.SearchService;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
-import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
@@ -25,29 +20,53 @@ import java.util.List;
 public class HeaderBacker implements Serializable {
     @Serial
     private static final long serialVersionUID = 7342292657804667855L;
+
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(HeaderBacker.class);
+
+    /**
+     * The user behind the current UserSession.
+     */
     private User user;
+
+    /**
+     * The current search Query.
+     */
     private String searchQuery;
+
+    /**
+     * List of suggested Topics for the current search.
+     */
     private List<Topic> topicSuggestions;
+
+    /**
+     * List of suggested Reports for the current search.
+     */
     private List<Report> reportSuggestions;
+
+    /**
+     * List of suggested Users for the current search.
+     */
     private List<User> userSuggestions;
 
+    /**
+     * The current UserSession.
+     */
+    @Inject
     private UserSession session;
-    private ApplicationSettings applicationSettings;
 
+    /**
+     * {@code true} if the Menu should be displayed, {@code false} otherwise.
+     */
     private boolean displayMenu;
 
     /**
      * Constructs a new header backing bean with the necessary dependencies.
-     *
-     * @param session             The current user session.
-     * @param applicationSettings The application settings cache.
      */
     @Inject
-    public HeaderBacker(final UserSession session, final ApplicationSettings applicationSettings) {
-        this.session = session;
-        this.applicationSettings = applicationSettings;
-    }
+    public HeaderBacker() { }
 
     @PostConstruct
     private void init() {
@@ -83,7 +102,7 @@ public class HeaderBacker implements Serializable {
     /**
      * @param user The user to set.
      */
-    public void setUser(User user) {
+    public void setUser(final User user) {
         this.user = user;
     }
 
@@ -97,7 +116,7 @@ public class HeaderBacker implements Serializable {
     /**
      * @param searchQuery The searchQuery to set.
      */
-    public void setSearchQuery(String searchQuery) {
+    public void setSearchQuery(final String searchQuery) {
         this.searchQuery = searchQuery;
     }
 
@@ -111,7 +130,7 @@ public class HeaderBacker implements Serializable {
     /**
      * @param topicSuggestions The topicSuggestions to set.
      */
-    public void setTopicSuggestions(List<Topic> topicSuggestions) {
+    public void setTopicSuggestions(final List<Topic> topicSuggestions) {
         this.topicSuggestions = topicSuggestions;
     }
 
@@ -125,7 +144,7 @@ public class HeaderBacker implements Serializable {
     /**
      * @param reportSuggestions The reportSuggestions to set.
      */
-    public void setReportSuggestions(List<Report> reportSuggestions) {
+    public void setReportSuggestions(final List<Report> reportSuggestions) {
         this.reportSuggestions = reportSuggestions;
     }
 
@@ -139,30 +158,37 @@ public class HeaderBacker implements Serializable {
     /**
      * @param userSuggestions The userSuggestions to set.
      */
-    public void setUserSuggestions(List<User> userSuggestions) {
+    public void setUserSuggestions(final List<User> userSuggestions) {
         this.userSuggestions = userSuggestions;
     }
 
-    public String toggleMenu() {
-        log.debug("displayMenu war " + displayMenu);
+
+    /**
+     * Activates/Deactivates the menu.
+     *
+     * @return {@code Null} to reload the page.
+     */
+    final public String toggleMenu() {
         if (displayMenu) {
             closeMenu();
         } else {
             openMenu();
         }
-        log.debug("displayMenu ist " + displayMenu);
         return null;
     }
 
-    public boolean getDisplayMenu() {
+    /**
+     * @return {@code true} if the Menu should be displayed, {@code false} otherwise.
+     */
+    final public boolean isDisplayMenu() {
         return displayMenu;
     }
 
-    public void closeMenu() {
-        displayMenu=false;
+    private void closeMenu() {
+        displayMenu = false;
     }
 
-    public void openMenu() {
-        displayMenu=true;
+    private void openMenu() {
+        displayMenu = true;
     }
 }

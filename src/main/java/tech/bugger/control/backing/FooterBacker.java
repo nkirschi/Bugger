@@ -19,20 +19,21 @@ public class FooterBacker implements Serializable {
     @Serial
     private static final long serialVersionUID = 4849101262721339096L;
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(FooterBacker.class);
-    private Language language;
-
-    @Inject
-    private UserSession session;
 
     /**
-     * Displays help messages for the current context (user and page).
-     *
-     * @param helpKey Identifies current page.
+     * The current Language.
      */
-    public void help(String helpKey) {
+    private Language language;
 
-    }
+    /**
+     * The current UserSession.
+     */
+    @Inject
+    private UserSession session;
 
     /**
      * Changes language. The change is effective for the whole session.
@@ -51,7 +52,7 @@ public class FooterBacker implements Serializable {
     /**
      * @param language The language to set.
      */
-    public void setLanguage(Language language) {
+    public void setLanguage(final Language language) {
         this.language = language;
     }
 
