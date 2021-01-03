@@ -79,6 +79,7 @@ public class HomeBacker implements Serializable {
      * @param notificationService The notification service to use.
      * @param topicService The topic service to use.
      */
+    @Inject
     public HomeBacker(final UserSession session, final NotificationService notificationService,
                       final TopicService topicService) {
         this.session = session;
