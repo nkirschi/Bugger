@@ -19,17 +19,20 @@ public class DBExtension implements BeforeAllCallback, AfterAllCallback, BeforeE
     private static EmbeddedPostgres pg;
     private static String setupSQL;
     private static String eraseSQL;
+    private static String testDataSQL;
 
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
         pg = EmbeddedPostgres.builder().start();
         setupSQL = Files.readString(Paths.get("src/main/webapp/WEB-INF/setup.sql"));
         eraseSQL = Files.readString(Paths.get("src/main/webapp/WEB-INF/erase.sql"));
+        testDataSQL = Files.readString(Paths.get("testdata/minimal.sql"));
     }
 
     @Override
     public void beforeEach(ExtensionContext extensionContext) {
         applyScript(setupSQL);
+        applyScript(testDataSQL);
     }
 
     @Override
