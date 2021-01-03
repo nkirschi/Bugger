@@ -111,7 +111,6 @@ public class TopicDBGateway implements TopicGateway {
         }
         sql.append(" LIMIT ").append(selection.getPageSize().getSize());
         sql.append(" OFFSET ").append(selection.getCurrentPage() * selection.getPageSize().getSize()).append(";");
-        // sql.append(" FETCH FIRST " + selection.getPageSize().getSize() + " ROWS ONLY;");
 
         List<Topic> selectedTopics = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
