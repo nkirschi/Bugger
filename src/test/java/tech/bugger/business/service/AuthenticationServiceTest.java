@@ -72,7 +72,7 @@ public class AuthenticationServiceTest {
         }).when(priorityExecutor).enqueue(any());
 
         service = new AuthenticationService(transactionManager, feedbackEvent, ResourceBundleMocker.mock(""),
-                priorityExecutor, mailer, configReader);
+                ResourceBundleMocker.mock(""), priorityExecutor, mailer, configReader);
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(tokenGateway).when(tx).newTokenGateway();
@@ -93,28 +93,28 @@ public class AuthenticationServiceTest {
     @Test
     public void testRegister() throws Exception {
         User copy = new User(testUser);
-        doReturn(testToken).when(tokenGateway).generateToken(any(), any());
+        doReturn(testToken).when(tokenGateway).createToken(any());
         doReturn(true).when(mailer).send(any());
-        service.register(copy);
-        verify(tokenGateway).generateToken(any(), any());
+        service.register(copy, "http://test.de");
+        verify(tokenGateway).createToken(any());
         verify(mailer).send(any());
     }
 
     @Test
     public void testRegisterMailNotOnFirstTry() throws Exception {
         User copy = new User(testUser);
-        doReturn(testToken).when(tokenGateway).generateToken(any(), any());
+        doReturn(testToken).when(tokenGateway).createToken(any());
         doReturn(false).doReturn(true).when(mailer).send(any());
-        service.register(copy);
-        verify(tokenGateway).generateToken(any(), any());
+        service.register(copy, "http://test.de");
+        verify(tokenGateway).createToken(any());
         verify(mailer, times(2)).send(any());
     }
 
     @Test
     public void testRegisterWhenNotFound() throws Exception {
         User copy = new User(testUser);
-        doThrow(NotFoundException.class).when(tokenGateway).generateToken(any(), any());
-        service.register(copy);
+        doThrow(NotFoundException.class).when(tokenGateway).createToken(any());
+        service.register(copy, "http://test.de");
         verify(feedbackEvent).fire(any());
     }
 
@@ -122,22 +122,22 @@ public class AuthenticationServiceTest {
     public void testRegisterWhenCommitFails() throws Exception {
         User copy = new User(testUser);
         doThrow(TransactionException.class).when(tx).commit();
-        service.register(copy);
-        verify(feedbackEvent).fire(any());
+        service.register(copy, "http://test.de");
+        verify(feedbackEvent, atLeastOnce()).fire(any());
     }
 
     @Test
-    public void testIsValidYes() {
-        doReturn(true).when(tokenGateway).isValid(any());
+    public void testIsValidYes() throws Exception {
+        doReturn(testToken).when(tokenGateway).getTokenByValue(any());
         assertTrue(service.isValid("0123456789abcdef"));
-        verify(tokenGateway).isValid(any());
+        verify(tokenGateway).getTokenByValue(any());
     }
 
     @Test
-    public void testIsValidNo() {
-        doReturn(false).when(tokenGateway).isValid(any());
+    public void testIsValidNo() throws Exception {
+        doThrow(NotFoundException.class).when(tokenGateway).getTokenByValue(any());
         assertFalse(service.isValid("0123456789abcdef"));
-        verify(tokenGateway).isValid(any());
+        verify(tokenGateway).getTokenByValue(any());
     }
 
     @Test
@@ -151,7 +151,7 @@ public class AuthenticationServiceTest {
     public void testSetPassword() throws Exception {
         User copy = new User(testUser);
         doNothing().when(userGateway).updateUser(any());
-        doReturn(true).when(tokenGateway).isValid(any());
+        doReturn(testToken).when(tokenGateway).getTokenByValue(any());
 
         boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
         assertAll(() -> assertTrue(res),
@@ -164,13 +164,13 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void testSetPasswordNotValid() {
+    public void testSetPasswordNotValid() throws Exception {
         User copy = new User(testUser);
 
-        doReturn(false).when(tokenGateway).isValid(any());
+        doThrow(NotFoundException.class).when(tokenGateway).getTokenByValue(any());
         boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
         assertFalse(res);
-        verify(feedbackEvent).fire(any());
+        verify(feedbackEvent, atLeastOnce()).fire(any());
     }
 
     @Test
@@ -218,7 +218,7 @@ public class AuthenticationServiceTest {
     public void testSetPasswordWhenUserNotFound() throws Exception {
         User copy = new User(testUser);
 
-        doReturn(true).when(tokenGateway).isValid(any());
+        doReturn(testToken).when(tokenGateway).getTokenByValue(any());
         doThrow(NotFoundException.class).when(userGateway).updateUser(any());
         boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
         assertFalse(res);

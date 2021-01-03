@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Locale;
 import javax.faces.context.ExternalContext;
+import javax.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,10 +36,14 @@ public class RegisterBackerTest {
     private UserSession userSession;
 
     @Mock
+    private HttpServletRequest request;
+
+    @Mock
     private ExternalContext ectx;
 
     @BeforeEach
     public void setUp() throws Exception {
+        lenient().doReturn(request).when(ectx).getRequest();
         lenient().doReturn(Locale.GERMAN).when(userSession).getLocale();
         registerBacker = new RegisterBacker(authenticationService, profileService, userSession, ectx);
         testUser = new User();
@@ -77,34 +82,49 @@ public class RegisterBackerTest {
 
     @Test
     public void testRegister() {
+        StringBuffer buffer = new StringBuffer("http://test.de/hello_there.xhtml?someparam=69420&other=kaykay");
+        lenient().doReturn(buffer).when(request).getRequestURL();
         doReturn(true).when(profileService).createUser(any());
-        doReturn(true).when(authenticationService).register(any());
+        doReturn(true).when(authenticationService).register(any(), any());
         assertNotNull(registerBacker.register());
         verify(profileService).createUser(any());
-        verify(authenticationService).register(any());
+        verify(authenticationService).register(any(), any());
+    }
+
+    @Test
+    public void testRegisterInvalidUrl() {
+        StringBuffer buffer = new StringBuffer("i am not a link");
+        lenient().doReturn(buffer).when(request).getRequestURL();
+        assertThrows(InternalError.class, () -> registerBacker.register());
     }
 
     @Test
     public void testRegisterFailCreateUser() {
+        StringBuffer buffer = new StringBuffer("http://test.de/hello_there.xhtml?someparam=69420&other=kaykay");
+        lenient().doReturn(buffer).when(request).getRequestURL();
         doReturn(false).when(profileService).createUser(any());
-        lenient().doReturn(true).when(authenticationService).register(any());
+        lenient().doReturn(true).when(authenticationService).register(any(), any());
         assertNull(registerBacker.register());
         verify(profileService).createUser(any());
     }
 
     @Test
     public void testRegisterFailRegister() {
+        StringBuffer buffer = new StringBuffer("http://test.de/hello_there.xhtml?someparam=69420&other=kaykay");
+        lenient().doReturn(buffer).when(request).getRequestURL();
         doReturn(true).when(profileService).createUser(any());
-        doReturn(false).when(authenticationService).register(any());
+        doReturn(false).when(authenticationService).register(any(), any());
         assertNull(registerBacker.register());
         verify(profileService).createUser(any());
-        verify(authenticationService).register(any());
+        verify(authenticationService).register(any(), any());
     }
 
     @Test
     public void testRegisterFailCreateUserAndRegister() {
+        StringBuffer buffer = new StringBuffer("http://test.de/hello_there.xhtml?someparam=69420&other=kaykay");
+        lenient().doReturn(buffer).when(request).getRequestURL();
         doReturn(false).when(profileService).createUser(any());
-        lenient().doReturn(false).when(authenticationService).register(any());
+        lenient().doReturn(false).when(authenticationService).register(any(), any());
         assertNull(registerBacker.register());
         verify(profileService).createUser(any());
     }

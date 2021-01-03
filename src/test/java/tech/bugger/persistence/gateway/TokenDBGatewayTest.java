@@ -1,6 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -43,92 +42,87 @@ public class TokenDBGatewayTest {
     }
 
     @Test
-    public void testGenerateToken() throws Exception {
-        // Get the token's expected length (multiply by 2 because we generate 32 bytes = 64 chars in hex)
-        Field f = TokenDBGateway.class.getDeclaredField("TOKEN_LENGTH");
-        f.setAccessible(true);
-        int tokenLength = (int) f.get(null) * 2;
-
+    public void testCreateToken() throws Exception {
         ZonedDateTime dt = ZonedDateTime.now();
-        Token token = gateway.generateToken(admin, Token.Type.CHANGE_EMAIL);
+        String value = "0123456789abcdef";
+        User user = new User();
+        user.setId(admin.getId());
+        Token toInsert = new Token(value, Token.Type.CHANGE_EMAIL, null, user);
+        Token token = gateway.createToken(toInsert);
 
         assertAll(() -> assertEquals(admin, token.getUser()),
-                () -> assertEquals(tokenLength, token.getValue().length()),
+                () -> assertEquals(value, token.getValue()),
                 () -> assertTrue(token.getTimestamp().isAfter(dt)));
     }
 
     @Test
-    public void testGenerateTokenWithUserIdNull() {
+    public void testCreateTokenWithTokenValueNull() {
+        Token token = new Token(null, Token.Type.CHANGE_EMAIL, null, admin);
+        assertThrows(IllegalArgumentException.class, () -> gateway.createToken(token));
+    }
+
+    @Test
+    public void testCreateTokenWithTokenTypeNull() {
+        Token token = new Token("0123456789abcdef", null, null, admin);
+        assertThrows(IllegalArgumentException.class, () -> gateway.createToken(token));
+    }
+
+    @Test
+    public void testCreateTokenWithNullUser() {
+        Token token = new Token("0123456789abcdef", Token.Type.CHANGE_EMAIL, null, null);
+        assertThrows(IllegalArgumentException.class, () -> gateway.createToken(token));
+    }
+
+    @Test
+    public void testCreateTokenWithUserIdNull() {
         User incompleteUser = new User(admin);
         incompleteUser.setId(null);
-        assertThrows(IllegalArgumentException.class,
-                () -> gateway.generateToken(incompleteUser, Token.Type.CHANGE_EMAIL));
+        Token token = new Token("0123456789abcdef", Token.Type.CHANGE_EMAIL, null, incompleteUser);
+        assertThrows(IllegalArgumentException.class, () -> gateway.createToken(token));
     }
 
     @Test
-    public void testGenerateTokenWhenDatabaseError() throws Exception {
+    public void testCreateTokenWhenDatabaseError() throws Exception {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(matches("INSERT INTO token.*"), anyInt());
-        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).generateToken(admin, Token.Type.CHANGE_EMAIL));
+        Token token = new Token("0123456789abcdef", Token.Type.CHANGE_EMAIL, null, admin);
+        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).createToken(token));
     }
 
     @Test
-    public void testGenerateTokenUserSearchWhenDatabaseError() throws Exception {
+    public void testCreateTokenUserSearchWhenDatabaseError() throws Exception {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(matches("SELECT \\* FROM \"user\".*"));
-        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).generateToken(admin, Token.Type.CHANGE_EMAIL));
+        Token token = new Token("0123456789abcdef", Token.Type.CHANGE_EMAIL, null, admin);
+        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).createToken(token));
     }
 
     @Test
-    public void testGenerateTokenUserNotExists() {
+    public void testCreateTokenUserNotExists() {
         User copy = new User(admin);
         copy.setId(45);
-        assertThrows(NotFoundException.class, () -> gateway.generateToken(copy, Token.Type.CHANGE_EMAIL));
+        Token token = new Token("0123456789abcdef", Token.Type.CHANGE_EMAIL, null, copy);
+        assertThrows(NotFoundException.class, () -> gateway.createToken(token));
     }
 
     @Test
-    public void testGenerateTokenInsertedNothing() throws Exception {
+    public void testCreateTokenInsertedNothing() throws Exception {
         TokenDBGateway gatewaySpy = spy(gateway);
         ResultSet resultSetMock = mock(ResultSet.class);
         PreparedStatement stmtMock = mock(PreparedStatement.class);
         Connection connectionSpy = spy(connection);
-        doReturn(true).when(gatewaySpy).isValid(any());
         doReturn(false).when(resultSetMock).next();
         doReturn(resultSetMock).when(stmtMock).getGeneratedKeys();
         doReturn(stmtMock).when(connectionSpy).prepareStatement(any(), anyInt());
-        assertNull(new TokenDBGateway(connectionSpy).generateToken(admin, Token.Type.CHANGE_EMAIL));
+        Token token = new Token("0123456789abcdef", Token.Type.CHANGE_EMAIL, null, admin);
+        assertNull(new TokenDBGateway(connectionSpy).createToken(token));
         reset(gatewaySpy, stmtMock);
     }
 
     @Test
-    public void testDefinitelyInvalidTokenIsValid() {
-        boolean isValid = gateway.isValid("i am an invalid token");
-        assertFalse(isValid);
-    }
-
-    @Test
-    public void testCrackedInvalidTokenIsValid() {
-        boolean isValid = gateway.isValid("db2b0333a72d2388e42eb772f90f309f7ed5ed5c8b02201392abff9a4509e660");
-        assertFalse(isValid);
-    }
-
-    @Test
-    public void testValidTokenIsValid() throws Exception {
-        Token token = gateway.generateToken(admin, Token.Type.CHANGE_EMAIL);
-        boolean isValid = gateway.isValid(token.getValue());
-        assertTrue(isValid);
-    }
-
-    @Test
-    public void testIsValidWhenDatabaseError() throws Exception {
-        Connection connectionSpy = spy(connection);
-        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
-        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).isValid("doesn't matter"));
-    }
-
-    @Test
     public void testGetTokenByValue() throws Exception {
-        Token token = gateway.generateToken(admin, Token.Type.CHANGE_EMAIL);
+        Token toInsert = new Token("0123456789abcdef", Token.Type.CHANGE_EMAIL, null, admin);
+        Token token = gateway.createToken(toInsert);
 
         Token fetched = null;
         try {
