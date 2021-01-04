@@ -86,7 +86,6 @@ public class AttachmentDBGateway implements AttachmentGateway {
                     .integer(attachment.getId())
                     .toStatement().executeUpdate();
             if (rowsAffected == 0) {
-                // TODO: How do we attach the DTO to a NotFoundException?
                 log.error("Attachment to be updated could not be found.");
                 throw new NotFoundException("Attachment to be updated could not be found.");
             }
