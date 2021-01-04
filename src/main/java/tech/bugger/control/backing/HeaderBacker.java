@@ -35,6 +35,9 @@ public class HeaderBacker implements Serializable {
      */
     private boolean displayMenu;
 
+    /**
+     * Initializes the User for the header and makes sure the headerMenu is closed.
+     */
     @PostConstruct
     void init() {
         user = session.getUser();
