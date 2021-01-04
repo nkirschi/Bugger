@@ -74,6 +74,13 @@ class TopicServiceTest {
     }
 
     @Test
+    public void testGetSelectedTopicsWhenNotFound() {
+        doThrow(NotFoundException.class).when(topicGateway).selectTopics(any());
+        assertNull(topicService.selectTopics(testSelection));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
     public void testSelectTopicsWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
         assertNull(topicService.selectTopics(testSelection));

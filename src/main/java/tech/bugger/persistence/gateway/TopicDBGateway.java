@@ -191,7 +191,6 @@ public class TopicDBGateway implements TopicGateway {
      */
     @Override
     public void demoteModerator(final Topic topic, final User user) {
-    public void removeModerator(final Topic topic, final User user) {
         // TODO Auto-generated method stub
 
     }
