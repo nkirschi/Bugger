@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:ui="http://java.sun.com/jsf/facelets">
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 <ui:composition template="/WEB-INF/template/main.xhtml">
     <ui:param name="title" value="#{labels.administration}"/>
     <ui:define name="content">
@@ -106,7 +106,7 @@
                 <h:message for="s-user-email-format"/>
 
                 <h:outputLabel id="o-allowed-file-extensions" for="it-allowed-file-extensions"
-                               value="#{labels.allowed_file_extensions}" />
+                               value="#{labels.allowed_file_extensions}"/>
                 <h:inputTextarea id="it-allowed-file-extensions"
                                  value="#{adminBacker.configuration.allowedFileExtensions}" styleClass="form-control"/>
                 <h:panelGroup/>
