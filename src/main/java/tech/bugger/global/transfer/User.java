@@ -1,5 +1,7 @@
 package tech.bugger.global.transfer;
 
+import tech.bugger.global.util.Lazy;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;

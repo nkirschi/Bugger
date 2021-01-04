@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.time.ZoneId;
 import java.util.List;
@@ -94,7 +95,7 @@ public class UserDBGateway implements UserGateway {
                 rs.getString("biography"), lang,
                 User.ProfileVisibility.valueOf(rs.getString("profile_visibility").toUpperCase()),
                 rs.getTimestamp("registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
-                rs.getInt("forced_voting_weight"), rs.getBoolean("is_admin"));
+                rs.getObject("forced_voting_weight", Integer.class), rs.getBoolean("is_admin"));
     }
 
     /**
@@ -336,15 +337,6 @@ public class UserDBGateway implements UserGateway {
             throw new StoreException("Error while searching for number of posts of the user with id "
                     + user.getId(), e);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isBanned(final User user, final Topic topic) {
-        // TODO Auto-generated method stub
-        return 0;
     }
 
     /**

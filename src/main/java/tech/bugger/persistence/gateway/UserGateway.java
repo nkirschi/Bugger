@@ -48,13 +48,6 @@ public interface UserGateway {
     public int getNumberOfAdmins();
 
     /**
-     * Retrieves the list of email addresses of all administrators.
-     *
-     * @return The list of email addresses of all administrators.
-     */
-    List<String> getAdminEmails();
-
-    /**
      * Retrieves a user by their ID.
      *
      * @param id The ID of the user to look for.

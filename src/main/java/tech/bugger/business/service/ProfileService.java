@@ -103,7 +103,7 @@ public class ProfileService {
             return true;
         } catch (TransactionException e) {
             log.error("User could not be created.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
 
         return false;
@@ -135,8 +135,8 @@ public class ProfileService {
         } catch (TransactionException e) {
             log.error("Error while updating the user with id " + user.getId(), e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            return false;
         }
-        return false;
     }
 
     /**
@@ -365,11 +365,11 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             user = tx.newUserGateway().getUserByEmail(emailAddress);
             tx.commit();
-        } catch (NotFoundException e) {
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.debug("User in search for e-mail could not be found.");
         } catch (TransactionException e) {
             log.error("Error while searching for e-mail.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
 
         return user;
@@ -387,11 +387,11 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             user = tx.newUserGateway().getUserByUsername(username);
             tx.commit();
-        } catch (NotFoundException e) {
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.debug("User in search for username could not be found.");
         } catch (TransactionException e) {
             log.error("Error while searching for username.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
 
         return user;
