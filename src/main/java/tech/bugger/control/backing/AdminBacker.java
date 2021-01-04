@@ -72,29 +72,9 @@ public class AdminBacker {
      * Initializes temporary data holders for the application configuration and organization data.
      */
     @PostConstruct
-    public void init() {
+    void init() {
         configuration = new Configuration(applicationSettings.getConfiguration());
         organization = new Organization(applicationSettings.getOrganization());
-    }
-
-    /**
-     * Redirects to the place where to browse users.
-     *
-     * @return The direction.
-     */
-    public String browseUsers() {
-        // TODO redirect to search page on users tab with no filters
-        return null;
-    }
-
-    /**
-     * Redirects to the place where to create a new user.
-     *
-     * @return The direction.
-     */
-    public String createUser() {
-        // TODO redirect to edit-user.xhtml with parameters
-        return null;
     }
 
     /**
