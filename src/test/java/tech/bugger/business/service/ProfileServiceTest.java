@@ -94,9 +94,10 @@ public class ProfileServiceTest {
 
     @Test
     public void testGetUser() throws Exception {
-        service.getUser(testUser.getId());
-        assertEquals(1, testUser.getId());
-        verify(userGateway).getUserByID(1);
+        doReturn(testUser).when(userGateway).getUserByID(testUser.getId());
+        User user = service.getUser(testUser.getId());
+        assertEquals(testUser.getId(), user.getId());
+        verify(userGateway).getUserByID(testUser.getId());
     }
 
     @Test
