@@ -198,7 +198,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public ZonedDateTime getLastChangeTimestamp(Topic topic) {
+    public ZonedDateTime getLastChangeTimestamp(final Topic topic) {
         // TODO Auto-generated method stub
         return null;
     }
