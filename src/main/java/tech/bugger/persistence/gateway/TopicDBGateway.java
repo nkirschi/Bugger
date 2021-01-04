@@ -43,7 +43,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfReports(Topic topic, boolean showOpenReports, boolean showClosedReports) {
+    public int getNumberOfReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -67,7 +67,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfModerators(Topic topic) {
+    public int getNumberOfModerators(final Topic topic) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -76,7 +76,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfBannedUsers(Topic topic) {
+    public int getNumberOfBannedUsers(final Topic topic) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -85,7 +85,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public Topic getTopicByID(int id) {
+    public Topic getTopicByID(final int id) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -135,7 +135,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void createTopic(Topic topic) {
+    public void createTopic(final Topic topic) {
         // TODO Auto-generated method stub
 
     }
@@ -144,7 +144,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void updateTopic(Topic topic) {
+    public void updateTopic(final Topic topic) {
         // TODO Auto-generated method stub
 
     }
@@ -153,7 +153,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void deleteTopic(Topic topic) {
+    public void deleteTopic(final Topic topic) {
         // TODO Auto-generated method stub
 
     }
@@ -162,7 +162,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void banUser(Topic topic, User user) {
+    public void banUser(final Topic topic, final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -171,7 +171,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void unbanUser(Topic topic, User user) {
+    public void unbanUser(final Topic topic, final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -180,7 +180,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void makeModerator(Topic topic, User user) {
+    public void makeModerator(final Topic topic, final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -189,7 +189,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void removeModerator(Topic topic, User user) {
+    public void removeModerator(final Topic topic, final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -207,7 +207,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfSubscribers(Topic topic) {
+    public int getNumberOfSubscribers(final Topic topic) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -216,7 +216,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfPosts(Topic topic) {
+    public int getNumberOfPosts(final Topic topic) {
         // TODO Auto-generated method stub
         return 0;
     }
