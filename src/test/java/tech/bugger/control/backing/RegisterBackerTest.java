@@ -3,6 +3,7 @@ package tech.bugger.control.backing;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Locale;
+import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,9 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
+import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 
@@ -41,11 +44,15 @@ public class RegisterBackerTest {
     @Mock
     private ExternalContext ectx;
 
+    @Mock
+    private Event<Feedback> feedbackEvent;
+
     @BeforeEach
     public void setUp() throws Exception {
         lenient().doReturn(request).when(ectx).getRequest();
         lenient().doReturn(Locale.GERMAN).when(userSession).getLocale();
-        registerBacker = new RegisterBacker(authenticationService, profileService, userSession, ectx);
+        registerBacker = new RegisterBacker(authenticationService, profileService, userSession, ectx, feedbackEvent,
+                ResourceBundleMocker.mock(""));
         testUser = new User();
     }
 

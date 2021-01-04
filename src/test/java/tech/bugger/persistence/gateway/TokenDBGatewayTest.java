@@ -90,14 +90,6 @@ public class TokenDBGatewayTest {
     }
 
     @Test
-    public void testCreateTokenUserSearchWhenDatabaseError() throws Exception {
-        Connection connectionSpy = spy(connection);
-        doThrow(SQLException.class).when(connectionSpy).prepareStatement(matches("SELECT \\* FROM \"user\".*"));
-        Token token = new Token("0123456789abcdef", Token.Type.CHANGE_EMAIL, null, admin);
-        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).createToken(token));
-    }
-
-    @Test
     public void testCreateTokenUserNotExists() {
         User copy = new User(admin);
         copy.setId(45);
@@ -119,13 +111,13 @@ public class TokenDBGatewayTest {
     }
 
     @Test
-    public void testGetTokenByValue() throws Exception {
+    public void testFindToken() throws Exception {
         Token toInsert = new Token("0123456789abcdef", Token.Type.CHANGE_EMAIL, null, admin);
         Token token = gateway.createToken(toInsert);
 
         Token fetched = null;
         try {
-            fetched = gateway.getTokenByValue(token.getValue());
+            fetched = gateway.findToken(token.getValue());
         } catch (NotFoundException e) {
             fail();
         }
@@ -133,15 +125,15 @@ public class TokenDBGatewayTest {
     }
 
     @Test
-    public void testGetTokenByValueNotFound() {
-        assertThrows(NotFoundException.class, () -> gateway.getTokenByValue("0123456789abcdef"));
+    public void testFindTokenNotFound() {
+        assertThrows(NotFoundException.class, () -> gateway.findToken("0123456789abcdef"));
     }
 
     @Test
-    public void testGetTokenByValueWhenDatabaseError() throws Exception {
+    public void testFindTokenWhenDatabaseError() throws Exception {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
-        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).getTokenByValue("0123456789abcdef"));
+        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).findToken("0123456789abcdef"));
     }
 
 }

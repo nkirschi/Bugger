@@ -1,7 +1,6 @@
 package tech.bugger.business.service;
 
 import java.lang.reflect.Field;
-import java.util.logging.Logger;
 import javax.enterprise.event.Event;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -97,7 +96,7 @@ public class AuthenticationServiceTest {
     public void testGenerateTokenFirstTry() throws Exception {
         try (MockedStatic<Hasher> hasherMock = mockStatic(Hasher.class)) {
             hasherMock.when(() -> Hasher.generateRandomBytes(anyInt())).thenReturn("0123456789abcdef");
-            doThrow(NotFoundException.class).when(tokenGateway).getTokenByValue(any());
+            doThrow(NotFoundException.class).when(tokenGateway).findToken(any());
             String token = service.generateToken();
             assertAll(() -> assertNotNull(token),
                     () -> hasherMock.verify(() -> Hasher.generateRandomBytes(anyInt())));
@@ -108,7 +107,7 @@ public class AuthenticationServiceTest {
     public void testGenerateTokenSecondTry() throws Exception {
         try (MockedStatic<Hasher> hasherMock = mockStatic(Hasher.class)) {
             hasherMock.when(() -> Hasher.generateRandomBytes(anyInt())).thenReturn("0123456789abcdef");
-            doReturn(testToken).doThrow(NotFoundException.class).when(tokenGateway).getTokenByValue(any());
+            doReturn(testToken).doThrow(NotFoundException.class).when(tokenGateway).findToken(any());
             String token = service.generateToken();
             assertAll(() -> assertNotNull(token),
                     () -> hasherMock.verify(times(2), () -> Hasher.generateRandomBytes(anyInt())));
@@ -163,16 +162,16 @@ public class AuthenticationServiceTest {
 
     @Test
     public void testIsValidYes() throws Exception {
-        doReturn(testToken).when(tokenGateway).getTokenByValue(any());
+        doReturn(testToken).when(tokenGateway).findToken(any());
         assertTrue(service.isValid("0123456789abcdef"));
-        verify(tokenGateway).getTokenByValue(any());
+        verify(tokenGateway).findToken(any());
     }
 
     @Test
     public void testIsValidNo() throws Exception {
-        doThrow(NotFoundException.class).when(tokenGateway).getTokenByValue(any());
+        doThrow(NotFoundException.class).when(tokenGateway).findToken(any());
         assertFalse(service.isValid("0123456789abcdef"));
-        verify(tokenGateway).getTokenByValue(any());
+        verify(tokenGateway).findToken(any());
     }
 
     @Test
@@ -186,7 +185,7 @@ public class AuthenticationServiceTest {
     public void testSetPassword() throws Exception {
         User copy = new User(testUser);
         doNothing().when(userGateway).updateUser(any());
-        doReturn(testToken).when(tokenGateway).getTokenByValue(any());
+        doReturn(testToken).when(tokenGateway).findToken(any());
 
         boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
         assertAll(() -> assertTrue(res),
@@ -202,7 +201,7 @@ public class AuthenticationServiceTest {
     public void testSetPasswordNotValid() throws Exception {
         User copy = new User(testUser);
 
-        doThrow(NotFoundException.class).when(tokenGateway).getTokenByValue(any());
+        doThrow(NotFoundException.class).when(tokenGateway).findToken(any());
         boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
         assertFalse(res);
         verify(feedbackEvent, atLeastOnce()).fire(any());
@@ -253,7 +252,7 @@ public class AuthenticationServiceTest {
     public void testSetPasswordWhenUserNotFound() throws Exception {
         User copy = new User(testUser);
 
-        doReturn(testToken).when(tokenGateway).getTokenByValue(any());
+        doReturn(testToken).when(tokenGateway).findToken(any());
         doThrow(NotFoundException.class).when(userGateway).updateUser(any());
         boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
         assertFalse(res);
@@ -261,24 +260,24 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void testGetTokenByValue() throws Exception {
-        doReturn(testToken).when(tokenGateway).getTokenByValue("0123456789abcdef");
+    public void testFindToken() throws Exception {
+        doReturn(testToken).when(tokenGateway).findToken("0123456789abcdef");
 
-        Token token = service.getTokenByValue("0123456789abcdef");
+        Token token = service.findToken("0123456789abcdef");
         assertEquals(testToken, token);
-        verify(tokenGateway).getTokenByValue("0123456789abcdef");
+        verify(tokenGateway).findToken("0123456789abcdef");
     }
 
     @Test
-    public void testGetTokenByValueWhenNotFound() throws Exception {
-        doThrow(NotFoundException.class).when(tokenGateway).getTokenByValue("0123456789abcdef");
-        assertNull(service.getTokenByValue("0123456789abcdef"));
+    public void testFindTokenWhenNotFound() throws Exception {
+        doThrow(NotFoundException.class).when(tokenGateway).findToken("0123456789abcdef");
+        assertNull(service.findToken("0123456789abcdef"));
     }
 
     @Test
-    public void testGetTokenByValueWhenCommitFails() throws Exception {
+    public void testFindTokenWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertNull(service.getTokenByValue("0123456789abcdef"));
+        assertNull(service.findToken("0123456789abcdef"));
         verify(feedbackEvent).fire(any());
     }
 
