@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Authorship;
-import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
