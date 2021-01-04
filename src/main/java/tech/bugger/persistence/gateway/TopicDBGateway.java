@@ -55,8 +55,11 @@ public class TopicDBGateway implements TopicGateway {
     public int getNumberOfTopics() {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM topic;")) {
             ResultSet rs = stmt.executeQuery();
-            rs.next();
-            return rs.getInt(1);
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                throw new InternalError("Could not count the number of topics.");
+            }
         } catch (SQLException e) {
             log.error("Error while retrieving number of topics.", e);
             throw new StoreException("Error while retrieving number of topics.", e);
