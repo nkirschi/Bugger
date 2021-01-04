@@ -3,11 +3,13 @@ package tech.bugger.global.transfer;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 /**
  * DTO representing a verification token.
  */
 public class Token implements Serializable {
+
     @Serial
     private static final long serialVersionUID = -8499689805678436803L;
 
@@ -31,9 +33,24 @@ public class Token implements Serializable {
         CHANGE_EMAIL
     }
 
+    /**
+     * This token's value.
+     */
     private String value;
+
+    /**
+     * This token's type.
+     */
     private Type type;
+
+    /**
+     * This token's timestamp of creation.
+     */
     private ZonedDateTime timestamp;
+
+    /**
+     * This token's associated {@link User}.
+     */
     private User user;
 
     /**
@@ -44,7 +61,7 @@ public class Token implements Serializable {
      * @param timestamp The token timestamp.
      * @param user      The associated user.
      */
-    public Token(String value, Type type, ZonedDateTime timestamp, User user) {
+    public Token(final String value, final Type type, final ZonedDateTime timestamp, final User user) {
         this.value = value;
         this.type = type;
         this.timestamp = timestamp;
@@ -65,7 +82,7 @@ public class Token implements Serializable {
      *
      * @param value The token value to be set.
      */
-    public void setValue(String value) {
+    public void setValue(final String value) {
         this.value = value;
     }
 
@@ -83,7 +100,7 @@ public class Token implements Serializable {
      *
      * @param type The token type to be set.
      */
-    public void setType(Type type) {
+    public void setType(final Type type) {
         this.type = type;
     }
 
@@ -101,7 +118,7 @@ public class Token implements Serializable {
      *
      * @param timestamp The token creation time to be set.
      */
-    public void setTimestamp(ZonedDateTime timestamp) {
+    public void setTimestamp(final ZonedDateTime timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -119,7 +136,7 @@ public class Token implements Serializable {
      *
      * @param user The associated user to be set.
      */
-    public void setUser(User user) {
+    public void setUser(final User user) {
         this.user = user;
     }
 
@@ -130,9 +147,20 @@ public class Token implements Serializable {
      * @return {@code true} iff {@code other} is a semantically equivalent token.
      */
     @Override
-    public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof Token)) {
+            return false;
+        }
+
+        Token token = (Token) other;
+        return value.equals(token.value)
+                && type == token.type
+                && timestamp.equals(token.timestamp)
+                && user.equals(token.user);
     }
 
     /**
@@ -143,8 +171,7 @@ public class Token implements Serializable {
      */
     @Override
     public int hashCode() {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        return Objects.hash(value, type, timestamp, user);
     }
 
     /**
@@ -154,8 +181,12 @@ public class Token implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "Token{"
+                + "value='" + value + '\''
+                + ", type=" + type
+                + ", timestamp=" + timestamp
+                + ", user=" + user
+                + '}';
     }
 
 }

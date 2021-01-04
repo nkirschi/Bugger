@@ -1,7 +1,6 @@
 package tech.bugger.persistence.gateway;
 
 import tech.bugger.global.transfer.Token;
-import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
 
 /**
@@ -10,27 +9,28 @@ import tech.bugger.persistence.exception.NotFoundException;
 public interface TokenGateway {
 
     /**
-     * Generates and stores a token for a user action.
+     * Stores a given {@link Token} for a user action (at least a value, type, and user ID is required).
      *
-     * @param user The user to generate a token for.
-     * @param type The type of user action the token should verify.
-     * @return The newly generated token.
+     * @param token The {@link Token} to store.
+     * @return The newly stored {@link Token} with valid additional metadata (at least a timestamp is generated).
      * @throws NotFoundException The user could not be found.
      */
-    public Token generateToken(User user, Token.Type type) throws NotFoundException;
+    Token createToken(Token token) throws NotFoundException;
 
     /**
-     * Checks whether a token is exists and is still valid.
+     * Returns the complete {@link Token} DTO for the given value.
      *
-     * @param token The token whose validity to check.
-     * @return Whether {@code token} exists and is valid.
+     * @param value The token value to find the associated DTO for.
+     * @return The complete {@link Token}.
+     * @throws NotFoundException The token value could not be found.
      */
-    public boolean isValid(String token);
+    Token findToken(String value) throws NotFoundException;
 
     /**
      * Deletes expired verification tokens and unverified users that lack a valid verification token.
      *
      * @param expirationAge The maximum number of seconds a verification token is to be considered valid.
      */
-    public void cleanUp(int expirationAge);
+    void cleanUp(int expirationAge);
+
 }

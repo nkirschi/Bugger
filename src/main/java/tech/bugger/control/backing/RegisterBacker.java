@@ -1,17 +1,24 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.AuthenticationService;
-import tech.bugger.business.util.Feedback;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ResourceBundle;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
+import javax.enterprise.event.Event;
+import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.service.AuthenticationService;
+import tech.bugger.business.service.ProfileService;
+import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.transfer.Language;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
 
 /**
  * Backing bean for the register page.
@@ -20,52 +27,123 @@ import javax.inject.Named;
 @Named
 public class RegisterBacker {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(RegisterBacker.class);
 
+    /**
+     * The service providing access to workflows regarding authentication.
+     */
+    private final transient AuthenticationService authenticationService;
+
+    /**
+     * The service providing access to workflows regarding profiles and user management.
+     */
+    private final transient ProfileService profileService;
+
+    /**
+     * The current user session.
+     */
+    private final UserSession session;
+
+    /**
+     * The current external context.
+     */
+    private final ExternalContext ectx;
+
+    /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Resource bundle for feedback messages.
+     */
+    private final ResourceBundle messagesBundle;
+
+    /**
+     * The user that is being created.
+     */
     private User user;
 
+    /**
+     * Constructs a new register page backing bean with the necessary dependencies.
+     *
+     * @param authenticationService The authentication service to use.
+     * @param profileService        The profile service to use.
+     * @param session               The current {@link UserSession}.
+     * @param ectx                  The current external context.
+     * @param feedbackEvent         The feedback event to use for user feedback.
+     * @param messagesBundle        The resource bundle for feedback messages.
+     */
     @Inject
-    private transient AuthenticationService authenticationService;
-
-    @Inject
-    private UserSession session;
+    public RegisterBacker(final AuthenticationService authenticationService, final ProfileService profileService,
+                          final UserSession session, final ExternalContext ectx, final Event<Feedback> feedbackEvent,
+                          @RegistryKey("messages") final ResourceBundle messagesBundle) {
+        this.authenticationService = authenticationService;
+        this.profileService = profileService;
+        this.session = session;
+        this.ectx = ectx;
+        this.feedbackEvent = feedbackEvent;
+        this.messagesBundle = messagesBundle;
+    }
 
     /**
      * Initializes the register page. If the user is already logged in, redirects them to the home page.
      */
     @PostConstruct
-    public void init() {
+    void init() {
+        if (session.getUser() != null) {
+            try {
+                ectx.redirect("home.xhtml");
+            } catch (IOException e) {
+                throw new InternalError("Error while redirecting.", e);
+            }
+        }
 
+        user = new User();
+        user.setPreferredLanguage(Language.of(session.getLocale()));
     }
 
     /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
+     * Registers a new user. An e-mail to finalize the process is sent to their address if the provided data checks out.
      *
-     * @param feedback The feedback with details on what to display.
+     * @return The site to redirect to.
      */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
+    public String register() {
+        URL currentUrl;
+        try {
+            currentUrl = new URL(((HttpServletRequest) ectx.getRequest()).getRequestURL().toString());
+        } catch (MalformedURLException e) {
+            throw new InternalError("URL is invalid.", e);
+        }
 
+        String domain = String.format("%s://%s", currentUrl.getProtocol(), currentUrl.getAuthority());
+        if (profileService.createUser(user) && authenticationService.register(user, domain)) {
+            log.debug("Registration for user " + user + " successful.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("register.success"), Feedback.Type.INFO));
+            return "home.xhtml";
+        }
+        return null;
     }
 
     /**
-     * Registers a new user. An e-mail to finalize the process is sent to their address if the provided data checks
-     * out.
-     */
-    public void register() {
-
-    }
-
-    /**
-     * @return The user.
+     * Returns the current {@link User} to register.
+     *
+     * @return The current {@link User} to register.
      */
     public User getUser() {
         return user;
     }
 
     /**
-     * @param user The user to set.
+     * Sets a new {@link User} to register.
+     *
+     * @param user The new {@link User} to register.
      */
-    public void setUser(User user) {
+    public void setUser(final User user) {
         this.user = user;
     }
+
 }
