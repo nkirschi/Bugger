@@ -1,12 +1,11 @@
 package tech.bugger.persistence.gateway;
 
+import java.util.List;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
-
-import java.util.List;
 
 /**
  * A user gateway allows to query and modify a persistent storage of users.
@@ -21,7 +20,7 @@ public interface UserGateway {
      * @return Whether {@code user} is a moderator of {@code topic}.
      * @throws NotFoundException The user or the topic could not be found.
      */
-    public boolean isModerator(User user, Topic topic) throws NotFoundException;
+    boolean isModerator(User user, Topic topic) throws NotFoundException;
 
     /**
      * Looks up if a user is banned from a given topic.
@@ -31,7 +30,7 @@ public interface UserGateway {
      * @return Whether {@code user} is banned from {@code topic}.
      * @throws NotFoundException The user or the topic could not be found.
      */
-    public boolean isBanned(User user, Topic topic) throws NotFoundException;
+    boolean isBanned(User user, Topic topic) throws NotFoundException;
 
     /**
      * Retrieves the number of posts a user has created.
@@ -49,13 +48,20 @@ public interface UserGateway {
     public int getNumberOfAdmins();
 
     /**
+     * Retrieves the list of email addresses of all administrators.
+     *
+     * @return The list of email addresses of all administrators.
+     */
+    List<String> getAdminEmails();
+
+    /**
      * Retrieves a user by their ID.
      *
      * @param id The ID of the user to look for.
      * @return The user identified by the ID.
      * @throws NotFoundException The user could not be found.
      */
-    public User getUserByID(int id) throws NotFoundException;
+    User getUserByID(int id) throws NotFoundException;
 
     /**
      * Retrieves a user by their username.
@@ -64,7 +70,16 @@ public interface UserGateway {
      * @return The user identified by the username.
      * @throws NotFoundException The user could not be found.
      */
-    public User getUserByUsername(String username) throws NotFoundException;
+    User getUserByUsername(String username) throws NotFoundException;
+
+    /**
+     * Retrieves a user by their e-mail address.
+     *
+     * @param emailAddress The username of the user to look for.
+     * @return The user identified by the given {@code emailAddress}.
+     * @throws NotFoundException The user could not be found.
+     */
+    User getUserByEmail(String emailAddress) throws NotFoundException;
 
     /**
      * Retrieves a list of moderators for a topic that match the given selection criteria.
@@ -74,7 +89,7 @@ public interface UserGateway {
      * @return The list of moderators of {@code topic}, filtered accordingly.
      * @throws NotFoundException The topic could not be found.
      */
-    public List<User> getSelectedModerators(Topic topic, Selection selection) throws NotFoundException;
+    List<User> getSelectedModerators(Topic topic, Selection selection) throws NotFoundException;
 
     /**
      * Retrieves a list of users that are banned from a given topic and match the given selection criteria.
@@ -84,7 +99,7 @@ public interface UserGateway {
      * @return The list of users banned from {@code topic}, filtered accordingly.
      * @throws NotFoundException The topic could not be found.
      */
-    public List<User> getSelectedBannedUsers(Topic topic, Selection selection) throws NotFoundException;
+    List<User> getSelectedBannedUsers(Topic topic, Selection selection) throws NotFoundException;
 
     /**
      * Retrieves the list of subscribers to a user.
@@ -93,7 +108,7 @@ public interface UserGateway {
      * @return The list of subscribers to {@code user}.
      * @throws NotFoundException The user could not be found.
      */
-    public List<User> getSubscribersOf(User user) throws NotFoundException;
+    List<User> getSubscribersOf(User user) throws NotFoundException;
 
     /**
      * Retrieves the list of subscribers to a report.
@@ -102,7 +117,7 @@ public interface UserGateway {
      * @return The list of subscribers to {@code report}.
      * @throws NotFoundException The report could not be found.
      */
-    public List<User> getSubscribersOf(Report report) throws NotFoundException;
+    List<User> getSubscribersOf(Report report) throws NotFoundException;
 
     /**
      * Retrieves the list of subscribers to a topic.
@@ -111,14 +126,14 @@ public interface UserGateway {
      * @return The list of subscribers to {@code topic}.
      * @throws NotFoundException The topic could not be found.
      */
-    public List<User> getSubscribersOf(Topic topic) throws NotFoundException;
+    List<User> getSubscribersOf(Topic topic) throws NotFoundException;
 
     /**
-     * Inserts a user into the user storage.
+     * Inserts a user into the user storage and sets its internal id, i.e. changes the given {@code user}.
      *
      * @param user The user to insert.
      */
-    public void createUser(User user);
+    void createUser(User user);
 
     /**
      * Updates a user's attributes in the user storage.
@@ -126,7 +141,7 @@ public interface UserGateway {
      * @param user The user to update.
      * @throws NotFoundException The user could not be found.
      */
-    public void updateUser(User user) throws NotFoundException;
+    void updateUser(User user) throws NotFoundException;
 
     /**
      * Deletes a user from the user storage.
@@ -134,6 +149,6 @@ public interface UserGateway {
      * @param user The user to delete.
      * @throws NotFoundException The user could not be found.
      */
-    public void deleteUser(User user) throws NotFoundException;
+    void deleteUser(User user) throws NotFoundException;
 
 }

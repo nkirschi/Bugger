@@ -1,7 +1,5 @@
 package tech.bugger.global.transfer;
 
-import tech.bugger.global.util.Lazy;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -32,109 +30,117 @@ public class User implements Serializable {
     }
 
     /**
-     * The user's unique id.
+     * This user's unique ID.
      */
-    private int id;
+    private Integer id;
 
     /**
-     * The user's username.
+     * This user's username.
      */
     private String username;
 
     /**
-     * The user's hashed password.
+     * The user's password hashed using the salt {@link #passwordSalt} and algorithm {@link #hashingAlgorithm}.
      */
     private String passwordHash;
 
     /**
-     * The salt used for hashing.
+     * The salt to use when hashing this user's password.
      */
     private String passwordSalt;
 
     /**
-     * The used hashing algorithm.
+     * The hashing algorithm to use when hashing this user's password.
      */
     private String hashingAlgorithm;
 
     /**
-     * The user's email address.
+     * This user's e-mail address.
      */
     private String emailAddress;
 
     /**
-     * The user's first name.
+     * This user's first name.
      */
     private String firstName;
 
     /**
-     * The user's last name.
+     * This user's last name.
      */
     private String lastName;
 
     /**
-     * The user's avatar.
+     * This user's avatar, loaded lazily.
      */
     private Lazy<byte[]> avatar;
 
     /**
-     * The user's avatar thumbnail.
+     * This user's avatar thumbnail.
      */
     private byte[] avatarThumbnail;
 
     /**
-     * The user's biography.
+     * This user's current biography in Markdown.
      */
     private String biography;
 
     /**
-     * The user's preferred language.
+     * This user's preferred language.
      */
     private Language preferredLanguage;
 
     /**
-     * The user's profile visibility limiting what normal users can see on the user's profile page.
+     * This user's profile visibility.
      */
     private ProfileVisibility profileVisibility;
 
     /**
-     * The date of registration.
+     * This user's date of registration.
      */
     private ZonedDateTime registrationDate;
 
     /**
-     * The overwritten voting weight set by an administrator.
+     * This user's forced voting weight or {@code null} if none.
      */
     private Integer forcedVotingWeight;
 
     /**
-     * The user's administrator status.
+     * Whether this user is administrator or not.
      */
     private boolean administrator;
 
     /**
-     * Constructs a new User with the given parameters.
-     *
-     * @param id The user's id.
-     * @param username The username.
-     * @param passwordHash The hashed password.
-     * @param passwordSalt The salt used for hashing.
-     * @param hashingAlgorithm The hashing algorithm.
-     * @param emailAddress The user's email address.
-     * @param firstName The user's first name.
-     * @param lastName The user's last name.
-     * @param avatar The user's avatar.
-     * @param avatarThumbnail The avatar thumbnail.
-     * @param biography The user's biography.
-     * @param preferredLanguage The user's preferred language.
-     * @param profileVisibility The user's profile visibility.
-     * @param registrationDate The user's registration date.
-     * @param forcedVotingWeight The overwritten voting weight.
-     * @param administrator The user's administrator status.
+     * Constructs an empty user.
      */
-    public User(final int id, final String username, final String passwordHash, final String passwordSalt,
-                final String hashingAlgorithm, final String emailAddress, final String firstName, final String lastName,
-                final Lazy<byte[]> avatar, final byte[] avatarThumbnail, final String biography,
-                final Language preferredLanguage, final ProfileVisibility profileVisibility,
+    public User() {
+        this(null, "", "", "", "", "", "", "", new Lazy<>(new byte[0]), new byte[0],
+                "", Language.ENGLISH, User.ProfileVisibility.FULL, null, null, false);
+    }
+
+    /**
+     * Constructs a new user from the specified parameters.
+     *
+     * @param id                 The ID of the user.
+     * @param username           The username of the user.
+     * @param passwordHash       The hashed password of the user.
+     * @param passwordSalt       The salt used to hash the password of the user.
+     * @param hashingAlgorithm   The algorithm used to hash the password of the user.
+     * @param emailAddress       The e-mail address of the user.
+     * @param firstName          The first name of the user.
+     * @param lastName           The last name of the user.
+     * @param avatar             The avatar of the user, loaded lazily.
+     * @param avatarThumbnail    The avatar thumbnail of the user.
+     * @param biography          The biography of the user.
+     * @param preferredLanguage  The preferred language of the user.
+     * @param profileVisibility  The profile visibility of the user.
+     * @param registrationDate   The registration date of the user.
+     * @param forcedVotingWeight The forced voting weight of the user.
+     * @param administrator      The administrator status of the user.
+     */
+    public User(final Integer id, final String username, final String passwordHash, final String passwordSalt,
+                final String hashingAlgorithm, final String emailAddress, final String firstName,
+                final String lastName, final Lazy<byte[]> avatar, final byte[] avatarThumbnail,
+                final String biography, final Language preferredLanguage, final ProfileVisibility profileVisibility,
                 final ZonedDateTime registrationDate, final Integer forcedVotingWeight, final boolean administrator) {
         this.id = id;
         this.username = username;
@@ -155,15 +161,15 @@ public class User implements Serializable {
     }
 
     /**
-     * Constructs a new user from the given user.
+     * Constructs a new user as deep clone of the given user.
      *
      * @param user The user to clone.
      */
     public User(final User user) {
-        this(user.id, user.username, user.passwordHash, user.passwordSalt, user.hashingAlgorithm, user.emailAddress,
-                user.firstName, user.lastName, user.avatar, user.avatarThumbnail, user.biography,
-                user.preferredLanguage, user.profileVisibility, user.registrationDate, user.forcedVotingWeight,
-                user.administrator);
+        this(user.id, user.username, user.passwordHash, user.passwordSalt, user.hashingAlgorithm,
+                user.emailAddress, user.firstName, user.lastName, user.avatar, user.avatarThumbnail.clone(),
+                user.biography, user.preferredLanguage, user.profileVisibility, user.registrationDate,
+                user.forcedVotingWeight, user.administrator);
     }
 
     /**
@@ -171,7 +177,7 @@ public class User implements Serializable {
      *
      * @return The user ID.
      */
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -180,7 +186,7 @@ public class User implements Serializable {
      *
      * @param id The user ID to be set.
      */
-    public void setId(final int id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 

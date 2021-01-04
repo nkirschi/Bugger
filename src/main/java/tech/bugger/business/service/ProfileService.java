@@ -91,10 +91,22 @@ public class ProfileService {
 
     /**
      * Creates a new user without need for verification. This should only be available for administrators.
+     * Also generates and sets the internal user id inside the given {@code user} object.
      *
      * @param user The user to be created.
+     * @return Whether the action was successful or not.
      */
-    public void createUser(final User user) {
+    public boolean createUser(final User user) {
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newUserGateway().createUser(user);
+            tx.commit();
+            return true;
+        } catch (TransactionException e) {
+            log.error("User could not be created.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return false;
     }
 
     /**
@@ -103,19 +115,20 @@ public class ProfileService {
      * @param user The user to be deleted.
      */
     public void deleteUser(final User user) {
-
     }
 
     /**
-     * Updates an existing user.
+     * Updates an existing user and returns whether the action was successful.
      *
      * @param user The user to update.
+     * @return {@code true} iff the action was successful, {@code false} otherwise.
      */
-    public void updateUser(final User user) {
-        try (Transaction transaction = transactionManager.begin()) {
-            transaction.newUserGateway().updateUser(user);
-            transaction.commit();
+    public boolean updateUser(final User user) {
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newUserGateway().updateUser(user);
+            tx.commit();
             feedback.fire(new Feedback(messages.getString("operation_successful"), Feedback.Type.INFO));
+            return true;
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The user with id " + user.getId() + "could not be found.", e);
             throw new NotFoundException(messages.getString("not_found_error"), e);
@@ -123,6 +136,7 @@ public class ProfileService {
             log.error("Error while updating the user with id " + user.getId(), e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
+        return false;
     }
 
     /**
@@ -141,7 +155,6 @@ public class ProfileService {
      * @param report     The report of which the subscription to is to be removed.
      */
     public void deleteReportSubscription(final User subscriber, final Report report) {
-
     }
 
     /**
@@ -151,7 +164,6 @@ public class ProfileService {
      * @param user       The user of which the subscription to is to be removed.
      */
     public void deleteUserSubscription(final User subscriber, final User user) {
-
     }
 
     /**
@@ -160,7 +172,6 @@ public class ProfileService {
      * @param user The user whose topic subscriptions are to be deleted.
      */
     public void deleteAllTopicSubscriptions(final User user) {
-
     }
 
     /**
@@ -169,7 +180,6 @@ public class ProfileService {
      * @param user The user whose report subscriptions are to be deleted.
      */
     public void deleteAllReportSubscriptions(final User user) {
-
     }
 
     /**
@@ -178,7 +188,6 @@ public class ProfileService {
      * @param user The user whose user subscriptions are to be deleted.
      */
     public void deleteAllUserSubscriptions(final User user) {
-
     }
 
     /**
@@ -342,6 +351,50 @@ public class ProfileService {
             log.error("Error while updating the user with id " + user.getId(), e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
+    }
+
+    /**
+     * Searches and returns the {@link User} with the given {@code emailAddress}.
+     *
+     * @param emailAddress The e-mail address to search for.
+     * @return The complete {@link User} or {@code null} iff the {@code emailAddress} is not assigned to any user.
+     */
+    public User getUserByEmail(final String emailAddress) {
+        User user = null;
+
+        try (Transaction tx = transactionManager.begin()) {
+            user = tx.newUserGateway().getUserByEmail(emailAddress);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.debug("User in search for e-mail could not be found.");
+        } catch (TransactionException e) {
+            log.error("Error while searching for e-mail.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return user;
+    }
+
+    /**
+     * Searches and returns the {@link User} with the given {@code username}.
+     *
+     * @param username The username to search for.
+     * @return The complete {@link User} or {@code null} iff the {@code username} is not assigned to any user.
+     */
+    public User getUserByUsername(final String username) {
+        User user = null;
+
+        try (Transaction tx = transactionManager.begin()) {
+            user = tx.newUserGateway().getUserByUsername(username);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.debug("User in search for username could not be found.");
+        } catch (TransactionException e) {
+            log.error("Error while searching for username.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return user;
     }
 
     private byte[] generateThumbnail(final byte[] image) {

@@ -2,6 +2,7 @@ package tech.bugger.global.util;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -67,6 +68,28 @@ public class Lazy<T> implements Serializable {
      */
     public boolean isPresent() {
         return value != null;
+    }
+
+    /**
+     * Converts this lazy object into a human-readable string representation.
+     *
+     * @return A human-readable string representation of this user.
+     */
+    @Override
+    public String toString() {
+        return toString(T::toString);
+    }
+
+    /**
+     * Converts this lazy object into a human-readable string representation.
+     *
+     * @param objToString A custom {@link Function} that maps the maybe present object to a String.
+     * @return A human-readable string representation of this user.
+     */
+    public String toString(final Function<T, String> objToString) {
+        return "Lazy{"
+                + (isPresent() ? "value=" + objToString.apply(value) : "absent")
+                + '}';
     }
 
 }
