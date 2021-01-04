@@ -1,4 +1,4 @@
-package tech.bugger.control.components;
+package tech.bugger.control.component;
 
 import javax.faces.component.UIComponent;
 import org.junit.jupiter.api.BeforeEach;

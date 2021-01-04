@@ -9,7 +9,7 @@
 >
 
 <h:body>
-    <cc:interface>
+    <cc:interface componentType="paginator">
         <cc:attribute name="paginator" required="true" type="tech.bugger.business.util.Paginator"/>
         <cc:attribute name="simple" required="false" type="java.lang.Boolean" default="false"/>
     </cc:interface>
@@ -55,11 +55,12 @@
                 rendered="#{not cc.attrs.paginator.isEmpty() and not cc.attrs.simple}">
             <h:outputText id="ot-entriesPP" value="#{labels['paginator.entries_per_page']} "/>
             <h:selectOneMenu id="s-entriesPP" value="#{cc.attrs.paginator.selection.pageSize}"
-                             onchange="document.getElementById('#{cc.id}:f-entries:cb-refresh').click()">
+                             onchange="document.getElementById('#{cc.refreshBtnID}').click()">
                 <f:selectItems value="#{cc.attrs.paginator.pageSizeValues()}"
                                var="item" itemValue="#{item}" itemLabel="#{item.size}"/>
             </h:selectOneMenu>
-            <h:commandButton id="cb-refresh" action="#{cc.attrs.paginator.updateReset}" value="&#x27f3;" type="submit"/>
+            <h:commandButton id="cb-refresh" action="#{cc.attrs.paginator.updateReset}" value="&#x27f3;" type="submit"
+                             binding="#{cc.refreshBtn}"/>
         </h:form>
     </cc:implementation>
 </h:body>
