@@ -50,7 +50,7 @@ class TopicServiceTest {
     private Selection testSelection;
 
     private Topic testTopic1 = new Topic(1, "Hi", "senberg");
-    private Topic testTopic2 = new Topic(2, "Hi", "performance");;
+    private Topic testTopic2 = new Topic(2, "Hi", "performance");
     private Topic testTopic3 = new Topic(3, "Hi", "de and seek");
 
     @BeforeEach
@@ -71,13 +71,13 @@ class TopicServiceTest {
     }
 
     @Test
-    public void testGetSelectedTopicsWhenFound() throws Exception {
+    public void testGetSelectedTopicsWhenFound() {
         doReturn(testSelectedTopics).when(topicGateway).selectTopics(any());
         assertEquals(testSelectedTopics, topicService.getSelectedTopics(testSelection));
     }
 
     @Test
-    public void testGetSelectedTopicsWhenNotFound() throws Exception {
+    public void testGetSelectedTopicsWhenNotFound() {
         doThrow(NotFoundException.class).when(topicGateway).selectTopics(any());
         assertNull(topicService.getSelectedTopics(testSelection));
         verify(feedbackEvent).fire(any());
