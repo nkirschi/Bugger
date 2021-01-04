@@ -43,7 +43,8 @@ public class UsernameAssignedValidator implements Validator<String> {
     }
 
     /**
-     * Validates the given {@code username}'s validity in terms of already being assigned.
+     * Validates the given {@code username}'s validity in terms of already being assigned. Not changed fields can be
+     * skipped using the {@code only-on-change} attribute inside an {@code <f:attribute>} with any value.
      *
      * @param fctx      The current {@link FacesContext}.
      * @param component The affected input {@link UIComponent}
@@ -53,7 +54,7 @@ public class UsernameAssignedValidator implements Validator<String> {
     @Override
     public void validate(final FacesContext fctx, final UIComponent component, final String username) {
         // Read whether this validator should only be run when this field has been changed from ID.
-        boolean onlyOnChange = component.getAttributes().containsKey("onlyOnChange");
+        boolean onlyOnChange = component.getAttributes().containsKey("only-on-change");
         if (onlyOnChange && Objects.equals(((UIInput) component).getValue(), username)) {
             // Don't validate as inputs have not changed.
             return;
