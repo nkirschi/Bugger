@@ -15,8 +15,8 @@ import tech.bugger.global.util.Constants;
 /**
  * Validator for password inputs.
  */
-@FacesValidator(value = "passwordValidator", managed = true)
-public class PasswordValidator implements Validator<String> {
+@FacesValidator(value = "passwordRegexValidator", managed = true)
+public class PasswordRegexValidator implements Validator<String> {
 
     /**
      * The RegEx to use when validating a password's strength.
@@ -36,7 +36,7 @@ public class PasswordValidator implements Validator<String> {
      * @param messagesBundle The resource bundle for feedback messages.
      */
     @Inject
-    public PasswordValidator(@RegistryKey("messages") final ResourceBundle messagesBundle) {
+    public PasswordRegexValidator(@RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.messagesBundle = messagesBundle;
     }
 

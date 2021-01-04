@@ -14,14 +14,16 @@
             <h:panelGrid columns="2">
                 <h:outputLabel id="o-username" for="it-username" value="#{labels['register.username']}"/>
                 <h:inputText id="it-username" value="#{registerBacker.user.username}" required="true">
-                    <f:validator validatorId="usernameValidator"/>
+                    <f:validator validatorId="usernameRegexValidator"/>
+                    <f:validator validatorId="usernameAssignedValidator"/>
                 </h:inputText>
                 <h:panelGroup/>
                 <h:message for="it-username"/>
 
                 <h:outputLabel id="o-email" for="it-email" value="#{labels['register.email']}"/>
                 <h:inputText id="it-email" value="#{registerBacker.user.emailAddress}" required="true">
-                    <f:validator validatorId="emailValidator"/>
+                    <f:validator validatorId="emailRegexValidator"/>
+                    <f:validator validatorId="emailAssignedValidator"/>
                 </h:inputText>
                 <h:panelGroup/>
                 <h:message for="it-email"/>

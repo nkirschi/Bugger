@@ -10,24 +10,18 @@ import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import tech.bugger.business.internal.ApplicationSettings;
-import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.util.RegistryKey;
 
 /**
  * Validator for e-mail address inputs.
  */
-@FacesValidator(value = "emailValidator", managed = true)
-public class EmailValidator implements Validator<String> {
+@FacesValidator(value = "emailRegexValidator", managed = true)
+public class EmailRegexValidator implements Validator<String> {
 
     /**
      * The current application settings.
      */
     private final ApplicationSettings applicationSettings;
-
-    /**
-     * The profile service for user interactions.
-     */
-    private final ProfileService profileService;
 
     /**
      * Resource bundle for feedback messages.
@@ -38,14 +32,12 @@ public class EmailValidator implements Validator<String> {
      * Constructs a new e-mail address validator with the necessary dependencies.
      *
      * @param applicationSettings The current application settings.
-     * @param profileService      The profile service for user interactions.
      * @param messagesBundle      The resource bundle for feedback messages.
      */
     @Inject
-    public EmailValidator(final ApplicationSettings applicationSettings, final ProfileService profileService,
-                          @RegistryKey("messages") final ResourceBundle messagesBundle) {
+    public EmailRegexValidator(final ApplicationSettings applicationSettings,
+                               @RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.applicationSettings = applicationSettings;
-        this.profileService = profileService;
         this.messagesBundle = messagesBundle;
     }
 
@@ -62,9 +54,6 @@ public class EmailValidator implements Validator<String> {
         Pattern pattern = Pattern.compile(applicationSettings.getConfiguration().getUserEmailFormat());
         if (!pattern.matcher(email).matches()) {
             FacesMessage message = new FacesMessage(messagesBundle.getString("email_validator.format_wrong"));
-            throw new ValidatorException(message);
-        } else if (profileService.getUserByEmail(email) != null) {
-            FacesMessage message = new FacesMessage(messagesBundle.getString("email_validator.already_exists"));
             throw new ValidatorException(message);
         }
     }
