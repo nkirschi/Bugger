@@ -2,16 +2,13 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
-import tech.bugger.business.util.Hasher;
 import tech.bugger.business.util.Paginator;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
@@ -143,8 +140,6 @@ public class ProfileBacker implements Serializable {
 
     /**
      * Opens the administrator promotion/demotion dialog.
-     *
-     * @return {@code null} to reload the page.
      */
     public void openPromoteDemoteAdminDialog() {
         displayDialog = DialogType.ADMIN;
@@ -152,8 +147,6 @@ public class ProfileBacker implements Serializable {
 
     /**
      * Closes the administrator promotion/demotion dialog.
-     *
-     * @return {@code null} to reload the page.
      */
     public void closePromoteDemoteAdminDialog() {
         displayDialog = DialogType.NONE;
@@ -420,7 +413,8 @@ public class ProfileBacker implements Serializable {
     /**
      * @param displayDialog The DialogType to set.
      */
-    public void setDisplayDialog(DialogType displayDialog) {
+    public void setDisplayDialog(final DialogType displayDialog) {
         this.displayDialog = displayDialog;
     }
+
 }

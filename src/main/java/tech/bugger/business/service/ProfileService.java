@@ -345,7 +345,7 @@ public class ProfileService {
      * @param password The password given as input.
      * @return {@code true} iff the input matched the user's hashed password.
      */
-    public boolean matchingPassword(User user, String password) {
+    public boolean matchingPassword(final User user, final String password) {
         if (user.getPasswordHash().equals(Hasher.hash(password, user.getPasswordSalt(), user.getHashingAlgorithm()))) {
             return true;
         } else {

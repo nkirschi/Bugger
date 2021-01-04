@@ -343,7 +343,7 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public boolean isBanned(User user, Topic topic) {
+    public boolean isBanned(final User user, final Topic topic) {
         // TODO Auto-generated method stub
         return false;
     }
