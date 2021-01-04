@@ -15,7 +15,7 @@ public class Topic implements Serializable {
     /**
      * The unique ID of a topic.
      */
-    private int id;
+    private Integer id;
 
     /**
      * The title.
@@ -28,13 +28,20 @@ public class Topic implements Serializable {
     private String description;
 
     /**
+     * Constructs an empty topic.
+     */
+    public Topic() {
+        this(null, null, null);
+    }
+
+    /**
      * Constructs a new topic from the specified parameters.
      *
      * @param id          The topic ID.
      * @param title       The topic title.
      * @param description The topic description.
      */
-    public Topic(final int id, final String title, final String description) {
+    public Topic(final Integer id, final String title, final String description) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -45,7 +52,7 @@ public class Topic implements Serializable {
      *
      * @return The topic ID.
      */
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -54,7 +61,7 @@ public class Topic implements Serializable {
      *
      * @param id The topic ID to be set.
      */
-    public void setId(final int id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
