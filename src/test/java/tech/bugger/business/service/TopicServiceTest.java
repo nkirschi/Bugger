@@ -49,13 +49,17 @@ class TopicServiceTest {
 
     private Selection testSelection;
 
+    private Topic testTopic1 = new Topic(1, "Hi", "senberg");
+    private Topic testTopic2 = new Topic(2, "Hi", "performance");;
+    private Topic testTopic3 = new Topic(3, "Hi", "de and seek");
+
     @BeforeEach
     public void setUp() {
         topicService = new TopicService(transactionManager, feedbackEvent, ResourceBundleMocker.mock(""));
         testSelectedTopics = new ArrayList<>();
-        testSelectedTopics.add(new Topic(1, "Hi", "senberg"));
-        testSelectedTopics.add(new Topic(2, "Hi", "performance"));
-        testSelectedTopics.add(new Topic(3, "Hi", "de and seek"));
+        testSelectedTopics.add(testTopic1);
+        testSelectedTopics.add(testTopic2);
+        testSelectedTopics.add(testTopic3);
         testNumberOfTopics = testSelectedTopics.size();
         testSelection = new Selection(3, 1, Selection.PageSize.NORMAL, "", true);
         lenient().doReturn(tx).when(transactionManager).begin();
@@ -92,7 +96,7 @@ class TopicServiceTest {
     }
 
     @Test
-    public void testGetNumberOfTopics() throws Exception {
+    public void testGetNumberOfTopics() {
         doReturn(testNumberOfTopics).when(topicGateway).countTopics();
         assertEquals(testNumberOfTopics, topicService.getNumberOfTopics());
     }
