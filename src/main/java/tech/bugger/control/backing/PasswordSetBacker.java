@@ -1,13 +1,17 @@
 package tech.bugger.control.backing;
 
 import java.io.IOException;
+import java.util.ResourceBundle;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
+import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.util.Log;
 
@@ -29,9 +33,9 @@ public class PasswordSetBacker {
     private String password;
 
     /**
-     * The currently typed repeated password.
+     * The currently typed (repeated) confirmation password.
      */
-    private String passwordRepeat;
+    private String passwordConfirmation;
 
     /**
      * The token being used to set a password.
@@ -54,18 +58,33 @@ public class PasswordSetBacker {
     private final ExternalContext ectx;
 
     /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Resource bundle for feedback messages.
+     */
+    private final ResourceBundle messagesBundle;
+
+    /**
      * Constructs a new register page backing bean with the necessary dependencies.
      *
      * @param authenticationService The authentication service to use.
      * @param session               The current {@link UserSession}.
      * @param ectx                  The current external context.
+     * @param feedbackEvent         The feedback event to use for user feedback.
+     * @param messagesBundle        The resource bundle for feedback messages.
      */
     @Inject
     public PasswordSetBacker(final AuthenticationService authenticationService, final UserSession session,
-                             final ExternalContext ectx) {
+                             final ExternalContext ectx, final Event<Feedback> feedbackEvent,
+                             @RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.authenticationService = authenticationService;
         this.session = session;
         this.ectx = ectx;
+        this.feedbackEvent = feedbackEvent;
+        this.messagesBundle = messagesBundle;
     }
 
     /**
@@ -82,8 +101,12 @@ public class PasswordSetBacker {
             }
         }
 
-        token = authenticationService.getTokenByValue(ectx.getRequestParameterMap().get("token"));
-        log.debug("Showing Password-Set page with token " + token + '.');
+        token = authenticationService.findToken(ectx.getRequestParameterMap().get("token"));
+        if (isValidToken()) {
+            log.debug("Showing Password-Set page with token " + token + '.');
+        } else {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -93,6 +116,7 @@ public class PasswordSetBacker {
      */
     public String setUserPassword() {
         if (authenticationService.setPassword(token.getUser(), password, token.getValue())) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("password_set.success"), Feedback.Type.INFO));
             return "home.xhtml";
         }
         return null;
@@ -117,21 +141,21 @@ public class PasswordSetBacker {
     }
 
     /**
-     * Returns the current repeated password.
+     * Returns the current (repeated) confirmation password.
      *
-     * @return The repeated password.
+     * @return The (repeated) confirmation password.
      */
-    public String getPasswordRepeat() {
-        return passwordRepeat;
+    public String getPasswordConfirmation() {
+        return passwordConfirmation;
     }
 
     /**
-     * Sets a new repeated password.
+     * Sets a new (repeated) confirmation password.
      *
-     * @param passwordRepeat The repeated password to set.
+     * @param passwordConfirmation The (repeated) confirmation password to set.
      */
-    public void setPasswordRepeat(final String passwordRepeat) {
-        this.passwordRepeat = passwordRepeat;
+    public void setPasswordConfirmation(final String passwordConfirmation) {
+        this.passwordConfirmation = passwordConfirmation;
     }
 
     /**
@@ -158,7 +182,8 @@ public class PasswordSetBacker {
      * @return Whether the supplied token is valid.
      */
     public boolean isValidToken() {
-        return token != null;
+        return token != null
+                && (token.getType() == Token.Type.REGISTER || token.getType() == Token.Type.FORGOT_PASSWORD);
     }
 
 }

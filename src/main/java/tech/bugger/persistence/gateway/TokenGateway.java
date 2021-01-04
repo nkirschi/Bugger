@@ -24,7 +24,7 @@ public interface TokenGateway {
      * @return The complete {@link Token}.
      * @throws NotFoundException The token value could not be found.
      */
-    Token getTokenByValue(String value) throws NotFoundException;
+    Token findToken(String value) throws NotFoundException;
 
     /**
      * Deletes expired verification tokens and unverified users that lack a valid verification token.

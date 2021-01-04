@@ -3,8 +3,10 @@ package tech.bugger.control.backing;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ResourceBundle;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -12,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
+import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
@@ -49,6 +53,16 @@ public class RegisterBacker {
     private final ExternalContext ectx;
 
     /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Resource bundle for feedback messages.
+     */
+    private final ResourceBundle messagesBundle;
+
+    /**
      * The user that is being created.
      */
     private User user;
@@ -60,14 +74,19 @@ public class RegisterBacker {
      * @param profileService        The profile service to use.
      * @param session               The current {@link UserSession}.
      * @param ectx                  The current external context.
+     * @param feedbackEvent         The feedback event to use for user feedback.
+     * @param messagesBundle        The resource bundle for feedback messages.
      */
     @Inject
     public RegisterBacker(final AuthenticationService authenticationService, final ProfileService profileService,
-                          final UserSession session, final ExternalContext ectx) {
+                          final UserSession session, final ExternalContext ectx, final Event<Feedback> feedbackEvent,
+                          @RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.authenticationService = authenticationService;
         this.profileService = profileService;
         this.session = session;
         this.ectx = ectx;
+        this.feedbackEvent = feedbackEvent;
+        this.messagesBundle = messagesBundle;
     }
 
     /**
@@ -84,7 +103,7 @@ public class RegisterBacker {
         }
 
         user = new User();
-        user.setPreferredLanguage(Language.getLanguage(session.getLocale()));
+        user.setPreferredLanguage(Language.of(session.getLocale()));
     }
 
     /**
@@ -102,6 +121,7 @@ public class RegisterBacker {
 
         String domain = String.format("%s://%s", currentUrl.getProtocol(), currentUrl.getAuthority());
         if (profileService.createUser(user) && authenticationService.register(user, domain)) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("register.success"), Feedback.Type.INFO));
             return "home.xhtml";
         }
         return null;

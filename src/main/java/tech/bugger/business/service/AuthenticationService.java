@@ -165,15 +165,8 @@ public class AuthenticationService {
                 .content(new MessageFormat(interactionsBundle.getString("email_register_content"))
                         .format(new String[]{token.getUser().getFirstName(), token.getUser().getLastName(), link}))
                 .envelop();
-        priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.HIGH, () -> {
-            int tries = 1;
-            while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
-                log.warning("Trying to send e-mail again. Try #" + tries + '.');
-            }
-            if (tries > MAX_EMAIL_TRIES) {
-                log.error("Couldn't send e-mail for more than " + MAX_EMAIL_TRIES + " times! Please investigate!");
-            }
-        }));
+        sendMail(mail);
+
         return true;
     }
 
@@ -220,11 +213,11 @@ public class AuthenticationService {
      * @param value The token value to find the associated DTO for.
      * @return The complete {@link Token} or {@code null} if the given {@code value} is invalid.
      */
-    public Token getTokenByValue(final String value) {
+    public Token findToken(final String value) {
         Token token = null;
 
         try (Transaction tx = transactionManager.begin()) {
-            token = tx.newTokenGateway().getTokenByValue(value);
+            token = tx.newTokenGateway().findToken(value);
             tx.commit();
         } catch (NotFoundException e) {
             log.debug("Token by value could not be found.");
@@ -252,7 +245,24 @@ public class AuthenticationService {
      * @return {@code true} if the token is valid, {@code false} otherwise.
      */
     public boolean isValid(final String token) {
-        return getTokenByValue(token) != null;
+        return findToken(token) != null;
+    }
+
+    /**
+     * Tries to send the given {@link Mail}.
+     *
+     * @param mail The e-mail to send.
+     */
+    private void sendMail(final Mail mail) {
+        priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.HIGH, () -> {
+            int tries = 1;
+            while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
+                log.warning("Trying to send e-mail again. Try #" + tries + '.');
+            }
+            if (tries > MAX_EMAIL_TRIES) {
+                log.error("Couldn't send e-mail for more than " + MAX_EMAIL_TRIES + " times! Please investigate!");
+            }
+        }));
     }
 
 }

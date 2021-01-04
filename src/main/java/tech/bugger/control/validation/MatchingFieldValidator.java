@@ -51,9 +51,9 @@ public class MatchingFieldValidator implements Validator<String> {
     @Override
     public void validate(final FacesContext fctx, final UIComponent component, final String value) {
         // Find the actual JSF component with the ID.
-        UIInput otherInput = (UIInput) component.getAttributes().get("otherInput");
+        UIInput otherInput = (UIInput) component.getAttributes().get("other-input");
         if (otherInput == null) {
-            log.error("Attribute 'otherInput' couldn't be found!");
+            log.error("Attribute 'other-input' couldn't be found!");
             throw new IllegalArgumentException("Unable to find other component to validate.");
         }
 

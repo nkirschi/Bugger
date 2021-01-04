@@ -53,19 +53,6 @@ public class TokenDBGateway implements TokenGateway {
 
         Token ret;
 
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE id = ?")) {
-            ResultSet rs = new StatementParametrizer(stmt)
-                    .integer(token.getUser().getId())
-                    .toStatement().executeQuery();
-
-            if (!rs.next()) {
-                throw new NotFoundException("User doesn't exist.");
-            }
-        } catch (SQLException e) {
-            log.error("Couldn't search for existing users.", e);
-            throw new StoreException(e);
-        }
-
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO token (value, type, verifies) "
                 + "VALUES (?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS)) {
 
@@ -77,14 +64,20 @@ public class TokenDBGateway implements TokenGateway {
 
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
-                ret = getTokenByValue(rs.getString("value"));
+                ret = findToken(rs.getString("value"));
             } else {
                 log.error("Couldn't read new token data.");
                 throw new StoreException("Couldn't read new token data.");
             }
         } catch (SQLException e) {
-            log.error("Couldn't insert token into database.", e);
-            throw new StoreException(e);
+            if ("23503".equals(e.getSQLState())) {
+                // 23503 states that "insert value of foreign key is invalid", hence the user is non-existent.
+                log.error("Couldn't find user when inserting token into database.", e);
+                throw new NotFoundException(e);
+            } else {
+                log.error("Couldn't insert token into database.", e);
+                throw new StoreException(e);
+            }
         }
 
         return ret;
@@ -94,7 +87,7 @@ public class TokenDBGateway implements TokenGateway {
      * {@inheritDoc}
      */
     @Override
-    public Token getTokenByValue(final String value) throws NotFoundException {
+    public Token findToken(final String value) throws NotFoundException {
         Token token;
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM token t "

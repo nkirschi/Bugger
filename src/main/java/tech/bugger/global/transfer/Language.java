@@ -23,7 +23,7 @@ public enum Language {
      * @param locale The locale to translate into the {@link Language} enum.
      * @return The appropriate {@link Language} to choose.
      */
-    public static Language getLanguage(final Locale locale) {
+    public static Language of(final Locale locale) {
         if (locale.equals(Locale.GERMAN)) {
             return GERMAN;
         } else {

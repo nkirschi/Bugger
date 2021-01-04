@@ -162,7 +162,7 @@ public class User implements Serializable {
     }
 
     /**
-     * Constructs a new user from the given user.
+     * Constructs a new user as deep clone of the given user.
      *
      * @param user The user to clone.
      */
