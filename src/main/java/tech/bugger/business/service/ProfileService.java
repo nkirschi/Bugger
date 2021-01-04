@@ -2,6 +2,7 @@ package tech.bugger.business.service;
 
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.Hasher;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
@@ -221,7 +222,7 @@ public class ProfileService {
         int numPosts = getNumberOfPostsForUser(user);
         if (numPosts == 0) {
             log.error("No voting weight could be calculated for the user with id " + user.getId()
-                    + "as the number of posts could not be calculated");
+                    + " as the number of posts could not be calculated");
             return votingWeight;
         } else {
             String[] votingDef = applicationSettings.getConfiguration().getVotingWeightDefinition().split(",");
@@ -231,29 +232,13 @@ public class ProfileService {
                 return votingWeight;
             }
             try {
-                int[] votingWeightDef = convertVotingWeight(votingDef);
+                int[] votingWeightDef = Arrays.stream(votingDef).mapToInt(Integer::parseInt).sorted().toArray();
                 votingWeight = calculateVotingWeight(numPosts, votingWeightDef);
             } catch (NumberFormatException e) {
                 log.error("The voting weight definition could not be parsed to a number");
                 feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
             }
         }
-        return votingWeight;
-    }
-
-    /**
-     * Parses the given String array to an int array.
-     *
-     * @param votingWeightDef The voting weight definition.
-     * @return The int array.
-     * @throws NumberFormatException The voting weight definition could not be parsed to a number.
-     */
-    private int[] convertVotingWeight(final String[] votingWeightDef) throws NumberFormatException {
-        int[] votingWeight = new int[votingWeightDef.length];
-        for (int i = 0; i < votingWeightDef.length; i++) {
-            votingWeight[i] = Integer.parseInt(votingWeightDef[i]);
-        }
-        Arrays.sort(votingWeight);
         return votingWeight;
     }
 
@@ -350,6 +335,22 @@ public class ProfileService {
             user.setAdministrator(!admin);
             log.error("Error while updating the user with id " + user.getId(), e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+    }
+
+    /**
+     * Checks whether the input password is the same as the given user's password.
+     *
+     * @param user The user whose password is to be checked.
+     * @param password The password given as input.
+     * @return {@code true} iff the input matched the user's hashed password.
+     */
+    public boolean matchingPassword(User user, String password) {
+        if (user.getPasswordHash().equals(Hasher.hash(password, user.getPasswordSalt(), user.getHashingAlgorithm()))) {
+            return true;
+        } else {
+            feedback.fire(new Feedback(messages.getString("wrong_password"), Feedback.Type.ERROR));
+            return false;
         }
     }
 

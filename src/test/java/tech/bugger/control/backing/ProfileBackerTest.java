@@ -1,29 +1,31 @@
 package tech.bugger.control.backing;
 
+import com.sun.faces.context.RequestParameterMap;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Lazy;
 
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class ProfileBackerTest {
@@ -37,6 +39,17 @@ public class ProfileBackerTest {
     @Mock
     private UserSession session;
 
+    private MockedStatic<FacesContext> fctxStatic;
+
+    @Mock
+    private FacesContext fctx;
+
+    @Mock
+    private ExternalContext ext;
+
+    @Mock
+    private RequestParameterMap map;
+
     private User user;
     private int theAnswer = 42;
 
@@ -44,26 +57,37 @@ public class ProfileBackerTest {
     public void setup()
     {
         user = new User(12345, "Helgi", "v3ry_s3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen", null,
-                null, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
+                new byte[]{1}, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         MockitoAnnotations.openMocks(this);
+        fctxStatic = mockStatic(FacesContext.class);
+        when(FacesContext.getCurrentInstance()).thenReturn(fctx);
+        when(fctx.getExternalContext()).thenReturn(ext);
+        when(ext.getRequestParameterMap()).thenReturn(map);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        fctxStatic.close();
     }
 
     @Test
-    public void testInit() throws NoSuchFieldException {
+    public void testInit() {
+        when(map.containsKey("id")).thenReturn(true);
+        when(map.get("id")).thenReturn("12345");
         profileBacker.setUserID(user.getId());
         when(profileService.getUser(user.getId())).thenReturn(user);
-        Field dialog = ProfileBacker.class.getDeclaredField("displayDialog");
-        dialog.setAccessible(true);
         profileBacker.init();
         assertAll(
                 () -> assertEquals(user, profileBacker.getUser()),
-                () -> assertEquals(dialog.get(profileBacker), ProfileBacker.DialogType.NONE)
+                () -> assertEquals(profileBacker.getDisplayDialog(), ProfileBacker.DialogType.NONE)
         );
     }
 
     @Test
     public void testInitEqualUser() {
+        when(map.containsKey("id")).thenReturn(true);
+        when(map.get("id")).thenReturn("12345");
         profileBacker.setUserID(user.getId());
         when(profileService.getUser(user.getId())).thenReturn(user);
         when(session.getUser()).thenReturn(user);
@@ -76,6 +100,8 @@ public class ProfileBackerTest {
 
     @Test
     public void testInitNotEqualUser() {
+        when(map.containsKey("id")).thenReturn(true);
+        when(map.get("id")).thenReturn("12345");
         profileBacker.setUserID(user.getId());
         User sessionUser = new User(user);
         sessionUser.setId(23456);
@@ -89,22 +115,30 @@ public class ProfileBackerTest {
     }
 
     @Test
-    public void testOpenPromoteDemoteAdminDialog() {
-        assertAll("Should return null and set the boolean to true!",
-                () -> assertNull(profileBacker.openPromoteDemoteAdminDialog()),
-                () -> assertTrue(profileBacker.isAdminDialog())
+    public void testInitKeyNotPresent() throws IOException {
+        when(map.get("id")).thenReturn("12345");
+        profileBacker.init();
+        verify(ext, times(1)).redirect(anyString());
+    }
+
+    @Test
+    public void testInitIOException() throws IOException {
+        doThrow(IOException.class).when(ext).redirect(anyString());
+        assertThrows(InternalError.class,
+                () -> profileBacker.init()
         );
     }
 
     @Test
+    public void testOpenPromoteDemoteAdminDialog() {
+        profileBacker.openPromoteDemoteAdminDialog();
+        assertEquals(ProfileBacker.DialogType.ADMIN, profileBacker.getDisplayDialog());
+    }
+
+    @Test
     public void testClosePromoteDemoteAdminDialog() throws NoSuchFieldException {
-        Field dialog = ProfileBacker.class.getDeclaredField("displayDialog");
-        dialog.setAccessible(true);
-        assertAll("Should return null and set the boolean to false",
-                () -> assertNull(profileBacker.closePromoteDemoteAdminDialog()),
-                () -> assertFalse(profileBacker.isAdminDialog()),
-                () -> assertEquals(dialog.get(profileBacker), ProfileBacker.DialogType.NONE)
-        );
+        profileBacker.closePromoteDemoteAdminDialog();
+        assertEquals(ProfileBacker.DialogType.NONE, profileBacker.getDisplayDialog());
     }
 
     @Test
@@ -162,10 +196,11 @@ public class ProfileBackerTest {
     public void testToggleAdmin() {
         user.setAdministrator(true);
         when(session.getUser()).thenReturn(user);
+        when(profileService.matchingPassword(any(), any())).thenReturn(true);
         profileBacker.setUser(user);
         profileBacker.toggleAdmin();
         verify(profileService, times(1)).toggleAdmin(user);
-        verify(session, times(4)).getUser();
+        verify(session, times(5)).getUser();
     }
 
     @Test
@@ -183,10 +218,11 @@ public class ProfileBackerTest {
         sessionUser.setId(23456);
         sessionUser.setAdministrator(true);
         when(session.getUser()).thenReturn(sessionUser);
+        when(profileService.matchingPassword(any(), any())).thenReturn(true);
         profileBacker.setUser(user);
         profileBacker.toggleAdmin();
         verify(profileService, times(1)).toggleAdmin(user);
-        verify(session, times(3)).getUser();
+        verify(session, times(4)).getUser();
     }
 
     @Test
@@ -195,5 +231,16 @@ public class ProfileBackerTest {
         profileBacker.toggleAdmin();
         verify(profileService, times(0)).toggleAdmin(user);
         verify(session, times(1)).getUser();
+    }
+
+    @Test
+    public void testToggleAdminWrongPassword() {
+        user.setAdministrator(true);
+        when(session.getUser()).thenReturn(user);
+        when(profileService.matchingPassword(any(), any())).thenReturn(false);
+        profileBacker.setUser(user);
+        profileBacker.toggleAdmin();
+        verify(profileService, times(1)).matchingPassword(any(), any());
+        verify(session, times(3)).getUser();
     }
 }

@@ -52,15 +52,6 @@ public class UserDBGatewayTest {
         connection.close();
     }
 
-    private void deleteUser(User user) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM \"user\" WHERE id = ?;")) {
-            new StatementParametrizer(stmt)
-                    .integer(user.getId())
-                    .toStatement()
-                    .executeUpdate();
-        }
-    }
-
     private void deleteAllUsers() throws SQLException {
         try (Statement stmt = connection.createStatement()) {
             stmt.execute("DELETE FROM \"user\";");

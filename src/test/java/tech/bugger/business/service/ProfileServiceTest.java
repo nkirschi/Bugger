@@ -10,6 +10,7 @@ import tech.bugger.LogExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.Hasher;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
@@ -132,6 +133,21 @@ public class ProfileServiceTest {
         doThrow(TransactionException.class).when(tx).commit();
         assertNull(service.getUser(1));
         verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testMatchingPassword() {
+        String hashedPassword = Hasher.hash(testUser.getPasswordHash(), testUser.getPasswordSalt(),
+                testUser.getHashingAlgorithm());
+        String password = testUser.getPasswordHash();
+        testUser.setPasswordHash(hashedPassword);
+        assertTrue(service.matchingPassword(testUser, password));
+    }
+
+    @Test
+    public void testMatchingPasswordFalse() {
+        assertFalse(service.matchingPassword(testUser, testUser.getPasswordHash()));
+        verify(feedbackEvent, times(1)).fire(any());
     }
 
     @Test

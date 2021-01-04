@@ -2,16 +2,22 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
+import tech.bugger.business.util.Hasher;
 import tech.bugger.business.util.Paginator;
+import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -119,6 +125,15 @@ public class ProfileBacker implements Serializable {
     @PostConstruct
     void init() {
         // The initialization of the subscriptions will be implemented in the subscriptions feature.
+        ExternalContext ext = FacesContext.getCurrentInstance().getExternalContext();
+        if (!ext.getRequestParameterMap().containsKey("id")) {
+            try {
+                ext.redirect("home.xhtml");
+            } catch (IOException e) {
+                throw new InternalError("Error while redirecting.", e);
+            }
+        }
+        userID = Integer.parseInt(ext.getRequestParameterMap().get("id"));
         user = profileService.getUser(userID);
         if ((session.getUser() != null) && (session.getUser().equals(user))) {
             session.setUser(new User(user));
@@ -131,9 +146,8 @@ public class ProfileBacker implements Serializable {
      *
      * @return {@code null} to reload the page.
      */
-    public String openPromoteDemoteAdminDialog() {
+    public void openPromoteDemoteAdminDialog() {
         displayDialog = DialogType.ADMIN;
-        return null;
     }
 
     /**
@@ -141,9 +155,8 @@ public class ProfileBacker implements Serializable {
      *
      * @return {@code null} to reload the page.
      */
-    public String closePromoteDemoteAdminDialog() {
+    public void closePromoteDemoteAdminDialog() {
         displayDialog = DialogType.NONE;
-        return null;
     }
 
     /**
@@ -318,6 +331,9 @@ public class ProfileBacker implements Serializable {
                     + "had no administrator status!");
             return;
         }
+        if (!profileService.matchingPassword(session.getUser(), password)) {
+            return;
+        }
         profileService.toggleAdmin(user);
         if (session.getUser().equals(user)) {
             session.getUser().setAdministrator(user.isAdministrator());
@@ -395,31 +411,16 @@ public class ProfileBacker implements Serializable {
     }
 
     /**
-     * @return Whether the promote/demote administrator dialog is to be rendered.
+     * @return The DialogType.
      */
-    public boolean isAdminDialog() {
-        return displayDialog.equals(DialogType.ADMIN);
+    public DialogType getDisplayDialog() {
+        return displayDialog;
     }
 
     /**
-     * @return Whether the delete all topic subscriptions dialog is to be rendered.
+     * @param displayDialog The DialogType to set.
      */
-    public boolean isTopicDialog() {
-        return displayDialog.equals(DialogType.TOPIC);
+    public void setDisplayDialog(DialogType displayDialog) {
+        this.displayDialog = displayDialog;
     }
-
-    /**
-     * @return Whether the delete all report subscriptions dialog is to be rendered.
-     */
-    public boolean isReportDialog() {
-        return displayDialog.equals(DialogType.REPORT);
-    }
-
-    /**
-     * @return Whether the delete all user subscriptions dialog is to be rendered.
-     */
-    public boolean isUserDialog() {
-        return displayDialog.equals(DialogType.USER);
-    }
-
 }
