@@ -256,6 +256,7 @@ public class AuthenticationService {
     private void sendMail(final Mail mail) {
         priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.HIGH, () -> {
             int tries = 1;
+            log.debug("Sending e-mail " + mail + ".");
             while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
                 log.warning("Trying to send e-mail again. Try #" + tries + '.');
             }

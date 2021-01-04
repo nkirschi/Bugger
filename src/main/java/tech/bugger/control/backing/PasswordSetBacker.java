@@ -92,7 +92,7 @@ public class PasswordSetBacker {
      * If the user is already logged in, they are redirected to the home page.
      */
     @PostConstruct
-    public void init() {
+    void init() {
         if (session.getUser() != null) {
             try {
                 ectx.redirect("home.xhtml");

@@ -93,7 +93,7 @@ public class RegisterBacker {
      * Initializes the register page. If the user is already logged in, redirects them to the home page.
      */
     @PostConstruct
-    public void init() {
+    void init() {
         if (session.getUser() != null) {
             try {
                 ectx.redirect("home.xhtml");
@@ -121,6 +121,7 @@ public class RegisterBacker {
 
         String domain = String.format("%s://%s", currentUrl.getProtocol(), currentUrl.getAuthority());
         if (profileService.createUser(user) && authenticationService.register(user, domain)) {
+            log.debug("Registration for user " + user + " successful.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("register.success"), Feedback.Type.INFO));
             return "home.xhtml";
         }
