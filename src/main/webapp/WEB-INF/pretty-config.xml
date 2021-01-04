@@ -6,6 +6,14 @@
         <pattern value="/"/>
         <view-id value="/faces/view/public/home.xhtml"/>
     </url-mapping>
+    <url-mapping id="register">
+        <pattern value="/register"/>
+        <view-id value="/faces/view/public/register.xhtml"/>
+    </url-mapping>
+    <url-mapping id="password-set">
+        <pattern value="/password-set"/>
+        <view-id value="/faces/view/public/password-set.xhtml"/>
+    </url-mapping>
     <url-mapping id="profile-edit">
         <pattern value="/profile-edit"/>
         <view-id value="/faces/view/public/profile-edit.xhtml"/>
