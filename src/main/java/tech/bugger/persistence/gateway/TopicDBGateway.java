@@ -119,8 +119,7 @@ public class TopicDBGateway implements TopicGateway {
         try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                Topic topic = new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description"));
-                selectedTopics.add(topic);
+                selectedTopics.add(new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description")));
             }
         } catch (SQLException e) {
             log.error("Error while retrieving topics with " + selection + ".", e);
