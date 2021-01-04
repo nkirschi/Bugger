@@ -97,7 +97,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<Topic> getSelectedTopics(final Selection selection) throws NotFoundException {
+    public List<Topic> getSelectedTopics(final Selection selection) {
         if (selection == null) {
             log.error("Error when trying to get topics with selection null.");
             throw new IllegalArgumentException("Selection cannot be null.");
@@ -125,12 +125,8 @@ public class TopicDBGateway implements TopicGateway {
             log.error("Error while retrieving topics with " + selection + ".", e);
             throw new StoreException("Error while retrieving topics with " + selection + ".", e);
         }
-        if (selectedTopics.isEmpty()) {
-            log.error("Topics with " + selection + " not found.");
-            throw new NotFoundException("Topics with " + selection + " not found.");
-        } else {
-            return selectedTopics;
-        }
+
+        return selectedTopics;
     }
 
     /**
