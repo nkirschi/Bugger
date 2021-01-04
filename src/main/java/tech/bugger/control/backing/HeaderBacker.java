@@ -70,9 +70,9 @@ public class HeaderBacker implements Serializable {
     /**
      * Activates/Deactivates the menu.
      *
-     * @return {@code Null} to reload the page.
+     * @return {@code null} to reload the page.
      */
-    final public String toggleMenu() {
+    public final String toggleMenu() {
         if (displayMenu) {
             closeMenu();
         } else {
