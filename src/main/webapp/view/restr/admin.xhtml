@@ -12,12 +12,12 @@
         <h:panelGroup>
             <h:outputLink value="search" styleClass="btn btn-secondary">
                 ${labels.browse}
-                <f:param name="q" value=""/>
-                <f:param name="t" value="USER"/>
+                <f:param name="t" value="USER"/><!-- user results tab on the search page -->
+                <f:param name="q" value=""/><!-- empty query string => all results displayed -->
             </h:outputLink>
             <h:outputLink value="profile-edit" styleClass="btn btn-primary">
                 ${labels.create}
-                <f:param name="c" value="true"/>
+                <f:param name="id" value="true"/><!-- empty profile-edit id = "create user as admin" -->
             </h:outputLink>
         </h:panelGroup>
 
