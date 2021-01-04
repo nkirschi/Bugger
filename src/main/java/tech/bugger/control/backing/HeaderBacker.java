@@ -2,6 +2,7 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.global.transfer.User;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
@@ -16,6 +17,7 @@ import java.io.Serializable;
 @SessionScoped
 @Named
 public class HeaderBacker implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 7342292657804667855L;
 
@@ -72,7 +74,7 @@ public class HeaderBacker implements Serializable {
      *
      * @return {@code null} to reload the page.
      */
-    public final String toggleMenu() {
+    public String toggleMenu() {
         if (displayMenu) {
             closeMenu();
         } else {
@@ -84,7 +86,7 @@ public class HeaderBacker implements Serializable {
     /**
      * @return {@code true} if the Menu should be displayed, {@code false} otherwise.
      */
-    final public boolean isDisplayMenu() {
+    public boolean isDisplayMenu() {
         return displayMenu;
     }
 
@@ -95,4 +97,5 @@ public class HeaderBacker implements Serializable {
     private void openMenu() {
         displayMenu = true;
     }
+
 }

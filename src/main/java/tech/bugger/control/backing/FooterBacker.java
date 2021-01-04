@@ -15,6 +15,7 @@ import java.io.Serializable;
 @SessionScoped
 @Named
 public class FooterBacker implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 4849101262721339096L;
 
