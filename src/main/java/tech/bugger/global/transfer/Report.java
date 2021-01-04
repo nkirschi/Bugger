@@ -53,17 +53,69 @@ public class Report implements Serializable {
         SEVERE
     }
 
-
+    /**
+     * The ID of the report.
+     */
     private int id;
+
+    /**
+     * The title of the report.
+     */
     private String title;
+
+    /**
+     * The type of the report.
+     */
     private Type type;
+
+    /**
+     * The severity of the report.
+     */
     private Severity severity;
+
+    /**
+     * The version the report is associated with.
+     */
     private String version;
+
+    /**
+     * Authorship metadata about the report.
+     */
     private Authorship authorship;
+
+    /**
+     * The closing date of the report.
+     */
     private ZonedDateTime closingDate;
+
+    /**
+     * The report this report is a duplicate of, loaded lazily.
+     */
     private Lazy<Report> duplicateOf;
+
+    /**
+     * The relevance value to override the calculated relevance.
+     */
     private Integer forcedRelevance;
+
+    /**
+     * The topic the report belongs to, loaded lazily.
+     */
     private Lazy<Topic> topic;
+
+    public Report(int id, String title, Type type, Severity severity, String version, Authorship authorship,
+                  ZonedDateTime closingDate, Lazy<Report> duplicateOf, Integer forcedRelevance, Lazy<Topic> topic) {
+        this.id = id;
+        this.title = title;
+        this.type = type;
+        this.severity = severity;
+        this.version = version;
+        this.authorship = authorship;
+        this.closingDate = closingDate;
+        this.duplicateOf = duplicateOf;
+        this.forcedRelevance = forcedRelevance;
+        this.topic = topic;
+    }
 
     /**
      * Returns the ID of this report.
@@ -174,7 +226,7 @@ public class Report implements Serializable {
     }
 
     /**
-     * Returns the data this report was closed.
+     * Returns the date this report was closed.
      *
      * @return The report closing date.
      */
@@ -253,8 +305,14 @@ public class Report implements Serializable {
      */
     @Override
     public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Report)) {
+            return false;
+        }
+        Report that = (Report) other;
+        return id == that.id;
     }
 
     /**

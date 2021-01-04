@@ -33,8 +33,11 @@ import static org.mockito.Mockito.when;
 public class AttachmentDBGatewayTest {
 
     private AttachmentDBGateway gateway;
+
     private Connection connection;
+
     private Post post;
+
     private Attachment attachment;
 
     @BeforeEach
@@ -44,7 +47,7 @@ public class AttachmentDBGatewayTest {
 
         post = new Post(100, "", null, null, null);
         byte[] content = "Some random byte string".getBytes();
-        attachment = new Attachment(2, "test.txt", new Lazy<>(content), "text/plain", new Lazy<>(post));
+        attachment = new Attachment(10000, "test.txt", new Lazy<>(content), "text/plain", new Lazy<>(post));
     }
 
     @AfterEach
@@ -83,17 +86,14 @@ public class AttachmentDBGatewayTest {
         doReturn(stmtMock).when(connectionSpy).prepareStatement(any(), anyInt());
         when(stmtMock.getGeneratedKeys()).thenReturn(rsMock);
         when(rsMock.next()).thenReturn(false);
-        assertThrows(StoreException.class,
-                () -> new AttachmentDBGateway(connectionSpy).create(attachment));
+        assertThrows(StoreException.class, () -> new AttachmentDBGateway(connectionSpy).create(attachment));
     }
 
     @Test
     public void testCreateWhenDatabaseError() throws Exception {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any(), anyInt());
-        Attachment attachmentMock = mock(Attachment.class);
-        assertThrows(StoreException.class,
-                () -> new AttachmentDBGateway(connectionSpy).create(attachmentMock));
+        assertThrows(StoreException.class, () -> new AttachmentDBGateway(connectionSpy).create(attachment));
     }
 
     @Test
@@ -116,8 +116,7 @@ public class AttachmentDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         Attachment attachmentMock = mock(Attachment.class);
-        assertThrows(StoreException.class,
-                () -> new AttachmentDBGateway(connectionSpy).update(attachmentMock));
+        assertThrows(StoreException.class, () -> new AttachmentDBGateway(connectionSpy).update(attachmentMock));
     }
 
     @Test
@@ -138,8 +137,7 @@ public class AttachmentDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         Attachment attachmentMock = mock(Attachment.class);
-        assertThrows(StoreException.class,
-                () -> new AttachmentDBGateway(connectionSpy).delete(attachmentMock));
+        assertThrows(StoreException.class, () -> new AttachmentDBGateway(connectionSpy).delete(attachmentMock));
     }
 
 }

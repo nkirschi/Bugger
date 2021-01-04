@@ -9,6 +9,7 @@ import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.StoreException;
@@ -32,26 +33,24 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
-public class PostDBGatewayTest {
+public class ReportDBGatewayTest {
 
-    private PostDBGateway gateway;
+    private ReportDBGateway gateway;
 
     private Connection connection;
 
     private Report report;
 
-    private Post post;
-
     @BeforeEach
     public void setUp() throws Exception {
         connection = DBExtension.getConnection();
-        gateway = new PostDBGateway(connection);
+        gateway = new ReportDBGateway(connection);
 
-        report = new Report(100, "title", Report.Type.BUG, Report.Severity.MINOR, "", null, null, null, null, null);
+        Topic topic = new Topic(1, "topictitle", "topicdescription");
         Authorship authorship = new Authorship(new User(), ZonedDateTime.now(), new User(), ZonedDateTime.now());
         authorship.getCreator().setId(1);
         authorship.getModifier().setId(1);
-        post = new Post(10000, "test.txt", new Lazy<>(report), authorship, null);
+        report = new Report(10000, "testtitle", Report.Type.BUG, Report.Severity.MINOR, "testversion", authorship, null, null, null, new Lazy<>(topic));
     }
 
     @AfterEach
@@ -59,15 +58,15 @@ public class PostDBGatewayTest {
         connection.close();
     }
 
-    private Post find(int id) throws Exception {
-        // necessary until PostDBGateway#find is implemented
-        PreparedStatement stmt = connection.prepareStatement("SELECT * FROM post WHERE id = ?;");
+    private Report find(int id) throws Exception {
+        // necessary until ReportDBGateway#find is implemented
+        PreparedStatement stmt = connection.prepareStatement("SELECT * FROM report WHERE id = ?;");
         ResultSet rs = new StatementParametrizer(stmt).integer(id).toStatement().executeQuery();
 
         if (rs.next()) {
-            return new Post(
-                    rs.getInt("id"), rs.getString("content"),
-                    null, null, null
+            return new Report(
+                    rs.getInt("id"), rs.getString("title"),
+                    null, null, null, null, null, null, null, null
             );
         } else {
             return null;
@@ -76,8 +75,8 @@ public class PostDBGatewayTest {
 
     @Test
     public void testCreate() throws Exception {
-        gateway.create(post);
-        assertEquals(post, find(post.getId()));
+        gateway.create(report);
+        assertEquals(report, find(report.getId()));
     }
 
     @Test
@@ -88,14 +87,14 @@ public class PostDBGatewayTest {
         doReturn(stmtMock).when(connectionSpy).prepareStatement(any(), anyInt());
         when(stmtMock.getGeneratedKeys()).thenReturn(rsMock);
         when(rsMock.next()).thenReturn(false);
-        assertThrows(StoreException.class, () -> new PostDBGateway(connectionSpy).create(post));
+        assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy).create(report));
     }
 
     @Test
     public void testCreateWhenDatabaseError() throws Exception {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any(), anyInt());
-        assertThrows(StoreException.class, () -> new PostDBGateway(connectionSpy).create(post));
+        assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy).create(report));
     }
 
 }
