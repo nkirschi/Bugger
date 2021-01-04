@@ -21,8 +21,8 @@ import tech.bugger.persistence.util.TransactionManager;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class ProfileServiceTest {
 
     private ProfileService service;
@@ -52,53 +52,50 @@ public class ProfileServiceTest {
 
     @Test
     public void testCreateUser() {
-        User copy = new User(testUser);
+        testUser.setId(null);
+
         doAnswer((invocation) -> {
             invocation.getArgument(0, User.class).setId(1);
             return null;
         }).when(userGateway).createUser(any());
-        assertAll(() -> assertTrue(service.createUser(copy)),
-                () -> assertEquals(1, copy.getId()));
-        verify(userGateway).createUser(any());
+
+        assertAll(() -> assertTrue(service.createUser(testUser)),
+                () -> assertEquals(1, testUser.getId()),
+                () -> verify(userGateway).createUser(any()));
     }
 
     @Test
     public void testCreateUserWhenCommitFails() throws Exception {
-        User copy = new User(testUser);
         doThrow(TransactionException.class).when(tx).commit();
-        assertFalse(service.createUser(copy));
+        assertFalse(service.createUser(testUser));
         verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void testUpdateUser() throws Exception {
-        User copy = new User(testUser);
-        assertAll(() -> assertTrue(service.updateUser(copy)),
-                () -> assertEquals(1, copy.getId()));
+        assertAll(() -> assertTrue(service.updateUser(testUser)),
+                () -> assertEquals(1, testUser.getId()));
         verify(userGateway).updateUser(any());
     }
 
     @Test
     public void testUpdateWhenNotFound() throws Exception {
-        User copy = new User(testUser);
         doThrow(NotFoundException.class).when(userGateway).updateUser(any());
-        assertFalse(service.updateUser(copy));
+        assertFalse(service.updateUser(testUser));
         verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void testUpdateWhenCommitFails() throws Exception {
-        User copy = new User(testUser);
         doThrow(TransactionException.class).when(tx).commit();
-        assertFalse(service.updateUser(copy));
+        assertFalse(service.updateUser(testUser));
         verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void testGetUser() throws Exception {
-        User copy = new User(testUser);
-        service.getUser(copy.getId());
-        assertEquals(1, copy.getId());
+        service.getUser(testUser.getId());
+        assertEquals(1, testUser.getId());
         verify(userGateway).getUserByID(1);
     }
 
@@ -117,11 +114,10 @@ public class ProfileServiceTest {
 
     @Test
     public void testGetUserByEmail() throws Exception {
-        User copy = new User(testUser);
-        doReturn(copy).when(userGateway).getUserByEmail(copy.getEmailAddress());
-        User user = service.getUserByEmail(copy.getEmailAddress());
-        assertEquals(copy, user);
-        verify(userGateway).getUserByEmail(copy.getEmailAddress());
+        doReturn(testUser).when(userGateway).getUserByEmail(testUser.getEmailAddress());
+        User user = service.getUserByEmail(testUser.getEmailAddress());
+        assertEquals(testUser, user);
+        verify(userGateway).getUserByEmail(testUser.getEmailAddress());
     }
 
     @Test
@@ -139,11 +135,10 @@ public class ProfileServiceTest {
 
     @Test
     public void testGetUserByUsername() throws Exception {
-        User copy = new User(testUser);
-        doReturn(copy).when(userGateway).getUserByUsername(copy.getUsername());
-        User user = service.getUserByUsername(copy.getUsername());
-        assertEquals(copy, user);
-        verify(userGateway).getUserByUsername(copy.getUsername());
+        doReturn(testUser).when(userGateway).getUserByUsername(testUser.getUsername());
+        User user = service.getUserByUsername(testUser.getUsername());
+        assertEquals(testUser, user);
+        verify(userGateway).getUserByUsername(testUser.getUsername());
     }
 
     @Test

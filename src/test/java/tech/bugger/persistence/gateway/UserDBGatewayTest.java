@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
+@ExtendWith(LogExtension.class)
 public class UserDBGatewayTest {
 
     private UserDBGateway gateway;

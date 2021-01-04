@@ -16,8 +16,8 @@ import tech.bugger.ResourceBundleMocker;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class MatchingFieldValidatorTest {
 
     private MatchingFieldValidator matchingFieldValidator;

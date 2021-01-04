@@ -89,8 +89,7 @@ public class PasswordSetBackerTest {
 
     @Test
     public void testInitLoggedInAndException() throws Exception {
-        User copy = new User(testUser);
-        doReturn(copy).when(userSession).getUser();
+        doReturn(testUser).when(userSession).getUser();
         doThrow(IOException.class).when(ectx).redirect(any());
         assertThrows(InternalError.class, () -> passwordSetBacker.init());
     }

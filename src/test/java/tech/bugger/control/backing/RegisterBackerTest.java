@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tech.bugger.LogExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
@@ -22,6 +23,7 @@ import tech.bugger.global.transfer.User;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
 public class RegisterBackerTest {
 
@@ -73,16 +75,14 @@ public class RegisterBackerTest {
 
     @Test
     public void testInitNoAccess() throws Exception {
-        User copy = new User(testUser);
-        doReturn(copy).when(userSession).getUser();
+        doReturn(testUser).when(userSession).getUser();
         registerBacker.init();
         verify(ectx).redirect(any());
     }
 
     @Test
     public void testInitNoAccessAndException() throws Exception {
-        User copy = new User(testUser);
-        doReturn(copy).when(userSession).getUser();
+        doReturn(testUser).when(userSession).getUser();
         doThrow(IOException.class).when(ectx).redirect(any());
         assertThrows(InternalError.class, () -> registerBacker.init());
     }

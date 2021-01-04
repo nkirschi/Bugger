@@ -19,8 +19,8 @@ import tech.bugger.persistence.exception.StoreException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
+@ExtendWith(LogExtension.class)
 public class TokenDBGatewayTest {
 
     private TokenDBGateway gateway;
@@ -91,9 +91,8 @@ public class TokenDBGatewayTest {
 
     @Test
     public void testCreateTokenUserNotExists() {
-        User copy = new User(admin);
-        copy.setId(45);
-        Token token = new Token("0123456789abcdef", Token.Type.CHANGE_EMAIL, null, copy);
+        admin.setId(45);
+        Token token = new Token("0123456789abcdef", Token.Type.CHANGE_EMAIL, null, admin);
         assertThrows(NotFoundException.class, () -> gateway.createToken(token));
     }
 

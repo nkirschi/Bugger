@@ -31,8 +31,8 @@ import tech.bugger.persistence.util.TransactionManager;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class AuthenticationServiceTest {
 
     private AuthenticationService service;
@@ -116,47 +116,42 @@ public class AuthenticationServiceTest {
 
     @Test
     public void testRegister() throws Exception {
-        User copy = new User(testUser);
         doReturn(testToken).when(tokenGateway).createToken(any());
         doReturn(true).when(mailer).send(any());
-        service.register(copy, "http://test.de");
+        service.register(testUser, "http://test.de");
         verify(tokenGateway).createToken(any());
         verify(mailer).send(any());
     }
 
     @Test
     public void testRegisterMailNotOnFirstTry() throws Exception {
-        User copy = new User(testUser);
         doReturn(testToken).when(tokenGateway).createToken(any());
         doReturn(false).doReturn(true).when(mailer).send(any());
-        service.register(copy, "http://test.de");
+        service.register(testUser, "http://test.de");
         verify(tokenGateway).createToken(any());
         verify(mailer, times(2)).send(any());
     }
 
     @Test
     public void testRegisterMailOnTooManyTries() throws Exception {
-        User copy = new User(testUser);
         doReturn(testToken).when(tokenGateway).createToken(any());
         doReturn(false).when(mailer).send(any());
-        service.register(copy, "http://test.de");
+        service.register(testUser, "http://test.de");
         verify(tokenGateway).createToken(any());
         verify(mailer, times(4)).send(any());
     }
 
     @Test
     public void testRegisterWhenNotFound() throws Exception {
-        User copy = new User(testUser);
         doThrow(NotFoundException.class).when(tokenGateway).createToken(any());
-        service.register(copy, "http://test.de");
+        service.register(testUser, "http://test.de");
         verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void testRegisterWhenCommitFails() throws Exception {
-        User copy = new User(testUser);
         doThrow(TransactionException.class).when(tx).commit();
-        service.register(copy, "http://test.de");
+        service.register(testUser, "http://test.de");
         verify(feedbackEvent, atLeastOnce()).fire(any());
     }
 
@@ -183,36 +178,31 @@ public class AuthenticationServiceTest {
 
     @Test
     public void testSetPassword() throws Exception {
-        User copy = new User(testUser);
         doNothing().when(userGateway).updateUser(any());
         doReturn(testToken).when(tokenGateway).findToken(any());
 
-        boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
+        boolean res = service.setPassword(testUser, "test1234", "0123456789abcdef");
         assertAll(() -> assertTrue(res),
-                () -> assertNotEquals("", copy.getPasswordHash()),
-                () -> assertNotNull(copy.getPasswordHash()),
-                () -> assertNotEquals("", copy.getPasswordSalt()),
-                () -> assertNotNull(copy.getPasswordSalt()),
-                () -> assertNotEquals("", copy.getHashingAlgorithm()),
-                () -> assertNotNull(copy.getHashingAlgorithm()));
+                () -> assertNotEquals("", testUser.getPasswordHash()),
+                () -> assertNotNull(testUser.getPasswordHash()),
+                () -> assertNotEquals("", testUser.getPasswordSalt()),
+                () -> assertNotNull(testUser.getPasswordSalt()),
+                () -> assertNotEquals("", testUser.getHashingAlgorithm()),
+                () -> assertNotNull(testUser.getHashingAlgorithm()));
     }
 
     @Test
     public void testSetPasswordNotValid() throws Exception {
-        User copy = new User(testUser);
-
         doThrow(NotFoundException.class).when(tokenGateway).findToken(any());
-        boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
+        boolean res = service.setPassword(testUser, "test1234", "0123456789abcdef");
         assertFalse(res);
         verify(feedbackEvent, atLeastOnce()).fire(any());
     }
 
     @Test
     public void testSetPasswordWhenCommitInIsValidFails() throws Exception {
-        User copy = new User(testUser);
-
         doThrow(TransactionException.class).when(tx).commit();
-        boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
+        boolean res = service.setPassword(testUser, "test1234", "0123456789abcdef");
         assertFalse(res);
         // As it is only a query, we can still recover and use the real values.
         verify(feedbackEvent, times(2)).fire(any());
@@ -221,7 +211,6 @@ public class AuthenticationServiceTest {
     @Test
     public void testSetPasswordWhenCommitFails() throws Exception {
         AuthenticationService service = mock(AuthenticationService.class);
-        User copy = new User(testUser);
 
         doCallRealMethod().when(service).setPassword(any(), any(), any());
         doReturn(true).when(service).isValid(any());
@@ -243,18 +232,16 @@ public class AuthenticationServiceTest {
         f.setAccessible(true);
         f.set(service, ResourceBundleMocker.mock(""));
 
-        boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
+        boolean res = service.setPassword(testUser, "test1234", "0123456789abcdef");
         assertFalse(res);
         verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void testSetPasswordWhenUserNotFound() throws Exception {
-        User copy = new User(testUser);
-
         doReturn(testToken).when(tokenGateway).findToken(any());
         doThrow(NotFoundException.class).when(userGateway).updateUser(any());
-        boolean res = service.setPassword(copy, "test1234", "0123456789abcdef");
+        boolean res = service.setPassword(testUser, "test1234", "0123456789abcdef");
         assertFalse(res);
         verify(feedbackEvent).fire(any());
     }
