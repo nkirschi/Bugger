@@ -170,7 +170,7 @@ public class TopicService {
 
         List<Topic> selectedTopics = null;
         try (Transaction tx = transactionManager.begin()) {
-            selectedTopics = tx.newTopicGateway().getSelectedTopics(selection);
+            selectedTopics = tx.newTopicGateway().selectTopics(selection);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error when loading selected topics.", e);
@@ -279,7 +279,7 @@ public class TopicService {
     public int getNumberOfTopics() {
         int numberOfTopics = 0;
         try (Transaction tx = transactionManager.begin()) {
-            numberOfTopics = tx.newTopicGateway().getNumberOfTopics();
+            numberOfTopics = tx.newTopicGateway().countTopics();
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error when loading number of topics.", e);

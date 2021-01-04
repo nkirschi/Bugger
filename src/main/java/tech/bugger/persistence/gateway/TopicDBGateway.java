@@ -42,7 +42,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
+    public int countReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -51,7 +51,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfTopics() {
+    public int countTopics() {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM topic;")) {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -69,7 +69,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfModerators(final Topic topic) {
+    public int countModerators(final Topic topic) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -78,7 +78,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfBannedUsers(final Topic topic) {
+    public int countBannedUsers(final Topic topic) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -87,7 +87,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public Topic getTopicByID(final int id) {
+    public Topic findTopic(final int id) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -96,7 +96,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<Topic> getSelectedTopics(final Selection selection) {
+    public List<Topic> selectTopics(final Selection selection) {
         if (selection == null) {
             log.error("Error when trying to get topics with selection null.");
             throw new IllegalArgumentException("Selection cannot be null.");
@@ -177,7 +177,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void makeModerator(final Topic topic, final User user) {
+    public void promoteModerator(final Topic topic, final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -186,7 +186,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void removeModerator(final Topic topic, final User user) {
+    public void demoteModerator(final Topic topic, final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -195,7 +195,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public ZonedDateTime getLastChangeTimestamp(final Topic topic) {
+    public ZonedDateTime determineLastActivity(final Topic topic) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -204,7 +204,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfSubscribers(final Topic topic) {
+    public int countSubscribers(final Topic topic) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -213,7 +213,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfPosts(final Topic topic) {
+    public int countPosts(final Topic topic) {
         // TODO Auto-generated method stub
         return 0;
     }

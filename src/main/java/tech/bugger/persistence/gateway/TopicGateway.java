@@ -4,7 +4,6 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
-import tech.bugger.persistence.exception.StoreException;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -23,7 +22,7 @@ public interface TopicGateway {
      * @return The list of reports of {@code topic}, filtered accordingly.
      * @throws NotFoundException The topic could not be found.
      */
-    int getNumberOfReports(Topic topic, boolean showOpenReports, boolean showClosedReports)
+    int countReports(Topic topic, boolean showOpenReports, boolean showClosedReports)
             throws NotFoundException;
 
     /**
@@ -31,7 +30,7 @@ public interface TopicGateway {
      *
      * @return The total number of topic in the topic storage.
      */
-    int getNumberOfTopics();
+    int countTopics();
 
     /**
      * Retrieves the number of moderators of a topic.
@@ -40,7 +39,7 @@ public interface TopicGateway {
      * @return The number of moderators of {@code topic}.
      * @throws NotFoundException The topic could not be found.
      */
-    int getNumberOfModerators(Topic topic) throws NotFoundException;
+    int countModerators(Topic topic) throws NotFoundException;
 
     /**
      * Retrieves the number of users banned for a topic.
@@ -49,7 +48,7 @@ public interface TopicGateway {
      * @return The number of users banned for {@code topic}.
      * @throws NotFoundException The topic could not be found.
      */
-    int getNumberOfBannedUsers(Topic topic) throws NotFoundException;
+    int countBannedUsers(Topic topic) throws NotFoundException;
 
     /**
      * Retrieves the number of subscribers to a topic.
@@ -58,7 +57,7 @@ public interface TopicGateway {
      * @return The number of subscribers of {@code topic}.
      * @throws NotFoundException The topic could not be found.
      */
-    int getNumberOfSubscribers(Topic topic) throws NotFoundException;
+    int countSubscribers(Topic topic) throws NotFoundException;
 
     /**
      * Retrieves the total number of posts of all reports that belong to a given topic.
@@ -67,7 +66,7 @@ public interface TopicGateway {
      * @return The total number of posts of {@code topic}.
      * @throws NotFoundException The topic could not be found.
      */
-    int getNumberOfPosts(Topic topic) throws NotFoundException;
+    int countPosts(Topic topic) throws NotFoundException;
 
     /**
      * Retrieves date and time of the last activity on a report of a given topic.
@@ -76,7 +75,7 @@ public interface TopicGateway {
      * @return The last activity on {@code topic}.
      * @throws NotFoundException The topic could not be found.
      */
-    ZonedDateTime getLastChangeTimestamp(Topic topic) throws NotFoundException;
+    ZonedDateTime determineLastActivity(Topic topic) throws NotFoundException;
 
     /**
      * Retrieves a topic by its ID.
@@ -85,7 +84,7 @@ public interface TopicGateway {
      * @return The topic identified by the ID.
      * @throws NotFoundException The topic could not be found.
      */
-    Topic getTopicByID(int id) throws NotFoundException;
+    Topic findTopic(int id) throws NotFoundException;
 
     /**
      * Retrieves a list of topics that match the given selection criteria.
@@ -93,7 +92,7 @@ public interface TopicGateway {
      * @param selection The search criteria to apply.
      * @return The list of topics, filtered accordingly.
      */
-    List<Topic> getSelectedTopics(Selection selection) throws NotFoundException;
+    List<Topic> selectTopics(Selection selection);
 
     /**
      * Inserts a topic into the topic storage.
@@ -144,7 +143,7 @@ public interface TopicGateway {
      * @param user  The user to appoint a moderator.
      * @throws NotFoundException The topic or the user could not be found.
      */
-    void makeModerator(Topic topic, User user) throws NotFoundException;
+    void promoteModerator(Topic topic, User user) throws NotFoundException;
 
     /**
      * Dismisses a user as a moderator of a topic. Does nothing if the user is not listed as a moderator for the topic.
@@ -153,6 +152,6 @@ public interface TopicGateway {
      * @param user  The user to dismiss as a moderator.
      * @throws NotFoundException The topic or the user could not be found.
      */
-    void removeModerator(Topic topic, User user) throws NotFoundException;
+    void demoteModerator(Topic topic, User user) throws NotFoundException;
 
 }
