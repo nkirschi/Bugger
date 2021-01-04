@@ -97,18 +97,18 @@ public class Topic implements Serializable {
     /**
      * Indicates whether some {@code other} topic is semantically equal to this topic.
      *
-     * @param that The object to compare this topic to.
+     * @param other The object to compare this topic to.
      * @return {@code true} iff {@code other} is a semantically equivalent topic.
      */
     @Override
-    public boolean equals(final Object that) {
-        if (this == that) {
+    public boolean equals(final Object other) {
+        if (this == other) {
             return true;
         }
-        if (!(that instanceof Topic)) {
+        if (!(other instanceof Topic)) {
             return false;
         }
-        Topic topic = (Topic) that;
+        Topic topic = (Topic) other;
         return this.id == topic.id;
     }
 
