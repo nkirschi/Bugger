@@ -328,7 +328,8 @@ public class TopicService {
      * @param topic The topic in question.
      * @return The time stamp of the last action as a {@code ZonedDateTime}.
      */
-    public ZonedDateTime lastChange(Topic topic) {
+    public ZonedDateTime lastChange(final Topic topic) {
         return null;
     }
+
 }
