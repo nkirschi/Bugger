@@ -34,7 +34,6 @@ public class HeaderBackerTest {
 
     @Test
     public void testInit() throws IllegalAccessException, NoSuchFieldException {
-        field.set(headerBacker, session);
         User user = new User();
         doReturn(user).when(session).getUser();
         headerBacker.init();
