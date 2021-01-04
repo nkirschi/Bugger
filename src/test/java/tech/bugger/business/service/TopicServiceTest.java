@@ -68,13 +68,13 @@ class TopicServiceTest {
 
     @Test
     public void testGetSelectedTopicsWhenFound() throws Exception {
-        doReturn(testSelectedTopics).when(topicGateway).getSelectedTopics(any());
+        doReturn(testSelectedTopics).when(topicGateway).selectTopics(any());
         assertEquals(testSelectedTopics, topicService.getSelectedTopics(testSelection));
     }
 
     @Test
     public void testGetSelectedTopicsWhenNotFound() throws Exception {
-        doThrow(NotFoundException.class).when(topicGateway).getSelectedTopics(any());
+        doThrow(NotFoundException.class).when(topicGateway).selectTopics(any());
         assertNull(topicService.getSelectedTopics(testSelection));
         verify(feedbackEvent).fire(any());
     }
@@ -93,7 +93,7 @@ class TopicServiceTest {
 
     @Test
     public void testGetNumberOfTopics() throws Exception {
-        doReturn(testNumberOfTopics).when(topicGateway).getNumberOfTopics();
+        doReturn(testNumberOfTopics).when(topicGateway).countTopics();
         assertEquals(testNumberOfTopics, topicService.getNumberOfTopics());
     }
 

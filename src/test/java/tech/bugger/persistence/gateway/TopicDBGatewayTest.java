@@ -79,24 +79,24 @@ class TopicDBGatewayTest {
     public void testGetNumberOfTopicsWhenThereAreSome() throws Exception {
         numberOfTopics = 5;
         addTopics();
-        assertEquals(numberOfTopics, gateway.getNumberOfTopics());
+        assertEquals(numberOfTopics, gateway.countTopics());
     }
 
     @Test
     public void testGetNumberOfTopicsWhenThereAreNone() {
-        assertEquals(0, gateway.getNumberOfTopics());
+        assertEquals(0, gateway.countTopics());
     }
 
     @Test
     public void testGetNumberOfTopicsWhenDatabaseError() throws Exception {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
-        assertThrows(StoreException.class, () -> new TopicDBGateway(connectionSpy).getNumberOfTopics());
+        assertThrows(StoreException.class, () -> new TopicDBGateway(connectionSpy).countTopics());
     }
 
     @Test
     public void testGetSelectedTopicsWhenSelectionIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> gateway.getSelectedTopics(null));
+        assertThrows(IllegalArgumentException.class, () -> gateway.selectTopics(null));
     }
 
     @Test
@@ -105,7 +105,7 @@ class TopicDBGatewayTest {
         addTopics();
         validSelection();
         expectedTopics(5);
-        assertEquals(topics, gateway.getSelectedTopics(selection));
+        assertEquals(topics, gateway.selectTopics(selection));
     }
 
     @Test
@@ -117,13 +117,13 @@ class TopicDBGatewayTest {
         selection.setSortedBy("id");
         expectedTopics(5);
         Collections.reverse(topics);
-        assertEquals(topics, gateway.getSelectedTopics(selection));
+        assertEquals(topics, gateway.selectTopics(selection));
     }
 
     @Test
     public void testGetSelectedTopicsWhenThereAreNone() {
         validSelection();
-        assertThrows(NotFoundException.class, () -> gateway.getSelectedTopics(selection));
+        assertThrows(NotFoundException.class, () -> gateway.selectTopics(selection));
     }
 
     @Test
@@ -132,7 +132,7 @@ class TopicDBGatewayTest {
         addTopics();
         validSelection();
         selection.setCurrentPage(-1);
-        assertThrows(StoreException.class, () -> gateway.getSelectedTopics(selection));
+        assertThrows(StoreException.class, () -> gateway.selectTopics(selection));
     }
 
     @Test
@@ -141,7 +141,7 @@ class TopicDBGatewayTest {
         addTopics();
         validSelection();
         selection.setSortedBy("hüttenkäse");
-        assertThrows(StoreException.class, () -> gateway.getSelectedTopics(selection));
+        assertThrows(StoreException.class, () -> gateway.selectTopics(selection));
     }
 
     @Test
@@ -151,7 +151,7 @@ class TopicDBGatewayTest {
         validSelection();
         selection.setTotalSize(300);
         expectedTopics(5);
-        assertEquals(topics, gateway.getSelectedTopics(selection));
+        assertEquals(topics, gateway.selectTopics(selection));
     }
 
     @Test
@@ -161,7 +161,7 @@ class TopicDBGatewayTest {
         validSelection();
         selection.setTotalSize(-11);
         expectedTopics(5);
-        assertEquals(topics, gateway.getSelectedTopics(selection));
+        assertEquals(topics, gateway.selectTopics(selection));
     }
 
     @Test
@@ -171,7 +171,7 @@ class TopicDBGatewayTest {
         validSelection();
         selection.setTotalSize(3);
         expectedTopics(5);
-        assertEquals(topics, gateway.getSelectedTopics(selection));
+        assertEquals(topics, gateway.selectTopics(selection));
     }
 
     @Test
@@ -180,7 +180,7 @@ class TopicDBGatewayTest {
         addTopics();
         validSelection();
         expectedTopics(20);
-        assertEquals(topics, gateway.getSelectedTopics(selection));
+        assertEquals(topics, gateway.selectTopics(selection));
     }
 
     @Test
@@ -203,6 +203,6 @@ class TopicDBGatewayTest {
         for (int i = 39; i >= 37; i--) {
             topics.add(makeTestTopic(i));
         }
-        assertEquals(topics, gateway.getSelectedTopics(selection));
+        assertEquals(topics, gateway.selectTopics(selection));
     }
 }
