@@ -15,50 +15,51 @@
     </cc:interface>
 
     <cc:implementation>
-        <h:outputText id="ot_noEntry" value="#{labels['paginator.empty']}"
+        <h:outputText id="ot-no-entry" value="#{labels['paginator.empty']}"
                       rendered="#{cc.attrs.paginator.isEmpty()}"/>
 
-        <h:form id="f_table" rendered="#{not cc.attrs.paginator.isEmpty()}">
-            <h:dataTable id="t_entries" var="var" value="#{cc.attrs.paginator}" paginator="true">
+        <h:form id="f-table" rendered="#{not cc.attrs.paginator.isEmpty()}">
+            <h:dataTable id="t-entries" var="var" value="#{cc.attrs.paginator}" paginator="true">
                 <cc:insertChildren/>
             </h:dataTable>
         </h:form>
 
-        <h:outputFormat id="ot_pagCount" value="#{cc.attrs.paginator.selection.totalSize == 1
-                      ? labels['paginator.entry']
-                      : labels['paginator.entries']}">
+        <h:outputFormat id="ot-pag-count" rendered="#{not cc.attrs.paginator.isEmpty()}"
+                        value="#{cc.attrs.paginator.selection.totalSize == 1
+                        ? labels['paginator.entry']
+                        : labels['paginator.entries']}">
             <f:param value="#{cc.attrs.paginator.selection.totalSize}"/>
         </h:outputFormat>
 
-        <h:form id="f_pagenav" rendered="#{not cc.attrs.paginator.isEmpty()}" style="display: inline;">
-            <h:commandButton id="cb_submit" action="#{cc.attrs.paginator.update}" style="display: none"/>
-            <h:commandButton id="cb_firstPage" value="&lt;&lt;" disabled="#{cc.attrs.paginator.isFirstPage()}"
+        <h:form id="f-pagenav" rendered="#{not cc.attrs.paginator.isEmpty()}" style="display: inline;">
+            <h:commandButton id="cb-submit" action="#{cc.attrs.paginator.update}" style="display: none"/>
+            <h:commandButton id="cb-first-page" value="&lt;&lt;" disabled="#{cc.attrs.paginator.isFirstPage()}"
                              action="#{cc.attrs.paginator.firstPage}" rendered="#{not cc.attrs.simple}">
             </h:commandButton>
-            <h:commandButton id="cb_prevPage" value="&lt;" disabled="#{cc.attrs.paginator.isFirstPage()}"
+            <h:commandButton id="cb-prev-page" value="&lt;" disabled="#{cc.attrs.paginator.isFirstPage()}"
                              action="#{cc.attrs.paginator.prevPage}">
             </h:commandButton>
-            <h:inputText id="i_currPage" value="#{cc.attrs.paginator.currentPage}" rendered="#{not cc.attrs.simple}"
+            <h:inputText id="i-curr-page" value="#{cc.attrs.paginator.currentPage}" rendered="#{not cc.attrs.simple}"
                          validatorMessage="#{messages['paginator.not_in_range']}">
                 <f:validateLongRange minimum="1" maximum="#{cc.attrs.paginator.determineLastPageIndex()}"/>
             </h:inputText>
-            <h:commandButton id="cb_nextPage" value="&gt;" disabled="#{cc.attrs.paginator.isLastPage()}"
+            <h:commandButton id="cb-next-page" value="&gt;" disabled="#{cc.attrs.paginator.isLastPage()}"
                              action="#{cc.attrs.paginator.nextPage}">
             </h:commandButton>
-            <h:commandButton id="cb_lastPage" value="&gt;&gt;" disabled="#{cc.attrs.paginator.isLastPage()}"
+            <h:commandButton id="cb-last-page" value="&gt;&gt;" disabled="#{cc.attrs.paginator.isLastPage()}"
                              action="#{cc.attrs.paginator.lastPage}" rendered="#{not cc.attrs.simple}">
             </h:commandButton>
         </h:form>
 
-        <h:form id="f_entries" style="display: inline;"
+        <h:form id="f-entries" style="display: inline;"
                 rendered="#{not cc.attrs.paginator.isEmpty() and not cc.attrs.simple}">
-            <h:outputText id="ot_entriesPP" value="#{labels['paginator.entries_per_page']} "/>
-            <h:selectOneMenu id="s_entriesPP" value="#{cc.attrs.paginator.selection.pageSize}"
-                             onchange="document.getElementById('#{cc.id}:f_entries:cb_refresh').click()">
+            <h:outputText id="ot-entriesPP" value="#{labels['paginator.entries_per_page']} "/>
+            <h:selectOneMenu id="s-entriesPP" value="#{cc.attrs.paginator.selection.pageSize}"
+                             onchange="document.getElementById('#{cc.id}:f-entries:cb-refresh').click()">
                 <f:selectItems value="#{cc.attrs.paginator.pageSizeValues()}"
                                var="item" itemValue="#{item}" itemLabel="#{item.size}"/>
             </h:selectOneMenu>
-            <h:commandButton id="cb_refresh" action="#{cc.attrs.paginator.updateReset}" value="&#x27f3;" type="submit"/>
+            <h:commandButton id="cb-refresh" action="#{cc.attrs.paginator.updateReset}" value="&#x27f3;" type="submit"/>
         </h:form>
     </cc:implementation>
 </h:body>
