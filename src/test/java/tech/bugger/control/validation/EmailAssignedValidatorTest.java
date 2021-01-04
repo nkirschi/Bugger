@@ -16,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UsernameValidatorTest {
+public class EmailAssignedValidatorTest {
 
-    private UsernameValidator usernameValidator;
+    private EmailAssignedValidator emailAssignedValidator;
 
     @Mock
     private FacesContext fctx;
@@ -31,24 +31,19 @@ public class UsernameValidatorTest {
 
     @BeforeEach
     public void setUp() {
-        usernameValidator = new UsernameValidator(profileServiceMock, ResourceBundleMocker.mock(""));
+        emailAssignedValidator = new EmailAssignedValidator(profileServiceMock, ResourceBundleMocker.mock(""));
     }
 
     @Test
-    public void testValidateOnUsernameNotValidFormat() {
-        assertThrows(ValidatorException.class, () -> usernameValidator.validate(fctx, comp, "hyperspe`ed"));
+    public void testValidateOnEmailExists() {
+        doReturn(new User()).when(profileServiceMock).getUserByEmail("test@test.de");
+        assertThrows(ValidatorException.class, () -> emailAssignedValidator.validate(fctx, comp, "test@test.de"));
     }
 
     @Test
-    public void testValidateOnUsernameExists() {
-        doReturn(new User()).when(profileServiceMock).getUserByUsername("hyperspeeed");
-        assertThrows(ValidatorException.class, () -> usernameValidator.validate(fctx, comp, "hyperspeeed"));
-    }
-
-    @Test
-    public void testValidateOnUsernameOkay() {
-        doReturn(null).when(profileServiceMock).getUserByUsername("hyperspeeed");
-        assertDoesNotThrow(() -> usernameValidator.validate(fctx, comp, "hyperspeeed"));
+    public void testValidateOnEmailOkay() {
+        doReturn(null).when(profileServiceMock).getUserByEmail("test@test.de");
+        assertDoesNotThrow(() -> emailAssignedValidator.validate(fctx, comp, "test@test.de"));
     }
 
 }

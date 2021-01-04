@@ -10,17 +10,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.internal.ApplicationSettings;
-import tech.bugger.business.service.ProfileService;
 import tech.bugger.global.transfer.Configuration;
-import tech.bugger.global.transfer.User;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class EmailValidatorTest {
+public class EmailRegexValidatorTest {
 
-    private EmailValidator emailValidator;
+    private EmailRegexValidator emailRegexValidator;
 
     @Mock
     private FacesContext fctx;
@@ -34,31 +32,21 @@ public class EmailValidatorTest {
     @Mock
     private ApplicationSettings settingsMock;
 
-    @Mock
-    private ProfileService profileServiceMock;
-
     @BeforeEach
     public void setUp() {
         doReturn(".+@.+").when(configurationMock).getUserEmailFormat();
         doReturn(configurationMock).when(settingsMock).getConfiguration();
-        emailValidator = new EmailValidator(settingsMock, profileServiceMock, ResourceBundleMocker.mock(""));
+        emailRegexValidator = new EmailRegexValidator(settingsMock, ResourceBundleMocker.mock(""));
     }
 
     @Test
     public void testValidateOnEmailNotValidFormat() {
-        assertThrows(ValidatorException.class, () -> emailValidator.validate(fctx, comp, "testtest.de"));
-    }
-
-    @Test
-    public void testValidateOnEmailExists() {
-        doReturn(new User()).when(profileServiceMock).getUserByEmail("test@test.de");
-        assertThrows(ValidatorException.class, () -> emailValidator.validate(fctx, comp, "test@test.de"));
+        assertThrows(ValidatorException.class, () -> emailRegexValidator.validate(fctx, comp, "testtest.de"));
     }
 
     @Test
     public void testValidateOnEmailOkay() {
-        doReturn(null).when(profileServiceMock).getUserByEmail("test@test.de");
-        assertDoesNotThrow(() -> emailValidator.validate(fctx, comp, "test@test.de"));
+        assertDoesNotThrow(() -> emailRegexValidator.validate(fctx, comp, "test@test.de"));
     }
 
 }

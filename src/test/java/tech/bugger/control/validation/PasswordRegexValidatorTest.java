@@ -13,9 +13,9 @@ import tech.bugger.ResourceBundleMocker;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class PasswordValidatorTest {
+public class PasswordRegexValidatorTest {
 
-    private PasswordValidator passwordValidator;
+    private PasswordRegexValidator passwordRegexValidator;
 
     @Mock
     private FacesContext fctx;
@@ -25,27 +25,27 @@ public class PasswordValidatorTest {
 
     @BeforeEach
     public void setUp() {
-        passwordValidator = new PasswordValidator(ResourceBundleMocker.mock(""));
+        passwordRegexValidator = new PasswordRegexValidator(ResourceBundleMocker.mock(""));
     }
 
     @Test
     public void testValidateOnTooShortPassword() {
-        assertThrows(ValidatorException.class, () -> passwordValidator.validate(fctx, comp, "t3st!"));
+        assertThrows(ValidatorException.class, () -> passwordRegexValidator.validate(fctx, comp, "t3st!"));
     }
 
     @Test
     public void testValidateOnTooLongPassword() {
-        assertThrows(ValidatorException.class, () -> passwordValidator.validate(fctx, comp, "Hello1am4verystr0ngpassword!hello1am4verystr0ngpassword!hello1am4verystr0ngpassword!hello1am4verystr0ngpassword!hello1am4verystr0ngpassworD!"));
+        assertThrows(ValidatorException.class, () -> passwordRegexValidator.validate(fctx, comp, "Hello1am4verystr0ngpassword!hello1am4verystr0ngpassword!hello1am4verystr0ngpassword!hello1am4verystr0ngpassword!hello1am4verystr0ngpassworD!"));
     }
 
     @Test
     public void testValidateOnTooWeakPassword() {
-        assertThrows(ValidatorException.class, () -> passwordValidator.validate(fctx, comp, "hello1am4wEakpassword"));
+        assertThrows(ValidatorException.class, () -> passwordRegexValidator.validate(fctx, comp, "hello1am4wEakpassword"));
     }
 
     @Test
     public void testValidateOnGoodPassword() {
-        assertDoesNotThrow(() -> passwordValidator.validate(fctx, comp, "Hello1am4verystr0ngpassword!"));
+        assertDoesNotThrow(() -> passwordRegexValidator.validate(fctx, comp, "Hello1am4verystr0ngpassword!"));
     }
 
 }
