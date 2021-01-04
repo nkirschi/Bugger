@@ -38,16 +38,24 @@ public class UsernameAssignedValidatorTest {
     }
 
     @Test
-    public void testValidateWithOnlyChangeAndChange() {
-        doReturn(Map.of("onlyOnChange", true)).when(comp).getAttributes();
+    public void testValidateWithOnlyOnChangeAndChangeWhenUsernameTaken() {
+        doReturn(Map.of("only-on-change", true)).when(comp).getAttributes();
         doReturn("someusername").when(comp).getValue();
         doReturn(new User()).when(profileServiceMock).getUserByUsername("hyperspeeed");
         assertThrows(ValidatorException.class, () -> usernameAssignedValidator.validate(fctx, comp, "hyperspeeed"));
     }
 
     @Test
-    public void testValidateWithOnlyChangeAndNoChange() {
-        doReturn(Map.of("onlyOnChange", true)).when(comp).getAttributes();
+    public void testValidateWithOnlyOnChangeAndChangeWhenUsernameNotTaken() {
+        doReturn(Map.of("only-on-change", true)).when(comp).getAttributes();
+        doReturn("someusername").when(comp).getValue();
+        doReturn(null).when(profileServiceMock).getUserByUsername("hyperspeeed");
+        assertDoesNotThrow(() -> usernameAssignedValidator.validate(fctx, comp, "hyperspeeed"));
+    }
+
+    @Test
+    public void testValidateWithOnlyOnChangeAndNoChange() {
+        doReturn(Map.of("only-on-change", true)).when(comp).getAttributes();
         doReturn("hyperspeeed").when(comp).getValue();
         assertDoesNotThrow(() -> usernameAssignedValidator.validate(fctx, comp, "hyperspeeed"));
     }
