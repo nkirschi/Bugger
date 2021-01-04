@@ -28,7 +28,7 @@ public class TopicDBGateway implements TopicGateway {
     /**
      * Database connection used by this gateway.
      */
-    private Connection conn;
+    private final Connection conn;
 
     /**
      * Constructs a new topic gateway with the given database connection.
