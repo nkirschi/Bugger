@@ -2,7 +2,6 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.global.transfer.Language;
-import tech.bugger.global.util.Log;
 
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
@@ -18,11 +17,6 @@ import java.io.Serializable;
 public class FooterBacker implements Serializable {
     @Serial
     private static final long serialVersionUID = 4849101262721339096L;
-
-    /**
-     * The {@link Log} instance associated with this class for logging purposes.
-     */
-    private static final Log log = Log.forClass(FooterBacker.class);
 
     /**
      * The current Language.
