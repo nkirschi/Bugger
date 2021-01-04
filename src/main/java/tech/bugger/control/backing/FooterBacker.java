@@ -2,7 +2,6 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.global.transfer.Language;
-import tech.bugger.global.util.Log;
 
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
@@ -16,23 +15,20 @@ import java.io.Serializable;
 @SessionScoped
 @Named
 public class FooterBacker implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 4849101262721339096L;
 
-    private static final Log log = Log.forClass(FooterBacker.class);
+    /**
+     * The current Language.
+     */
     private Language language;
 
+    /**
+     * The current UserSession.
+     */
     @Inject
     private UserSession session;
-
-    /**
-     * Displays help messages for the current context (user and page).
-     *
-     * @param helpKey Identifies current page.
-     */
-    public void help(String helpKey) {
-
-    }
 
     /**
      * Changes language. The change is effective for the whole session.
@@ -51,7 +47,7 @@ public class FooterBacker implements Serializable {
     /**
      * @param language The language to set.
      */
-    public void setLanguage(Language language) {
+    public void setLanguage(final Language language) {
         this.language = language;
     }
 
