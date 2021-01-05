@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -108,6 +109,7 @@ public class ProfileBackerTest {
     public void testInitKeyNotPresent() throws IOException {
         // Since ext.redirect is mocked, it just tries and then executes the rest of the method.
         when(map.get("id")).thenReturn("12345");
+        when(profileService.getUser(anyInt())).thenReturn(user);
         profileBacker.init();
         verify(ext, times(1)).redirect(anyString());
     }
