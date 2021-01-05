@@ -7,6 +7,7 @@ import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Constants;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
@@ -65,9 +66,9 @@ public class ProfileBacker implements Serializable {
     }
 
     /**
-     * The id of the profile owner.
+     * The username of the profile owner.
      */
-    private int userID;
+    private String username;
 
     /**
      * The profile owner's user information.
@@ -133,7 +134,8 @@ public class ProfileBacker implements Serializable {
     @PostConstruct
     void init() {
         // The initialization of the subscriptions will be implemented in the subscriptions feature.
-        if (!ext.getRequestParameterMap().containsKey("id")) {
+        if ((!ext.getRequestParameterMap().containsKey("u")) || (ext.getRequestParameterMap().get("u").length()
+                > Constants.USERNAME_MAX)) {
             try {
                 ext.redirect("home.xhtml");
             } catch (IOException e) {
@@ -141,15 +143,17 @@ public class ProfileBacker implements Serializable {
             }
         }
 
-        try {
-            userID = Integer.parseInt(ext.getRequestParameterMap().get("id"));
-        } catch (NumberFormatException e) {
-            log.error("The id " + ext.getRequestParameterMap().get("id") + " could not be parsed to a number.");
-            throw new InternalError("The id " + ext.getRequestParameterMap().get("id")
-                    + " could not be parsed to a number.", e);
+        username = ext.getRequestParameterMap().get("u");
+        user = profileService.getUserByUsername(username);
+
+        if (user == null) {
+            try {
+                ext.redirect("error.xhtml");
+            } catch (IOException e) {
+                throw new InternalError("Error while redirecting.", e);
+            }
         }
 
-        user = profileService.getUser(userID);
         sanitizedBiography = MarkdownHandler.toHtml(user.getBiography());
         if ((session.getUser() != null) && (session.getUser().equals(user))) {
             session.setUser(new User(user));
@@ -165,27 +169,11 @@ public class ProfileBacker implements Serializable {
     }
 
     /**
-     * Closes the administrator promotion/demotion dialog.
-     */
-    public void closePromoteDemoteAdminDialog() {
-        displayDialog = DialogType.NONE;
-    }
-
-    /**
      * Opens the dialog for deleting all topic subscriptions of a particular type.
      *
      * @return {@code null} to reload the page.
      */
     public String openDeleteAllTopicSubscriptionsDialog() {
-        return null;
-    }
-
-    /**
-     * Closes the dialog for deleting all topic subscriptions of a particular type.
-     *
-     * @return {@code null} to reload the page.
-     */
-    public String closeDeleteAllTopicSubscriptionsDialog() {
         return null;
     }
 
@@ -199,15 +187,6 @@ public class ProfileBacker implements Serializable {
     }
 
     /**
-     * Closes the dialog for deleting all report subscriptions of a particular type.
-     *
-     * @return {@code null} to reload the page.
-     */
-    public String closeDeleteAllReportSubscriptionsDialog() {
-        return null;
-    }
-
-    /**
      * Opens the dialog for deleting all user subscriptions of a particular type.
      *
      * @return {@code null} to reload the page.
@@ -217,12 +196,10 @@ public class ProfileBacker implements Serializable {
     }
 
     /**
-     * Closes the dialog for deleting all user subscriptions of a particular type.
-     *
-     * @return {@code null} to reload the page.
+     * Closes any open dialog.
      */
-    public String closeDeleteAllUserSubscriptionsDialog() {
-        return null;
+    public void closeDialog() {
+        displayDialog = DialogType.NONE;
     }
 
     /**
@@ -353,17 +330,17 @@ public class ProfileBacker implements Serializable {
     }
 
     /**
-     * @return The userID.
+     * @return The username.
      */
-    public int getUserID() {
-        return userID;
+    public String getUsername() {
+        return username;
     }
 
     /**
-     * @param userID The userID to set.
+     * @param username The username to set.
      */
-    public void setUserID(final int userID) {
-        this.userID = userID;
+    public void setUsername(final String username) {
+        this.username = username;
     }
 
     /**

@@ -11,7 +11,7 @@
                     <h:graphicImage id="g-logo-header" library="images" name="bugger.png" width="80" height="80"/>
                 </h:link>
                 <h:outputText value="#{applicationSettings.organization.name}" id="ot-comp-name" styleClass="organizationName"/>
-                <h:form styleClass="headerMenu">
+                <h:form styleClass="headerMenu" rendered="#{userSession.user != null}">
                     <h:commandLink value="Avatar-Menu" action="#{headerBacker.toggleMenu}" immediate="true" />
                 </h:form>
             </h:panelGroup>
@@ -37,15 +37,15 @@
             </h:panelGroup>
             <h:panelGroup styleClass="row" layout="block">
                 <h:link value="Profile" href="../authorized/profile.xhtml" id="l-profile">
-                    <f:param name="id" value="#{userSession.user.id}"/>
+                    <f:param name="u" value="#{userSession.user.username}"/>
                 </h:link>
             </h:panelGroup>
         </h:panelGroup>
         <h:panelGroup id="p-authentication" rendered="#{userSession.user == null}">
             <!-- TODO add login outcome -->
-            <h:button id="b-login" value="#{labels.login}" styleClass="button" outcome=""/>
-            <!-- TODO add register outcome -->
-            <h:button id="b-register" value="#{labels.register}" styleClass="button" outcome=""/>
+            <h:button id="b-login" value="#{labels.login}" styleClass="button" outcome="#"/>
+            <h:button id="b-register" value="#{labels.register}" styleClass="button"
+                      outcome="../public/register.xhtml"/>
         </h:panelGroup>
     </ui:composition>
 </html>

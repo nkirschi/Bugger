@@ -274,10 +274,9 @@ public class ProfileService {
         try (Transaction transaction = transactionManager.begin()) {
             numPosts = transaction.newUserGateway().getNumberOfPosts(user);
             transaction.commit();
-            if (numPosts == 0) {
-                log.error("The number of posts could not be calculated for the user with id " + user.getId());
-                feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
-            }
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("The number of posts could not be calculated for the user with id " + user.getId());
+            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while loading the number of posts for the user with id " + user.getId(), e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));

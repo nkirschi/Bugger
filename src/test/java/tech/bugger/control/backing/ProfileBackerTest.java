@@ -23,12 +23,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(LogExtension.class)
@@ -50,7 +49,9 @@ public class ProfileBackerTest {
     private RequestParameterMap map;
 
     private User user;
-    private int theAnswer = 42;
+    private static final int THE_ANSWER = 42;
+    private static final String PARAMETER = "u";
+    private static final String LONG_USERNAME = "This username is much too long";
 
     @BeforeEach
     public void setup()
@@ -64,10 +65,10 @@ public class ProfileBackerTest {
 
     @Test
     public void testInit() {
-        when(map.containsKey("id")).thenReturn(true);
-        when(map.get("id")).thenReturn("12345");
-        profileBacker.setUserID(user.getId());
-        when(profileService.getUser(user.getId())).thenReturn(user);
+        when(map.containsKey(PARAMETER)).thenReturn(true);
+        when(map.get(PARAMETER)).thenReturn(user.getUsername());
+        profileBacker.setUsername(user.getUsername());
+        when(profileService.getUserByUsername(user.getUsername())).thenReturn(user);
         profileBacker.init();
         assertAll(
                 () -> assertEquals(user, profileBacker.getUser()),
@@ -77,10 +78,10 @@ public class ProfileBackerTest {
 
     @Test
     public void testInitEqualUser() {
-        when(map.containsKey("id")).thenReturn(true);
-        when(map.get("id")).thenReturn("12345");
-        profileBacker.setUserID(user.getId());
-        when(profileService.getUser(user.getId())).thenReturn(user);
+        when(map.containsKey(PARAMETER)).thenReturn(true);
+        when(map.get(PARAMETER)).thenReturn(user.getUsername());
+        profileBacker.setUsername(user.getUsername());
+        when(profileService.getUserByUsername(user.getUsername())).thenReturn(user);
         when(session.getUser()).thenReturn(user);
         profileBacker.init();
         assertAll(
@@ -91,12 +92,12 @@ public class ProfileBackerTest {
 
     @Test
     public void testInitNotEqualUser() {
-        when(map.containsKey("id")).thenReturn(true);
-        when(map.get("id")).thenReturn("12345");
-        profileBacker.setUserID(user.getId());
+        when(map.containsKey(PARAMETER)).thenReturn(true);
+        when(map.get(PARAMETER)).thenReturn(user.getUsername());
+        profileBacker.setUsername(user.getUsername());
         User sessionUser = new User(user);
         sessionUser.setId(23456);
-        when(profileService.getUser(user.getId())).thenReturn(user);
+        when(profileService.getUserByUsername(user.getUsername())).thenReturn(user);
         when(session.getUser()).thenReturn(sessionUser);
         profileBacker.init();
         assertAll(
@@ -108,8 +109,17 @@ public class ProfileBackerTest {
     @Test
     public void testInitKeyNotPresent() throws IOException {
         // Since ext.redirect is mocked, it just tries and then executes the rest of the method.
-        when(map.get("id")).thenReturn("12345");
-        when(profileService.getUser(anyInt())).thenReturn(user);
+        when(map.get(PARAMETER)).thenReturn(user.getUsername());
+        when(profileService.getUserByUsername(anyString())).thenReturn(user);
+        profileBacker.init();
+        verify(ext, times(1)).redirect(anyString());
+    }
+
+    @Test
+    public void testInitUsernameTooLong() throws IOException {
+        when(map.containsKey(PARAMETER)).thenReturn(true);
+        when(map.get(PARAMETER)).thenReturn(LONG_USERNAME);
+        when(profileService.getUserByUsername(anyString())).thenReturn(user);
         profileBacker.init();
         verify(ext, times(1)).redirect(anyString());
     }
@@ -123,9 +133,12 @@ public class ProfileBackerTest {
     }
 
     @Test
-    public void testInitNumberFormatException() {
-        when(map.containsKey("id")).thenReturn(true);
-        when(map.get("id")).thenReturn("abc");
+    public void testInitUserNull() throws IOException {
+        when(map.containsKey(PARAMETER)).thenReturn(true);
+        when(map.get(PARAMETER)).thenReturn(user.getUsername());
+        profileBacker.setUsername(user.getUsername());
+        when(profileService.getUserByUsername(user.getUsername())).thenReturn(null);
+        doThrow(IOException.class).when(ext).redirect("error.xhtml");
         assertThrows(InternalError.class,
                 () -> profileBacker.init()
         );
@@ -138,26 +151,26 @@ public class ProfileBackerTest {
     }
 
     @Test
-    public void testClosePromoteDemoteAdminDialog() throws NoSuchFieldException {
-        profileBacker.closePromoteDemoteAdminDialog();
+    public void testClosePromoteDemoteAdminDialog() {
+        profileBacker.closeDialog();
         assertEquals(ProfileBacker.DialogType.NONE, profileBacker.getDisplayDialog());
     }
 
     @Test
     public void testGetVotingWeight() {
         profileBacker.setUser(user);
-        when(profileService.getVotingWeightForUser(user)).thenReturn(theAnswer);
+        when(profileService.getVotingWeightForUser(user)).thenReturn(THE_ANSWER);
         int votingWeight = profileBacker.getVotingWeight();
-        assertEquals(theAnswer, votingWeight);
+        assertEquals(THE_ANSWER, votingWeight);
         verify(profileService, times(1)).getVotingWeightForUser(user);
     }
 
     @Test
     public void testGetNumberOfPosts() {
         profileBacker.setUser(user);
-        when(profileService.getNumberOfPostsForUser(user)).thenReturn(theAnswer);
+        when(profileService.getNumberOfPostsForUser(user)).thenReturn(THE_ANSWER);
         int posts = profileBacker.getNumberOfPosts();
-        assertEquals(theAnswer, posts);
+        assertEquals(THE_ANSWER, posts);
         verify(profileService, times(1)).getNumberOfPostsForUser(user);
     }
 

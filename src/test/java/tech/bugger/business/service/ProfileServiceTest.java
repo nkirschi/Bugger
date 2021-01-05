@@ -62,14 +62,14 @@ public class ProfileServiceTest {
     private ApplicationSettings applicationSettings;
 
     @Mock
-    ResourceBundle messages;
+    private ResourceBundle messages;
 
     @Mock
     private Configuration config;
 
-    private final int theAnswer = 42;
-    private final int manyPosts = 1500;
-    private final String votingWeightDef = "1000,0,200,50,100,25,400,600,800,10";
+    private static final int THE_ANSWER = 42;
+    private static final int MANY_POSTS = 1500;
+    private static final String VOTING_WEIGHT_DEF = "1000,0,200,50,100,25,400,600,800,10";
 
     @BeforeEach
     public void setUp() {
@@ -204,19 +204,19 @@ public class ProfileServiceTest {
     }
 
     @Test
-    public void testGetVotingWeight() {
-        when(userGateway.getNumberOfPosts(testUser)).thenReturn(theAnswer);
+    public void testGetVotingWeight() throws NotFoundException {
+        when(userGateway.getNumberOfPosts(testUser)).thenReturn(THE_ANSWER);
         when(applicationSettings.getConfiguration()).thenReturn(config);
-        when(config.getVotingWeightDefinition()).thenReturn(votingWeightDef);
+        when(config.getVotingWeightDefinition()).thenReturn(VOTING_WEIGHT_DEF);
         assertEquals(3, service.getVotingWeightForUser(testUser));
         verify(userGateway, times(1)).getNumberOfPosts(testUser);
     }
 
     @Test
-    public void testGetVotingWeightMaxWeight() {
-        when(userGateway.getNumberOfPosts(testUser)).thenReturn(manyPosts);
+    public void testGetVotingWeightMaxWeight() throws NotFoundException {
+        when(userGateway.getNumberOfPosts(testUser)).thenReturn(MANY_POSTS);
         when(applicationSettings.getConfiguration()).thenReturn(config);
-        when(config.getVotingWeightDefinition()).thenReturn(votingWeightDef);
+        when(config.getVotingWeightDefinition()).thenReturn(VOTING_WEIGHT_DEF);
         assertEquals(10, service.getVotingWeightForUser(testUser));
         verify(userGateway, times(1)).getNumberOfPosts(testUser);
     }
@@ -228,8 +228,8 @@ public class ProfileServiceTest {
     }
 
     @Test
-    public void testGetVotingWeightEmpty() {
-        when(userGateway.getNumberOfPosts(testUser)).thenReturn(theAnswer);
+    public void testGetVotingWeightEmpty() throws NotFoundException {
+        when(userGateway.getNumberOfPosts(testUser)).thenReturn(THE_ANSWER);
         when(applicationSettings.getConfiguration()).thenReturn(config);
         when(config.getVotingWeightDefinition()).thenReturn(",");
         service.getVotingWeightForUser(testUser);
@@ -238,8 +238,8 @@ public class ProfileServiceTest {
     }
 
     @Test
-    public void testGetVotingWeightNumberFormatException() {
-        when(userGateway.getNumberOfPosts(testUser)).thenReturn(theAnswer);
+    public void testGetVotingWeightNumberFormatException() throws NotFoundException {
+        when(userGateway.getNumberOfPosts(testUser)).thenReturn(THE_ANSWER);
         when(applicationSettings.getConfiguration()).thenReturn(config);
         when(config.getVotingWeightDefinition()).thenReturn("a, b");
         service.getVotingWeightForUser(testUser);
@@ -248,16 +248,16 @@ public class ProfileServiceTest {
     }
 
     @Test
-    public void testGetVotingWeightNoPosts() {
-        when(userGateway.getNumberOfPosts(testUser)).thenReturn(0);
+    public void testGetVotingWeightNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(userGateway).getNumberOfPosts(testUser);
         assertEquals(0, service.getVotingWeightForUser(testUser));
         verify(userGateway, times(1)).getNumberOfPosts(testUser);
         verify(feedbackEvent, times(1)).fire(any());
     }
 
     @Test
-    public void testGetVotingWeightContainsNoZero() {
-        when(userGateway.getNumberOfPosts(testUser)).thenReturn(theAnswer);
+    public void testGetVotingWeightContainsNoZero() throws NotFoundException {
+        when(userGateway.getNumberOfPosts(testUser)).thenReturn(THE_ANSWER);
         when(applicationSettings.getConfiguration()).thenReturn(config);
         when(config.getVotingWeightDefinition()).thenReturn("100,200");
         service.getVotingWeightForUser(testUser);
@@ -266,15 +266,15 @@ public class ProfileServiceTest {
     }
 
     @Test
-    public void testGetNumberOfPosts() {
-        when(userGateway.getNumberOfPosts(testUser)).thenReturn(theAnswer);
+    public void testGetNumberOfPosts() throws NotFoundException {
+        when(userGateway.getNumberOfPosts(testUser)).thenReturn(THE_ANSWER);
         assertEquals(42, service.getNumberOfPostsForUser(testUser));
         verify(userGateway, times(1)).getNumberOfPosts(testUser);
     }
 
     @Test
-    public void testGetNumberOfPostsNoPosts() {
-        when(userGateway.getNumberOfPosts(testUser)).thenReturn(0);
+    public void testGetNumberOfPostsNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(userGateway).getNumberOfPosts(testUser);
         assertEquals(0, service.getNumberOfPostsForUser(testUser));
         verify(userGateway, times(1)).getNumberOfPosts(testUser);
         verify(feedbackEvent, times(1)).fire(any());
@@ -317,7 +317,7 @@ public class ProfileServiceTest {
     @Test
     public void testToggleAdminDemoteAdmin() throws NotFoundException {
         testUser.setAdministrator(true);
-        when(userGateway.getNumberOfAdmins()).thenReturn(theAnswer);
+        when(userGateway.getNumberOfAdmins()).thenReturn(THE_ANSWER);
         service.toggleAdmin(testUser);
         assertFalse(testUser.isAdministrator());
         verify(userGateway, times(1)).getNumberOfAdmins();
@@ -328,7 +328,7 @@ public class ProfileServiceTest {
     @Test
     public void testToggleAdminDemoteAdminNotFound() throws NotFoundException {
         testUser.setAdministrator(true);
-        when(userGateway.getNumberOfAdmins()).thenReturn(theAnswer);
+        when(userGateway.getNumberOfAdmins()).thenReturn(THE_ANSWER);
         doThrow(NotFoundException.class).when(userGateway).updateUser(testUser);
         service.toggleAdmin(testUser);
         assertTrue(testUser.isAdministrator());
@@ -340,7 +340,7 @@ public class ProfileServiceTest {
     @Test
     public void testToggleAdminDemoteAdminTransactionException() throws TransactionException, NotFoundException {
         testUser.setAdministrator(true);
-        when(userGateway.getNumberOfAdmins()).thenReturn(theAnswer);
+        when(userGateway.getNumberOfAdmins()).thenReturn(THE_ANSWER);
         doNothing().doThrow(TransactionException.class).when(tx).commit();
         service.toggleAdmin(testUser);
         assertTrue(testUser.isAdministrator());

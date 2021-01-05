@@ -323,7 +323,7 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfPosts(final User user) {
+    public int getNumberOfPosts(final User user) throws NotFoundException {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT num_posts FROM user_num_posts WHERE "
                 + "author = ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
@@ -332,7 +332,8 @@ public class UserDBGateway implements UserGateway {
             if (rs.next()) {
                 return rs.getInt("num_posts");
             } else {
-                return 0;
+                log.error("No posts could be found for the user with id " + user.getId());
+                throw new NotFoundException("No posts could be found for the user with id " + user.getId());
             }
         } catch (SQLException e) {
             log.error("Error while searching for number of posts of the user with id " + user.getId(), e);

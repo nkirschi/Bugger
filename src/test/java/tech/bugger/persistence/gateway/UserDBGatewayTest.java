@@ -216,7 +216,7 @@ public class UserDBGatewayTest {
     public void testGetNumberOfAdmins() throws NotFoundException {
         gateway.createUser(user);
         gateway.createUser(admin);
-        //One inserted admins plus default admin.
+        //One inserted admin plus default admin.
         assertEquals(2, gateway.getNumberOfAdmins());
     }
 
@@ -224,6 +224,18 @@ public class UserDBGatewayTest {
     public void testGetNumberOfAdminsNoAdmins() throws SQLException {
         deleteAllUsers();
         assertEquals(0, gateway.getNumberOfAdmins());
+    }
+
+    @Test
+    public void testGetNumberOfAdminsEmptyResultSet() throws SQLException {
+        ResultSet resultSetMock = mock(ResultSet.class);
+        PreparedStatement stmtMock = mock(PreparedStatement.class);
+        Connection connectionSpy = spy(connection);
+        doReturn(false).when(resultSetMock).next();
+        doReturn(resultSetMock).when(stmtMock).executeQuery();
+        doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
+        assertEquals(0, new UserDBGateway(connectionSpy).getNumberOfAdmins());
+        reset(connectionSpy, stmtMock);
     }
 
     @Test
@@ -259,14 +271,16 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testGetNumberOfPosts() {
+    public void testGetNumberOfPosts() throws NotFoundException {
         gateway.createUser(user);
         assertEquals(0, gateway.getNumberOfPosts(user));
     }
 
     @Test
     public void testGetNumberOfPostNoEntries() {
-        assertEquals(0, gateway.getNumberOfPosts(user));
+        assertThrows(NotFoundException.class,
+                () -> gateway.getNumberOfPosts(user)
+        );
     }
 
     @Test

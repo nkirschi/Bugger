@@ -46,7 +46,7 @@
                         <h:commandButton id="cb-change-status" value="#{labels.change_status}"
                                          action="#{profileBacker.toggleAdmin}" styleClass="button"/>
                         <h:commandButton id="cb-abort-change" value="#{labels.abort}" styleClass="button"
-                                         action="#{profileBacker.closePromoteDemoteAdminDialog}" immediate="true"/>
+                                         action="#{profileBacker.closeDialog}" immediate="true"/>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup class="col-sm-2" layout="block"/>
@@ -69,7 +69,7 @@
                         <h:commandButton id="cb-really-unsub-topics" value="#{labels.really_unsub}"
                                          action="#{profileBacker.deleteAllTopicSubscriptions}" styleClass="button"/>
                         <h:commandButton id="cb-abort-unsub-topics" value="#{labels.abort}" styleClass="button"
-                                         action="#{profileBacker.closeDeleteAllTopicSubscriptionsDialog}"/>
+                                         action="#{profileBacker.closeDialog}"/>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup class="col-sm-2" layout="block"/>
@@ -92,7 +92,7 @@
                         <h:commandButton id="cb-really-unsub-reports" value="#{labels.really_unsub}"
                                          action="#{profileBacker.deleteAllReportSubscriptions}" styleClass="button"/>
                         <h:commandButton id="cb-abort-unsub-reports" value="#{labels.abort}" styleClass="button"
-                                         action="#{profileBacker.closeDeleteAllReportSubscriptionsDialog}"/>
+                                         action="#{profileBacker.closeDialog}"/>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup class="col-sm-2" layout="block"/>
@@ -114,7 +114,7 @@
                         <h:commandButton id="cb-really-unsub-users" value="#{labels.really_unsub}"
                                          action="#{profileBacker.deleteAllUserSubscriptions}" styleClass="button"/>
                         <h:commandButton id="cb-abort-unsub-users" value="#{labels.abort}" styleClass="button"
-                                         action="#{profileBacker.closeDeleteAllUserSubscriptionsDialog}"/>
+                                         action="#{profileBacker.closeDialog}"/>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup class="col-sm-2" layout="block"/>
