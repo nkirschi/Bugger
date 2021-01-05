@@ -10,6 +10,7 @@ import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.util.Constants;
 
 /**
  * Validator for username inputs.
@@ -20,7 +21,8 @@ public class UsernameRegexValidator implements Validator<String> {
     /**
      * The RegEx to use when validating a username.
      */
-    private static final Pattern REGEX = Pattern.compile("^([a-zA-Z0-9_äöüÄÖÜ]){4,16}$");
+    private static final Pattern REGEX = Pattern.compile("^([a-zA-Z0-9_äöüÄÖÜ])"
+            + '{' + Constants.USERNAME_MIN + ',' + Constants.USERNAME_MAX + "}$");
 
     /**
      * Resource bundle for feedback messages.

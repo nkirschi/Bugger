@@ -3,17 +3,23 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets"
-      lang="#{userSession.locale.language}" xml:lang="#{userSession.locale.language}">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
 
 <ui:composition template="/WEB-INF/template/main.xhtml">
+    <f:metadata>
+        <f:importConstants type="tech.bugger.global.util.Constants" var="Constants"/>
+    </f:metadata>
+
     <ui:param name="title" value="#{labels['register.title']}"/>
 
     <ui:define name="content">
         <h:form id="f-register">
             <h:panelGrid columns="2">
                 <h:outputLabel id="o-username" for="it-username" value="#{labels['register.username']}:"/>
-                <h:inputText id="it-username" value="#{registerBacker.user.username}" required="true">
+                <h:inputText id="it-username" value="#{registerBacker.user.username}" required="true"
+                             a:maxlength="#{Constants.USERNAME_MAX}">
                     <f:validator validatorId="usernameRegexValidator"/>
                     <f:validator validatorId="usernameAssignedValidator"/>
                 </h:inputText>
@@ -21,7 +27,8 @@
                 <h:message for="it-username"/>
 
                 <h:outputLabel id="o-email" for="it-email" value="#{labels['register.email']}:"/>
-                <h:inputText id="it-email" value="#{registerBacker.user.emailAddress}" required="true">
+                <h:inputText id="it-email" value="#{registerBacker.user.emailAddress}" required="true"
+                             a:maxlength="#{Constants.SMALL_FIELD}">
                     <f:validator validatorId="emailRegexValidator"/>
                     <f:validator validatorId="emailAssignedValidator"/>
                 </h:inputText>
@@ -29,12 +36,14 @@
                 <h:message for="it-email"/>
 
                 <h:outputLabel id="o-first-name" for="it-first-name" value="#{labels['register.first_name']}:"/>
-                <h:inputText id="it-first-name" value="#{registerBacker.user.firstName}" required="true"/>
+                <h:inputText id="it-first-name" value="#{registerBacker.user.firstName}" required="true"
+                             a:maxlength="#{Constants.SMALL_FIELD}"/>
                 <h:panelGroup/>
                 <h:message for="it-first-name"/>
 
                 <h:outputLabel id="o-last-name" for="it-last-name" value="#{labels['register.last_name']}:"/>
-                <h:inputText id="it-last-name" value="#{registerBacker.user.lastName}" required="true"/>
+                <h:inputText id="it-last-name" value="#{registerBacker.user.lastName}" required="true"
+                             a:maxlength="#{Constants.SMALL_FIELD}"/>
                 <h:panelGroup/>
                 <h:message for="it-last-name"/>
             </h:panelGrid>
