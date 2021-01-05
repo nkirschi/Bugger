@@ -4,12 +4,14 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -195,9 +197,34 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public ZonedDateTime determineLastActivity(final Topic topic) {
-        // TODO Auto-generated method stub
-        return null;
+    public ZonedDateTime determineLastActivity(final Topic topic) throws NotFoundException {
+        if (topic == null) {
+            log.error("Error when trying to determine last activity in topic null.");
+            throw new IllegalArgumentException("Topic must not be null!");
+        } else if (topic.getId() == null) {
+            log.error("Error when trying to determine last activity in topic with ID null.");
+            throw new IllegalArgumentException("Topic ID must not be null!");
+        }
+
+        ZonedDateTime lastActivity = null;
+        String sql = "SELECT * FROM topic_last_activity WHERE topic =" + topic.getId();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getTimestamp("last_activity") != null) {
+                    lastActivity = rs.getTimestamp("last_activity").toInstant().atZone(ZoneId.systemDefault());
+                }
+            } else {
+                log.error("Topic " + topic + " could not be found when trying to determine last activity.");
+                throw new NotFoundException("Topic " + topic
+                        + " could not be found when trying to determine last activity.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while determining last activity in topic " + topic, e);
+            throw new StoreException("Error while determining last activity in topic " + topic, e);
+        }
+
+        return lastActivity;
     }
 
     /**

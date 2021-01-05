@@ -123,7 +123,7 @@ class TopicDBGatewayTest {
     @Test
     public void testGetSelectedTopicsWhenThereAreNone() {
         validSelection();
-        assertThrows(NotFoundException.class, () -> gateway.selectTopics(selection));
+        assertTrue(gateway.selectTopics(selection).isEmpty());
     }
 
     @Test
@@ -204,5 +204,37 @@ class TopicDBGatewayTest {
             topics.add(makeTestTopic(i));
         }
         assertEquals(topics, gateway.selectTopics(selection));
+    }
+
+    @Test
+    public void testDetermineLastActivityWhenTopicIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> gateway.determineLastActivity(null));
+    }
+
+    @Test
+    public void testDetermineLastActivityWhenTopicIDIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> gateway.determineLastActivity(new Topic()));
+    }
+
+    @Test
+    public void testDetermineLastActivityWhenNoActivity() throws Exception {
+        numberOfTopics = 1;
+        addTopics();
+        Topic topic = makeTestTopic(1);
+        assertNull(gateway.determineLastActivity(topic));
+    }
+
+    @Test
+    public void testDetermineLastActivityWhenThereWasSomeActivity() throws Exception {
+        numberOfTopics = 1;
+        addTopics();
+        Topic topic = makeTestTopic(1);
+
+    }
+
+    @Test
+    public void testDetermineLastActivityWhenTopicNotFound() {
+        Topic topic = makeTestTopic(42);
+        assertThrows(NotFoundException.class, () -> gateway.determineLastActivity(topic));
     }
 }
