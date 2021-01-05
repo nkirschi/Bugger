@@ -2,6 +2,7 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
+import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
@@ -10,7 +11,6 @@ import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -80,6 +80,11 @@ public class ProfileBacker implements Serializable {
     private String password;
 
     /**
+     * The profile owner's sanitized biography.
+     */
+    private String sanitizedBiography;
+
+    /**
      * The profile owner's topic subscriptions.
      */
     private Paginator<Topic> topicSubscriptions;
@@ -145,6 +150,7 @@ public class ProfileBacker implements Serializable {
         }
 
         user = profileService.getUser(userID);
+        sanitizedBiography = MarkdownHandler.toHtml(user.getBiography());
         if ((session.getUser() != null) && (session.getUser().equals(user))) {
             session.setUser(new User(user));
         }
@@ -372,6 +378,13 @@ public class ProfileBacker implements Serializable {
      */
     public void setUser(final User user) {
         this.user = user;
+    }
+
+    /**
+     * @return The sanitized biography.
+     */
+    public String getSanitizedBiography() {
+        return sanitizedBiography;
     }
 
     /**
