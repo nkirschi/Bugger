@@ -111,6 +111,12 @@ public class ProfileBacker implements Serializable {
     private UserSession session;
 
     /**
+     * The current external context.
+     */
+    @Inject
+    private ExternalContext ext;
+
+    /**
      * The profile service providing the business logic.
      */
     @Inject
@@ -122,7 +128,6 @@ public class ProfileBacker implements Serializable {
     @PostConstruct
     void init() {
         // The initialization of the subscriptions will be implemented in the subscriptions feature.
-        ExternalContext ext = FacesContext.getCurrentInstance().getExternalContext();
         if (!ext.getRequestParameterMap().containsKey("id")) {
             try {
                 ext.redirect("home.xhtml");
@@ -130,7 +135,15 @@ public class ProfileBacker implements Serializable {
                 throw new InternalError("Error while redirecting.", e);
             }
         }
-        userID = Integer.parseInt(ext.getRequestParameterMap().get("id"));
+
+        try {
+            userID = Integer.parseInt(ext.getRequestParameterMap().get("id"));
+        } catch (NumberFormatException e) {
+            log.error("The id " + ext.getRequestParameterMap().get("id") + " could not be parsed to a number.");
+            throw new InternalError("The id " + ext.getRequestParameterMap().get("id")
+                    + " could not be parsed to a number.", e);
+        }
+
         user = profileService.getUser(userID);
         if ((session.getUser() != null) && (session.getUser().equals(user))) {
             session.setUser(new User(user));

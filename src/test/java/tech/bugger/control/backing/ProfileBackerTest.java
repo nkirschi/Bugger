@@ -1,31 +1,34 @@
 package tech.bugger.control.backing;
 
 import com.sun.faces.context.RequestParameterMap;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 
 import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(LogExtension.class)
 public class ProfileBackerTest {
@@ -38,11 +41,6 @@ public class ProfileBackerTest {
 
     @Mock
     private UserSession session;
-
-    private MockedStatic<FacesContext> fctxStatic;
-
-    @Mock
-    private FacesContext fctx;
 
     @Mock
     private ExternalContext ext;
@@ -60,15 +58,7 @@ public class ProfileBackerTest {
                 new byte[]{1}, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         MockitoAnnotations.openMocks(this);
-        fctxStatic = mockStatic(FacesContext.class);
-        when(FacesContext.getCurrentInstance()).thenReturn(fctx);
-        when(fctx.getExternalContext()).thenReturn(ext);
         when(ext.getRequestParameterMap()).thenReturn(map);
-    }
-
-    @AfterEach
-    public void tearDown() {
-        fctxStatic.close();
     }
 
     @Test
@@ -116,6 +106,7 @@ public class ProfileBackerTest {
 
     @Test
     public void testInitKeyNotPresent() throws IOException {
+        // Since ext.redirect is mocked, it just tries and then executes the rest of the method.
         when(map.get("id")).thenReturn("12345");
         profileBacker.init();
         verify(ext, times(1)).redirect(anyString());
@@ -124,6 +115,15 @@ public class ProfileBackerTest {
     @Test
     public void testInitIOException() throws IOException {
         doThrow(IOException.class).when(ext).redirect(anyString());
+        assertThrows(InternalError.class,
+                () -> profileBacker.init()
+        );
+    }
+
+    @Test
+    public void testInitNumberFormatException() {
+        when(map.containsKey("id")).thenReturn(true);
+        when(map.get("id")).thenReturn("abc");
         assertThrows(InternalError.class,
                 () -> profileBacker.init()
         );

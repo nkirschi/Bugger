@@ -66,8 +66,10 @@ public class UserDBGateway implements UserGateway {
                 .bytes(user.getAvatar().get())
                 .bytes(user.getAvatarThumbnail())
                 .string(user.getBiography())
-                .string(user.getPreferredLanguage().name())
-                .object(user.getProfileVisibility(), Types.OTHER)
+                .string(user.getPreferredLanguage() != null ? user.getPreferredLanguage().name()
+                        : Language.ENGLISH.name())
+                .object(user.getProfileVisibility() != null ? user.getProfileVisibility() : User.ProfileVisibility.FULL,
+                        Types.OTHER)
                 .object(user.getForcedVotingWeight(), Types.INTEGER)
                 .bool(user.isAdministrator());
     }
@@ -81,7 +83,7 @@ public class UserDBGateway implements UserGateway {
      */
     static User getUserFromResultSet(final ResultSet rs) throws SQLException {
         String langStr = rs.getString("preferred_language").toUpperCase();
-        Language lang = null;
+        Language lang = Language.ENGLISH;
 
         if (!langStr.isBlank()) {
             lang = Language.valueOf(langStr);

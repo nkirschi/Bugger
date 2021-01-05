@@ -473,9 +473,11 @@ public class User implements Serializable {
         if (this == other) {
             return true;
         }
+
         if (!(other instanceof User)) {
             return false;
         }
+
         User user = (User) other;
         return id == user.id;
     }
@@ -507,7 +509,7 @@ public class User implements Serializable {
                 + ", emailAddress='" + emailAddress + '\''
                 + ", firstName='" + firstName + '\''
                 + ", lastName='" + lastName + '\''
-                + ", avatar=" + avatar
+                + ", avatar=" + (avatar == null ? "null" : avatar.toString(Arrays::toString))
                 + ", avatarThumbnail=" + Arrays.toString(avatarThumbnail)
                 + ", biography='" + biography + '\''
                 + ", preferredLanguage=" + preferredLanguage

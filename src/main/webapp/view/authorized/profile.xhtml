@@ -11,7 +11,7 @@
       xmlns:b="http://tech.bugger/tags">
 
 <ui:composition template="../../WEB-INF/template/main.xhtml">
-    <ui:param name="title" value="#{labels.profile}"/>
+    <ui:param name="title" value="#{(labels.profile_page).concat(' ').concat(profileBacker.user.username)}"/>
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>

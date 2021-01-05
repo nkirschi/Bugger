@@ -64,7 +64,7 @@ CREATE TABLE "user" (
     avatar_thumbnail BYTEA,
     biography VARCHAR,
     preferred_language VARCHAR,
-    profile_visibility user_profile_visibility,
+    profile_visibility user_profile_visibility DEFAULT 'FULL',
     registered_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     forced_voting_weight INTEGER,
     is_admin BOOLEAN,

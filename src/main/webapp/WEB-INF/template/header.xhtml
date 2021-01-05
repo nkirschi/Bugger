@@ -2,40 +2,43 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:ui="http://java.sun.com/jsf/facelets">
+      xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core">
     <ui:composition>
         <h:panelGroup styleClass="header">
             <h:panelGroup styleClass="row" layout="block">
-                <h:link href="#{request.contextPath}" id="l_logo-header">
-                    <h:graphicImage id="g_logo-header" library="images" name="bugger.png" width="80" height="80"/>
+                <h:link href="#{request.contextPath}" id="l-logo-header">
+                    <h:graphicImage id="g-logo-header" library="images" name="bugger.png" width="80" height="80"/>
                 </h:link>
-                <h:outputText value="#{applicationSettings.organization.name}" id="ot_compName" styleClass="organizationName"/>
+                <h:outputText value="#{applicationSettings.organization.name}" id="ot-comp-name" styleClass="organizationName"/>
                 <h:form styleClass="headerMenu">
                     <h:commandLink value="Avatar-Menu" action="#{headerBacker.toggleMenu}" immediate="true" />
                 </h:form>
             </h:panelGroup>
         </h:panelGroup>
-        <h:panelGroup styleClass="dropdown" rendered="#{headerBacker.displayMenu}" id="p_userMenu">
+        <h:panelGroup styleClass="dropdown" rendered="#{headerBacker.displayMenu and userSession.user != null}" id="p-user-menu">
             <h:panelGroup styleClass="row" layout="block">
-                <h:outputText value="#{headerBacker.user.firstName}" id="ot_firstName"/>
+                <h:outputText value="#{headerBacker.user.firstName}" id="ot-first-name"/>
             </h:panelGroup>
             <h:panelGroup styleClass="row" layout="block">
-                <h:outputText value="#{headerBacker.user.lastName}" id="ot_lastName"/>
+                <h:outputText value="#{headerBacker.user.lastName}" id="ot-last-name"/>
             </h:panelGroup>
             <h:panelGroup styleClass="row" layout="block">
-                <h:outputText value="#{headerBacker.user.username}" id="ot_username"/>
+                <h:outputText value="#{headerBacker.user.username}" id="ot-username"/>
             </h:panelGroup>
             <h:panelGroup styleClass="row" layout="block">
-                <h:outputText value="(Admin)" id="ot_role" rendered="#{headerBacker.user.administrator}"/>
+                <h:outputText value="(Admin)" id="ot-role" rendered="#{headerBacker.user.administrator}"/>
             </h:panelGroup>
             <h:panelGroup styleClass="row" layout="block">
-                <h:link value="#{labels.administration}" href="../restr/admin.xhtml" rendered="#{headerBacker.user.administrator}" id="l_configuration"/>
+                <h:link value="#{labels.administration}" href="../restr/admin.xhtml" rendered="#{headerBacker.user.administrator}" id="l-configuration"/>
             </h:panelGroup>
             <h:panelGroup styleClass="row" layout="block">
                 <!-- logout -->
             </h:panelGroup>
             <h:panelGroup styleClass="row" layout="block">
-                <h:link value="Profile" href="../authorized/profile.xhtml" id="l_profile"/>
+                <h:link value="Profile" href="../authorized/profile.xhtml" id="l-profile">
+                    <f:param name="id" value="#{userSession.user.id}"/>
+                </h:link>
             </h:panelGroup>
         </h:panelGroup>
     </ui:composition>
