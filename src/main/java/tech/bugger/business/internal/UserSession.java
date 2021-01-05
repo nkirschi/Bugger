@@ -1,8 +1,6 @@
 package tech.bugger.business.internal;
 
-import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
@@ -18,28 +16,38 @@ import java.util.Locale;
 @SessionScoped
 @Named
 public class UserSession implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 8943571923172893158L;
-    private static final Log log = Log.forClass(UserSession.class);
+
+    /**
+     * The currently logged in user.
+     */
     private User user;
+
+    /**
+     * The currently selected locale.
+     */
     private Locale locale;
 
+    /**
+     * Initializes this user session by setting a preferred locale.
+     */
     @PostConstruct
     public void init() {
         locale = FacesContext.getCurrentInstance().getExternalContext().getRequestLocale();
     }
 
     /**
-     * Invalidates the session.
+     * Invalidates the Session.
      */
     public void invalidateSession() {
-
     }
 
     /**
-     * Gets the user.
+     * Returns the currently logged in user, being {@code null} iff the user is not logged in.
      *
-     * @return The user.
+     * @return The user or {@code null} iff the user is not logged in.
      */
     public User getUser() {
         // Until this is implemented, just return dummy topic.
@@ -49,16 +57,16 @@ public class UserSession implements Serializable {
     }
 
     /**
-     * Sets the user.
+     * Sets the current user.
      *
      * @param user The user to set.
      */
-    public void setUser(User user) {
+    public void setUser(final User user) {
         this.user = user;
     }
 
     /**
-     * Gets the locale.
+     * Gets the currently preferred locale.
      *
      * @return The locale.
      */
@@ -67,11 +75,11 @@ public class UserSession implements Serializable {
     }
 
     /**
-     * Sets the locale.
+     * Sets the preferred locale.
      *
-     * @param locale The locale to set.
+     * @param locale The preferred locale to set.
      */
-    public void setLocale(Locale locale) {
+    public void setLocale(final Locale locale) {
         this.locale = locale;
     }
 

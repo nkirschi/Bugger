@@ -1,19 +1,15 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.SearchService;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.List;
+
 
 /**
  * Backing Bean for the header.
@@ -21,23 +17,34 @@ import java.util.List;
 @SessionScoped
 @Named
 public class HeaderBacker implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 7342292657804667855L;
-    private static final Log log = Log.forClass(HeaderBacker.class);
+
+    /**
+     * The user behind the current UserSession.
+     */
     private User user;
-    private String searchQuery;
-    private List<Topic> topicSuggestions;
-    private List<Report> reportSuggestions;
-    private List<User> userSuggestions;
 
-    @Inject
-    private transient SearchService searchService;
-
+    /**
+     * The current UserSession.
+     */
     @Inject
     private UserSession session;
 
-    @Inject
-    private ApplicationSettings applicationSettings;
+    /**
+     * {@code true} if the Menu should be displayed, {@code false} otherwise.
+     */
+    private boolean displayMenu;
+
+    /**
+     * Initializes the User for the header and makes sure the headerMenu is closed.
+     */
+    @PostConstruct
+    void init() {
+        user = session.getUser();
+        closeMenu();
+    }
 
     /**
      * Takes the user to the search page with the current {@code searchQuery} already typed in.
@@ -45,15 +52,6 @@ public class HeaderBacker implements Serializable {
      * @return The location to redirect to.
      */
     public String search() {
-        return null;
-    }
-
-    /**
-     * Logs out the user. This also invalidates the user session.
-     *
-     * @return The location to redirect to.
-     */
-    public String logout() {
         return null;
     }
 
@@ -67,63 +65,37 @@ public class HeaderBacker implements Serializable {
     /**
      * @param user The user to set.
      */
-    public void setUser(User user) {
+    public void setUser(final User user) {
         this.user = user;
     }
 
     /**
-     * @return The searchQuery.
+     * Activates/Deactivates the menu.
+     *
+     * @return {@code null} to reload the page.
      */
-    public String getSearchQuery() {
-        return searchQuery;
+    public String toggleMenu() {
+        if (displayMenu) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+        return null;
     }
 
     /**
-     * @param searchQuery The searchQuery to set.
+     * @return {@code true} if the Menu should be displayed, {@code false} otherwise.
      */
-    public void setSearchQuery(String searchQuery) {
-        this.searchQuery = searchQuery;
+    public boolean isDisplayMenu() {
+        return displayMenu;
     }
 
-    /**
-     * @return The topicSuggestions.
-     */
-    public List<Topic> getTopicSuggestions() {
-        return topicSuggestions;
+    private void closeMenu() {
+        displayMenu = false;
     }
 
-    /**
-     * @param topicSuggestions The topicSuggestions to set.
-     */
-    public void setTopicSuggestions(List<Topic> topicSuggestions) {
-        this.topicSuggestions = topicSuggestions;
+    private void openMenu() {
+        displayMenu = true;
     }
 
-    /**
-     * @return The reportSuggestions.
-     */
-    public List<Report> getReportSuggestions() {
-        return reportSuggestions;
-    }
-
-    /**
-     * @param reportSuggestions The reportSuggestions to set.
-     */
-    public void setReportSuggestions(List<Report> reportSuggestions) {
-        this.reportSuggestions = reportSuggestions;
-    }
-
-    /**
-     * @return The userSuggestions.
-     */
-    public List<User> getUserSuggestions() {
-        return userSuggestions;
-    }
-
-    /**
-     * @param userSuggestions The userSuggestions to set.
-     */
-    public void setUserSuggestions(List<User> userSuggestions) {
-        this.userSuggestions = userSuggestions;
-    }
 }
