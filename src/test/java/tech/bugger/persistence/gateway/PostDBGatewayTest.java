@@ -44,6 +44,7 @@ public class PostDBGatewayTest {
 
     @BeforeEach
     public void setUp() throws Exception {
+        DBExtension.insertMinimalTestData();
         connection = DBExtension.getConnection();
         gateway = new PostDBGateway(connection);
 

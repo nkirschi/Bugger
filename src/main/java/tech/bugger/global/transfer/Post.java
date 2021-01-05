@@ -16,27 +16,27 @@ public class Post implements Serializable {
     private static final long serialVersionUID = -4665707287087752126L;
 
     /**
-     * The ID of the post.
+     * The post ID.
      */
     private int id;
 
     /**
-     * The content of the post.
+     * The post content.
      */
     private String content;
 
     /**
-     * The report the post belongs to, loaded lazily.
+     * The associated report, loaded lazily.
      */
     private Lazy<Report> report;
 
     /**
-     * Authorship metadata about the post.
+     * The manipulation metadata.
      */
     private Authorship authorship;
 
     /**
-     * The list of attachments of the post.
+     * The post attachments.
      */
     private List<Attachment> attachments;
 
@@ -45,7 +45,7 @@ public class Post implements Serializable {
      *
      * @param id          The post ID.
      * @param content     The post content.
-     * @param report      The associated report.
+     * @param report      The associated report, loaded lazily.
      * @param authorship  The manipulation metadata.
      * @param attachments The post attachments.
      */

@@ -6,9 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.ResourceBundleMocker;
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
+import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.util.Lazy;
@@ -31,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -41,6 +44,14 @@ import static org.mockito.Mockito.verify;
 public class PostServiceTest {
 
     private PostService service;
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private ApplicationSettings applicationSettings;
+
+    private Configuration configuration;
 
     @Mock
     private TransactionManager transactionManager;
@@ -61,12 +72,16 @@ public class PostServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new PostService(transactionManager, feedbackEvent, ResourceBundleMocker.mock(""));
+        service = new PostService(notificationService, applicationSettings, transactionManager, feedbackEvent,
+                ResourceBundleMocker.mock(""));
         List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
         testPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
+
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(postGateway).when(tx).newPostGateway();
         lenient().doReturn(attachmentGateway).when(tx).newAttachmentGateway();
+        configuration = new Configuration(false, false, "", "", 5, "");
+        doReturn(configuration).when(applicationSettings).getConfiguration();
     }
 
     @Test
@@ -74,6 +89,13 @@ public class PostServiceTest {
         assertTrue(service.createPost(testPost));
         verify(postGateway).create(any());
         verify(attachmentGateway, times(3)).create(any());
+    }
+
+    @Test
+    public void testCreatePostWhenTooManyAttachments() throws Exception {
+        configuration.setMaxAttachmentsPerPost(2);
+        assertFalse(service.createPost(testPost));
+        verify(feedbackEvent).fire(any());
     }
 
     @Test

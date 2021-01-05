@@ -1,5 +1,6 @@
 package tech.bugger.business.internal;
 
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
@@ -41,6 +42,9 @@ public class UserSession implements Serializable {
      * @return The user.
      */
     public User getUser() {
+        // Until this is implemented, just return dummy topic.
+        User user = new User();
+        user.setId(1);
         return user;
     }
 

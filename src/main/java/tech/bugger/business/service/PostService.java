@@ -1,5 +1,6 @@
 package tech.bugger.business.service;
 
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Attachment;
@@ -11,6 +12,7 @@ import tech.bugger.persistence.gateway.AttachmentGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Any;
@@ -30,8 +32,15 @@ public class PostService {
      */
     private static final Log log = Log.forClass(PostService.class);
 
-    @Inject
-    NotificationService notificationService;
+    /**
+     * Notification service used for sending notifications.
+     */
+    private final NotificationService notificationService;
+
+    /**
+     * The current application settings.
+     */
+    private ApplicationSettings applicationSettings;
 
     /**
      * Transaction manager used for creating transactions.
@@ -51,13 +60,18 @@ public class PostService {
     /**
      * Constructs a new post service with the given dependencies.
      *
-     * @param transactionManager The transaction manager to use for creating transactions.
-     * @param feedbackEvent      The feedback event to use for user feedback.
-     * @param messagesBundle     The resource bundle for feedback messages.
+     * @param notificationService The notification service to use for sending notifications.
+     * @param applicationSettings The application settings to use.
+     * @param transactionManager  The transaction manager to use for creating transactions.
+     * @param feedbackEvent       The feedback event to use for user feedback.
+     * @param messagesBundle      The resource bundle for feedback messages.
      */
     @Inject
-    public PostService(final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
+    public PostService(final NotificationService notificationService, final ApplicationSettings applicationSettings,
+                       final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
                        final @RegistryKey("messages") ResourceBundle messagesBundle) {
+        this.notificationService = notificationService;
+        this.applicationSettings = applicationSettings;
         this.transactionManager = transactionManager;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;
@@ -81,12 +95,20 @@ public class PostService {
      */
     public boolean createPost(Post post) {
         // Notifications will be dealt with when implementing the subscriptions feature.
+        if (post.getAttachments().size() > applicationSettings.getConfiguration().getMaxAttachmentsPerPost()) {
+            log.info("Trying to create post with too many attachments");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("too_many_attachments"),
+                    Feedback.Type.ERROR));
+            return false;
+        }
+
         try (Transaction tx = transactionManager.begin()) {
             tx.newPostGateway().create(post);
             AttachmentGateway attachmentGateway = tx.newAttachmentGateway();
             post.getAttachments().forEach(attachmentGateway::create);
             tx.commit();
             log.info("Post created successfully.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("post_created"), Feedback.Type.INFO));
             return true;
         } catch (TransactionException e) {
             log.error("Error while creating a new post.", e);

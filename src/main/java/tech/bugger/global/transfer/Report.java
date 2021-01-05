@@ -103,6 +103,20 @@ public class Report implements Serializable {
      */
     private Lazy<Topic> topic;
 
+    /**
+     * Constructs a new report from the specified parameters.
+     *
+     * @param id The report ID.
+     * @param title The report title.
+     * @param type The report type.
+     * @param severity The report severity.
+     * @param version The version the report is associated with.
+     * @param authorship The report authorship metadata.
+     * @param closingDate The closing date of the report.
+     * @param duplicateOf The report this report is a duplicate of, loaded lazily.
+     * @param forcedRelevance The relevance value to override the calculated relevance.
+     * @param topic The topic the report belongs to, loaded lazily.
+     */
     public Report(int id, String title, Type type, Severity severity, String version, Authorship authorship,
                   ZonedDateTime closingDate, Lazy<Report> duplicateOf, Integer forcedRelevance, Lazy<Topic> topic) {
         this.id = id;

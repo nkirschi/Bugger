@@ -42,6 +42,7 @@ public class AttachmentDBGatewayTest {
 
     @BeforeEach
     public void setUp() throws Exception {
+        DBExtension.insertMinimalTestData();
         connection = DBExtension.getConnection();
         gateway = new AttachmentDBGateway(connection);
 

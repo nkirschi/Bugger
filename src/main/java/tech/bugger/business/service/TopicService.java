@@ -11,6 +11,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -18,7 +19,7 @@ import java.util.List;
  * Service providing methods related to topics. A {@code Feedback} event is fired, if unexpected circumstances occur.
  */
 @Dependent
-public class TopicService {
+public class TopicService implements Serializable {
 
     private static final Log log = Log.forClass(TopicService.class);
 
@@ -91,7 +92,8 @@ public class TopicService {
      * @return The topic with that ID if it exists, {@code null} if no topic with that ID exists.
      */
     public Topic getTopicByID(int topicID) {
-        return null;
+        // Until this is implemented, just return dummy topic.
+        return new Topic(1, "testtopic", "testdescription");
     }
 
     /**

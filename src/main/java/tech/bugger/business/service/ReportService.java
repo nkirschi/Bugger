@@ -9,10 +9,12 @@ import tech.bugger.persistence.gateway.AttachmentGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -21,7 +23,7 @@ import java.util.ResourceBundle;
  * Service providing methods related to reports. A {@code Feedback} event is fired, if unexpected circumstances occur.
  */
 @Dependent
-public class ReportService {
+public class ReportService implements Serializable {
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.
@@ -188,7 +190,7 @@ public class ReportService {
             tx.newPostGateway().create(firstPost);
             tx.commit();
             log.info("Report created successfully.");
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("operation_successful"), Feedback.Type.INFO));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("report_created"), Feedback.Type.INFO));
             return true;
         } catch (TransactionException e) {
             log.error("Error while creating a new report", e);

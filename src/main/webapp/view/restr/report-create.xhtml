@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:b="http://tech.bugger/tags">
+
+<h:head>
+    <title>Create report</title>
+</h:head>
+<h:body>
+    <f:view>
+        <h1><h:outputText value="#{labels.create_report}"/></h1>
+        <h:form id="f-create-report"
+                rendered="#{reportCreateBacker.session.user != null and reportCreateBacker.isBanned() or true}"
+                enctype="multipart/form-data">
+            <h:panelGrid columns="2">
+                <h:outputLabel id="o-title" for="it-title" value="#{labels.title}"/>
+                <h:inputText id="it-title" value="#{reportCreateBacker.report.title}" required="true"/>
+                <h:panelGroup/>
+                <h:message for="it-title"/>
+
+                <h:outputLabel id="o-type" for="s-type" value="#{labels.type}"/>
+                <h:selectOneMenu id="s-type" value="#{reportCreateBacker.report.type}">
+                    <f:selectItems value="#{reportCreateBacker.reportTypes}" var="type"
+                                   itemValue="#{type}" itemLabel="#{labels['report_type.'.concat(type)]}" />
+                </h:selectOneMenu>
+                <h:panelGroup/>
+                <h:message for="s-type"/>
+
+                <h:outputLabel id="o-severity" for="s-severity" value="#{labels.severity}"/>
+                <h:selectOneMenu id="s-severity" value="#{reportCreateBacker.report.severity}">
+                    <f:selectItems value="#{reportCreateBacker.reportSeverities}" var="severity"
+                                   itemValue="#{severity}" itemLabel="#{labels['report_severity.'.concat(severity)]}" />
+                </h:selectOneMenu>
+                <h:panelGroup/>
+                <h:message for="s-severity"/>
+
+                <h:outputLabel id="o-version" for="it-version" value="#{labels.version}"/>
+                <h:inputText id="it-version" value="#{reportCreateBacker.report.version}"/>
+                <h:panelGroup/>
+                <h:message for="it-version"/>
+
+                <h:outputLabel id="o-post-content" for="it-post-content" value="#{labels.first_post_content}"/>
+                <h:inputTextarea id="it-post-content" value="#{reportCreateBacker.firstPost.content}" required="true"/>
+                <h:panelGroup/>
+                <h:message for="it-post-content"/>
+            </h:panelGrid>
+
+            <h:panelGroup styleClass="row" layout="block">
+                <h:panelGroup styleClass="row" layout="block">
+                    <b:pagitable id="p-attachments" paginator="#{reportCreateBacker.attachmentsPaginator}" simple="true">
+                        <!-- TODO Specification says h:link. What would it link to? -->
+                        <h:column><h:outputText value="#{var.name}"></h:outputText></h:column>
+                    </b:pagitable>
+                </h:panelGroup>
+
+                <h:panelGroup styleClass="row" layout="block">
+                    <h:outputLabel id="o-attachment" for="it-attachment" value="#{labels.add_attachment}"/>
+                    <h:inputFile id="it-attachment" value="#{reportCreateBacker.uploadedAttachment}">
+                        <f:validator validatorId="fileValidator"/>
+                    </h:inputFile>
+                    <h:panelGroup/>
+                    <h:message for="it-attachment"/>
+                    <h:commandButton id="cb-add-attachment"
+                                     value="#{labels.add_attachment}"
+                                     action="#{reportCreateBacker.saveAttachment}"/>
+                </h:panelGroup>
+
+                <h:commandButton id="cb-remove-attachments"
+                                 value="#{labels.remove_all_attachments}"
+                                 action="#{reportCreateBacker.deleteAllAttachments}"/>
+            </h:panelGroup>
+
+            <h:commandButton value="#{labels.create}" action="#{reportCreateBacker.create}"/>
+        </h:form>
+    </f:view>
+</h:body>
+</html>
