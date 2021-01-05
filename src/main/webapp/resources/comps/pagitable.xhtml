@@ -39,14 +39,15 @@
                 <h:commandButton id="cb-submit" action="#{cc.attrs.paginator.update}" style="display: none"/>
                 <h:panelGroup layout="block" id="pg-first-page"
                               styleClass="page-item #{cc.attrs.paginator.isFirstPage() ? 'disabled' : ''}">
-                    <h:commandButton id="cb-first-page" value="First" action="#{cc.attrs.paginator.firstPage}"
-                                     styleClass="page-link btn btn-link" rendered="#{not cc.attrs.simple}">
+                    <h:commandButton id="cb-first-page" value="&lt;&lt;" action="#{cc.attrs.paginator.firstPage}"
+                                     styleClass="page-link btn btn-link font-weight-bold"
+                                     rendered="#{not cc.attrs.simple}">
                     </h:commandButton>
                 </h:panelGroup>
                 <h:panelGroup layout="block" id="pg-prev-page"
                               styleClass="page-item #{cc.attrs.paginator.isFirstPage() ? 'disabled' : ''}">
-                    <h:commandButton id="cb-prev-page" value="Previous" action="#{cc.attrs.paginator.prevPage}"
-                                     styleClass="page-link btn btn-link">
+                    <h:commandButton id="cb-prev-page" value="&lt;" action="#{cc.attrs.paginator.prevPage}"
+                                     styleClass="page-link btn btn-link font-weight-bold">
                     </h:commandButton>
                 </h:panelGroup>
                 <h:inputText id="i-curr-page" value="#{cc.attrs.paginator.currentPage}"
@@ -56,14 +57,15 @@
                 </h:inputText>
                 <h:panelGroup layout="block" id="pg-next-page"
                               styleClass="page-item #{cc.attrs.paginator.isLastPage() ? 'disabled' : ''}">
-                    <h:commandButton id="cb-next-page" value="Next" action="#{cc.attrs.paginator.nextPage}"
-                                     styleClass="page-link btn btn-link">
+                    <h:commandButton id="cb-next-page" value="&gt;" action="#{cc.attrs.paginator.nextPage}"
+                                     styleClass="page-link btn btn-link font-weight-bold">
                     </h:commandButton>
                 </h:panelGroup>
                 <h:panelGroup layout="block" id="pg-last-page"
                               styleClass="page-item #{cc.attrs.paginator.isLastPage() ? 'disabled' : ''}">
-                    <h:commandButton id="cb-last-page" value="Last" action="#{cc.attrs.paginator.lastPage}"
-                                     styleClass="page-link btn btn-link" rendered="#{not cc.attrs.simple}">
+                    <h:commandButton id="cb-last-page" value="&gt;&gt;" action="#{cc.attrs.paginator.lastPage}"
+                                     styleClass="page-link btn btn-link font-weight-bold"
+                                     rendered="#{not cc.attrs.simple}">
                     </h:commandButton>
                 </h:panelGroup>
             </h:form>
@@ -78,7 +80,7 @@
                                    var="item" itemValue="#{item}" itemLabel="#{item.size}"/>
                 </h:selectOneMenu>
                 <h:commandButton id="cb-refresh" action="#{cc.attrs.paginator.updateReset}" value="&#x27f3;"
-                                 type="submit" styleClass="btn btn-sm"
+                                 type="submit" styleClass="btn btn-sm font-weight-bold"
                                  binding="#{cc.refreshBtn}"/>
             </h:form>
         </h:panelGroup>
