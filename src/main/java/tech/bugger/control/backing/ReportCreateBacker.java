@@ -251,6 +251,7 @@ public class ReportCreateBacker implements Serializable {
         attachment.setPost(new Lazy<>(firstPost));
         attachments.add(attachment);
         log.debug("Attachment '" + uploadedAttachment.getSubmittedFileName() + "' uploaded.");
+        attachmentsPaginator.update();
     }
 
     /**
