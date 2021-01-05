@@ -12,11 +12,10 @@ import tech.bugger.persistence.gateway.AttachmentGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
-import javax.enterprise.inject.Any;
 import javax.inject.Inject;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -87,29 +86,53 @@ public class PostService {
     }
 
     /**
+     * Creates a post using a given {@code Transaction}.
+     *
+     * @param post The post to be created.
+     * @param tx   The transaction to use when creating the post.
+     * @return {@code true} iff creating the post succeeded.
+     * @throws TransactionException The transaction could not be committed successfully.
+     */
+    boolean createPostWithTransaction(final Post post, final Transaction tx) {
+        /*
+         * TODO: The existence of this method is terrible. However, since ReportService#createReport should use the same
+         * transaction for the report, the post, and the attachments, and since the following code is used in
+         * ReportService#createReport and PostService#createPost, I temporarily used this approach.
+         */
+        int maxAttachments = applicationSettings.getConfiguration().getMaxAttachmentsPerPost();
+        if (post.getAttachments().size() > maxAttachments) {
+            log.info("Trying to create post with too many attachments");
+            String message = MessageFormat.format(messagesBundle.getString("too_many_attachments"), maxAttachments);
+            feedbackEvent.fire(new Feedback(message, Feedback.Type.ERROR));
+            return false;
+        }
+
+
+        // TODO: Test if attachment names are unique.
+
+        tx.newPostGateway().create(post);
+        AttachmentGateway attachmentGateway = tx.newAttachmentGateway();
+        post.getAttachments().forEach(attachmentGateway::create);
+        return true;
+    }
+
+    /**
      * Creates a new post for an existing report and notifies users about the creation. Notifications are handled by the
      * {@code NotificationService}.
      *
      * @param post The post to be created.
      * @return {@code true} iff creating the post succeeded.
      */
-    public boolean createPost(Post post) {
+    public boolean createPost(final Post post) {
         // Notifications will be dealt with when implementing the subscriptions feature.
-        if (post.getAttachments().size() > applicationSettings.getConfiguration().getMaxAttachmentsPerPost()) {
-            log.info("Trying to create post with too many attachments");
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("too_many_attachments"),
-                    Feedback.Type.ERROR));
-            return false;
-        }
-
         try (Transaction tx = transactionManager.begin()) {
-            tx.newPostGateway().create(post);
-            AttachmentGateway attachmentGateway = tx.newAttachmentGateway();
-            post.getAttachments().forEach(attachmentGateway::create);
-            tx.commit();
-            log.info("Post created successfully.");
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("post_created"), Feedback.Type.INFO));
-            return true;
+            boolean success = createPostWithTransaction(post, tx);
+            if (success) {
+                tx.commit();
+                log.info("Post created successfully.");
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("post_created"), Feedback.Type.INFO));
+            }
+            return success;
         } catch (TransactionException e) {
             log.error("Error while creating a new post.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));

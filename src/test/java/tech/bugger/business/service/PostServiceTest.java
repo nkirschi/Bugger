@@ -37,8 +37,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
@@ -81,27 +83,44 @@ public class PostServiceTest {
         lenient().doReturn(postGateway).when(tx).newPostGateway();
         lenient().doReturn(attachmentGateway).when(tx).newAttachmentGateway();
         configuration = new Configuration(false, false, "", "", 5, "");
-        doReturn(configuration).when(applicationSettings).getConfiguration();
+        lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
     }
 
     @Test
-    public void testCreatePostWhenFine() {
-        assertTrue(service.createPost(testPost));
+    public void testCreatePostWithTransactionWhenFine() {
+        assertTrue(service.createPostWithTransaction(testPost, tx));
         verify(postGateway).create(any());
         verify(attachmentGateway, times(3)).create(any());
     }
 
     @Test
-    public void testCreatePostWhenTooManyAttachments() throws Exception {
+    public void testCreatePostWithTransactionWhenTooManyAttachments() {
         configuration.setMaxAttachmentsPerPost(2);
-        assertFalse(service.createPost(testPost));
+        assertFalse(service.createPostWithTransaction(testPost, tx));
         verify(feedbackEvent).fire(any());
     }
 
     @Test
+    public void testCreatePostWhenFine() throws Exception {
+        PostService serviceSpy = spy(service);
+        lenient().doReturn(true).when(serviceSpy).createPostWithTransaction(any(), any());
+        assertTrue(serviceSpy.createPost(testPost));
+        verify(tx).commit();
+    }
+
+    @Test
+    public void testCreatePostWhenNoSuccess() throws Exception {
+        PostService serviceSpy = spy(service);
+        lenient().doReturn(false).when(serviceSpy).createPostWithTransaction(any(), any());
+        assertFalse(serviceSpy.createPost(testPost));
+    }
+
+    @Test
     public void testCreatePostWhenCommitFails() throws Exception {
+        PostService serviceSpy = spy(service);
+        lenient().doReturn(true).when(serviceSpy).createPostWithTransaction(any(), any());
         doThrow(TransactionException.class).when(tx).commit();
-        assertFalse(service.createPost(testPost));
+        assertFalse(serviceSpy.createPost(testPost));
         verify(feedbackEvent).fire(any());
     }
 

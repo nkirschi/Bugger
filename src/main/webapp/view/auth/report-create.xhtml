@@ -12,8 +12,8 @@
 
     <ui:define name="content">
         <h:form id="f-create-report"
-                rendered="#{reportCreateBacker.session.user != null and reportCreateBacker.isBanned() or true}"
-                enctype="multipart/form-data">
+                enctype="multipart/form-data"
+                rendered="#{reportCreateBacker.session.user != null and reportCreateBacker.isBanned() or true}">
             <h:panelGrid columns="2">
                 <h:outputLabel id="o-title" for="it-title" value="#{labels.title}"/>
                 <h:inputText id="it-title" value="#{reportCreateBacker.report.title}" required="true"/>
@@ -48,34 +48,33 @@
             </h:panelGrid>
 
             <h:commandButton value="#{labels.create}" action="#{reportCreateBacker.create}"/>
-        </h:form>
 
-        <h:form id="f-attachments"
-                rendered="#{reportCreateBacker.session.user != null and reportCreateBacker.isBanned() or true}"
-                enctype="multipart/form-data">
             <h:panelGroup styleClass="row" layout="block">
-                <!-- TODO It doesn't want to go into block layout. -->
-                <h:panelGroup styleClass="row" layout="block">
-                    <b:pagitable id="p-attachments"
-                                 paginator="#{reportCreateBacker.attachmentsPaginator}"
-                                 simple="true">
-                        <!-- TODO Specification says h:link. What would it link to? -->
-                        <h:column><h:outputText value="#{var.name}"></h:outputText></h:column>
-                    </b:pagitable>
-                </h:panelGroup>
+                <b:pagitable id="p-attachments"
+                             paginator="#{reportCreateBacker.attachmentsPaginator}"
+                             simple="true">
+                    <!-- TODO Specification says h:link. What would it link to? -->
+                    <h:column><h:outputText value="#{var.name}"></h:outputText></h:column>
+                </b:pagitable>
+            </h:panelGroup>
 
-                <h:panelGroup styleClass="row" layout="block">
-                    <h:outputLabel id="o-attachment" for="it-attachment" value="#{labels.add_attachment}"/>
-                    <h:inputFile id="it-attachment" value="#{reportCreateBacker.uploadedAttachment}">
-                        <f:validator validatorId="fileValidator"/>
-                    </h:inputFile>
-                    <h:panelGroup/>
-                    <h:message for="it-attachment"/>
-                    <h:commandButton id="cb-add-attachment"
-                                     value="#{labels.add_attachment}"
-                                     action="#{reportCreateBacker.saveAttachment}"/>
-                </h:panelGroup>
+            <!-- TODO It doesn't want to go into block layout. -->
+            <h:panelGroup styleClass="row"
+                          layout="block"
+                          rendered="#{reportCreateBacker.attachments.size()
+                                      lt applicationSettings.configuration.maxAttachmentsPerPost}">
+                <h:outputLabel id="o-attachment" for="it-attachment" value="#{labels.add_attachment}"/>
+                <h:inputFile id="it-attachment" value="#{reportCreateBacker.uploadedAttachment}">
+                    <f:validator validatorId="fileValidator"/>
+                </h:inputFile>
+                <h:panelGroup/>
+                <h:message for="it-attachment"/>
+                <h:commandButton id="cb-add-attachment"
+                                 value="#{labels.add_attachment}"
+                                 action="#{reportCreateBacker.saveAttachment}"/>
+            </h:panelGroup>
 
+            <h:panelGroup styleClass="row" layout="block">
                 <h:commandButton id="cb-remove-attachments"
                                  value="#{labels.remove_all_attachments}"
                                  action="#{reportCreateBacker.deleteAllAttachments}"/>

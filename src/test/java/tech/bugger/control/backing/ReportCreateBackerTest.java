@@ -11,6 +11,7 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
@@ -178,6 +179,7 @@ public class ReportCreateBackerTest {
         doReturn(attachment.getName()).when(uploadedAttachment).getSubmittedFileName();
         doReturn(attachment.getMimetype()).when(uploadedAttachment).getContentType();
 
+        reportCreateBacker.setAttachmentsPaginator(mock(Paginator.class));
         reportCreateBacker.setAttachments(new ArrayList<>());
         reportCreateBacker.saveAttachment();
         assertTrue(reportCreateBacker.getAttachments().contains(attachment));

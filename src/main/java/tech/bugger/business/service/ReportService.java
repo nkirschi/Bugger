@@ -30,8 +30,17 @@ public class ReportService implements Serializable {
      */
     private static final Log log = Log.forClass(PostService.class);
 
+    /**
+     * Notification service used for sending notifications.
+     */
     @Inject
     NotificationService notificationService;
+
+    /**
+     * Post service used for creating posts.
+     */
+    @Inject
+    PostService postService;
 
     /**
      * Transaction manager used for creating transactions.
@@ -187,11 +196,15 @@ public class ReportService implements Serializable {
         // Notifications will be dealt with when implementing the subscriptions feature.
         try (Transaction tx = transactionManager.begin()) {
             tx.newReportGateway().create(report);
-            tx.newPostGateway().create(firstPost);
-            tx.commit();
-            log.info("Report created successfully.");
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("report_created"), Feedback.Type.INFO));
-            return true;
+            boolean postCreated = postService.createPostWithTransaction(firstPost, tx);
+            if (postCreated) {
+                tx.commit();
+                log.info("Report created successfully.");
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("report_created"), Feedback.Type.INFO));
+            } else {
+                tx.abort();
+            }
+            return postCreated;
         } catch (TransactionException e) {
             log.error("Error while creating a new report", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));

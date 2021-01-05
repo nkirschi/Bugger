@@ -27,6 +27,7 @@ import javax.servlet.http.Part;
 import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -228,12 +229,15 @@ public class ReportCreateBacker implements Serializable {
             return;
         }
 
-        if (attachments.size() >= applicationSettings.getConfiguration().getMaxAttachmentsPerPost()) {
+        int maxAttachments = applicationSettings.getConfiguration().getMaxAttachmentsPerPost();
+        if (attachments.size() >= maxAttachments) {
             log.info("Trying to create first post with too many attachments");
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("too_many_attachments"),
-                    Feedback.Type.ERROR));
+            String message = MessageFormat.format(messagesBundle.getString("too_many_attachments"), maxAttachments);
+            feedbackEvent.fire(new Feedback(message, Feedback.Type.ERROR));
             return;
         }
+
+        // TODO: Test if attachment name is unique.
 
         byte[] content;
         try {
@@ -259,6 +263,7 @@ public class ReportCreateBacker implements Serializable {
      */
     public void deleteAllAttachments() {
         attachments.clear();
+        attachmentsPaginator.update();
     }
 
     /**

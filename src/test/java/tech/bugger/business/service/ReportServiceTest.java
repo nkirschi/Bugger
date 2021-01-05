@@ -28,6 +28,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -38,6 +39,9 @@ import static org.mockito.Mockito.verify;
 public class ReportServiceTest {
 
     private ReportService service;
+
+    @Mock
+    private PostService postService;
 
     @Mock
     private TransactionManager transactionManager;
@@ -65,6 +69,7 @@ public class ReportServiceTest {
         testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
                 mock(ZonedDateTime.class), null, null, new Lazy<>(mock(Topic.class)));
+        service.postService = postService;
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(reportGateway).when(tx).newReportGateway();
@@ -72,14 +77,23 @@ public class ReportServiceTest {
     }
 
     @Test
-    public void testCreatePostWhenFine() {
+    public void testCreateReportWhenFine() throws Exception {
+        doReturn(true).when(postService).createPostWithTransaction(any(), any());
         assertTrue(service.createReport(testReport, testFirstPost));
         verify(reportGateway).create(any());
-        verify(postGateway).create(any());
+        verify(tx).commit();
     }
 
     @Test
-    public void testCreatePostWhenCommitFails() throws Exception {
+    public void testCreateReportWhenPostCreationFails() {
+        doReturn(false).when(postService).createPostWithTransaction(any(), any());
+        assertFalse(service.createReport(testReport, testFirstPost));
+        verify(tx).abort();
+    }
+
+    @Test
+    public void testCreateReportWhenCommitFails() throws Exception {
+        doReturn(true).when(postService).createPostWithTransaction(any(), any());
         doThrow(TransactionException.class).when(tx).commit();
         assertFalse(service.createReport(testReport, testFirstPost));
         verify(feedbackEvent).fire(any());
