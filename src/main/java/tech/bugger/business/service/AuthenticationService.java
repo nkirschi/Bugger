@@ -114,28 +114,33 @@ public class AuthenticationService {
      * @return The user with all their data.
      */
     public User authenticate(final String username, final String password) {
-        //TODO add message with key wrong_credentials
         User user = null;
+
         try (Transaction tx = transactionManager.begin()) {
             user = tx.newUserGateway().getUserByUsername(username);
             tx.commit();
         } catch (NotFoundException e) {
             log.error("The user with username " + username + "could not be found.", e);
-            feedback.fire(new Feedback(messages.getString("wrong_credentials"), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("authentication_service.wrong_credentials"),
+                    Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while loading user with username " + username, e);
-            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         if (user == null) {
             return null;
         }
+
         if (!(user.getPasswordHash().equals(Hasher.hash(password, user.getPasswordSalt(),
                 user.getHashingAlgorithm())))) {
             log.warning("The supplied password of the user with username " + username + " did not match the actual"
                     + " password");
-            feedback.fire(new Feedback(messages.getString("wrong_credentials"), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("authentication_service.wrong_credentials"),
+                    Feedback.Type.ERROR));
             return null;
         }
+
         return user;
     }
 

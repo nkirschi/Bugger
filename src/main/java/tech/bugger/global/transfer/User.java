@@ -1,5 +1,7 @@
 package tech.bugger.global.transfer;
 
+import tech.bugger.global.util.Lazy;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -477,36 +479,18 @@ public class User implements Serializable {
         }
 
         User user = (User) other;
-        return Objects.equals(id, user.id)
-                && administrator == user.administrator
-                && Objects.equals(username, user.username)
-                && Objects.equals(passwordHash, user.passwordHash)
-                && Objects.equals(passwordSalt, user.passwordSalt)
-                && Objects.equals(hashingAlgorithm, user.hashingAlgorithm)
-                && Objects.equals(lastName, user.lastName)
-                && Objects.equals(emailAddress, user.emailAddress)
-                && Objects.equals(firstName, user.firstName)
-                && Arrays.equals(avatarThumbnail, user.avatarThumbnail)
-                && Objects.equals(biography, user.biography)
-                && preferredLanguage == user.preferredLanguage
-                && profileVisibility == user.profileVisibility
-                && Objects.equals(registrationDate, user.registrationDate)
-                && Objects.equals(forcedVotingWeight, user.forcedVotingWeight);
+        return id == user.id;
     }
 
     /**
-     * Calculates a hash code for this user for hashing purposes, and to fulfil the {@link Object#equals(Object)}
+     * Calculates a hash code for this user for hashing purposes, and to fulfill the {@link Object#equals(Object)}
      * contract.
      *
      * @return The hash code value of this user.
      */
     @Override
     public int hashCode() {
-        int result = Objects.hash(id, username, passwordHash, passwordSalt, hashingAlgorithm, emailAddress, firstName,
-                lastName, biography, preferredLanguage, profileVisibility, registrationDate, forcedVotingWeight,
-                administrator);
-        result = 31 * result + Arrays.hashCode(avatarThumbnail);
-        return result;
+        return Objects.hash(id);
     }
 
     /**

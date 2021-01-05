@@ -92,12 +92,12 @@ public class LoginBacker {
 
         //TODO pass redirectURL as Parameter in header?
         HttpServletRequest request = (HttpServletRequest) fctx.getExternalContext().getRequest();
-        Object url = request.getParameter("redirectURL");
+        Object url = request.getParameter("url");
 
         redirectURL = (url != null) ? url.toString() : "";
 
         user = new User(0, "", "", "", "", "", "", "", new Lazy<>(new byte[0]), new byte[0], "",
-                (session.getLocale() != null) ? Language.getLanguage(session.getLocale()) : Language.ENGLISH,
+                (session.getLocale() != null) ? Language.of(session.getLocale()) : Language.ENGLISH,
                 User.ProfileVisibility.FULL, null, null, false);
     }
 
