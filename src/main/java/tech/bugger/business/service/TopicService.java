@@ -176,9 +176,6 @@ public class TopicService {
             log.error("Error when loading selected topics.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
             selectedTopics = null;
-        } catch (NotFoundException e) {
-            log.error("Selected topics with Selection " + selection + " not found.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         }
         return selectedTopics;
     }
