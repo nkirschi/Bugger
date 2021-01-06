@@ -268,4 +268,20 @@ public class AuthenticationServiceTest {
         verify(feedbackEvent).fire(any());
     }
 
+    @Test
+    public void testUpdateEmail() throws NotFoundException {
+        doReturn(testToken).when(tokenGateway).createToken(any());
+        doReturn(true).when(mailer).send(any());
+        assertTrue(service.updateEmail(testUser, "http://test.de"));
+        verify(tokenGateway).createToken(any());
+        verify(mailer).send(any());
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testUpdateEmailTokenNull() throws NotFoundException {
+        assertFalse(service.updateEmail(testUser, "http://test.de"));
+        verify(tokenGateway).createToken(any());
+    }
+
 }

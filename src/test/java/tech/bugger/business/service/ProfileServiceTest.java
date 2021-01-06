@@ -1,6 +1,8 @@
 package tech.bugger.business.service;
 
 import javax.enterprise.event.Event;
+import javax.servlet.http.Part;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,23 +22,11 @@ import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
+import java.io.IOException;
 import java.util.ResourceBundle;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doNothing;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -378,6 +368,33 @@ public class ProfileServiceTest {
         service.toggleAdmin(testUser);
         assertTrue(testUser.isAdministrator());
         verify(tx, times(1)).commit();
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testUploadAvatar() throws IOException {
+        Part part = mock(Part.class);
+        when(part.getInputStream()).thenReturn(ClassLoader.getSystemResourceAsStream("images/bugger.png"));
+        assertNotNull(service.uploadAvatar(part));
+    }
+
+    @Test
+    public void testUploadAvatarIOException() throws IOException {
+        Part part = mock(Part.class);
+        when(part.getInputStream()).thenThrow(IOException.class);
+        assertNull(service.uploadAvatar(part));
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testGenerateThumbnail() throws IOException {
+        byte[] bytes = ClassLoader.getSystemResourceAsStream("images/bugger.png").readAllBytes();
+        assertNotNull(service.generateThumbnail(bytes));
+    }
+
+    @Test
+    public void testGenerateThumbnailCorruptImageException() {
+        assertNull(service.generateThumbnail(new byte[0]));
         verify(feedbackEvent, times(1)).fire(any());
     }
 

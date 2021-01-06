@@ -17,6 +17,7 @@
     </f:metadata>
 
     <ui:define name="content">
+
         <!-- Renders the popup dialog for changing the profile owner's administrator status. -->
         <h:form id="f-change-status" rendered="#{profileBacker.displayDialog == 'ADMIN'}">
             <h:panelGroup class="row" layout="block">
@@ -33,8 +34,9 @@
                             <h:outputLabel id="ol-user-password" value="#{labels.password}" for="i-user-password"/>
                         </h:panelGroup>
                         <h:panelGroup class="col-sm-6" id="p-user-password-input">
-                            <h:inputSecret id="i-user-password" value="#{profileBacker.password}"
-                                           maxlength="#{C.PASSWORD_MAX}" required="true"/>
+                            <h:inputSecret id="i-user-password" value="#{profileBacker.password}" required="true">
+                                <f:validateLength maximum="#{C.PASSWORD_MAX}"/>
+                            </h:inputSecret>
                         </h:panelGroup>
                         <h:panelGroup class="col-sm-3" id="p-user-password-message">
                             <h:message for="i-user-password"/>
@@ -137,9 +139,10 @@
                                and profileBacker.user.administrator}">
                     <h:graphicImage id="g-rem-admin" value="/resources/images/delete.png" alt="Button to remove admin"/>
                 </h:commandLink>
-                <!-- TODO change outcome to profile-edit.xhtml -->
-                <h:button id="b-edit" value="#{labels.edit}" outcome="" rendered="#{profileBacker.privileged}"
-                          styleClass="button"/>
+                <h:link id="l-edit" value="#{labels.edit}" outcome="/view/restr/profile-edit.xhtml"
+                        rendered="#{profileBacker.privileged}" styleClass="button">
+                    <f:param name="e" value="#{profileBacker.user.id}"/>
+                </h:link>
             </h:panelGroup>
 
             <!-- The profile owner's user information -->

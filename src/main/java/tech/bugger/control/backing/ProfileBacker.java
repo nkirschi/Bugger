@@ -317,7 +317,7 @@ public class ProfileBacker implements Serializable {
     public void toggleAdmin() {
         if ((session.getUser() == null) || (!session.getUser().isAdministrator())) {
             log.error("A user was able to to use the promote or demote administrator functionality even though "
-                    + "had no administrator status!");
+                    + "they had no administrator status!");
             return;
         }
         if (!profileService.matchingPassword(session.getUser(), password)) {
