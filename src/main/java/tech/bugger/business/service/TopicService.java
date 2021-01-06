@@ -7,6 +7,7 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
@@ -325,7 +326,26 @@ public class TopicService {
      * @return The time stamp of the last action as a {@code ZonedDateTime}.
      */
     public ZonedDateTime lastChange(final Topic topic) {
-        return null;
+        if (topic == null) {
+            log.error("Error while determining last change with topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Error while determining last change with topic ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
+
+        ZonedDateTime lastChange = null;
+        try (Transaction tx = transactionManager.begin()) {
+            lastChange = tx.newTopicGateway().determineLastActivity(topic);
+            tx.commit();
+        } catch (NotFoundException e) {
+            lastChange = null;
+        } catch (TransactionException e) {
+            lastChange = null;
+            log.error("Error when determining last change in topic " + topic + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return lastChange;
     }
 
 }
