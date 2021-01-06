@@ -184,10 +184,11 @@ public class Post implements Serializable {
      */
     @Override
     public String toString() {
+        String reportId = report.isPresent() ? String.valueOf(report.get().getId()) : "<absent>";
         return "Post{"
                 + "id='" + id + '\''
                 + ", content='" + content + '\''
-                + ", report='#" + report.get().getId() + '\''
+                + ", report='#" + reportId + '\''
                 + ", authorship='" + authorship + '\''
                 + ", attachments='" + attachments + '\''
                 + '}';

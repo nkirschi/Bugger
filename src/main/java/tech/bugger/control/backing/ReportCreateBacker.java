@@ -74,11 +74,6 @@ public class ReportCreateBacker implements Serializable {
     private List<Attachment> attachments;
 
     /**
-     * The paginator of the list of attachments of the first post.
-     */
-    private Paginator<Attachment> attachmentsPaginator;
-
-    /**
      * Whether the user is banned from the topic to create the report in.
      */
     private boolean banned;
@@ -150,19 +145,7 @@ public class ReportCreateBacker implements Serializable {
      * not banned from the topic the report is located in. If the user may not create reports, acts as if the page did
      * not exist.
      */
-    @PostConstruct
-    void init() {
-        try {
-            topicID = Integer.parseInt(ectx.getRequestParameterMap().get("t"));
-        } catch (NumberFormatException nfe) {
-            // TODO: What do we do here?
-            try {
-                ectx.redirect(ectx.getRequestContextPath() + "/some/404/page.xhtml");
-            } catch (IOException ie) {
-            }
-            return;
-        }
-
+    public void init() {
         User user = session.getUser();
         Topic topic = topicService.getTopicByID(topicID);
         if (user == null || topic == null || topicService.isBanned(user, topic)) {
@@ -180,29 +163,6 @@ public class ReportCreateBacker implements Serializable {
         report.setTopic(new Lazy<>(topic));
         attachments = new ArrayList<>();
         firstPost = new Post(0, "", new Lazy<>(report), authorship, attachments);
-
-        // TODO: This should probably be outsourced, maybe a ListPaginator<T> as a utility for paginating a given List.
-        // TODO: What do we actually want to sort by? Name? The order of insertion? Do we even want to sort?
-        attachmentsPaginator = new Paginator<Attachment>("", Selection.PageSize.SMALL) {
-
-            @Override
-            protected Iterable<Attachment> fetch() {
-                List<Attachment> result = new ArrayList<>(attachments);
-
-                if (!getSelection().isAscending()) {
-                    Collections.reverse(result);
-                }
-
-                int size = getSelection().getPageSize().getSize();
-                return result.subList(getSelection().getCurrentPage() * size,
-                        Math.min((getSelection().getCurrentPage() + 1) * size, result.size()));
-            }
-
-            @Override
-            protected int totalSize() {
-                return attachments.size();
-            }
-        };
     }
 
     /**
@@ -255,7 +215,6 @@ public class ReportCreateBacker implements Serializable {
         attachment.setPost(new Lazy<>(firstPost));
         attachments.add(attachment);
         log.debug("Attachment '" + uploadedAttachment.getSubmittedFileName() + "' uploaded.");
-        attachmentsPaginator.update();
     }
 
     /**
@@ -263,7 +222,6 @@ public class ReportCreateBacker implements Serializable {
      */
     public void deleteAllAttachments() {
         attachments.clear();
-        attachmentsPaginator.update();
     }
 
     /**
@@ -366,24 +324,6 @@ public class ReportCreateBacker implements Serializable {
     }
 
     /**
-     * Returns the paginator of the list of attachments of the first post.
-     *
-     * @return The paginator of attachments.
-     */
-    public Paginator<Attachment> getAttachmentsPaginator() {
-        return attachmentsPaginator;
-    }
-
-    /**
-     * Sets the paginator of the list of attachments of the first post.
-     *
-     * @param attachmentsPaginator The paginator of attachments.
-     */
-    public void setAttachmentsPaginator(final Paginator<Attachment> attachmentsPaginator) {
-        this.attachmentsPaginator = attachmentsPaginator;
-    }
-
-    /**
      * Returns the current user session.
      *
      * @return The current user session.
@@ -407,7 +347,6 @@ public class ReportCreateBacker implements Serializable {
      * @return The list of available report types.
      */
     public Report.Type[] getReportTypes() {
-        // TODO: where does this method go?
         return Report.Type.values();
     }
 
@@ -417,7 +356,6 @@ public class ReportCreateBacker implements Serializable {
      * @return The list of available report severities.
      */
     public Report.Severity[] getReportSeverities() {
-        // TODO: where does this method go?
         return Report.Severity.values();
     }
 

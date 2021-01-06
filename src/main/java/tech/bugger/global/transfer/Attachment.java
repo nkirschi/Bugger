@@ -190,14 +190,15 @@ public class Attachment implements Serializable {
      */
     @Override
     public String toString() {
+        String length = content.isPresent() ? String.valueOf(content.get().length) : "<absent>";
+        String postId = post.isPresent() ? String.valueOf(post.get().getId()) : "<absent>";
         return "Attachment{"
                 + "id='" + id + '\''
-                + "name='" + name + '\''
-                + ", content=byte[" + content.get().length + "]" // TODO: Really fetch the content just for toString?
+                + ", name='" + name + '\''
+                + ", content=byte[" + length + "]"
                 + ", mimetype='" + mimetype + '\''
-                + ", post='##" + post.get().getId() + '\''       // TODO same
+                + ", post='##" + postId + '\''
                 + '}';
-
     }
 
 }

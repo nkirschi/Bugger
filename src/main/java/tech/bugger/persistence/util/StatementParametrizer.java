@@ -48,12 +48,8 @@ public class StatementParametrizer {
      * @throws SQLException if substituting {@code integer} for the next parameter is not possible.
      * @see PreparedStatement#setInt(int, int)
      */
-    public StatementParametrizer integer(final Integer integer) throws SQLException {
-        if (integer == null) {
-            stmt.setNull(counter++, Types.INTEGER);
-        } else {
-            stmt.setInt(counter++, integer);
-        }
+    public StatementParametrizer integer(final int integer) throws SQLException {
+        stmt.setInt(counter++, integer);
         return this;
     }
 
@@ -65,12 +61,8 @@ public class StatementParametrizer {
      * @throws SQLException if substituting {@code bool} for the next parameter is not possible.
      * @see PreparedStatement#setBoolean(int, boolean)
      */
-    public StatementParametrizer bool(final Boolean bool) throws SQLException {
-        if (bool == null) {
-            stmt.setNull(counter++, Types.BOOLEAN);
-        } else {
-            stmt.setBoolean(counter++, bool);
-        }
+    public StatementParametrizer bool(final boolean bool) throws SQLException {
+        stmt.setBoolean(counter++, bool);
         return this;
     }
 

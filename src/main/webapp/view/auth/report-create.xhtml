@@ -10,6 +10,11 @@
 <ui:composition template="../../WEB-INF/template/main.xhtml">
     <ui:param name="title" value="#{labels.create_report}"/>
 
+    <f:metadata>
+        <f:viewParam name="t" value="#{reportCreateBacker.topicID}" />
+        <f:viewAction action="#{reportCreateBacker.init}" />
+    </f:metadata>
+
     <ui:define name="content">
         <h:form id="f-create-report"
                 enctype="multipart/form-data"
@@ -49,14 +54,14 @@
 
             <h:commandButton value="#{labels.create}" action="#{reportCreateBacker.create}"/>
 
-            <h:panelGroup styleClass="row" layout="block">
-                <b:pagitable id="p-attachments"
-                             paginator="#{reportCreateBacker.attachmentsPaginator}"
-                             simple="true">
+            <!-- TODO Adding attachment when post content is empty will trigger a "value is required" message and will
+                 not add attachment. -->
+            <ul>
+                <ui:repeat var="attachment" value="#{reportCreateBacker.attachments}">
                     <!-- TODO Specification says h:link. What would it link to? -->
-                    <h:column><h:outputText value="#{var.name}"></h:outputText></h:column>
-                </b:pagitable>
-            </h:panelGroup>
+                    <li><h:outputText value="#{attachment.name}"></h:outputText></li>
+                </ui:repeat>
+            </ul>
 
             <!-- TODO It doesn't want to go into block layout. -->
             <h:panelGroup styleClass="row"

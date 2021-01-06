@@ -79,8 +79,6 @@ public class ReportCreateBackerTest {
 
     private Configuration configuration;
 
-    private Map<String, String> paramMap;
-
     @BeforeEach
     public void setUp() throws Exception {
         reportCreateBacker = new ReportCreateBacker(applicationSettings, reportService, topicService, session, ectx,
@@ -101,33 +99,24 @@ public class ReportCreateBackerTest {
         configuration = mock(Configuration.class);
         lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
         lenient().doReturn(5).when(configuration).getMaxAttachmentsPerPost();
-        paramMap = mock(Map.class);
-        lenient().doReturn(paramMap).when(ectx).getRequestParameterMap();
     }
 
     @Test
     public void testInit() {
-        doReturn("1").when(paramMap).get("t");
         User userMock = mock(User.class);
         doReturn(userMock).when(session).getUser();
         Topic topicMock = mock(Topic.class);
         doReturn(topicMock).when(topicService).getTopicByID(1);
+        reportCreateBacker.setTopicID(1);
         reportCreateBacker.init();
         assertEquals(userMock, reportCreateBacker.getReport().getAuthorship().getCreator());
         assertEquals(topicMock, reportCreateBacker.getReport().getTopic().get());
     }
 
     @Test
-    public void testInitWhenParamInvalid() {
-        doReturn(null).when(paramMap).get("t");
-        reportCreateBacker.init();
-        verify(session, times(0)).getUser();
-    }
-
-    @Test
     public void testInitWhenNoUser() throws Exception {
-        doReturn("1").when(paramMap).get("t");
         doReturn(null).when(session).getUser();
+        reportCreateBacker.setTopicID(1);
         reportCreateBacker.init();
         verify(ectx).redirect(any());
         assertTrue(reportCreateBacker.isBanned());
@@ -135,9 +124,9 @@ public class ReportCreateBackerTest {
 
     @Test
     public void testInitWhenNoTopic() throws Exception {
-        doReturn("1").when(paramMap).get("t");
         doReturn(mock(User.class)).when(session).getUser();
         doReturn(null).when(topicService).getTopicByID(anyInt());
+        reportCreateBacker.setTopicID(1);
         reportCreateBacker.init();
         verify(ectx).redirect(any());
         assertTrue(reportCreateBacker.isBanned());
@@ -145,10 +134,10 @@ public class ReportCreateBackerTest {
 
     @Test
     public void testInitWhenBanned() throws Exception {
-        doReturn("1").when(paramMap).get("t");
         doReturn(mock(User.class)).when(session).getUser();
         doReturn(mock(Topic.class)).when(topicService).getTopicByID(anyInt());
         doReturn(true).when(topicService).isBanned(any(), any());
+        reportCreateBacker.setTopicID(1);
         reportCreateBacker.init();
         verify(ectx).redirect(any());
         assertTrue(reportCreateBacker.isBanned());
@@ -179,7 +168,6 @@ public class ReportCreateBackerTest {
         doReturn(attachment.getName()).when(uploadedAttachment).getSubmittedFileName();
         doReturn(attachment.getMimetype()).when(uploadedAttachment).getContentType();
 
-        reportCreateBacker.setAttachmentsPaginator(mock(Paginator.class));
         reportCreateBacker.setAttachments(new ArrayList<>());
         reportCreateBacker.saveAttachment();
         assertTrue(reportCreateBacker.getAttachments().contains(attachment));
@@ -219,11 +207,6 @@ public class ReportCreateBackerTest {
         reportCreateBacker.setAttachments(new LinkedList<>(Arrays.asList(new Attachment(), new Attachment())));
         reportCreateBacker.deleteAllAttachments();
         assertEquals(0, reportCreateBacker.getAttachments().size());
-    }
-
-    @Test
-    public void testIsBanned() {
-        // TODO
     }
 
     @Test

@@ -33,14 +33,12 @@ public class ReportService implements Serializable {
     /**
      * Notification service used for sending notifications.
      */
-    @Inject
-    NotificationService notificationService;
+    private final NotificationService notificationService;
 
     /**
      * Post service used for creating posts.
      */
-    @Inject
-    PostService postService;
+    private final PostService postService;
 
     /**
      * Transaction manager used for creating transactions.
@@ -60,13 +58,18 @@ public class ReportService implements Serializable {
     /**
      * Constructs a new report service with the given dependencies.
      *
-     * @param transactionManager The transaction manager to use for creating transactions.
-     * @param feedbackEvent      The feedback event to use for user feedback.
-     * @param messagesBundle     The resource bundle for feedback messages.
+     * @param notificationService The notification service to use.
+     * @param postService         The post service to use.
+     * @param transactionManager  The transaction manager to use for creating transactions.
+     * @param feedbackEvent       The feedback event to use for user feedback.
+     * @param messagesBundle      The resource bundle for feedback messages.
      */
     @Inject
-    public ReportService(final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
+    public ReportService(final NotificationService notificationService, final PostService postService,
+                         final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
                          final @RegistryKey("messages") ResourceBundle messagesBundle) {
+        this.notificationService = notificationService;
+        this.postService = postService;
         this.transactionManager = transactionManager;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;

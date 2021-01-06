@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
 /**
@@ -61,8 +62,8 @@ public class PostDBGateway implements PostGateway {
             User modifier = post.getAuthorship().getModifier();
             PreparedStatement statement = new StatementParametrizer(stmt)
                     .string(post.getContent())
-                    .integer(creator == null ? null : creator.getId())
-                    .integer(modifier == null ? null : modifier.getId())
+                    .object(creator == null ? null : creator.getId(), Types.INTEGER)
+                    .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
                     .integer(post.getReport().get().getId())
                     .toStatement();
             statement.executeUpdate();

@@ -41,6 +41,9 @@ public class ReportServiceTest {
     private ReportService service;
 
     @Mock
+    private NotificationService notificationService;
+
+    @Mock
     private PostService postService;
 
     @Mock
@@ -64,12 +67,12 @@ public class ReportServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new ReportService(transactionManager, feedbackEvent, ResourceBundleMocker.mock(""));
+        service = new ReportService(notificationService, postService, transactionManager, feedbackEvent,
+                ResourceBundleMocker.mock(""));
         List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
         testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
                 mock(ZonedDateTime.class), null, null, new Lazy<>(mock(Topic.class)));
-        service.postService = postService;
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(reportGateway).when(tx).newReportGateway();

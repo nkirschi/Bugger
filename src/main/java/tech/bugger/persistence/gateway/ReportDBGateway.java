@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,8 +84,8 @@ public class ReportDBGateway implements ReportGateway {
                     .string(report.getTitle())
                     .string(report.getType().name())
                     .string(report.getSeverity().name())
-                    .integer(creator == null ? null : creator.getId())
-                    .integer(modifier == null ? null : modifier.getId())
+                    .object(creator == null ? null : creator.getId(), Types.INTEGER)
+                    .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
                     .integer(report.getTopic().get().getId())
                     .toStatement();
             statement.executeUpdate();
