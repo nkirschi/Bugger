@@ -33,6 +33,10 @@ class HomeBackerTest {
     @Mock
     private TopicService topicService;
 
+    private Topic testTopic1 = new Topic(1, "Hi", "senberg");
+    private Topic testTopic2 = new Topic(2, "Hi", "performance");
+    private Topic testTopic3 = new Topic(3, "Hi", "de and seek");
+
     @BeforeEach
     public void setUp() {
         this.homeBacker = new HomeBacker(session, notificationService, topicService);
@@ -45,9 +49,9 @@ class HomeBackerTest {
     @Test
     public void testInit() {
         List<Topic> topicsMock = new ArrayList<>();
-        topicsMock.add(new Topic(1, "Hi", "senberg"));
-        topicsMock.add(new Topic(2, "Hi", "performance"));
-        topicsMock.add(new Topic(3, "Hi", "de and seek"));
+        topicsMock.add(testTopic1);
+        topicsMock.add(testTopic2);
+        topicsMock.add(testTopic3);
         doReturn(topicsMock).when(topicService).selectTopics(any());
         doReturn(topicsMock.size()).when(topicService).countTopics();
         homeBacker.init();
@@ -62,6 +66,6 @@ class HomeBackerTest {
     public void testLastChange() {
         ZonedDateTime mockDate = ZonedDateTime.now();
         doReturn(mockDate).when(topicService).lastChange(any());
-        assertEquals(mockDate, homeBacker.lastChange(new Topic(1, "Hi", "senberg")));
+        assertEquals(mockDate, homeBacker.lastChange(testTopic1));
     }
 }
