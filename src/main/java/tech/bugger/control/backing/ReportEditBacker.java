@@ -2,11 +2,14 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
+import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.faces.context.FacesContext;
@@ -32,8 +35,13 @@ public class ReportEditBacker implements Serializable {
     private Topic destination;
     private boolean displayMoveDialog;
 
+    private boolean priviledged;
+
     @Inject
     private transient ReportService reportService;
+
+    @Inject
+    private transient TopicService topicService;
 
     @Inject
     private UserSession session;
@@ -45,17 +53,14 @@ public class ReportEditBacker implements Serializable {
      * Initializes the report edit page. Loads the report to be edited and checks if the user is allowed to edit the
      * report. If this is not the case, acts as if the page did not exist.
      */
+    @PostConstruct
     public void init() {
-
-    }
-
-    /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
-     *
-     * @param feedback The feedback with details on what to display.
-     */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
-
+        report = reportService.getReportByID(reportID);
+        Topic topic = report.getTopic().get();
+        User user = session.getUser();
+        priviledged = user.equals(report.getAuthorship().getCreator())
+                || user.isAdministrator()
+                || topicService.isModerator(user, topic);
     }
 
     /**

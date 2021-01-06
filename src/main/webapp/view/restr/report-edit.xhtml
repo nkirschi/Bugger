@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets"
+      lang="#{userSession.locale.language}" xml:lang="#{userSession.locale.language}">
+
+<ui:composition template="../../WEB-INF/template/main.xhtml">
+    <ui:param name="title" value="#{labels.report_edit_title}"/>
+
+    <ui:define name="content">
+        <h:form id="f-report-edit"
+                enctype="multipart/form-data"
+                rendered="#{reportEditBacker.isPrivileged}">
+            <h:panelGrid columns="2">
+                <h:outputLabel id="o-title" for="it-title" value="#{labels.report_title}"/>
+                <h:inputText id="it-title" value="#{reportEditBacker.report.title}" required="true"/>
+                <h:panelGroup/>
+                <h:message for="it-title"/>
+
+                <h:outputLabel id="o-type" for="s-type" value="#{labels.report_type}"/>
+                <h:selectOneMenu id="s-type" value="#{reportEditBacker.report.type}">
+                    <f:selectItems value="#{reportEditBacker.reportTypes}" var="type"
+                                   itemValue="#{type}" itemLabel="#{labels['report_type.'.concat(type)]}" />
+                </h:selectOneMenu>
+                <h:panelGroup/>
+                <h:message for="s-type"/>
+
+                <h:outputLabel id="o-severity" for="s-severity" value="#{labels.report_severity}"/>
+                <h:selectOneMenu id="s-severity" value="#{reportEditBacker.report.severity}">
+                    <f:selectItems value="#{reportEditBacker.reportSeverities}" var="severity"
+                                   itemValue="#{severity}" itemLabel="#{labels['report_severity.'.concat(severity)]}" />
+                </h:selectOneMenu>
+                <h:panelGroup/>
+                <h:message for="s-severity"/>
+
+                <h:outputLabel id="o-version" for="it-version" value="#{labels.report_version}"/>
+                <h:inputText id="it-version" value="#{reportEditBacker.report.version}"/>
+                <h:panelGroup/>
+                <h:message for="it-version"/>
+            </h:panelGrid>
+
+            <h:commandButton value="#{labels.report_edit_submit}" action="#{reportCreateBacker.saveChanges}"/>
+        </h:form>
+
+        <h:form id="f-confirm">
+
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>
