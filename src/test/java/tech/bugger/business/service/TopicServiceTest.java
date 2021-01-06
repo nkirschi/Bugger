@@ -92,13 +92,13 @@ class TopicServiceTest {
     @Test
     public void testGetNumberOfTopics() {
         doReturn(testNumberOfTopics).when(topicGateway).countTopics();
-        assertEquals(testNumberOfTopics, topicService.getNumberOfTopics());
+        assertEquals(testNumberOfTopics, topicService.countTopics());
     }
 
     @Test
     public void testGetNumberOfTopicsWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertEquals(0, topicService.getNumberOfTopics());
+        assertEquals(0, topicService.countTopics());
         verify(feedbackEvent).fire(any());
     }
 
