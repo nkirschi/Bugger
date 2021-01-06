@@ -29,7 +29,9 @@
                                     <f:validator validatorId="usernameRegexValidator"/>
                                     <f:validator validatorId="usernameAssignedValidator"/>
                                 </h:inputText>
-                                <h:message for="it-username" styleClass="text-danger"/>
+                                <h:outputLabel id="ol-username-hint" value="#{labels['register.username_hint']}"
+                                               styleClass="small form-text text-muted"/>
+                                <h:message for="it-username" styleClass="error"/>
                             </h:panelGroup>
 
                             <h:panelGroup layout="block" styleClass="form-group">
@@ -40,7 +42,9 @@
                                     <f:validator validatorId="emailRegexValidator"/>
                                     <f:validator validatorId="emailAssignedValidator"/>
                                 </h:inputText>
-                                <h:message for="it-email" styleClass="text-danger"/>
+                                <h:outputLabel id="ol-email-hint" value="#{labels['register.email_hint']}"
+                                               styleClass="small form-text text-muted"/>
+                                <h:message for="it-email" styleClass="error"/>
                             </h:panelGroup>
 
                             <h:panelGroup layout="block" styleClass="form-group">
@@ -49,7 +53,7 @@
                                 <h:inputText id="it-first-name" value="#{registerBacker.user.firstName}" required="true"
                                              a:maxlength="#{Constants.SMALL_FIELD}" styleClass="form-control"
                                              a:placeholder="#{labels['register.first_name']}"/>
-                                <h:message for="it-first-name" styleClass="text-danger"/>
+                                <h:message for="it-first-name" styleClass="error"/>
                             </h:panelGroup>
 
                             <h:panelGroup layout="block" styleClass="form-group">
@@ -58,7 +62,7 @@
                                 <h:inputText id="it-last-name" value="#{registerBacker.user.lastName}" required="true"
                                              a:maxlength="#{Constants.SMALL_FIELD}" styleClass="form-control"
                                              a:placeholder="#{labels['register.last_name']}"/>
-                                <h:message for="it-last-name" styleClass="text-danger"/>
+                                <h:message for="it-last-name" styleClass="error"/>
                             </h:panelGroup>
 
                             <div class="d-flex justify-content-between">
