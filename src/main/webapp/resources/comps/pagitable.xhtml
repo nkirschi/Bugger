@@ -83,6 +83,8 @@
                                  type="submit" styleClass="btn btn-sm font-weight-bold"
                                  binding="#{cc.refreshBtn}"/>
             </h:form>
+            <h:panelGroup id="pg-layout-fix" layout="block"
+                          rendered="#{not cc.attrs.paginator.isEmpty() and cc.attrs.simple}"/>
         </h:panelGroup>
     </cc:implementation>
 </h:body>
