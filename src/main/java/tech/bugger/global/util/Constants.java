@@ -52,4 +52,14 @@ public final class Constants {
      */
     public static final int LARGE_AREA = 100_000;
 
+    /**
+     * Regular expression for a comma-separated list of integers.
+     */
+    public static final String INTEGER_LIST_REGEX = "^\\d+(,\\d+)*$";
+
+    /**
+     * Regular expression for a comma-separated list of file extensions.
+     */
+    public static final String EXTENSION_LIST_REGEX = "^\\.[^,]+(,\\s?\\.[^,\\s\\.]+)*$";
+
 }
