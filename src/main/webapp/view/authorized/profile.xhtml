@@ -10,15 +10,13 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:b="http://tech.bugger/tags">
 
-<ui:composition template="../../WEB-INF/template/main.xhtml">
+<ui:composition template="/WEB-INF/template/main.xhtml">
     <ui:param name="title" value="#{(labels.profile_page).concat(' ').concat(profileBacker.user.username)}"/>
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
 
     <ui:define name="content">
-        <h:outputText id="ot-page-title" styleClass="h1" value="#{labels.profile_page}"/>
-
         <!-- Renders the popup dialog for changing the profile owner's administrator status. -->
         <h:form id="f-change-status" rendered="#{profileBacker.displayDialog == 'ADMIN'}">
             <h:panelGroup class="row" layout="block">

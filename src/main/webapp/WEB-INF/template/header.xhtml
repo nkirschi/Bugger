@@ -41,11 +41,12 @@
                 </h:link>
             </h:panelGroup>
         </h:panelGroup>
+        <!-- TODO style these like buttons -->
         <h:panelGroup id="p-authentication" rendered="#{userSession.user == null}">
             <!-- TODO add login outcome -->
-            <h:button id="b-login" value="#{labels.login}" styleClass="button" outcome="#"/>
-            <h:button id="b-register" value="#{labels.register}" styleClass="button"
-                      outcome="../public/register.xhtml"/>
+            <h:link id="l-login" value="#{labels.login}" styleClass="button" outcome="/view/public/home"/>
+            <h:link id="l-register" value="#{labels.register}" styleClass="button"
+                      outcome="/view/public/register.xhtml"/>
         </h:panelGroup>
     </ui:composition>
 </html>
