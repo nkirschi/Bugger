@@ -41,8 +41,7 @@
                 <h:panelGroup layout="block" id="pg-first-page"
                               styleClass="page-item #{cc.attrs.paginator.isFirstPage() ? 'disabled' : ''}">
                     <h:commandButton id="cb-first-page" value="&lt;&lt;" action="#{cc.attrs.paginator.firstPage}"
-                                     styleClass="page-link btn btn-link font-weight-bold"
-                                     rendered="#{not cc.attrs.simple}">
+                                     styleClass="page-link btn btn-link font-weight-bold">
                     </h:commandButton>
                 </h:panelGroup>
                 <h:panelGroup layout="block" id="pg-prev-page"
@@ -52,7 +51,7 @@
                     </h:commandButton>
                 </h:panelGroup>
                 <h:inputText id="i-curr-page" value="#{cc.attrs.paginator.currentPage}"
-                             rendered="#{not cc.attrs.simple}" styleClass="form-control form-control-sm text-center"
+                             styleClass="form-control form-control-sm text-center"
                              validatorMessage="#{messages['paginator.not_in_range']}">
                     <f:validateLongRange minimum="1" maximum="#{cc.attrs.paginator.determineLastPageIndex()}"/>
                 </h:inputText>
@@ -65,14 +64,13 @@
                 <h:panelGroup layout="block" id="pg-last-page"
                               styleClass="page-item #{cc.attrs.paginator.isLastPage() ? 'disabled' : ''}">
                     <h:commandButton id="cb-last-page" value="&gt;&gt;" action="#{cc.attrs.paginator.lastPage}"
-                                     styleClass="page-link btn btn-link font-weight-bold"
-                                     rendered="#{not cc.attrs.simple}">
+                                     styleClass="page-link btn btn-link font-weight-bold">
                     </h:commandButton>
                 </h:panelGroup>
             </h:form>
 
             <h:form id="f-entries" styleClass="form-inline p-2"
-                    rendered="#{not cc.attrs.paginator.isEmpty() and not cc.attrs.simple}">
+                    rendered="#{not cc.attrs.paginator.isEmpty()}">
                 <h:outputText id="ot-entriesPP" value="#{labels['paginator.entries_per_page']}:&nbsp;"/>
                 <h:selectOneMenu id="s-entriesPP" value="#{cc.attrs.paginator.selection.pageSize}"
                                  onchange="document.getElementById('#{cc.refreshBtnID}').click()"
