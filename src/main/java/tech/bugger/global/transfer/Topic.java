@@ -2,6 +2,7 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * DTO representing a topic.
@@ -10,8 +11,19 @@ public class Topic implements Serializable {
     @Serial
     private static final long serialVersionUID = 6600990552933685863L;
 
+    /**
+     * The id of the post.
+     */
     private int id;
+
+    /**
+     * The title of the post.
+     */
     private String title;
+
+    /**
+     * A short description of this topics purpose.
+     */
     private String description;
 
     /**
@@ -21,7 +33,7 @@ public class Topic implements Serializable {
      * @param title       The topic title.
      * @param description The topic description.
      */
-    public Topic(int id, String title, String description) {
+    public Topic(final int id, final String title, final String description) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -41,7 +53,7 @@ public class Topic implements Serializable {
      *
      * @param id The topic ID to be set.
      */
-    public void setId(int id) {
+    public void setId(final int id) {
         this.id = id;
     }
 
@@ -59,7 +71,7 @@ public class Topic implements Serializable {
      *
      * @param title The topic title to be set.
      */
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -77,7 +89,7 @@ public class Topic implements Serializable {
      *
      * @param description The topic description to be set.
      */
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
@@ -85,12 +97,18 @@ public class Topic implements Serializable {
      * Indicates whether some {@code other} topic is semantically equal to this topic.
      *
      * @param other The object to compare this topic to.
-     * @return {@code true} iff {@code other} is a semantically equivalent topic.
+     * @return {@code true} if {@code other} is a semantically equivalent topic.
      */
     @Override
-    public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+    public boolean equals(final Object other) {
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof Topic)) {
+            return false;
+        }
+        Topic o = (Topic) other;
+        return o.id == id;
     }
 
     /**
@@ -101,8 +119,7 @@ public class Topic implements Serializable {
      */
     @Override
     public int hashCode() {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        return Objects.hashCode(id);
     }
 
     /**
@@ -112,8 +129,7 @@ public class Topic implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return title + " (" + id + "): " + description.substring(0, 100);
     }
 
 }

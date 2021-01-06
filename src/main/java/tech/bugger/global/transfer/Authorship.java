@@ -3,6 +3,7 @@ package tech.bugger.global.transfer;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 /**
  * DTO representing content authorship metadata.
@@ -13,9 +14,24 @@ public class Authorship implements Serializable {
     @Serial
     private static final long serialVersionUID = -1621253242478497728L;
 
+    /**
+     * The User listed as the original author of the content.
+     */
     private User creator;
+
+    /**
+     * The Point in Time where the creation of the content happened.
+     */
     private ZonedDateTime creationDate;
+
+    /**
+     * The user listed as the last modifier of the content.
+     */
     private User modifier;
+
+    /**
+     * he Point in Time where the last modification of the content happened.
+     */
     private ZonedDateTime modifiedDate;
 
     /**
@@ -26,7 +42,7 @@ public class Authorship implements Serializable {
      * @param modifier     The last modifier of the associated content.
      * @param modifiedDate The last modification date of the associated content.
      */
-    public Authorship(User creator, ZonedDateTime creationDate, User modifier, ZonedDateTime modifiedDate) {
+    public Authorship(final User creator, final ZonedDateTime creationDate, final User modifier, final ZonedDateTime modifiedDate) {
         this.creator = creator;
         this.creationDate = creationDate;
         this.modifier = modifier;
@@ -47,7 +63,7 @@ public class Authorship implements Serializable {
      *
      * @param creator The original creator.
      */
-    public void setCreator(User creator) {
+    public void setCreator(final User creator) {
         this.creator = creator;
     }
 
@@ -65,7 +81,7 @@ public class Authorship implements Serializable {
      *
      * @param modifier The user responsible for the last modification.
      */
-    public void setModifier(User modifier) {
+    public void setModifier(final User modifier) {
         this.modifier = modifier;
     }
 
@@ -83,7 +99,7 @@ public class Authorship implements Serializable {
      *
      * @param creationDate The original creation date.
      */
-    public void setCreationDate(ZonedDateTime creationDate) {
+    public void setCreationDate(final ZonedDateTime creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -101,7 +117,7 @@ public class Authorship implements Serializable {
      *
      * @param modifiedDate The last modification date.
      */
-    public void setModifiedDate(ZonedDateTime modifiedDate) {
+    public void setModifiedDate(final ZonedDateTime modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
 
@@ -112,9 +128,18 @@ public class Authorship implements Serializable {
      * @return {@code true} iff {@code other} is a semantically equivalent authorship.
      */
     @Override
-    public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Authorship)) {
+            return false;
+        }
+        Authorship o = (Authorship) other;
+        return creator == o.creator
+                && creationDate == o.creationDate
+                && modifier == o.modifier
+                && modifiedDate == o.modifiedDate;
     }
 
     /**
@@ -125,8 +150,7 @@ public class Authorship implements Serializable {
      */
     @Override
     public int hashCode() {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        return Objects.hash(creator, creationDate, modifier, modifiedDate);
     }
 
     /**
@@ -136,8 +160,12 @@ public class Authorship implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "Authorship{"
+                + "creator=" + creator
+                + ", creationDate=" + creationDate
+                + ", modifier=" + modifier
+                + ", modifiedDate='" + modifiedDate
+                + '}';
     }
 
 }
