@@ -19,8 +19,15 @@
         <pattern value="/profile-edit"/>
         <view-id value="/faces/view/public/profile-edit.xhtml"/>
     </url-mapping>
+    <url-mapping id="profile">
+        <pattern value="/profile"/>
+        <query-param name="u">#{u}</query-param>
+        <view-id value="/faces/view/authorized/profile.xhtml"/>
+    </url-mapping>
     <url-mapping id="search">
         <pattern value="/search"/>
+        <query-param name="q">#{searchBacker.query}</query-param>
+        <query-param name="t">#{searchBacker.tab}</query-param>
         <view-id value="/faces/view/public/search.xhtml"/>
     </url-mapping>
     <url-mapping id="admin">
