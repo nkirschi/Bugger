@@ -52,7 +52,7 @@ public class SearchBacker implements Serializable {
     @Serial
     private static final long serialVersionUID = -1264737473650782156L;
 
-    private String searchQuery;
+    private String query;
     private Tab tab;
 
     private Paginator<Topic> topicResults;
@@ -175,15 +175,15 @@ public class SearchBacker implements Serializable {
     /**
      * @return The searchQuery.
      */
-    public String getSearchQuery() {
-        return searchQuery;
+    public String getQuery() {
+        return query;
     }
 
     /**
-     * @param searchQuery The searchQuery to set.
+     * @param query The searchQuery to set.
      */
-    public void setSearchQuery(String searchQuery) {
-        this.searchQuery = searchQuery;
+    public void setQuery(String query) {
+        this.query = query;
     }
 
     /**
