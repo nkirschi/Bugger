@@ -19,6 +19,7 @@ import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.event.Event;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,13 +78,6 @@ class TopicServiceTest {
     }
 
     @Test
-    public void testGetSelectedTopicsWhenNotFound() {
-        doThrow(NotFoundException.class).when(topicGateway).selectTopics(any());
-        assertNull(topicService.getSelectedTopics(testSelection));
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
     public void testGetSelectedTopicsWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
         assertNull(topicService.getSelectedTopics(testSelection));
@@ -105,6 +99,42 @@ class TopicServiceTest {
     public void testGetNumberOfTopicsWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
         assertEquals(0, topicService.getNumberOfTopics());
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testLastChange() throws Exception {
+        ZonedDateTime lastChange = ZonedDateTime.now();
+        doReturn(lastChange).when(topicGateway).determineLastActivity(any());
+        assertEquals(lastChange, topicService.lastChange(testTopic1));
+    }
+
+    @Test
+    public void testLastChangeWhenNoChange() throws Exception {
+        doReturn(null).when(topicGateway).determineLastActivity(any());
+        assertNull(topicService.lastChange(testTopic1));
+    }
+
+    @Test
+    public void testLastChangeWhenTopicIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> topicService.lastChange(null));
+    }
+
+    @Test
+    public void testLastChangeWhenTopicIDIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> topicService.lastChange(new Topic()));
+    }
+
+    @Test
+    public void testLastChangeWhenNotFound() throws Exception {
+        doThrow(NotFoundException.class).when(topicGateway).determineLastActivity(any());
+        assertNull(topicService.lastChange(testTopic1));
+    }
+
+    @Test
+    public void testLastChangeWhenCommitFails() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertNull(topicService.lastChange(testTopic1));
         verify(feedbackEvent).fire(any());
     }
 }
