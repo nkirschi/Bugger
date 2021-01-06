@@ -80,7 +80,7 @@ public class HomeBacker implements Serializable {
         topics = new Paginator<Topic>("", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Topic> fetch() {
-                return topicService.getSelectedTopics(getSelection());
+                return topicService.selectTopics(getSelection());
             }
 
             @Override

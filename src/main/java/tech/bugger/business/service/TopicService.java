@@ -166,7 +166,7 @@ public class TopicService implements Serializable {
      * @param selection Information on which part of the topic results to get.
      * @return A list of topics containing the selected results.
      */
-    public List<Topic> getSelectedTopics(final Selection selection) {
+    public List<Topic> selectTopics(final Selection selection) {
         if (selection == null) {
             IllegalArgumentException e = new IllegalArgumentException("Selection cannot be null.");
             log.error("Error when loading topics with Selection null.", e);

@@ -48,7 +48,7 @@ class HomeBackerTest {
         topicsMock.add(new Topic(1, "Hi", "senberg"));
         topicsMock.add(new Topic(2, "Hi", "performance"));
         topicsMock.add(new Topic(3, "Hi", "de and seek"));
-        doReturn(topicsMock).when(topicService).getSelectedTopics(any());
+        doReturn(topicsMock).when(topicService).selectTopics(any());
         doReturn(topicsMock.size()).when(topicService).getNumberOfTopics();
         homeBacker.init();
         assertAll(
