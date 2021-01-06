@@ -173,7 +173,7 @@ public class TopicService implements Serializable {
             throw e;
         }
 
-        List<Topic> selectedTopics = null;
+        List<Topic> selectedTopics;
         try (Transaction tx = transactionManager.begin()) {
             selectedTopics = tx.newTopicGateway().selectTopics(selection);
             tx.commit();
