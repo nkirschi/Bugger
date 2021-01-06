@@ -13,8 +13,14 @@ import java.util.List;
  */
 public class PostDBGateway implements PostGateway {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(PostDBGateway.class);
 
+    /**
+     * Database connection used by this gateway.
+     */
     private Connection conn;
 
     /**
@@ -22,7 +28,7 @@ public class PostDBGateway implements PostGateway {
      *
      * @param conn The database connection to use for the gateway.
      */
-    public PostDBGateway(Connection conn) {
+    public PostDBGateway(final Connection conn) {
         this.conn = conn;
     }
 
@@ -30,7 +36,7 @@ public class PostDBGateway implements PostGateway {
      * {@inheritDoc}
      */
     @Override
-    public Post getPostByID(int id) {
+    public Post findPost(final int id) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -39,7 +45,7 @@ public class PostDBGateway implements PostGateway {
      * {@inheritDoc}
      */
     @Override
-    public void createPost(Post post) {
+    public void createPost(final Post post) {
         // TODO Auto-generated method stub
 
     }
@@ -48,7 +54,7 @@ public class PostDBGateway implements PostGateway {
      * {@inheritDoc}
      */
     @Override
-    public void updatePost(Post post) {
+    public void updatePost(final Post post) {
         // TODO Auto-generated method stub
 
     }
@@ -57,7 +63,7 @@ public class PostDBGateway implements PostGateway {
      * {@inheritDoc}
      */
     @Override
-    public void deletePost(Post post) {
+    public void deletePost(final Post post) {
         // TODO Auto-generated method stub
 
     }
@@ -66,7 +72,7 @@ public class PostDBGateway implements PostGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<Post> getPostsOfReport(Report report, Selection selection) {
+    public List<Post> selectPostsOfReport(final Report report, final Selection selection) {
         // TODO Auto-generated method stub
         return null;
     }
