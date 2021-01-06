@@ -10,6 +10,7 @@ import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
@@ -52,6 +53,7 @@ public class NotificationService implements Serializable {
      * @param feedbackEvent The feedback event to use for user feedback.
      * @param messagesBundle The resource bundle for feedback messages.
      */
+    @Inject
     public NotificationService(final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
                                final @RegistryKey("messages") ResourceBundle messagesBundle) {
         this.transactionManager = transactionManager;
