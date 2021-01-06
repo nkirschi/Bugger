@@ -104,7 +104,7 @@ public class Topic implements Serializable {
     /**
      * Indicates whether some {@code other} topic is semantically equal to this topic.
      *
-     * @param that The object to compare this topic to.
+     * @param other The object to compare this topic to.
      * @return {@code true} iff {@code other} is a semantically equivalent topic.
      */
     @Override
@@ -116,7 +116,7 @@ public class Topic implements Serializable {
             return false;
         }
         Topic topic = (Topic) other;
-        return this.id == topic.id;
+        return Objects.equals(this.id, topic.id);
     }
 
     /**
