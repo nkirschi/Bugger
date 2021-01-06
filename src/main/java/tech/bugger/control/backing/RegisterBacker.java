@@ -119,8 +119,9 @@ public class RegisterBacker {
             throw new InternalError("URL is invalid.", e);
         }
 
-        String domain = String.format("%s://%s", currentUrl.getProtocol(), currentUrl.getAuthority());
-        if (profileService.createUser(user) && authenticationService.register(user, domain)) {
+        String path = String.format("%s://%s%s", currentUrl.getProtocol(), currentUrl.getAuthority(),
+                ectx.getApplicationContextPath());
+        if (profileService.createUser(user) && authenticationService.register(user, path)) {
             log.debug("Registration for user " + user + " successful.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("register.success"), Feedback.Type.INFO));
             return "home.xhtml";
