@@ -77,7 +77,7 @@ public class HomeBacker implements Serializable {
      */
     @PostConstruct
     void init() {
-        topics = new Paginator<Topic>("", Selection.PageSize.NORMAL) {
+        topics = new Paginator<>("title", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Topic> fetch() {
                 return topicService.selectTopics(getSelection());
