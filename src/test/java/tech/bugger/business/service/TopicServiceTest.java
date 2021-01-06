@@ -132,43 +132,6 @@ class TopicServiceTest {
     public void testLastChangeWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(topicGateway).determineLastActivity(any());
         assertNull(topicService.lastChange(testTopic1));
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testLastChangeWhenCommitFails() throws Exception {
-        doThrow(TransactionException.class).when(tx).commit();
-        assertNull(topicService.lastChange(testTopic1));
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testLastChange() throws Exception {
-        ZonedDateTime lastChange = ZonedDateTime.now();
-        doReturn(lastChange).when(topicGateway).determineLastActivity(any());
-        assertEquals(lastChange, topicService.lastChange(testTopic1));
-    }
-
-    @Test
-    public void testLastChangeWhenNoChange() throws Exception {
-        doReturn(null).when(topicGateway).determineLastActivity(any());
-        assertNull(topicService.lastChange(testTopic1));
-    }
-
-    @Test
-    public void testLastChangeWhenTopicIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> topicService.lastChange(null));
-    }
-
-    @Test
-    public void testLastChangeWhenTopicIDIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> topicService.lastChange(new Topic()));
-    }
-
-    @Test
-    public void testLastChangeWhenNotFound() throws Exception {
-        doThrow(NotFoundException.class).when(topicGateway).determineLastActivity(any());
-        assertNull(topicService.lastChange(testTopic1));
     }
 
     @Test
