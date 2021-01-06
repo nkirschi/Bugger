@@ -5,7 +5,13 @@
     font-weight: bold;
 }
 
+.error {
+    color: #f00;
+}
 
+input.error, textarea.error {
+    border-color: #f00;
+}
 
 .header {
     position: absolute;

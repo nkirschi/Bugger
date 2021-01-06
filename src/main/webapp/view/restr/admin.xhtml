@@ -7,7 +7,6 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
 <ui:composition template="/WEB-INF/template/main.xhtml">
-    <!--@elvariable id="Constants" type="tech.bugger.global.util.Constants"-->
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="Constants"/>
     </f:metadata>
@@ -33,12 +32,14 @@
         <h:outputText value="#{labels.organization_settings}" styleClass="h2"/>
         <h:form id="f-organisation" enctype="multipart/form-data">
             <h:panelGrid columns="2">
+
+                <!-- organization name -->
                 <h:outputLabel id="o-name" for="it-name" value="#{labels.name}"/>
-                <h:inputText id="it-name" value="#{adminBacker.organization.name}"
+                <h:inputText id="it-name"
+                             value="#{adminBacker.organization.name}"
                              a:maxlength="#{Constants.SMALL_FIELD}"
-                             validatorMessage="#{messages.validate_maxlength}"
                              a:placeholder="#{labels.organization_name_placeholder}"
-                             styleClass="form-control">
+                             styleClass="form-control#{component.valid ? '' : ' error'}">
                     <f:validateLength maximum="#{Constants.SMALL_FIELD}"/>
                 </h:inputText>
                 <h:panelGroup/>
@@ -46,10 +47,10 @@
                     <h:outputText id="ot-name-hint"
                                   value="#{labels.organization_name_hint}"
                                   styleClass="small form-text text-muted"/>
-                    <h:message for="it-name"/>
+                    <h:message for="it-name" styleClass="error"/>
                 </h:panelGroup>
 
-
+                <!-- organization logo (later) -->
                 <h:outputLabel id="o-logo" for="g-logo" value="#{labels.logo}"/>
                 <h:panelGrid columns="1">
                     <!-- TODO upgrade to real image from DB -->
@@ -67,51 +68,52 @@
                     </h:panelGroup>
                 </h:panelGrid>
                 <h:panelGroup/>
-                <h:message for="i-logo"/>
+                <h:message for="i-logo" styleClass="error"/>
 
+                <!-- organization theme -->
                 <h:outputLabel id="o-theme" for="s-theme" value="#{labels.theme}"/>
                 <h:selectOneMenu id="s-theme" styleClass="form-control" value="#{adminBacker.organization.theme}">
                     <f:selectItems value="#{adminBacker.availableThemes}"/>
                 </h:selectOneMenu>
                 <h:panelGroup/>
                 <h:panelGroup>
-                    <h:message for="s-theme"/>
                     <h:outputText id="ot-theme-hint"
                                   value="#{labels.organization_theme_hint}"
                                   styleClass="small form-text text-muted"/>
+                    <h:message for="s-theme" styleClass="error"/>
                 </h:panelGroup>
 
+                <!-- organization imprint (Markdown) -->
                 <h:outputLabel id="o-imprint" for="it-imprint" value="#{labels.imprint}"/>
                 <h:inputTextarea id="it-imprint" value="#{adminBacker.organization.imprint}"
                                  a:maxlength="#{Constants.LARGE_AREA}"
-                                 validatorMessage="#{messages.validate_maxlength}"
-                                 styleClass="form-control">
+                                 styleClass="form-control#{component.valid ? '' : ' error'}">
                     <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
                 </h:inputTextarea>
                 <h:panelGroup/>
-                <h:message for="it-imprint"/>
+                <h:message for="it-imprint" styleClass="error"/>
 
+                <!-- organization privacy policy (Markdown) -->
                 <h:outputLabel id="o-privacy-policy" for="it-privacy-policy" value="#{labels.privacy_policy}"/>
                 <h:inputTextarea id="it-privacy-policy"
                                  value="#{adminBacker.organization.privacyPolicy}"
                                  a:maxlength="#{Constants.LARGE_AREA}"
-                                 validatorMessage="#{messages.validate_maxlength}"
-                                 styleClass="form-control">
+                                 styleClass="form-control#{component.valid ? '' : ' error'}">
                     <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
                 </h:inputTextarea>
                 <h:panelGroup/>
-                <h:message for="it-privacy-policy"/>
+                <h:message for="it-privacy-policy" styleClass="error"/>
 
+                <!-- organization support information (Markdown) -->
                 <h:outputLabel id="o-support-info" for="it-support-info" value="#{labels.support_info}"/>
                 <h:inputTextarea id="it-support-info"
                                  value="#{adminBacker.organization.supportInfo}"
                                  a:maxlength="#{Constants.LARGE_AREA}"
-                                 validatorMessage="#{messages.validate_maxlength}"
-                                 styleClass="form-control">
+                                 styleClass="form-control#{component.valid ? '' : ' error'}">
                     <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
                 </h:inputTextarea>
                 <h:panelGroup/>
-                <h:message for="it-support-info"/>
+                <h:message for="it-support-info" styleClass="error"/>
             </h:panelGrid>
             <h:commandButton value="#{labels.save}"
                              action="#{adminBacker.saveOrganization}"
@@ -119,10 +121,10 @@
         </h:form>
 
         <!-- application configuration form -->
-        <h:outputText value="#{labels.configuration_settings}"
-                      styleClass="h2"/>
+        <h:outputText value="#{labels.configuration_settings}" styleClass="h2"/>
         <h:form id="f-configuration">
             <h:panelGrid columns="2">
+                <!-- guest reading policy -->
                 <h:outputText value="#{labels.guest_reading}"/>
                 <h:panelGroup>
                     <h:selectBooleanCheckbox id="s-guest-reading"
@@ -132,9 +134,10 @@
                                    for="s-guest-reading"
                                    value="#{labels.guest_reading_detail}"/>
                 </h:panelGroup>
-
                 <h:panelGroup/>
-                <h:message for="s-guest-reading"/>
+                <h:message for="s-guest-reading" styleClass="error"/>
+
+                <!-- closed report policy -->
                 <h:outputText value="#{labels.closed_report_posting}"/>
                 <h:panelGroup>
                     <h:selectBooleanCheckbox id="s-closed-report-posting"
@@ -144,60 +147,76 @@
                                    value="#{labels.closed_report_posting_detail}"/>
                 </h:panelGroup>
                 <h:panelGroup/>
-                <h:message for="s-closed-report-posting"/>
+                <h:message for="s-closed-report-posting" styleClass="error"/>
 
+                <!-- user e-mail address format -->
                 <h:outputLabel id="o-user-email-format"
                                for="s-user-email-format"
                                value="#{labels.user_email_format}"/>
                 <h:inputText id="s-user-email-format"
                              value="#{adminBacker.configuration.userEmailFormat}"
                              validator="regexValidator"
-                             validatorMessage="#{messages.validate_maxlength}"
                              a:maxlength="#{Constants.LARGE_FIELD}"
-                             styleClass="form-control">
+                             styleClass="form-control#{component.valid ? '' : ' error'}">
                     <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>
                 </h:inputText>
                 <h:panelGroup/>
-                <h:message for="s-user-email-format"/>
+                <h:message for="s-user-email-format" styleClass="error"/>
 
-                <h:outputLabel id="o-allowed-file-extensions"
-                               for="it-allowed-file-extensions"
-                               value="#{labels.allowed_file_extensions}"/>
-                <h:inputTextarea id="it-allowed-file-extensions"
-                                 value="#{adminBacker.configuration.allowedFileExtensions}"
-                                 a:maxlength="#{Constants.SMALL_AREA}"
-                                 validatorMessage="#{messages.validate_maxlength}"
-                                 styleClass="form-control">
-                    <f:validateLength maximum="#{Constants.SMALL_AREA}"/>
-                </h:inputTextarea>
-                <h:panelGroup/>
-                <h:message for="it-allowed-file-extensions"/>
-
-                <h:outputLabel id="o-max-attachments-per-post"
-                               for="it-max-attachments-per-post"
-                               value="#{labels.max_attachments_per_post}"/>
-                <h:inputText id="it-max-attachments-per-post"
-                             value="#{adminBacker.configuration.maxAttachmentsPerPost}"
-                             styleClass="form-control"
-                             a:maxlength="#{Constants.SMALL_FIELD}"
-                             validatorMessage="#{messages.validate_nonnegative_number}">
-                    <f:validateLongRange minimum="0" maximum="#{Constants.SMALL_FIELD}"/>
-                </h:inputText>
-                <h:panelGroup/>
-                <h:message for="it-max-attachments-per-post"/>
-
+                <!-- definition of a user's voting weight -->
                 <h:outputLabel id="o-voting-weight-definition"
                                for="it-voting-weight-definition"
                                value="#{labels.voting_weight_definition}"/>
                 <h:inputText id="it-voting-weight-definition"
                              value="#{adminBacker.configuration.votingWeightDefinition}"
                              a:maxlength="#{Constants.LARGE_FIELD}"
-                             validatorMessage="#{messages.validate_maxlength}"
-                             styleClass="form-control">
+                             styleClass="form-control#{component.valid ? '' : ' error'}">
                     <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>
+                    <f:validateRegex pattern="#{Constants.INTEGER_LIST_REGEX}"/>
                 </h:inputText>
+                <h:panelGrid/>
+                <h:panelGrid>
+                    <h:message for="it-voting-weight-definition" styleClass="error"/>
+                    <h:outputText id="ot-voting-weight-definition-hint"
+                                  value="#{labels.voting_weight_definition_hint}"
+                                  styleClass="small form-text text-muted"/>
+                </h:panelGrid>
+
+                <!-- allowed file extensions for uploads -->
+                <h:outputLabel id="o-allowed-file-extensions"
+                               for="it-allowed-file-extensions"
+                               value="#{labels.allowed_file_extensions}"/>
+                <h:inputTextarea id="it-allowed-file-extensions"
+                                 value="#{adminBacker.configuration.allowedFileExtensions}"
+                                 a:maxlength="#{Constants.SMALL_AREA}"
+                                 styleClass="form-control#{component.valid ? '' : ' error'}">
+                    <f:validateLength maximum="#{Constants.SMALL_AREA}"/>
+                    <f:validateRegex pattern="#{Constants.EXTENSION_LIST_REGEX}"/>
+                </h:inputTextarea>
+                <h:panelGroup/>
+                <h:panelGroup>
+                    <h:message for="it-allowed-file-extensions" styleClass="error"/>
+                    <h:outputText id="ot-allowed-file-extensions-hint"
+                                  value="#{labels.allowed_file_extensions_hint}"
+                                  styleClass="small form-text text-muted"/>
+                </h:panelGroup>
+
+                <!-- maximum number of attachments per post -->
+                <h:outputLabel id="o-max-attachments-per-post"
+                               for="it-max-attachments-per-post"
+                               value="#{labels.max_attachments_per_post}"/>
+                <h:inputText id="it-max-attachments-per-post"
+                             value="#{adminBacker.configuration.maxAttachmentsPerPost}"
+                             styleClass="form-control#{component.valid ? '' : ' error'}"
+                             a:maxlength="#{Constants.SMALL_FIELD}"
+                             validatorMessage="#{messages.validate_nonnegative_number}">
+                    <f:validateLongRange minimum="0" maximum="#{Constants.SMALL_FIELD}"/>
+                </h:inputText>
+                <h:panelGroup/>
+                <h:message for="it-max-attachments-per-post" styleClass="error"/>
             </h:panelGrid>
-            <h:commandButton value="#{labels.save}" action="#{adminBacker.saveConfiguration}"
+            <h:commandButton value="#{labels.save}"
+                             action="#{adminBacker.saveConfiguration}"
                              styleClass="btn btn-primary"/>
         </h:form>
     </ui:define>
