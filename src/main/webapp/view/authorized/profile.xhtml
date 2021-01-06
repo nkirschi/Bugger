@@ -240,6 +240,7 @@
         <h:panelGroup class="row" layout="block" id="p-moderated">
             <h:panelGroup class="col-sm-12" layout="block" id="p-moderated-pagination">
                 <b:pagitable paginator="#{profileBacker.moderatedTopics}" simple="true">
+                    <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                     <h:column><h:outputText value="#{var}"/></h:column>
                 </b:pagitable>
             </h:panelGroup>
@@ -262,6 +263,7 @@
             <h:panelGroup class="col-sm-12" layout="block" id="p-sub-topics-pagination">
                 <b:pagitable paginator="#{profileBacker.topicSubscriptions}">
                     <b:column title="ID" paginator="#{profileBacker.topicSubscriptions}" key="id">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                         <h:outputText value="#{var}"/>
                     </b:column>
                 </b:pagitable>
@@ -284,6 +286,7 @@
             <h:panelGroup class="col-sm-12" layout="block" id="p-sub-reports-pagination">
                 <b:pagitable paginator="#{profileBacker.reportSubscriptions}">
                     <b:column title="ID" paginator="#{profileBacker.reportSubscriptions}" key="id">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
                         <h:outputText value="#{var}"/>
                     </b:column>
                 </b:pagitable>
@@ -306,6 +309,7 @@
             <h:panelGroup class="col-sm-12" layout="block" id="p-sub-users-pagination">
                 <b:pagitable paginator="#{profileBacker.userSubscriptions}">
                     <b:column title="ID" paginator="#{profileBacker.userSubscriptions}" key="id">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
                         <h:outputText value="#{var}"/>
                     </b:column>
                 </b:pagitable>

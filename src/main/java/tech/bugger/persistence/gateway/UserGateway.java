@@ -39,13 +39,13 @@ public interface UserGateway {
      * @return The number of posts that {@code user} has created.
      * @throws NotFoundException The user could not be found.
      */
-    public int getNumberOfPosts(User user) throws NotFoundException;
+    int getNumberOfPosts(User user) throws NotFoundException;
 
     /**
      * Retrieves the current number of administrators.
      * @return The number of administrators.
      */
-    public int getNumberOfAdmins();
+    int getNumberOfAdmins();
 
     /**
      * Retrieves a user by their ID.
