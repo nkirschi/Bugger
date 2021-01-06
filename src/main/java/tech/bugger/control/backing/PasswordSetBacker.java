@@ -1,7 +1,6 @@
 package tech.bugger.control.backing;
 
 import java.util.ResourceBundle;
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
 import javax.faces.context.FacesContext;
@@ -52,6 +51,11 @@ public class PasswordSetBacker {
     private final ResourceBundle messagesBundle;
 
     /**
+     * The current token parameter from the view.
+     */
+    private String tokenParam;
+
+    /**
      * The token being used to set a password.
      */
     private Token token;
@@ -90,15 +94,15 @@ public class PasswordSetBacker {
      * Initializes the page for setting a new password. Checks if the token for setting a new password is still valid.
      * If the user is already logged in, they are redirected to the home page.
      */
-    @PostConstruct
-    void init() {
+    public void init() {
         if (session.getUser() != null) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:base");
         }
 
-        token = authenticationService.findToken(fctx.getExternalContext().getRequestParameterMap().get("token"));
+        token = authenticationService.findToken(tokenParam);
         if (isValidToken()) {
             log.debug("Showing Password-Set page with token " + token + '.');
+            fctx.getExternalContext().getFlash().put("token", token);
         } else {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         }
@@ -110,11 +114,30 @@ public class PasswordSetBacker {
      * @return The site to redirect to or {@code null}.
      */
     public String setUserPassword() {
+        Token token = (Token) fctx.getExternalContext().getFlash().get("token");
         if (authenticationService.setPassword(token.getUser(), password, token.getValue())) {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("password_set.success"), Feedback.Type.INFO));
             return "pretty:base";
         }
         return null;
+    }
+
+    /**
+     * Returns the current token parameter.
+     *
+     * @return The current token parameter.
+     */
+    public String getTokenParam() {
+        return tokenParam;
+    }
+
+    /**
+     * Sets a new token parameter.
+     *
+     * @param tokenParam The token parameter to set.
+     */
+    public void setTokenParam(final String tokenParam) {
+        this.tokenParam = tokenParam;
     }
 
     /**
