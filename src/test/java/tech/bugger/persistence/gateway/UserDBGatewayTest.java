@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.ZonedDateTime;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,9 +19,18 @@ import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(DBExtension.class)
 @ExtendWith(LogExtension.class)
@@ -29,19 +41,29 @@ public class UserDBGatewayTest {
     private Connection connection;
 
     private User user;
+    private User admin;
 
     @BeforeEach
     public void setUp() throws Exception {
         connection = DBExtension.getConnection();
         gateway = new UserDBGateway(connection);
 
-        user = new User(null, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
-                Language.GERMAN, User.ProfileVisibility.MINIMAL, null, 3, false);
+        user = new User(12345, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
+                Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+        admin = new User(67890, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@admin.de", "Helgo", "Brötchen", new Lazy<>(new byte[]{1, 2, 3, 4}),
+                new byte[]{1}, "Ich bin der Administrator hier!", Language.ENGLISH, User.ProfileVisibility.MINIMAL,
+                ZonedDateTime.now(), null, true);
     }
 
     @AfterEach
     public void tearDown() throws Exception {
         connection.close();
+    }
+
+    private void deleteAllUsers() throws SQLException {
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute("DELETE FROM \"user\";");
+        }
     }
 
     @Test
@@ -143,6 +165,7 @@ public class UserDBGatewayTest {
 
     @Test
     public void testUpdateUserNullId() {
+        user.setId(null);
         assertThrows(IllegalArgumentException.class, () -> gateway.updateUser(user));
     }
 
@@ -187,6 +210,86 @@ public class UserDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).getUserByUsername("testuser"));
+    }
+
+    @Test
+    public void testGetNumberOfAdmins() throws NotFoundException {
+        gateway.createUser(user);
+        gateway.createUser(admin);
+        //One inserted admin plus default admin.
+        assertEquals(2, gateway.getNumberOfAdmins());
+    }
+
+    @Test
+    public void testGetNumberOfAdminsNoAdmins() throws SQLException {
+        deleteAllUsers();
+        assertEquals(0, gateway.getNumberOfAdmins());
+    }
+
+    @Test
+    public void testGetNumberOfAdminsEmptyResultSet() throws SQLException {
+        ResultSet resultSetMock = mock(ResultSet.class);
+        PreparedStatement stmtMock = mock(PreparedStatement.class);
+        Connection connectionSpy = spy(connection);
+        doReturn(false).when(resultSetMock).next();
+        doReturn(resultSetMock).when(stmtMock).executeQuery();
+        doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
+        assertEquals(0, new UserDBGateway(connectionSpy).getNumberOfAdmins());
+        reset(connectionSpy, stmtMock);
+    }
+
+    @Test
+    public void testGetNumberOfAdminsDatabaseError() throws SQLException {
+        Connection connSpy = spy(connection);
+        doThrow(SQLException.class).when(connSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new UserDBGateway(connSpy).getNumberOfAdmins()
+        );
+    }
+
+    @Test
+    public void testGetUserByID() throws NotFoundException {
+        gateway.createUser(user);
+        User helga = gateway.getUserByID(user.getId());
+        assertEquals(user, helga);
+    }
+
+    @Test
+    public void testGetUserByIDNotFound() {
+        assertThrows(NotFoundException.class,
+                () -> gateway.getUserByID(2222)
+        );
+    }
+
+    @Test
+    public void testGetUserByIDDatabaseError() throws SQLException {
+        Connection connSpy = spy(connection);
+        doThrow(SQLException.class).when(connSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new UserDBGateway(connSpy).getUserByID(user.getId())
+        );
+    }
+
+    @Test
+    public void testGetNumberOfPosts() throws NotFoundException {
+        gateway.createUser(user);
+        assertEquals(0, gateway.getNumberOfPosts(user));
+    }
+
+    @Test
+    public void testGetNumberOfPostNoEntries() {
+        assertThrows(NotFoundException.class,
+                () -> gateway.getNumberOfPosts(user)
+        );
+    }
+
+    @Test
+    public void testGetNumberOfPostsDatabaseError() throws SQLException {
+        Connection connSpy = spy(connection);
+        doThrow(SQLException.class).when(connSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new UserDBGateway(connSpy).getNumberOfPosts(user)
+        );
     }
 
 }

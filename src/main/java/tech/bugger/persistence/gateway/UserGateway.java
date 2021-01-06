@@ -42,20 +42,10 @@ public interface UserGateway {
     int getNumberOfPosts(User user) throws NotFoundException;
 
     /**
-     * Retrieves the voting weight of a user.
-     *
-     * @param user The user whose voting weight to look up.
-     * @return The user's voting weight.
-     * @throws NotFoundException The user could not be found.
+     * Retrieves the current number of administrators.
+     * @return The number of administrators.
      */
-    int getVotingWeight(User user) throws NotFoundException;
-
-    /**
-     * Retrieves the list of email addresses of all administrators.
-     *
-     * @return The list of email addresses of all administrators.
-     */
-    List<String> getAdminEmails();
+    int getNumberOfAdmins();
 
     /**
      * Retrieves a user by their ID.
