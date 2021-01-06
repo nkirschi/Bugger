@@ -85,7 +85,7 @@ public class HomeBacker implements Serializable {
 
             @Override
             protected int totalSize() {
-                return topicService.getNumberOfTopics();
+                return topicService.countTopics();
             }
         };
     }

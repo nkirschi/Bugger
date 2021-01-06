@@ -278,7 +278,7 @@ public class TopicService implements Serializable {
      *
      * @return The number of topics.
      */
-    public int getNumberOfTopics() {
+    public int countTopics() {
         int numberOfTopics = 0;
         try (Transaction tx = transactionManager.begin()) {
             numberOfTopics = tx.newTopicGateway().countTopics();
