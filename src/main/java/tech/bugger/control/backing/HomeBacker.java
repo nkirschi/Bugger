@@ -3,7 +3,6 @@ package tech.bugger.control.backing;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.NotificationService;
 import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
@@ -11,8 +10,6 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -104,15 +101,6 @@ public class HomeBacker implements Serializable {
     }
 
     /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
-     *
-     * @param feedback The feedback with details on what to display.
-     */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
-
-    }
-
-    /**
      * Irreversibly deletes the current {@code notificationToBeDeleted}.
      */
     public void deleteNotification() {
@@ -134,7 +122,7 @@ public class HomeBacker implements Serializable {
      * @param topic The topic in question.
      * @return {@code true} if the user is subscribed to the topic, {@code false} otherwise.
      */
-    public boolean isSubscribed(Topic topic) {
+    public boolean isSubscribed(final Topic topic) {
         return false;
     }
 
