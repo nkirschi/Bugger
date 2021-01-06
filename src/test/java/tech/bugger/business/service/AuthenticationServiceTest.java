@@ -28,13 +28,8 @@ import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -60,10 +55,11 @@ public class AuthenticationServiceTest {
     private Token testToken;
 
     private final String password = "v3rys3cur3";
-    private String wrongPassword = "password";
-    private String salt = "0123456789abcdef";
-    private String hashingAlgo = "SHA3-512";
-    private String tokenValue = "0123456789abcdef";
+    private final String wrongPassword = "password";
+    private final String salt = "0123456789abcdef";
+    private final String hashingAlgo = "SHA3-512";
+    private final String tokenValue = "0123456789abcdef";
+    private final String updateHashingAlgo = "SHA-256";
 
     @Mock
     private TransactionManager transactionManager;
@@ -321,6 +317,43 @@ public class AuthenticationServiceTest {
         doThrow(TransactionException.class).when(tx).commit();
         assertNull(service.authenticate(testUser.getUsername(), password));
         verify(tx, times(1)).commit();
+        verify(feedbackEvent, times(2)).fire(any());
+    }
+
+    @Test
+    public void testHashingAlgorithmChanges() throws NotFoundException {
+        when(userGateway.getUserByUsername(testUser.getUsername())).thenReturn(testUser);
+        when(configReader.getString(anyString())).thenReturn(updateHashingAlgo);
+        User updatedUser = service.authenticate(testUser.getUsername(), password);
+        assertAll(
+                () -> assertEquals(updateHashingAlgo, updatedUser.getHashingAlgorithm()),
+                () -> assertNotEquals(testUser.getPasswordHash(), updatedUser.getPasswordHash())
+        );
+        verify(userGateway, times(1)).updateUser(any());
+    }
+
+    @Test
+    public void testHashingAlgorithmNotFound() throws NotFoundException {
+        when(userGateway.getUserByUsername(testUser.getUsername())).thenReturn(testUser);
+        when(configReader.getString(anyString())).thenReturn(updateHashingAlgo);
+        doThrow(NotFoundException.class).when(userGateway).updateUser(any());
+        assertThrows(tech.bugger.business.exception.NotFoundException.class,
+                () -> service.authenticate(testUser.getUsername(), password)
+        );
+        verify(userGateway, times(1)).updateUser(any());
+    }
+
+    @Test
+    public void testHashingAlgorithmTransactionException() throws NotFoundException, TransactionException {
+        when(userGateway.getUserByUsername(testUser.getUsername())).thenReturn(testUser);
+        when(configReader.getString(anyString())).thenReturn(updateHashingAlgo);
+        doNothing().doThrow(TransactionException.class).when(tx).commit();
+        User updatedUser = service.authenticate(testUser.getUsername(), password);
+        assertAll(
+                () -> assertEquals(hashingAlgo, updatedUser.getHashingAlgorithm()),
+                () -> assertEquals(testUser.getPasswordHash(), updatedUser.getPasswordHash())
+        );
+        verify(userGateway, times(1)).updateUser(any());
         verify(feedbackEvent, times(1)).fire(any());
     }
 }

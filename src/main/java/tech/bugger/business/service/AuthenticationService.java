@@ -114,31 +114,76 @@ public class AuthenticationService {
      * @return The user with all their data.
      */
     public User authenticate(final String username, final String password) {
+        User user = findUser(username);
+
+        if ((user != null) && (user.getPasswordHash().equals(Hasher.hash(password, user.getPasswordSalt(),
+                user.getHashingAlgorithm())))) {
+            String configAlgo = configReader.getString("HASH_ALGO");
+            try {
+                user = updateHashingAlgorithm(user, configAlgo, password);
+            } catch (NotFoundException e) {
+                log.error("The user with username " + username + " could not be found in the database.");
+                throw new tech.bugger.business.exception.NotFoundException("The user with username " + username
+                        + " could not be found in the database.");
+            }
+            return user;
+        } else {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("authentication_service.wrong_credentials"),
+                    Feedback.Type.ERROR));
+        }
+
+        return null;
+    }
+
+    /**
+     * Loads the user with the given username from the database.
+     *
+     * @param username The username.
+     * @return The user with all their data.
+     */
+    private User findUser(final String username) {
         User user = null;
 
         try (Transaction tx = transactionManager.begin()) {
             user = tx.newUserGateway().getUserByUsername(username);
             tx.commit();
         } catch (NotFoundException e) {
-            log.error("The user with username " + username + "could not be found.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("authentication_service.wrong_credentials"),
-                    Feedback.Type.ERROR));
+            log.error("The user with username " + username + " could not be found.", e);
         } catch (TransactionException e) {
             log.error("Error while loading user with username " + username, e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
 
-        if (user == null) {
-            return null;
-        }
+        return user;
+    }
 
-        if (!(user.getPasswordHash().equals(Hasher.hash(password, user.getPasswordSalt(),
-                user.getHashingAlgorithm())))) {
-            log.warning("The supplied password of the user with username " + username + " did not match the actual"
-                    + " password");
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("authentication_service.wrong_credentials"),
-                    Feedback.Type.ERROR));
-            return null;
+    /**
+     * Updates the given user's hashing algorithm to the current one specified in the configuration.
+     *
+     * @param user The user.
+     * @param hashingAlgo The new hashing algorithm.
+     * @param password The user's password.
+     * @return The user.
+     */
+    private User updateHashingAlgorithm(final User user, final String hashingAlgo, final String password)
+            throws NotFoundException {
+        User updateUser = new User(user);
+
+        if (!updateUser.getHashingAlgorithm().equals(hashingAlgo)) {
+            updateUser.setPasswordHash(Hasher.hash(password, user.getPasswordSalt(), hashingAlgo));
+            updateUser.setHashingAlgorithm(hashingAlgo);
+
+            try (Transaction tx = transactionManager.begin()) {
+                tx.newUserGateway().updateUser(user);
+                tx.commit();
+                return updateUser;
+            } catch (TransactionException e) {
+                log.error("Error while updating the hashing algorithm of the user with username "
+                        + user.getUsername(), e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"),
+                        Feedback.Type.ERROR));
+            }
+
         }
 
         return user;

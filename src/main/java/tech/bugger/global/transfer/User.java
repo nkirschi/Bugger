@@ -479,7 +479,7 @@ public class User implements Serializable {
         }
 
         User user = (User) other;
-        return id == user.id;
+        return id.equals(user.id);
     }
 
     /**
