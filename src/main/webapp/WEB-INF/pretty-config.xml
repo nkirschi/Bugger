@@ -13,6 +13,7 @@
     <url-mapping id="password-set">
         <pattern value="/password-set"/>
         <view-id value="/faces/view/public/password-set.xhtml"/>
+        <query-param name="token">#{passwordSetBacker.tokenParam}</query-param>
     </url-mapping>
     <url-mapping id="profile-edit">
         <pattern value="/profile-edit"/>
