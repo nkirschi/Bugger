@@ -15,8 +15,8 @@
     <ui:param name="title" value="#{labels['register.title']}"/>
 
     <ui:define name="content">
-        <div class="d-flex p-2 justify-content-center align-items-center container">
-            <div class="row">
+        <h:panelGroup layout="block" styleClass="d-flex p-2 justify-content-center align-items-center container">
+            <h:panelGroup layout="block" styleClass="row">
                 <h:form id="f-register" style="width: 50vw;">
                     <h:panelGroup styleClass="card">
                         <h:panelGroup styleClass="card-body">
@@ -65,17 +65,17 @@
                                 <h:message for="it-last-name" styleClass="error"/>
                             </h:panelGroup>
 
-                            <div class="d-flex justify-content-between">
+                            <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
                                 <h:commandButton value="#{labels['register.submit']}" styleClass="btn btn-primary"
                                                  action="#{registerBacker.register}" type="submit"/>
                                 <h:link value="#{labels['login.title']}" outcome="pretty:login"
                                         styleClass="btn btn-secondary"/>
-                            </div>
+                            </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:form>
-            </div>
-        </div>
+            </h:panelGroup>
+        </h:panelGroup>
     </ui:define>
 </ui:composition>
 </html>
