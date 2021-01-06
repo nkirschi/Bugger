@@ -7,7 +7,6 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
@@ -66,7 +65,7 @@ public class TopicService {
      * @param username The username of the user to be banned.
      * @param topic    The topic which the user is to be banned from.
      */
-    public void ban(String username, Topic topic) {
+    public void ban(final String username, final Topic topic) {
     }
 
     /**
@@ -75,7 +74,7 @@ public class TopicService {
      * @param user  The user to be unbanned.
      * @param topic The topic which the user is to be unbanned from.
      */
-    public void unban(User user, Topic topic) {
+    public void unban(final User user, final Topic topic) {
 
     }
 
@@ -85,7 +84,7 @@ public class TopicService {
      * @param username The username of the user to be made a moderator.
      * @param topic    The topic which the user is to be made a moderator of.
      */
-    public void makeModerator(String username, Topic topic) {
+    public void makeModerator(final String username, final Topic topic) {
 
     }
 
@@ -95,7 +94,7 @@ public class TopicService {
      * @param user  The user who is about to lose moderator privileges.
      * @param topic The topic which the user is a moderator of.
      */
-    public void removeModerator(User user, Topic topic) {
+    public void removeModerator(final User user, final Topic topic) {
 
     }
 
@@ -105,7 +104,7 @@ public class TopicService {
      * @param user  The user to be subscribed to the topic.
      * @param topic The topic receiving the subscription.
      */
-    public void subscribeToTopic(User user, Topic topic) {
+    public void subscribeToTopic(final User user, final Topic topic) {
     }
 
     /**
@@ -114,7 +113,7 @@ public class TopicService {
      * @param user  The user whose subscription is to be removed.
      * @param topic The topic the user is subscribed to.
      */
-    public void unsubscribeFromTopic(User user, Topic topic) {
+    public void unsubscribeFromTopic(final User user, final Topic topic) {
 
     }
 
@@ -124,7 +123,7 @@ public class TopicService {
      * @param topicID The ID of the desired topic.
      * @return The topic with that ID if it exists, {@code null} if no topic with that ID exists.
      */
-    public Topic getTopicByID(int topicID) {
+    public Topic getTopicByID(final int topicID) {
         return null;
     }
 
@@ -133,7 +132,7 @@ public class TopicService {
      *
      * @param topic The topic to be created.
      */
-    public void createTopic(Topic topic) {
+    public void createTopic(final Topic topic) {
 
     }
 
@@ -142,7 +141,7 @@ public class TopicService {
      *
      * @param topic The topic to update.
      */
-    public void updateTopic(Topic topic) {
+    public void updateTopic(final Topic topic) {
         // if topic does not exist in database, createTopic instead
     }
 
@@ -151,7 +150,7 @@ public class TopicService {
      *
      * @param topic The topic to be deleted.
      */
-    public void deleteTopic(Topic topic) {
+    public void deleteTopic(final Topic topic) {
 
     }
 
@@ -189,8 +188,8 @@ public class TopicService {
      * @param showClosedReports Whether or not to include closed reports.
      * @return A list of reports containing the selected results.
      */
-    public List<Report> getSelectedReports(Topic topic, Selection selection, boolean showOpenReports,
-                                           boolean showClosedReports) {
+    public List<Report> getSelectedReports(final Topic topic, final Selection selection, final boolean showOpenReports,
+                                           final boolean showClosedReports) {
         return null;
     }
 
@@ -201,7 +200,7 @@ public class TopicService {
      * @param selection Information on which part of the moderator results to get.
      * @return A list of users containing the selected results.
      */
-    public List<User> getSelectedModerators(Topic topic, Selection selection) {
+    public List<User> getSelectedModerators(final Topic topic, final Selection selection) {
         return null;
     }
 
@@ -212,7 +211,7 @@ public class TopicService {
      * @param selection Information on which part of the user results to get.
      * @return A list of users containing the selected results.
      */
-    public List<User> getSelectedBannedUsers(Topic topic, Selection selection) {
+    public List<User> getSelectedBannedUsers(final Topic topic, final Selection selection) {
         return null;
     }
 
@@ -224,7 +223,7 @@ public class TopicService {
      * @param showClosedReports Whether or not to include closed reports.
      * @return The number of reports.
      */
-    public int getNumberOfReports(Topic topic, boolean showOpenReports, boolean showClosedReports) {
+    public int getNumberOfReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
         return 0;
     }
 
@@ -234,7 +233,7 @@ public class TopicService {
      * @param topic The topic which the moderators belong to.
      * @return The number of moderators.
      */
-    public int getNumberOfModerators(Topic topic) {
+    public int getNumberOfModerators(final Topic topic) {
         return 0;
     }
 
@@ -244,7 +243,7 @@ public class TopicService {
      * @param topic The topic which the users are banned from.
      * @return The number of banned users.
      */
-    public int getNumberOfBannedUsers(Topic topic) {
+    public int getNumberOfBannedUsers(final Topic topic) {
         return 0;
     }
 
@@ -254,7 +253,7 @@ public class TopicService {
      * @param topic The topic in question.
      * @return The number of subscribers.
      */
-    public int getNumberOfSubscribers(Topic topic) {
+    public int getNumberOfSubscribers(final Topic topic) {
         return 0;
     }
 
@@ -264,7 +263,7 @@ public class TopicService {
      * @param topic The topic which the posts belong to.
      * @return The number of posts.
      */
-    public int getNumberOfPosts(Topic topic) {
+    public int getNumberOfPosts(final Topic topic) {
         return 0;
     }
 
@@ -292,7 +291,7 @@ public class TopicService {
      * @param topic The topic in question.
      * @return {@code true} if the user is a moderator, {@code false} otherwise.
      */
-    public boolean isModerator(User user, Topic topic) {
+    public boolean isModerator(final User user, final Topic topic) {
         return false;
     }
 
@@ -303,7 +302,7 @@ public class TopicService {
      * @param topic The topic in question.
      * @return {@code true} if the user is banned, {@code false} otherwise.
      */
-    public boolean isBanned(User user, Topic topic) {
+    public boolean isBanned(final User user, final Topic topic) {
         return false;
     }
 
@@ -314,7 +313,7 @@ public class TopicService {
      * @param topic The topic in question.
      * @return {@code true} if the user is subscribed, {@code false} otherwise.
      */
-    public boolean isSubscribed(User user, Topic topic) {
+    public boolean isSubscribed(final User user, final Topic topic) {
         return false;
     }
 
