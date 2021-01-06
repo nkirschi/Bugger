@@ -12,10 +12,12 @@ import tech.bugger.persistence.gateway.AttachmentGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -23,7 +25,7 @@ import java.util.ResourceBundle;
  * Service providing methods related to posts and attachments. A {@code Feedback} event is fired, if unexpected
  * circumstances occur.
  */
-@Dependent
+@ApplicationScoped
 public class PostService {
 
     /**
@@ -86,6 +88,50 @@ public class PostService {
     }
 
     /**
+     * Checks whether an attachment's name is valid according to the current application configuration.
+     *
+     * @param name The attachment name to check the validity of.
+     * @return Whether the attachment name is valid.
+     */
+    private boolean isAttachmentNameValid(String name) {
+        return Arrays.stream(applicationSettings.getConfiguration().getAllowedFileExtensions().split(","))
+                .anyMatch(suffix -> name.endsWith(suffix));
+    }
+
+    /**
+     * Checks whether a list of attachments is allowed for a post according to the current application configuration.
+     *
+      * @param attachments The list of attachments to check the validity of.
+     * @return Whether the list of attachments is valid.
+     */
+    public boolean isAttachmentListValid(List<Attachment> attachments) {
+        int maxAttachments = applicationSettings.getConfiguration().getMaxAttachmentsPerPost();
+        if (attachments.size() > maxAttachments) {
+            log.info("Trying to create post with too many attachments.");
+            String message = MessageFormat.format(messagesBundle.getString("too_many_attachments"),
+                    maxAttachments);
+            feedbackEvent.fire(new Feedback(message, Feedback.Type.ERROR));
+            return false;
+        }
+
+        if (attachments.size() != attachments.stream().map(Attachment::getName).distinct().count()) {
+            log.info("Trying to create post where attachment names are not unique.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("attachment_names_not_unique"),
+                    Feedback.Type.ERROR));
+            return false;
+        }
+
+        if (!attachments.stream().map(Attachment::getName).allMatch(this::isAttachmentNameValid)) {
+            log.info("Trying to create post with invalid attachment name.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("attachment_names_invalid"),
+                    Feedback.Type.ERROR));
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Creates a post using a given {@code Transaction}.
      *
      * @param post The post to be created.
@@ -94,27 +140,13 @@ public class PostService {
      * @throws TransactionException The transaction could not be committed successfully.
      */
     boolean createPostWithTransaction(final Post post, final Transaction tx) {
-        List<Attachment> attachments = post.getAttachments();
-        int maxAttachments = applicationSettings.getConfiguration().getMaxAttachmentsPerPost();
-        if (attachments.size() > maxAttachments) {
-            log.info("Trying to create post with too many attachments.");
-            String message = MessageFormat.format(messagesBundle.getString("too_many_attachments"), maxAttachments);
-            feedbackEvent.fire(new Feedback(message, Feedback.Type.ERROR));
-            return false;
+        boolean valid = isAttachmentListValid(post.getAttachments());
+        if (valid) {
+            tx.newPostGateway().create(post);
+            AttachmentGateway attachmentGateway = tx.newAttachmentGateway();
+            post.getAttachments().forEach(attachmentGateway::create);
         }
-
-        if (attachments.size() != attachments.stream().map(Attachment::getName).distinct().count()) {
-            log.info("Trying to create post where attachment names are not unique.");
-            String message = MessageFormat.format(messagesBundle.getString("attachment_names_not_unique"),
-                    maxAttachments);
-            feedbackEvent.fire(new Feedback(message, Feedback.Type.ERROR));
-            return false;
-        }
-
-        tx.newPostGateway().create(post);
-        AttachmentGateway attachmentGateway = tx.newAttachmentGateway();
-        attachments.forEach(attachmentGateway::create);
-        return true;
+        return valid;
     }
 
     /**

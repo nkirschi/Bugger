@@ -8,10 +8,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Paginator;
+import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
@@ -35,10 +37,12 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -55,10 +59,13 @@ public class ReportCreateBackerTest {
     private ApplicationSettings applicationSettings;
 
     @Mock
+    private TopicService topicService;
+
+    @Mock
     private ReportService reportService;
 
     @Mock
-    private TopicService topicService;
+    private PostService postService;
 
     @Mock
     private UserSession session;
@@ -68,6 +75,9 @@ public class ReportCreateBackerTest {
 
     @Mock
     private Event<Feedback> feedbackEvent;
+
+    @Mock
+    private Registry registry;
 
     @Mock
     private Part uploadedAttachment;
@@ -82,8 +92,9 @@ public class ReportCreateBackerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        reportCreateBacker = new ReportCreateBacker(applicationSettings, reportService, topicService, session, ectx,
-                feedbackEvent/*, ResourceBundleMocker.mock("")*/);
+        doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(anyString(), any());
+        reportCreateBacker = new ReportCreateBacker(applicationSettings, topicService, reportService, postService,
+                session, ectx, feedbackEvent, registry);
 
         List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
         testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
@@ -163,6 +174,7 @@ public class ReportCreateBackerTest {
         doReturn(attachment.getContent().get()).when(inputStream).readAllBytes();
         doReturn(attachment.getName()).when(uploadedAttachment).getSubmittedFileName();
         doReturn(attachment.getMimetype()).when(uploadedAttachment).getContentType();
+        doReturn(true).when(postService).isAttachmentListValid(any());
 
         reportCreateBacker.setAttachments(new ArrayList<>());
         reportCreateBacker.saveAttachment();
@@ -179,36 +191,27 @@ public class ReportCreateBackerTest {
     }
 
     @Test
-    public void testSaveAttachmentWhenNamesNotUnique() throws Exception {
-        doReturn("test.txt").when(uploadedAttachment).getSubmittedFileName();
-        List<Attachment> attachments = Arrays.asList(new Attachment(0, "test.txt", null, "", null));
-        reportCreateBacker.setAttachments(new ArrayList<>(attachments));
-        reportCreateBacker.saveAttachment();
-        assertEquals(attachments, reportCreateBacker.getAttachments());
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testSaveAttachmentWhenTooManyAttachments() throws Exception {
-        doReturn(2).when(configuration).getMaxAttachmentsPerPost();
-        List<Attachment> attachments = Arrays.asList(
-                new Attachment(0, "test1.txt", null, "", null),
-                new Attachment(0, "test2.txt", null, "", null)
-        );
-        reportCreateBacker.setAttachments(new ArrayList<>(attachments));
-        reportCreateBacker.saveAttachment();
-        assertEquals(attachments, reportCreateBacker.getAttachments());
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testSaveAttachmentWhenAttachmentInvalid() throws Exception {
+    public void testSaveAttachmentWhenAttachmentUnreadable() throws Exception {
         doThrow(IOException.class).when(inputStream).readAllBytes();
         List<Attachment> attachments = new ArrayList<>();
         reportCreateBacker.setAttachments(attachments);
         reportCreateBacker.saveAttachment();
         assertEquals(attachments, reportCreateBacker.getAttachments());
         verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSaveAttachmentWhenListInvalid() throws Exception {
+        Attachment attachment = new Attachment(0, "test.txt", new Lazy<>(new byte[]{1, 2, 3, 4}),
+                "text/plain", new Lazy<>(testFirstPost));
+        doReturn(attachment.getContent().get()).when(inputStream).readAllBytes();
+        doReturn(attachment.getName()).when(uploadedAttachment).getSubmittedFileName();
+        doReturn(attachment.getMimetype()).when(uploadedAttachment).getContentType();
+        doReturn(false).when(postService).isAttachmentListValid(any());
+
+        reportCreateBacker.setAttachments(new ArrayList<>());
+        reportCreateBacker.saveAttachment();
+        assertFalse(reportCreateBacker.getAttachments().contains(attachment));
     }
 
     @Test

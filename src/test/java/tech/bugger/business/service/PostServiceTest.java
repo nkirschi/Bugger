@@ -86,29 +86,58 @@ public class PostServiceTest {
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(postGateway).when(tx).newPostGateway();
         lenient().doReturn(attachmentGateway).when(tx).newAttachmentGateway();
-        configuration = new Configuration(false, false, "", "", 5, "");
+        configuration = new Configuration(false, false, "", ".txt,.mp3", 5, "");
         lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
     }
 
     @Test
+    public void testIsAttachmentListValidWhenFine() {
+        assertTrue(service.isAttachmentListValid(testPost.getAttachments()));
+    }
+
+    @Test
+    public void testIsAttachmentListValidWhenTooManyAttachments() {
+        configuration.setMaxAttachmentsPerPost(2);
+        assertFalse(service.isAttachmentListValid(testPost.getAttachments()));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testIsAttachmentListValidWhenNamesNotUnique() {
+        testPost.getAttachments().get(2).setName("test1.txt");
+        assertFalse(service.isAttachmentListValid(testPost.getAttachments()));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testIsAttachmentListValidWhenNoExtension() {
+        testPost.getAttachments().get(2).setName("test");
+        assertFalse(service.isAttachmentListValid(testPost.getAttachments()));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testIsAttachmentListValidWhenWrongExtension() {
+        testPost.getAttachments().get(2).setName("test.gif");
+        assertFalse(service.isAttachmentListValid(testPost.getAttachments()));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
     public void testCreatePostWithTransactionWhenFine() {
-        assertTrue(service.createPostWithTransaction(testPost, tx));
+        PostService serviceSpy = spy(service);
+        lenient().doReturn(true).when(serviceSpy).isAttachmentListValid(any());
+        assertTrue(serviceSpy.createPostWithTransaction(testPost, tx));
         verify(postGateway).create(any());
         verify(attachmentGateway, times(3)).create(any());
     }
 
     @Test
-    public void testCreatePostWithTransactionWhenTooManyAttachments() {
-        configuration.setMaxAttachmentsPerPost(2);
-        assertFalse(service.createPostWithTransaction(testPost, tx));
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testCreatePostWithTransactionWhenNamesNotUnique() {
-        testPost.getAttachments().get(2).setName("test1.txt");
-        assertFalse(service.createPostWithTransaction(testPost, tx));
-        verify(feedbackEvent).fire(any());
+    public void testCreatePostWithTransactionWhenInvalid() {
+        PostService serviceSpy = spy(service);
+        lenient().doReturn(false).when(serviceSpy).isAttachmentListValid(any());
+        assertFalse(serviceSpy.createPostWithTransaction(testPost, tx));
+        verify(postGateway, times(0)).create(any());
     }
 
     @Test

@@ -2,9 +2,11 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
@@ -79,14 +81,19 @@ public class ReportCreateBacker implements Serializable {
     private ApplicationSettings applicationSettings;
 
     /**
+     * The topic service giving access to topics.
+     */
+    private transient TopicService topicService;
+
+    /**
      * The report service creating reports.
      */
     private transient ReportService reportService;
 
     /**
-     * The topic service giving access to topics.
+     * The post service validating posts and attachments.
      */
-    private transient TopicService topicService;
+    private transient PostService postService;
 
     /**
      * The current user session.
@@ -112,26 +119,27 @@ public class ReportCreateBacker implements Serializable {
      * Constructs a new report creation page backing bean with the necessary dependencies.
      *
      * @param applicationSettings The current application settings.
-     * @param reportService       The report service to use.
      * @param topicService        The topic service to use.
+     * @param reportService       The report service to use.
+     * @param postService         The post service to use.
      * @param session             The current user session.
      * @param ectx                The current {@link ExternalContext} of the application.
      * @param feedbackEvent       The feedback event to use for user feedback.
-     * @param messagesBundle      The resource bundle for feedback messages.
+     * @param registry            The dependency registry to use.
      */
     @Inject
-    public ReportCreateBacker(final ApplicationSettings applicationSettings, final ReportService reportService,
-                              final TopicService topicService, final UserSession session, final ExternalContext ectx,
-                              final Event<Feedback> feedbackEvent/*,
-                              @RegistryKey("messages") final ResourceBundle messagesBundle*/) {
+    public ReportCreateBacker(final ApplicationSettings applicationSettings, final TopicService topicService,
+                              final ReportService reportService, final PostService postService,
+                              final UserSession session, final ExternalContext ectx,
+                              final Event<Feedback> feedbackEvent, final Registry registry) {
         this.applicationSettings = applicationSettings;
-        this.reportService = reportService;
         this.topicService = topicService;
+        this.reportService = reportService;
+        this.postService = postService;
         this.session = session;
         this.ectx = ectx;
         this.feedbackEvent = feedbackEvent;
-        this.messagesBundle = ResourceBundle.getBundle("tech.bugger.i18n.messages");
-        /*this.messagesBundle = messagesBundle;*/
+        this.messagesBundle = registry.getBundle("messages", session);
         this.banned = true;
     }
 
@@ -184,23 +192,6 @@ public class ReportCreateBacker implements Serializable {
             return;
         }
 
-        int maxAttachments = applicationSettings.getConfiguration().getMaxAttachmentsPerPost();
-        if (attachments.size() >= maxAttachments) {
-            log.info("Trying to create first post with too many attachments");
-            String message = MessageFormat.format(messagesBundle.getString("too_many_attachments"), maxAttachments);
-            feedbackEvent.fire(new Feedback(message, Feedback.Type.ERROR));
-            return;
-        }
-
-        String name = uploadedAttachment.getSubmittedFileName();
-        if (attachments.stream().map(Attachment::getName).anyMatch(a -> a.equals(name))) {
-            log.info("Trying to create post where attachment names are not unique.");
-            String message = MessageFormat.format(messagesBundle.getString("attachment_names_not_unique"),
-                    maxAttachments);
-            feedbackEvent.fire(new Feedback(message, Feedback.Type.ERROR));
-            return;
-        }
-
         byte[] content;
         try {
             content = uploadedAttachment.getInputStream().readAllBytes();
@@ -215,8 +206,13 @@ public class ReportCreateBacker implements Serializable {
         attachment.setContent(new Lazy<>(content));
         attachment.setMimetype(uploadedAttachment.getContentType());
         attachment.setPost(new Lazy<>(firstPost));
+
         attachments.add(attachment);
-        log.debug("Attachment '" + uploadedAttachment.getSubmittedFileName() + "' uploaded.");
+        if (postService.isAttachmentListValid(attachments)) {
+            log.debug("Attachment '" + attachment.getName() + "' uploaded.");
+        } else {
+            attachments.remove(attachment);
+        }
     }
 
     /**
