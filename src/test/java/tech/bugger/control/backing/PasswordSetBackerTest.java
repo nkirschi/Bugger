@@ -1,11 +1,12 @@
 package tech.bugger.control.backing;
 
-import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Locale;
 import javax.enterprise.event.Event;
-import javax.faces.context.ExternalContext;
+import javax.faces.application.Application;
+import javax.faces.application.NavigationHandler;
+import javax.faces.context.FacesContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,13 +34,19 @@ public class PasswordSetBackerTest {
     private Token testToken;
 
     @Mock
+    private NavigationHandler navHandler;
+
+    @Mock
+    private Application application;
+
+    @Mock
     private AuthenticationService authenticationService;
 
     @Mock
     private UserSession userSession;
 
     @Mock
-    private ExternalContext ectx;
+    private FacesContext fctx;
 
     @Mock
     private Event<Feedback> feedbackEvent;
@@ -47,7 +54,7 @@ public class PasswordSetBackerTest {
     @BeforeEach
     public void setUp() throws Exception {
         lenient().doReturn(Locale.GERMAN).when(userSession).getLocale();
-        passwordSetBacker = new PasswordSetBacker(authenticationService, userSession, ectx, feedbackEvent,
+        passwordSetBacker = new PasswordSetBacker(authenticationService, userSession, fctx, feedbackEvent,
                 ResourceBundleMocker.mock(""));
         testUser = new User();
         testToken = new Token("0123456789abcdef", Token.Type.REGISTER,
@@ -55,50 +62,45 @@ public class PasswordSetBackerTest {
     }
 
     @Test
-    public void testInitTokenTypeRegister() throws Exception {
+    public void testInitTokenTypeRegister() {
         doReturn(testToken).when(authenticationService).findToken(any());
         passwordSetBacker.init();
-        verify(ectx, never()).redirect("home.xhtml");
+        verify(fctx, never()).getApplication();
         assertEquals(testToken, passwordSetBacker.getToken());
     }
 
     @Test
-    public void testInitTokenTypeForgotPassword() throws Exception {
+    public void testInitTokenTypeForgotPassword() {
         testToken.setType(Token.Type.FORGOT_PASSWORD);
         doReturn(testToken).when(authenticationService).findToken(any());
         passwordSetBacker.init();
-        verify(ectx, never()).redirect("home.xhtml");
+        verify(fctx, never()).getApplication();
         assertEquals(testToken, passwordSetBacker.getToken());
     }
 
     @Test
-    public void testInitTokenTypeChangeEmail() throws Exception {
+    public void testInitTokenTypeChangeEmail() {
         testToken.setType(Token.Type.CHANGE_EMAIL);
         doReturn(testToken).when(authenticationService).findToken(any());
         passwordSetBacker.init();
-        verify(ectx, never()).redirect("home.xhtml");
+        verify(fctx, never()).getApplication();
         verify(feedbackEvent).fire(any());
     }
 
     @Test
-    public void testInitLoggedIn() throws Exception {
+    public void testInitLoggedIn() {
+        doReturn(navHandler).when(application).getNavigationHandler();
+        doReturn(application).when(fctx).getApplication();
         doReturn(testUser).when(userSession).getUser();
         passwordSetBacker.init();
-        verify(ectx).redirect("home.xhtml");
+        verify(navHandler).handleNavigation(any(), any(), any());
     }
 
     @Test
-    public void testInitLoggedInAndException() throws Exception {
-        doReturn(testUser).when(userSession).getUser();
-        doThrow(IOException.class).when(ectx).redirect(any());
-        assertThrows(InternalError.class, () -> passwordSetBacker.init());
-    }
-
-    @Test
-    public void testInitNoTokenFound() throws Exception {
+    public void testInitNoTokenFound() {
         doReturn(null).when(authenticationService).findToken(any());
         passwordSetBacker.init();
-        verify(ectx, never()).redirect("home.xhtml");
+        verify(fctx, never()).getApplication();
         verify(feedbackEvent).fire(any());
     }
 
