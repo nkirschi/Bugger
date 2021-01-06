@@ -6,6 +6,7 @@ import java.util.Locale;
 import javax.enterprise.event.Event;
 import javax.faces.application.Application;
 import javax.faces.application.NavigationHandler;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,9 @@ public class PasswordSetBackerTest {
     private UserSession userSession;
 
     @Mock
+    private ExternalContext ectx;
+
+    @Mock
     private FacesContext fctx;
 
     @Mock
@@ -53,6 +57,7 @@ public class PasswordSetBackerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
+        lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(Locale.GERMAN).when(userSession).getLocale();
         passwordSetBacker = new PasswordSetBacker(authenticationService, userSession, fctx, feedbackEvent,
                 ResourceBundleMocker.mock(""));
@@ -65,7 +70,7 @@ public class PasswordSetBackerTest {
     public void testInitTokenTypeRegister() {
         doReturn(testToken).when(authenticationService).findToken(any());
         passwordSetBacker.init();
-        verify(fctx, never()).getApplication();
+        verify(navHandler, never()).handleNavigation(any(), any(), any());
         assertEquals(testToken, passwordSetBacker.getToken());
     }
 
@@ -74,7 +79,7 @@ public class PasswordSetBackerTest {
         testToken.setType(Token.Type.FORGOT_PASSWORD);
         doReturn(testToken).when(authenticationService).findToken(any());
         passwordSetBacker.init();
-        verify(fctx, never()).getApplication();
+        verify(navHandler, never()).handleNavigation(any(), any(), any());
         assertEquals(testToken, passwordSetBacker.getToken());
     }
 
@@ -83,7 +88,7 @@ public class PasswordSetBackerTest {
         testToken.setType(Token.Type.CHANGE_EMAIL);
         doReturn(testToken).when(authenticationService).findToken(any());
         passwordSetBacker.init();
-        verify(fctx, never()).getApplication();
+        verify(navHandler, never()).handleNavigation(any(), any(), any());
         verify(feedbackEvent).fire(any());
     }
 
@@ -100,7 +105,7 @@ public class PasswordSetBackerTest {
     public void testInitNoTokenFound() {
         doReturn(null).when(authenticationService).findToken(any());
         passwordSetBacker.init();
-        verify(fctx, never()).getApplication();
+        verify(navHandler, never()).handleNavigation(any(), any(), any());
         verify(feedbackEvent).fire(any());
     }
 
@@ -109,7 +114,7 @@ public class PasswordSetBackerTest {
         doReturn(true).when(authenticationService).setPassword(any(), any(), any());
         passwordSetBacker.setToken(testToken);
         String redirect = passwordSetBacker.setUserPassword();
-        assertEquals("home.xhtml", redirect);
+        assertEquals("pretty:base", redirect);
     }
 
     @Test
@@ -117,7 +122,7 @@ public class PasswordSetBackerTest {
         doReturn(false).when(authenticationService).setPassword(any(), any(), any());
         passwordSetBacker.setToken(testToken);
         String redirect = passwordSetBacker.setUserPassword();
-        assertNull(redirect);
+        assertEquals("pretty:", redirect);
     }
 
     @Test
