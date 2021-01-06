@@ -45,17 +45,17 @@ public class HomeBacker implements Serializable {
     /**
      * The session containing the currently logged in user.
      */
-    private UserSession session;
+    private final UserSession session;
 
     /**
      * The service performing tasks concerning notifications.
      */
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
 
     /**
      * The service performing tasks concerning topics.
      */
-    private TopicService topicService;
+    private final TopicService topicService;
 
     /**
      * Constructs a new home page backing bean.
