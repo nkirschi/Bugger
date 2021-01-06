@@ -43,16 +43,6 @@ public class HomeBacker implements Serializable {
     private Paginator<Topic> topics;
 
     /**
-     * The notification to be deleted.
-     */
-    private Notification notificationToBeDeleted;
-
-    /**
-     * The notification to be marked as read.
-     */
-    private Notification notificationRead;
-
-    /**
      * The session containing the currently logged in user.
      */
     private UserSession session;
@@ -101,18 +91,21 @@ public class HomeBacker implements Serializable {
     }
 
     /**
-     * Irreversibly deletes the current {@code notificationToBeDeleted}.
+     * Irreversibly deletes the notification.
+     *
+     * @param notification The notification to be deleted.
      */
-    public void deleteNotification() {
+    public void deleteNotification(final Notification notification) {
 
     }
 
     /**
-     * Marks the current {@code notificationRead} as read.
+     * Marks the notification as read and redirects the user to the area of interest.
      *
+     * @param notification The notification to be opened.
      * @return A String that is used to redirect a user to the post of the opened notification.
      */
-    public String openNotification() {
+    public String openNotification(final Notification notification) {
         return null;
     }
 
@@ -149,34 +142,6 @@ public class HomeBacker implements Serializable {
      */
     public Paginator<Topic> getTopics() {
         return topics;
-    }
-
-    /**
-     * @return The notificationToBeDeleted.
-     */
-    public Notification getNotificationToBeDeleted() {
-        return notificationToBeDeleted;
-    }
-
-    /**
-     * @param notificationToBeDeleted The notificationToBeDeleted to set.
-     */
-    public void setNotificationToBeDeleted(final Notification notificationToBeDeleted) {
-        this.notificationToBeDeleted = notificationToBeDeleted;
-    }
-
-    /**
-     * @return The notificationRead.
-     */
-    public Notification getNotificationRead() {
-        return notificationRead;
-    }
-
-    /**
-     * @param notificationRead The notificationRead to set.
-     */
-    public void setNotificationRead(final Notification notificationRead) {
-        this.notificationRead = notificationRead;
     }
 
 }
