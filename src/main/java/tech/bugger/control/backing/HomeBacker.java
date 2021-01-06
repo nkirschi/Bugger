@@ -63,12 +63,12 @@ public class HomeBacker implements Serializable {
     /**
      * The service performing tasks concerning notifications.
      */
-    private transient NotificationService notificationService;
+    private NotificationService notificationService;
 
     /**
      * The service performing tasks concerning topics.
      */
-    private transient TopicService topicService;
+    private TopicService topicService;
 
     /**
      * Constructs a new home page backing bean.
