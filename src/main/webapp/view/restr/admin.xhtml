@@ -72,20 +72,23 @@
 
                 <!-- organization theme -->
                 <h:outputLabel id="o-theme" for="s-theme" value="#{labels.theme}"/>
-                <h:selectOneMenu id="s-theme" styleClass="form-control" value="#{adminBacker.organization.theme}">
+                <h:selectOneMenu id="s-theme"
+                                 styleClass="form-control#{component.valid ? '' : ' error'}"
+                                 value="#{adminBacker.organization.theme}">
                     <f:selectItems value="#{adminBacker.availableThemes}"/>
                 </h:selectOneMenu>
                 <h:panelGroup/>
                 <h:panelGroup>
+                    <h:message for="s-theme" styleClass="error"/>
                     <h:outputText id="ot-theme-hint"
                                   value="#{labels.organization_theme_hint}"
                                   styleClass="small form-text text-muted"/>
-                    <h:message for="s-theme" styleClass="error"/>
                 </h:panelGroup>
 
                 <!-- organization imprint (Markdown) -->
                 <h:outputLabel id="o-imprint" for="it-imprint" value="#{labels.imprint}"/>
-                <h:inputTextarea id="it-imprint" value="#{adminBacker.organization.imprint}"
+                <h:inputTextarea id="it-imprint"
+                                 value="#{adminBacker.organization.imprint}"
                                  a:maxlength="#{Constants.LARGE_AREA}"
                                  styleClass="form-control#{component.valid ? '' : ' error'}">
                     <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
@@ -161,7 +164,13 @@
                     <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>
                 </h:inputText>
                 <h:panelGroup/>
-                <h:message for="s-user-email-format" styleClass="error"/>
+                <h:panelGroup>
+                    <h:message for="s-user-email-format" styleClass="error"/>
+                    <h:outputText id="ot-user-email-format-hint"
+                                  value="#{labels.user_email_format_hint}"
+                                  styleClass="small form-text text-muted"/>
+                </h:panelGroup>
+
 
                 <!-- definition of a user's voting weight -->
                 <h:outputLabel id="o-voting-weight-definition"
