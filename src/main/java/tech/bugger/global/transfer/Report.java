@@ -54,7 +54,7 @@ public class Report implements Serializable {
     }
 
 
-    private int id;
+    private Integer id;
     private String title;
     private Type type;
     private Severity severity;
@@ -65,12 +65,32 @@ public class Report implements Serializable {
     private Integer forcedRelevance;
     private Lazy<Topic> topic;
 
+    public Report() {
+        this(null, null, null, null, null, null, null, null, null, null);
+    }
+
+    public Report(final Integer id, final String title, final Type type, final Severity severity, final String version,
+                  final Authorship authorship, final ZonedDateTime closingDate, final Lazy<Report> duplicateOf,
+                  final Integer forcedRelevance, final Lazy<Topic> topic) {
+        this.id = id;
+        this.title = title;
+        this.type = type;
+        this.severity = severity;
+        this.version = version;
+        this.authorship = authorship;
+        this.closingDate = closingDate;
+        this.duplicateOf = duplicateOf;
+        this.forcedRelevance = forcedRelevance;
+        this.topic = topic;
+    }
+
+
     /**
      * Returns the ID of this report.
      *
      * @return The report ID.
      */
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -79,7 +99,7 @@ public class Report implements Serializable {
      *
      * @param id The report ID to be set.
      */
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
