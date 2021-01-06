@@ -14,6 +14,7 @@ import tech.bugger.persistence.exception.StoreException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -229,7 +230,10 @@ class TopicDBGatewayTest {
         numberOfTopics = 1;
         addTopics();
         Topic topic = makeTestTopic(1);
-
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute("INSERT INTO report (title, type, severity, topic) VALUES ('Hello', 'BUG', 'MINOR', 1)");
+        }
+        assertNotNull(gateway.determineLastActivity(topic));
     }
 
     @Test
