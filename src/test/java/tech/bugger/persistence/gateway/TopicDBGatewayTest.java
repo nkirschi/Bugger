@@ -253,7 +253,10 @@ class TopicDBGatewayTest {
         numberOfTopics = 1;
         addTopics();
         Topic topic = makeTestTopic(1);
-
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute("INSERT INTO report (title, type, severity, topic) VALUES ('Hello', 'BUG', 'MINOR', 1)");
+        }
+        assertNotNull(gateway.determineLastActivity(topic));
     }
 
     @Test
