@@ -19,12 +19,14 @@ public class DBExtension implements BeforeAllCallback, AfterAllCallback, BeforeE
     private static EmbeddedPostgres pg;
     private static String setupSQL;
     private static String eraseSQL;
+    private static String minimalSQL;
 
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
         pg = EmbeddedPostgres.builder().start();
         setupSQL = Files.readString(Paths.get("src/main/webapp/WEB-INF/setup.sql"));
         eraseSQL = Files.readString(Paths.get("src/main/webapp/WEB-INF/erase.sql"));
+        minimalSQL = Files.readString(Paths.get("testdata/minimal.sql"));
     }
 
     @Override
@@ -46,7 +48,11 @@ public class DBExtension implements BeforeAllCallback, AfterAllCallback, BeforeE
         return pg.getPostgresDatabase().getConnection();
     }
 
-    private void applyScript(String sql) {
+    public static void insertMinimalTestData() {
+        applyScript(minimalSQL);
+    }
+
+    private static void applyScript(String sql) {
         try (Connection conn = pg.getPostgresDatabase().getConnection();
              Statement stmt = conn.createStatement()) {
 
@@ -57,7 +63,7 @@ public class DBExtension implements BeforeAllCallback, AfterAllCallback, BeforeE
             }
             stmt.executeBatch();
         } catch (SQLException e) {
-            throw new InternalError("Schema initialization failed.", e);
+            throw new InternalError("Applying SQL script failed.", e);
         }
     }
 }

@@ -1,15 +1,19 @@
 package tech.bugger.business.service;
 
+import java.util.ResourceBundle;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Event;
-import javax.enterprise.inject.Any;
-import javax.inject.Inject;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.util.Transaction;
+import tech.bugger.persistence.util.TransactionManager;
 
 /**
  * Service providing methods related to users and user profiles. A {@code Feedback} event is fired, if unexpected
@@ -18,11 +22,40 @@ import javax.inject.Inject;
 @Dependent
 public class ProfileService {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(ProfileService.class);
 
+    /**
+     * Transaction manager used for creating transactions.
+     */
+    private final TransactionManager transactionManager;
+
+    /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Resource bundle for feedback messages.
+     */
+    private final ResourceBundle messagesBundle;
+
+    /**
+     * Constructs a new profile service with the given dependencies.
+     *
+     * @param transactionManager The transaction manager to use for creating transactions.
+     * @param feedbackEvent      The feedback event to use for user feedback.
+     * @param messagesBundle     The resource bundle for feedback messages.
+     */
     @Inject
-    @Any
-    Event<Feedback> feedback;
+    public ProfileService(final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
+                          @RegistryKey("messages") final ResourceBundle messagesBundle) {
+        this.transactionManager = transactionManager;
+        this.feedbackEvent = feedbackEvent;
+        this.messagesBundle = messagesBundle;
+    }
 
     /**
      * Returns the user with the specified ID. If no such user exists, returns {@code null} and fires an event.
@@ -30,16 +63,40 @@ public class ProfileService {
      * @param id The ID of the user to return.
      * @return The user, if they exist, {@code null} if no user with that ID exists.
      */
-    public User getUser(int id) {
-        return null;
+    public User getUser(final int id) {
+        User user = null;
+
+        try (Transaction tx = transactionManager.begin()) {
+            user = tx.newUserGateway().getUserByID(id);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.debug("User in search for ID could not be found.");
+        } catch (TransactionException e) {
+            log.error("User could not be created.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return user;
     }
 
     /**
      * Creates a new user without need for verification. This should only be available for administrators.
+     * Also generates and sets the internal user id inside the given {@code user} object.
      *
      * @param user The user to be created.
+     * @return Whether the action was successful or not.
      */
-    public void createUser(User user) {
+    public boolean createUser(final User user) {
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newUserGateway().createUser(user);
+            tx.commit();
+            return true;
+        } catch (TransactionException e) {
+            log.error("User could not be created.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return false;
     }
 
     /**
@@ -47,17 +104,29 @@ public class ProfileService {
      *
      * @param user The user to be deleted.
      */
-    public void deleteUser(User user) {
-
+    public void deleteUser(final User user) {
     }
 
     /**
-     * Updates an existing user.
+     * Updates an existing user and returns whether the action was successful.
      *
      * @param user The user to update.
+     * @return {@code true} iff the action was successful, {@code false} otherwise.
      */
-    public void updateUser(User user) {
+    public boolean updateUser(final User user) {
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newUserGateway().updateUser(user);
+            tx.commit();
+            return true;
+        } catch (NotFoundException e) {
+            log.error("User could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while updating the user.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
 
+        return false;
     }
 
     /**
@@ -66,7 +135,7 @@ public class ProfileService {
      * @param subscriber The user subscribed to the topic.
      * @param topic      The topic of which the subscription to is to be removed.
      */
-    public void deleteTopicSubscription(User subscriber, Topic topic) {
+    public void deleteTopicSubscription(final User subscriber, final Topic topic) {
     }
 
     /**
@@ -75,8 +144,7 @@ public class ProfileService {
      * @param subscriber The user subscribed to the report.
      * @param report     The report of which the subscription to is to be removed.
      */
-    public void deleteReportSubscription(User subscriber, Report report) {
-
+    public void deleteReportSubscription(final User subscriber, final Report report) {
     }
 
     /**
@@ -85,8 +153,7 @@ public class ProfileService {
      * @param subscriber The user subscribed to the other user.
      * @param user       The user of which the subscription to is to be removed.
      */
-    public void deleteUserSubscription(User subscriber, User user) {
-
+    public void deleteUserSubscription(final User subscriber, final User user) {
     }
 
     /**
@@ -94,8 +161,7 @@ public class ProfileService {
      *
      * @param user The user whose topic subscriptions are to be deleted.
      */
-    public void deleteAllTopicSubscriptions(User user) {
-
+    public void deleteAllTopicSubscriptions(final User user) {
     }
 
     /**
@@ -103,8 +169,7 @@ public class ProfileService {
      *
      * @param user The user whose report subscriptions are to be deleted.
      */
-    public void deleteAllReportSubscriptions(User user) {
-
+    public void deleteAllReportSubscriptions(final User user) {
     }
 
     /**
@@ -112,8 +177,7 @@ public class ProfileService {
      *
      * @param user The user whose user subscriptions are to be deleted.
      */
-    public void deleteAllUserSubscriptions(User user) {
-
+    public void deleteAllUserSubscriptions(final User user) {
     }
 
     /**
@@ -122,7 +186,7 @@ public class ProfileService {
      * @param subscriber   The user who will subscribe to the other user.
      * @param subscribedTo The user who will receive a subscription.
      */
-    public void subscribeToUser(User subscriber, User subscribedTo) {
+    public void subscribeToUser(final User subscriber, final User subscribedTo) {
     }
 
     /**
@@ -130,7 +194,7 @@ public class ProfileService {
      *
      * @param user The user with a new avatar.
      */
-    public void updateAvatar(User user) {
+    public void updateAvatar(final User user) {
     }
 
     /**
@@ -139,7 +203,7 @@ public class ProfileService {
      * @param user The user in question.
      * @return The voting weight as an {@code int}.
      */
-    public int getVotingWeightForUser(User user) {
+    public int getVotingWeightForUser(final User user) {
         return 0;
     }
 
@@ -149,11 +213,56 @@ public class ProfileService {
      * @param user The user in question.
      * @return The number of posts as an {@code int}.
      */
-    public int getNumberOfPostsForUser(User user) {
+    public int getNumberOfPostsForUser(final User user) {
         return 0;
     }
 
-    private byte[] generateThumbnail(byte[] image) {
+    /**
+     * Searches and returns the {@link User} with the given {@code emailAddress}.
+     *
+     * @param emailAddress The e-mail address to search for.
+     * @return The complete {@link User} or {@code null} iff the {@code emailAddress} is not assigned to any user.
+     */
+    public User getUserByEmail(final String emailAddress) {
+        User user = null;
+
+        try (Transaction tx = transactionManager.begin()) {
+            user = tx.newUserGateway().getUserByEmail(emailAddress);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.debug("User in search for e-mail could not be found.");
+        } catch (TransactionException e) {
+            log.error("Error while searching for e-mail.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return user;
+    }
+
+    /**
+     * Searches and returns the {@link User} with the given {@code username}.
+     *
+     * @param username The username to search for.
+     * @return The complete {@link User} or {@code null} iff the {@code username} is not assigned to any user.
+     */
+    public User getUserByUsername(final String username) {
+        User user = null;
+
+        try (Transaction tx = transactionManager.begin()) {
+            user = tx.newUserGateway().getUserByUsername(username);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.debug("User in search for username could not be found.");
+        } catch (TransactionException e) {
+            log.error("Error while searching for username.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return user;
+    }
+
+    private byte[] generateThumbnail(final byte[] image) {
         return null;
     }
+
 }
