@@ -21,7 +21,7 @@
     </url-mapping>
     <url-mapping id="profile">
         <pattern value="/profile"/>
-        <query-param name="u">#{u}</query-param>
+        <query-param name="u">#{profileBacker.username}</query-param>
         <view-id value="/faces/view/authorized/profile.xhtml"/>
     </url-mapping>
     <url-mapping id="search">
