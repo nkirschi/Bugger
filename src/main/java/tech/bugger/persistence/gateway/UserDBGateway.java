@@ -1,13 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.time.ZoneId;
-import java.util.List;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
@@ -18,6 +10,15 @@ import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.time.ZoneId;
+import java.util.List;
 
 /**
  * User gateway that gives access to user stored in a database.
@@ -30,7 +31,7 @@ public class UserDBGateway implements UserGateway {
     private static final Log log = Log.forClass(UserDBGateway.class);
 
     /**
-     * Database connection used by this gateway.
+     * The database connection used by this gateway.
      */
     private final Connection conn;
 
@@ -65,8 +66,10 @@ public class UserDBGateway implements UserGateway {
                 .bytes(user.getAvatar().get())
                 .bytes(user.getAvatarThumbnail())
                 .string(user.getBiography())
-                .string(user.getPreferredLanguage().name())
-                .object(user.getProfileVisibility(), Types.OTHER)
+                .string(user.getPreferredLanguage() != null ? user.getPreferredLanguage().name()
+                        : Language.ENGLISH.name())
+                .object(user.getProfileVisibility() != null ? user.getProfileVisibility() : User.ProfileVisibility.FULL,
+                        Types.OTHER)
                 .object(user.getForcedVotingWeight(), Types.INTEGER)
                 .bool(user.isAdministrator());
     }
@@ -80,7 +83,7 @@ public class UserDBGateway implements UserGateway {
      */
     static User getUserFromResultSet(final ResultSet rs) throws SQLException {
         String langStr = rs.getString("preferred_language").toUpperCase();
-        Language lang = null;
+        Language lang = Language.ENGLISH;
 
         if (!langStr.isBlank()) {
             lang = Language.valueOf(langStr);
@@ -94,7 +97,7 @@ public class UserDBGateway implements UserGateway {
                 rs.getString("biography"), lang,
                 User.ProfileVisibility.valueOf(rs.getString("profile_visibility").toUpperCase()),
                 rs.getTimestamp("registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
-                rs.getInt("forced_voting_weight"), rs.getBoolean("is_admin"));
+                rs.getObject("forced_voting_weight", Integer.class), rs.getBoolean("is_admin"));
     }
 
     /**
@@ -110,9 +113,19 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<String> getAdminEmails() {
-        // TODO Auto-generated method stub
-        return null;
+    public int getNumberOfAdmins() {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(u.id) AS num_admins FROM \"user\" AS u "
+                + "WHERE u.is_admin = true;")) {
+            ResultSet resultSet = stmt.executeQuery();
+            int numAdmins = 0;
+            if (resultSet.next()) {
+                numAdmins = resultSet.getInt("num_admins");
+            }
+            return numAdmins;
+        } catch (SQLException e) {
+            log.error("Error while counting the number of administrators", e);
+            throw new StoreException("Error while counting the number of administrators", e);
+        }
     }
 
     /**
@@ -128,14 +141,13 @@ public class UserDBGateway implements UserGateway {
             if (rs.next()) {
                 user = getUserFromResultSet(rs);
             } else {
-                log.error("No user with the given ID could be found in the database");
-                throw new NotFoundException("No user with the given ID could be found in the database.");
+                log.error("No user with id " + id + " could be found in the database");
+                throw new NotFoundException("No user with id " + id + " could be found in the database.");
             }
         } catch (SQLException e) {
-            log.error("Error while searching for user by ID.", e);
-            throw new StoreException("Error while searching for user by ID.", e);
+            log.error("Error while searching for user with id " + id, e);
+            throw new StoreException("Error while searching for user with id " + id, e);
         }
-
         return user;
     }
 
@@ -263,12 +275,12 @@ public class UserDBGateway implements UserGateway {
                     .toStatement().executeUpdate();
 
             if (changedRows == 0) {
-                log.error("User to update couldn't be found in the database.");
-                throw new NotFoundException("User to update couldn't be found in the database.");
+                log.error("No user with id " + user.getId() + " could be found in the database");
+                throw new NotFoundException("No user with id " + user.getId() + " could be found in the database.");
             }
         } catch (SQLException e) {
-            log.error("Couldn't update the user due to a database error.", e);
-            throw new StoreException(e);
+            log.error("Error while updating the user with id " + user.getId(), e);
+            throw new StoreException("Error while updating user with id " + user.getId(), e);
         }
     }
 
@@ -311,18 +323,23 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfPosts(final User user) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getVotingWeight(final User user) {
-        // TODO Auto-generated method stub
-        return 0;
+    public int getNumberOfPosts(final User user) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT num_posts FROM user_num_posts WHERE "
+                + "author = ?;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .toStatement().executeQuery();
+            if (rs.next()) {
+                return rs.getInt("num_posts");
+            } else {
+                log.error("No posts could be found for the user with id " + user.getId());
+                throw new NotFoundException("No posts could be found for the user with id " + user.getId());
+            }
+        } catch (SQLException e) {
+            log.error("Error while searching for number of posts of the user with id " + user.getId(), e);
+            throw new StoreException("Error while searching for number of posts of the user with id "
+                    + user.getId(), e);
+        }
     }
 
     /**
