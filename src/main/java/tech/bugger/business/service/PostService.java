@@ -94,25 +94,26 @@ public class PostService {
      * @throws TransactionException The transaction could not be committed successfully.
      */
     boolean createPostWithTransaction(final Post post, final Transaction tx) {
-        /*
-         * TODO: The existence of this method is terrible. However, since ReportService#createReport should use the same
-         * transaction for the report, the post, and the attachments, and since the following code is used in
-         * ReportService#createReport and PostService#createPost, I temporarily used this approach.
-         */
+        List<Attachment> attachments = post.getAttachments();
         int maxAttachments = applicationSettings.getConfiguration().getMaxAttachmentsPerPost();
-        if (post.getAttachments().size() > maxAttachments) {
-            log.info("Trying to create post with too many attachments");
+        if (attachments.size() > maxAttachments) {
+            log.info("Trying to create post with too many attachments.");
             String message = MessageFormat.format(messagesBundle.getString("too_many_attachments"), maxAttachments);
             feedbackEvent.fire(new Feedback(message, Feedback.Type.ERROR));
             return false;
         }
 
-
-        // TODO: Test if attachment names are unique.
+        if (attachments.size() != attachments.stream().map(Attachment::getName).distinct().count()) {
+            log.info("Trying to create post where attachment names are not unique.");
+            String message = MessageFormat.format(messagesBundle.getString("attachment_names_not_unique"),
+                    maxAttachments);
+            feedbackEvent.fire(new Feedback(message, Feedback.Type.ERROR));
+            return false;
+        }
 
         tx.newPostGateway().create(post);
         AttachmentGateway attachmentGateway = tx.newAttachmentGateway();
-        post.getAttachments().forEach(attachmentGateway::create);
+        attachments.forEach(attachmentGateway::create);
         return true;
     }
 
@@ -199,4 +200,5 @@ public class PostService {
     public boolean isPrivileged(User user, Post post) {
         return false;
     }
+
 }

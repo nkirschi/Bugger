@@ -76,7 +76,11 @@ public class PostServiceTest {
     public void setUp() {
         service = new PostService(notificationService, applicationSettings, transactionManager, feedbackEvent,
                 ResourceBundleMocker.mock(""));
-        List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
+        List<Attachment> attachments = Arrays.asList(
+                new Attachment(0, "test1.txt", null, "", null),
+                new Attachment(0, "test2.txt", null, "", null),
+                new Attachment(0, "test3.txt", null, "", null)
+        );
         testPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
 
         lenient().doReturn(tx).when(transactionManager).begin();
@@ -96,6 +100,13 @@ public class PostServiceTest {
     @Test
     public void testCreatePostWithTransactionWhenTooManyAttachments() {
         configuration.setMaxAttachmentsPerPost(2);
+        assertFalse(service.createPostWithTransaction(testPost, tx));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testCreatePostWithTransactionWhenNamesNotUnique() {
+        testPost.getAttachments().get(2).setName("test1.txt");
         assertFalse(service.createPostWithTransaction(testPost, tx));
         verify(feedbackEvent).fire(any());
     }

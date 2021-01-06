@@ -2,7 +2,6 @@ package tech.bugger.persistence.util;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
 
 /**
  * Builder for conveniently parametrizing {@link PreparedStatement}s.

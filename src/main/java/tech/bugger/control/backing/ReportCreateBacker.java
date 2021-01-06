@@ -5,19 +5,15 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
-import tech.bugger.business.util.Paginator;
-import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.faces.view.ViewScoped;
@@ -29,7 +25,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -197,7 +192,14 @@ public class ReportCreateBacker implements Serializable {
             return;
         }
 
-        // TODO: Test if attachment name is unique.
+        String name = uploadedAttachment.getSubmittedFileName();
+        if (attachments.stream().map(Attachment::getName).anyMatch(a -> a.equals(name))) {
+            log.info("Trying to create post where attachment names are not unique.");
+            String message = MessageFormat.format(messagesBundle.getString("attachment_names_not_unique"),
+                    maxAttachments);
+            feedbackEvent.fire(new Feedback(message, Feedback.Type.ERROR));
+            return;
+        }
 
         byte[] content;
         try {

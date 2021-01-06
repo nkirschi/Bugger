@@ -69,11 +69,12 @@ public class ReportCreateBackerTest {
     @Mock
     private Event<Feedback> feedbackEvent;
 
+    @Mock
+    private Part uploadedAttachment;
+
     private Report testReport;
 
     private Post testFirstPost;
-
-    private Part uploadedAttachment;
 
     private InputStream inputStream;
 
@@ -144,11 +145,6 @@ public class ReportCreateBackerTest {
     }
 
     @Test
-    public void testAttachmentsPaginator() {
-        // TODO
-    }
-
-    @Test
     public void testCreateWhenFine() {
         doReturn(true).when(reportService).createReport(any(), any());
         assertTrue(reportCreateBacker.create().endsWith("report.xhtml?r=" + testReport.getId()));
@@ -162,7 +158,7 @@ public class ReportCreateBackerTest {
 
     @Test
     public void testSaveAttachmentWhenFine() throws Exception {
-        Attachment attachment = new Attachment(0, "some-file-name.txt", new Lazy<>(new byte[]{1, 2, 3, 4}),
+        Attachment attachment = new Attachment(0, "test.txt", new Lazy<>(new byte[]{1, 2, 3, 4}),
                 "text/plain", new Lazy<>(testFirstPost));
         doReturn(attachment.getContent().get()).when(inputStream).readAllBytes();
         doReturn(attachment.getName()).when(uploadedAttachment).getSubmittedFileName();
@@ -183,9 +179,22 @@ public class ReportCreateBackerTest {
     }
 
     @Test
+    public void testSaveAttachmentWhenNamesNotUnique() throws Exception {
+        doReturn("test.txt").when(uploadedAttachment).getSubmittedFileName();
+        List<Attachment> attachments = Arrays.asList(new Attachment(0, "test.txt", null, "", null));
+        reportCreateBacker.setAttachments(new ArrayList<>(attachments));
+        reportCreateBacker.saveAttachment();
+        assertEquals(attachments, reportCreateBacker.getAttachments());
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
     public void testSaveAttachmentWhenTooManyAttachments() throws Exception {
         doReturn(2).when(configuration).getMaxAttachmentsPerPost();
-        List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment());
+        List<Attachment> attachments = Arrays.asList(
+                new Attachment(0, "test1.txt", null, "", null),
+                new Attachment(0, "test2.txt", null, "", null)
+        );
         reportCreateBacker.setAttachments(new ArrayList<>(attachments));
         reportCreateBacker.saveAttachment();
         assertEquals(attachments, reportCreateBacker.getAttachments());
