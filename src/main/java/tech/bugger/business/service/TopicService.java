@@ -285,7 +285,7 @@ public class TopicService implements Serializable {
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error when loading number of topics.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString(""), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return numberOfTopics;
     }
