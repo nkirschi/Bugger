@@ -19,7 +19,7 @@ input.error, textarea.error {
     left: 0;
     right: 0;
     padding: 20px;
-    box-shadow: 0 8px 20px 0 rgba(0,0,0,.08);
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
 }
 
 .footer {
@@ -30,7 +30,7 @@ input.error, textarea.error {
     left: 0;
     right: 0;
     text-align: center;
-    box-shadow: 0 8px 20px 0 rgba(0,0,0,.08);
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
 }
 
 .footerElement {
@@ -54,13 +54,13 @@ input.error, textarea.error {
     position: absolute;
     text-align: left;
     padding: 10px;
-    box-shadow: 0 8px 20px 0 rgba(0,0,0,.08);
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
     right: 60px;
     top: 80px;
 }
 
 .titlebar {
-    box-shadow: 0 8px 20px 0 rgba(0,0,0,.08);
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
     left: 5%;
     right: 5%;
     top: 130px;
@@ -77,7 +77,7 @@ input.error, textarea.error {
 }
 
 .content {
-    box-shadow: 0 8px 20px 0 rgba(0,0,0,.08);
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
     overflow: auto;
     padding: 10px;
     left: 5%;
@@ -118,7 +118,7 @@ input.error, textarea.error {
 }
 
 .col-sm-8 {
-    box-shadow: 0 8px 20px 0 rgba(0,0,0,.08);
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
     height: 100%;
     padding: 1%;
 }
