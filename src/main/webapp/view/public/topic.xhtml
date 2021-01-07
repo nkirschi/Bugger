@@ -17,16 +17,25 @@
             <h:panelGroup class="row" layout="block">
                 <h:panelGroup class="col-sm-2" layout="block"/>
                 <h:panelGroup class="col-sm-8" layout="block">
-                    <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" rendered="#{userSession.user.administrator}" styleClass="button"/>
+                    <h:outputLabel value="description:"/>
                     <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
+                    <h:panelGroup class="row" layout="block">
+                        <!-- rendered="#{userSession.user.administrator}" -->
+                        <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button" value="delete Topic"/>
+                        <!-- rendered="#{userSession.user.administrator}" -->
+                        <h:button id="b-edit" outcome="/restr/topic-edit.xhtml" value="edit Topic">
+                            <ui:param name="topic" value="#{topicBacker.topicID}"/>
+                        </h:button>
+                    </h:panelGroup>
                     <!-- statistik link -->
-                    <h:button id="b-edit" outcome="/restr/topic-edit.xhtml" rendered="#{userSession.user.administrator}">
-                        <ui:param name="topic" value="#{topicBacker.topicID}"/>
-                    </h:button>
-                    <h:outputLabel value="Offene Reports Anzeigen:"/>
-                    <h:selectBooleanCheckbox id="s-showOpen" value="#{topicBacker.openReportShown}"/>
-                    <h:outputLabel value="Geschlossene reports Anzeigen:"/>
-                    <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"/>
+                    <h:panelGroup class="row" layout="block">
+                        <h:outputLabel value="#{labels.topic_show_open_reports}"/>
+                        <h:selectBooleanCheckbox id="s-showOpen" value="#{topicBacker.openReportShown}"/>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block">
+                        <h:outputLabel value="#{labels.topic_show_closed_reports}"/>
+                        <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"/>
+                    </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup class="col-sm-2" layout="block"/>
             </h:panelGroup>
@@ -34,39 +43,35 @@
         <h:panelGroup class="row" layout="block">
             <h:panelGroup class="col-sm-12" layout="block">
                 <b:pagitable paginator="#{topicBacker.reports}">
-                    <h:column title="ID" paginator="#{topicBacker.reports}" key="id">
+                    <h:column title="#{labels.col_id}" paginator="#{topicBacker.reports}" key="id">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                         <h:outputText value="#{var}"/>
                     </h:column>
-                    <h:column title="Status" paginator="#{topicBacker.reports}" key="status">
+                    <h:column title="#{labels.col_title}" paginator="#{topicBacker.reports}" key="title">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                         <h:outputText value="#{var}"/>
                     </h:column>
-                    <h:column title="Title" paginator="#{topicBacker.reports}" key="title">
+                    <h:column title="#{labels.col_type}}" paginator="#{topicBacker.reports}" key="type">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                         <h:outputText value="#{var}"/>
                     </h:column>
-                    <h:column title="Type" paginator="#{topicBacker.reports}" key="type">
+                    <h:column title="#{labels.col_severity}" paginator="#{topicBacker.reports}" key="severity">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                         <h:outputText value="#{var}"/>
                     </h:column>
-                    <h:column title="Severity" paginator="#{topicBacker.reports}" key="severity">
+                    <h:column title="#{labels.col_version}" paginator="#{topicBacker.reports}" key="version">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                         <h:outputText value="#{var}"/>
                     </h:column>
-                    <h:column title="Version" paginator="#{topicBacker.reports}" key="version">
+                    <h:column title="#{labels.col_duplicate}" paginator="#{topicBacker.reports}" key="duplicate">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                         <h:outputText value="#{var}"/>
                     </h:column>
-                    <h:column title="Duplicate" paginator="#{topicBacker.reports}" key="duplicate">
+                    <h:column title="#{labels.col_relevance}" paginator="#{topicBacker.reports}" key="relevance">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                         <h:outputText value="#{var}"/>
                     </h:column>
-                    <h:column title="Relevance" paginator="#{topicBacker.reports}" key="relevance">
-                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
-                        <h:outputText value="#{var}"/>
-                    </h:column>
-                    <h:column title="Last Change" paginator="#{topicBacker.reports}" key="change">
+                    <h:column title="#{labels.col_change}" paginator="#{topicBacker.reports}" key="change">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                         <h:outputText value="#{var}"/>
                     </h:column>
@@ -74,9 +79,19 @@
             </h:panelGroup>
         </h:panelGroup>
         <h:form id="f-delTopic" rendered="#{topicBacker.displayDeleteDialog}">
-            <h:outputText value="Soll das wikrlich weg?"/>
-            <h:commandButton id="cb-delTopic" action="#{topicBacker.delete}" styleClass="button" immediate="true"/>
-            <h:commandButton id="cb-abortDelTopic" action="#{topicBacker.closeDeleteDialog}" styleClass="button" immediate="true"/>
+            <h:panelGroup class="row" layout="block" styleClass="align-center">
+                <h:panelGroup class="col-sm-4" layout="block"/>
+                <h:panelGroup class="col-sm-4" layout="block">
+                    <h:panelGroup class="row" layout="block">
+                        <h:outputText value="Soll das wikrlich weg?"/>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block">
+                        <h:commandButton id="cb-delTopic" action="#{topicBacker.delete}" styleClass="button" value="Delete" immediate="true"/>
+                        <h:commandButton id="cb-abortDelTopic" action="#{topicBacker.closeDeleteDialog}" styleClass="button" value="Cancel" immediate="true"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+            <h:panelGroup class="col-sm-4" layout="block"/>
+            </h:panelGroup>
         </h:form>
     </ui:define>
 </ui:composition>

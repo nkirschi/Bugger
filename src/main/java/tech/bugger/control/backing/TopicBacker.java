@@ -107,9 +107,8 @@ public class TopicBacker implements Serializable {
             }
         }
          **/
-        topicID = 100;
+        topicID = 1;
         topic = topicService.getTopicByID(topicID);
-
         if (topic == null) {
             try {
                 ext.redirect("error.xhtml");
@@ -117,14 +116,10 @@ public class TopicBacker implements Serializable {
                 throw new InternalError("Error while redirecting.", e);
             }
         }
-
         sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
-
         displayDeleteDialog = false;
-
         openReportShown = true;
         closedReportShown = false;
-
     }
 
     /**
