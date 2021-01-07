@@ -15,13 +15,18 @@
         <query-param name="token">#{token}</query-param>
         <view-id value="/faces/view/public/password-set.xhtml"/>
     </url-mapping>
+    <url-mapping id="login">
+        <pattern value="/login"/>
+        <query-param name="url">#{loginBacker.redirectURL}</query-param>
+        <view-id value="/faces/view/public/login.xhtml"/>
+    </url-mapping>
     <url-mapping id="profile-edit">
         <pattern value="/profile-edit"/>
         <view-id value="/faces/view/public/profile-edit.xhtml"/>
     </url-mapping>
     <url-mapping id="profile">
         <pattern value="/profile"/>
-        <query-param name="u">#{u}</query-param>
+        <query-param name="u">#{profileBacker.username}</query-param>
         <view-id value="/faces/view/authorized/profile.xhtml"/>
     </url-mapping>
     <url-mapping id="search">

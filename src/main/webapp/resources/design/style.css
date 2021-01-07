@@ -108,6 +108,24 @@ input.error, textarea.error {
     margin: 1%;
 }
 
+.style-button {
+    text-decoration: none;
+    background-color: white;
+    color: black;
+    border: 1px solid #cccccc;
+    display: inline-block;
+    padding: 4px 24px;
+    line-height: 24px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.style-button:hover {
+    text-decoration: none;
+    color: black;
+}
+
 .command-link {
     margin: 1%;
 }
