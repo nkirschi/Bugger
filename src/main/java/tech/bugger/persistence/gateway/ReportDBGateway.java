@@ -5,6 +5,7 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
 import java.sql.Connection;
@@ -106,8 +107,31 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void deleteReport(final Report report) {
-        // TODO Auto-generated method stub
+    public void deleteReport(final Report report) throws NotFoundException {
+        if (report == null) {
+            log.error("Cannot delete report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot delete report with ID null");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
+
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM report * WHERE id = " + report.getId()
+                + " RETURNING *")) {
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getInt("id") != report.getId()) {
+                    throw new InternalError("Wrong report deleted! Please investigate! Expected: " + report
+                            + ", actual ID: " + rs.getInt("id"));
+                }
+            } else {
+                log.error("Report to delete " + report + " not found.");
+                throw new NotFoundException("Report to delete " + report + " not found.");
+            }
+        } catch (SQLException e) {
+            log.error("Error when deleting report " + report + ".", e);
+            throw new StoreException("Error when deleting report " + report + ".", e);
+        }
 
     }
 

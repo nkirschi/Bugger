@@ -8,11 +8,14 @@ import org.postgresql.util.PSQLException;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,6 +63,13 @@ class ReportDBGatewayTest {
         }
     }
 
+    public boolean isGone(int reportID) throws Exception {
+        try (Statement stmt = connection.createStatement()) {
+            ResultSet rs = stmt.executeQuery("SELECT * FROM report WHERE id = " + reportID);
+            return (!rs.next());
+        }
+    }
+
     @Test
     public void testCountPostsWhenReportIsNull() {
         assertThrows(IllegalArgumentException.class, () -> gateway.countPosts(null));
@@ -75,7 +85,7 @@ class ReportDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         report.setId(100);
-        assertThrows(StoreException.class, () -> gateway.countPosts(report));
+        assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy).countPosts(report));
     }
 
     @Test
@@ -100,7 +110,43 @@ class ReportDBGatewayTest {
     }
 
     @Test
-    void deleteReport() {
+    public void testDeleteReportWhenReportIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> gateway.deleteReport(null));
+    }
+
+    @Test
+    public void testDeleteReportWhenReportIDIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> gateway.deleteReport(new Report()));
+    }
+
+    @Test
+    public void testDeleteReportWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        report.setId(100);
+        assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy).deleteReport(report));
+    }
+
+    @Test
+    public void testDeleteReportWhenReportDoesNotExist() {
+        report.setId(11);
+        assertThrows(NotFoundException.class, () -> gateway.deleteReport(report));
+    }
+
+    @Test
+    public void testDeleteReport() throws Exception {
+        insertReport();
+        report.setId(100);
+        gateway.deleteReport(report);
+        assertTrue(isGone(100));
+    }
+
+    @Test
+    public void testDeleteReportTwice() throws Exception {
+        insertReport();
+        report.setId(100);
+        gateway.deleteReport(report);
+        assertThrows(NotFoundException.class, () -> gateway.deleteReport(report));
     }
 
     @Test
