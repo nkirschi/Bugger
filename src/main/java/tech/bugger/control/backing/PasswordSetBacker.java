@@ -94,13 +94,14 @@ public class PasswordSetBacker {
     void init() {
         if (session.getUser() != null) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:base");
+            return;
         }
 
         token = authenticationService.findToken(fctx.getExternalContext().getRequestParameterMap().get("token"));
         if (isValidToken()) {
             log.debug("Showing Password-Set page with token " + token + '.');
         } else {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:base");
         }
     }
 

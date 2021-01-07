@@ -8,7 +8,7 @@
 <ui:composition>
     <h:panelGroup styleClass="header">
         <h:panelGroup styleClass="row" layout="block">
-            <h:link href="#{request.contextPath}" id="l-logo-header">
+            <h:link outcome="pretty:base" id="l-logo-header">
                 <h:graphicImage id="g-logo-header" library="images" name="bugger.png" width="80" height="80"/>
             </h:link>
             <h:outputText value="#{applicationSettings.organization.name}" id="ot-comp-name"

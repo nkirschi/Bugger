@@ -57,6 +57,8 @@ public class PasswordSetBackerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
+        lenient().doReturn(navHandler).when(application).getNavigationHandler();
+        lenient().doReturn(application).when(fctx).getApplication();
         lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(Locale.GERMAN).when(userSession).getLocale();
         passwordSetBacker = new PasswordSetBacker(authenticationService, userSession, fctx, feedbackEvent,
@@ -88,14 +90,11 @@ public class PasswordSetBackerTest {
         testToken.setType(Token.Type.CHANGE_EMAIL);
         doReturn(testToken).when(authenticationService).findToken(any());
         passwordSetBacker.init();
-        verify(navHandler, never()).handleNavigation(any(), any(), any());
-        verify(feedbackEvent).fire(any());
+        verify(navHandler).handleNavigation(any(), any(), any());
     }
 
     @Test
     public void testInitLoggedIn() {
-        doReturn(navHandler).when(application).getNavigationHandler();
-        doReturn(application).when(fctx).getApplication();
         doReturn(testUser).when(userSession).getUser();
         passwordSetBacker.init();
         verify(navHandler).handleNavigation(any(), any(), any());
@@ -105,8 +104,7 @@ public class PasswordSetBackerTest {
     public void testInitNoTokenFound() {
         doReturn(null).when(authenticationService).findToken(any());
         passwordSetBacker.init();
-        verify(navHandler, never()).handleNavigation(any(), any(), any());
-        verify(feedbackEvent).fire(any());
+        verify(navHandler).handleNavigation(any(), any(), any());
     }
 
     @Test
