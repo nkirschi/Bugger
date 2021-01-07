@@ -123,7 +123,7 @@ public class RegisterBacker {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("register.success"), Feedback.Type.INFO));
             return "pretty:base";
         }
-        return "pretty:";
+        return null;
     }
 
     /**
