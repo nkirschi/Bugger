@@ -2,8 +2,36 @@
                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                xsi:schemaLocation="http://ocpsoft.org/schema/rewrite-config-prettyfaces
                       http://ocpsoft.org/xml/ns/prettyfaces/rewrite-config-prettyfaces.xsd">
-    <url-mapping id="base">
+    <url-mapping id="home">
         <pattern value="/"/>
         <view-id value="/faces/view/public/home.xhtml"/>
+    </url-mapping>
+    <url-mapping id="register">
+        <pattern value="/register"/>
+        <view-id value="/faces/view/public/register.xhtml"/>
+    </url-mapping>
+    <url-mapping id="password-set">
+        <pattern value="/password-set"/>
+        <query-param name="token">#{token}</query-param>
+        <view-id value="/faces/view/public/password-set.xhtml"/>
+    </url-mapping>
+    <url-mapping id="profile-edit">
+        <pattern value="/profile-edit"/>
+        <view-id value="/faces/view/public/profile-edit.xhtml"/>
+    </url-mapping>
+    <url-mapping id="profile">
+        <pattern value="/profile"/>
+        <query-param name="u">#{profileBacker.username}</query-param>
+        <view-id value="/faces/view/authorized/profile.xhtml"/>
+    </url-mapping>
+    <url-mapping id="search">
+        <pattern value="/search"/>
+        <query-param name="q">#{searchBacker.query}</query-param>
+        <query-param name="t">#{searchBacker.tab}</query-param>
+        <view-id value="/faces/view/public/search.xhtml"/>
+    </url-mapping>
+    <url-mapping id="admin">
+        <pattern value="/admin"/>
+        <view-id value="/faces/view/restr/admin.xhtml"/>
     </url-mapping>
 </pretty-config>
