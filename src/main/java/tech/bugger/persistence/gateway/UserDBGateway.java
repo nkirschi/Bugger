@@ -1,6 +1,14 @@
 package tech.bugger.persistence.gateway;
 
 import tech.bugger.global.transfer.Language;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.time.ZoneId;
+import java.util.List;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
@@ -10,15 +18,6 @@ import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.time.ZoneId;
-import java.util.List;
 
 /**
  * User gateway that gives access to user stored in a database.
@@ -66,10 +65,8 @@ public class UserDBGateway implements UserGateway {
                 .bytes(user.getAvatar().get())
                 .bytes(user.getAvatarThumbnail())
                 .string(user.getBiography())
-                .string(user.getPreferredLanguage() != null ? user.getPreferredLanguage().name()
-                        : Language.ENGLISH.name())
-                .object(user.getProfileVisibility() != null ? user.getProfileVisibility() : User.ProfileVisibility.FULL,
-                        Types.OTHER)
+                .string(user.getPreferredLanguage().name())
+                .object(user.getProfileVisibility(), Types.OTHER)
                 .object(user.getForcedVotingWeight(), Types.INTEGER)
                 .bool(user.isAdministrator());
     }
@@ -82,19 +79,12 @@ public class UserDBGateway implements UserGateway {
      * @throws SQLException Some parsing error occurred.
      */
     static User getUserFromResultSet(final ResultSet rs) throws SQLException {
-        String langStr = rs.getString("preferred_language").toUpperCase();
-        Language lang = Language.ENGLISH;
-
-        if (!langStr.isBlank()) {
-            lang = Language.valueOf(langStr);
-        }
-
         return new User(rs.getInt("id"), rs.getString("username"),
                 rs.getString("password_hash"), rs.getString("password_salt"),
                 rs.getString("hashing_algorithm"), rs.getString("email_address"),
                 rs.getString("first_name"), rs.getString("last_name"),
                 new Lazy<>(rs.getBytes("avatar")), rs.getBytes("avatar_thumbnail"),
-                rs.getString("biography"), lang,
+                rs.getString("biography"), Language.valueOf(rs.getString("preferred_language").toUpperCase()),
                 User.ProfileVisibility.valueOf(rs.getString("profile_visibility").toUpperCase()),
                 rs.getTimestamp("registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
                 rs.getObject("forced_voting_weight", Integer.class), rs.getBoolean("is_admin"));

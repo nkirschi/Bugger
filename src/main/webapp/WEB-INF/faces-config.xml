@@ -25,4 +25,8 @@
         </resource-bundle>
         <message-bundle>tech.bugger.i18n.messages</message-bundle>
     </application>
+
+    <lifecycle>
+        <phase-listener>com.ocpsoft.pretty.faces.event.MultiPageMessagesSupport</phase-listener>
+    </lifecycle>
 </faces-config>

@@ -58,8 +58,9 @@ public class MatchingFieldValidator implements Validator<String> {
         }
 
         // Get its value, i.e. the entered text of the other field.
-        String other = (String) otherInput.getValue();
-        other = other == null ? (String) otherInput.getSubmittedValue() : other;
+        String other = (String) otherInput.getSubmittedValue();
+        other = other == null ? (String) otherInput.getValue() : other;
+        log.debug("Checking " + value + " and " + other + " for equality");
 
         // Check if the initial and other text are equal.
         if (!Objects.equals(other, value)) {

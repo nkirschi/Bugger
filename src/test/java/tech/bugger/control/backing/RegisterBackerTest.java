@@ -1,10 +1,12 @@
 package tech.bugger.control.backing;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Locale;
 import javax.enterprise.event.Event;
+import javax.faces.application.Application;
+import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,12 @@ public class RegisterBackerTest {
     private User testUser;
 
     @Mock
+    private NavigationHandler navHandler;
+
+    @Mock
+    private Application application;
+
+    @Mock
     private AuthenticationService authenticationService;
 
     @Mock
@@ -44,6 +52,9 @@ public class RegisterBackerTest {
     private HttpServletRequest request;
 
     @Mock
+    private FacesContext fctx;
+
+    @Mock
     private ExternalContext ectx;
 
     @Mock
@@ -52,8 +63,9 @@ public class RegisterBackerTest {
     @BeforeEach
     public void setUp() throws Exception {
         lenient().doReturn(request).when(ectx).getRequest();
+        lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(Locale.GERMAN).when(userSession).getLocale();
-        registerBacker = new RegisterBacker(authenticationService, profileService, userSession, ectx, feedbackEvent,
+        registerBacker = new RegisterBacker(authenticationService, profileService, userSession, fctx, feedbackEvent,
                 ResourceBundleMocker.mock(""));
         testUser = new User();
     }
@@ -74,17 +86,12 @@ public class RegisterBackerTest {
     }
 
     @Test
-    public void testInitNoAccess() throws Exception {
+    public void testInitNoAccess() {
+        doReturn(navHandler).when(application).getNavigationHandler();
+        doReturn(application).when(fctx).getApplication();
         doReturn(testUser).when(userSession).getUser();
         registerBacker.init();
-        verify(ectx).redirect(any());
-    }
-
-    @Test
-    public void testInitNoAccessAndException() throws Exception {
-        doReturn(testUser).when(userSession).getUser();
-        doThrow(IOException.class).when(ectx).redirect(any());
-        assertThrows(InternalError.class, () -> registerBacker.init());
+        verify(navHandler).handleNavigation(any(), any(), any());
     }
 
     @Test
