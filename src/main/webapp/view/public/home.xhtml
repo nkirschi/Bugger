@@ -15,7 +15,7 @@
         <b:pagitable paginator="#{homeBacker.topics}">
             <b:column title="Title" paginator="#{homeBacker.topics}" key="title"><h:outputText value="#{var.title}"/></b:column>
             <b:column title="Description" paginator="#{homeBacker.topics}" key="description"><h:outputText value="#{var.description}" escape="false"/></b:column>
-            <b:column title="Last activity" paginator="#{homeBacker.topics}" key=""><h:outputText value="#{homeBacker.lastChange(var)}"/></b:column>
+            <b:column title="Last activity" paginator="#{homeBacker.topics}" key="last_activity"><h:outputText value="#{var.lastActivity}"/></b:column>
         </b:pagitable>
     </ui:define>
 </ui:composition>
