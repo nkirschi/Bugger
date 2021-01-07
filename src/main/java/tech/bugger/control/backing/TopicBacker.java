@@ -5,19 +5,23 @@ import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Constants;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -30,9 +34,13 @@ import java.util.List;
 @Named
 public class TopicBacker implements Serializable {
 
-    private static final Log log = Log.forClass(TopicBacker.class);
     @Serial
     private static final long serialVersionUID = 6893463272223847178L;
+
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
+    private static final Log log = Log.forClass(ProfileBacker.class);
 
     private int topicID;
     private Topic topic;
@@ -52,6 +60,8 @@ public class TopicBacker implements Serializable {
     private boolean displayUnmodDialog;
     private boolean displayDeleteDialog;
 
+    private String sanitizedDescription;
+
     @Inject
     private UserSession session;
 
@@ -68,11 +78,53 @@ public class TopicBacker implements Serializable {
     private FacesContext fctx;
 
     /**
+     * The current external context.
+     */
+    @Inject
+    private ExternalContext ext;
+
+    /**
      * Initializes the topic page. By default, only open reports are shown. Also checks if the user is allowed to view
      * the page. If not, acts as if the page did not exist.
      */
     @PostConstruct
     public void init() {
+        /**
+        if ((!ext.getRequestParameterMap().containsKey("t"))) {
+            try {
+                ext.redirect("home.xhtml");
+            } catch (IOException e) {
+                throw new InternalError("Error while redirecting.", e);
+            }
+        }
+        try {
+            topicID = Integer.parseInt(ext.getRequestParameterMap().get("t"));
+        } catch (NumberFormatException e) {
+            try {
+                ext.redirect("home.xhtml");
+            } catch (IOException e2) {
+                throw new InternalError("Error while redirecting.", e2);
+            }
+        }
+         **/
+        topicID = 100;
+        topic = topicService.getTopicByID(topicID);
+
+        if (topic == null) {
+            try {
+                ext.redirect("error.xhtml");
+            } catch (IOException e) {
+                throw new InternalError("Error while redirecting.", e);
+            }
+        }
+
+        sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
+
+        displayDeleteDialog = false;
+
+        openReportShown = true;
+        closedReportShown = false;
+
     }
 
     /**
@@ -189,6 +241,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openDeleteDialog() {
+        displayDeleteDialog = true;
         return null;
     }
 
@@ -198,6 +251,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String closeDeleteDialog() {
+        displayDeleteDialog = false;
         return null;
     }
 
@@ -222,7 +276,9 @@ public class TopicBacker implements Serializable {
     /**
      * Irreversibly deletes the topic.
      */
-    public void delete() {
+    public String delete() {
+        topicService.deleteTopic(topic);
+        return null;
     }
 
     /**
@@ -368,6 +424,13 @@ public class TopicBacker implements Serializable {
      */
     public void setClosedReportShown(boolean showClosedReports) {
         this.closedReportShown = showClosedReports;
+    }
+
+    /**
+     * @return the sanitized description
+     */
+    public String getSanitizedDescription() {
+        return sanitizedDescription;
     }
 
     /**

@@ -4,14 +4,80 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:b="http://tech.bugger/tags">
+
 <ui:composition template="/WEB-INF/template/main.xhtml">
     <ui:param name="title" value="#{(labels.topic_page).concat(' ').concat(topicBacker.topic.title)}"/>
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
     <ui:define name="content">
-
+        <h:form id="f-topic">
+            <h:panelGroup class="row" layout="block">
+                <h:panelGroup class="col-sm-2" layout="block"/>
+                <h:panelGroup class="col-sm-8" layout="block">
+                    <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" rendered="#{userSession.user.administrator}" styleClass="button"/>
+                    <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
+                    <!-- statistik link -->
+                    <h:button id="b-edit" outcome="/restr/topic-edit.xhtml" rendered="#{userSession.user.administrator}">
+                        <ui:param name="topic" value="#{topicBacker.topicID}"/>
+                    </h:button>
+                    <h:outputLabel value="Offene Reports Anzeigen:"/>
+                    <h:selectBooleanCheckbox id="s-showOpen" value="#{topicBacker.openReportShown}"/>
+                    <h:outputLabel value="Geschlossene reports Anzeigen:"/>
+                    <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"/>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-2" layout="block"/>
+            </h:panelGroup>
+        </h:form>
+        <h:panelGroup class="row" layout="block">
+            <h:panelGroup class="col-sm-12" layout="block">
+                <b:pagitable paginator="#{topicBacker.reports}">
+                    <h:column title="ID" paginator="#{topicBacker.reports}" key="id">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+                        <h:outputText value="#{var}"/>
+                    </h:column>
+                    <h:column title="Status" paginator="#{topicBacker.reports}" key="status">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+                        <h:outputText value="#{var}"/>
+                    </h:column>
+                    <h:column title="Title" paginator="#{topicBacker.reports}" key="title">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+                        <h:outputText value="#{var}"/>
+                    </h:column>
+                    <h:column title="Type" paginator="#{topicBacker.reports}" key="type">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+                        <h:outputText value="#{var}"/>
+                    </h:column>
+                    <h:column title="Severity" paginator="#{topicBacker.reports}" key="severity">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+                        <h:outputText value="#{var}"/>
+                    </h:column>
+                    <h:column title="Version" paginator="#{topicBacker.reports}" key="version">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+                        <h:outputText value="#{var}"/>
+                    </h:column>
+                    <h:column title="Duplicate" paginator="#{topicBacker.reports}" key="duplicate">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+                        <h:outputText value="#{var}"/>
+                    </h:column>
+                    <h:column title="Relevance" paginator="#{topicBacker.reports}" key="relevance">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+                        <h:outputText value="#{var}"/>
+                    </h:column>
+                    <h:column title="Last Change" paginator="#{topicBacker.reports}" key="change">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+                        <h:outputText value="#{var}"/>
+                    </h:column>
+                </b:pagitable>
+            </h:panelGroup>
+        </h:panelGroup>
+        <h:form id="f-delTopic" rendered="#{topicBacker.displayDeleteDialog}">
+            <h:outputText value="Soll das wikrlich weg?"/>
+            <h:commandButton id="cb-delTopic" action="#{topicBacker.delete}" styleClass="button" immediate="true"/>
+            <h:commandButton id="cb-abortDelTopic" action="#{topicBacker.closeDeleteDialog}" styleClass="button" immediate="true"/>
+        </h:form>
     </ui:define>
 </ui:composition>
 </html>

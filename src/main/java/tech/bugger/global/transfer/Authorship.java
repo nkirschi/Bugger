@@ -30,7 +30,7 @@ public class Authorship implements Serializable {
     private User modifier;
 
     /**
-     * he Point in Time where the last modification of the content happened.
+     * The Point in Time where the last modification of the content happened.
      */
     private ZonedDateTime modifiedDate;
 

@@ -70,7 +70,7 @@ public class TopicDBGateway implements TopicGateway {
             }
         }
         if (showClosedReports) {
-            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT * AS num_reports FROM \"reports\" WHERE topic = ?, IS NOT NULL")) {
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT * AS num_reports FROM \"reports\" WHERE topic = ?, closed_at IS NOT NULL")) {
                 ResultSet resultSet = new StatementParametrizer(stmt)
                         .integer(topic.getId()).toStatement().executeQuery();
                 int numReports = 0;
@@ -175,7 +175,6 @@ public class TopicDBGateway implements TopicGateway {
             log.error("Error while deleting the topic with id " + topic.getId(), e);
             throw new StoreException("Error while deleting the topic with id " + topic.getId(), e);
         }
-
     }
 
     /**

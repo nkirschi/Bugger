@@ -1,11 +1,17 @@
 package tech.bugger.business.service;
 
+import tech.bugger.business.exception.NotFoundException;
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.util.Transaction;
+import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
@@ -13,6 +19,7 @@ import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Service providing methods related to topics. A {@code Feedback} event is fired, if unexpected circumstances occur.
@@ -25,6 +32,31 @@ public class TopicService {
     @Inject
     @Any
     Event<Feedback> feedback;
+
+    /**
+     * The transaction manager used for creating transactions.
+     */
+    private final TransactionManager transactionManager;
+
+    /**
+     * The resource bundle for feedback messages.
+     */
+    private final ResourceBundle messages;
+
+    /**
+     * Constructs a new topic service with the given dependencies.
+     *
+     * @param feedback The feedback event to be used for user feedback.
+     * @param transactionManager The transaction manager to be used for creating transactions.
+     * @param messages The resource bundle to look up feedback messages.
+     */
+    @Inject
+    public TopicService(final Event<Feedback> feedback, final TransactionManager transactionManager,
+                          final @RegistryKey("messages") ResourceBundle messages) {
+        this.feedback = feedback;
+        this.transactionManager = transactionManager;
+        this.messages = messages;
+    }
 
     /**
      * Bans a user from a topic. Administrators and moderators of the topic cannot be banned.
@@ -91,7 +123,18 @@ public class TopicService {
      * @return The topic with that ID if it exists, {@code null} if no topic with that ID exists.
      */
     public Topic getTopicByID(int topicID) {
-        return null;
+        Topic topic = null;
+        try (Transaction transaction = transactionManager.begin()) {
+            topic = transaction.newTopicGateway().getTopicByID(topicID);
+            transaction.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("The topic with id " + topicID + " could not be found.", e);
+            throw new NotFoundException(messages.getString("not_found_error"), e);
+        } catch (TransactionException e) {
+            log.error("Error while loading the topic with id " + topicID, e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return topic;
     }
 
     /**
@@ -118,7 +161,16 @@ public class TopicService {
      * @param topic The topic to be deleted.
      */
     public void deleteTopic(Topic topic) {
-
+        try (Transaction transaction = transactionManager.begin()) {
+            transaction.newTopicGateway().deleteTopic(topic);
+            transaction.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("The topic could not be found.", e);
+            throw new NotFoundException(messages.getString("not_found_error"), e);
+        } catch (TransactionException e) {
+            log.error("Error while deleting the topic", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -142,7 +194,18 @@ public class TopicService {
      */
     public List<Report> getSelectedReports(Topic topic, Selection selection, boolean showOpenReports,
                                            boolean showClosedReports) {
-        return null;
+        List<Report> reports = null;
+        try (Transaction transaction = transactionManager.begin()) {
+            reports = transaction.newReportGateway().getSelectedReports(topic, selection, showOpenReports, showClosedReports);
+            transaction.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("The topic could not be found.", e);
+            throw new NotFoundException(messages.getString("not_found_error"), e);
+        } catch (TransactionException e) {
+            log.error("Error while loading the selected reports in a topic", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return reports;
     }
 
     /**
@@ -176,7 +239,18 @@ public class TopicService {
      * @return The number of reports.
      */
     public int getNumberOfReports(Topic topic, boolean showOpenReports, boolean showClosedReports) {
-        return 0;
+        int numberOfTopics = 0;
+        try (Transaction transaction = transactionManager.begin()) {
+            numberOfTopics = transaction.newTopicGateway().getNumberOfReports(topic, showOpenReports, showClosedReports);
+            transaction.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("The topic could not be found.", e);
+            throw new NotFoundException(messages.getString("not_found_error"), e);
+        } catch (TransactionException e) {
+            log.error("Error while loading the topic.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return numberOfTopics;
     }
 
     /**
