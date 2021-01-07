@@ -4,7 +4,9 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.global.transfer.User;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.SessionScoped;
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
@@ -14,7 +16,7 @@ import java.io.Serializable;
 /**
  * Backing Bean for the header.
  */
-@SessionScoped
+@RequestScoped
 @Named
 public class HeaderBacker implements Serializable {
 
@@ -38,10 +40,26 @@ public class HeaderBacker implements Serializable {
     private boolean displayMenu;
 
     /**
+     * The current {@link FacesContext} of the application.
+     */
+    private FacesContext fctx;
+
+    /**
+     * Constructs a new header backing bean.
+     *
+     * @param fctx The current {@link FacesContext} of the application.
+     */
+    @Inject
+    public HeaderBacker(final FacesContext fctx) {
+        this.fctx = fctx;
+    }
+
+    /**
      * Initializes the User for the header and makes sure the headerMenu is closed.
      */
     @PostConstruct
     void init() {
+        System.out.println(displayMenu);
         user = session.getUser();
         closeMenu();
     }
@@ -81,6 +99,28 @@ public class HeaderBacker implements Serializable {
             openMenu();
         }
         return null;
+    }
+
+    /**
+     * Determine alert class for messages.
+     *
+     * @return The determined alert class.
+     */
+    public String determineAlertClass() {
+        if (!fctx.getMessageList().isEmpty()) {
+            FacesMessage.Severity maxSeverity = fctx.getMessageList().stream().map(FacesMessage::getSeverity)
+                                                    .max(FacesMessage.Severity::compareTo).get();
+            if (maxSeverity.equals(FacesMessage.SEVERITY_ERROR)) {
+                return " alert-danger";
+            } else if (maxSeverity.equals(FacesMessage.SEVERITY_WARN)) {
+                return " alert-warning";
+            } else if (maxSeverity.equals(FacesMessage.SEVERITY_INFO)) {
+                return " alert-success";
+            } else {
+                return " alert-primary";
+            }
+        }
+        return "";
     }
 
     /**

@@ -1,36 +1,49 @@
-.h1 {
+.h1, .h2, .h3, .h4, .h5, .h6 {
     display: block;
-    font-size: 2em;
-    margin: 0.67em 0;
-    font-weight: bold;
 }
 
-.error {
-    color: #f00;
-}
-
-input.error, textarea.error {
-    border-color: #f00;
-}
-
-.header {
-    position: absolute;
+#header {
+    position: fixed;
     height: 80px;
+    top: 0;
     left: 0;
     right: 0;
-    padding: 20px;
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
+    background: #fff;
 }
 
-.footer {
-    position: absolute;
-    height: 45px;
+#g-logo {
+    padding: 10px;
+    height: 100%;
+    width: auto;
+}
+
+#footer {
+    position: fixed;
+    height: 40px;
     bottom: 0;
     padding-top: 10px;
     left: 0;
     right: 0;
     text-align: center;
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
+    background: #fff;
+}
+
+#content {
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
+    overflow: auto;
+    padding: 40px;
+    margin: 100px auto 60px auto;
+    max-width: 1200px;
+}
+
+#messages {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    margin-left: -200px;
+    width: 400px;
 }
 
 .footerElement {
@@ -49,7 +62,7 @@ input.error, textarea.error {
     float: right;
 }
 
-.dropdown {
+#p-user-menu {
     z-index: 2;
     position: absolute;
     text-align: left;
@@ -59,38 +72,11 @@ input.error, textarea.error {
     top: 80px;
 }
 
-.titlebar {
-    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
-    left: 5%;
-    right: 5%;
-    top: 130px;
-    height: 50px;
-    position: absolute;
-}
-
 .title {
     margin-top: 0;
     display: inline-block;
     float: left;
     font-size: 2em;
-    font-weight: bold;
-}
-
-.content {
-    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
-    overflow: auto;
-    padding: 10px;
-    left: 5%;
-    right: 5%;
-    top: 195px;
-    bottom: 65px;
-    position: absolute;
-}
-
-.h2 {
-    display: block;
-    font-size: 1.5em;
-    margin: 0.67em 0;
     font-weight: bold;
 }
 
