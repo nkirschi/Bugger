@@ -231,6 +231,30 @@ class TopicDBGatewayTest {
     }
 
     @Test
+    public void testSelectTopicsWhenSortedByLastActivityWithNoActivity() throws Exception {
+        numberOfTopics = 5;
+        addTopics();
+        validSelection();
+        selection.setSortedBy("last_activity");
+        expectedTopics(5);
+        assertEquals(topics, gateway.selectTopics(selection));
+    }
+
+    @Test
+    public void testSelectTopicsWhenSortedByLastActivityWithSomeActivity() throws Exception {
+        numberOfTopics = 5;
+        addTopics();
+        validSelection();
+        selection.setSortedBy("last_activity");
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute("INSERT INTO report (title, type, severity, topic) VALUES ('Hello', 'BUG', 'MINOR', 5)");
+        }
+        expectedTopics(4);
+        topics.add(0, makeTestTopic(5));
+        assertEquals(topics, gateway.selectTopics(selection));
+    }
+
+    @Test
     public void testDetermineLastActivityWhenTopicIsNull() {
         assertThrows(IllegalArgumentException.class, () -> gateway.determineLastActivity(null));
     }
