@@ -132,6 +132,7 @@ class TopicServiceTest {
     public void testLastChangeWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(topicGateway).determineLastActivity(any());
         assertNull(topicService.lastChange(testTopic1));
+        verify(feedbackEvent).fire(any());
     }
 
     @Test
