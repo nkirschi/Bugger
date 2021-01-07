@@ -15,6 +15,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -150,7 +154,60 @@ class ReportDBGatewayTest {
     }
 
     @Test
-    void closeReport() {
+    public void testCloseReportWhenReportIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> gateway.closeReport(null));
+    }
+
+    @Test
+    public void testCloseReportWhenReportIDIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> gateway.closeReport(new Report()));
+    }
+
+    @Test
+    public void testCloseReportWhenReportClosingDateIsNull() {
+        report.setId(100);
+        assertThrows(IllegalArgumentException.class, () -> gateway.closeReport(report));
+    }
+
+    @Test
+    public void testCloseReportWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        report.setId(100);
+        report.setClosingDate(ZonedDateTime.now());
+        assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy).closeReport(report));
+    }
+
+    @Test
+    public void testCloseReportWhenReportDoesNotExist() {
+        report.setId(21);
+        report.setClosingDate(ZonedDateTime.now());
+        // assertNull(ZonedDateTime.now());
+        assertThrows(NotFoundException.class, () -> gateway.closeReport(report));
+    }
+
+    @Test
+    public void testCloseReport() throws Exception {
+        insertReport();
+        report.setId(100);
+        report.setClosingDate(ZonedDateTime.now());
+        assertDoesNotThrow(() -> gateway.closeReport(report));
+    }
+
+    @Test
+    public void testCloseReportVerifyClosingDate() throws Exception {
+        insertReport();
+        report.setId(100);
+        report.setClosingDate(ZonedDateTime.now());
+        gateway.closeReport(report);
+        ZonedDateTime fromDatabase = null;
+        try (Statement stmt = connection.createStatement()) {
+            ResultSet rs = stmt.executeQuery("SELECT * FROM report WHERE id = 100");
+            if (rs.next()) {
+                fromDatabase = rs.getTimestamp("closed_at").toInstant().atZone(ZoneId.systemDefault());
+            }
+        }
+        assertEquals(report.getClosingDate().truncatedTo(ChronoUnit.SECONDS), fromDatabase.truncatedTo(ChronoUnit.SECONDS));
     }
 
     @Test
