@@ -5,8 +5,12 @@ import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Post;
+import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -14,6 +18,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
+import java.sql.Connection;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -101,7 +106,26 @@ public class PostService {
      * @param post The post to be deleted.
      */
     public void deletePost(final Post post) {
-
+        if (post == null) {
+            log.error("Cannot delete post null.");
+            throw new IllegalArgumentException("Post cannot be null.");
+        }
+        Report report = post.getReport().get();
+        try (Transaction tx = transactionManager.begin()) {
+            Post firstPost = tx.newPostGateway().getFirstPost(report);
+            if (post.equals(firstPost)) {
+                tx.newReportGateway().deleteReport(report);
+            } else {
+                tx.newPostGateway().deletePost(post);
+            }
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Post to be deleted " + post + " not found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when deleting post " + post + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -151,7 +175,15 @@ public class PostService {
      * @param post The post in question.
      * @return {@code true} if the user is allowed to modify the post, {@code false} otherwise.
      */
-    public boolean isPrivileged(User user, Post post) {
-        return false;
+    public boolean isPrivileged(final User user, final Post post) {
+        // TODO add moderator check, ban check
+        if (user == null) {
+            return false;
+        } else if (user.isAdministrator()) {
+            return true;
+        } else {
+            return user.equals(post.getAuthorship().getCreator());
+        }
     }
+
 }
