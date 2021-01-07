@@ -4,6 +4,9 @@ import javax.faces.component.FacesComponent;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UINamingContainer;
 
+/**
+ * UI Component for the {@link tech.bugger.business.util.Paginator}.
+ */
 @FacesComponent("paginator")
 public class PaginatorComponent extends UINamingContainer {
 
