@@ -11,9 +11,7 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,8 +19,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
@@ -93,6 +90,17 @@ class TopicDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class, () -> new TopicDBGateway(connectionSpy).countTopics());
+    }
+
+    @Test
+    public void testCountTopicsWhenSNAFU() throws Exception {
+        ResultSet resultSetMock = mock(ResultSet.class);
+        PreparedStatement stmtMock = mock(PreparedStatement.class);
+        Connection connectionSpy = spy(connection);
+        doReturn(false).when(resultSetMock).next();
+        doReturn(resultSetMock).when(stmtMock).executeQuery();
+        doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
+        assertThrows(InternalError.class, () -> new TopicDBGateway(connectionSpy).countTopics());
     }
 
     @Test
