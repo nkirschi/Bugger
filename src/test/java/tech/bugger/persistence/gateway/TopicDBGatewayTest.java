@@ -77,31 +77,31 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testGetNumberOfTopicsWhenThereAreSome() throws Exception {
+    public void testCountTopicsWhenThereAreSome() throws Exception {
         numberOfTopics = 5;
         addTopics();
         assertEquals(numberOfTopics, gateway.countTopics());
     }
 
     @Test
-    public void testGetNumberOfTopicsWhenThereAreNone() {
+    public void testCountTopicsWhenThereAreNone() {
         assertEquals(0, gateway.countTopics());
     }
 
     @Test
-    public void testGetNumberOfTopicsWhenDatabaseError() throws Exception {
+    public void testCountTopicsWhenDatabaseError() throws Exception {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class, () -> new TopicDBGateway(connectionSpy).countTopics());
     }
 
     @Test
-    public void testGetSelectedTopicsWhenSelectionIsNull() {
+    public void testSelectTopicsWhenSelectionIsNull() {
         assertThrows(IllegalArgumentException.class, () -> gateway.selectTopics(null));
     }
 
     @Test
-    public void testGetSelectedTopicsWhenThereAreSome() throws Exception {
+    public void testSelectTopicsWhenThereAreSome() throws Exception {
         numberOfTopics = 5;
         addTopics();
         validSelection();
@@ -110,7 +110,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testGetSelectedTopicsWhenSortedByIDDescending() throws Exception {
+    public void testSelectTopicsWhenSortedByIDDescending() throws Exception {
         numberOfTopics = 5;
         addTopics();
         validSelection();
@@ -122,13 +122,13 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testGetSelectedTopicsWhenThereAreNone() {
+    public void testSelectTopicsWhenThereAreNone() {
         validSelection();
         assertTrue(gateway.selectTopics(selection).isEmpty());
     }
 
     @Test
-    public void testGetSelectedTopicsWhenCurrentPageIsInvalid() throws Exception {
+    public void testSelectTopicsWhenCurrentPageIsInvalid() throws Exception {
         numberOfTopics = 5;
         addTopics();
         validSelection();
@@ -137,7 +137,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testGetSelectedTopicsWhenSortedByIsInvalid() throws Exception {
+    public void testSelectTopicsWhenSortedByIsInvalid() throws Exception {
         numberOfTopics = 5;
         addTopics();
         validSelection();
@@ -146,7 +146,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testGetSelectedTopicsWhenTotalSizeIsTooBig() throws Exception {
+    public void testSelectTopicsWhenTotalSizeIsTooBig() throws Exception {
         numberOfTopics = 5;
         addTopics();
         validSelection();
@@ -156,7 +156,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testGetSelectedTopicsWhenTotalSizeIsNegative() throws Exception {
+    public void testSelectTopicsWhenTotalSizeIsNegative() throws Exception {
         numberOfTopics = 5;
         addTopics();
         validSelection();
@@ -166,7 +166,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testGetSelectedTopicsWhenTotalSizeIsTooSmall() throws Exception {
+    public void testSelectTopicsWhenTotalSizeIsTooSmall() throws Exception {
         numberOfTopics = 5;
         addTopics();
         validSelection();
@@ -176,7 +176,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testGetSelectedTopicsWhenThereAreTooMany() throws Exception {
+    public void testSelectTopicsWhenThereAreTooMany() throws Exception {
         numberOfTopics = 50;
         addTopics();
         validSelection();
@@ -185,7 +185,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testGetSelectedTopicsWhenThereAreTooManySortedByTitleDescending() throws Exception {
+    public void testSelectTopicsWhenThereAreTooManySortedByTitleDescending() throws Exception {
         numberOfTopics = 50;
         addTopics();
         validSelection();
