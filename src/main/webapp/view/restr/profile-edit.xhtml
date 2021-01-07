@@ -39,10 +39,12 @@
                         </h:panelGroup>
                     </h:panelGroup>
                     <h:panelGroup layout="block" styleClass="row align-center">
-                        <h:commandButton id="cb-really-del" value="#{labels['profile_edit.really_del']}"
-                                         action="#{profileEditBacker.delete}" styleClass="button"/>
-                        <h:commandButton id="cb-cancel-del" value="#{labels.abort}" styleClass="button"
-                                         action="#{profileEditBacker.closeDeleteDialog}" immediate="true"/>
+                        <h:panelGroup layout="blok" styleClass="col-sm-12">
+                            <h:commandButton id="cb-really-del" value="#{labels['profile_edit.really_del']}"
+                                             action="#{profileEditBacker.delete}" styleClass="button"/>
+                            <h:commandButton id="cb-cancel-del" value="#{labels.abort}" styleClass="button"
+                                             action="#{profileEditBacker.closeDeleteDialog}" immediate="true"/>
+                        </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="col-sm-2"/>
@@ -75,10 +77,12 @@
                         </h:panelGroup>
                     </h:panelGroup>
                     <h:panelGroup layout="block" styleClass="row align-center">
-                        <h:commandButton id="cb-really-change" value="#{labels['profile_edit.really_change']}"
-                                         action="#{profileEditBacker.saveChanges}" styleClass="button"/>
-                        <h:commandButton id="cb-cancel-change" value="#{labels.abort}" styleClass="button"
-                                         action="#{profileEditBacker.closeChangeDialog}" immediate="true"/>
+                        <h:panelGroup layout="block" styleClass="col-sm-12">
+                            <h:commandButton id="cb-really-change" value="#{labels['profile_edit.really_change']}"
+                                             action="#{profileEditBacker.saveChanges}" styleClass="button"/>
+                            <h:commandButton id="cb-cancel-change" value="#{labels.abort}" styleClass="button"
+                                             action="#{profileEditBacker.closeChangeDialog}" immediate="true"/>
+                        </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="col-sm-2"/>
@@ -222,10 +226,12 @@
             </h:panelGrid>
 
             <h:panelGroup id="p-buttons" styleClass="row align-center">
-                <h:commandButton id="cb-apply" value="#{labels['profile_edit.apply_changes']}"
-                                 action="#{profileEditBacker.openChangeDialog}" styleClass="button"/>
-                <h:commandButton id="cb-delete" value="#{labels['profile_edit.delete']}"
-                                 action="#{profileEditBacker.openDeleteDialog}" styleClass="button"/>
+                <h:panelGroup layout="block" styleClass="col-sm-12">
+                    <h:commandButton id="cb-apply" value="#{labels['profile_edit.apply_changes']}"
+                                     action="#{profileEditBacker.openChangeDialog}" styleClass="button"/>
+                    <h:commandButton id="cb-delete" value="#{labels['profile_edit.delete']}"
+                                     action="#{profileEditBacker.openDeleteDialog}" styleClass="button"/>
+                </h:panelGroup>
             </h:panelGroup>
         </h:form>
     </ui:define>
