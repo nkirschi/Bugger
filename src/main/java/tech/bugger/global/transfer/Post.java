@@ -133,9 +133,15 @@ public class Post implements Serializable {
      * @return {@code true} iff {@code other} is a semantically equivalent post.
      */
     @Override
-    public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Post)) {
+            return false;
+        }
+        Post post = (Post) other;
+        return this.id == post.id;
     }
 
     /**
@@ -157,8 +163,7 @@ public class Post implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "Post{ID = " + id + "}";
     }
 
 }

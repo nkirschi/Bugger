@@ -69,6 +69,20 @@ public class Report implements Serializable {
         this(null, null, null, null, null, null, null, null, null, null);
     }
 
+    /**
+     * Constructs a new report.
+     *
+     * @param id
+     * @param title
+     * @param type
+     * @param severity
+     * @param version
+     * @param authorship
+     * @param closingDate
+     * @param duplicateOf
+     * @param forcedRelevance
+     * @param topic
+     */
     public Report(final Integer id, final String title, final Type type, final Severity severity, final String version,
                   final Authorship authorship, final ZonedDateTime closingDate, final Lazy<Report> duplicateOf,
                   final Integer forcedRelevance, final Lazy<Topic> topic) {
