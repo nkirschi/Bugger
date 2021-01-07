@@ -56,7 +56,7 @@ public class TopicDBGateway implements TopicGateway {
     public int getNumberOfReports(Topic topic, boolean showOpenReports, boolean showClosedReports) {
         int numberOfReports = 0;
         if (showOpenReports) {
-            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT id FROM \"reports\" WHERE topic = ?, closed_at IS NULL")) {
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT * FROM report WHERE topic = ? AND closed_at IS NULL")) {
                 ResultSet resultSet = new StatementParametrizer(stmt)
                         .integer(topic.getId()).toStatement().executeQuery();
                 int numReports = 0;
@@ -70,7 +70,7 @@ public class TopicDBGateway implements TopicGateway {
             }
         }
         if (showClosedReports) {
-            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT id FROM \"reports\" WHERE topic = ?, closed_at IS NOT NULL")) {
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT * FROM report WHERE topic = ? AND closed_at IS NOT NULL")) {
                 ResultSet resultSet = new StatementParametrizer(stmt)
                         .integer(topic.getId()).toStatement().executeQuery();
                 int numReports = 0;
