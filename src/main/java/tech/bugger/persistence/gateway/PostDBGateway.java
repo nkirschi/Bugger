@@ -103,6 +103,37 @@ public class PostDBGateway implements PostGateway {
      * {@inheritDoc}
      */
     @Override
+    public Post getFirstPost(final Report report) throws NotFoundException {
+        if (report == null) {
+            log.error("Cannot find first post of report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot find first post of report with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
+
+        String sql = "SELECT * FROM post WHERE report = " + report.getId() + " ORDER BY created_at ASC LIMIT 1;";
+        Post firstPost = null;
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                // TODO authorship, attachments
+                firstPost = new Post(rs.getInt("id"), rs.getString("content"), new Lazy<>(report), null, null);
+            } else {
+                log.error("Could not find first post of report " + report + ".");
+                throw new NotFoundException("Could not find first post of report " + report + ".");
+            }
+        } catch (SQLException e) {
+            log.error("Error when retrieving first post of report " + report + ".", e);
+            throw new StoreException("Error when retrieving first post of report " + report + ".", e);
+        }
+        return firstPost;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<Post> selectPostsOfReport(final Report report, final Selection selection) {
         if (report == null) {
             log.error("Error when selecting posts of report null.");

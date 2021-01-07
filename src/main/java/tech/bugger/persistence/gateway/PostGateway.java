@@ -54,4 +54,12 @@ public interface PostGateway {
      */
     void deletePost(Post post) throws NotFoundException;
 
+    /**
+     * Retrieves the first post of the given report.
+     *
+     * @param report The report in question.
+     * @return The first post of the report.
+     */
+    Post getFirstPost(Report report) throws NotFoundException;
+
 }
