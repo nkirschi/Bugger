@@ -36,7 +36,7 @@
 
             <h:form id="f-pagenav" rendered="#{not cc.attrs.paginator.isEmpty()}"
                     styleClass="pagination-sm form-inline p-2">
-                <h:commandButton id="cb-submit" action="#{cc.attrs.paginator.update}" style="display: none"/>
+                <h:commandButton id="cb-submit" action="#{cc.attrs.paginator.update}" styleClass="hide"/>
                 <h:panelGroup layout="block" id="pg-first-page"
                               styleClass="page-item #{cc.attrs.paginator.isFirstPage() ? 'disabled' : ''}">
                     <h:commandButton id="cb-first-page" value="&lt;&lt;" action="#{cc.attrs.paginator.firstPage}"
