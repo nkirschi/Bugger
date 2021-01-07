@@ -4,110 +4,230 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
-      lang="#{userSession.locale.language}" xml:lang="#{userSession.locale.language}">
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+<ui:composition template="/WEB-INF/template/main.xhtml">
+    <f:metadata>
+        <f:importConstants type="tech.bugger.global.util.Constants" var="Constants"/>
+    </f:metadata>
 
-<h:head>
-    <title>Administration</title>
-</h:head>
-<h:body>
-    <f:view locale="#{userSession.locale}">
-        <h2><h:outputText value="#{labels.user_management}"/></h2>
-        <h:form>
-            <h:panelGroup>
-                <h:commandButton value="#{labels.browse}" action="#{adminBacker.browseUsers}"/>
-                <h:commandButton value="#{labels.create}" action="#{adminBacker.createUser}"/>
-            </h:panelGroup>
-        </h:form>
+    <ui:param name="title" value="#{labels.administration}"/>
+    <ui:define name="content">
 
-        <h2><h:outputText value="#{labels.organization_settings}"/></h2>
-        <h:form id="f_organisation" enctype="multipart/form-data">
+        <!-- useful links for managing the users in the system -->
+        <h:outputText value="#{labels.user_management}" styleClass="h2"/>
+        <h:panelGroup>
+            <h:outputLink value="search" styleClass="btn btn-secondary">
+                ${labels.browse}
+                <f:param name="t" value="USER"/><!-- user results tab on the search page -->
+                <f:param name="q" value=""/><!-- empty query string => all results displayed -->
+            </h:outputLink>
+            <h:outputLink value="profile-edit" styleClass="btn btn-primary">
+                ${labels.create}
+                <f:param name="u" value=""/><!-- empty profile-edit username = "create user" -->
+            </h:outputLink>
+        </h:panelGroup>
+
+        <!-- organization settings form -->
+        <h:outputText value="#{labels.organization_settings}" styleClass="h2"/>
+        <h:form id="f-organisation" enctype="multipart/form-data">
             <h:panelGrid columns="2">
-                <h:outputLabel id="o_name" for="it_name" value="#{labels.name}"/>
-                <h:inputText id="it_name" value="#{adminBacker.organization.name}"/>
-                <h:panelGroup/>
-                <h:message for="it_name"/>
 
-                <h:outputLabel id="o_logo" for="g_logo" value="#{labels.logo}"/>
+                <!-- organization name -->
+                <h:outputLabel id="o-name" for="it-name" value="#{labels.name}"/>
+                <h:inputText id="it-name"
+                             value="#{adminBacker.organization.name}"
+                             a:maxlength="#{Constants.SMALL_FIELD}"
+                             a:placeholder="#{labels.organization_name_placeholder}"
+                             styleClass="form-control#{component.valid ? '' : ' error'}">
+                    <f:validateLength maximum="#{Constants.SMALL_FIELD}"/>
+                </h:inputText>
+                <h:panelGroup/>
+                <h:panelGroup>
+                    <h:outputLabel id="ot-name-hint"
+                                  value="#{labels.organization_name_hint}"
+                                  styleClass="small form-text text-muted"/>
+                    <h:message for="it-name" styleClass="error"/>
+                </h:panelGroup>
+
+                <!-- organization logo (later) -->
+                <h:outputLabel id="o-logo" for="g-logo" value="#{labels.logo}"/>
                 <h:panelGrid columns="1">
                     <!-- TODO upgrade to real image from DB -->
-                    <h:graphicImage id="g_logo" library="images" name="bugger.png" width="100" height="100"/>
-                    <h:inputFile id="i_logo" validator="imageValidator"
-                                 valueChangeListener="#{adminBacker.uploadLogo}"/>
+                    <h:graphicImage id="g-logo"
+                                    library="images"
+                                    name="bugger.png"
+                                    width="100" height="100"/>
+                    <h:inputFile id="i-logo"
+                                 validator="imageValidator"
+                                 valueChangeListener="#{adminBacker.uploadLogo}"
+                                 styleClass="form-control-file"/>
                     <h:panelGroup>
-                        <h:selectBooleanCheckbox id="s_remove-logo" valueChangeListener="#{adminBacker.removeLogo}"/>
-                        <h:outputLabel id="o_remove-logo" for="s_remove-logo" value="#{labels.remove}"/>
+                        <h:selectBooleanCheckbox id="s-remove-logo" valueChangeListener="#{adminBacker.removeLogo}"/>
+                        <h:outputLabel id="o-remove-logo" for="s-remove-logo" value="#{labels.remove}"/>
                     </h:panelGroup>
                 </h:panelGrid>
                 <h:panelGroup/>
-                <h:message for="i_logo"/>
+                <h:message for="i-logo" styleClass="error"/>
 
-                <h:outputLabel id="o_theme" for="s_theme" value="#{labels.theme}"/>
-                <h:selectOneMenu id="s_theme" value="#{adminBacker.organization.theme}">
+                <!-- organization theme -->
+                <h:outputLabel id="o-theme" for="s-theme" value="#{labels.theme}"/>
+                <h:selectOneMenu id="s-theme"
+                                 styleClass="form-control#{component.valid ? '' : ' error'}"
+                                 value="#{adminBacker.organization.theme}">
                     <f:selectItems value="#{adminBacker.availableThemes}"/>
                 </h:selectOneMenu>
                 <h:panelGroup/>
-                <h:message for="s_theme"/>
+                <h:panelGroup>
+                    <h:message for="s-theme" styleClass="error"/>
+                    <h:outputLabel id="ot-theme-hint"
+                                  value="#{labels.organization_theme_hint}"
+                                  styleClass="small form-text text-muted"/>
+                </h:panelGroup>
 
-                <h:outputLabel id="o_imprint" for="it_imprint" value="#{labels.imprint}"/>
-                <h:inputTextarea id="it_imprint" value="#{adminBacker.organization.imprint}"/>
+                <!-- organization imprint (Markdown) -->
+                <h:outputLabel id="o-imprint" for="it-imprint" value="#{labels.imprint}"/>
+                <h:inputTextarea id="it-imprint"
+                                 value="#{adminBacker.organization.imprint}"
+                                 a:maxlength="#{Constants.LARGE_AREA}"
+                                 styleClass="form-control#{component.valid ? '' : ' error'}">
+                    <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
+                </h:inputTextarea>
                 <h:panelGroup/>
-                <h:message for="it_imprint"/>
+                <h:message for="it-imprint" styleClass="error"/>
 
-                <h:outputLabel id="o_privacy-policy" for="it_privacy-policy" value="#{labels.privacy_policy}"/>
-                <h:inputTextarea id="it_privacy-policy" value="#{adminBacker.organization.privacyPolicy}"/>
+                <!-- organization privacy policy (Markdown) -->
+                <h:outputLabel id="o-privacy-policy" for="it-privacy-policy" value="#{labels.privacy_policy}"/>
+                <h:inputTextarea id="it-privacy-policy"
+                                 value="#{adminBacker.organization.privacyPolicy}"
+                                 a:maxlength="#{Constants.LARGE_AREA}"
+                                 styleClass="form-control#{component.valid ? '' : ' error'}">
+                    <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
+                </h:inputTextarea>
                 <h:panelGroup/>
-                <h:message for="it_privacy-policy"/>
+                <h:message for="it-privacy-policy" styleClass="error"/>
 
-                <h:outputLabel id="o_support-info" for="it_support-info" value="#{labels.support_info}"/>
-                <h:inputTextarea id="it_support-info" value="#{adminBacker.organization.supportInfo}"/>
+                <!-- organization support information (Markdown) -->
+                <h:outputLabel id="o-support-info" for="it-support-info" value="#{labels.support_info}"/>
+                <h:inputTextarea id="it-support-info"
+                                 value="#{adminBacker.organization.supportInfo}"
+                                 a:maxlength="#{Constants.LARGE_AREA}"
+                                 styleClass="form-control#{component.valid ? '' : ' error'}">
+                    <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
+                </h:inputTextarea>
                 <h:panelGroup/>
-                <h:message for="it_support-info"/>
+                <h:message for="it-support-info" styleClass="error"/>
             </h:panelGrid>
-            <h:commandButton value="#{labels.save}" action="#{adminBacker.saveOrganization}"/>
+            <h:commandButton value="#{labels.save}"
+                             action="#{adminBacker.saveOrganization}"
+                             styleClass="btn btn-primary"/>
         </h:form>
 
-        <h2><h:outputText value="#{labels.configuration_settings}"/></h2>
-        <h:form id="f_configuration">
+        <!-- application configuration form -->
+        <h:outputText value="#{labels.configuration_settings}" styleClass="h2"/>
+        <h:form id="f-configuration">
             <h:panelGrid columns="2">
-                <h:outputLabel id="o_guest-reading" for="s_guest-reading" value="#{labels.guest_reading}"/>
-                <h:selectBooleanCheckbox id="s_guest-reading" value="#{adminBacker.configuration.guestReading}"/>
+                <!-- guest reading policy -->
+                <h:outputText value="#{labels.guest_reading}"/>
+                <h:panelGroup>
+                    <h:selectBooleanCheckbox id="s-guest-reading"
+                                             value="#{adminBacker.configuration.guestReading}"
+                                             styleClass="form-check-input"/>
+                    <h:outputLabel id="o-guest-reading"
+                                   for="s-guest-reading"
+                                   value="#{labels.guest_reading_detail}"/>
+                </h:panelGroup>
                 <h:panelGroup/>
-                <h:message for="s_guest-reading"/>
+                <h:message for="s-guest-reading" styleClass="error"/>
 
-                <h:outputLabel id="o_closed-report-posting" for="s_closed-report-posting"
-                               value="#{labels.closed_report_posting}"/>
-                <h:selectBooleanCheckbox id="s_closed-report-posting"
-                                         value="#{adminBacker.configuration.closedReportPosting}"/>
+                <!-- closed report policy -->
+                <h:outputText value="#{labels.closed_report_posting}"/>
+                <h:panelGroup>
+                    <h:selectBooleanCheckbox id="s-closed-report-posting"
+                                             value="#{adminBacker.configuration.closedReportPosting}"
+                                             styleClass="form-check-input"/>
+                    <h:outputLabel id="o-closed-report-posting" for="s-closed-report-posting"
+                                   value="#{labels.closed_report_posting_detail}"/>
+                </h:panelGroup>
                 <h:panelGroup/>
-                <h:message for="s_closed-report-posting"/>
+                <h:message for="s-closed-report-posting" styleClass="error"/>
 
-                <h:outputLabel id="o_user-email-format" for="s_user-email-format" value="#{labels.user_email_format}"/>
-                <h:inputText id="s_user-email-format" value="#{adminBacker.configuration.userEmailFormat}"
-                             validator="regexValidator"/>
+                <!-- user e-mail address format -->
+                <h:outputLabel id="o-user-email-format"
+                               for="s-user-email-format"
+                               value="#{labels.user_email_format}"/>
+                <h:inputText id="s-user-email-format"
+                             value="#{adminBacker.configuration.userEmailFormat}"
+                             validator="regexValidator"
+                             a:maxlength="#{Constants.LARGE_FIELD}"
+                             styleClass="form-control#{component.valid ? '' : ' error'}">
+                    <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>
+                </h:inputText>
                 <h:panelGroup/>
-                <h:message for="s_user-email-format"/>
+                <h:panelGroup>
+                    <h:message for="s-user-email-format" styleClass="error"/>
+                    <h:outputLabel id="ot-user-email-format-hint"
+                                  value="#{labels.user_email_format_hint}"
+                                  styleClass="small form-text text-muted"/>
+                </h:panelGroup>
 
-                <h:outputLabel id="o_allowed-file-extensions" for="it_allowed-file-extensions"
-                               value="#{labels.allowed_file_extensions}"/>
-                <h:inputTextarea id="it_allowed-file-extensions"
-                                 value="#{adminBacker.configuration.allowedFileExtensions}"/>
-                <h:panelGroup/>
-                <h:message for="it_allowed-file-extensions"/>
 
-                <h:outputLabel id="o_max-attachments-per-post" for="it_max-attachments-per-post"
-                               value="#{labels.max_attachments_per_post}"/>
-                <h:inputText id="it_max-attachments-per-post"
-                             value="#{adminBacker.configuration.maxAttachmentsPerPost}"/>
-                <h:panelGroup/>
-                <h:message for="it_max-attachments-per-post"/>
-
-                <h:outputLabel id="o_voting-weight-definition" for="it_voting-weight-definition"
+                <!-- definition of a user's voting weight -->
+                <h:outputLabel id="o-voting-weight-definition"
+                               for="it-voting-weight-definition"
                                value="#{labels.voting_weight_definition}"/>
-                <h:inputText id="it_voting-weight-definition"
-                             value="#{adminBacker.configuration.votingWeightDefinition}"/>
+                <h:inputText id="it-voting-weight-definition"
+                             value="#{adminBacker.configuration.votingWeightDefinition}"
+                             a:maxlength="#{Constants.LARGE_FIELD}"
+                             styleClass="form-control#{component.valid ? '' : ' error'}">
+                    <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>
+                    <f:validateRegex pattern="#{Constants.INTEGER_LIST_REGEX}"/>
+                </h:inputText>
+                <h:panelGrid/>
+                <h:panelGrid>
+                    <h:message for="it-voting-weight-definition" styleClass="error"/>
+                    <h:outputLabel id="ot-voting-weight-definition-hint"
+                                  value="#{labels.voting_weight_definition_hint}"
+                                  styleClass="small form-text text-muted"/>
+                </h:panelGrid>
+
+                <!-- allowed file extensions for uploads -->
+                <h:outputLabel id="o-allowed-file-extensions"
+                               for="it-allowed-file-extensions"
+                               value="#{labels.allowed_file_extensions}"/>
+                <h:inputTextarea id="it-allowed-file-extensions"
+                                 value="#{adminBacker.configuration.allowedFileExtensions}"
+                                 a:maxlength="#{Constants.SMALL_AREA}"
+                                 styleClass="form-control#{component.valid ? '' : ' error'}">
+                    <f:validateLength maximum="#{Constants.SMALL_AREA}"/>
+                    <f:validateRegex pattern="#{Constants.EXTENSION_LIST_REGEX}"/>
+                </h:inputTextarea>
+                <h:panelGroup/>
+                <h:panelGroup>
+                    <h:message for="it-allowed-file-extensions" styleClass="error"/>
+                    <h:outputLabel id="ot-allowed-file-extensions-hint"
+                                  value="#{labels.allowed_file_extensions_hint}"
+                                  styleClass="small form-text text-muted"/>
+                </h:panelGroup>
+
+                <!-- maximum number of attachments per post -->
+                <h:outputLabel id="o-max-attachments-per-post"
+                               for="it-max-attachments-per-post"
+                               value="#{labels.max_attachments_per_post}"/>
+                <h:inputText id="it-max-attachments-per-post"
+                             value="#{adminBacker.configuration.maxAttachmentsPerPost}"
+                             styleClass="form-control#{component.valid ? '' : ' error'}"
+                             a:maxlength="#{Constants.SMALL_FIELD}"
+                             validatorMessage="#{messages.validate_nonnegative_number}">
+                    <f:validateLongRange minimum="0" maximum="#{Constants.SMALL_FIELD}"/>
+                </h:inputText>
+                <h:panelGroup/>
+                <h:message for="it-max-attachments-per-post" styleClass="error"/>
             </h:panelGrid>
-            <h:commandButton value="#{labels.save}" action="#{adminBacker.saveConfiguration}"/>
+            <h:commandButton value="#{labels.save}"
+                             action="#{adminBacker.saveConfiguration}"
+                             styleClass="btn btn-primary"/>
         </h:form>
-    </f:view>
-</h:body>
+    </ui:define>
+</ui:composition>
 </html>

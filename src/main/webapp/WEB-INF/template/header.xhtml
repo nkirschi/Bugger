@@ -2,21 +2,24 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:f="http://java.sun.com/jsf/core">
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
 <ui:composition>
     <h:panelGroup styleClass="header">
         <h:panelGroup styleClass="row" layout="block">
-            <h:link href="#{request.contextPath}" id="l-logo-header">
+            <h:link outcome="pretty:home" id="l-logo-header">
                 <h:graphicImage id="g-logo-header" library="images" name="bugger.png" width="80" height="80"/>
             </h:link>
-            <h:outputText value="#{applicationSettings.organization.name}" id="ot-comp-name" styleClass="organizationName"/>
+            <h:outputText value="#{applicationSettings.organization.name}" id="ot-comp-name"
+                          styleClass="organizationName"/>
             <h:form styleClass="headerMenu" rendered="#{userSession.user != null}">
-                <h:commandLink value="Avatar-Menu" action="#{headerBacker.toggleMenu}" immediate="true" />
+                <h:commandLink value="Avatar-Menu" action="#{headerBacker.toggleMenu}" immediate="true"/>
             </h:form>
         </h:panelGroup>
     </h:panelGroup>
-    <h:panelGroup styleClass="dropdown" rendered="#{headerBacker.displayMenu and userSession.user != null}" id="p-user-menu">
+    <h:panelGroup styleClass="dropdown" rendered="#{headerBacker.displayMenu and userSession.user != null}"
+                  id="p-user-menu">
         <h:panelGroup styleClass="row" layout="block">
             <h:outputText value="#{headerBacker.user.firstName}" id="ot-first-name"/>
         </h:panelGroup>
@@ -30,7 +33,8 @@
             <h:outputText value="(Admin)" id="ot-role" rendered="#{headerBacker.user.administrator}"/>
         </h:panelGroup>
         <h:panelGroup styleClass="row" layout="block">
-            <h:link value="#{labels.administration}" href="../restr/admin.xhtml" rendered="#{headerBacker.user.administrator}" id="l-configuration"/>
+            <h:link value="#{labels.administration}" href="../restr/admin.xhtml"
+                    rendered="#{headerBacker.user.administrator}" id="l-configuration"/>
         </h:panelGroup>
         <h:panelGroup styleClass="row" layout="block">
             <!-- logout -->
@@ -41,14 +45,11 @@
             </h:link>
         </h:panelGroup>
     </h:panelGroup>
-
-    <h:panelGroup id="p-authentication" rendered="#{userSession.user == null}" styleClass="align-right">
-        <h:link id="l-login" value="#{labels.login}" styleClass="button style-button"
-                outcome="/view/public/login.xhtml">
-            <f:viewParam name="url" value="#{facesContext.viewRoot.viewId}"/>
-        </h:link>
-        <h:link id="l-register" value="#{labels.register}" styleClass="button style-button"
-                outcome="/view/public/register.xhtml"/>
+    <!-- TODO style these like buttons -->
+    <h:panelGroup id="p-authentication" rendered="#{userSession.user == null}">
+        <!-- TODO add login outcome -->
+        <h:link id="l-login" value="#{labels.login}" styleClass="btn btn-primary" outcome="/view/public/home"/>
+        <h:button id="b-register" value="#{labels.register}" styleClass="btn btn-primary" outcome="pretty:register"/>
     </h:panelGroup>
 </ui:composition>
 </html>

@@ -5,7 +5,13 @@
     font-weight: bold;
 }
 
+.error {
+    color: #f00;
+}
 
+input.error, textarea.error {
+    border-color: #f00;
+}
 
 .header {
     position: absolute;
@@ -13,7 +19,7 @@
     left: 0;
     right: 0;
     padding: 20px;
-    box-shadow: 0 8px 20px 0 rgba(0,0,0,.08);
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
 }
 
 .footer {
@@ -24,7 +30,7 @@
     left: 0;
     right: 0;
     text-align: center;
-    box-shadow: 0 8px 20px 0 rgba(0,0,0,.08);
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
 }
 
 .footerElement {
@@ -48,13 +54,13 @@
     position: absolute;
     text-align: left;
     padding: 10px;
-    box-shadow: 0 8px 20px 0 rgba(0,0,0,.08);
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
     right: 60px;
     top: 80px;
 }
 
 .titlebar {
-    box-shadow: 0 8px 20px 0 rgba(0,0,0,.08);
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
     left: 5%;
     right: 5%;
     top: 130px;
@@ -71,7 +77,7 @@
 }
 
 .content {
-    box-shadow: 0 8px 20px 0 rgba(0,0,0,.08);
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
     overflow: auto;
     padding: 10px;
     left: 5%;
@@ -130,7 +136,7 @@
 }
 
 .col-sm-8 {
-    box-shadow: 0 8px 20px 0 rgba(0,0,0,.08);
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
     height: 100%;
     padding: 1%;
 }
@@ -150,4 +156,21 @@
     display: block;
     margin: 0.3em 0 0;
     font-size: 1.3em;
+}
+
+.hide {
+    display: none !important;
+}
+
+.vw-50 {
+    width: 50vw;
+}
+
+.no-ul {
+    text-decoration: none !important
+}
+
+.sel-float {
+    width: auto !important;
+    display: inline-block !important;
 }

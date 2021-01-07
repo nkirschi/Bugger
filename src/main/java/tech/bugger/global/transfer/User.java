@@ -509,7 +509,8 @@ public class User implements Serializable {
                 + ", emailAddress='" + emailAddress + '\''
                 + ", firstName='" + firstName + '\''
                 + ", lastName='" + lastName + '\''
-                + ", avatar=" + (avatar == null ? "null" : avatar.toString(Arrays::toString))
+                + ", avatar=" + (avatar == null ? "null"
+                : avatar.toString(a -> String.format("%.100s", Arrays.toString(a))))
                 + ", avatarThumbnail=" + Arrays.toString(avatarThumbnail)
                 + ", biography='" + biography + '\''
                 + ", preferredLanguage=" + preferredLanguage

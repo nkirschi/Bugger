@@ -207,11 +207,11 @@ public class AuthenticationService {
     /**
      * Registers a new user by generating a {@link Token} and sending a confirmation email to the new user.
      *
-     * @param user   The user to be registered.
-     * @param domain The current domain of this web application.
+     * @param user The user to be registered.
+     * @param path The current deployment path of this web application.
      * @return Whether the action was successful or not.
      */
-    public boolean register(final User user, final String domain) {
+    public boolean register(final User user, final String path) {
         Token token = null;
 
         try (Transaction tx = transactionManager.begin()) {
@@ -230,7 +230,7 @@ public class AuthenticationService {
             return false;
         }
 
-        String link = domain + "/faces/view/public/password-set.xhtml?token=" + token.getValue();
+        String link = path + "/password-set?token=" + token.getValue();
         Mail mail = new MailBuilder()
                 .to(user.getEmailAddress())
                 .subject(interactionsBundle.getString("email_register_subject"))

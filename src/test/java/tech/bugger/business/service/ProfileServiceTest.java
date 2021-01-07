@@ -7,8 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
-import tech.bugger.ResourceBundleMocker;
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.Hasher;
+import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
@@ -18,8 +20,23 @@ import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import java.util.ResourceBundle;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doNothing;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -41,13 +58,26 @@ public class ProfileServiceTest {
     @Mock
     private Event<Feedback> feedbackEvent;
 
+    @Mock
+    private ApplicationSettings applicationSettings;
+
+    @Mock
+    private ResourceBundle messages;
+
+    @Mock
+    private Configuration config;
+
+    private static final int THE_ANSWER = 42;
+    private static final int MANY_POSTS = 1500;
+    private static final String VOTING_WEIGHT_DEF = "1000,0,200,50,100,25,400,600,800,10";
+
     @BeforeEach
     public void setUp() {
-        service = new ProfileService(transactionManager, feedbackEvent, ResourceBundleMocker.mock(""));
+        service = new ProfileService(feedbackEvent, transactionManager, applicationSettings, messages);
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(userGateway).when(tx).newUserGateway();
         testUser = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
-                Language.GERMAN, User.ProfileVisibility.MINIMAL, null, 3, false);
+                Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
     }
 
     @Test
@@ -81,8 +111,9 @@ public class ProfileServiceTest {
     @Test
     public void testUpdateWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(userGateway).updateUser(any());
-        assertFalse(service.updateUser(testUser));
-        verify(feedbackEvent).fire(any());
+        assertThrows(tech.bugger.business.exception.NotFoundException.class,
+                () -> service.updateUser(testUser)
+        );
     }
 
     @Test
@@ -103,7 +134,9 @@ public class ProfileServiceTest {
     @Test
     public void testGetUserWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(userGateway).getUserByID(1);
-        assertNull(service.getUser(1));
+        assertThrows(tech.bugger.business.exception.NotFoundException.class,
+                () -> service.getUser(1)
+        );
     }
 
     @Test
@@ -111,6 +144,21 @@ public class ProfileServiceTest {
         doThrow(TransactionException.class).when(tx).commit();
         assertNull(service.getUser(1));
         verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testMatchingPassword() {
+        String hashedPassword = Hasher.hash(testUser.getPasswordHash(), testUser.getPasswordSalt(),
+                testUser.getHashingAlgorithm());
+        String password = testUser.getPasswordHash();
+        testUser.setPasswordHash(hashedPassword);
+        assertTrue(service.matchingPassword(testUser, password));
+    }
+
+    @Test
+    public void testMatchingPasswordFalse() {
+        assertFalse(service.matchingPassword(testUser, testUser.getPasswordHash()));
+        verify(feedbackEvent, times(1)).fire(any());
     }
 
     @Test
@@ -153,6 +201,184 @@ public class ProfileServiceTest {
         doThrow(TransactionException.class).when(tx).commit();
         assertNull(service.getUserByUsername("test"));
         verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetVotingWeight() throws NotFoundException {
+        when(userGateway.getNumberOfPosts(testUser)).thenReturn(THE_ANSWER);
+        when(applicationSettings.getConfiguration()).thenReturn(config);
+        when(config.getVotingWeightDefinition()).thenReturn(VOTING_WEIGHT_DEF);
+        assertEquals(3, service.getVotingWeightForUser(testUser));
+        verify(userGateway, times(1)).getNumberOfPosts(testUser);
+    }
+
+    @Test
+    public void testGetVotingWeightMaxWeight() throws NotFoundException {
+        when(userGateway.getNumberOfPosts(testUser)).thenReturn(MANY_POSTS);
+        when(applicationSettings.getConfiguration()).thenReturn(config);
+        when(config.getVotingWeightDefinition()).thenReturn(VOTING_WEIGHT_DEF);
+        assertEquals(10, service.getVotingWeightForUser(testUser));
+        verify(userGateway, times(1)).getNumberOfPosts(testUser);
+    }
+
+    @Test
+    public void testGetVotingWeightOverwritten() {
+        testUser.setForcedVotingWeight(100);
+        assertEquals(100, service.getVotingWeightForUser(testUser));
+    }
+
+    @Test
+    public void testGetVotingWeightEmpty() throws NotFoundException {
+        when(userGateway.getNumberOfPosts(testUser)).thenReturn(THE_ANSWER);
+        when(applicationSettings.getConfiguration()).thenReturn(config);
+        when(config.getVotingWeightDefinition()).thenReturn(",");
+        service.getVotingWeightForUser(testUser);
+        verify(userGateway, times(1)).getNumberOfPosts(testUser);
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testGetVotingWeightNumberFormatException() throws NotFoundException {
+        when(userGateway.getNumberOfPosts(testUser)).thenReturn(THE_ANSWER);
+        when(applicationSettings.getConfiguration()).thenReturn(config);
+        when(config.getVotingWeightDefinition()).thenReturn("a, b");
+        service.getVotingWeightForUser(testUser);
+        verify(userGateway, times(1)).getNumberOfPosts(testUser);
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testGetVotingWeightNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(userGateway).getNumberOfPosts(testUser);
+        assertEquals(0, service.getVotingWeightForUser(testUser));
+        verify(userGateway, times(1)).getNumberOfPosts(testUser);
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testGetVotingWeightContainsNoZero() throws NotFoundException {
+        when(userGateway.getNumberOfPosts(testUser)).thenReturn(THE_ANSWER);
+        when(applicationSettings.getConfiguration()).thenReturn(config);
+        when(config.getVotingWeightDefinition()).thenReturn("100,200");
+        service.getVotingWeightForUser(testUser);
+        verify(userGateway, times(1)).getNumberOfPosts(testUser);
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testGetNumberOfPosts() throws NotFoundException {
+        when(userGateway.getNumberOfPosts(testUser)).thenReturn(THE_ANSWER);
+        assertEquals(42, service.getNumberOfPostsForUser(testUser));
+        verify(userGateway, times(1)).getNumberOfPosts(testUser);
+    }
+
+    @Test
+    public void testGetNumberOfPostsNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(userGateway).getNumberOfPosts(testUser);
+        assertEquals(0, service.getNumberOfPostsForUser(testUser));
+        verify(userGateway, times(1)).getNumberOfPosts(testUser);
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testGetNumberOfPostsTransactionException() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertEquals(0, service.getNumberOfPostsForUser(testUser));
+        verify(tx, times(1)).commit();
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testToggleAdminPromote() throws NotFoundException {
+        service.toggleAdmin(testUser);
+        assertTrue(testUser.isAdministrator());
+        verify(userGateway, times(1)).updateUser(testUser);
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testToggleAdminPromoteNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(userGateway).updateUser(testUser);
+        service.toggleAdmin(testUser);
+        assertFalse(testUser.isAdministrator());
+        verify(userGateway, times(1)).updateUser(testUser);
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testToggleAdminPromoteTransactionException() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        service.toggleAdmin(testUser);
+        assertFalse(testUser.isAdministrator());
+        verify(tx, times(1)).commit();
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testToggleAdminDemoteAdmin() throws NotFoundException {
+        testUser.setAdministrator(true);
+        when(userGateway.getNumberOfAdmins()).thenReturn(THE_ANSWER);
+        service.toggleAdmin(testUser);
+        assertFalse(testUser.isAdministrator());
+        verify(userGateway, times(1)).getNumberOfAdmins();
+        verify(userGateway, times(1)).updateUser(testUser);
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testToggleAdminDemoteAdminNotFound() throws NotFoundException {
+        testUser.setAdministrator(true);
+        when(userGateway.getNumberOfAdmins()).thenReturn(THE_ANSWER);
+        doThrow(NotFoundException.class).when(userGateway).updateUser(testUser);
+        service.toggleAdmin(testUser);
+        assertTrue(testUser.isAdministrator());
+        verify(userGateway, times(1)).getNumberOfAdmins();
+        verify(userGateway, times(1)).updateUser(testUser);
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testToggleAdminDemoteAdminTransactionException() throws TransactionException, NotFoundException {
+        testUser.setAdministrator(true);
+        when(userGateway.getNumberOfAdmins()).thenReturn(THE_ANSWER);
+        doNothing().doThrow(TransactionException.class).when(tx).commit();
+        service.toggleAdmin(testUser);
+        assertTrue(testUser.isAdministrator());
+        verify(userGateway, times(1)).getNumberOfAdmins();
+        verify(userGateway, times(1)).updateUser(testUser);
+        verify(tx, times(2)).commit();
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testToggleAdminLastAdmin() {
+        testUser.setAdministrator(true);
+        when(userGateway.getNumberOfAdmins()).thenReturn(1);
+        service.toggleAdmin(testUser);
+        assertTrue(testUser.isAdministrator());
+        verify(userGateway, times(1)).getNumberOfAdmins();
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testToggleAdminNoAdmins() {
+        testUser.setAdministrator(true);
+        when(userGateway.getNumberOfAdmins()).thenReturn(0);
+        assertThrows(InternalError.class,
+                () -> service.toggleAdmin(testUser)
+        );
+        assertTrue(testUser.isAdministrator());
+        verify(userGateway, times(1)).getNumberOfAdmins();
+    }
+
+    @Test
+    public void testToggleAdminTransactionException() throws TransactionException {
+        testUser.setAdministrator(true);
+        doThrow(TransactionException.class).when(tx).commit();
+        service.toggleAdmin(testUser);
+        assertTrue(testUser.isAdministrator());
+        verify(tx, times(1)).commit();
+        verify(feedbackEvent, times(1)).fire(any());
     }
 
 }
