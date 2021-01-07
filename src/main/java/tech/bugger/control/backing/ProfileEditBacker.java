@@ -235,7 +235,8 @@ public class ProfileEditBacker implements Serializable {
             throw new InternalError("URL is invalid.", e);
         }
 
-        String domain = String.format("%s://%s", url.getProtocol(), url.getAuthority());
+        String domain = String.format("%s://%s%s", url.getProtocol(), url.getAuthority(),
+                fctx.getExternalContext().getApplicationContextPath());
         User updateUser = new User(user);
 
         return authenticationService.updateEmail(updateUser, domain, email);

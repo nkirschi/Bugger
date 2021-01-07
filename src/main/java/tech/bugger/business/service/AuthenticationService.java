@@ -282,9 +282,9 @@ public class AuthenticationService {
             return false;
         }
 
-        String link = domain + "/faces/view/restr/profile-edit.xhtml?token=" + token.getValue();
+        String link = domain + "/profile-edit.xhtml?token=" + token.getValue();
         Mail mail = new MailBuilder()
-                .to(user.getEmailAddress())
+                .to(email)
                 .subject(interactionsBundle.getString("email_update_subject"))
                 .content(new MessageFormat(interactionsBundle.getString("email_update_content"))
                         .format(new String[]{token.getUser().getFirstName(), token.getUser().getLastName(), link}))
