@@ -8,6 +8,7 @@ import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Constants;
@@ -108,6 +109,7 @@ public class TopicBacker implements Serializable {
         }
          **/
         topicID = 1;
+
         topic = topicService.getTopicByID(topicID);
         if (topic == null) {
             try {
@@ -116,6 +118,17 @@ public class TopicBacker implements Serializable {
                 throw new InternalError("Error while redirecting.", e);
             }
         }
+        reports = new Paginator<>("title", Selection.PageSize.NORMAL) {
+            @Override
+            protected Iterable<Report> fetch() {
+                return topicService.getSelectedReports(topic, getSelection(), openReportShown, closedReportShown);
+            }
+
+            @Override
+            protected int totalSize() {
+                return topicService.getNumberOfReports(topic, openReportShown, closedReportShown);
+            }
+        };
         sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
         displayDeleteDialog = false;
         openReportShown = true;

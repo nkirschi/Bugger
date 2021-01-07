@@ -56,12 +56,12 @@ public class TopicDBGateway implements TopicGateway {
     public int getNumberOfReports(Topic topic, boolean showOpenReports, boolean showClosedReports) {
         int numberOfReports = 0;
         if (showOpenReports) {
-            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT * AS num_reports FROM \"reports\" WHERE topic = ?, closed_at IS NULL")) {
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT id FROM \"reports\" WHERE topic = ?, closed_at IS NULL")) {
                 ResultSet resultSet = new StatementParametrizer(stmt)
                         .integer(topic.getId()).toStatement().executeQuery();
                 int numReports = 0;
                 if (resultSet.next()) {
-                    numReports = resultSet.getInt("num_reports");
+                    numReports = resultSet.getInt(1);
                     numberOfReports =+ numReports;
                 }
             } catch (SQLException e) {
@@ -70,12 +70,12 @@ public class TopicDBGateway implements TopicGateway {
             }
         }
         if (showClosedReports) {
-            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT * AS num_reports FROM \"reports\" WHERE topic = ?, closed_at IS NOT NULL")) {
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT id FROM \"reports\" WHERE topic = ?, closed_at IS NOT NULL")) {
                 ResultSet resultSet = new StatementParametrizer(stmt)
                         .integer(topic.getId()).toStatement().executeQuery();
                 int numReports = 0;
                 if (resultSet.next()) {
-                    numReports = resultSet.getInt("num_reports");
+                    numReports = resultSet.getInt(1);
                     numberOfReports =+ numReports;
                 }
             } catch (SQLException e) {

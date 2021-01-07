@@ -17,13 +17,13 @@
             <h:panelGroup class="row" layout="block">
                 <h:panelGroup class="col-sm-2" layout="block"/>
                 <h:panelGroup class="col-sm-8" layout="block">
-                    <h:outputLabel value="description:"/>
+                    <h:outputLabel value="#{labels.description}"/>
                     <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
                     <h:panelGroup class="row" layout="block">
                         <!-- rendered="#{userSession.user.administrator}" -->
-                        <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button" value="delete Topic"/>
+                        <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button" value="#{labels.delete_topic}"/>
                         <!-- rendered="#{userSession.user.administrator}" -->
-                        <h:button id="b-edit" outcome="/restr/topic-edit.xhtml" value="edit Topic">
+                        <h:button id="b-edit" outcome="/restr/topic-edit.xhtml" value="#{labels.edit_topic}">
                             <ui:param name="topic" value="#{topicBacker.topicID}"/>
                         </h:button>
                     </h:panelGroup>
@@ -83,11 +83,11 @@
                 <h:panelGroup class="col-sm-4" layout="block"/>
                 <h:panelGroup class="col-sm-4" layout="block">
                     <h:panelGroup class="row" layout="block">
-                        <h:outputText value="Soll das wikrlich weg?"/>
+                        <h:outputText value="#{labels.delete_affirm}"/>
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block">
-                        <h:commandButton id="cb-delTopic" action="#{topicBacker.delete}" styleClass="button" value="Delete" immediate="true"/>
-                        <h:commandButton id="cb-abortDelTopic" action="#{topicBacker.closeDeleteDialog}" styleClass="button" value="Cancel" immediate="true"/>
+                        <h:commandButton id="cb-delTopic" action="#{topicBacker.delete}" styleClass="button" value="#{labels.delete}" immediate="true"/>
+                        <h:commandButton id="cb-abortDelTopic" action="#{topicBacker.closeDeleteDialog}" styleClass="button" value="#{labels.cancel}" immediate="true"/>
                     </h:panelGroup>
                 </h:panelGroup>
             <h:panelGroup class="col-sm-4" layout="block"/>
