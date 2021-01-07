@@ -10,10 +10,12 @@ import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.util.Lazy;
+import tech.bugger.persistence.exception.NotFoundException;
 
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,7 +42,7 @@ class PostDBGatewayTest {
     }
 
     public void validSelection() {
-        testSelection = new Selection(42, 0, Selection.PageSize.NORMAL, "", true);
+        testSelection = new Selection(42, 0, Selection.PageSize.NORMAL, "id", true);
     }
 
     public void insertReport() throws Exception {
@@ -106,4 +108,50 @@ class PostDBGatewayTest {
         assertEquals(expectedPosts(), gateway.selectPostsOfReport(testReport, testSelection));
     }
 
+    @Test
+    public void testSelectPostsOfReportWhenThereAreNone() throws Exception {
+        validSelection();
+        testReport.setId(100);
+        insertReport();
+        assertTrue(gateway.selectPostsOfReport(testReport, testSelection).isEmpty());
+    }
+
+    @Test
+    public void testSelectPostsOfReportWhenReportDoesNotExist() {
+        validSelection();
+        testReport.setId(12);
+        assertTrue(gateway.selectPostsOfReport(testReport, testSelection).isEmpty());
+    }
+
+    @Test
+    public void testSelectPostsOfReportSecondPage() throws Exception {
+        validSelection();
+        testReport.setId(100);
+        insertReport();
+        numberOfPosts = 50;
+        insertPosts(100);
+        testSelection.setCurrentPage(1);
+        List<Post> expected = new ArrayList<>(20);
+        for (int i = 120; i < 140; i++) {
+            expected.add(makeTestPost(i));
+        }
+        assertEquals(expected, gateway.selectPostsOfReport(testReport, testSelection));
+    }
+
+    @Test
+    public void testSelectPostsOfReportWhenSortedByCreatedAtDescending() throws Exception {
+        insertReport();
+        numberOfPosts = 1;
+        for (int i = 0; i < 10; i++) {
+            insertPosts(100);
+        }
+        testReport.setId(100);
+        validSelection();
+        testSelection.setSortedBy("created_at");
+        testSelection.setAscending(false);
+        numberOfPosts = 10;
+        List<Post> expected = expectedPosts();
+        Collections.reverse(expected);
+        assertEquals(expected, gateway.selectPostsOfReport(testReport, testSelection));
+    }
 }
