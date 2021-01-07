@@ -147,3 +147,12 @@ input.error, textarea.error {
 .vw-50 {
     width: 50vw;
 }
+
+.no-ul {
+    text-decoration: none !important
+}
+
+.sel-float {
+    width: auto !important;
+    display: inline-block !important;
+}
