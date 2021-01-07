@@ -119,13 +119,17 @@ public class AuthenticationService {
         if ((user != null) && (user.getPasswordHash().equals(Hasher.hash(password, user.getPasswordSalt(),
                 user.getHashingAlgorithm())))) {
             String configAlgo = configReader.getString("HASH_ALGO");
-            try {
-                user = updateHashingAlgorithm(user, configAlgo, password);
-            } catch (NotFoundException e) {
-                log.error("The user with username " + username + " could not be found in the database.");
-                throw new tech.bugger.business.exception.NotFoundException("The user with username " + username
-                        + " could not be found in the database.");
+
+            if (!user.getHashingAlgorithm().equals(configAlgo)) {
+                try {
+                    user = updateHashingAlgorithm(user, configAlgo, password);
+                } catch (NotFoundException e) {
+                    log.error("The user with username " + username + " could not be found in the database.");
+                    throw new tech.bugger.business.exception.NotFoundException("The user with username " + username
+                            + " could not be found in the database.");
+                }
             }
+
             return user;
         } else {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("authentication_service.wrong_credentials"),
@@ -168,22 +172,18 @@ public class AuthenticationService {
     private User updateHashingAlgorithm(final User user, final String hashingAlgo, final String password)
             throws NotFoundException {
         User updateUser = new User(user);
+        updateUser.setPasswordHash(Hasher.hash(password, user.getPasswordSalt(), hashingAlgo));
+        updateUser.setHashingAlgorithm(hashingAlgo);
 
-        if (!updateUser.getHashingAlgorithm().equals(hashingAlgo)) {
-            updateUser.setPasswordHash(Hasher.hash(password, user.getPasswordSalt(), hashingAlgo));
-            updateUser.setHashingAlgorithm(hashingAlgo);
-
-            try (Transaction tx = transactionManager.begin()) {
-                tx.newUserGateway().updateUser(user);
-                tx.commit();
-                return updateUser;
-            } catch (TransactionException e) {
-                log.error("Error while updating the hashing algorithm of the user with username "
-                        + user.getUsername(), e);
-                feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"),
-                        Feedback.Type.ERROR));
-            }
-
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newUserGateway().updateUser(user);
+            tx.commit();
+            return updateUser;
+        } catch (TransactionException e) {
+            log.error("Error while updating the hashing algorithm of the user with username "
+                    + user.getUsername(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"),
+                    Feedback.Type.ERROR));
         }
 
         return user;
