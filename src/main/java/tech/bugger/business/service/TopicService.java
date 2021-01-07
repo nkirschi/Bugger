@@ -345,6 +345,8 @@ public class TopicService implements Serializable {
             tx.commit();
         } catch (NotFoundException e) {
             lastChange = null;
+            log.error("Topic " + topic + " could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             lastChange = null;
             log.error("Error when determining last change in topic " + topic + ".", e);
