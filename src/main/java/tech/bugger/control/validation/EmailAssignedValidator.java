@@ -1,8 +1,10 @@
 package tech.bugger.control.validation;
 
+import java.util.Objects;
 import java.util.ResourceBundle;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIInput;
 import javax.faces.context.FacesContext;
 import javax.faces.validator.FacesValidator;
 import javax.faces.validator.Validator;
@@ -50,6 +52,13 @@ public class EmailAssignedValidator implements Validator<String> {
      */
     @Override
     public void validate(final FacesContext fctx, final UIComponent component, final String email) {
+        // Read whether this validator should only be run when this field has been changed from ID.
+        boolean onlyOnChange = component.getAttributes().containsKey("only-on-change");
+        if (onlyOnChange && Objects.equals(((UIInput) component).getValue(), email)) {
+            // Don't validate as inputs have not changed.
+            return;
+        }
+
         if (profileService.getUserByEmail(email) != null) {
             FacesMessage message = new FacesMessage(messagesBundle.getString("email_validator.already_exists"));
             throw new ValidatorException(message);
