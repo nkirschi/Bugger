@@ -2,6 +2,7 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
 /**
@@ -26,6 +27,11 @@ public class Topic implements Serializable {
      * The description.
      */
     private String description;
+
+    /**
+     * The point in time of the last activity in the topic.
+     */
+    private ZonedDateTime lastActivity;
 
     /**
      * Constructs an empty topic.
@@ -102,6 +108,24 @@ public class Topic implements Serializable {
     }
 
     /**
+     * Returns the last activity of this topic.
+     *
+     * @return The last activity.
+     */
+    public ZonedDateTime getLastActivity() {
+        return lastActivity;
+    }
+
+    /**
+     * Sets the last activity of this topic.
+     *
+     * @param lastActivity The last activity to be set.
+     */
+    public void setLastActivity(final ZonedDateTime lastActivity) {
+        this.lastActivity = lastActivity;
+    }
+
+    /**
      * Indicates whether some {@code other} topic is semantically equal to this topic.
      *
      * @param other The object to compare this topic to.
@@ -138,7 +162,7 @@ public class Topic implements Serializable {
     @Override
     public String toString() {
         return "Topic{" + "ID = " + id + ", title = " + title + ", description = "
-                + String.format("%.100s", description) + '}';
+                + String.format("%.100s", description) + ", last activity = " + lastActivity + '}';
     }
 
 }
