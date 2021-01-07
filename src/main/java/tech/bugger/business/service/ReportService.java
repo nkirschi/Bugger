@@ -1,30 +1,75 @@
 package tech.bugger.business.service;
 
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.*;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Service providing methods related to reports. A {@code Feedback} event is fired, if unexpected circumstances occur.
  */
-@Dependent
+@ApplicationScoped
 public class ReportService {
 
-    private static final Log log = Log.forClass(ReportService.class);
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
+    private static final Log log = Log.forClass(PostService.class);
 
-    @Inject
-    NotificationService notificationService;
+    /**
+     * Notification service used for sending notifications.
+     */
+    private final NotificationService notificationService;
 
+    /**
+     * Post service used for creating posts.
+     */
+    private final PostService postService;
+
+    /**
+     * Transaction manager used for creating transactions.
+     */
+    private final TransactionManager transactionManager;
+
+    /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Resource bundle for feedback messages.
+     */
+    private final ResourceBundle messagesBundle;
+
+    /**
+     * Constructs a new report service with the given dependencies.
+     *
+     * @param notificationService The notification service to use.
+     * @param postService         The post service to use.
+     * @param transactionManager  The transaction manager to use for creating transactions.
+     * @param feedbackEvent       The feedback event to use for user feedback.
+     * @param messagesBundle      The resource bundle for feedback messages.
+     */
     @Inject
-    @Any
-    Event<Feedback> feedback;
+    public ReportService(final NotificationService notificationService, final PostService postService,
+                         final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
+                         final @RegistryKey("messages") ResourceBundle messagesBundle) {
+        this.notificationService = notificationService;
+        this.postService = postService;
+        this.transactionManager = transactionManager;
+        this.feedbackEvent = feedbackEvent;
+        this.messagesBundle = messagesBundle;
+    }
 
     /**
      * Subscribes a user to a report. Afterwards, they will receive notifications if the report is moved or edited, new
@@ -33,7 +78,8 @@ public class ReportService {
      * @param user   The user who will subscribe to the report.
      * @param report The report receiving the subscription.
      */
-    public void subscribeToReport(User user, Report report) {
+    public void subscribeToReport(final User user, final Report report) {
+
     }
 
     /**
@@ -42,7 +88,7 @@ public class ReportService {
      * @param user   The user whose subscription is to be removed.
      * @param report The report the user is subscribed to.
      */
-    public void unsubscribeFromReport(User user, Report report) {
+    public void unsubscribeFromReport(final User user, final Report report) {
 
     }
 
@@ -51,7 +97,7 @@ public class ReportService {
      *
      * @param report The report to be closed.
      */
-    public void close(Report report) {
+    public void close(final Report report) {
 
     }
 
@@ -60,7 +106,7 @@ public class ReportService {
      *
      * @param report The report to be opened.
      */
-    public void open(Report report) {
+    public void open(final Report report) {
 
     }
 
@@ -71,7 +117,7 @@ public class ReportService {
      * @param report The report to be moved.
      * @param topic  The topic where the report is to be moved to.
      */
-    public void move(Report report, Topic topic) {
+    public void move(final Report report, final Topic topic) {
 
     }
 
@@ -81,7 +127,7 @@ public class ReportService {
      * @param report The report the relevance of which is to be increased.
      * @param user   The user voting on the report.
      */
-    public void upvote(Report report, User user) {
+    public void upvote(final Report report, final User user) {
 
     }
 
@@ -91,7 +137,7 @@ public class ReportService {
      * @param report The report the relevance of which is to be decreased.
      * @param user   The user voting on the report.
      */
-    public void downvote(Report report, User user) {
+    public void downvote(final Report report, final User user) {
 
     }
 
@@ -101,7 +147,7 @@ public class ReportService {
      * @param report The report the vote of the user of which is to be removed.
      * @param user   The user whose vote is to be removed.
      */
-    public void removeVote(Report report, User user) {
+    public void removeVote(final Report report, final User user) {
 
     }
 
@@ -112,7 +158,7 @@ public class ReportService {
      * @param user   The user in question.
      * @return {@code true} if they have voted to increase the relevance, {@code false} otherwise.
      */
-    public boolean hasUpvoted(Report report, User user) {
+    public boolean hasUpvoted(final Report report, final User user) {
         return false;
     }
 
@@ -123,7 +169,7 @@ public class ReportService {
      * @param user   The user in question.
      * @return {@code true} if they have voted to decrease the relevance, {@code false} otherwise.
      */
-    public boolean hasDownvoted(Report report, User user) {
+    public boolean hasDownvoted(final Report report, final User user) {
         return false;
     }
 
@@ -164,7 +210,7 @@ public class ReportService {
      *
      * @param report The report to be deleted.
      */
-    public void deleteReport(Report report) {
+    public void deleteReport(final Report report) {
 
     }
 
@@ -174,7 +220,7 @@ public class ReportService {
      * @param duplicate     The report which is a duplicate.
      * @param duplicateOfID The ID of the report the other report is a duplicate of.
      */
-    public void markDuplicate(Report duplicate, int duplicateOfID) {
+    public void markDuplicate(final Report duplicate, final int duplicateOfID) {
 
     }
 
@@ -183,7 +229,7 @@ public class ReportService {
      *
      * @param report The report to be unmarked.
      */
-    public void unmarkDuplicate(Report report) {
+    public void unmarkDuplicate(final Report report) {
 
     }
 
@@ -194,7 +240,7 @@ public class ReportService {
      * @param report    The report the relevance of which is to be overwritten.
      * @param relevance The new value of the relevance.
      */
-    public void overwriteRelevance(Report report, Integer relevance) {
+    public void overwriteRelevance(final Report report, final Integer relevance) {
         // if relevance == null, restore original relevance value
     }
 
@@ -204,7 +250,7 @@ public class ReportService {
      * @param report The report in question.
      * @return The number of posts as an {@code int}.
      */
-    public int getNumberOfPosts(Report report) {
+    public int getNumberOfPosts(final Report report) {
         return 0;
     }
 
@@ -215,7 +261,7 @@ public class ReportService {
      * @param selection Information on which posts to get.
      * @return A list containing the selected posts.
      */
-    public List<Post> getPostsFor(Report report, Selection selection) {
+    public List<Post> getPostsFor(final Report report, final Selection selection) {
         return null;
     }
 
@@ -226,7 +272,8 @@ public class ReportService {
      * @param report The report in question.
      * @return The time stamp of the last action as a {@code ZonedDateTime}.
      */
-    public ZonedDateTime lastChange(Report report) {
+    public ZonedDateTime lastChange(final Report report) {
         return null;
     }
+
 }
