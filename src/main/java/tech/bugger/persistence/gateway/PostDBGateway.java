@@ -8,6 +8,7 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
 import java.sql.Connection;
@@ -74,9 +75,28 @@ public class PostDBGateway implements PostGateway {
      * {@inheritDoc}
      */
     @Override
-    public void deletePost(final Post post) {
-        // TODO Auto-generated method stub
+    public void deletePost(final Post post) throws NotFoundException {
+        if (post == null) {
+            log.error("Cannot delete post null.");
+            throw new IllegalArgumentException("Post cannot be null.");
+        }
 
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM post * WHERE id = " + post.getId()
+                + " RETURNING *")) {
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getInt("id") != post.getId()) {
+                    throw new InternalError("Wrong post deleted! Please investigate! Expected: " + post + ", actual: "
+                            + rs.getInt("id"));
+                }
+            } else {
+                log.error("Post to delete " + post + " not found.");
+                throw new NotFoundException("Post to delete " + post + " not found.");
+            }
+        } catch (SQLException e) {
+            log.error("Error when deleting post " + post + ".", e);
+            throw new StoreException("Error when deleting post " + post + ".", e);
+        }
     }
 
     /**

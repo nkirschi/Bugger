@@ -12,7 +12,9 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 
+import java.beans.Transient;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,6 +79,13 @@ class PostDBGatewayTest {
 
     public Post makeTestPost(int postID) {
         return new Post(postID, "testpost" + postID, new Lazy<>(testReport), null, null);
+    }
+
+    public boolean isGone(int postID) throws Exception {
+        try (Statement stmt = connection.createStatement()) {
+            ResultSet rs = stmt.executeQuery("SELECT * FROM post WHERE id = " + postID);
+            return (!rs.next());
+        }
     }
 
     @Test
@@ -153,5 +162,33 @@ class PostDBGatewayTest {
         List<Post> expected = expectedPosts();
         Collections.reverse(expected);
         assertEquals(expected, gateway.selectPostsOfReport(testReport, testSelection));
+    }
+
+    @Test
+    public void testDeletePost() throws Exception {
+        insertReport();
+        numberOfPosts = 1;
+        insertPosts(100);
+        gateway.deletePost(makeTestPost(100));
+        assertTrue(isGone(100));
+    }
+
+    @Test
+    public void testDeletePostTwice() throws Exception {
+        insertReport();
+        numberOfPosts = 1;
+        insertPosts(100);
+        gateway.deletePost(makeTestPost(100));
+        assertThrows(NotFoundException.class, () -> gateway.deletePost(makeTestPost(100)));
+    }
+
+    @Test
+    public void testDeletePostWhenPostDoesNotExist() {
+        assertThrows(NotFoundException.class, () -> gateway.deletePost(makeTestPost(4)));
+    }
+
+    @Test
+    public void testDeletePostWhenPostIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> gateway.deletePost(null));
     }
 }
