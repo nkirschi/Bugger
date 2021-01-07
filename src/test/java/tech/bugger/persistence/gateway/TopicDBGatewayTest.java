@@ -101,6 +101,21 @@ class TopicDBGatewayTest {
     }
 
     @Test
+    public void testSelectTopicsWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        validSelection();
+        assertThrows(StoreException.class, () -> new TopicDBGateway(connectionSpy).selectTopics(selection));
+    }
+
+    @Test
+    public void testSelectTopicsWhenSelectionIsBlank() {
+        validSelection();
+        selection.setSortedBy("");
+        assertThrows(IllegalArgumentException.class, () -> gateway.selectTopics(selection));
+    }
+
+    @Test
     public void testSelectTopicsWhenThereAreSome() throws Exception {
         numberOfTopics = 5;
         addTopics();
