@@ -88,15 +88,6 @@ public interface ReportGateway {
     public void openReport(Report report) throws NotFoundException;
 
     /**
-     * Moves a report to a new topic.
-     *
-     * @param report      The report to move.
-     * @param destination The topic to move the report to.
-     * @throws NotFoundException The report or the topic could not be found.
-     */
-    public void moveReport(Report report, Topic destination) throws NotFoundException;
-
-    /**
      * Marks a report as a duplicate of another report.
      *
      * @param duplicate  The report to mark as a duplicate.

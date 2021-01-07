@@ -1,6 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import org.ocpsoft.rewrite.config.Not;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
@@ -15,6 +14,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -44,7 +44,8 @@ public class ReportDBGateway implements ReportGateway {
     /**
      * Constructs a new report gateway with the given database connection.
      *
-     * @param conn The database connection to use for the gateway.
+     * @param conn        The database connection to use for the gateway.
+     * @param userGateway The user gateway to use.
      */
     public ReportDBGateway(final Connection conn, final UserGateway userGateway) {
         this.conn = conn;
@@ -76,14 +77,15 @@ public class ReportDBGateway implements ReportGateway {
                 User creator = userGateway.getUserByID(rs.getInt("created_by"));
                 ZonedDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime()
                         .atZone(ZoneId.systemDefault());
-                User modifier = userGateway.getUserByID(rs.getInt("modified_by"));
-                ZonedDateTime modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime()
+                User modifier = userGateway.getUserByID(rs.getInt("last_modified_by"));
+                ZonedDateTime modifiedAt = rs.getTimestamp("last_modified_at").toLocalDateTime()
                         .atZone(ZoneId.systemDefault());
                 Authorship authorship = new Authorship(creator, createdAt, modifier, modifiedAt);
                 Integer forcedRelevance = rs.getInt("forced_relevance");
                 if (rs.wasNull()) {
                     forcedRelevance = null;
                 }
+                Timestamp closingDate = rs.getTimestamp("closed_at");
 
                 return new Report(
                         id,
@@ -92,8 +94,7 @@ public class ReportDBGateway implements ReportGateway {
                         Report.Severity.valueOf(rs.getString("severity")),
                         rs.getString("version"),
                         authorship,
-                        rs.getTimestamp("closed_at").toLocalDateTime()
-                                .atZone(ZoneId.systemDefault()),
+                        closingDate != null ? closingDate.toLocalDateTime().atZone(ZoneId.systemDefault()) : null,
                         null, // TODO Lazy<Report>
                         forcedRelevance,
                         null // TODO Lazy<Topic>
@@ -130,17 +131,23 @@ public class ReportDBGateway implements ReportGateway {
      */
     @Override
     public void update(final Report report) throws NotFoundException {
+        // TODO: Check if topic exists?
+
         try (PreparedStatement stmt = conn.prepareStatement(
                 "UPDATE report "
                         + "SET title = ?, type = ?::report_type, severity = ?::report_severity, "
-                        + "    last_modified_by = ?, topic = ?"
+                        + "    version = ?, last_modified_by = ?, topic = ?"
                         + "WHERE id = ?;"
         )) {
+            User modifier = report.getAuthorship().getModifier();
             int rowsAffected = new StatementParametrizer(stmt)
                     .string(report.getTitle())
                     .string(report.getType().name())
                     .string(report.getSeverity().name())
-                    .object(report.getAuthorship().getModifier().getId(), Types.INTEGER)
+                    .string(report.getVersion())
+                    .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
+                    .integer(report.getTopic().get().getId())
+                    .integer(report.getId())
                     .toStatement().executeUpdate();
             if (rowsAffected == 0) {
                 throw new NotFoundException("Report to be updated could not be found.");
