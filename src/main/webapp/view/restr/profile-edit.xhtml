@@ -151,7 +151,7 @@
                 <h:inputSecret id="i-password-new-repeat" value="#{profileEditBacker.passwordNewConfirm}"
                                styleClass="profile-info" required="#{profileEditBacker.create}">
                     <f:validateLength minimum="#{C.PASSWORD_MIN}" maximum="#{C.PASSWORD_MAX}"/>
-                    <f:attribute name="otherInput" value="#{password1}"/>
+                    <f:attribute name="other-input" value="#{password1}"/>
                     <f:validator validatorId="matchingFieldValidator"/>
                 </h:inputSecret>
 

@@ -10,6 +10,7 @@ import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -111,7 +112,7 @@ public class ProfileEditBacker implements Serializable {
      * The current external context.
      */
     @Inject
-    private ExternalContext ext;
+    private FacesContext fctx;
 
     /**
      * The profile service providing the business logic.
@@ -130,17 +131,14 @@ public class ProfileEditBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        ExternalContext ext = fctx.getExternalContext();
         if (ext.getRequestParameterMap().containsKey("token")) {
             updateUserEmail(authenticationService.findToken(ext.getRequestParameterMap().get("token")));
             log.debug("Updating the user's email address with the given token.");
         }
 
         if (session.getUser() == null) {
-            try {
-                ext.redirect("home.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
         dialog = DialogType.NONE;
 
@@ -157,11 +155,7 @@ public class ProfileEditBacker implements Serializable {
         }
 
         if (user == null) {
-            try {
-                ext.redirect("error.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
         } else {
             emailNew = user.getEmailAddress();
             usernameNew = user.getUsername();
@@ -193,11 +187,7 @@ public class ProfileEditBacker implements Serializable {
             profileService.updateUser(token.getUser());
         } else {
             log.error("The token " + token + " was invalid for updating the email address.");
-            try {
-                ext.redirect("error.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
         }
     }
 
@@ -223,11 +213,7 @@ public class ProfileEditBacker implements Serializable {
         }
 
         if (successful) {
-            try {
-                ext.redirect("profile.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:profile");
         }
     }
 
@@ -240,15 +226,15 @@ public class ProfileEditBacker implements Serializable {
      * @return Whether the operation was successful or not.
      */
     private boolean updateEmail(final User user, final String email) {
-        URL currentUrl;
+        URL url;
         try {
-            currentUrl = new URL(((HttpServletRequest) ext.getRequest()).getRequestURL().toString());
+            url = new URL(((HttpServletRequest) fctx.getExternalContext().getRequest()).getRequestURL().toString());
         } catch (MalformedURLException e) {
             log.debug("The user with id " + user.getId() + " tried to update their email with an invalid URL.", e);
             throw new InternalError("URL is invalid.", e);
         }
 
-        String domain = String.format("%s://%s", currentUrl.getProtocol(), currentUrl.getAuthority());
+        String domain = String.format("%s://%s", url.getProtocol(), url.getAuthority());
         User updateUser = new User(user);
         updateUser.setEmailAddress(email);
 
@@ -269,11 +255,7 @@ public class ProfileEditBacker implements Serializable {
                 session.invalidateSession();
             }
 
-            try {
-                ext.redirect("home.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
     }
 

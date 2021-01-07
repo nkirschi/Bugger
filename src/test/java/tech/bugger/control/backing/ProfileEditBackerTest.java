@@ -16,9 +16,11 @@ import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 
+import javax.faces.application.Application;
+import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
 
@@ -31,7 +33,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(LogExtension.class)
@@ -42,6 +43,9 @@ public class ProfileEditBackerTest {
 
     @Mock
     private UserSession session;
+
+    @Mock
+    private FacesContext fctx;
 
     @Mock
     private ExternalContext ext;
@@ -57,6 +61,12 @@ public class ProfileEditBackerTest {
 
     @Mock
     private HttpServletRequest request;
+
+    @Mock
+    private NavigationHandler navHandler;
+
+    @Mock
+    private Application application;
 
     private User user;
     private static final String TOKEN = "token";
@@ -78,6 +88,9 @@ public class ProfileEditBackerTest {
         MockitoAnnotations.openMocks(this);
         createUser = profileEditBacker.getClass().getDeclaredField("create");
         createUser.setAccessible(true);
+        when(fctx.getExternalContext()).thenReturn(ext);
+        when(fctx.getApplication()).thenReturn(application);
+        when(application.getNavigationHandler()).thenReturn(navHandler);
         when(ext.getRequestParameterMap()).thenReturn(map);
         when(ext.getRequest()).thenReturn(request);
     }
@@ -112,36 +125,25 @@ public class ProfileEditBackerTest {
     }
 
     @Test
-    public void testInitWithTokenNull() throws IOException {
+    public void testInitWithTokenNull() {
         when(map.containsKey(TOKEN)).thenReturn(true);
         when(map.get(TOKEN)).thenReturn(TOKEN);
         when(session.getUser()).thenReturn(user);
         profileEditBacker.init();
-        //Since ext is mocked, method execution continues after the first redirect in updateUserEmail().
-        verify(ext, times(2)).redirect(ERROR);
+        //Since navHandler is mocked, method execution continues after the first redirect in updateUserEmail().
+        verify(navHandler, times(2)).handleNavigation(any(), any(), any());
     }
 
     @Test
-    public void testInitWithTokenWrongType() throws IOException {
+    public void testInitWithTokenWrongType() {
         emailToken.setType(Token.Type.REGISTER);
         when(map.containsKey(TOKEN)).thenReturn(true);
         when(map.get(TOKEN)).thenReturn(TOKEN);
         when(authenticationService.findToken(TOKEN)).thenReturn(emailToken);
         when(session.getUser()).thenReturn(user);
         profileEditBacker.init();
-        //Since ext is mocked, method execution continues after the first redirect in updateUserEmail().
-        verify(ext, times(2)).redirect(ERROR);
-    }
-
-    @Test
-    public void testInitWithTokenIOException() throws IOException {
-        when(map.containsKey(TOKEN)).thenReturn(true);
-        when(map.get(TOKEN)).thenReturn(TOKEN);
-        when(session.getUser()).thenReturn(user);
-        doThrow(IOException.class).when(ext).redirect(ERROR);
-        assertThrows(InternalError.class,
-                () -> profileEditBacker.init()
-        );
+        //Since navHandler is mocked, method execution continues after the first redirect in updateUserEmail().
+        verify(navHandler, times(2)).handleNavigation(any(), any(), any());
     }
 
     @Test
@@ -190,7 +192,7 @@ public class ProfileEditBackerTest {
     }
 
     @Test
-    public void testInitWithEditInvalidId() throws IOException {
+    public void testInitWithEditInvalidId() {
         when(session.getUser()).thenReturn(user);
         when(map.containsKey(EDIT)).thenReturn(true);
         when(map.get(EDIT)).thenReturn("abc");
@@ -199,95 +201,75 @@ public class ProfileEditBackerTest {
                 () -> assertNull(profileEditBacker.getUser()),
                 () -> assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog())
         );
-        verify(ext, times(1)).redirect(ERROR);
+        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
-    public void testInitSessionUserNull() throws IOException {
-        //Necessary since method execution continues after first call to ext.redirect().
+    public void testInitSessionUserNull() {
+        //Necessary since method execution continues after first call to handleNavigation().
         when(session.getUser()).thenReturn(null).thenReturn(user);
         profileEditBacker.init();
-        verify(ext, times(1)).redirect(HOME);
+        verify(navHandler, times(2)).handleNavigation(any(), any(), any());
     }
 
     @Test
-    public void testInitSessionUserNullIOException() throws IOException {
-        doThrow(IOException.class).when(ext).redirect(HOME);
-        assertThrows(InternalError.class,
-                () -> profileEditBacker.init()
-        );
-    }
-
-    @Test
-    public void testInitGetUserNull() throws IOException {
+    public void testInitGetUserNull() {
         when(session.getUser()).thenReturn(user);
         profileEditBacker.init();
-        verify(ext, times(1)).redirect(ERROR);
+        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
-    public void testInitUserNullIOException() throws IOException {
-        when(session.getUser()).thenReturn(user);
-        doThrow(IOException.class).when(ext).redirect(ERROR);
-        assertThrows(InternalError.class,
-                () -> profileEditBacker.init()
-        );
-    }
-
-    @Test
-    public void testSaveChangesCreate() throws IllegalAccessException, IOException {
+    public void testSaveChangesCreate() throws IllegalAccessException {
         createUser.setBoolean(profileEditBacker, true);
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         when(profileService.createUser(any())).thenReturn(true);
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(profileService, times(1)).createUser(any());
-        verify(ext, times(1)).redirect(PROFILE);
+        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
-    public void testSaveChangesCreateUnsuccessful() throws IllegalAccessException, IOException {
+    public void testSaveChangesCreateUnsuccessful() throws IllegalAccessException {
         createUser.setBoolean(profileEditBacker, true);
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(profileService, times(1)).createUser(any());
-        verify(ext, times(0)).redirect(PROFILE);
     }
 
     @Test
-    public void testSaveChangesPasswordNotMatching() throws IllegalAccessException, IOException {
+    public void testSaveChangesPasswordNotMatching() throws IllegalAccessException {
         createUser.setBoolean(profileEditBacker, true);
         when(profileService.matchingPassword(any(), any())).thenReturn(false);
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(profileService, times(0)).createUser(any());
-        verify(ext, times(0)).redirect(PROFILE);
     }
 
     @Test
-    public void testSaveChanges() throws IOException {
+    public void testSaveChanges() {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         when(profileService.updateUser(user)).thenReturn(true);
         profileEditBacker.setUser(user);
         profileEditBacker.setEmailNew(user.getEmailAddress());
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(ext, times(1)).redirect(PROFILE);
+        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
-    public void testSaveChangesUnsuccessful() throws IOException {
+    public void testSaveChangesUnsuccessful() {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         profileEditBacker.setUser(user);
         profileEditBacker.setEmailNew(user.getEmailAddress());
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(ext, times(0)).redirect(PROFILE);
     }
 
     @Test
-    public void testSaveChangesNewEmail() throws IOException {
+    public void testSaveChangesNewEmail() {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         StringBuffer buffer = new StringBuffer("http://test.de/hello_there.xhtml?someparam=69420");
         doReturn(buffer).when(request).getRequestURL();
@@ -298,11 +280,11 @@ public class ProfileEditBackerTest {
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(authenticationService, times(1)).updateEmail(any(), any());
-        verify(ext, times(1)).redirect(PROFILE);
+        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
-    public void testSaveChangesNewEmailUnsuccessful() throws IOException {
+    public void testSaveChangesNewEmailUnsuccessful() {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         StringBuffer buffer = new StringBuffer("http://test.de/hello_there.xhtml?someparam=69420");
         doReturn(buffer).when(request).getRequestURL();
@@ -311,7 +293,6 @@ public class ProfileEditBackerTest {
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(authenticationService, times(1)).updateEmail(any(), any());
-        verify(ext, times(0)).redirect(PROFILE);
     }
 
     @Test
@@ -327,49 +308,34 @@ public class ProfileEditBackerTest {
     }
 
     @Test
-    public void testSaveChangesIOException() throws IOException {
-        when(profileService.matchingPassword(any(), any())).thenReturn(true);
-        when(profileService.updateUser(any())).thenReturn(true);
-        doThrow(IOException.class).when(ext).redirect(PROFILE);
-        profileEditBacker.setUser(user);
-        profileEditBacker.setEmailNew(user.getEmailAddress());
-        assertThrows(InternalError.class,
-                () -> profileEditBacker.saveChanges()
-        );
-        verify(profileService, times(1)).matchingPassword(any(), any());
-    }
-
-    @Test
-    public void testDelete() throws IOException {
+    public void testDelete() {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         when(profileService.deleteUser(user)).thenReturn(true);
         profileEditBacker.setUser(user);
         profileEditBacker.delete();
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(profileService, times(1)).deleteUser(user);
-        verify(ext, times(1)).redirect(HOME);
+        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
-    public void testDeleteFails() throws IOException {
+    public void testDeleteFails() {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         profileEditBacker.setUser(user);
         profileEditBacker.delete();
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(profileService, times(1)).deleteUser(user);
-        verify(ext, times(0)).redirect(HOME);
     }
 
     @Test
-    public void testDeleteWrongPassword() throws IOException {
+    public void testDeleteWrongPassword() {
         profileEditBacker.setUser(user);
         profileEditBacker.delete();
         verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(ext, times(0)).redirect(HOME);
     }
 
     @Test
-    public void testDeleteEqualSessionUser() throws IOException {
+    public void testDeleteEqualSessionUser() {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         when(profileService.deleteUser(user)).thenReturn(true);
         when(session.getUser()).thenReturn(user);
@@ -378,20 +344,7 @@ public class ProfileEditBackerTest {
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(profileService, times(1)).deleteUser(user);
         verify(session, times(1)).invalidateSession();
-        verify(ext, times(1)).redirect(HOME);
-    }
-
-    @Test
-    public void testDeleteIOException() throws IOException {
-        when(profileService.matchingPassword(any(), any())).thenReturn(true);
-        when(profileService.deleteUser(user)).thenReturn(true);
-        doThrow(IOException.class).when(ext).redirect(HOME);
-        profileEditBacker.setUser(user);
-        assertThrows(InternalError.class,
-                () -> profileEditBacker.delete()
-        );
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(profileService, times(1)).deleteUser(user);
+        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test

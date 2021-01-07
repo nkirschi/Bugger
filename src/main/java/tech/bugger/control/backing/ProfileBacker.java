@@ -12,6 +12,7 @@ import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -120,7 +121,7 @@ public class ProfileBacker implements Serializable {
      * The current external context.
      */
     @Inject
-    private ExternalContext ext;
+    private FacesContext fctx;
 
     /**
      * The profile service providing the business logic.
@@ -133,25 +134,18 @@ public class ProfileBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        ExternalContext ext = fctx.getExternalContext();
         // The initialization of the subscriptions will be implemented in the subscriptions feature.
         if ((!ext.getRequestParameterMap().containsKey("u")) || (ext.getRequestParameterMap().get("u").length()
                 > Constants.USERNAME_MAX)) {
-            try {
-                ext.redirect("home.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
 
         username = ext.getRequestParameterMap().get("u");
         user = profileService.getUserByUsername(username);
 
         if (user == null) {
-            try {
-                ext.redirect("error.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
         }
 
         sanitizedBiography = MarkdownHandler.toHtml(user.getBiography());
