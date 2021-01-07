@@ -80,22 +80,18 @@ public class ReportDBGateway implements ReportGateway {
                     .integer(id)
                     .toStatement().executeQuery();
             if (rs.next()) {
-                User creator = userGateway.getUserByID(rs.getInt("created_by"));
+                Integer creatorID = rs.getObject("created_by", Integer.class);
+                User creator = creatorID == null ? null : userGateway.getUserByID(creatorID);
                 ZonedDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime()
                         .atZone(ZoneId.systemDefault());
-                User modifier = userGateway.getUserByID(rs.getInt("last_modified_by"));
+                Integer modifierID = rs.getObject("last_modified_by", Integer.class);
+                User modifier = modifierID == null ? null : userGateway.getUserByID(modifierID);
                 ZonedDateTime modifiedAt = rs.getTimestamp("last_modified_at").toLocalDateTime()
                         .atZone(ZoneId.systemDefault());
                 Authorship authorship = new Authorship(creator, createdAt, modifier, modifiedAt);
 
-                Integer forcedRelevance = rs.getInt("forced_relevance");
-                if (rs.wasNull()) {
-                    forcedRelevance = null;
-                }
-                Integer duplicateOf = rs.getInt("duplicate_of");
-                if (rs.wasNull()) {
-                    duplicateOf = null;
-                }
+                Integer forcedRelevance = rs.getObject("forced_relevance", Integer.class);
+                Integer duplicateOf = rs.getObject("duplicate_of", Integer.class);
                 Timestamp closingDate = rs.getTimestamp("closed_at");
 
                 return new Report(
