@@ -114,7 +114,79 @@ public class AuthenticationService {
      * @return The user with all their data.
      */
     public User authenticate(final String username, final String password) {
+        User user = findUser(username);
+
+        if ((user != null) && (user.getPasswordHash().equals(Hasher.hash(password, user.getPasswordSalt(),
+                user.getHashingAlgorithm())))) {
+            String configAlgo = configReader.getString("HASH_ALGO");
+
+            if (!user.getHashingAlgorithm().equals(configAlgo)) {
+                try {
+                    user = updateHashingAlgorithm(user, configAlgo, password);
+                } catch (NotFoundException e) {
+                    log.error("The user with username " + username + " could not be found in the database.");
+                    throw new tech.bugger.business.exception.NotFoundException("The user with username " + username
+                            + " could not be found in the database.");
+                }
+            }
+
+            return user;
+        } else {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("authentication_service.wrong_credentials"),
+                    Feedback.Type.ERROR));
+        }
+
         return null;
+    }
+
+    /**
+     * Loads the user with the given username from the database.
+     *
+     * @param username The username.
+     * @return The user with all their data.
+     */
+    private User findUser(final String username) {
+        User user = null;
+
+        try (Transaction tx = transactionManager.begin()) {
+            user = tx.newUserGateway().getUserByUsername(username);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("The user with username " + username + " could not be found.", e);
+        } catch (TransactionException e) {
+            log.error("Error while loading user with username " + username, e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return user;
+    }
+
+    /**
+     * Updates the given user's hashing algorithm to the current one specified in the configuration.
+     *
+     * @param user The user.
+     * @param hashingAlgo The new hashing algorithm.
+     * @param password The user's password.
+     * @return The user.
+     */
+    private User updateHashingAlgorithm(final User user, final String hashingAlgo, final String password)
+            throws NotFoundException {
+        User updateUser = new User(user);
+        updateUser.setPasswordHash(Hasher.hash(password, user.getPasswordSalt(), hashingAlgo));
+        updateUser.setHashingAlgorithm(hashingAlgo);
+
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newUserGateway().updateUser(user);
+            tx.commit();
+            return updateUser;
+        } catch (TransactionException e) {
+            log.error("Error while updating the hashing algorithm of the user with username "
+                    + user.getUsername(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"),
+                    Feedback.Type.ERROR));
+        }
+
+        return user;
     }
 
     /**
@@ -135,11 +207,11 @@ public class AuthenticationService {
     /**
      * Registers a new user by generating a {@link Token} and sending a confirmation email to the new user.
      *
-     * @param user   The user to be registered.
-     * @param domain The current domain of this web application.
+     * @param user The user to be registered.
+     * @param path The current deployment path of this web application.
      * @return Whether the action was successful or not.
      */
-    public boolean register(final User user, final String domain) {
+    public boolean register(final User user, final String path) {
         Token token = null;
 
         try (Transaction tx = transactionManager.begin()) {
@@ -158,7 +230,7 @@ public class AuthenticationService {
             return false;
         }
 
-        String link = domain + "/faces/view/public/password-set.xhtml?token=" + token.getValue();
+        String link = path + "/password-set?token=" + token.getValue();
         Mail mail = new MailBuilder()
                 .to(user.getEmailAddress())
                 .subject(interactionsBundle.getString("email_register_subject"))

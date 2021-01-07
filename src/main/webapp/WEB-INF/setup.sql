@@ -63,8 +63,8 @@ CREATE TABLE "user" (
     avatar BYTEA,
     avatar_thumbnail BYTEA,
     biography VARCHAR,
-    preferred_language VARCHAR,
-    profile_visibility user_profile_visibility,
+    preferred_language VARCHAR NOT NULL DEFAULT 'ENGLISH',
+    profile_visibility user_profile_visibility NOT NULL DEFAULT 'FULL',
     registered_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     forced_voting_weight INTEGER,
     is_admin BOOLEAN,
@@ -77,11 +77,11 @@ CREATE TABLE "user" (
 -- Insert the first admin with the password 'BuggerFahrenMachtSpass42'
 INSERT INTO "user" (username, password_hash, password_salt, hashing_algorithm,
     email_address, first_name, last_name, avatar, avatar_thumbnail, biography,
-    preferred_language, profile_visibility, is_admin, forced_voting_weight)
+    profile_visibility, is_admin, forced_voting_weight)
 VALUES ('admin',
     'cb64f9739595a2eb5d58cb7a291aed0b0627f4efcbbf1a6b1c5e5864df3f6c941a0495fad7939cdd810bc74852a670ca14a9ae5033843c8d233d2a4f33b11393',
     'aa35afbed60537ff39a5be70dc1d183fbf6614ea5ce7d36c2e5f154d2d3e1706d9429f8597fb12fd4d0601391aaa5684d15d8d0078645b4946acf5512766fc25',
-    'SHA3-512', '', 'Admin', 'Istrator', '', '', '', '', 'MINIMAL', TRUE, NULL
+    'SHA3-512', '', 'Admin', 'Is Traitor', '', '', '', 'MINIMAL', TRUE, NULL
 );
 
 

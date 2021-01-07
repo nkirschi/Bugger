@@ -16,6 +16,7 @@
     <servlet-mapping>
         <servlet-name>Faces Servlet</servlet-name>
         <url-pattern>/faces/*</url-pattern>
+        <url-pattern>/admin</url-pattern>
     </servlet-mapping>
 
     <context-param>
