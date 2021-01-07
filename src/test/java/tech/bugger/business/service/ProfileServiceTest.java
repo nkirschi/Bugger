@@ -25,8 +25,23 @@ import tech.bugger.persistence.util.TransactionManager;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doNothing;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -89,6 +104,24 @@ public class ProfileServiceTest {
         doThrow(TransactionException.class).when(tx).commit();
         assertFalse(service.createUser(testUser));
         verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testDeleteUser() {
+        assertTrue(service.deleteUser(testUser));
+    }
+
+    @Test
+    public void testDeleteUserNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(userGateway).deleteUser(testUser);
+        assertTrue(service.deleteUser(testUser));
+    }
+
+    @Test
+    public void testDeleteUserTransactionException() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertFalse(service.deleteUser(testUser));
+        verify(feedbackEvent, times(1)).fire(any());
     }
 
     @Test

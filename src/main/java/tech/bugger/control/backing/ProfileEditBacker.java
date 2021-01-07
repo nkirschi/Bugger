@@ -129,9 +129,10 @@ public class ProfileEditBacker implements Serializable {
      * Initializes the profile edit page. Also checks if the user is allowed to modify this profile.
      */
     @PostConstruct
-    private void init() {
+    void init() {
         if (ext.getRequestParameterMap().containsKey("token")) {
             updateUserEmail(authenticationService.findToken(ext.getRequestParameterMap().get("token")));
+            log.debug("Updating the user's email address with the given token.");
         }
 
         if (session.getUser() == null) {
@@ -146,10 +147,13 @@ public class ProfileEditBacker implements Serializable {
         if (ext.getRequestParameterMap().containsKey("c") && session.getUser().isAdministrator()) {
             create = true;
             user = new User();
+            log.debug("Creating new user.");
         } else if (ext.getRequestParameterMap().containsKey("e")) {
             user = findUser(ext.getRequestParameterMap().get("e"));
+            log.debug("Using the edit key to find the user in the database.");
         } else {
             user = profileService.getUser(session.getUser().getId());
+            log.debug("Using the session user's id to find the user in the database.");
         }
 
         if (user == null) {
@@ -180,14 +184,34 @@ public class ProfileEditBacker implements Serializable {
     }
 
     /**
+     * Finalizes updating a user's email address using the {@link Token} to update the user information in the database.
+     *
+     * @param token The token containing the user's new email address.
+     */
+    private void updateUserEmail(final Token token) {
+        if (token != null && token.getType() == Token.Type.CHANGE_EMAIL) {
+            profileService.updateUser(token.getUser());
+        } else {
+            log.error("The token " + token + " was invalid for updating the email address.");
+            try {
+                ext.redirect("error.xhtml");
+            } catch (IOException e) {
+                throw new InternalError("Error while redirecting.", e);
+            }
+        }
+    }
+
+    /**
      * Applies and saves the changes made.
      */
     public void saveChanges() {
         boolean successful;
+
+        if (!profileService.matchingPassword(session.getUser(), password)) {
+            return;
+        }
+
         if (create) {
-            if (!profileService.matchingPassword(session.getUser(), password)) {
-                return;
-            }
             successful = profileService.createUser(user);
         } else {
             if (!emailNew.equals(user.getEmailAddress())) {
@@ -220,6 +244,7 @@ public class ProfileEditBacker implements Serializable {
         try {
             currentUrl = new URL(((HttpServletRequest) ext.getRequest()).getRequestURL().toString());
         } catch (MalformedURLException e) {
+            log.debug("The user with id " + user.getId() + " tried to update their email with an invalid URL.", e);
             throw new InternalError("URL is invalid.", e);
         }
 
@@ -228,52 +253,6 @@ public class ProfileEditBacker implements Serializable {
         updateUser.setEmailAddress(email);
 
         return authenticationService.updateEmail(updateUser, domain);
-    }
-
-    /**
-     * Finalizes updating a user's email address using the {@link Token} to update the user information in the database.
-     *
-     * @param token The token containing the user's new email address.
-     */
-    private void updateUserEmail(final Token token) {
-        if (token != null && token.getType() == Token.Type.CHANGE_EMAIL) {
-            profileService.updateUser(token.getUser());
-        } else {
-            log.error("The token " + token + " was invalid for updating the email address.");
-            try {
-                ext.redirect("error.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
-        }
-    }
-
-    /**
-     * Opens the delete profile dialog.
-     */
-    public void openDeleteDialog() {
-        dialog = DialogType.DELETE;
-    }
-
-    /**
-     * Closes the delete profile dialog.
-     */
-    public void closeDeleteDialog() {
-        dialog = DialogType.NONE;
-    }
-
-    /**
-     * Opens the dialog that is displayed if an administrator edits another user's profile.
-     */
-    public void openChangeDialog() {
-        dialog = DialogType.UPDATE;
-    }
-
-    /**
-     * Closes the dialog that is displayed if an administrator edits another user's profile.
-     */
-    public void closeChangeDialog() {
-        dialog = DialogType.NONE;
     }
 
     /**
@@ -303,7 +282,7 @@ public class ProfileEditBacker implements Serializable {
      */
     public void deleteAvatar() {
         //TODO needs to be changed to default pictures in Milestone 2
-        user.setAvatar(new Lazy<>(null));
+        user.setAvatar(new Lazy<>(new byte[0]));
         user.setAvatarThumbnail(new byte[0]);
     }
 
@@ -312,7 +291,7 @@ public class ProfileEditBacker implements Serializable {
      */
     public void uploadAvatar() {
         Lazy<byte[]> image = (profileService.uploadAvatar(tempAvatar));
-        if (image.isPresent()) {
+        if (image != null) {
             user.setAvatar(image);
             byte[] thumbnail = (profileService.generateThumbnail(image.get()));
             //TODO needs to be changed to default thumbnail in Milestone 2
@@ -322,6 +301,34 @@ public class ProfileEditBacker implements Serializable {
             user.setAvatar(new Lazy<>(new byte[0]));
             user.setAvatarThumbnail(new byte[0]);
         }
+    }
+
+    /**
+     * Opens the delete profile dialog.
+     */
+    public void openDeleteDialog() {
+        dialog = DialogType.DELETE;
+    }
+
+    /**
+     * Closes the delete profile dialog.
+     */
+    public void closeDeleteDialog() {
+        dialog = DialogType.NONE;
+    }
+
+    /**
+     * Opens the dialog that is displayed if an administrator edits another user's profile.
+     */
+    public void openChangeDialog() {
+        dialog = DialogType.UPDATE;
+    }
+
+    /**
+     * Closes the dialog that is displayed if an administrator edits another user's profile.
+     */
+    public void closeChangeDialog() {
+        dialog = DialogType.NONE;
     }
 
     /**

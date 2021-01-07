@@ -391,6 +391,15 @@ public class User implements Serializable {
     }
 
     /**
+     * Returns all language values as an array.
+     *
+     * @return All language values.
+     */
+    public Language[] getPreferredLanguages() {
+        return Language.values();
+    }
+
+    /**
      * Returns the profile visibility level of this user.
      *
      * @return The user's profile visibility.
@@ -406,6 +415,15 @@ public class User implements Serializable {
      */
     public void setProfileVisibility(final ProfileVisibility profileVisibility) {
         this.profileVisibility = profileVisibility;
+    }
+
+    /**
+     * Returns all profile visibility values as an array.
+     *
+     * @return All profile visibility values.
+     */
+    public ProfileVisibility[] getProfileVisibilities() {
+        return ProfileVisibility.values();
     }
 
     /**
@@ -479,7 +497,7 @@ public class User implements Serializable {
         }
 
         User user = (User) other;
-        return id.equals(user.id);
+        return Objects.equals(id, user.id);
     }
 
     /**

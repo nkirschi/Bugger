@@ -25,7 +25,6 @@
                             <h:outputText id="ot-really-del-warn" value="#{labels['profile_edit.delete_warn']}"/>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <!-- TODO validate password equals user password or session user password if administrator -->
                     <h:panelGroup id="p-delete-password" styleClass="row align-center">
                         <h:panelGroup layout="block" styleClass="col-sm-3">
                             <h:outputLabel id="o-password-del" for="i-password-del" value="#{labels.password}"/>
@@ -41,8 +40,8 @@
                     </h:panelGroup>
                     <h:panelGroup layout="block" styleClass="row align-center">
                         <h:commandButton id="cb-really-del" value="#{labels['profile_edit.really_del']}"
-                                         action="#{profileEditBacker.delete}"/>
-                        <h:commandButton id="cb-cancel-del" value="#{labels.abort}"
+                                         action="#{profileEditBacker.delete}" styleClass="button"/>
+                        <h:commandButton id="cb-cancel-del" value="#{labels.abort}" styleClass="button"
                                          action="#{profileEditBacker.closeDeleteDialog}" immediate="true"/>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -62,7 +61,6 @@
                             <h:outputText id="ot-really-change-info" value="#{labels['profile_edit.apply_info']}"/>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <!-- TODO validate password equals session user password if create -->
                     <h:panelGroup id="p-update-password" styleClass="row align-center">
                         <h:panelGroup layout="block" styleClass="col-sm-3">
                             <h:outputLabel id="o-password-change" for="i-password-change" value="#{labels.password}"/>
@@ -78,8 +76,8 @@
                     </h:panelGroup>
                     <h:panelGroup layout="block" styleClass="row align-center">
                         <h:commandButton id="cb-really-change" value="#{labels['profile_edit.really_change']}"
-                                         action="#{profileEditBacker.saveChanges}"/>
-                        <h:commandButton id="cb-cancel-change" value="#{labels.abort}"
+                                         action="#{profileEditBacker.saveChanges}" styleClass="button"/>
+                        <h:commandButton id="cb-cancel-change" value="#{labels.abort}" styleClass="button"
                                          action="#{profileEditBacker.closeChangeDialog}" immediate="true"/>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -88,11 +86,12 @@
         </h:form>
 
         <!-- Renders the profile owner's user information. -->
-        <h:form id="f-profile-edit" rendered="#{not userSession.user == null and (userSession.user.administrator
-        or userSession.user.equals(profileEditBacker.user))}">
+        <h:form id="f-profile-edit" rendered="#{userSession.user != null and userSession.user.administrator
+        or userSession.user.id == profileEditBacker.user.id}">
 
+            <!-- TODO uncomment this and change once servlet has been implemented -->
+            <!--
             <h:panelGroup layout="block" id="p-avatar" styleClass="row p-avatar">
-                <!-- TODO add user avatar once servlet has been implemented -->
                 <h:graphicImage id="g-avatar" value="" styleClass="g-avatar" alt="The user's avatar"/>
             </h:panelGroup>
 
@@ -109,12 +108,14 @@
                 <h:commandButton id="cb-delete-avatar" value="#{labels['profile_edit.del_avatar']}"
                                  action="#{profileEditBacker.deleteAvatar}" styleClass="button"/>
             </h:panelGroup>
+        -->
 
             <h:panelGrid id="p-profile-info" columns="2">
                 <h:outputLabel id="o-visibility" for="s-visibility" value="#{labels['profile_edit.visibility']}"/>
                 <h:selectOneMenu id="s-visibility" value="#{profileEditBacker.user.profileVisibility}"
                                  required="true">
-                    <f:selectItems id="s-visibility-values" value="#{profileEditBacker.user.profileVisibility}"
+                    <f:selectItem itemLabel="#{labels['visibility.'.concat(profileEditBacker.user.profileVisibility)]}"/>
+                    <f:selectItems id="s-visibility-values" value="#{profileEditBacker.user.profileVisibilities}"
                                    var="visibility" itemValue="#{visibility}"
                                    itemLabel="#{labels['visibility.'.concat(visibility)]}"/>
                 </h:selectOneMenu>
@@ -148,8 +149,7 @@
                 <h:outputLabel id="o-password-new-repeat" for="i-password-new-repeat"
                                value="#{labels['profile_edit.repeat']}"/>
                 <h:inputSecret id="i-password-new-repeat" value="#{profileEditBacker.passwordNewConfirm}"
-                               styleClass="profile-info" validator="passwordValidator"
-                               required="#{profileEditBacker.create}">
+                               styleClass="profile-info" required="#{profileEditBacker.create}">
                     <f:validateLength minimum="#{C.PASSWORD_MIN}" maximum="#{C.PASSWORD_MAX}"/>
                     <f:attribute name="otherInput" value="#{password1}"/>
                     <f:validator validatorId="matchingFieldValidator"/>
@@ -189,10 +189,10 @@
                 <h:message id="m-email" for="it-email"/>
 
                 <h:outputLabel id="o-bio" for="ia-bio" value="#{labels.biography}"/>
-                <h:inputText id="ia-bio" value="#{profileEditBacker.user.biography}" styleClass="profile-info"
+                <h:inputTextarea id="ia-bio" value="#{profileEditBacker.user.biography}" styleClass="profile-info"
                              escape="false">
                     <f:validateLength maximum="#{C.SMALL_AREA}"/>
-                </h:inputText>
+                </h:inputTextarea>
 
                 <h:panelGroup/>
                 <h:message id="m-bio" for="ia-bio"/>
@@ -200,15 +200,16 @@
                 <h:outputLabel id="o-language" for="s-language" value="#{labels.language}"/>
                 <h:selectOneMenu id="s-language" value="#{profileEditBacker.user.preferredLanguage}"
                                  required="true">
-                    <f:selectItems id="s-language-values" value="#{profileEditBacker.user.preferredLanguage}"
+                    <f:selectItem itemLabel="#{labels['lang.'.concat(profileEditBacker.user.preferredLanguage)]}"/>
+                    <f:selectItems id="s-language-values" value="#{profileEditBacker.user.preferredLanguages}"
                                    var="lang" itemValue="#{lang}" itemLabel="#{labels['lang.'.concat(lang)]}"/>
                 </h:selectOneMenu>
 
                 <h:panelGroup/>
                 <h:message id="m-language" for="s-language"/>
 
-                <h:outputLabel id="o-overwrite-vote" for="it-overwrite-vote"
-                               value="#{labels['profile_edit.overwrite']}"/>
+                <h:outputLabel id="o-overwrite-vote" for="it-overwrite-vote" value="#{labels['profile_edit.overwrite']}"
+                               rendered="#{userSession.user.administrator}"/>
                 <h:inputText id="it-overwrite-vote" value="#{profileEditBacker.user.forcedVotingWeight}"
                              styleClass="profile-info" rendered="#{userSession.user.administrator}">
                     <f:validateLength maximum="#{C.SMALL_FIELD}"/>
