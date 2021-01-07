@@ -89,8 +89,15 @@ public class Topic implements Serializable {
      */
     @Override
     public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Topic)) {
+            return false;
+        }
+        Topic that = (Topic) other;
+        return id == that.id;
+
     }
 
     /**

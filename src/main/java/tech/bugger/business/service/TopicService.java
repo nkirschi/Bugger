@@ -7,7 +7,7 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Service providing methods related to topics. A {@code Feedback} event is fired, if unexpected circumstances occur.
  */
-@Dependent
+@ApplicationScoped
 public class TopicService {
 
     private static final Log log = Log.forClass(TopicService.class);

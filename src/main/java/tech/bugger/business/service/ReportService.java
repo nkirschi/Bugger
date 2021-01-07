@@ -13,6 +13,7 @@ import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -24,7 +25,7 @@ import java.util.ResourceBundle;
 /**
  * Service providing methods related to reports. A {@code Feedback} event is fired, if unexpected circumstances occur.
  */
-@Dependent
+@ApplicationScoped
 public class ReportService implements Serializable {
 
     /**
@@ -191,6 +192,7 @@ public class ReportService implements Serializable {
             tx.commit();
             return report;
         } catch (NotFoundException e) {
+            log.debug("Report not found.", e);
             return null;
         } catch (TransactionException e) {
             log.error("Error while searching for report.", e);
@@ -208,7 +210,7 @@ public class ReportService implements Serializable {
      * @return {@code true} iff creating the report succeeded.
      */
     public boolean createReport(final Report report, final Post firstPost) {
-
+        return false;
     }
 
     /**
