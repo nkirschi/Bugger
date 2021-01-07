@@ -11,15 +11,25 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
-import java.sql.*;
-import java.time.ZonedDateTime;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
@@ -293,118 +303,7 @@ class TopicDBGatewayTest {
     public void testGetNumberOfTopicsWhenDatabaseError() throws Exception {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
-        assertThrows(StoreException.class, () -> new TopicDBGateway(connectionSpy).getNumberOfTopics());
+        assertThrows(StoreException.class, () -> new TopicDBGateway(connectionSpy).countTopics());
     }
 
-    @Test
-    public void testGetSelectedTopicsWhenSelectionIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> gateway.getSelectedTopics(null));
-    }
-
-    @Test
-    public void testGetSelectedTopicsWhenThereAreSome() throws Exception {
-        numberOfTopics = 5;
-        addTopics();
-        validSelection();
-        expectedTopics(5);
-        assertEquals(topics, gateway.getSelectedTopics(selection));
-    }
-
-    @Test
-    public void testGetSelectedTopicsWhenSortedByIDDescending() throws Exception {
-        numberOfTopics = 5;
-        addTopics();
-        validSelection();
-        selection.setAscending(false);
-        selection.setSortedBy("id");
-        expectedTopics(5);
-        Collections.reverse(topics);
-        assertEquals(topics, gateway.getSelectedTopics(selection));
-    }
-
-    @Test
-    public void testGetSelectedTopicsWhenThereAreNone() {
-        validSelection();
-        assertThrows(NotFoundException.class, () -> gateway.getSelectedTopics(selection));
-    }
-
-    @Test
-    public void testGetSelectedTopicsWhenCurrentPageIsInvalid() throws Exception {
-        numberOfTopics = 5;
-        addTopics();
-        validSelection();
-        selection.setCurrentPage(-1);
-        assertThrows(StoreException.class, () -> gateway.getSelectedTopics(selection));
-    }
-
-    @Test
-    public void testGetSelectedTopicsWhenSortedByIsInvalid() throws Exception {
-        numberOfTopics = 5;
-        addTopics();
-        validSelection();
-        selection.setSortedBy("hüttenkäse");
-        assertThrows(StoreException.class, () -> gateway.getSelectedTopics(selection));
-    }
-
-    @Test
-    public void testGetSelectedTopicsWhenTotalSizeIsTooBig() throws Exception {
-        numberOfTopics = 5;
-        addTopics();
-        validSelection();
-        selection.setTotalSize(300);
-        expectedTopics(5);
-        assertEquals(topics, gateway.getSelectedTopics(selection));
-    }
-
-    @Test
-    public void testGetSelectedTopicsWhenTotalSizeIsNegative() throws Exception {
-        numberOfTopics = 5;
-        addTopics();
-        validSelection();
-        selection.setTotalSize(-11);
-        expectedTopics(5);
-        assertEquals(topics, gateway.getSelectedTopics(selection));
-    }
-
-    @Test
-    public void testGetSelectedTopicsWhenTotalSizeIsTooSmall() throws Exception {
-        numberOfTopics = 5;
-        addTopics();
-        validSelection();
-        selection.setTotalSize(3);
-        expectedTopics(5);
-        assertEquals(topics, gateway.getSelectedTopics(selection));
-    }
-
-    @Test
-    public void testGetSelectedTopicsWhenThereAreTooMany() throws Exception {
-        numberOfTopics = 50;
-        addTopics();
-        validSelection();
-        expectedTopics(20);
-        assertEquals(topics, gateway.getSelectedTopics(selection));
-    }
-
-    @Test
-    public void testGetSelectedTopicsWhenThereAreTooManySortedByTitleDescending() throws Exception {
-        numberOfTopics = 50;
-        addTopics();
-        validSelection();
-        selection.setSortedBy("title");
-        selection.setAscending(false);
-        topics = new ArrayList<>(20);
-        for (int i = 9; i >= 6; i--) {
-            topics.add(makeTestTopic(i));
-        }
-        topics.add(makeTestTopic(50));
-        topics.add(makeTestTopic(5));
-        for (int i = 49; i >= 40; i--) {
-            topics.add(makeTestTopic(i));
-        }
-        topics.add(makeTestTopic(4));
-        for (int i = 39; i >= 37; i--) {
-            topics.add(makeTestTopic(i));
-        }
-        assertEquals(topics, gateway.getSelectedTopics(selection));
-    }
 }
