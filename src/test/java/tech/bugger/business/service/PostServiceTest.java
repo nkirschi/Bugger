@@ -9,8 +9,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
@@ -53,6 +55,7 @@ class PostServiceTest {
     @Mock
     private Event<Feedback> feedbackEvent;
 
+    private User testUser = new User();
     private Report testReport = new Report(100, "Hi", Report.Type.BUG, Report.Severity.MINOR, "1", null, null, null, null, null);
     private Post testPost = new Post(300, "Hi", new Lazy<>(testReport), null, null);
 
@@ -103,6 +106,28 @@ class PostServiceTest {
     }
 
     @Test
-    public void isPrivileged() {
+    public void testIsPrivilegedWhenUserIsAnon() {
+        assertFalse(postService.isPrivileged(null, testPost));
+    }
+
+    @Test
+    public void testIsPrivilegedWhenUserIsAdmin() {
+        testUser.setAdministrator(true);
+        assertTrue(postService.isPrivileged(testUser, testPost));
+    }
+
+    @Test
+    public void testIsPrivilegedWhenUserIsAuthor() {
+        testUser.setAdministrator(false);
+        Authorship authorship = new Authorship(testUser, null, null, null);
+        testPost.setAuthorship(authorship);
+        assertTrue(postService.isPrivileged(testUser, testPost));
+    }
+
+    @Test
+    public void testIsPrivilegedWhenUserIsNotAuthor() {
+        testUser.setAdministrator(false);
+        testPost.setAuthorship(new Authorship(null, null, null, null));
+        assertFalse(postService.isPrivileged(testUser, testPost));
     }
 }
