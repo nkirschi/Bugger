@@ -12,6 +12,8 @@
 <ui:composition template="../../WEB-INF/template/main.xhtml">
     <ui:param name="title" value="Home"/>
     <ui:define name="content">
+        <h:outputText value="Topics" styleClass="h2" />
+        <!--TODO button to create-topic-->
         <b:pagitable paginator="#{homeBacker.topics}">
             <b:column title="Title" paginator="#{homeBacker.topics}" key="title"><h:outputText value="#{var.title}"/></b:column>
             <b:column title="Description" paginator="#{homeBacker.topics}" key="description"><h:outputText value="#{var.description}" escape="false"/></b:column>
