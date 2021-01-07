@@ -167,8 +167,26 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void openReport(final Report report) {
-        // TODO Auto-generated method stub
+    public void openReport(final Report report) throws NotFoundException {
+        if (report == null) {
+            log.error("Cannot open report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot open report with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
+
+        String sql = "UPDATE report SET closed_at = null WHERE id = " + report.getId() + ";";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows == 0) {
+                log.error("Report to open " + report + " cannot be found.");
+                throw new NotFoundException("Report to open " + report + " cannot be found.");
+            }
+        } catch (SQLException e) {
+            log.error("Error when opening report " + report + ".", e);
+            throw new StoreException("Error when opening report " + report + ".", e);
+        }
 
     }
 

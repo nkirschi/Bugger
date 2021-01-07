@@ -211,6 +211,7 @@ class ReportDBGatewayTest {
     }
 
     @Test
-    void openReport() {
+    public void testOpenReportWhenReportIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> gateway.openReport(null));
     }
 }
