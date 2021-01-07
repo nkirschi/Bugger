@@ -13,7 +13,7 @@
     <cc:interface componentType="paginator">
         <cc:attribute name="paginator" required="true" type="tech.bugger.business.util.Paginator"/>
         <cc:attribute name="simple" required="false" type="java.lang.Boolean" default="false"/>
-        <cc:attribute name="layout-fix" required="false" type="java.lang.Boolean" default="false"/>
+        <cc:attribute name="layout-fix" required="false" type="java.lang.Boolean" default="true"/>
     </cc:interface>
 
     <cc:implementation>
@@ -28,66 +28,76 @@
             </h:panelGrid>
         </h:form>
 
-        <h:panelGroup layout="block" styleClass="row d-flex justify-content-between">
-            <h:outputFormat id="ot-pag-count" rendered="#{not cc.attrs.paginator.isEmpty()}"
-                            styleClass="text-sm-left p-2"
-                            value="#{cc.attrs.paginator.selection.totalSize == 1
+        <h:panelGroup layout="block" styleClass="row d-flex justify-content-between"
+                      rendered="#{not cc.attrs.paginator.isEmpty()}">
+            <h:panelGroup layout="block" styleClass="col p-2">
+                <h:outputFormat id="ot-pag-count" styleClass="text-sm-left"
+                                value="#{cc.attrs.paginator.selection.totalSize == 1
                         ? labels['paginator.entry']
                         : labels['paginator.entries']}">
-                <f:param value="#{cc.attrs.paginator.selection.totalSize}"/>
-            </h:outputFormat>
+                    <f:param value="#{cc.attrs.paginator.selection.totalSize}"/>
+                </h:outputFormat>
+            </h:panelGroup>
 
-            <h:form id="f-pagenav" rendered="#{not cc.attrs.paginator.isEmpty()}"
-                    styleClass="pagination-sm form-inline p-2">
-                <h:commandButton id="cb-submit" action="#{cc.attrs.paginator.update}" styleClass="hide"/>
-                <h:panelGroup layout="block" id="pg-first-page"
-                              styleClass="page-item #{cc.attrs.paginator.isFirstPage() ? 'disabled' : ''}">
-                    <h:commandButton id="cb-first-page" value="&lt;&lt;" action="#{cc.attrs.paginator.firstPage}"
-                                     styleClass="page-link btn btn-link font-weight-bold"
-                                     rendered="#{not cc.attrs.simple}">
-                    </h:commandButton>
-                </h:panelGroup>
-                <h:panelGroup layout="block" id="pg-prev-page"
-                              styleClass="page-item #{cc.attrs.paginator.isFirstPage() ? 'disabled' : ''}">
-                    <h:commandButton id="cb-prev-page" value="&lt;" action="#{cc.attrs.paginator.prevPage}"
-                                     styleClass="page-link btn btn-link font-weight-bold">
-                    </h:commandButton>
-                </h:panelGroup>
-                <h:inputText id="i-curr-page" value="#{cc.attrs.paginator.currentPage}"
-                             rendered="#{not cc.attrs.simple}" styleClass="form-control form-control-sm text-center"
-                             validatorMessage="#{messages['paginator.not_in_range']}">
-                    <f:validateLongRange minimum="1" maximum="#{cc.attrs.paginator.determineLastPageIndex()}"/>
-                </h:inputText>
-                <h:panelGroup layout="block" id="pg-next-page"
-                              styleClass="page-item #{cc.attrs.paginator.isLastPage() ? 'disabled' : ''}">
-                    <h:commandButton id="cb-next-page" value="&gt;" action="#{cc.attrs.paginator.nextPage}"
-                                     styleClass="page-link btn btn-link font-weight-bold">
-                    </h:commandButton>
-                </h:panelGroup>
-                <h:panelGroup layout="block" id="pg-last-page"
-                              styleClass="page-item #{cc.attrs.paginator.isLastPage() ? 'disabled' : ''}">
-                    <h:commandButton id="cb-last-page" value="&gt;&gt;" action="#{cc.attrs.paginator.lastPage}"
-                                     styleClass="page-link btn btn-link font-weight-bold"
-                                     rendered="#{not cc.attrs.simple}">
-                    </h:commandButton>
-                </h:panelGroup>
-            </h:form>
+            <h:panelGroup layout="block" styleClass="align-#{cc.attrs['layout-fix'] ? 'center' : 'right'} col p-2">
+                <h:form layout="block" id="f-pagenav" styleClass="pagination pagination-sm">
+                    <h:commandButton id="cb-submit" action="#{cc.attrs.paginator.update}" styleClass="hide"/>
+                    <h:panelGroup layout="block" id="pg-first-page"
+                                  styleClass="page-item #{cc.attrs.paginator.isFirstPage() ? 'disabled' : ''}">
+                        <h:commandButton id="cb-first-page" value="&lt;&lt;" action="#{cc.attrs.paginator.firstPage}"
+                                         styleClass="page-link btn btn-link font-weight-bold"
+                                         rendered="#{not cc.attrs.simple}">
+                        </h:commandButton>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" id="pg-prev-page"
+                                  styleClass="page-item #{cc.attrs.paginator.isFirstPage() ? 'disabled' : ''}">
+                        <h:commandButton id="cb-prev-page" value="&lt;" action="#{cc.attrs.paginator.prevPage}"
+                                         styleClass="page-link btn btn-link font-weight-bold">
+                        </h:commandButton>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" id="pg-curr-page" styleClass="page-item">
+                        <h:inputText id="i-curr-page" value="#{cc.attrs.paginator.currentPage}"
+                                     rendered="#{not cc.attrs.simple}"
+                                     styleClass="form-control form-control-sm text-center"
+                                     validatorMessage="#{messages['paginator.not_in_range']}">
+                            <f:validateLongRange minimum="1" maximum="#{cc.attrs.paginator.determineLastPageIndex()}"/>
+                        </h:inputText>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" id="pg-next-page"
+                                  styleClass="page-item #{cc.attrs.paginator.isLastPage() ? 'disabled' : ''}">
+                        <h:commandButton id="cb-next-page" value="&gt;" action="#{cc.attrs.paginator.nextPage}"
+                                         styleClass="page-link btn btn-link font-weight-bold">
+                        </h:commandButton>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" id="pg-last-page"
+                                  styleClass="page-item #{cc.attrs.paginator.isLastPage() ? 'disabled' : ''}">
+                        <h:commandButton id="cb-last-page" value="&gt;&gt;" action="#{cc.attrs.paginator.lastPage}"
+                                         styleClass="page-link btn btn-link font-weight-bold"
+                                         rendered="#{not cc.attrs.simple}">
+                        </h:commandButton>
+                    </h:panelGroup>
+                </h:form>
+            </h:panelGroup>
 
-            <h:form id="f-entries" styleClass="form-inline p-2"
-                    rendered="#{not cc.attrs.paginator.isEmpty() and not cc.attrs.simple}">
-                <h:outputText id="ot-entriesPP" value="#{labels['paginator.entries_per_page']}:&nbsp;"/>
-                <h:selectOneMenu id="s-entriesPP" value="#{cc.attrs.paginator.selection.pageSize}"
-                                 onchange="document.getElementById('#{cc.refreshBtnID}').click()"
-                                 styleClass="form-control form-control-sm">
-                    <f:selectItems value="#{cc.attrs.paginator.pageSizeValues()}"
-                                   var="item" itemValue="#{item}" itemLabel="#{item.size}"/>
-                </h:selectOneMenu>
-                <h:commandButton id="cb-refresh" action="#{cc.attrs.paginator.updateReset}" value="&#x27f3;"
-                                 type="submit" styleClass="btn btn-sm font-weight-bold"
-                                 binding="#{cc.refreshBtn}"/>
-            </h:form>
-            <h:panelGroup id="pg-layout-fix" layout="block"
-                          rendered="#{not cc.attrs.paginator.isEmpty() and cc.attrs['layout-fix']}"/>
+            <h:panelGroup layout="block" styleClass="align-right col p-2"
+                          rendered="#{not cc.attrs.simple}">
+                <h:form id="f-entries">
+                    <h:outputText id="ot-entriesPP" value="#{labels['paginator.entries_per_page']}:&nbsp;"
+                                  styleClass="col"/>
+                    <h:selectOneMenu id="s-entriesPP" value="#{cc.attrs.paginator.selection.pageSize}"
+                                     onchange="document.getElementById('#{cc.refreshBtnID}').click()"
+                                     styleClass="form-select form-select-sm col sel-float">
+                        <f:selectItems value="#{cc.attrs.paginator.pageSizeValues()}"
+                                       var="item" itemValue="#{item}" itemLabel="#{item.size}"/>
+                    </h:selectOneMenu>
+                    <h:commandButton id="cb-refresh" action="#{cc.attrs.paginator.updateReset}" value="&#x27f3;"
+                                     type="submit" styleClass="btn btn-sm font-weight-bold col"
+                                     binding="#{cc.refreshBtn}"/>
+                </h:form>
+            </h:panelGroup>
+
+            <h:panelGroup id="pg-layout-fix" layout="block" styleClass="col p-2"
+                          rendered="#{cc.attrs['layout-fix'] and cc.attrs['simple']}"/>
         </h:panelGroup>
     </cc:implementation>
 </h:body>
