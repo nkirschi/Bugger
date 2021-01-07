@@ -12,6 +12,7 @@
     <cc:interface componentType="paginator">
         <cc:attribute name="paginator" required="true" type="tech.bugger.business.util.Paginator"/>
         <cc:attribute name="simple" required="false" type="java.lang.Boolean" default="false"/>
+        <cc:attribute name="layout-fix" required="false" type="java.lang.Boolean" default="false"/>
     </cc:interface>
 
     <cc:implementation>
@@ -84,7 +85,7 @@
                                  binding="#{cc.refreshBtn}"/>
             </h:form>
             <h:panelGroup id="pg-layout-fix" layout="block"
-                          rendered="#{not cc.attrs.paginator.isEmpty() and cc.attrs.simple}"/>
+                          rendered="#{not cc.attrs.paginator.isEmpty() and cc.attrs['layout-fix']}"/>
         </h:panelGroup>
     </cc:implementation>
 </h:body>
