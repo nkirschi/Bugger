@@ -114,18 +114,6 @@ public class TopicDBGateway implements TopicGateway {
                 + " LIMIT " + selection.getPageSize().getSize()
                 + " OFFSET " + selection.getCurrentPage() * selection.getPageSize().getSize() + ";";
 
-//        StringBuilder sqlz = new StringBuilder("SELECT * FROM topic");
-//        if (selection.getSortedBy() != null && !selection.getSortedBy().equals("")) {
-//            sql.append(" ORDER BY ").append(selection.getSortedBy());
-//            if (selection.isAscending()) {
-//                sql.append(" ASC");
-//            } else {
-//                sql.append(" DESC");
-//            }
-//        }
-//        sql.append(" LIMIT ").append(selection.getPageSize().getSize());
-//        sql.append(" OFFSET ").append(selection.getCurrentPage() * selection.getPageSize().getSize()).append(";");
-
         List<Topic> selectedTopics = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
