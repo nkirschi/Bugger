@@ -12,10 +12,9 @@ import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -24,16 +23,13 @@ import java.util.ResourceBundle;
 /**
  * Service providing methods related to topics. A {@code Feedback} event is fired, if unexpected circumstances occur.
  */
-@Dependent
+@ApplicationScoped
 public class TopicService implements Serializable {
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.
      */
     private static final Log log = Log.forClass(TopicService.class);
-
-    @Serial
-    private static final long serialVersionUID = -8262090151411485508L;
 
     /**
      * Transaction manager used for creating transactions.

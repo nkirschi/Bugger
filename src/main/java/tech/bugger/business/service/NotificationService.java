@@ -8,10 +8,9 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -20,16 +19,13 @@ import java.util.ResourceBundle;
  * Service providing methods related to notifications. A {@code Feedback} event is fired, if unexpected circumstances
  * occur.
  */
-@Dependent
+@ApplicationScoped
 public class NotificationService implements Serializable {
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.
      */
     private static final Log log = Log.forClass(NotificationService.class);
-
-    @Serial
-    private static final long serialVersionUID = -8591869589356898852L;
 
     /**
      * Transaction manager used for creating transactions.
@@ -66,7 +62,7 @@ public class NotificationService implements Serializable {
      *
      * @param notification The notification to be deleted.
      */
-    public void deleteNotification(Notification notification) {
+    public void deleteNotification(final Notification notification) {
     }
 
     /**
@@ -74,7 +70,7 @@ public class NotificationService implements Serializable {
      *
      * @param notification The notification to be marked as read.
      */
-    public void markAsRead(Notification notification) {
+    public void markAsRead(final Notification notification) {
 
     }
 
@@ -84,7 +80,7 @@ public class NotificationService implements Serializable {
      * @param user The user in question.
      * @return The number of notifications as an {@code int}.
      */
-    public int getNumberOfNotificationsFor(User user) {
+    public int getNumberOfNotificationsFor(final User user) {
         return 0;
     }
 
@@ -95,7 +91,7 @@ public class NotificationService implements Serializable {
      * @param selection Information on which notifications to return.
      * @return A list containing the requested notifications.
      */
-    public List<Notification> getNotificationsFor(User user, Selection selection) {
+    public List<Notification> getNotificationsFor(final User user, final Selection selection) {
         return null;
     }
 
@@ -105,7 +101,7 @@ public class NotificationService implements Serializable {
      *
      * @param notification The notification based on which new notifications are to be created.
      */
-    public void createNotification(Notification notification) {
+    public void createNotification(final Notification notification) {
     }
 
     /**
@@ -114,4 +110,5 @@ public class NotificationService implements Serializable {
     public void processUnsentNotifications() {
 
     }
+
 }
