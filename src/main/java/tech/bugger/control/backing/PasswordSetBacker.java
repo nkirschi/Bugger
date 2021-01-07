@@ -93,7 +93,7 @@ public class PasswordSetBacker {
     @PostConstruct
     void init() {
         if (session.getUser() != null) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:base");
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
             return;
         }
 
@@ -101,7 +101,7 @@ public class PasswordSetBacker {
         if (isValidToken()) {
             log.debug("Showing Password-Set page with token " + token + '.');
         } else {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:base");
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
     }
 
@@ -113,7 +113,7 @@ public class PasswordSetBacker {
     public String setUserPassword() {
         if (authenticationService.setPassword(token.getUser(), password, token.getValue())) {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("password_set.success"), Feedback.Type.INFO));
-            return "pretty:base";
+            return "pretty:home";
         }
         return null;
     }

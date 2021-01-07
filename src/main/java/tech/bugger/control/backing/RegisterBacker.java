@@ -95,7 +95,7 @@ public class RegisterBacker {
     @PostConstruct
     void init() {
         if (session.getUser() != null) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:base");
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
 
         user = new User();
@@ -121,7 +121,7 @@ public class RegisterBacker {
         if (profileService.createUser(user) && authenticationService.register(user, path)) {
             log.debug("Registration for user " + user + " successful.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("register.success"), Feedback.Type.INFO));
-            return "pretty:base";
+            return "pretty:home";
         }
         return null;
     }
