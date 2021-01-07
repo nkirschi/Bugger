@@ -255,7 +255,7 @@ CREATE VIEW topic_last_activity (topic, last_activity) AS
     FROM topic AS t
     LEFT OUTER JOIN report AS r
     ON t.id = r.topic
-    JOIN report_last_activity AS l
+    LEFT OUTER JOIN report_last_activity AS l
     ON l.report = r.id
     GROUP BY t.id;
 
