@@ -68,31 +68,31 @@ class TopicServiceTest {
     }
 
     @Test
-    public void testGetSelectedTopicsWhenFound() {
+    public void testSelectTopicsWhenFound() {
         doReturn(testSelectedTopics).when(topicGateway).selectTopics(any());
         assertEquals(testSelectedTopics, topicService.selectTopics(testSelection));
     }
 
     @Test
-    public void testGetSelectedTopicsWhenCommitFails() throws Exception {
+    public void testSelectTopicsWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
         assertNull(topicService.selectTopics(testSelection));
         verify(feedbackEvent).fire(any());
     }
 
     @Test
-    public void testGetSelectedTopicsWhenSelectionIsNull() {
+    public void testSelectTopicsWhenSelectionIsNull() {
         assertThrows(IllegalArgumentException.class, () -> topicService.selectTopics(null));
     }
 
     @Test
-    public void testGetNumberOfTopics() {
+    public void testCountTopics() {
         doReturn(testNumberOfTopics).when(topicGateway).countTopics();
         assertEquals(testNumberOfTopics, topicService.countTopics());
     }
 
     @Test
-    public void testGetNumberOfTopicsWhenCommitFails() throws Exception {
+    public void testCountTopicsWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
         assertEquals(0, topicService.countTopics());
         verify(feedbackEvent).fire(any());
