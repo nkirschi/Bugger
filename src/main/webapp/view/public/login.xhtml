@@ -47,10 +47,10 @@
             </h:panelGroup>
 
             <h:panelGroup id="p-login-buttons" styleClass="row" layout="block">
-                <h:button id="b-forgot" value="#{labels['password_forgot.title']}" outcome="password-forgot.xhtml"
-                          styleClass="button"/>
-                <h:button id="b-register" value="#{labels['register.title']}" outcome="register.xhtml"
-                          styleClass="button"/>
+                <h:link id="l-forgot" value="#{labels['password_forgot.title']}" outcome="password-forgot.xhtml"
+                          styleClass="button style-button"/>
+                <h:link id="l-register" value="#{labels['register.title']}" outcome="register.xhtml"
+                          styleClass="button style-button"/>
                 <h:commandButton id="cb-login" value="#{labels['login.title']}" action="#{loginBacker.login}"
                                  styleClass="button"/>
             </h:panelGroup>

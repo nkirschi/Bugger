@@ -1,5 +1,6 @@
 package tech.bugger.control.backing;
 
+import com.sun.faces.context.RequestParameterMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,10 +16,8 @@ import tech.bugger.global.util.Lazy;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -50,7 +49,7 @@ public class LoginBackerTest {
     private ExternalContext context;
 
     @Mock
-    private HttpServletRequest request;
+    private RequestParameterMap map;
 
     private User user;
     private final String home = "home";
@@ -66,24 +65,13 @@ public class LoginBackerTest {
         loginBacker.setUsername(user.getUsername());
         loginBacker.setPassword(user.getPasswordHash());
         when(fctx.getExternalContext()).thenReturn(context);
-        when(fctx.getExternalContext().getRequest()).thenReturn(request);
+        when(context.getRequestParameterMap()).thenReturn(map);
     }
 
     @Test
     public void testInit() {
-        when(session.getLocale()).thenReturn(Locale.GERMAN);
         loginBacker.init();
-        assertAll(
-                () -> assertEquals("", loginBacker.getRedirectURL()),
-                () -> assertEquals(Language.GERMAN, loginBacker.getUser().getPreferredLanguage())
-        );
-    }
-
-    @Test
-    public void testInitNoPreferredLanguage() {
-        when(session.getLocale()).thenReturn(null);
-        loginBacker.init();
-        assertEquals(Language.ENGLISH, loginBacker.getUser().getPreferredLanguage());
+        assertEquals("", loginBacker.getRedirectURL());
     }
 
     @Test
@@ -105,7 +93,7 @@ public class LoginBackerTest {
 
     @Test
     public void testInitRedirectURL() {
-        when(request.getParameter(any())).thenReturn(home);
+        when(map.get(anyString())).thenReturn(home);
         loginBacker.init();
         assertEquals(home, loginBacker.getRedirectURL());
     }

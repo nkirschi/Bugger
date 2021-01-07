@@ -2,9 +2,7 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
@@ -12,7 +10,6 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
@@ -90,15 +87,9 @@ public class LoginBacker {
             }
         }
 
-        //TODO pass redirectURL as Parameter in header?
-        HttpServletRequest request = (HttpServletRequest) fctx.getExternalContext().getRequest();
-        Object url = request.getParameter("url");
+        String url = fctx.getExternalContext().getRequestParameterMap().get("url");
 
-        redirectURL = (url != null) ? url.toString() : "";
-
-        user = new User(0, "", "", "", "", "", "", "", new Lazy<>(new byte[0]), new byte[0], "",
-                (session.getLocale() != null) ? Language.of(session.getLocale()) : Language.ENGLISH,
-                User.ProfileVisibility.FULL, null, null, false);
+        redirectURL = (url != null) ? url : "";
     }
 
     /**
