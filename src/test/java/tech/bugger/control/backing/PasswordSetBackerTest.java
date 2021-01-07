@@ -122,7 +122,7 @@ public class PasswordSetBackerTest {
         doReturn(false).when(authenticationService).setPassword(any(), any(), any());
         passwordSetBacker.setToken(testToken);
         String redirect = passwordSetBacker.setUserPassword();
-        assertEquals("pretty:", redirect);
+        assertNull(redirect);
     }
 
     @Test

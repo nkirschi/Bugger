@@ -118,7 +118,7 @@ public class RegisterBackerTest {
         lenient().doReturn(buffer).when(request).getRequestURL();
         doReturn(false).when(profileService).createUser(any());
         lenient().doReturn(true).when(authenticationService).register(any(), any());
-        assertEquals("pretty:", registerBacker.register());
+        assertNull(registerBacker.register());
         verify(profileService).createUser(any());
     }
 
@@ -128,7 +128,7 @@ public class RegisterBackerTest {
         lenient().doReturn(buffer).when(request).getRequestURL();
         doReturn(true).when(profileService).createUser(any());
         doReturn(false).when(authenticationService).register(any(), any());
-        assertEquals("pretty:", registerBacker.register());
+        assertNull(registerBacker.register());
         verify(profileService).createUser(any());
         verify(authenticationService).register(any(), any());
     }
@@ -139,7 +139,7 @@ public class RegisterBackerTest {
         lenient().doReturn(buffer).when(request).getRequestURL();
         doReturn(false).when(profileService).createUser(any());
         lenient().doReturn(false).when(authenticationService).register(any(), any());
-        assertEquals("pretty:", registerBacker.register());
+        assertNull(registerBacker.register());
         verify(profileService).createUser(any());
     }
 

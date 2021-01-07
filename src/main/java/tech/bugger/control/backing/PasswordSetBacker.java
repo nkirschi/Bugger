@@ -114,7 +114,7 @@ public class PasswordSetBacker {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("password_set.success"), Feedback.Type.INFO));
             return "pretty:base";
         }
-        return "pretty:";
+        return null;
     }
 
     /**
