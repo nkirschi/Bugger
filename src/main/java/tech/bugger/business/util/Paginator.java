@@ -36,6 +36,8 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      * Fetches a slice of data specified by the current paginator state given by {@link #getSelection()}.
      *
      * @return The data chunk characterized by the current paginator state.
+     * @see tech.bugger.global.util.Pagitable#getItemOffset(Selection)
+     * @see tech.bugger.global.util.Pagitable#getItemLimit(Selection)
      */
     protected abstract Iterable<T> fetch();
 

@@ -1,11 +1,10 @@
 package tech.bugger.control.backing;
 
-import java.io.IOException;
 import java.util.ResourceBundle;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
-import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
@@ -28,21 +27,6 @@ public class PasswordSetBacker {
     private static final Log log = Log.forClass(PasswordSetBacker.class);
 
     /**
-     * The currently typed password.
-     */
-    private String password;
-
-    /**
-     * The currently typed (repeated) confirmation password.
-     */
-    private String passwordConfirmation;
-
-    /**
-     * The token being used to set a password.
-     */
-    private Token token;
-
-    /**
      * The service providing access methods for authentication related procedures.
      */
     private final AuthenticationService authenticationService;
@@ -53,9 +37,9 @@ public class PasswordSetBacker {
     private final UserSession session;
 
     /**
-     * The current external context.
+     * The current faces context.
      */
-    private final ExternalContext ectx;
+    private final FacesContext fctx;
 
     /**
      * Feedback Event for user feedback.
@@ -68,21 +52,36 @@ public class PasswordSetBacker {
     private final ResourceBundle messagesBundle;
 
     /**
+     * The token being used to set a password.
+     */
+    private Token token;
+
+    /**
+     * The currently typed password.
+     */
+    private String password;
+
+    /**
+     * The currently typed (repeated) confirmation password.
+     */
+    private String passwordConfirmation;
+
+    /**
      * Constructs a new register page backing bean with the necessary dependencies.
      *
      * @param authenticationService The authentication service to use.
      * @param session               The current {@link UserSession}.
-     * @param ectx                  The current external context.
+     * @param fctx                  The current faces context.
      * @param feedbackEvent         The feedback event to use for user feedback.
      * @param messagesBundle        The resource bundle for feedback messages.
      */
     @Inject
     public PasswordSetBacker(final AuthenticationService authenticationService, final UserSession session,
-                             final ExternalContext ectx, final Event<Feedback> feedbackEvent,
+                             final FacesContext fctx, final Event<Feedback> feedbackEvent,
                              @RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.authenticationService = authenticationService;
         this.session = session;
-        this.ectx = ectx;
+        this.fctx = fctx;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;
     }
@@ -94,18 +93,15 @@ public class PasswordSetBacker {
     @PostConstruct
     void init() {
         if (session.getUser() != null) {
-            try {
-                ectx.redirect("home.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+            return;
         }
 
-        token = authenticationService.findToken(ectx.getRequestParameterMap().get("token"));
+        token = authenticationService.findToken(fctx.getExternalContext().getRequestParameterMap().get("token"));
         if (isValidToken()) {
             log.debug("Showing Password-Set page with token " + token + '.');
         } else {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
     }
 
@@ -117,9 +113,27 @@ public class PasswordSetBacker {
     public String setUserPassword() {
         if (authenticationService.setPassword(token.getUser(), password, token.getValue())) {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("password_set.success"), Feedback.Type.INFO));
-            return "home.xhtml";
+            return "pretty:home";
         }
         return null;
+    }
+
+    /**
+     * Returns the current token.
+     *
+     * @return The current token.
+     */
+    public Token getToken() {
+        return token;
+    }
+
+    /**
+     * Sets a new token.
+     *
+     * @param token The token to set.
+     */
+    public void setToken(final Token token) {
+        this.token = token;
     }
 
     /**
@@ -156,24 +170,6 @@ public class PasswordSetBacker {
      */
     public void setPasswordConfirmation(final String passwordConfirmation) {
         this.passwordConfirmation = passwordConfirmation;
-    }
-
-    /**
-     * Returns the current token.
-     *
-     * @return The current token.
-     */
-    public Token getToken() {
-        return token;
-    }
-
-    /**
-     * Sets a new token.
-     *
-     * @param token The token to set.
-     */
-    public void setToken(final Token token) {
-        this.token = token;
     }
 
     /**

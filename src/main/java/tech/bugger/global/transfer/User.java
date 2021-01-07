@@ -1,12 +1,11 @@
 package tech.bugger.global.transfer;
 
-import tech.bugger.global.util.Lazy;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Objects;
+import tech.bugger.global.util.Lazy;
 
 /**
  * DTO representing a user.
@@ -479,7 +478,7 @@ public class User implements Serializable {
         }
 
         User user = (User) other;
-        return id.equals(user.id);
+        return Objects.equals(id, user.id);
     }
 
     /**
@@ -509,7 +508,8 @@ public class User implements Serializable {
                 + ", emailAddress='" + emailAddress + '\''
                 + ", firstName='" + firstName + '\''
                 + ", lastName='" + lastName + '\''
-                + ", avatar=" + (avatar == null ? "null" : avatar.toString(Arrays::toString))
+                + ", avatar=" + (avatar == null ? "null"
+                : avatar.toString(a -> String.format("%.100s", Arrays.toString(a))))
                 + ", avatarThumbnail=" + Arrays.toString(avatarThumbnail)
                 + ", biography='" + biography + '\''
                 + ", preferredLanguage=" + preferredLanguage

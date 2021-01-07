@@ -1,6 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -8,6 +7,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
@@ -48,9 +48,9 @@ public class RegisterBacker {
     private final UserSession session;
 
     /**
-     * The current external context.
+     * The current faces context.
      */
-    private final ExternalContext ectx;
+    private final FacesContext fctx;
 
     /**
      * Feedback Event for user feedback.
@@ -73,18 +73,18 @@ public class RegisterBacker {
      * @param authenticationService The authentication service to use.
      * @param profileService        The profile service to use.
      * @param session               The current {@link UserSession}.
-     * @param ectx                  The current external context.
+     * @param fctx                  The current faces context.
      * @param feedbackEvent         The feedback event to use for user feedback.
      * @param messagesBundle        The resource bundle for feedback messages.
      */
     @Inject
     public RegisterBacker(final AuthenticationService authenticationService, final ProfileService profileService,
-                          final UserSession session, final ExternalContext ectx, final Event<Feedback> feedbackEvent,
+                          final UserSession session, final FacesContext fctx, final Event<Feedback> feedbackEvent,
                           @RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.authenticationService = authenticationService;
         this.profileService = profileService;
         this.session = session;
-        this.ectx = ectx;
+        this.fctx = fctx;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;
     }
@@ -95,11 +95,7 @@ public class RegisterBacker {
     @PostConstruct
     void init() {
         if (session.getUser() != null) {
-            try {
-                ectx.redirect("home.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
 
         user = new User();
@@ -112,6 +108,7 @@ public class RegisterBacker {
      * @return The site to redirect to.
      */
     public String register() {
+        ExternalContext ectx = fctx.getExternalContext();
         URL currentUrl;
         try {
             currentUrl = new URL(((HttpServletRequest) ectx.getRequest()).getRequestURL().toString());
@@ -119,11 +116,12 @@ public class RegisterBacker {
             throw new InternalError("URL is invalid.", e);
         }
 
-        String domain = String.format("%s://%s", currentUrl.getProtocol(), currentUrl.getAuthority());
-        if (profileService.createUser(user) && authenticationService.register(user, domain)) {
+        String path = String.format("%s://%s%s", currentUrl.getProtocol(), currentUrl.getAuthority(),
+                ectx.getApplicationContextPath());
+        if (profileService.createUser(user) && authenticationService.register(user, path)) {
             log.debug("Registration for user " + user + " successful.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("register.success"), Feedback.Type.INFO));
-            return "home.xhtml";
+            return "pretty:home";
         }
         return null;
     }

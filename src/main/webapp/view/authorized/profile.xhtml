@@ -252,7 +252,8 @@
             <h:outputText id="ot-sub-topics" styleClass="h2" value="#{labels.topic_subs}"
                           rendered="#{profileBacker.privileged}"/>
             <h:panelGroup class="row" layout="block" styleClass="align-right" id="p-unsub-all-topics">
-                <h:commandButton id="cb-unsub-all-topics" action="#{profileBacker.openDeleteAllTopicSubscriptionsDialog}"
+                <h:commandButton id="cb-unsub-all-topics"
+                                 action="#{profileBacker.openDeleteAllTopicSubscriptionsDialog}"
                                  rendered="#{not profileBacker.topicSubscriptions.isEmpty() and
                                  profileBacker.privileged}" value="#{labels.unsub_all}" styleClass="button"/>
             </h:panelGroup>
@@ -275,7 +276,8 @@
             <h:outputText id="ot-sub-reports" styleClass="h2" value="#{labels.report_subs}"
                           rendered="#{profileBacker.privileged}"/>
             <h:panelGroup class="row" layout="block" styleClass="align-right" id="p-unsub-all-reports">
-                <h:commandButton id="cb-unsub-all-reports" action="#{profileBacker.openDeleteAllReportSubscriptionsDialog}"
+                <h:commandButton id="cb-unsub-all-reports"
+                                 action="#{profileBacker.openDeleteAllReportSubscriptionsDialog}"
                                  rendered="#{not profileBacker.reportSubscriptions.isEmpty() and
                                  profileBacker.privileged}" value="#{labels.unsub_all}" styleClass="button"/>
             </h:panelGroup>
