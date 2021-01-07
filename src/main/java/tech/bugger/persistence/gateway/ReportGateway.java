@@ -23,7 +23,7 @@ public interface ReportGateway {
      * @return The number of posts of the report.
      * @throws NotFoundException The report could not be found.
      */
-    public int getNumberOfPosts(Report report) throws NotFoundException;
+    public int countPosts(Report report) throws NotFoundException;
 
     /**
      * Retrieves a report by its ID.

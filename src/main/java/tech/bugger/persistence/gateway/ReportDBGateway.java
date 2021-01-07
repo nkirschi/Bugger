@@ -15,8 +15,14 @@ import java.util.Optional;
  */
 public class ReportDBGateway implements ReportGateway {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(ReportDBGateway.class);
 
+    /**
+     * Database connection used by this gateway.
+     */
     private Connection conn;
 
     /**
@@ -24,7 +30,7 @@ public class ReportDBGateway implements ReportGateway {
      *
      * @param conn The database connection to use for the gateway.
      */
-    public ReportDBGateway(Connection conn) {
+    public ReportDBGateway(final Connection conn) {
         this.conn = conn;
     }
 
@@ -32,7 +38,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfPosts(Report report) {
+    public int countPosts(final Report report) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -78,7 +84,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void deleteReport(Report report) {
+    public void deleteReport(final Report report) {
         // TODO Auto-generated method stub
 
     }
@@ -87,7 +93,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void closeReport(Report report) {
+    public void closeReport(final Report report) {
         // TODO Auto-generated method stub
 
     }
@@ -96,7 +102,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void openReport(Report report) {
+    public void openReport(final Report report) {
         // TODO Auto-generated method stub
 
     }
