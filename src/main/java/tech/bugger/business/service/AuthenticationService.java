@@ -272,9 +272,10 @@ public class AuthenticationService {
      *
      * @param user The user whose email address is to be updated.
      * @param domain The current domain of this web application.
+     * @param email The user's new email address to be confirmed.
      * @return Whether the action was successful or not.
      */
-    public boolean updateEmail(final User user, final String domain, String email) {
+    public boolean updateEmail(final User user, final String domain, final String email) {
         Token token = createToken(user, Token.Type.CHANGE_EMAIL, email);
 
         if (token == null) {
@@ -300,9 +301,10 @@ public class AuthenticationService {
      *
      * @param user The user for whom the token should be generated.
      * @param type The token's type.
+     * @param metaData The token's meta information.
      * @return The generated {@link Token} or {@code null} upon error.
      */
-    private Token createToken(final User user, final Token.Type type, String metaData) {
+    private Token createToken(final User user, final Token.Type type, final String metaData) {
         Token token = null;
 
         try (Transaction tx = transactionManager.begin()) {

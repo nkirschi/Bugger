@@ -64,6 +64,7 @@ public class Token implements Serializable {
      * @param value     The token value.
      * @param type      The token type.
      * @param timestamp The token timestamp.
+     * @param meta      The token's meta information.
      * @param user      The associated user.
      */
     public Token(final String value, final Type type, final ZonedDateTime timestamp, final String meta,
@@ -143,7 +144,7 @@ public class Token implements Serializable {
      *
      * @param meta The meta information to be set.
      */
-    public void setMeta(String meta) {
+    public void setMeta(final String meta) {
         this.meta = meta;
     }
 

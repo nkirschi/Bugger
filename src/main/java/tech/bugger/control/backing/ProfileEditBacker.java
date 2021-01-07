@@ -16,7 +16,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
-import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.net.MalformedURLException;
