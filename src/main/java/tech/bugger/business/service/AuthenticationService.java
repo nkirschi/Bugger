@@ -208,7 +208,7 @@ public class AuthenticationService {
      * Registers a new user by generating a {@link Token} and sending a confirmation email to the new user.
      *
      * @param user The user to be registered.
-     * @param path The current deployment path of this web application.
+     * @param domain The current deployment path of this web application.
      * @return Whether the action was successful or not.
      */
     public boolean register(final User user, final String domain) {
@@ -218,7 +218,7 @@ public class AuthenticationService {
             return false;
         }
 
-        String link = path + "/password-set?token=" + token.getValue();
+        String link = domain + "/password-set?token=" + token.getValue();
         Mail mail = new MailBuilder()
                 .to(user.getEmailAddress())
                 .subject(interactionsBundle.getString("email_register_subject"))
