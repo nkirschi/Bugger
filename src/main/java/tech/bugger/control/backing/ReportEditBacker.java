@@ -4,20 +4,22 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
-import javax.faces.context.FacesContext;
+import javax.enterprise.event.Event;
+import javax.faces.context.ExternalContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ResourceBundle;
 
 /**
  * Backing Bean for the report edit page.
@@ -32,78 +34,157 @@ public class ReportEditBacker implements Serializable {
 
     private int reportID;
     private Report report;
-    private Topic destination;
-    private boolean displayMoveDialog;
+    private Topic topic;
+    private boolean displayConfirmDialog;
 
     private boolean priviledged;
 
-    @Inject
-    private transient ReportService reportService;
-
-    @Inject
+    /**
+     * The topic service giving access to topics.
+     */
     private transient TopicService topicService;
 
-    @Inject
+    /**
+     * The report service creating reports.
+     */
+    private transient ReportService reportService;
+
+    /**
+     * The current user session.
+     */
     private UserSession session;
 
+
+    /**
+     * The current {@link ExternalContext}.
+     */
+    private ExternalContext ectx;
+
+    /**
+     * Feedback event for user feedback.
+     */
+    private transient Event<Feedback> feedbackEvent;
+
+    /**
+     * Resource bundle for feedback message.
+     */
+    private transient ResourceBundle messagesBundle;
+
+
+    /**
+     * Constructs a new report editing page backing bean with the necessary dependencies.
+     *
+     * @param topicService        The topic service to use.
+     * @param reportService       The report service to use.
+     * @param session             The current user session.
+     * @param ectx                The current {@link ExternalContext} of the application.
+     * @param feedbackEvent       The feedback event to use for user feedback.
+     * @param registry            The dependency registry to use.
+     */
     @Inject
-    private FacesContext fctx;
+    public ReportEditBacker(final TopicService topicService, final ReportService reportService,
+                            final UserSession session, final ExternalContext ectx,
+                            final Event<Feedback> feedbackEvent, final Registry registry) {
+        this.topicService = topicService;
+        this.reportService = reportService;
+        this.session = session;
+        this.ectx = ectx;
+        this.feedbackEvent = feedbackEvent;
+        this.messagesBundle = registry.getBundle("messages", session);
+        this.priviledged = false;
+    }
 
     /**
      * Initializes the report edit page. Loads the report to be edited and checks if the user is allowed to edit the
      * report. If this is not the case, acts as if the page did not exist.
      */
-    @PostConstruct
     public void init() {
         report = reportService.getReportByID(reportID);
-        Topic topic = report.getTopic().get();
-        User user = session.getUser();
-        priviledged = user.equals(report.getAuthorship().getCreator())
-                || user.isAdministrator()
-                || topicService.isModerator(user, topic);
+        if (report != null) {
+            Lazy<Topic> topic = new Lazy<>(new Topic(1, "", ""));// TODO: Use report.getTopic();
+            User user = new User();// TODO: Use session.getUser();
+            user.setAdministrator(true);// TODO: Remove
+            report.setTopic(topic);// TODO: Remove
+
+            if (topic != null) {
+                this.topic = new Topic(1, "", "");// TODO: Clone report.getTopic()?
+            }
+
+            priviledged = user != null
+                    && topic != null
+                    && (user.equals(report.getAuthorship().getCreator())
+                        || user.isAdministrator()
+                        || topicService.isModerator(user, topic.get()));
+        }
+
+        if (!priviledged) {
+            // TODO: What means acting "as if the page did not exist"?
+            try {
+                ectx.redirect(ectx.getRequestContextPath() + "/some/404/page.xhtml");
+            } catch (IOException e) {
+            }
+            return;
+        }
     }
 
     /**
-     * Opens the move dialog.
+     * Opens the confirmation dialog.
      *
      * @return {@code null} to reload the page.
      */
-    public String openMoveDialog() {
+    public String openConfirmDialog() {
+        displayConfirmDialog = true;
         return null;
     }
 
     /**
-     * Closes the move dialog.
+     * Closes the confirmation dialog.
      *
      * @return {@code null} to reload the page.
      */
-    public String closeMoveDialog() {
+    public String closeConfirmDialog() {
+        displayConfirmDialog = false;
         return null;
+    }
+
+    /**
+     * Saves the changes made into the database or opens the confirmation dialog if the report's topic changed.
+     *
+     * @return The page to navigate to.
+     */
+    public String saveChangesWithConfirm() {
+        if (report.getTopic().get().equals(topic)) {
+            return saveChanges();
+        } else {
+            return openConfirmDialog();
+        }
     }
 
     /**
      * Saves the changes made into the database.
+     *
+     * @return The page to navigate to.
      */
-    public void saveChanges() {
-
+    public String saveChanges() {
+        if (reportService.updateReport(report)) {
+            return "report.xhtml?r=" + report.getId();
+        } else {
+            return null;
+        }
     }
 
     /**
-     * Moves the report to a new topic.
+     * Returns whether to display a warning that the report will be moved to a topic that the user does not moderate.
      *
-     * @return {@code null} to reload the page.
+     * @return Whether to display the warning.
      */
-    public String move() {
-        return null;
-    }
-
-    /**
-     * Checks if the user is banned from the topic the report is located in.
-     *
-     * @return {@code true} if the user is banned and {@code false} otherwise.
-     */
-    public boolean isBanned() {
-        return false;
+    public boolean isDisplayNoModerationWarning() {
+        User user = session.getUser();
+        Topic oldTopic = report.getTopic().get();
+        return user != null
+                && !oldTopic.equals(topic)
+                && topicService.isModerator(user, oldTopic)
+                && !topicService.isModerator(user, topic);
     }
 
     /**
@@ -113,55 +194,86 @@ public class ReportEditBacker implements Serializable {
      * @return {@code true} if the user may edit the report and {@code false} otherwise.
      */
     public boolean isPrivileged() {
-        return false;
+        return priviledged;
     }
 
     /**
-     * @return The report.
+     * Returns the report to edit.
+     *
+     * @return The report to edit.
      */
     public Report getReport() {
         return report;
     }
 
     /**
-     * @param report The report to set.
+     * Sets the report to edit.
+     *
+     * @param report The report to edit.
      */
     public void setReport(Report report) {
         this.report = report;
     }
 
     /**
-     * @return The destination, that is, the topic the report is supposed to be moved to.
+     * Returns the destination topic, that is, the topic the report is supposed to be moved to.
+     * @return The
      */
-    public Topic getDestination() {
-        return destination;
+    public Topic getTopic() {
+        return topic;
     }
 
     /**
-     * @param destination The topic to set as destination for moving the report.
+     * Sets the topic the report is to be moved to.
+     *
+     * @param topic The topic to move the report to.
      */
-    public void setDestination(Topic destination) {
-        this.destination = destination;
+    public void setTopic(Topic topic) {
+        this.topic = topic;
     }
 
     /**
-     * @return The reportID.
+     * Returns the ID of the report to edit.
+     *
+     * @return The ID of the report to edit.
      */
     public int getReportID() {
         return reportID;
     }
 
     /**
-     * @param reportID The reportID to set.
+     * Sets the ID of the report to edit.
+     * @param reportID The ID of the report to edit.
      */
     public void setReportID(int reportID) {
         this.reportID = reportID;
     }
 
     /**
-     * @return The displayMoveDialog.
+     * Returns whether the confirmation dialog is to be shown.
+     *
+     * @return Whether the confirmation dialog is to be shown.
      */
-    public boolean isDisplayMoveDialog() {
-        return displayMoveDialog;
+    public boolean isDisplayConfirmDialog() {
+        return displayConfirmDialog;
     }
+
+    /**
+     * Returns the list of available report types.
+     *
+     * @return The list of available report types.
+     */
+    public Report.Type[] getReportTypes() {
+        return Report.Type.values();
+    }
+
+    /**
+     * Returns the list of available report severities.
+     *
+     * @return The list of available report severities.
+     */
+    public Report.Severity[] getReportSeverities() {
+        return Report.Severity.values();
+    }
+
 }

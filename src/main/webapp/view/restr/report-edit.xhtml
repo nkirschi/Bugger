@@ -9,13 +9,19 @@
 <ui:composition template="../../WEB-INF/template/main.xhtml">
     <ui:param name="title" value="#{labels.report_edit_title}"/>
 
+    <f:metadata>
+        <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
+        <f:viewParam name="r" value="#{reportEditBacker.reportID}" />
+        <f:viewAction action="#{reportEditBacker.init}" />
+    </f:metadata>
+
     <ui:define name="content">
         <h:form id="f-report-edit"
                 enctype="multipart/form-data"
-                rendered="#{reportEditBacker.isPrivileged}">
+                rendered="#{reportEditBacker.isPrivileged()}">
             <h:panelGrid columns="2">
                 <h:outputLabel id="o-title" for="it-title" value="#{labels.report_title}"/>
-                <h:inputText id="it-title" value="#{reportEditBacker.report.title}" required="true"/>
+                <h:inputText id="it-title" value="#{reportEditBacker.report.title}" maxlength="#{C.LARGE_FIELD}" required="true"/>
                 <h:panelGroup/>
                 <h:message for="it-title"/>
 
@@ -36,16 +42,26 @@
                 <h:message for="s-severity"/>
 
                 <h:outputLabel id="o-version" for="it-version" value="#{labels.report_version}"/>
-                <h:inputText id="it-version" value="#{reportEditBacker.report.version}"/>
+                <h:inputText id="it-version" maxlength="#{C.SMALL_FIELD}" value="#{reportEditBacker.report.version}"/>
                 <h:panelGroup/>
                 <h:message for="it-version"/>
+
+                <h:outputLabel id="o-topic" for="it-topic" value="#{labels.report_topic}"/>
+                <h:inputText id="it-topic" value="#{reportEditBacker.topic.id}"/>
+                <h:panelGroup/>
+                <h:message for="it-topic"/>
             </h:panelGrid>
 
-            <h:commandButton value="#{labels.report_edit_submit}" action="#{reportCreateBacker.saveChanges}"/>
-        </h:form>
+            <h:commandButton value="#{labels.report_edit_submit}" action="#{reportEditBacker.saveChangesWithConfirm}"/>
 
-        <h:form id="f-confirm">
-
+            <h:panelGroup id="p-confirm" rendered="#{reportEditBacker.displayConfirmDialog}">
+                <h:outputText value="#{labels.report_edit_move_warning}"
+                              rendered="#{not reportEditBacker.displayNoModerationWarning}"/>
+                <h:outputText value="#{labels.report_edit_no_moderation_warning}"
+                              rendered="#{reportEditBacker.displayNoModerationWarning}"/>
+                <h:commandButton value="#{labels.report_edit_confirm}" action="#{reportEditBacker.saveChanges}"/>
+                <h:commandButton value="#{labels.report_edit_cancel}" action="#{reportEditBacker.closeConfirmDialog}"/>
+            </h:panelGroup>
         </h:form>
     </ui:define>
 </ui:composition>
