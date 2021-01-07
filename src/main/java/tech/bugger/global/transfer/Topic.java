@@ -2,17 +2,43 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.Objects;
 
 /**
  * DTO representing a topic.
  */
 public class Topic implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 6600990552933685863L;
 
-    private int id;
+    /**
+     * The unique ID of a topic.
+     */
+    private Integer id;
+
+    /**
+     * The title.
+     */
     private String title;
+
+    /**
+     * The description.
+     */
     private String description;
+
+    /**
+     * The point in time of the last activity in the topic.
+     */
+    private ZonedDateTime lastActivity;
+
+    /**
+     * Constructs an empty topic.
+     */
+    public Topic() {
+        this(null, null, null, null);
+    }
 
     /**
      * Constructs a new topic from the specified parameters.
@@ -21,10 +47,23 @@ public class Topic implements Serializable {
      * @param title       The topic title.
      * @param description The topic description.
      */
-    public Topic(int id, String title, String description) {
+    public Topic(final Integer id, final String title, final String description) {
+        this(id, title, description, null);
+    }
+
+    /**
+     * Constructs a new topic from the specified parameters.
+     *
+     * @param id The topic ID.
+     * @param title The topic title.
+     * @param description The topic description.
+     * @param lastActivity The time of the last activity in the topic.
+     */
+    public Topic(final Integer id, final String title, final String description, final ZonedDateTime lastActivity) {
         this.id = id;
         this.title = title;
         this.description = description;
+        this.lastActivity = lastActivity;
     }
 
     /**
@@ -32,7 +71,7 @@ public class Topic implements Serializable {
      *
      * @return The topic ID.
      */
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -41,7 +80,7 @@ public class Topic implements Serializable {
      *
      * @param id The topic ID to be set.
      */
-    public void setId(int id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
@@ -59,7 +98,7 @@ public class Topic implements Serializable {
      *
      * @param title The topic title to be set.
      */
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -77,8 +116,26 @@ public class Topic implements Serializable {
      *
      * @param description The topic description to be set.
      */
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
+    }
+
+    /**
+     * Returns the last activity of this topic.
+     *
+     * @return The last activity.
+     */
+    public ZonedDateTime getLastActivity() {
+        return lastActivity;
+    }
+
+    /**
+     * Sets the last activity of this topic.
+     *
+     * @param lastActivity The last activity to be set.
+     */
+    public void setLastActivity(final ZonedDateTime lastActivity) {
+        this.lastActivity = lastActivity;
     }
 
     /**
@@ -88,9 +145,15 @@ public class Topic implements Serializable {
      * @return {@code true} iff {@code other} is a semantically equivalent topic.
      */
     @Override
-    public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Topic)) {
+            return false;
+        }
+        Topic topic = (Topic) other;
+        return Objects.equals(this.id, topic.id);
     }
 
     /**
@@ -101,8 +164,7 @@ public class Topic implements Serializable {
      */
     @Override
     public int hashCode() {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        return Objects.hash(id);
     }
 
     /**
@@ -112,8 +174,8 @@ public class Topic implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "Topic{" + "ID = " + id + ", title = " + title + ", description = "
+                + String.format("%.100s", description) + ", last activity = " + lastActivity + '}';
     }
 
 }
