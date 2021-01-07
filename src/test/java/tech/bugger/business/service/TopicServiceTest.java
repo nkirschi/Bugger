@@ -67,10 +67,6 @@ class TopicServiceTest {
         lenient().doReturn(topicGateway).when(tx).newTopicGateway();
     }
 
-    @AfterEach
-    public void tearDown() {
-    }
-
     @Test
     public void testGetSelectedTopicsWhenFound() {
         doReturn(testSelectedTopics).when(topicGateway).selectTopics(any());
