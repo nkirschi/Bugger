@@ -37,7 +37,7 @@ public class Topic implements Serializable {
      * Constructs an empty topic.
      */
     public Topic() {
-        this(null, null, null);
+        this(null, null, null, null);
     }
 
     /**
@@ -48,9 +48,22 @@ public class Topic implements Serializable {
      * @param description The topic description.
      */
     public Topic(final Integer id, final String title, final String description) {
+        this(id, title, description, null);
+    }
+
+    /**
+     * Constructs a new topic from the specified parameters.
+     *
+     * @param id The topic ID.
+     * @param title The topic title.
+     * @param description The topic description.
+     * @param lastActivity The time of the last activity in the topic.
+     */
+    public Topic(final Integer id, final String title, final String description, final ZonedDateTime lastActivity) {
         this.id = id;
         this.title = title;
         this.description = description;
+        this.lastActivity = lastActivity;
     }
 
     /**
