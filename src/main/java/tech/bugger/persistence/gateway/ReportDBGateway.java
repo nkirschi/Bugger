@@ -1,15 +1,21 @@
 package tech.bugger.persistence.gateway;
 
+import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.StatementParametrizer;
+import tech.bugger.persistence.util.Transaction;
+import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.inject.spi.CDI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -81,9 +87,14 @@ public class ReportDBGateway implements ReportGateway {
                 ZonedDateTime modifiedAt = rs.getTimestamp("last_modified_at").toLocalDateTime()
                         .atZone(ZoneId.systemDefault());
                 Authorship authorship = new Authorship(creator, createdAt, modifier, modifiedAt);
+
                 Integer forcedRelevance = rs.getInt("forced_relevance");
                 if (rs.wasNull()) {
                     forcedRelevance = null;
+                }
+                Integer duplicateOf = rs.getInt("duplicate_of");
+                if (rs.wasNull()) {
+                    duplicateOf = null;
                 }
                 Timestamp closingDate = rs.getTimestamp("closed_at");
 
@@ -95,9 +106,9 @@ public class ReportDBGateway implements ReportGateway {
                         rs.getString("version"),
                         authorship,
                         closingDate != null ? closingDate.toLocalDateTime().atZone(ZoneId.systemDefault()) : null,
-                        null, // TODO Lazy<Report>
+                        duplicateOf,
                         forcedRelevance,
-                        null // TODO Lazy<Topic>
+                        rs.getInt("topic")
                 );
             } else {
                 throw new NotFoundException("Report could not be found.");
@@ -146,7 +157,7 @@ public class ReportDBGateway implements ReportGateway {
                     .string(report.getSeverity().name())
                     .string(report.getVersion())
                     .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
-                    .integer(report.getTopic().get().getId())
+                    .object(report.getTopic(), Types.INTEGER)
                     .integer(report.getId())
                     .toStatement().executeUpdate();
             if (rowsAffected == 0) {

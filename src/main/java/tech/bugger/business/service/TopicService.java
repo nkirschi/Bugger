@@ -91,7 +91,8 @@ public class TopicService {
      * @return The topic with that ID if it exists, {@code null} if no topic with that ID exists.
      */
     public Topic getTopicByID(int topicID) {
-        return null;
+        // TODO: Until implemented, use dummy topic.
+        return topicID < 4 ? new Topic(topicID, "dummy", "dummy") : null;
     }
 
     /**

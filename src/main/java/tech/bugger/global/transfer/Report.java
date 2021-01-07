@@ -1,7 +1,5 @@
 package tech.bugger.global.transfer;
 
-import tech.bugger.global.util.Lazy;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -61,9 +59,9 @@ public class Report implements Serializable {
     private String version;
     private Authorship authorship;
     private ZonedDateTime closingDate;
-    private Lazy<Report> duplicateOf;
+    private Integer duplicateOf;
     private Integer forcedRelevance;
-    private Lazy<Topic> topic;
+    private int topic;
 
     /**
      * Constructs a new report from the specified parameters.
@@ -80,7 +78,7 @@ public class Report implements Serializable {
      * @param topic The topic the report belongs to, loaded lazily.
      */
     public Report(int id, String title, Type type, Severity severity, String version, Authorship authorship,
-                  ZonedDateTime closingDate, Lazy<Report> duplicateOf, Integer forcedRelevance, Lazy<Topic> topic) {
+                  ZonedDateTime closingDate, Integer duplicateOf, Integer forcedRelevance, Integer topic) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -225,7 +223,7 @@ public class Report implements Serializable {
      *
      * @return The original report or {@code null} if this is no duplicate.
      */
-    public Lazy<Report> getDuplicateOf() {
+    public Integer getDuplicateOf() {
         return duplicateOf;
     }
 
@@ -234,7 +232,7 @@ public class Report implements Serializable {
      *
      * @param duplicateOf The original report to be set
      */
-    public void setDuplicateOf(Lazy<Report> duplicateOf) {
+    public void setDuplicateOf(Integer duplicateOf) {
         this.duplicateOf = duplicateOf;
     }
 
@@ -261,7 +259,7 @@ public class Report implements Serializable {
      *
      * @return The associated topic.
      */
-    public Lazy<Topic> getTopic() {
+    public int getTopic() {
         return topic;
     }
 
@@ -270,7 +268,7 @@ public class Report implements Serializable {
      *
      * @param topic The associated topic to be set.
      */
-    public void setTopic(Lazy<Topic> topic) {
+    public void setTopic(int topic) {
         this.topic = topic;
     }
 

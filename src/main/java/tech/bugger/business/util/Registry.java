@@ -8,7 +8,6 @@ import tech.bugger.persistence.util.PropertiesReader;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.MissingResourceException;

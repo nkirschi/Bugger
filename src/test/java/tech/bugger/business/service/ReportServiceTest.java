@@ -73,7 +73,7 @@ public class ReportServiceTest {
                 ResourceBundleMocker.mock(""));
         List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
         testReport = new Report(200, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(ZonedDateTime.class), null, null, new Lazy<>(mock(Topic.class)));
+                mock(ZonedDateTime.class), null, null, 0);
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(reportGateway).when(tx).newReportGateway();

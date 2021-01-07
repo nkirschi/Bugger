@@ -8,17 +8,19 @@ import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 
 import javax.enterprise.event.Event;
+import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 /**
@@ -28,16 +30,43 @@ import java.util.ResourceBundle;
 @Named
 public class ReportEditBacker implements Serializable {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(ReportEditBacker.class);
+
     @Serial
     private static final long serialVersionUID = -1310546265441099227L;
 
+    /**
+     * The ID of the report to edit.
+     */
     private int reportID;
+
+    /**
+     * The report to edit.
+     */
     private Report report;
-    private Topic topic;
+
+    /**
+     * The current topic of the report to edit.
+     */
+    private Topic currentTopic;
+
+    /**
+     * The ID of the topic to move the report to.
+     */
+    private int destinationID;
+
+    /**
+     * Whether to display the confirmation dialog.
+     */
     private boolean displayConfirmDialog;
 
-    private boolean priviledged;
+    /**
+     * Whether the user is allowed to edit the report.
+     */
+    private boolean privileged;
 
     /**
      * The topic service giving access to topics.
@@ -54,11 +83,10 @@ public class ReportEditBacker implements Serializable {
      */
     private UserSession session;
 
-
     /**
      * The current {@link ExternalContext}.
      */
-    private ExternalContext ectx;
+    private FacesContext fctx;
 
     /**
      * Feedback event for user feedback.
@@ -70,28 +98,27 @@ public class ReportEditBacker implements Serializable {
      */
     private transient ResourceBundle messagesBundle;
 
-
     /**
      * Constructs a new report editing page backing bean with the necessary dependencies.
      *
      * @param topicService        The topic service to use.
      * @param reportService       The report service to use.
      * @param session             The current user session.
-     * @param ectx                The current {@link ExternalContext} of the application.
+     * @param fctx                The current {@link FacesContext} of the application.
      * @param feedbackEvent       The feedback event to use for user feedback.
      * @param registry            The dependency registry to use.
      */
     @Inject
     public ReportEditBacker(final TopicService topicService, final ReportService reportService,
-                            final UserSession session, final ExternalContext ectx,
+                            final UserSession session, final FacesContext fctx,
                             final Event<Feedback> feedbackEvent, final Registry registry) {
         this.topicService = topicService;
         this.reportService = reportService;
         this.session = session;
-        this.ectx = ectx;
+        this.fctx = fctx;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = registry.getBundle("messages", session);
-        this.priviledged = false;
+        this.privileged = false;
     }
 
     /**
@@ -101,26 +128,21 @@ public class ReportEditBacker implements Serializable {
     public void init() {
         report = reportService.getReportByID(reportID);
         if (report != null) {
-            Lazy<Topic> topic = new Lazy<>(new Topic(1, "", ""));// TODO: Use report.getTopic();
-            User user = new User();// TODO: Use session.getUser();
-            user.setAdministrator(true);// TODO: Remove
-            report.setTopic(topic);// TODO: Remove
+            destinationID = report.getTopic();
+            currentTopic = topicService.getTopicByID(destinationID);
+            User user = new User(); // TODO session.getUser();
+            user.setAdministrator(true); // TODO remove
 
-            if (topic != null) {
-                this.topic = new Topic(1, "", "");// TODO: Clone report.getTopic()?
-            }
-
-            priviledged = user != null
-                    && topic != null
+            privileged = user != null && currentTopic != null
                     && (user.equals(report.getAuthorship().getCreator())
                         || user.isAdministrator()
-                        || topicService.isModerator(user, topic.get()));
+                        || topicService.isModerator(user, currentTopic));
         }
 
-        if (!priviledged) {
+        if (!privileged) {
             // TODO: What means acting "as if the page did not exist"?
             try {
-                ectx.redirect(ectx.getRequestContextPath() + "/some/404/page.xhtml");
+                fctx.getExternalContext().redirect(fctx.getExternalContext().getRequestContextPath() + "/some/404/page.xhtml");
             } catch (IOException e) {
             }
             return;
@@ -153,11 +175,14 @@ public class ReportEditBacker implements Serializable {
      * @return The page to navigate to.
      */
     public String saveChangesWithConfirm() {
-        if (report.getTopic().get().equals(topic)) {
+        if (report.getTopic() == destinationID) {
             return saveChanges();
-        } else {
-            return openConfirmDialog();
         }
+
+        if (canMoveToTopic()) {
+            openConfirmDialog();
+        }
+        return null;
     }
 
     /**
@@ -166,6 +191,7 @@ public class ReportEditBacker implements Serializable {
      * @return The page to navigate to.
      */
     public String saveChanges() {
+        report.setTopic(destinationID);
         if (reportService.updateReport(report)) {
             return "report.xhtml?r=" + report.getId();
         } else {
@@ -179,12 +205,35 @@ public class ReportEditBacker implements Serializable {
      * @return Whether to display the warning.
      */
     public boolean isDisplayNoModerationWarning() {
-        User user = session.getUser();
-        Topic oldTopic = report.getTopic().get();
-        return user != null
-                && !oldTopic.equals(topic)
-                && topicService.isModerator(user, oldTopic)
-                && !topicService.isModerator(user, topic);
+        if (destinationID == currentTopic.getId()) {
+            return false;
+        } else {
+            Topic destination = topicService.getTopicByID(destinationID);
+            User user = session.getUser();
+            return user != null
+                    && destination != null
+                    && topicService.isModerator(user, currentTopic)
+                    && !topicService.isModerator(user, destination);
+        }
+    }
+
+    /**
+     * Checks whether the topic with ID {@code destinationID} exists and the user is allowed to move the report to it.
+     * Displays an error message if not.
+     *
+     * @return Whether the report can be moved to the destination topic.
+     */
+    private boolean canMoveToTopic() {
+        Topic destination = topicService.getTopicByID(destinationID);
+        if (destination == null || topicService.isBanned(session.getUser(), destination)) {
+            String message = MessageFormat.format(messagesBundle.getString("report_edit_topic_not_found"),
+                    destinationID);
+            fctx.addMessage("f-report-edit:it-topic", new FacesMessage(message));
+            destinationID = currentTopic.getId();
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -194,7 +243,7 @@ public class ReportEditBacker implements Serializable {
      * @return {@code true} if the user may edit the report and {@code false} otherwise.
      */
     public boolean isPrivileged() {
-        return priviledged;
+        return privileged;
     }
 
     /**
@@ -216,20 +265,39 @@ public class ReportEditBacker implements Serializable {
     }
 
     /**
-     * Returns the destination topic, that is, the topic the report is supposed to be moved to.
-     * @return The
+     * Returns the current topic of the report to edit.
+     *
+     * @return The current topic.
      */
-    public Topic getTopic() {
-        return topic;
+    public Topic getCurrentTopic() {
+        return currentTopic;
     }
 
     /**
-     * Sets the topic the report is to be moved to.
+     * Sets the current topic of the report to edit.
      *
-     * @param topic The topic to move the report to.
+     * @param currentTopic The current topic.
      */
-    public void setTopic(Topic topic) {
-        this.topic = topic;
+    public void setCurrentTopic(Topic currentTopic) {
+        this.currentTopic = currentTopic;
+    }
+
+    /**
+     * Returns the ID of the topic the report is supposed to be moved to.
+     *
+     * @return The ID of the destination topic,
+     */
+    public int getDestinationID() {
+        return destinationID;
+    }
+
+    /**
+     * Sets the ID of the topic the report is to be moved to.
+     *
+     * @param destinationID The ID of topic to move the report to.
+     */
+    public void setDestinationID(int destinationID) {
+        this.destinationID = destinationID;
     }
 
     /**

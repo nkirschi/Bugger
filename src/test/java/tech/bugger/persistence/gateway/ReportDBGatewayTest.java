@@ -58,7 +58,7 @@ public class ReportDBGatewayTest {
 
         report = new Report(0, "App crashes", Report.Type.HINT, Report.Severity.SEVERE, "1.4.1",
                 new Authorship(null, ZonedDateTime.now(), null, ZonedDateTime.now()), null,
-                null, null, new Lazy<>(mock(Topic.class)));
+                null, null, 0);
     }
 
     @AfterEach
@@ -93,7 +93,7 @@ public class ReportDBGatewayTest {
     @Test
     public void testUpdate() throws Exception {
         report.setId(100);
-        doReturn(1).when(report.getTopic().get()).getId();
+        doReturn(1).when(report).getTopic();
         gateway.update(report);
 
         Report reportFromDatabase = gateway.find(100);
