@@ -71,7 +71,7 @@ public class LoginBackerTest {
     @Test
     public void testInit() {
         loginBacker.init();
-        assertEquals("", loginBacker.getRedirectURL());
+        assertEquals(home, loginBacker.getRedirectURL());
     }
 
     @Test
@@ -96,17 +96,6 @@ public class LoginBackerTest {
         when(map.get(anyString())).thenReturn(home);
         loginBacker.init();
         assertEquals(home, loginBacker.getRedirectURL());
-    }
-
-    @Test
-    public void testLogin() {
-        loginBacker.setRedirectURL("");
-        when(authenticationService.authenticate(loginBacker.getUsername(), loginBacker.getPassword())).thenReturn(user);
-        assertAll(
-                () -> assertEquals(home, loginBacker.login()),
-                () -> assertEquals(user, loginBacker.getUser())
-        );
-        verify(authenticationService, times(1)).authenticate(any(), anyString());
     }
 
     @Test

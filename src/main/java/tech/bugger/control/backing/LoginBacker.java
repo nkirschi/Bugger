@@ -89,7 +89,7 @@ public class LoginBacker {
 
         String url = fctx.getExternalContext().getRequestParameterMap().get("url");
 
-        redirectURL = (url != null) ? url : "";
+        redirectURL = (url != null) ? url : "home";
     }
 
     /**
@@ -104,9 +104,6 @@ public class LoginBacker {
             return null;
         }
         session.setUser(user);
-        if (redirectURL.isBlank()) {
-            return "home";
-        }
         return redirectURL;
     }
 
