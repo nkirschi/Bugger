@@ -1,5 +1,6 @@
 package tech.bugger.persistence.gateway;
 
+import com.ocpsoft.pretty.faces.util.StringUtils;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
@@ -102,25 +103,39 @@ public class TopicDBGateway implements TopicGateway {
         if (selection == null) {
             log.error("Error when trying to get topics with selection null.");
             throw new IllegalArgumentException("Selection cannot be null.");
+        } else if (StringUtils.isBlank(selection.getSortedBy())) {
+            log.error("Error when trying to get topics sorted by nothing.");
+            throw new IllegalArgumentException("Cannot sort by nothing.");
         }
 
-        StringBuilder sql = new StringBuilder("SELECT * FROM topic");
-        if (selection.getSortedBy() != null && !selection.getSortedBy().equals("")) {
-            sql.append(" ORDER BY ").append(selection.getSortedBy());
-            if (selection.isAscending()) {
-                sql.append(" ASC");
-            } else {
-                sql.append(" DESC");
-            }
-        }
-        sql.append(" LIMIT ").append(selection.getPageSize().getSize());
-        sql.append(" OFFSET ").append(selection.getCurrentPage() * selection.getPageSize().getSize()).append(";");
+        String sql = "SELECT t.*, l.last_activity FROM topic AS t"
+                + " LEFT OUTER JOIN topic_last_activity AS l ON t.id = l.topic"
+                + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
+                + " LIMIT " + selection.getPageSize().getSize()
+                + " OFFSET " + selection.getCurrentPage() * selection.getPageSize().getSize() + ";";
+
+//        StringBuilder sqlz = new StringBuilder("SELECT * FROM topic");
+//        if (selection.getSortedBy() != null && !selection.getSortedBy().equals("")) {
+//            sql.append(" ORDER BY ").append(selection.getSortedBy());
+//            if (selection.isAscending()) {
+//                sql.append(" ASC");
+//            } else {
+//                sql.append(" DESC");
+//            }
+//        }
+//        sql.append(" LIMIT ").append(selection.getPageSize().getSize());
+//        sql.append(" OFFSET ").append(selection.getCurrentPage() * selection.getPageSize().getSize()).append(";");
 
         List<Topic> selectedTopics = new ArrayList<>(Math.max(0, selection.getTotalSize()));
-        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                selectedTopics.add(new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description")));
+                ZonedDateTime lastActivity = null;
+                if (rs.getTimestamp("last_activity") != null) {
+                    lastActivity = rs.getTimestamp("last_activity").toInstant().atZone(ZoneId.systemDefault());
+                }
+                selectedTopics.add(new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description"),
+                        lastActivity));
             }
         } catch (SQLException e) {
             log.error("Error while retrieving topics with " + selection + ".", e);

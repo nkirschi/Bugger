@@ -46,7 +46,7 @@ class TopicDBGatewayTest {
     }
 
     private void validSelection() {
-        selection = new Selection(3, 0, Selection.PageSize.NORMAL, "", true);
+        selection = new Selection(3, 0, Selection.PageSize.NORMAL, "id", true);
     }
 
     private void addTopics() throws Exception {
@@ -204,6 +204,30 @@ class TopicDBGatewayTest {
         for (int i = 39; i >= 37; i--) {
             topics.add(makeTestTopic(i));
         }
+        assertEquals(topics, gateway.selectTopics(selection));
+    }
+
+    @Test
+    public void testSelectTopicsWhenSortedByLastActivityWithNoActivity() throws Exception {
+        numberOfTopics = 5;
+        addTopics();
+        validSelection();
+        selection.setSortedBy("last_activity");
+        expectedTopics(5);
+        assertEquals(topics, gateway.selectTopics(selection));
+    }
+
+    @Test
+    public void testSelectTopicsWhenSortedByLastActivityWithSomeActivity() throws Exception {
+        numberOfTopics = 5;
+        addTopics();
+        validSelection();
+        selection.setSortedBy("last_activity");
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute("INSERT INTO report (title, type, severity, topic) VALUES ('Hello', 'BUG', 'MINOR', 5)");
+        }
+        expectedTopics(4);
+        topics.add(0, makeTestTopic(5));
         assertEquals(topics, gateway.selectTopics(selection));
     }
 
