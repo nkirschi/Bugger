@@ -95,11 +95,35 @@ public class PostDBGateway implements PostGateway {
             throw new IllegalArgumentException("Selection cannot be null.");
         }
 
-        String sql = "SELECT * FROM post AS p"
+        String sql = "SELECT p.id AS p_id, p.content AS p_content, p.created_at AS p_created_at,"
+                + " p.created_by AS p_created_by, p.last_modified_at AS p_last_modified_at,"
+                + " p.last_modified_by AS p_last_modified_by, p.report AS p_report,"
+                + " author.id AS author_id, author.username AS author_username,"
+                + " author.password_hash AS author_password_hash, author.password_salt AS author_password_salt,"
+                + " author.hashing_algorithm AS author_hashing_algorithm,"
+                + " author.email_address AS author_email_address, author.first_name AS author_first_name,"
+                + " author.last_name AS author_last_name, author.avatar AS author_avatar,"
+                + " author.avatar_thumbnail AS author_avatar_thumbnail, author.biography AS author_biography,"
+                + " author.preferred_language AS author_preferred_language,"
+                + " author.profile_visibility AS author_profile_visibility,"
+                + " author.registered_at AS author_registered_at,"
+                + " author.forced_voting_weight AS author_forced_voting_weight, author.is_admin AS author_is_admin,"
+                + " modifier.id AS modifier_id, modifier.username AS modifier_username,"
+                + " modifier.password_hash AS modifier_password_hash, modifier.password_salt AS modifier_password_salt,"
+                + " modifier.hashing_algorithm AS modifier_hashing_algorithm,"
+                + " modifier.email_address AS modifier_email_address, modifier.first_name AS modifier_first_name,"
+                + " modifier.last_name AS modifier_last_name, modifier.avatar AS modifier_avatar,"
+                + " modifier.avatar_thumbnail AS modifier_avatar_thumbnail, modifier.biography AS modifier_biography,"
+                + " modifier.preferred_language AS modifier_preferred_language,"
+                + " modifier.profile_visibility AS modifier_profile_visibility,"
+                + " modifier.registered_at AS modifier_registered_at,"
+                + " modifier.forced_voting_weight AS modifier_forced_voting_weight,"
+                + " modifier.is_admin AS modifier_is_admin"
+                + " FROM post AS p"
                 + " LEFT JOIN \"user\" AS author ON p.created_by = author.id"
                 + " LEFT JOIN \"user\" AS modifier ON p.last_modified_by = modifier.id"
                 + " WHERE p.report = " + report.getId()
-                + " GROUP BY p.id"
+                // + " GROUP BY p.id"
                 + " ORDER BY p." + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
                 + " LIMIT " + selection.getPageSize().getSize()
                 + " OFFSET " + selection.getCurrentPage() * selection.getPageSize().getSize() + ";";
@@ -109,21 +133,24 @@ public class PostDBGateway implements PostGateway {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                User author = parseUserFromResultSetWithPrefix("author.", rs);
+                User author = null;
+                if (rs.getInt("p_created_by") != 0) {
+                    author = parseUserFromResultSetWithPrefix("author_", rs);
+                }
                 User modifier = null;
-                if (rs.getInt("p.last_modified_by") != 0) {
-                    modifier = parseUserFromResultSetWithPrefix("modifier.", rs);
+                if (rs.getInt("p_last_modified_by") != 0) {
+                    modifier = parseUserFromResultSetWithPrefix("modifier_", rs);
                 }
                 ZonedDateTime creationDate = null;
-                if (rs.getTimestamp("p.created_at") != null) {
-                    creationDate = rs.getTimestamp("p.created_at").toInstant().atZone(ZoneId.systemDefault());
+                if (rs.getTimestamp("p_created_at") != null) {
+                    creationDate = rs.getTimestamp("p_created_at").toInstant().atZone(ZoneId.systemDefault());
                 }
                 ZonedDateTime modificationDate = null;
-                if (rs.getTimestamp("p.last_modified_at") != null) {
-                    modificationDate = rs.getTimestamp("p.last_modified_at").toInstant().atZone(ZoneId.systemDefault());
+                if (rs.getTimestamp("p_last_modified_at") != null) {
+                    modificationDate = rs.getTimestamp("p_last_modified_at").toInstant().atZone(ZoneId.systemDefault());
                 }
                 Authorship authorship = new Authorship(author, creationDate, modifier, modificationDate);
-                selectedPosts.add(new Post(rs.getInt("p.id"), rs.getString("p.content"), reportLazy, authorship, null));
+                selectedPosts.add(new Post(rs.getInt("p_id"), rs.getString("p_content"), reportLazy, authorship, null));
             }
         } catch (SQLException e) {
             log.error("Error when selecting posts of report " + report + " with selection " + selection + ".", e);
