@@ -18,7 +18,7 @@
     <ui:define name="content">
         <h:form id="f-create-report"
                 enctype="multipart/form-data"
-                rendered="#{reportCreateBacker.session.user != null and reportCreateBacker.isBanned() or true}">
+                rendered="#{reportCreateBacker.session.user != null and !reportCreateBacker.isBanned()}">
             <h:panelGrid columns="2">
                 <h:outputLabel id="o-title" for="it-title" value="#{labels.title}"/>
                 <h:inputText id="it-title" value="#{reportCreateBacker.report.title}"
@@ -61,12 +61,10 @@
                  not add attachment. -->
             <ul>
                 <ui:repeat var="attachment" value="#{reportCreateBacker.attachments}">
-                    <!-- TODO Specification says h:link. What would it link to? -->
                     <li><h:outputText value="#{attachment.name}"></h:outputText></li>
                 </ui:repeat>
             </ul>
 
-            <!-- TODO It doesn't want to go into block layout. -->
             <h:panelGroup styleClass="row"
                           layout="block"
                           rendered="#{reportCreateBacker.attachments.size()
