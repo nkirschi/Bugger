@@ -214,4 +214,40 @@ class ReportDBGatewayTest {
     public void testOpenReportWhenReportIsNull() {
         assertThrows(IllegalArgumentException.class, () -> gateway.openReport(null));
     }
+
+    @Test
+    public void testOpenReportWhenReportIDIsNull() {
+        assertThrows(IllegalArgumentException.class, ()  -> gateway.openReport(new Report()));
+    }
+
+    @Test
+    public void testOpenReportWhenReportDoesNotExist() {
+        report.setId(8);
+        assertThrows(NotFoundException.class, () -> gateway.openReport(report));
+    }
+
+    @Test
+    public void testOpenReportWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        report.setId(100);
+        assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy).openReport(report));
+    }
+
+    @Test
+    public void testOpenReportWhenReportIsOpen() throws Exception {
+        insertReport();
+        report.setId(100);
+        assertDoesNotThrow(() -> gateway.openReport(report));
+    }
+
+    @Test
+    public void testOpenReportWhenReportIsClosed() throws Exception {
+        insertReport();
+        report.setId(100);
+        report.setClosingDate(ZonedDateTime.now());
+        gateway.closeReport(report);
+        assertDoesNotThrow(() -> gateway.openReport(report));
+    }
+
 }
