@@ -212,7 +212,7 @@ public class AuthenticationService {
      * @return Whether the action was successful or not.
      */
     public boolean register(final User user, final String domain) {
-        Token token = createToken(user, Token.Type.REGISTER);
+        Token token = createToken(user, Token.Type.REGISTER, "");
 
         if (token == null) {
             return false;
@@ -274,8 +274,8 @@ public class AuthenticationService {
      * @param domain The current domain of this web application.
      * @return Whether the action was successful or not.
      */
-    public boolean updateEmail(final User user, final String domain) {
-        Token token = createToken(user, Token.Type.CHANGE_EMAIL);
+    public boolean updateEmail(final User user, final String domain, String email) {
+        Token token = createToken(user, Token.Type.CHANGE_EMAIL, email);
 
         if (token == null) {
             return false;
@@ -302,11 +302,11 @@ public class AuthenticationService {
      * @param type The token's type.
      * @return The generated {@link Token} or {@code null} upon error.
      */
-    private Token createToken(final User user, final Token.Type type) {
+    private Token createToken(final User user, final Token.Type type, String metaData) {
         Token token = null;
 
         try (Transaction tx = transactionManager.begin()) {
-            Token toInsert = new Token(generateToken(), type, null, user);
+            Token toInsert = new Token(generateToken(), type, null, metaData, user);
             token = tx.newTokenGateway().createToken(toInsert);
             tx.commit();
         } catch (NotFoundException e) {

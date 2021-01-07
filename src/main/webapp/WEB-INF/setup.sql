@@ -95,6 +95,7 @@ CREATE TABLE token (
     value VARCHAR PRIMARY KEY,
     type token_type NOT NULL,
     "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    meta VARCHAR,
     verifies INTEGER REFERENCES "user" (id) ON DELETE CASCADE
 );
 

@@ -60,6 +60,7 @@ public class AuthenticationServiceTest {
     private final String hashingAlgo = "SHA3-512";
     private final String tokenValue = "0123456789abcdef";
     private final String updateHashingAlgo = "SHA-256";
+    private final String email = "test@test.de";
 
     @Mock
     private TransactionManager transactionManager;
@@ -105,7 +106,7 @@ public class AuthenticationServiceTest {
         String passwordHash = Hasher.hash(password, salt, hashingAlgo);
         testUser = new User(1, "testuser", passwordHash, salt, hashingAlgo, "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, null, 3, false);
-        testToken = new Token(tokenValue, Token.Type.REGISTER, null, testUser);
+        testToken = new Token(tokenValue, Token.Type.REGISTER, null, "", testUser);
     }
 
     @AfterEach
@@ -293,7 +294,7 @@ public class AuthenticationServiceTest {
     public void testUpdateEmail() throws NotFoundException {
         doReturn(testToken).when(tokenGateway).createToken(any());
         doReturn(true).when(mailer).send(any());
-        assertTrue(service.updateEmail(testUser, "http://test.de"));
+        assertTrue(service.updateEmail(testUser, "http://test.de", email));
         verify(tokenGateway).createToken(any());
         verify(mailer).send(any());
         verify(feedbackEvent, times(1)).fire(any());
@@ -301,7 +302,7 @@ public class AuthenticationServiceTest {
 
     @Test
     public void testUpdateEmailTokenNull() throws NotFoundException {
-        assertFalse(service.updateEmail(testUser, "http://test.de"));
+        assertFalse(service.updateEmail(testUser, "http://test.de", email));
         verify(tokenGateway).createToken(any());
     }
 

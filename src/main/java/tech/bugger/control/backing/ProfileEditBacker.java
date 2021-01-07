@@ -184,7 +184,9 @@ public class ProfileEditBacker implements Serializable {
      */
     private void updateUserEmail(final Token token) {
         if (token != null && token.getType() == Token.Type.CHANGE_EMAIL) {
-            profileService.updateUser(token.getUser());
+            User updateUser = profileService.getUser(token.getUser().getId());
+            updateUser.setEmailAddress(token.getMeta());
+            profileService.updateUser(updateUser);
         } else {
             log.error("The token " + token + " was invalid for updating the email address.");
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
@@ -236,9 +238,8 @@ public class ProfileEditBacker implements Serializable {
 
         String domain = String.format("%s://%s", url.getProtocol(), url.getAuthority());
         User updateUser = new User(user);
-        updateUser.setEmailAddress(email);
 
-        return authenticationService.updateEmail(updateUser, domain);
+        return authenticationService.updateEmail(updateUser, domain, email);
     }
 
     /**

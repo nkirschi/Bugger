@@ -49,6 +49,11 @@ public class Token implements Serializable {
     private ZonedDateTime timestamp;
 
     /**
+     * This token's meta information.
+     */
+    private String meta;
+
+    /**
      * This token's associated {@link User}.
      */
     private User user;
@@ -61,10 +66,12 @@ public class Token implements Serializable {
      * @param timestamp The token timestamp.
      * @param user      The associated user.
      */
-    public Token(final String value, final Type type, final ZonedDateTime timestamp, final User user) {
+    public Token(final String value, final Type type, final ZonedDateTime timestamp, final String meta,
+                 final User user) {
         this.value = value;
         this.type = type;
         this.timestamp = timestamp;
+        this.meta = meta;
         this.user = user;
     }
 
@@ -120,6 +127,24 @@ public class Token implements Serializable {
      */
     public void setTimestamp(final ZonedDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    /**
+     * Returns the token's meta information.
+     *
+     * @return The meta information.
+     */
+    public String getMeta() {
+        return meta;
+    }
+
+    /**
+     * Sets this token's meta information.
+     *
+     * @param meta The meta information to be set.
+     */
+    public void setMeta(String meta) {
+        this.meta = meta;
     }
 
     /**

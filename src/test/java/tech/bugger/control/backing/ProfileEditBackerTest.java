@@ -72,9 +72,6 @@ public class ProfileEditBackerTest {
     private static final String TOKEN = "token";
     private static final String CREATE = "c";
     private static final String EDIT = "e";
-    private static final String ERROR = "error.xhtml";
-    private static final String HOME = "home.xhtml";
-    private static final String PROFILE = "profile.xhtml";
     private static final String EMAIL = "test@test.de";
     private Token emailToken;
     private Field createUser;
@@ -84,7 +81,7 @@ public class ProfileEditBackerTest {
         user = new User(12345, "Helgi", "v3ry_s3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen", new Lazy<>(new byte[1]),
                 new byte[]{1}, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
-        emailToken = new Token(TOKEN, Token.Type.CHANGE_EMAIL, ZonedDateTime.now(), user);
+        emailToken = new Token(TOKEN, Token.Type.CHANGE_EMAIL, ZonedDateTime.now(), EMAIL, user);
         MockitoAnnotations.openMocks(this);
         createUser = profileEditBacker.getClass().getDeclaredField("create");
         createUser.setAccessible(true);
@@ -114,7 +111,7 @@ public class ProfileEditBackerTest {
         when(map.get(TOKEN)).thenReturn(TOKEN);
         when(authenticationService.findToken(TOKEN)).thenReturn(emailToken);
         when(session.getUser()).thenReturn(user);
-        when(profileService.getUser(user.getId())).thenReturn(user);
+        when(profileService.getUser(emailToken.getUser().getId())).thenReturn(user);
         profileEditBacker.init();
         assertAll(
                 () -> assertEquals(user, profileEditBacker.getUser()),
@@ -273,13 +270,13 @@ public class ProfileEditBackerTest {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         StringBuffer buffer = new StringBuffer("http://test.de/hello_there.xhtml?someparam=69420");
         doReturn(buffer).when(request).getRequestURL();
-        when(authenticationService.updateEmail(any(), any())).thenReturn(true);
+        when(authenticationService.updateEmail(any(), any(), any())).thenReturn(true);
         when(profileService.updateUser(any())).thenReturn(true);
         profileEditBacker.setUser(user);
         profileEditBacker.setEmailNew(EMAIL);
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(authenticationService, times(1)).updateEmail(any(), any());
+        verify(authenticationService, times(1)).updateEmail(any(), any(), any());
         verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
@@ -292,7 +289,7 @@ public class ProfileEditBackerTest {
         profileEditBacker.setEmailNew(EMAIL);
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(authenticationService, times(1)).updateEmail(any(), any());
+        verify(authenticationService, times(1)).updateEmail(any(), any(), any());
     }
 
     @Test
