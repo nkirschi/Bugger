@@ -319,4 +319,22 @@ public class ReportService {
         return null;
     }
 
+    /**
+     * Returns whether the user is privileged for the report in terms of editing rights.
+     *
+     * @param user The user in question.
+     * @param report The report in question.
+     * @return {@code true} iff the user is privileged.
+     */
+    public boolean isPrivileged(final User user, final Report report) {
+        // TODO add checks for mods, banned users
+        if (user == null) {
+            return false;
+        } else if (user.isAdministrator()) {
+            return true;
+        } else {
+            return user.equals(report.getAuthorship().getCreator());
+        }
+    }
+
 }
