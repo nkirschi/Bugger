@@ -16,6 +16,7 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.faces.view.ViewScoped;
@@ -147,11 +148,10 @@ public class ReportCreateBacker implements Serializable {
      * not banned from the topic the report is located in. If the user may not create reports, acts as if the page did
      * not exist.
      */
-    public void init() {
+    @PostConstruct
+    void init() {
         try {
-            String param = ectx.getRequestParameterMap().get("id");
-            System.out.println(param);
-            topicID = Integer.parseInt(param);
+            topicID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
             // Topic ID parameter not given or invalid.
             redirectTo404Page();
