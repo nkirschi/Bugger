@@ -53,7 +53,6 @@ public class Report implements Serializable {
         SEVERE
     }
 
-
     private int id;
     private String title;
     private Type type;
@@ -61,9 +60,9 @@ public class Report implements Serializable {
     private String version;
     private Authorship authorship;
     private ZonedDateTime closingDate;
-    private Lazy<Report> duplicateOf;
+    private Integer duplicateOf;
     private Integer forcedRelevance;
-    private Lazy<Topic> topic;
+    private Integer topic;
 
     /**
      * Returns the ID of this report.
@@ -196,7 +195,7 @@ public class Report implements Serializable {
      *
      * @return The original report or {@code null} if this is no duplicate.
      */
-    public Lazy<Report> getDuplicateOf() {
+    public Integer getDuplicateOf() {
         return duplicateOf;
     }
 
@@ -205,7 +204,7 @@ public class Report implements Serializable {
      *
      * @param duplicateOf The original report to be set
      */
-    public void setDuplicateOf(Lazy<Report> duplicateOf) {
+    public void setDuplicateOf(Integer duplicateOf) {
         this.duplicateOf = duplicateOf;
     }
 
@@ -232,7 +231,7 @@ public class Report implements Serializable {
      *
      * @return The associated topic.
      */
-    public Lazy<Topic> getTopic() {
+    public Integer getTopic() {
         return topic;
     }
 
@@ -241,7 +240,7 @@ public class Report implements Serializable {
      *
      * @param topic The associated topic to be set.
      */
-    public void setTopic(Lazy<Topic> topic) {
+    public void setTopic(Integer topic) {
         this.topic = topic;
     }
 

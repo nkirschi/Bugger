@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:b="http://tech.bugger/tags">
+
+<ui:composition template="/WEB-INF/template/main.xhtml">
+    <ui:param name="title" value="#{(labels.topic_page).concat(' ').concat(topicBacker.topic.title)}"/>
+    <f:metadata>
+        <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
+    </f:metadata>
+    <ui:define name="content">
+        <h:form id="f-topic">
+            <h:panelGroup class="row" layout="block">
+                <h:panelGroup class="col-sm-2" layout="block"/>
+                <h:panelGroup class="col-sm-8" layout="block">
+                    <h:outputLabel value="#{labels.description}"/>
+                    <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
+                    <h:panelGroup class="row" layout="block">
+                        <!-- rendered="#{userSession.user.administrator}" -->
+                        <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button" value="#{labels.delete_topic}"/>
+                        <!-- rendered="#{userSession.user.administrator}" -->
+                        <h:button id="b-edit" outcome="/restr/topic-edit.xhtml" value="#{labels.edit_topic}">
+                            <ui:param name="topic" value="#{topicBacker.topicID}"/>
+                        </h:button>
+                    </h:panelGroup>
+                    <!-- statistik link -->
+                    <h:panelGroup class="row" layout="block">
+                        <h:outputLabel value="#{labels.topic_show_open_reports}"/>
+                        <h:selectBooleanCheckbox id="s-showOpen" value="#{topicBacker.openReportShown}"/>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block">
+                        <h:outputLabel value="#{labels.topic_show_closed_reports}"/>
+                        <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"/>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block">
+                        <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}" styleClass="button" value="#{labels.apply_filter}"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-2" layout="block"/>
+            </h:panelGroup>
+        </h:form>
+        <h:panelGroup class="row" layout="block">
+            <h:panelGroup class="col-sm-12" layout="block">
+                <b:pagitable paginator="#{topicBacker.reports}">
+                    <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
+                    <b:column title="#{labels.col_id}" paginator="#{topicBacker.reports}" key="id">
+                        <h:outputText value="#{var.id}"/>
+                    </b:column>
+                    <b:column title="#{labels.col_title}" paginator="#{topicBacker.reports}" key="title">
+                        <h:outputText value="#{var.title}"/>
+                    </b:column>
+                    <b:column title="#{labels.col_type}}" paginator="#{topicBacker.reports}" key="type">
+                        <h:outputText value="#{var.type}"/>
+                    </b:column>
+                    <b:column title="#{labels.col_severity}" paginator="#{topicBacker.reports}" key="severity">
+                        <h:outputText value="#{var.severity}"/>
+                    </b:column>
+                    <b:column title="#{labels.col_version}" paginator="#{topicBacker.reports}" key="version">
+                        <h:outputText value="#{var.version}"/>
+                    </b:column>
+                    <b:column title="#{labels.col_duplicate}" paginator="#{topicBacker.reports}" key="duplicate_of">
+                        <h:outputText value="#{var.duplicateOf}"/>
+                    </b:column>
+                    <b:column title="#{labels.col_relevance}" paginator="#{topicBacker.reports}" key="forced_relevance" >
+                        <h:outputText value="#{var.forcedRelevance}"/>
+                    </b:column>
+                    <b:column title="#{labels.col_change}" paginator="#{topicBacker.reports}" key="last_modified">
+                        <h:outputText value="#{var.authorship.modifier}"/>
+                    </b:column>
+                </b:pagitable>
+            </h:panelGroup>
+        </h:panelGroup>
+        <h:form id="f-delTopic" rendered="#{topicBacker.displayDeleteDialog}">
+            <h:panelGroup class="row" layout="block" styleClass="align-center">
+                <h:panelGroup class="col-sm-4" layout="block"/>
+                <h:panelGroup class="col-sm-4" layout="block">
+                    <h:panelGroup class="row" layout="block">
+                        <h:outputText value="#{labels.delete_affirm}"/>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block">
+                        <h:commandButton id="cb-delTopic" action="#{topicBacker.delete}" styleClass="button" value="#{labels.delete}" immediate="true"/>
+                        <h:commandButton id="cb-abortDelTopic" action="#{topicBacker.closeDeleteDialog}" styleClass="button" value="#{labels.cancel}" immediate="true"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+            <h:panelGroup class="col-sm-4" layout="block"/>
+            </h:panelGroup>
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>
