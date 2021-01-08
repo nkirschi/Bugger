@@ -1,29 +1,81 @@
 package tech.bugger.business.service;
 
 import tech.bugger.business.util.Feedback;
-import tech.bugger.global.transfer.*;
+import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.transfer.Post;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.util.Transaction;
+import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
-import javax.enterprise.inject.Any;
 import javax.inject.Inject;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Service providing methods related to reports. A {@code Feedback} event is fired, if unexpected circumstances occur.
  */
-@Dependent
+@ApplicationScoped
 public class ReportService {
 
-    private static final Log log = Log.forClass(ReportService.class);
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
+    private static final Log log = Log.forClass(PostService.class);
 
-    NotificationService notificationService;
+    /**
+     * Notification service used for sending notifications.
+     */
+    private final NotificationService notificationService;
 
+    /**
+     * Post service used for creating posts.
+     */
+    private final PostService postService;
+
+    /**
+     * Transaction manager used for creating transactions.
+     */
+    private final TransactionManager transactionManager;
+
+    /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Resource bundle for feedback messages.
+     */
+    private final ResourceBundle messagesBundle;
+
+    /**
+     * Constructs a new report service with the given dependencies.
+     *
+     * @param notificationService The notification service to use.
+     * @param postService         The post service to use.
+     * @param transactionManager  The transaction manager to use for creating transactions.
+     * @param feedbackEvent       The feedback event to use for user feedback.
+     * @param messagesBundle      The resource bundle for feedback messages.
+     */
     @Inject
-    @Any
-    Event<Feedback> feedback;
+    public ReportService(final NotificationService notificationService, final PostService postService,
+                         final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
+                         final @RegistryKey("messages") ResourceBundle messagesBundle) {
+        this.notificationService = notificationService;
+        this.postService = postService;
+        this.transactionManager = transactionManager;
+        this.feedbackEvent = feedbackEvent;
+        this.messagesBundle = messagesBundle;
+    }
 
     /**
      * Subscribes a user to a report. Afterwards, they will receive notifications if the report is moved or edited, new
@@ -134,7 +186,18 @@ public class ReportService {
      * @return The report with that ID if it exists, {@code null} if there is no report with that ID.
      */
     public Report getReportByID(int id) {
-        return null;
+        try (Transaction tx = transactionManager.begin()) {
+            Report report = tx.newReportGateway().find(id);
+            tx.commit();
+            return report;
+        } catch (NotFoundException e) {
+            log.debug("Report not found.", e);
+            return null;
+        } catch (TransactionException e) {
+            log.error("Error while searching for report.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            return null;
+        }
     }
 
     /**
@@ -143,9 +206,26 @@ public class ReportService {
      *
      * @param report    The report to be created.
      * @param firstPost The first post of the report.
+     * @return {@code true} iff creating the report succeeded.
      */
-    public void createReport(Report report, Post firstPost) {
-
+    public boolean createReport(final Report report, final Post firstPost) {
+        // Notifications will be dealt with when implementing the subscriptions feature.
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().create(report);
+            boolean postCreated = postService.createPostWithTransaction(firstPost, tx);
+            if (postCreated) {
+                tx.commit();
+                log.info("Report created successfully.");
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("report_created"), Feedback.Type.INFO));
+            } else {
+                tx.abort();
+            }
+            return postCreated;
+        } catch (TransactionException e) {
+            log.error("Error while creating a new report", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
+            return false;
+        }
     }
 
     /**
@@ -153,9 +233,23 @@ public class ReportService {
      * NotificationService}.
      *
      * @param report The report to update.
+     * @return {@code true} iff updating the report succeeded.
      */
-    public void updateReport(Report report) {
-
+    public boolean updateReport(Report report) {
+        // Notifications will be dealt with when implementing the subscriptions feature.
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().update(report);
+            tx.commit();
+            return true;
+        } catch (NotFoundException e) {
+            log.error("Report to be updated could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            return false;
+        } catch (TransactionException e) {
+            log.error("Error while updating a report.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
+            return false;
+        }
     }
 
     /**
@@ -228,4 +322,5 @@ public class ReportService {
     public ZonedDateTime lastChange(Report report) {
         return null;
     }
+
 }
