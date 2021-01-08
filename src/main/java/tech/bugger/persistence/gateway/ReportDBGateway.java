@@ -31,7 +31,7 @@ public class ReportDBGateway implements ReportGateway {
     private static final Log log = Log.forClass(ReportDBGateway.class);
 
     /**
-     * The Gateway Connection
+     * The Gateway Connection.
      */
     private final Connection conn;
 

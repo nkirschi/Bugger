@@ -36,6 +36,9 @@
                         <h:outputLabel value="#{labels.topic_show_closed_reports}"/>
                         <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"/>
                     </h:panelGroup>
+                    <h:panelGroup class="row" layout="block">
+                        <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}" styleClass="button" value="#{labels.apply_filter}"/>
+                    </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup class="col-sm-2" layout="block"/>
             </h:panelGroup>
@@ -66,7 +69,7 @@
                         <h:outputText value="#{var.forcedRelevance}"/>
                     </b:column>
                     <b:column title="#{labels.col_change}" paginator="#{topicBacker.reports}" key="last_modified">
-                        <h:outputText value="#{var.authorship.modifier.}"/>
+                        <h:outputText value="#{var.authorship.modifier}"/>
                     </b:column>
                 </b:pagitable>
             </h:panelGroup>

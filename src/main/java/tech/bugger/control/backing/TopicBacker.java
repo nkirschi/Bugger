@@ -261,6 +261,13 @@ public class TopicBacker implements Serializable {
     }
 
     /**
+     * Apply the current filter to the report pagination.
+     */
+    public void applyFilters() {
+        reports.update();
+    }
+
+    /**
      * Closes the ban dialog.
      *
      * @return {@code null} to reload the page.
