@@ -1,7 +1,5 @@
 package tech.bugger.global.transfer;
 
-import tech.bugger.global.util.Lazy;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -62,7 +60,42 @@ public class Report implements Serializable {
     private ZonedDateTime closingDate;
     private Integer duplicateOf;
     private Integer forcedRelevance;
-    private Integer topic;
+    private int topic;
+
+    /**
+     * Constructs a new report from the specified parameters.
+     *
+     * @param id The report ID.
+     * @param title The report title.
+     * @param type The report type.
+     * @param severity The report severity.
+     * @param version The version the report is associated with.
+     * @param authorship The report authorship metadata.
+     * @param closingDate The closing date of the report.
+     * @param duplicateOf The report this report is a duplicate of, loaded lazily.
+     * @param forcedRelevance The relevance value to override the calculated relevance.
+     * @param topic The topic the report belongs to, loaded lazily.
+     */
+    public Report(int id, String title, Type type, Severity severity, String version, Authorship authorship,
+                  ZonedDateTime closingDate, Integer duplicateOf, Integer forcedRelevance, int topic) {
+        this.id = id;
+        this.title = title;
+        this.type = type;
+        this.severity = severity;
+        this.version = version;
+        this.authorship = authorship;
+        this.closingDate = closingDate;
+        this.duplicateOf = duplicateOf;
+        this.forcedRelevance = forcedRelevance;
+        this.topic = topic;
+    }
+
+    /**
+     * Constructs an empty report.
+     */
+    public Report() {
+        this(0, "", Type.BUG, Severity.MINOR, "", new Authorship(null, null, null, null), null, null, null, 0);
+    }
 
     /**
      * Returns the ID of this report.
@@ -231,7 +264,7 @@ public class Report implements Serializable {
      *
      * @return The associated topic.
      */
-    public Integer getTopic() {
+    public int getTopic() {
         return topic;
     }
 
@@ -240,7 +273,7 @@ public class Report implements Serializable {
      *
      * @param topic The associated topic to be set.
      */
-    public void setTopic(Integer topic) {
+    public void setTopic(int topic) {
         this.topic = topic;
     }
 

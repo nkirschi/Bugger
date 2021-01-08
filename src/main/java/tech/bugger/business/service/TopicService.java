@@ -124,7 +124,7 @@ public class TopicService implements Serializable {
      * @param topicID The ID of the desired topic.
      * @return The topic with that ID if it exists, {@code null} if no topic with that ID exists.
      */
-    public Topic getTopicByID(int topicID) {
+    public Topic getTopicByID(final int topicID) {
         Topic topic = null;
         try (Transaction transaction = transactionManager.begin()) {
             topic = transaction.newTopicGateway().findTopic(topicID);
