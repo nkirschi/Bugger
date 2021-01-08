@@ -166,8 +166,8 @@ public class ReportCreateBacker implements Serializable {
 
         banned = false;
         Authorship authorship = new Authorship(session.getUser(), null, session.getUser(), null);
-        report = new Report(0, "", Report.Type.BUG, Report.Severity.MINOR, "", authorship, null, null, null, null);
-        report.setTopic(new Lazy<>(topic));
+        report = new Report(0, "", Report.Type.BUG, Report.Severity.MINOR, "", authorship, null, null, null, 0);
+        report.setTopic(topicID);
         attachments = new ArrayList<>();
         firstPost = new Post(0, "", new Lazy<>(report), authorship, attachments);
     }

@@ -1,7 +1,5 @@
 package tech.bugger.global.transfer;
 
-import tech.bugger.global.util.Lazy;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -53,55 +51,16 @@ public class Report implements Serializable {
         SEVERE
     }
 
-    /**
-     * The ID of the report.
-     */
     private int id;
-
-    /**
-     * The title of the report.
-     */
     private String title;
-
-    /**
-     * The type of the report.
-     */
     private Type type;
-
-    /**
-     * The severity of the report.
-     */
     private Severity severity;
-
-    /**
-     * The version the report is associated with.
-     */
     private String version;
-
-    /**
-     * Authorship metadata about the report.
-     */
     private Authorship authorship;
-
-    /**
-     * The closing date of the report.
-     */
     private ZonedDateTime closingDate;
-
-    /**
-     * The report this report is a duplicate of, loaded lazily.
-     */
-    private Lazy<Report> duplicateOf;
-
-    /**
-     * The relevance value to override the calculated relevance.
-     */
+    private Integer duplicateOf;
     private Integer forcedRelevance;
-
-    /**
-     * The topic the report belongs to, loaded lazily.
-     */
-    private Lazy<Topic> topic;
+    private int topic;
 
     /**
      * Constructs a new report from the specified parameters.
@@ -118,7 +77,7 @@ public class Report implements Serializable {
      * @param topic The topic the report belongs to, loaded lazily.
      */
     public Report(int id, String title, Type type, Severity severity, String version, Authorship authorship,
-                  ZonedDateTime closingDate, Lazy<Report> duplicateOf, Integer forcedRelevance, Lazy<Topic> topic) {
+                  ZonedDateTime closingDate, Integer duplicateOf, Integer forcedRelevance, int topic) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -129,6 +88,13 @@ public class Report implements Serializable {
         this.duplicateOf = duplicateOf;
         this.forcedRelevance = forcedRelevance;
         this.topic = topic;
+    }
+
+    /**
+     * Constructs an empty report.
+     */
+    public Report() {
+        this(0, "", Type.BUG, Severity.MINOR, "", new Authorship(null, null, null, null), null, null, null, 0);
     }
 
     /**
@@ -240,7 +206,7 @@ public class Report implements Serializable {
     }
 
     /**
-     * Returns the date this report was closed.
+     * Returns the data this report was closed.
      *
      * @return The report closing date.
      */
@@ -262,7 +228,7 @@ public class Report implements Serializable {
      *
      * @return The original report or {@code null} if this is no duplicate.
      */
-    public Lazy<Report> getDuplicateOf() {
+    public Integer getDuplicateOf() {
         return duplicateOf;
     }
 
@@ -271,7 +237,7 @@ public class Report implements Serializable {
      *
      * @param duplicateOf The original report to be set
      */
-    public void setDuplicateOf(Lazy<Report> duplicateOf) {
+    public void setDuplicateOf(Integer duplicateOf) {
         this.duplicateOf = duplicateOf;
     }
 
@@ -298,7 +264,7 @@ public class Report implements Serializable {
      *
      * @return The associated topic.
      */
-    public Lazy<Topic> getTopic() {
+    public int getTopic() {
         return topic;
     }
 
@@ -307,7 +273,7 @@ public class Report implements Serializable {
      *
      * @param topic The associated topic to be set.
      */
-    public void setTopic(Lazy<Topic> topic) {
+    public void setTopic(int topic) {
         this.topic = topic;
     }
 
@@ -319,14 +285,8 @@ public class Report implements Serializable {
      */
     @Override
     public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (!(other instanceof Report)) {
-            return false;
-        }
-        Report that = (Report) other;
-        return id == that.id;
+        // TODO Auto-generated method stub
+        return super.equals(other);
     }
 
     /**

@@ -48,7 +48,7 @@ public class PostDBGatewayTest {
         connection = DBExtension.getConnection();
         gateway = new PostDBGateway(connection);
 
-        report = new Report(100, "title", Report.Type.BUG, Report.Severity.MINOR, "", null, null, null, null, null);
+        report = new Report(100, "title", Report.Type.BUG, Report.Severity.MINOR, "", null, null, null, null, 0);
         Authorship authorship = new Authorship(new User(), ZonedDateTime.now(), new User(), ZonedDateTime.now());
         authorship.getCreator().setId(1);
         authorship.getModifier().setId(1);

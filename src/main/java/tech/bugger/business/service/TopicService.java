@@ -1,5 +1,4 @@
 package tech.bugger.business.service;
-
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Report;
@@ -125,9 +124,19 @@ public class TopicService implements Serializable {
      * @param topicID The ID of the desired topic.
      * @return The topic with that ID if it exists, {@code null} if no topic with that ID exists.
      */
-    public Topic getTopicByID(int topicID) {
-        // Until this is implemented, just return dummy topic.
-        return new Topic(1, "testtopic", "testdescription");
+    public Topic getTopicByID(final int topicID) {
+        Topic topic = null;
+        try (Transaction transaction = transactionManager.begin()) {
+            topic = transaction.newTopicGateway().findTopic(topicID);
+            transaction.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("The topic with id " + topicID + " could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while loading the topic with id " + topicID, e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return topic;
     }
 
     /**
@@ -153,8 +162,17 @@ public class TopicService implements Serializable {
      *
      * @param topic The topic to be deleted.
      */
-    public void deleteTopic(final Topic topic) {
-
+    public void deleteTopic(Topic topic) {
+        try (Transaction transaction = transactionManager.begin()) {
+            transaction.newTopicGateway().deleteTopic(topic);
+            transaction.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("The topic could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while deleting the topic", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -193,7 +211,18 @@ public class TopicService implements Serializable {
      */
     public List<Report> getSelectedReports(final Topic topic, final Selection selection, final boolean showOpenReports,
                                            final boolean showClosedReports) {
-        return null;
+        List<Report> reports = null;
+        try (Transaction transaction = transactionManager.begin()) {
+            reports = transaction.newReportGateway().getSelectedReports(topic, selection, showOpenReports, showClosedReports);
+            transaction.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("The topic could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while loading the selected reports in a topic", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return reports;
     }
 
     /**
@@ -227,7 +256,18 @@ public class TopicService implements Serializable {
      * @return The number of reports.
      */
     public int getNumberOfReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
-        return 0;
+        int numberOfTopics = 0;
+        try (Transaction transaction = transactionManager.begin()) {
+            numberOfTopics = transaction.newTopicGateway().countReports(topic, showOpenReports, showClosedReports);
+            transaction.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("The topic could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while loading the topic.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return numberOfTopics;
     }
 
     /**

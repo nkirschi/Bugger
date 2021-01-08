@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Authorship;
@@ -38,19 +39,22 @@ public class ReportDBGatewayTest {
 
     private Connection connection;
 
+    @Mock
+    private UserDBGateway userGateway;
+
     private Report report;
 
     @BeforeEach
     public void setUp() throws Exception {
         DBExtension.insertMinimalTestData();
         connection = DBExtension.getConnection();
-        gateway = new ReportDBGateway(connection);
+        gateway = new ReportDBGateway(connection, userGateway);
 
         Topic topic = new Topic(1, "topictitle", "topicdescription");
         Authorship authorship = new Authorship(new User(), ZonedDateTime.now(), new User(), ZonedDateTime.now());
         authorship.getCreator().setId(1);
         authorship.getModifier().setId(1);
-        report = new Report(10000, "testtitle", Report.Type.BUG, Report.Severity.MINOR, "testversion", authorship, null, null, null, new Lazy<>(topic));
+        report = new Report(10000, "testtitle", Report.Type.BUG, Report.Severity.MINOR, "testversion", authorship, null, null, null, 1);
     }
 
     @AfterEach
@@ -66,7 +70,7 @@ public class ReportDBGatewayTest {
         if (rs.next()) {
             return new Report(
                     rs.getInt("id"), rs.getString("title"),
-                    null, null, null, null, null, null, null, null
+                    null, null, null, null, null, null, null, 0
             );
         } else {
             return null;
@@ -87,14 +91,14 @@ public class ReportDBGatewayTest {
         doReturn(stmtMock).when(connectionSpy).prepareStatement(any(), anyInt());
         when(stmtMock.getGeneratedKeys()).thenReturn(rsMock);
         when(rsMock.next()).thenReturn(false);
-        assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy).create(report));
+        assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy, userGateway).create(report));
     }
 
     @Test
     public void testCreateWhenDatabaseError() throws Exception {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any(), anyInt());
-        assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy).create(report));
+        assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy, userGateway).create(report));
     }
 
 }
