@@ -1,5 +1,7 @@
 package tech.bugger.control.servlet;
 
+import org.jboss.weld.context.http.Http;
+import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.util.Log;
@@ -14,7 +16,7 @@ import java.io.Serial;
 /**
  * Custom servlet that serves post attachments.
  */
-public class AttachmentServlet extends HttpServlet {
+public class AttachmentServlet extends MediaServlet {
 
     @Serial
     private static final long serialVersionUID = -1911464315254552535L;
@@ -35,14 +37,12 @@ public class AttachmentServlet extends HttpServlet {
      * <p>
      * Verifies if the client is authorized to view the attachment, retrieves it and writes the attachment or potential
      * errors to the response.
-     * <p>
-     * Called by the server when a GET request occurs.
      *
      * @param request  The request to handle.
      * @param response The response to return to the client.
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    protected void handleRequest(HttpServletRequest request, HttpServletResponse response) {
         // Retrieve the attachment ID from the request.
         int attachmentID = 0;
         try {
@@ -55,7 +55,7 @@ public class AttachmentServlet extends HttpServlet {
 
         // TODO: Check if user is allowed to download attachment.
 
-        // Fetch attachment the requested attachment.
+        // Fetch the requested attachment.
         Attachment attachment = postService.getAttachmentByID(attachmentID);
         if (attachment == null) {
             log.debug("Attachment with ID " + attachmentID + " not found.");
@@ -65,42 +65,18 @@ public class AttachmentServlet extends HttpServlet {
 
         // Initialize servlet response.
         response.reset();
-        // TODO: Attachment name might break this HEADER.
+        enableClientCaching(response);
+        // TODO: Attachment name might break this header.
         response.setHeader("Content-disposition", "attachment; filename=" + attachment.getName());
         response.setContentType(attachment.getMimetype());
         response.setContentLength(attachment.getContent().get().length);
+        // TODO: Caching like in
 
         // Write attachment content to response.
         try {
             response.getOutputStream().write(attachment.getContent().get());
         } catch (IOException e) {
             log.error("Could not write servlet response.", e);
-        }
-    }
-
-    /**
-     * Handles a request for a post attachment. Expects the attachment's ID as a request parameter.
-     * <p>
-     * Verifies if the client is authorized to view the attachment, retrieves it and writes the attachment or potential
-     * errors to the response.
-     * <p>
-     * Called by the server when a POST request occurs.
-     *
-     * @param request  The request to handle.
-     * @param response The response to return to the client.
-     */
-    @Override
-    protected void doPost(HttpServletRequest request,
-                          HttpServletResponse response) {
-        doGet(request, response);
-    }
-
-    private void redirectToNotFoundPage(HttpServletResponse response) {
-        try {
-            // TODO: Redirect to our own error page.
-            response.sendError(HttpServletResponse.SC_NOT_FOUND); // 404.
-        } catch (IOException e) {
-            throw new InternalError("Could not redirect to 404 page.");
         }
     }
 

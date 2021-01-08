@@ -1,37 +1,37 @@
 package tech.bugger.control.servlet;
 
+import tech.bugger.business.service.PostService;
+import tech.bugger.business.service.ProfileService;
+import tech.bugger.global.transfer.Attachment;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.Serial;
+import java.util.Date;
 
 /**
  * Custom servlet that serves avatars and avatar thumbnails.
  */
-public class AvatarServlet extends HttpServlet {
+public class AvatarServlet extends MediaServlet {
 
-    private static final Log log = Log.forClass(AvatarServlet.class);
     @Serial
     private static final long serialVersionUID = 3230525044134835918L;
 
     /**
-     * Handles a request for a user's avatar. Expects the user's ID and the type of avatar (full image or thumbnail) as
-     * a request parameter.
-     * <p>
-     * Verifies if the client is authorized to view the avatar, retrieves it and writes the attachment or potential
-     * errors to the response.
-     * <p>
-     * Called by the server when a GET request occurs.
-     *
-     * @param request  The request to handle.
-     * @param response The response to return to the client.
+     * The {@link Log} instance associated with this class for logging purposes.
      */
-    @Override
-    protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response) {
-    }
+    private static final Log log = Log.forClass(AvatarServlet.class);
+
+    /**
+     * The post service providing attachments.
+     */
+    @Inject
+    private ProfileService profileService;
 
     /**
      * Handles a request for a user's avatar. Expects the user's ID and the type of avatar (full image or thumbnail) as
@@ -39,14 +39,49 @@ public class AvatarServlet extends HttpServlet {
      * <p>
      * Verifies if the client is authorized to view the avatar, retrieves it and writes the attachment or potential
      * errors to the response.
-     * <p>
-     * Called by the server when a POST request occurs.
      *
      * @param request  The request to handle.
      * @param response The response to return to the client.
      */
     @Override
-    protected void doPost(HttpServletRequest request,
-                          HttpServletResponse response) {
+    protected void handleRequest(HttpServletRequest request, HttpServletResponse response) {
+        // Retrieve user ID and image type from the request.
+        int userID = 0;
+        try {
+            userID = Integer.parseInt(request.getParameter("id"));
+        } catch (NumberFormatException e) {
+            log.debug("Invalid user ID given.");
+            redirectToNotFoundPage(response);
+            return;
+        }
+        boolean serveThumbnail = "thumbnail".equals(request.getParameter("type"));
+
+        // TODO: Check if user is allowed to download avatar.
+
+        // Fetch the requested image.
+        User user = profileService.getUser(userID);
+        if (user == null) {
+            log.debug("User with ID " + userID + " not found.");
+            redirectToNotFoundPage(response);
+            return;
+        }
+        byte[] image = serveThumbnail ? user.getAvatarThumbnail() : user.getAvatar().get();
+        if (image == null) {
+            log.debug("Avatar or thumbnail for user with ID " + userID + " not found.");
+            redirectToNotFoundPage(response);
+            return;
+        }
+
+        // Initialize servlet response.
+        response.reset();
+        enableClientCaching(response);
+
+        // Write image to response.
+        try {
+            response.getOutputStream().write(image);
+        } catch (IOException e) {
+            log.error("Could not write servlet response.", e);
+        }
     }
+
 }
