@@ -8,14 +8,15 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -185,7 +186,18 @@ public class ReportService {
      * @return The report with that ID if it exists, {@code null} if there is no report with that ID.
      */
     public Report getReportByID(int id) {
-        return null;
+        try (Transaction tx = transactionManager.begin()) {
+            Report report = tx.newReportGateway().find(id);
+            tx.commit();
+            return report;
+        } catch (NotFoundException e) {
+            log.debug("Report not found.", e);
+            return null;
+        } catch (TransactionException e) {
+            log.error("Error while searching for report.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            return null;
+        }
     }
 
     /**
@@ -221,9 +233,23 @@ public class ReportService {
      * NotificationService}.
      *
      * @param report The report to update.
+     * @return {@code true} iff updating the report succeeded.
      */
-    public void updateReport(Report report) {
-
+    public boolean updateReport(Report report) {
+        // Notifications will be dealt with when implementing the subscriptions feature.
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().update(report);
+            tx.commit();
+            return true;
+        } catch (NotFoundException e) {
+            log.error("Report to be updated could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            return false;
+        } catch (TransactionException e) {
+            log.error("Error while updating a report.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
+            return false;
+        }
     }
 
     /**
@@ -296,5 +322,5 @@ public class ReportService {
     public ZonedDateTime lastChange(Report report) {
         return null;
     }
-    
+
 }

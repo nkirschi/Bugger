@@ -1,10 +1,10 @@
 package tech.bugger.persistence.gateway;
 
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.User;
 import tech.bugger.global.transfer.Authorship;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -32,21 +33,20 @@ public class ReportDBGateway implements ReportGateway {
     private static final Log log = Log.forClass(ReportDBGateway.class);
 
     /**
-<<<<<<< HEAD
      * Database connection used by this gateway.
      */
-    private final Connection conn;
+    private Connection conn;
 
     /**
-     * A user gateway for further querys.
+     * User gateway used for finding users.
      */
-    private final UserGateway userGateway;
+    private UserGateway userGateway;
 
     /**
      * Constructs a new report gateway with the given database connection.
      *
-     * @param conn The database connection to use for the gateway.
-     * @param userGateway The user gateway for further querys.
+     * @param conn        The database connection to use for the gateway.
+     * @param userGateway The user gateway to use.
      */
     public ReportDBGateway(final Connection conn, final UserGateway userGateway) {
         this.conn = conn;
@@ -66,9 +66,46 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public Report find(final int id) {
-        // TODO Auto-generated method stub
-        return null;
+    public Report find(final int id) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "SELECT * FROM report WHERE id = ?;"
+        )) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(id)
+                    .toStatement().executeQuery();
+            if (rs.next()) {
+                Integer creatorID = rs.getObject("created_by", Integer.class);
+                User creator = creatorID == null ? null : userGateway.getUserByID(creatorID);
+                ZonedDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime()
+                        .atZone(ZoneId.systemDefault());
+                Integer modifierID = rs.getObject("last_modified_by", Integer.class);
+                User modifier = modifierID == null ? null : userGateway.getUserByID(modifierID);
+                ZonedDateTime modifiedAt = rs.getTimestamp("last_modified_at").toLocalDateTime()
+                        .atZone(ZoneId.systemDefault());
+                Authorship authorship = new Authorship(creator, createdAt, modifier, modifiedAt);
+
+                Integer forcedRelevance = rs.getObject("forced_relevance", Integer.class);
+                Integer duplicateOf = rs.getObject("duplicate_of", Integer.class);
+                Timestamp closingDate = rs.getTimestamp("closed_at");
+
+                return new Report(
+                        id,
+                        rs.getString("title"),
+                        Report.Type.valueOf(rs.getString("type")),
+                        Report.Severity.valueOf(rs.getString("severity")),
+                        rs.getString("version"),
+                        authorship,
+                        closingDate != null ? closingDate.toLocalDateTime().atZone(ZoneId.systemDefault()) : null,
+                        duplicateOf,
+                        forcedRelevance,
+                        rs.getInt("topic")
+                );
+            } else {
+                throw new NotFoundException("Report could not be found.");
+            }
+        } catch (SQLException e) {
+            throw new StoreException("Error while searching for report.", e);
+        }
     }
 
     /**
@@ -179,7 +216,29 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void update(final Report report) {
+    public void update(final Report report) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "UPDATE report "
+                        + "SET title = ?, type = ?::report_type, severity = ?::report_severity, "
+                        + "    version = ?, last_modified_by = ?, topic = ?"
+                        + "WHERE id = ?;"
+        )) {
+            User modifier = report.getAuthorship().getModifier();
+            int rowsAffected = new StatementParametrizer(stmt)
+                    .string(report.getTitle())
+                    .string(report.getType().name())
+                    .string(report.getSeverity().name())
+                    .string(report.getVersion())
+                    .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
+                    .object(report.getTopic(), Types.INTEGER)
+                    .integer(report.getId())
+                    .toStatement().executeUpdate();
+            if (rowsAffected == 0) {
+                throw new NotFoundException("Report to be updated could not be found.");
+            }
+        } catch (SQLException e) {
+            throw new StoreException("Error while updating report.", e);
+        }
     }
 
     /**
@@ -193,7 +252,6 @@ public class ReportDBGateway implements ReportGateway {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void closeReport(final Report report) {
         // TODO Auto-generated method stub
 
@@ -204,15 +262,6 @@ public class ReportDBGateway implements ReportGateway {
      */
     @Override
     public void openReport(final Report report) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void moveReport(final Report report, final Topic destination) {
         // TODO Auto-generated method stub
 
     }

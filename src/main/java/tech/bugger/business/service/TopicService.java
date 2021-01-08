@@ -14,7 +14,6 @@ import tech.bugger.persistence.util.TransactionManager;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -23,7 +22,7 @@ import java.util.ResourceBundle;
  * Service providing methods related to topics. A {@code Feedback} event is fired, if unexpected circumstances occur.
  */
 @ApplicationScoped
-public class TopicService implements Serializable {
+public class TopicService {
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.

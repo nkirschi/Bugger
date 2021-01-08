@@ -8,7 +8,6 @@ import tech.bugger.persistence.util.PropertiesReader;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -204,11 +203,11 @@ public class Registry {
     }
 
     /**
-     * Returns the {@link ResourceBundle} specified by a key.
+     * Returns the {@link ResourceBundle} registered for the given key.
      *
-     * @param key         The key of the requested bundle.
+     * @param key         The key of the desired resource bundle.
      * @param userSession The current user session yielding locale information.
-     * @return The resource bundle associated with the key.
+     * @return The resource bundle associated with {@code key}.
      */
     public ResourceBundle getBundle(String key, final UserSession userSession) {
         try {
