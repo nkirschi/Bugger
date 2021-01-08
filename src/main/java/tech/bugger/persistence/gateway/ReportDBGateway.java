@@ -114,9 +114,18 @@ public class ReportDBGateway implements ReportGateway {
     @Override
     public List<Report> getSelectedReports(final Topic topic, final Selection selection, final boolean showOpenReports,
                                            final boolean showClosedReports) {
-        log.info("searching for Reports");
         List<Report> selectedReports = new ArrayList<>(Math.max(0, selection.getTotalSize()));
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"report\" WHERE topic = ?")) {
+        String filter = ";";
+        if (!showClosedReports) {
+            filter = "AND closed_at IS NULL;";
+        }
+        if (!showOpenReports) {
+            filter = "AND closed_at IS NOT NULL;";
+        }
+        if (!showClosedReports && !showOpenReports) {
+            return selectedReports;
+        }
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM report WHERE topic = ? " + filter)) {
             ResultSet rs = new StatementParametrizer(stmt).integer(topic.getId()).toStatement().executeQuery();
 
             while (rs.next()) {
@@ -130,7 +139,7 @@ public class ReportDBGateway implements ReportGateway {
         return selectedReports;
     }
 
-    private Report getReportFromResultSet(ResultSet rs) throws SQLException, NotFoundException {
+    private Report getReportFromResultSet(final ResultSet rs) throws SQLException, NotFoundException {
         Report report = new Report();
         report.setId(rs.getInt("id"));
         report.setTitle(rs.getString("title"));
@@ -218,7 +227,6 @@ public class ReportDBGateway implements ReportGateway {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void closeReport(final Report report) {
         // TODO Auto-generated method stub
 

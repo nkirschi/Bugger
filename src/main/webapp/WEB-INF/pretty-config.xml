@@ -42,8 +42,4 @@
         <pattern value="/admin"/>
         <view-id value="/faces/view/restr/admin.xhtml"/>
     </url-mapping>
-    <url-mapping id="topic">
-        <pattern value="/topic"/>
-        <view-id value="/faces/view/public/topic.xhtml"/>
-    </url-mapping>
 </pretty-config>
