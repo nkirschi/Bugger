@@ -60,6 +60,7 @@
                                      validatorMessage="#{messages['paginator.not_in_range']}">
                             <f:validateLongRange minimum="1" maximum="#{cc.attrs.paginator.determineLastPageIndex()}"/>
                         </h:inputText>
+                        <h:message for="i-curr-page" styleClass="text-danger" />
                     </h:panelGroup>
                     <h:panelGroup layout="block" id="pg-next-page"
                                   styleClass="page-item #{cc.attrs.paginator.isLastPage() ? 'disabled' : ''}">
