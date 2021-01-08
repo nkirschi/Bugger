@@ -50,9 +50,6 @@ public class UserSession implements Serializable {
      * @return The user or {@code null} iff the user is not logged in.
      */
     public User getUser() {
-        // Until this is implemented, just return dummy topic.
-        User user = new User();
-        user.setId(1);
         return user;
     }
 
