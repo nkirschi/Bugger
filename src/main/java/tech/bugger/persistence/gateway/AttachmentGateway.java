@@ -18,7 +18,7 @@ public interface AttachmentGateway {
      * @return The attachment identified by the ID.
      * @throws NotFoundException The attachment could not be found.
      */
-    public Attachment getContentByID(int id) throws NotFoundException;
+    public Attachment find(int id) throws NotFoundException;
 
     /**
      * Retrieves the list of attachments of a given post.

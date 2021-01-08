@@ -1,7 +1,12 @@
 package tech.bugger.persistence.gateway;
 
+import org.ocpsoft.rewrite.config.Not;
 import tech.bugger.global.transfer.Attachment;
+import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
@@ -11,6 +16,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -121,9 +129,27 @@ public class AttachmentDBGateway implements AttachmentGateway {
      * {@inheritDoc}
      */
     @Override
-    public Attachment getContentByID(final int id) {
-        // TODO Auto-generated method stub
-        return null;
+    public Attachment find(final int id) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "SELECT * FROM attachment WHERE id = ?;"
+        )) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(id)
+                    .toStatement().executeQuery();
+            if (rs.next()) {
+                return new Attachment(
+                        id,
+                        rs.getString("name"),
+                        new Lazy<>(rs.getBytes("content")), // TODO: Lazy
+                        rs.getString("mimetype"),
+                        null // TODO: Retrieve post lazily
+                );
+            } else {
+                throw new NotFoundException("Attachment could not be found.");
+            }
+        } catch (SQLException e) {
+            throw new StoreException("Error while retrieving attachment.", e);
+        }
     }
 
     /**

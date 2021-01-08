@@ -19,6 +19,26 @@
         <url-pattern>/admin</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>Attachment Servlet</servlet-name>
+        <servlet-class>tech.bugger.control.servlet.AttachmentServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Attachment Servlet</servlet-name>
+        <url-pattern>/attachment</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>Avatar Servlet</servlet-name>
+        <servlet-class>tech.bugger.control.servlet.AvatarServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Avatar Servlet</servlet-name>
+        <url-pattern>/avatar</url-pattern>
+    </servlet-mapping>
+
     <context-param>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
         <param-value>Development</param-value>

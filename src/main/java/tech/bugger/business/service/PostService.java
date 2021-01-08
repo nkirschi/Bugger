@@ -5,8 +5,10 @@ import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Post;
+import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentGateway;
 import tech.bugger.persistence.util.Transaction;
@@ -190,6 +192,27 @@ public class PostService {
      */
     public Post getPostByID(int id) {
         return null;
+    }
+
+    /**
+     * Returns the attachment with the specified ID.
+     *
+     * @param id The ID of the attachment to be returned.
+     * @return The attachment with the specified ID if it exists, {@code null} if no attachment with that ID exists.
+     */
+    public Attachment getAttachmentByID(int id) {
+        try (Transaction tx = transactionManager.begin()) {
+            Attachment attachment = tx.newAttachmentGateway().find(id);
+            tx.commit();
+            return attachment;
+        } catch (NotFoundException e) {
+            log.debug("Attachment not found.", e);
+            return null;
+        } catch (TransactionException e) {
+            log.error("Error while retrieving attachment.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            return null;
+        }
     }
 
     /**
