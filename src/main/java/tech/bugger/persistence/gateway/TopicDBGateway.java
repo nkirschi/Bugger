@@ -1,19 +1,14 @@
 package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.NotFoundException;
-import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
 
-import javax.mail.Store;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,7 +58,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfReports(final Topic topic, boolean showOpenReports, boolean showClosedReports) {
+    public int countReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
         int numberOfReports = 0;
         if (showOpenReports) {
             try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM report WHERE topic = ? AND closed_at IS NULL;")) {
@@ -72,7 +67,7 @@ public class TopicDBGateway implements TopicGateway {
                 int numReports = 0;
                 if (resultSet.next()) {
                     numReports = resultSet.getInt(1);
-                    numberOfReports =+ numReports;
+                    numberOfReports += numReports;
                 }
             } catch (SQLException e) {
                 log.error("Error while searching for report by topic.", e);
@@ -86,7 +81,7 @@ public class TopicDBGateway implements TopicGateway {
                 int numReports = 0;
                 if (resultSet.next()) {
                     numReports = resultSet.getInt(1);
-                    numberOfReports =+ numReports;
+                    numberOfReports += numReports;
                 }
             } catch (SQLException e) {
                 log.error("Error while searching for report by topic.", e);
@@ -136,7 +131,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public Topic getTopicByID(int id) throws NotFoundException {
+    public Topic findTopic(final int id) throws NotFoundException {
         Topic topic;
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM topic WHERE id = ?")) {

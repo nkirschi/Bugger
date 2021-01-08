@@ -1,7 +1,4 @@
 package tech.bugger.business.service;
-
-import tech.bugger.business.exception.NotFoundException;
-import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Report;
@@ -10,9 +7,6 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
-import tech.bugger.persistence.exception.TransactionException;
-import tech.bugger.persistence.util.Transaction;
-import tech.bugger.persistence.util.TransactionManager;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
@@ -64,31 +58,6 @@ public class TopicService implements Serializable {
         this.transactionManager = transactionManager;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;
-    }
-
-    /**
-     * The transaction manager used for creating transactions.
-     */
-    private final TransactionManager transactionManager;
-
-    /**
-     * The resource bundle for feedback messages.
-     */
-    private final ResourceBundle messages;
-
-    /**
-     * Constructs a new topic service with the given dependencies.
-     *
-     * @param feedback The feedback event to be used for user feedback.
-     * @param transactionManager The transaction manager to be used for creating transactions.
-     * @param messages The resource bundle to look up feedback messages.
-     */
-    @Inject
-    public TopicService(final Event<Feedback> feedback, final TransactionManager transactionManager,
-                          final @RegistryKey("messages") ResourceBundle messages) {
-        this.feedback = feedback;
-        this.transactionManager = transactionManager;
-        this.messages = messages;
     }
 
     /**
@@ -158,14 +127,14 @@ public class TopicService implements Serializable {
     public Topic getTopicByID(int topicID) {
         Topic topic = null;
         try (Transaction transaction = transactionManager.begin()) {
-            topic = transaction.newTopicGateway().getTopicByID(topicID);
+            topic = transaction.newTopicGateway().findTopic(topicID);
             transaction.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The topic with id " + topicID + " could not be found.", e);
-            throw new NotFoundException(messages.getString("not_found_error"), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while loading the topic with id " + topicID, e);
-            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return topic;
     }
@@ -199,10 +168,10 @@ public class TopicService implements Serializable {
             transaction.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The topic could not be found.", e);
-            throw new NotFoundException(messages.getString("not_found_error"), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while deleting the topic", e);
-            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
     }
 
@@ -240,18 +209,18 @@ public class TopicService implements Serializable {
      * @param showClosedReports Whether or not to include closed reports.
      * @return A list of reports containing the selected results.
      */
-    public List<Report> getSelectedReports(Topic topic, Selection selection, boolean showOpenReports,
-                                           boolean showClosedReports) {
+    public List<Report> getSelectedReports(final Topic topic, final Selection selection, final boolean showOpenReports,
+                                           final boolean showClosedReports) {
         List<Report> reports = null;
         try (Transaction transaction = transactionManager.begin()) {
             reports = transaction.newReportGateway().getSelectedReports(topic, selection, showOpenReports, showClosedReports);
             transaction.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The topic could not be found.", e);
-            throw new NotFoundException(messages.getString("not_found_error"), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while loading the selected reports in a topic", e);
-            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return reports;
     }
@@ -287,18 +256,16 @@ public class TopicService implements Serializable {
      * @return The number of reports.
      */
     public int getNumberOfReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
-        return 0;
-    public int getNumberOfReports(Topic topic, boolean showOpenReports, boolean showClosedReports) {
         int numberOfTopics = 0;
         try (Transaction transaction = transactionManager.begin()) {
-            numberOfTopics = transaction.newTopicGateway().getNumberOfReports(topic, showOpenReports, showClosedReports);
+            numberOfTopics = transaction.newTopicGateway().countReports(topic, showOpenReports, showClosedReports);
             transaction.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The topic could not be found.", e);
-            throw new NotFoundException(messages.getString("not_found_error"), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while loading the topic.", e);
-            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return numberOfTopics;
     }
