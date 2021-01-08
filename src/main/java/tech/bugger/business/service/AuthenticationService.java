@@ -208,29 +208,17 @@ public class AuthenticationService {
      * Registers a new user by generating a {@link Token} and sending a confirmation email to the new user.
      *
      * @param user The user to be registered.
-     * @param path The current deployment path of this web application.
+     * @param domain The current deployment path of this web application.
      * @return Whether the action was successful or not.
      */
-    public boolean register(final User user, final String path) {
-        Token token = null;
-
-        try (Transaction tx = transactionManager.begin()) {
-            Token toInsert = new Token(generateToken(), Token.Type.REGISTER, null, user);
-            token = tx.newTokenGateway().createToken(toInsert);
-            tx.commit();
-        } catch (NotFoundException e) {
-            log.error("The user couldn't be found.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
-        } catch (TransactionException e) {
-            log.error("Token could not be generated.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
-        }
+    public boolean register(final User user, final String domain) {
+        Token token = createToken(user, Token.Type.REGISTER, "");
 
         if (token == null) {
             return false;
         }
 
-        String link = path + "/password-set?token=" + token.getValue();
+        String link = domain + "/password-set?token=" + token.getValue();
         Mail mail = new MailBuilder()
                 .to(user.getEmailAddress())
                 .subject(interactionsBundle.getString("email_register_subject"))
@@ -277,6 +265,61 @@ public class AuthenticationService {
         }
 
         return false;
+    }
+
+    /**
+     * Updates a user's email address by generating a {@link Token} and sending them a confirmation email.
+     *
+     * @param user The user whose email address is to be updated.
+     * @param domain The current domain of this web application.
+     * @param email The user's new email address to be confirmed.
+     * @return Whether the action was successful or not.
+     */
+    public boolean updateEmail(final User user, final String domain, final String email) {
+        Token token = createToken(user, Token.Type.CHANGE_EMAIL, email);
+
+        if (token == null) {
+            return false;
+        }
+
+        String link = domain + "/profile-edit.xhtml?token=" + token.getValue();
+        Mail mail = new MailBuilder()
+                .to(email)
+                .subject(interactionsBundle.getString("email_update_subject"))
+                .content(new MessageFormat(interactionsBundle.getString("email_update_content"))
+                        .format(new String[]{token.getUser().getFirstName(), token.getUser().getLastName(), link}))
+                .envelop();
+        sendMail(mail);
+
+        feedbackEvent.fire(new Feedback(messagesBundle.getString("email_success"), Feedback.Type.INFO));
+
+        return true;
+    }
+
+    /**
+     * Creates a new {@link Token} of the given {@link Token.Type} for the given {@link User}.
+     *
+     * @param user The user for whom the token should be generated.
+     * @param type The token's type.
+     * @param metaData The token's meta information.
+     * @return The generated {@link Token} or {@code null} upon error.
+     */
+    private Token createToken(final User user, final Token.Type type, final String metaData) {
+        Token token = null;
+
+        try (Transaction tx = transactionManager.begin()) {
+            Token toInsert = new Token(generateToken(), type, null, metaData, user);
+            token = tx.newTokenGateway().createToken(toInsert);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("The user with id " + user.getId() + " could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Token could not be generated.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return token;
     }
 
     /**

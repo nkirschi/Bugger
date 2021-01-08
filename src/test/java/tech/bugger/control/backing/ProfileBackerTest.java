@@ -10,25 +10,22 @@ import org.mockito.MockitoAnnotations;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
+import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 
+import javax.faces.application.Application;
+import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
-import java.io.IOException;
+import javax.faces.context.FacesContext;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class ProfileBackerTest {
@@ -43,10 +40,19 @@ public class ProfileBackerTest {
     private UserSession session;
 
     @Mock
-    private ExternalContext ext;
+    private FacesContext fctx;
+
+    @Mock
+    private ExternalContext context;
 
     @Mock
     private RequestParameterMap map;
+
+    @Mock
+    private NavigationHandler navHandler;
+
+    @Mock
+    private Application application;
 
     private User user;
     private static final int THE_ANSWER = 42;
@@ -60,7 +66,10 @@ public class ProfileBackerTest {
                 new byte[]{1}, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         MockitoAnnotations.openMocks(this);
-        when(ext.getRequestParameterMap()).thenReturn(map);
+        when(fctx.getExternalContext()).thenReturn(context);
+        when(context.getRequestParameterMap()).thenReturn(map);
+        when(fctx.getApplication()).thenReturn(application);
+        when(application.getNavigationHandler()).thenReturn(navHandler);
     }
 
     @Test
@@ -107,41 +116,21 @@ public class ProfileBackerTest {
     }
 
     @Test
-    public void testInitKeyNotPresent() throws IOException {
+    public void testInitKeyNotPresent() {
         // Since ext.redirect is mocked, it just tries and then executes the rest of the method.
         when(map.get(PARAMETER)).thenReturn(user.getUsername());
         when(profileService.getUserByUsername(anyString())).thenReturn(user);
         profileBacker.init();
-        verify(ext, times(1)).redirect(anyString());
+        verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
     }
 
     @Test
-    public void testInitUsernameTooLong() throws IOException {
+    public void testInitUsernameTooLong() {
         when(map.containsKey(PARAMETER)).thenReturn(true);
         when(map.get(PARAMETER)).thenReturn(LONG_USERNAME);
         when(profileService.getUserByUsername(anyString())).thenReturn(user);
         profileBacker.init();
-        verify(ext, times(1)).redirect(anyString());
-    }
-
-    @Test
-    public void testInitIOException() throws IOException {
-        doThrow(IOException.class).when(ext).redirect(anyString());
-        assertThrows(InternalError.class,
-                () -> profileBacker.init()
-        );
-    }
-
-    @Test
-    public void testInitUserNull() throws IOException {
-        when(map.containsKey(PARAMETER)).thenReturn(true);
-        when(map.get(PARAMETER)).thenReturn(user.getUsername());
-        profileBacker.setUsername(user.getUsername());
-        when(profileService.getUserByUsername(user.getUsername())).thenReturn(null);
-        doThrow(IOException.class).when(ext).redirect("error.xhtml");
-        assertThrows(InternalError.class,
-                () -> profileBacker.init()
-        );
+        verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
     }
 
     @Test

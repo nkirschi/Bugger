@@ -25,12 +25,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(DBExtension.class)
 @ExtendWith(LogExtension.class)
@@ -48,9 +48,9 @@ public class UserDBGatewayTest {
         connection = DBExtension.getConnection();
         gateway = new UserDBGateway(connection);
 
-        user = new User(12345, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
+        user = new User(2, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
-        admin = new User(67890, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@admin.de", "Helgo", "Brötchen", new Lazy<>(new byte[]{1, 2, 3, 4}),
+        admin = new User(3, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@admin.de", "Helgo", "Brötchen", new Lazy<>(new byte[]{1, 2, 3, 4}),
                 new byte[]{1}, "Ich bin der Administrator hier!", Language.ENGLISH, User.ProfileVisibility.MINIMAL,
                 ZonedDateTime.now(), null, true);
     }
@@ -213,7 +213,7 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testGetNumberOfAdmins() throws NotFoundException {
+    public void testGetNumberOfAdmins() {
         gateway.createUser(user);
         gateway.createUser(admin);
         //One inserted admin plus default admin.
@@ -289,6 +289,31 @@ public class UserDBGatewayTest {
         doThrow(SQLException.class).when(connSpy).prepareStatement(any());
         assertThrows(StoreException.class,
                 () -> new UserDBGateway(connSpy).getNumberOfPosts(user)
+        );
+    }
+
+    @Test
+    public void testDeleteUser() throws NotFoundException {
+        gateway.createUser(user);
+        gateway.deleteUser(user);
+        assertThrows(NotFoundException.class,
+                () -> gateway.getUserByID(user.getId())
+        );
+    }
+
+    @Test
+    public void testDeleteUserNotFound() {
+        assertThrows(NotFoundException.class,
+                () -> gateway.deleteUser(user)
+        );
+    }
+
+    @Test
+    public void testDeleteUserDatabaseError() throws SQLException {
+        Connection connSpy = spy(connection);
+        doThrow(SQLException.class).when(connSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new UserDBGateway(connSpy).deleteUser(user)
         );
     }
 
