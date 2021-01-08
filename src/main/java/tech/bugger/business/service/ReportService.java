@@ -25,7 +25,7 @@ import java.util.ResourceBundle;
  * Service providing methods related to reports. A {@code Feedback} event is fired, if unexpected circumstances occur.
  */
 @ApplicationScoped
-public class ReportService implements Serializable {
+public class ReportService {
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.
@@ -209,7 +209,23 @@ public class ReportService implements Serializable {
      * @return {@code true} iff creating the report succeeded.
      */
     public boolean createReport(final Report report, final Post firstPost) {
-        return false;
+        // Notifications will be dealt with when implementing the subscriptions feature.
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().create(report);
+            boolean postCreated = postService.createPostWithTransaction(firstPost, tx);
+            if (postCreated) {
+                tx.commit();
+                log.info("Report created successfully.");
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("report_created"), Feedback.Type.INFO));
+            } else {
+                tx.abort();
+            }
+            return postCreated;
+        } catch (TransactionException e) {
+            log.error("Error while creating a new report", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
+            return false;
+        }
     }
 
     /**

@@ -182,8 +182,34 @@ public class ReportDBGateway implements ReportGateway {
      */
     @Override
     public void create(final Report report) {
-        // TODO Auto-generated method stub
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO report (title, type, severity, created_by, last_modified_by, topic)"
+                        + "VALUES (?, ?::report_type, ?::report_severity, ?, ?, ?);",
+                PreparedStatement.RETURN_GENERATED_KEYS
+        )) {
+            User creator = report.getAuthorship().getCreator();
+            User modifier = report.getAuthorship().getModifier();
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .string(report.getTitle())
+                    .string(report.getType().name())
+                    .string(report.getSeverity().name())
+                    .object(creator == null ? null : creator.getId(), Types.INTEGER)
+                    .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
+                    .integer(report.getTopic())
+                    .toStatement();
+            statement.executeUpdate();
 
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                report.setId(generatedKeys.getInt("id"));
+            } else {
+                log.error("Error while retrieving new report ID.");
+                throw new StoreException("Error while retrieving new report ID.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating report.", e);
+            throw new StoreException("Error while creating report.", e);
+        }
     }
 
     /**
@@ -221,7 +247,6 @@ public class ReportDBGateway implements ReportGateway {
     @Override
     public void delete(final Report report) {
         // TODO Auto-generated method stub
-
     }
 
     /**

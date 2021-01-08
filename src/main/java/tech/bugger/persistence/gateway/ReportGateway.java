@@ -51,6 +51,8 @@ public interface ReportGateway {
     /**
      * Inserts a report into the report storage.
      *
+     * Sets the ID of {@ode report} that was assigned upon insertion by the report storage.
+     *
      * @param report The report to insert.
      */
     public void create(Report report);

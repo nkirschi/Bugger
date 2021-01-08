@@ -1,13 +1,14 @@
 package tech.bugger.business.internal;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Locale;
+import tech.bugger.global.transfer.User;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
-import tech.bugger.global.transfer.User;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Locale;
 
 /**
  * Internal bean holding details of the session of a user.
@@ -49,6 +50,9 @@ public class UserSession implements Serializable {
      * @return The user or {@code null} iff the user is not logged in.
      */
     public User getUser() {
+        // Until this is implemented, just return dummy topic.
+        User user = new User();
+        user.setId(1);
         return user;
     }
 

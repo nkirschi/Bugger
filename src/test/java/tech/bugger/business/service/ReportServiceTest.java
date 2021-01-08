@@ -11,11 +11,9 @@ import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
-import tech.bugger.persistence.gateway.AttachmentGateway;
 import tech.bugger.persistence.gateway.PostGateway;
 import tech.bugger.persistence.gateway.ReportGateway;
 import tech.bugger.persistence.util.Transaction;
@@ -36,7 +34,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,13 +64,16 @@ public class ReportServiceTest {
 
     private Report testReport;
 
+    private Post testFirstPost;
+
     @BeforeEach
     public void setUp() {
         service = new ReportService(notificationService, postService, transactionManager, feedbackEvent,
                 ResourceBundleMocker.mock(""));
         List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
+        testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
         testReport = new Report(200, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(ZonedDateTime.class), null, null, 0);
+                mock(ZonedDateTime.class), null, null, 1);
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(reportGateway).when(tx).newReportGateway();
@@ -117,6 +117,27 @@ public class ReportServiceTest {
     public void testUpdateReportWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
         assertFalse(service.updateReport(testReport));
+    }
+
+    public void testCreateReportWhenFine() throws Exception {
+        doReturn(true).when(postService).createPostWithTransaction(any(), any());
+        assertTrue(service.createReport(testReport, testFirstPost));
+        verify(reportGateway).create(any());
+        verify(tx).commit();
+    }
+
+    @Test
+    public void testCreateReportWhenPostCreationFails() {
+        doReturn(false).when(postService).createPostWithTransaction(any(), any());
+        assertFalse(service.createReport(testReport, testFirstPost));
+        verify(tx).abort();
+    }
+
+    @Test
+    public void testCreateReportWhenCommitFails() throws Exception {
+        doReturn(true).when(postService).createPostWithTransaction(any(), any());
+        doThrow(TransactionException.class).when(tx).commit();
+        assertFalse(service.createReport(testReport, testFirstPost));
         verify(feedbackEvent).fire(any());
     }
 

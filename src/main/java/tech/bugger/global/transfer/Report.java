@@ -77,7 +77,7 @@ public class Report implements Serializable {
      * @param topic The topic the report belongs to, loaded lazily.
      */
     public Report(int id, String title, Type type, Severity severity, String version, Authorship authorship,
-                  ZonedDateTime closingDate, Integer duplicateOf, Integer forcedRelevance, Integer topic) {
+                  ZonedDateTime closingDate, Integer duplicateOf, Integer forcedRelevance, int topic) {
         this.id = id;
         this.title = title;
         this.type = type;
