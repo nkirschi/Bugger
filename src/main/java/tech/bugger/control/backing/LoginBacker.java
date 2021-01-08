@@ -10,7 +10,6 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.IOException;
 
 /**
  * Backing Bean for the login page.
@@ -80,11 +79,7 @@ public class LoginBacker {
     @PostConstruct
     void init() {
         if (session.getUser() != null) {
-            try {
-                fctx.getExternalContext().redirect("home.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
 
         String url = fctx.getExternalContext().getRequestParameterMap().get("url");

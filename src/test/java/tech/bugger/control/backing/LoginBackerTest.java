@@ -14,19 +14,18 @@ import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 
+import javax.faces.application.Application;
+import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import java.io.IOException;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 
@@ -50,6 +49,12 @@ public class LoginBackerTest {
 
     @Mock
     private RequestParameterMap map;
+
+    @Mock
+    private NavigationHandler navHandler;
+
+    @Mock
+    private Application application;
 
     private User user;
     private final String home = "home";
@@ -75,20 +80,12 @@ public class LoginBackerTest {
     }
 
     @Test
-    public void testInitUserNotNull() throws IOException {
+    public void testInitUserNotNull() {
         when(session.getUser()).thenReturn(user);
+        when(fctx.getApplication()).thenReturn(application);
+        when(application.getNavigationHandler()).thenReturn(navHandler);
         loginBacker.init();
-        verify(context, times(1)).redirect(any());
-    }
-
-    @Test
-    public void testInitUserIOException() throws IOException {
-        when(session.getUser()).thenReturn(user);
-        doThrow(IOException.class).when(context).redirect(any());
-        assertThrows(InternalError.class,
-                () -> loginBacker.init()
-        );
-        verify(context, times(1)).redirect(any());
+        verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
     }
 
     @Test

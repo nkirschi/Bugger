@@ -1,12 +1,15 @@
 package tech.bugger.business.service;
 
+import tech.bugger.business.exception.CorruptImageException;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Hasher;
+import tech.bugger.business.util.Images;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.business.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
@@ -16,6 +19,8 @@ import tech.bugger.persistence.util.TransactionManager;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.servlet.http.Part;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 
@@ -101,6 +106,7 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newUserGateway().createUser(user);
             tx.commit();
+            feedback.fire(new Feedback(messages.getString("operation_successful"), Feedback.Type.INFO));
             return true;
         } catch (TransactionException e) {
             log.error("User could not be created.", e);
@@ -114,8 +120,20 @@ public class ProfileService {
      * Irreversibly deletes a user. This does not delete their created reports and posts.
      *
      * @param user The user to be deleted.
+     * @return Whether the deletion was successful or not.
      */
-    public void deleteUser(final User user) {
+    public boolean deleteUser(final User user) {
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newUserGateway().deleteUser(user);
+            tx.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("The user with id " + user.getId() + " could not be found.", e);
+        } catch (TransactionException e) {
+            log.error("The user with id " + user.getId() + " could not be deleted.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -397,7 +415,35 @@ public class ProfileService {
         return user;
     }
 
-    private byte[] generateThumbnail(final byte[] image) {
+    /**
+     * Converts the given {@code avatar} into an {@link Lazy} byte array.
+     *
+     * @param avatar The input {@link Part} to be converted.
+     * @return The new {@link Lazy} byte array or {@code null} iff the input could not be converted.
+     */
+    public Lazy<byte[]> uploadAvatar(final Part avatar) {
+        try {
+            return new Lazy<>(avatar.getInputStream().readAllBytes());
+        } catch (IOException e) {
+            log.error("Error while uploading an avatar.", e);
+            feedback.fire(new Feedback(messages.getString("upload_avatar"), Feedback.Type.ERROR));
+        }
+        return null;
+    }
+
+    /**
+     * Converts the given image into thumbnail.
+     *
+     * @param image The image.
+     * @return The generated thumbnail or {@code null} iff the given image was corrupt.
+     */
+    public byte[] generateThumbnail(final byte[] image) {
+        try {
+            return Images.generateThumbnail(image);
+        } catch (CorruptImageException e) {
+            log.error("Error while trying to generate a thumbnail.", e);
+            feedback.fire(new Feedback(messages.getString("generate_thumbnail"), Feedback.Type.ERROR));
+        }
         return null;
     }
 

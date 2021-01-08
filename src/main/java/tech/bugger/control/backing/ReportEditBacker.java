@@ -126,12 +126,12 @@ public class ReportEditBacker implements Serializable {
      * report. If this is not the case, acts as if the page did not exist.
      */
     public void init() {
+        reportID = 104; // Use fixed ID to at least display page with contents. TODO: Remove
         report = reportService.getReportByID(reportID);
         if (report != null) {
             destinationID = report.getTopic();
             currentTopic = topicService.getTopicByID(destinationID);
-            User user = new User(); // TODO session.getUser();
-            user.setAdministrator(true); // TODO remove
+            User user = session.getUser();
 
             privileged = user != null && currentTopic != null
                     && (user.equals(report.getAuthorship().getCreator())
@@ -140,11 +140,7 @@ public class ReportEditBacker implements Serializable {
         }
 
         if (!privileged) {
-            // TODO: What means acting "as if the page did not exist"?
-            try {
-                fctx.getExternalContext().redirect(fctx.getExternalContext().getRequestContextPath() + "/some/404/page.xhtml");
-            } catch (IOException e) {
-            }
+            redirectTo404Page();
             return;
         }
     }
@@ -233,6 +229,19 @@ public class ReportEditBacker implements Serializable {
             return false;
         } else {
             return true;
+        }
+    }
+
+    /**
+     * Redirects the user to a 404 page.
+     */
+    private void redirectTo404Page() {
+        // This will be subject to change when the error page is implemented.
+        try {
+            ExternalContext ectx = fctx.getExternalContext();
+            ectx.redirect(ectx.getRequestContextPath() + "/faces/view/public/error.xhtml");
+        } catch (IOException e) {
+            throw new InternalError("Redirection to error page failed.");
         }
     }
 
