@@ -8,6 +8,7 @@ import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
@@ -156,6 +157,17 @@ public class ReportBacker implements Serializable {
     void init() {
         currentDialog = null;
 
+        posts = new Paginator<>("created_at", Selection.PageSize.NORMAL) {
+            @Override
+            protected Iterable<Post> fetch() {
+                return reportService.getPostsFor(report, getSelection());
+            }
+
+            @Override
+            protected int totalSize() {
+                return reportService.getNumberOfPosts(report);
+            }
+        };
     }
 
     /**
