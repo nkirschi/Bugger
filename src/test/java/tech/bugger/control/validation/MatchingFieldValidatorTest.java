@@ -45,7 +45,7 @@ public class MatchingFieldValidatorTest {
 
     @Test
     public void testValidateNotEqual() {
-        doReturn("test").when(otherInputMock).getValue();
+        doReturn("test").when(otherInputMock).getSubmittedValue();
         Map<String, Object> attributes = Map.of("other-input", otherInputMock);
         doReturn(attributes).when(comp).getAttributes();
         assertThrows(ValidatorException.class, () -> matchingFieldValidator.validate(fctx, comp, "tat"));
@@ -53,16 +53,16 @@ public class MatchingFieldValidatorTest {
 
     @Test
     public void testValidateEqual() {
-        doReturn("test").when(otherInputMock).getValue();
+        doReturn("test").when(otherInputMock).getSubmittedValue();
         Map<String, Object> attributes = Map.of("other-input", otherInputMock);
         doReturn(attributes).when(comp).getAttributes();
         assertDoesNotThrow(() -> matchingFieldValidator.validate(fctx, comp, "test"));
     }
 
     @Test
-    public void testValidateValueNotLocally() {
-        doReturn(null).when(otherInputMock).getValue();
-        doReturn("test").when(otherInputMock).getSubmittedValue();
+    public void testValidateValueNotSubmitted() {
+        doReturn("test").when(otherInputMock).getValue();
+        doReturn(null).when(otherInputMock).getSubmittedValue();
         Map<String, Object> attributes = Map.of("other-input", otherInputMock);
         doReturn(attributes).when(comp).getAttributes();
         assertDoesNotThrow(() -> matchingFieldValidator.validate(fctx, comp, "test"));

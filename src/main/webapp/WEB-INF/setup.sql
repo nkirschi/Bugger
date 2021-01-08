@@ -77,11 +77,11 @@ CREATE TABLE "user" (
 -- Insert the first admin with the password 'BuggerFahrenMachtSpass42'
 INSERT INTO "user" (username, password_hash, password_salt, hashing_algorithm,
     email_address, first_name, last_name, avatar, avatar_thumbnail, biography,
-    preferred_language, profile_visibility, is_admin, forced_voting_weight)
+    profile_visibility, is_admin, forced_voting_weight)
 VALUES ('admin',
     'cb64f9739595a2eb5d58cb7a291aed0b0627f4efcbbf1a6b1c5e5864df3f6c941a0495fad7939cdd810bc74852a670ca14a9ae5033843c8d233d2a4f33b11393',
     'aa35afbed60537ff39a5be70dc1d183fbf6614ea5ce7d36c2e5f154d2d3e1706d9429f8597fb12fd4d0601391aaa5684d15d8d0078645b4946acf5512766fc25',
-    'SHA3-512', '', 'Admin', 'Istrator', '', '', '', '', 'MINIMAL', TRUE, NULL
+    'SHA3-512', '', 'Admin', 'Is Traitor', '', '', '', 'MINIMAL', TRUE, NULL
 );
 
 
@@ -95,6 +95,7 @@ CREATE TABLE token (
     value VARCHAR PRIMARY KEY,
     type token_type NOT NULL,
     "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    meta VARCHAR,
     verifies INTEGER REFERENCES "user" (id) ON DELETE CASCADE
 );
 
@@ -255,7 +256,7 @@ CREATE VIEW topic_last_activity (topic, last_activity) AS
     FROM topic AS t
     LEFT OUTER JOIN report AS r
     ON t.id = r.topic
-    JOIN report_last_activity AS l
+    LEFT OUTER JOIN report_last_activity AS l
     ON l.report = r.id
     GROUP BY t.id;
 
