@@ -5,8 +5,10 @@ import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
@@ -14,10 +16,12 @@ import tech.bugger.global.util.Log;
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -30,42 +34,134 @@ import java.util.List;
 @Named
 public class TopicBacker implements Serializable {
 
-    private static final Log log = Log.forClass(TopicBacker.class);
     @Serial
     private static final long serialVersionUID = 6893463272223847178L;
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
+    private static final Log log = Log.forClass(ProfileBacker.class);
+
+    /**
+     * ID of the currently displayed topic.
+     */
     private int topicID;
+
+    /**
+     * The currently displayed Topic.
+     */
     private Topic topic;
+
+    /**
+     * The username of the User to be banned.
+     */
     private String userToBeBanned;
+
+    /**
+     * The Username of the User to be made a moderator.
+     */
     private String userToBeModded;
+
+    /**
+     * List of users similar to the entered name, for modding porpoise.
+     */
     private List<User> userBanSuggestions;
+
+    /**
+     * List of users similar to the entered name, for banning porpoise.
+     */
     private List<User> userModSuggestions;
+
+    /**
+     * Paginator for reports in the Topic.
+     */
     private Paginator<Report> reports;
+
+    /**
+     * Paginator for moderators in this Topic.
+     */
     private Paginator<User> moderators;
+
+    /**
+     * Paginator for banned users in this Topic.
+     */
     private Paginator<User> bannedUsers;
+
+    /**
+     * Weather or not open reports should be shown in the Pagination.
+     */
     private boolean openReportShown; // default: true
+
+    /**
+     * Weather or not closed reports should be shown in the Pagination.
+     */
     private boolean closedReportShown; // default: false
 
+    /**
+     * Weather or not the Ban dialog should be shown.
+     */
     private boolean displayBanDialog;
+
+    /**
+     * Weather or not the un-ban dialog should be shown.
+     */
     private boolean displayUnbanDialog;
+
+    /**
+     * Weather or not the make mod dialog should be shown.
+     */
     private boolean displayModDialog;
+
+    /**
+     * Weather or not the un-make mod dialog should be shown.
+     */
     private boolean displayUnmodDialog;
+
+    /**
+     * Weather or not the delete topic dialog should be shown.
+     */
     private boolean displayDeleteDialog;
 
+    /**
+     * A senitized form of the description, ready for display.
+     */
+    private String sanitizedDescription;
+
+    /**
+     * The current user session.
+     */
     @Inject
     private UserSession session;
 
+    /**
+     * A transient topic service.
+     */
     @Inject
     private transient TopicService topicService;
 
+    /**
+     * A trransient report service.
+     */
     @Inject
     private transient ReportService reportService;
 
+    /**
+     * A transient search service.
+     */
     @Inject
     private transient SearchService searchService;
 
+    /**
+     * The current faces context.
+     */
     @Inject
     private FacesContext fctx;
+
+    /**
+     * The current external context.
+     */
+    @Inject
+    private ExternalContext ext;
 
     /**
      * Initializes the topic page. By default, only open reports are shown. Also checks if the user is allowed to view
@@ -73,6 +169,50 @@ public class TopicBacker implements Serializable {
      */
     @PostConstruct
     public void init() {
+        
+        /**
+        if ((!ext.getRequestParameterMap().containsKey("t"))) {
+            try {
+                ext.redirect("public/home.xhtml");
+            } catch (IOException e) {
+                throw new InternalError("Error while redirecting.", e);
+            }
+        }
+        try {
+            topicID = Integer.parseInt(ext.getRequestParameterMap().get("t"));
+        } catch (NumberFormatException e) {
+            try {
+                ext.redirect("public/home.xhtml");
+            } catch (IOException e2) {
+                throw new InternalError("Error while redirecting.", e2);
+            }
+        } **/
+
+        topicID = 1;
+
+        topic = topicService.getTopicByID(topicID);
+        if (topic == null) {
+            try {
+                ext.redirect("error.xhtml");
+            } catch (IOException e) {
+                throw new InternalError("Error while redirecting.", e);
+            }
+        }
+        displayDeleteDialog = false;
+        openReportShown = true;
+        closedReportShown = false;
+        sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
+        reports = new Paginator<>("title", Selection.PageSize.NORMAL) {
+            @Override
+            protected Iterable<Report> fetch() {
+                return topicService.getSelectedReports(topic, getSelection(), openReportShown, closedReportShown);
+            }
+
+            @Override
+            protected int totalSize() {
+                return topicService.getNumberOfReports(topic, openReportShown, closedReportShown);
+            }
+        };
     }
 
     /**
@@ -89,7 +229,7 @@ public class TopicBacker implements Serializable {
      * @param report The report in question.
      * @return The relevance.
      */
-    public int getRelevance(Report report) {
+    public int getRelevance(final Report report) {
         return 0;
     }
 
@@ -189,6 +329,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openDeleteDialog() {
+        displayDeleteDialog = true;
         return null;
     }
 
@@ -198,6 +339,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String closeDeleteDialog() {
+        displayDeleteDialog = false;
         return null;
     }
 
@@ -221,8 +363,10 @@ public class TopicBacker implements Serializable {
 
     /**
      * Irreversibly deletes the topic.
+     *
      */
     public void delete() {
+        topicService.deleteTopic(topic);
     }
 
     /**
@@ -243,7 +387,7 @@ public class TopicBacker implements Serializable {
      *
      * @param user The user to unban.
      */
-    public void unbanUser(User user) {
+    public void unbanUser(final User user) {
     }
 
     /**
@@ -259,7 +403,7 @@ public class TopicBacker implements Serializable {
      *
      * @param user The user to remove as moderator.
      */
-    public void removeModerator(User user) {
+    public void removeModerator(final User user) {
     }
 
     /**
@@ -275,7 +419,7 @@ public class TopicBacker implements Serializable {
      * @param report The report in question.
      * @return The time stamp of the last action as a {@code ZonedDateTime}.
      */
-    public ZonedDateTime lastChange(Report report) {
+    public ZonedDateTime lastChange(final Report report) {
         return null;
     }
 
@@ -289,7 +433,7 @@ public class TopicBacker implements Serializable {
     /**
      * @param topic The topic to set.
      */
-    public void setTopic(Topic topic) {
+    public void setTopic(final Topic topic) {
         this.topic = topic;
     }
 
@@ -303,7 +447,7 @@ public class TopicBacker implements Serializable {
     /**
      * @param userToBeBanned The userToBeBanned to set.
      */
-    public void setUserToBeBanned(String userToBeBanned) {
+    public void setUserToBeBanned(final String userToBeBanned) {
         this.userToBeBanned = userToBeBanned;
     }
 
@@ -317,7 +461,7 @@ public class TopicBacker implements Serializable {
     /**
      * @param userToBeModded The userToBeModded to set.
      */
-    public void setUserToBeModded(String userToBeModded) {
+    public void setUserToBeModded(final String userToBeModded) {
         this.userToBeModded = userToBeModded;
     }
 
@@ -352,7 +496,7 @@ public class TopicBacker implements Serializable {
     /**
      * @param showOpenReports The showOpenReports to set.
      */
-    public void setOpenReportShown(boolean showOpenReports) {
+    public void setOpenReportShown(final boolean showOpenReports) {
         this.openReportShown = showOpenReports;
     }
 
@@ -366,8 +510,15 @@ public class TopicBacker implements Serializable {
     /**
      * @param showClosedReports The showClosedReports to set.
      */
-    public void setClosedReportShown(boolean showClosedReports) {
+    public void setClosedReportShown(final boolean showClosedReports) {
         this.closedReportShown = showClosedReports;
+    }
+
+    /**
+     * @return the sanitized description
+     */
+    public String getSanitizedDescription() {
+        return sanitizedDescription;
     }
 
     /**
@@ -380,7 +531,7 @@ public class TopicBacker implements Serializable {
     /**
      * @param session the session to set
      */
-    public void setSession(UserSession session) {
+    public void setSession(final UserSession session) {
         this.session = session;
     }
 
@@ -394,7 +545,7 @@ public class TopicBacker implements Serializable {
     /**
      * @param topicService the topicService to set
      */
-    public void setTopicService(TopicService topicService) {
+    public void setTopicService(final TopicService topicService) {
         this.topicService = topicService;
     }
 
@@ -408,7 +559,7 @@ public class TopicBacker implements Serializable {
     /**
      * @param topicID The topicID to set.
      */
-    public void setTopicID(int topicID) {
+    public void setTopicID(final int topicID) {
         this.topicID = topicID;
     }
 
@@ -457,7 +608,7 @@ public class TopicBacker implements Serializable {
     /**
      * @param userBanSuggestions The userBanSuggestions to set.
      */
-    public void setUserBanSuggestions(List<User> userBanSuggestions) {
+    public void setUserBanSuggestions(final List<User> userBanSuggestions) {
         this.userBanSuggestions = userBanSuggestions;
     }
 
@@ -471,7 +622,7 @@ public class TopicBacker implements Serializable {
     /**
      * @param userModSuggestions The userModSuggestions to set.
      */
-    public void setUserModSuggestions(List<User> userModSuggestions) {
+    public void setUserModSuggestions(final List<User> userModSuggestions) {
         this.userModSuggestions = userModSuggestions;
     }
 }

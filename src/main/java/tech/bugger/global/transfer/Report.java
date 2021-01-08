@@ -51,7 +51,6 @@ public class Report implements Serializable {
         SEVERE
     }
 
-
     private int id;
     private String title;
     private Type type;
@@ -91,6 +90,12 @@ public class Report implements Serializable {
         this.topic = topic;
     }
 
+    /**
+     * Constructs an empty report.
+     */
+    public Report() {
+        this(0, "", Type.BUG, Severity.MINOR, "", new Authorship(null, null, null, null), null, null, null, 0);
+    }
 
     /**
      * Returns the ID of this report.
