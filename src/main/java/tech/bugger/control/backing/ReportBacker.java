@@ -6,9 +6,7 @@ import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
-import tech.bugger.global.transfer.Post;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.*;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
@@ -16,6 +14,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -155,8 +154,29 @@ public class ReportBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        // TODO : reportID Übergabe-Gedöns richtig
+        reportID = 100;
+        // TODO getReportByID
+        report = new Report();
+        report.setId(reportID);
+        report.setAuthorship(new Authorship(null, null, null, null));
+        User user = session.getUser();
+        boolean maySee = false;
+        // TODO add proper checks for mods, banned users
+        if (applicationSettings.getConfiguration().isGuestReading()) {
+            maySee = true;
+        } else if (user != null) {
+            maySee = true;
+        }
+        // TODO proper redirect
+        if (!maySee) {
+            try {
+                fctx.getExternalContext().redirect("pretty:home");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         currentDialog = null;
-
         posts = new Paginator<>("created_at", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Post> fetch() {
