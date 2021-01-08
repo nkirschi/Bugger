@@ -48,7 +48,7 @@ public class ReportCreateBacker implements Serializable {
     /**
      * The ID of the topic to create the report in.
      */
-    private int topicID;
+    private Integer topicID;
 
     /**
      * The report to create.
@@ -149,14 +149,15 @@ public class ReportCreateBacker implements Serializable {
      * not exist.
      */
     public void init() {
+        if (topicID == null) {
+            redirectTo404Page();
+            return;
+        }
+
         User user = session.getUser();
         Topic topic = topicService.getTopicByID(topicID);
         if (user == null || topic == null || topicService.isBanned(user, topic)) {
-            // TODO: What means acting "as if the page did not exist"?
-            try {
-                ectx.redirect(ectx.getRequestContextPath() + "/some/404/page.xhtml");
-            } catch (IOException e) {
-            }
+            redirectTo404Page();
             return;
         }
 
@@ -223,6 +224,18 @@ public class ReportCreateBacker implements Serializable {
     }
 
     /**
+     * Redirects the user to a 404 page.
+     */
+    private void redirectTo404Page() {
+        // This will be subject to change when the error page is implemented.
+        try {
+            ectx.redirect(ectx.getRequestContextPath() + "/faces/view/public/error.xhtml");
+        } catch (IOException e) {
+            throw new InternalError("Redirection to error page failed.");
+        }
+    }
+
+    /**
      * Checks if the user is banned from the topic they want to create the report in.
      *
      * @return {@code true} iff the user is banned.
@@ -236,7 +249,7 @@ public class ReportCreateBacker implements Serializable {
      *
      * @return The ID of the topic the report is to be created in.
      */
-    public int getTopicID() {
+    public Integer getTopicID() {
         return topicID;
     }
 
@@ -245,7 +258,7 @@ public class ReportCreateBacker implements Serializable {
      *
      * @param topicID The ID of the topic the report is to be created in.
      */
-    public void setTopicID(final int topicID) {
+    public void setTopicID(final Integer topicID) {
         this.topicID = topicID;
     }
 
