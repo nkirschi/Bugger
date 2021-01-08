@@ -155,6 +155,7 @@ public class ReportCreateBacker implements Serializable {
         } catch (NumberFormatException e) {
             // Topic ID parameter not given or invalid.
             redirectTo404Page();
+            return;
         }
 
         User user = session.getUser();
