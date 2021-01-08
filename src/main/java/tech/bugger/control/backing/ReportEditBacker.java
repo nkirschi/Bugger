@@ -10,6 +10,7 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
@@ -125,8 +126,16 @@ public class ReportEditBacker implements Serializable {
      * Initializes the report edit page. Loads the report to be edited and checks if the user is allowed to edit the
      * report. If this is not the case, acts as if the page did not exist.
      */
-    public void init() {
-        reportID = 104; // Use fixed ID to at least display page with contents. TODO: Remove
+    @PostConstruct
+    void init() {
+        try {
+            reportID = Integer.parseInt(fctx.getExternalContext().getRequestParameterMap().get("id"));
+        } catch (NumberFormatException e) {
+            // Report ID parameter not given or invalid.
+            redirectTo404Page();
+            return;
+        }
+
         report = reportService.getReportByID(reportID);
         if (report != null) {
             destinationID = report.getTopic();

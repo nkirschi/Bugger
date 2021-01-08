@@ -68,7 +68,7 @@ public class ReportDBGateway implements ReportGateway {
     @Override
     public Report find(final int id) throws NotFoundException {
         try (PreparedStatement stmt = conn.prepareStatement(
-                "SELECT * FROM report WHERE id = ?"
+                "SELECT * FROM report WHERE id = ?;"
         )) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(id)
