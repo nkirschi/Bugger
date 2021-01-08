@@ -169,7 +169,7 @@ public class TopicBacker implements Serializable {
      */
     @PostConstruct
     public void init() {
-        
+
         /**
         if ((!ext.getRequestParameterMap().containsKey("t"))) {
             try {
@@ -220,7 +220,7 @@ public class TopicBacker implements Serializable {
      *
      * @param feedback The feedback with details on what to display.
      */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
+    public void displayFeedback(@Observes @Any final Feedback feedback) {
     }
 
     /**

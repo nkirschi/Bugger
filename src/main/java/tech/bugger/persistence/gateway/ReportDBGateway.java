@@ -1,7 +1,10 @@
 package tech.bugger.persistence.gateway;
 
-import tech.bugger.global.transfer.*;
-import tech.bugger.global.util.Lazy;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
@@ -22,19 +25,28 @@ import java.util.Optional;
  */
 public class ReportDBGateway implements ReportGateway {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(ReportDBGateway.class);
 
-    private Connection conn;
+    /**
+     * The Gateway Connection
+     */
+    private final Connection conn;
 
-
-    private UserGateway userGateway;
+    /**
+     * A user gateway for further querys.
+     */
+    private final UserGateway userGateway;
 
     /**
      * Constructs a new report gateway with the given database connection.
      *
      * @param conn The database connection to use for the gateway.
+     * @param userGateway The user gateway for further querys.
      */
-    public ReportDBGateway(Connection conn, UserGateway userGateway) {
+    public ReportDBGateway(final Connection conn, final UserGateway userGateway) {
         this.userGateway = userGateway;
         this.conn = conn;
     }
@@ -43,7 +55,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfPosts(Report report) {
+    public int getNumberOfPosts(final Report report) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -52,7 +64,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public Report getReportByID(int id) {
+    public Report getReportByID(final int id) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -61,8 +73,8 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<Report> getSelectedReports(Topic topic, Selection selection, boolean showOpenReports,
-                                           boolean showClosedReports) {
+    public List<Report> getSelectedReports(final Topic topic, final Selection selection, final boolean showOpenReports,
+                                           final boolean showClosedReports) {
         log.info("searching for Reports");
         List<Report> selectedReports = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"report\" WHERE topic = ?")) {
@@ -79,7 +91,7 @@ public class ReportDBGateway implements ReportGateway {
         return selectedReports;
     }
 
-    private Report getReportFromResultSet(ResultSet rs) throws SQLException, NotFoundException {
+    private Report getReportFromResultSet(final ResultSet rs) throws SQLException, NotFoundException {
         Report report = new Report();
         report.setId(rs.getInt("id"));
         report.setTitle(rs.getString("title"));
@@ -121,7 +133,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void createReport(Report report) {
+    public void createReport(final Report report) {
         // TODO Auto-generated method stub
 
     }
@@ -130,7 +142,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void updateReport(Report report) {
+    public void updateReport(final Report report) {
         // TODO Auto-generated method stub
 
     }
@@ -139,7 +151,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void deleteReport(Report report) {
+    public void deleteReport(final Report report) {
         // TODO Auto-generated method stub
 
     }
@@ -148,7 +160,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void closeReport(Report report) {
+    public void closeReport(final Report report) {
         // TODO Auto-generated method stub
 
     }
@@ -157,7 +169,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void openReport(Report report) {
+    public void openReport(final Report report) {
         // TODO Auto-generated method stub
 
     }
@@ -166,7 +178,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void moveReport(Report report, Topic destination) {
+    public void moveReport(final Report report, final Topic destination) {
         // TODO Auto-generated method stub
 
     }
@@ -175,7 +187,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void markDuplicate(Report duplicate, int originalID) {
+    public void markDuplicate(final Report duplicate, final int originalID) {
         // TODO Auto-generated method stub
 
     }
@@ -184,7 +196,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void unmarkDuplicate(Report report) {
+    public void unmarkDuplicate(final Report report) {
         // TODO Auto-generated method stub
 
     }
@@ -193,7 +205,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void overwriteRelevance(Report report, Optional<Integer> relevance) {
+    public void overwriteRelevance(final Report report, final Optional<Integer> relevance) {
         // TODO Auto-generated method stub
 
     }
@@ -202,7 +214,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void upvote(Report report, User user) {
+    public void upvote(final Report report, final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -211,7 +223,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void downvote(Report report, User user) {
+    public void downvote(final Report report, final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -220,7 +232,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void removeVote(Report report, User user) {
+    public void removeVote(final Report report, final User user) {
         // TODO Auto-generated method stub
 
     }
