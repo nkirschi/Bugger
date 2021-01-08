@@ -1,11 +1,14 @@
 package tech.bugger.persistence.gateway;
 
+import com.ocpsoft.pretty.faces.util.StringUtils;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
@@ -17,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,16 +28,22 @@ import java.util.List;
  */
 public class TopicDBGateway implements TopicGateway {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(TopicDBGateway.class);
 
-    private Connection conn;
+    /**
+     * Database connection used by this gateway.
+     */
+    private final Connection conn;
 
     /**
      * Constructs a new topic gateway with the given database connection.
      *
      * @param conn The database connection to use for the gateway.
      */
-    public TopicDBGateway(Connection conn) {
+    public TopicDBGateway(final Connection conn) {
         this.conn = conn;
     }
 
@@ -53,7 +63,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfReports(Topic topic, boolean showOpenReports, boolean showClosedReports) {
+    public int getNumberOfReports(final Topic topic, boolean showOpenReports, boolean showClosedReports) {
         int numberOfReports = 0;
         if (showOpenReports) {
             try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM report WHERE topic = ? AND closed_at IS NULL;")) {
@@ -90,7 +100,25 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfTopics() {
+    public int countTopics() {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM topic;")) {
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                throw new InternalError("Could not count the number of topics.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while retrieving number of topics.", e);
+            throw new StoreException("Error while retrieving number of topics.", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int countModerators(final Topic topic) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -99,16 +127,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfModerators(Topic topic) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getNumberOfBannedUsers(Topic topic) {
+    public int countBannedUsers(final Topic topic) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -120,7 +139,7 @@ public class TopicDBGateway implements TopicGateway {
     public Topic getTopicByID(int id) throws NotFoundException {
         Topic topic;
 
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"topic\" WHERE id = ?")) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM topic WHERE id = ?")) {
             ResultSet rs = new StatementParametrizer(stmt).integer(id).toStatement().executeQuery();
 
             if (rs.next()) {
@@ -140,16 +159,45 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<Topic> getSelectedTopics(Selection selection) {
-        // TODO Auto-generated method stub
-        return null;
+    public List<Topic> selectTopics(final Selection selection) {
+        if (selection == null) {
+            log.error("Error when trying to get topics with selection null.");
+            throw new IllegalArgumentException("Selection cannot be null.");
+        } else if (StringUtils.isBlank(selection.getSortedBy())) {
+            log.error("Error when trying to get topics sorted by nothing.");
+            throw new IllegalArgumentException("Cannot sort by nothing.");
+        }
+
+        String sql = "SELECT t.*, l.last_activity FROM topic AS t"
+                + " LEFT OUTER JOIN topic_last_activity AS l ON t.id = l.topic"
+                + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
+                + " LIMIT " + selection.getPageSize().getSize()
+                + " OFFSET " + selection.getCurrentPage() * selection.getPageSize().getSize() + ";";
+
+        List<Topic> selectedTopics = new ArrayList<>(Math.max(0, selection.getTotalSize()));
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                ZonedDateTime lastActivity = null;
+                if (rs.getTimestamp("last_activity") != null) {
+                    lastActivity = rs.getTimestamp("last_activity").toInstant().atZone(ZoneId.systemDefault());
+                }
+                selectedTopics.add(new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description"),
+                        lastActivity));
+            }
+        } catch (SQLException e) {
+            log.error("Error while retrieving topics with " + selection + ".", e);
+            throw new StoreException("Error while retrieving topics with " + selection + ".", e);
+        }
+
+        return selectedTopics;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void createTopic(Topic topic) {
+    public void createTopic(final Topic topic) {
         // TODO Auto-generated method stub
 
     }
@@ -158,7 +206,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void updateTopic(Topic topic) {
+    public void updateTopic(final Topic topic) {
         // TODO Auto-generated method stub
 
     }
@@ -167,7 +215,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void deleteTopic(Topic topic) {
+    public void deleteTopic(final Topic topic) {
         try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM \"topic\" WHERE id = ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(topic.getId()).toStatement().executeQuery();
@@ -181,7 +229,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void banUser(Topic topic, User user) {
+    public void banUser(final Topic topic, final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -190,7 +238,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void unbanUser(Topic topic, User user) {
+    public void unbanUser(final Topic topic, final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -199,7 +247,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void makeModerator(Topic topic, User user) {
+    public void promoteModerator(final Topic topic, final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -208,7 +256,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void removeModerator(Topic topic, User user) {
+    public void demoteModerator(final Topic topic, final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -217,16 +265,41 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public ZonedDateTime getLastChangeTimestamp(Topic topic) {
-        // TODO Auto-generated method stub
-        return null;
+    public ZonedDateTime determineLastActivity(final Topic topic) throws NotFoundException {
+        if (topic == null) {
+            log.error("Error when trying to determine last activity in topic null.");
+            throw new IllegalArgumentException("Topic must not be null!");
+        } else if (topic.getId() == null) {
+            log.error("Error when trying to determine last activity in topic with ID null.");
+            throw new IllegalArgumentException("Topic ID must not be null!");
+        }
+
+        ZonedDateTime lastActivity = null;
+        String sql = "SELECT * FROM topic_last_activity WHERE topic =" + topic.getId();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getTimestamp("last_activity") != null) {
+                    lastActivity = rs.getTimestamp("last_activity").toInstant().atZone(ZoneId.systemDefault());
+                }
+            } else {
+                log.error("Topic " + topic + " could not be found when trying to determine last activity.");
+                throw new NotFoundException("Topic " + topic
+                        + " could not be found when trying to determine last activity.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while determining last activity in topic " + topic, e);
+            throw new StoreException("Error while determining last activity in topic " + topic, e);
+        }
+
+        return lastActivity;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfSubscribers(Topic topic) {
+    public int countSubscribers(final Topic topic) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -235,7 +308,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfPosts(Topic topic) {
+    public int countPosts(final Topic topic) {
         // TODO Auto-generated method stub
         return 0;
     }

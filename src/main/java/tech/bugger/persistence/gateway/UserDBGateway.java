@@ -9,6 +9,14 @@ import java.sql.Types;
 import java.time.ZoneId;
 import java.util.List;
 import tech.bugger.global.transfer.Language;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.time.ZoneId;
+import java.util.List;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
@@ -265,7 +273,7 @@ public class UserDBGateway implements UserGateway {
                     .toStatement().executeUpdate();
 
             if (changedRows == 0) {
-                log.error("No user with id " + user.getId() + " could be found in the database");
+                log.error("No user with id " + user.getId() + " could be found in the database.");
                 throw new NotFoundException("No user with id " + user.getId() + " could be found in the database.");
             }
         } catch (SQLException e) {
@@ -278,8 +286,17 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public void deleteUser(final User user) {
-        // TODO Auto-generated method stub
+    public void deleteUser(final User user) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM \"user\" WHERE id = ?;")) {
+            int modified = new StatementParametrizer(stmt).integer(user.getId()).toStatement().executeUpdate();
+            if (modified == 0) {
+                log.debug("The user with the id " + user.getId() + " has already been deleted.");
+                throw new NotFoundException("The user with the id " + user.getId() + " has already been deleted.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while deleting the user with id " + user.getId(), e);
+            throw new StoreException("Error while deleting the user with id " + user.getId(), e);
+        }
     }
 
     /**

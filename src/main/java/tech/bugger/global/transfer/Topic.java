@@ -2,29 +2,43 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
 /**
  * DTO representing a topic.
  */
 public class Topic implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 6600990552933685863L;
 
     /**
-     * The id of the post.
+     * The unique ID of a topic.
      */
-    private int id;
+    private Integer id;
 
     /**
-     * The title of the post.
+     * The title.
      */
     private String title;
 
     /**
-     * A short description of this topics purpose.
+     * The description.
      */
     private String description;
+
+    /**
+     * The point in time of the last activity in the topic.
+     */
+    private ZonedDateTime lastActivity;
+
+    /**
+     * Constructs an empty topic.
+     */
+    public Topic() {
+        this(null, null, null, null);
+    }
 
     /**
      * Constructs a new topic from the specified parameters.
@@ -33,10 +47,23 @@ public class Topic implements Serializable {
      * @param title       The topic title.
      * @param description The topic description.
      */
-    public Topic(final int id, final String title, final String description) {
+    public Topic(final Integer id, final String title, final String description) {
+        this(id, title, description, null);
+    }
+
+    /**
+     * Constructs a new topic from the specified parameters.
+     *
+     * @param id The topic ID.
+     * @param title The topic title.
+     * @param description The topic description.
+     * @param lastActivity The time of the last activity in the topic.
+     */
+    public Topic(final Integer id, final String title, final String description, final ZonedDateTime lastActivity) {
         this.id = id;
         this.title = title;
         this.description = description;
+        this.lastActivity = lastActivity;
     }
 
     /**
@@ -44,7 +71,7 @@ public class Topic implements Serializable {
      *
      * @return The topic ID.
      */
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -53,7 +80,7 @@ public class Topic implements Serializable {
      *
      * @param id The topic ID to be set.
      */
-    public void setId(final int id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
@@ -94,21 +121,39 @@ public class Topic implements Serializable {
     }
 
     /**
+     * Returns the last activity of this topic.
+     *
+     * @return The last activity.
+     */
+    public ZonedDateTime getLastActivity() {
+        return lastActivity;
+    }
+
+    /**
+     * Sets the last activity of this topic.
+     *
+     * @param lastActivity The last activity to be set.
+     */
+    public void setLastActivity(final ZonedDateTime lastActivity) {
+        this.lastActivity = lastActivity;
+    }
+
+    /**
      * Indicates whether some {@code other} topic is semantically equal to this topic.
      *
      * @param other The object to compare this topic to.
-     * @return {@code true} if {@code other} is a semantically equivalent topic.
+     * @return {@code true} iff {@code other} is a semantically equivalent topic.
      */
     @Override
     public boolean equals(final Object other) {
-        if (other == this) {
+        if (this == other) {
             return true;
         }
         if (!(other instanceof Topic)) {
             return false;
         }
-        Topic o = (Topic) other;
-        return o.id == id;
+        Topic topic = (Topic) other;
+        return Objects.equals(this.id, topic.id);
     }
 
     /**
@@ -119,7 +164,7 @@ public class Topic implements Serializable {
      */
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hash(id);
     }
 
     /**
@@ -129,7 +174,8 @@ public class Topic implements Serializable {
      */
     @Override
     public String toString() {
-        return title + " (" + id + "): " + description.substring(0, 100);
+        return "Topic{" + "ID = " + id + ", title = " + title + ", description = "
+                + String.format("%.100s", description) + ", last activity = " + lastActivity + '}';
     }
 
 }

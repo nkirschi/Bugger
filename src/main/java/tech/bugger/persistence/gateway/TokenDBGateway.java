@@ -53,12 +53,13 @@ public class TokenDBGateway implements TokenGateway {
 
         Token ret;
 
-        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO token (value, type, verifies) "
-                + "VALUES (?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO token (value, type, meta, verifies) "
+                + "VALUES (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS)) {
 
             new StatementParametrizer(stmt)
                     .string(token.getValue())
                     .object(token.getType(), Types.OTHER)
+                    .string(token.getMeta())
                     .integer(token.getUser().getId())
                     .toStatement().executeUpdate();
 
@@ -96,7 +97,7 @@ public class TokenDBGateway implements TokenGateway {
             if (rs.next()) {
                 token = new Token(rs.getString("value"), Token.Type.valueOf(rs.getString("type")),
                         rs.getTimestamp("timestamp").toLocalDateTime().atZone(ZoneId.systemDefault()),
-                        UserDBGateway.getUserFromResultSet(rs));
+                        rs.getString("meta"), UserDBGateway.getUserFromResultSet(rs));
             } else {
                 log.error("Searched token by value could not be found.");
                 throw new NotFoundException("Searched token by value could not be found!");

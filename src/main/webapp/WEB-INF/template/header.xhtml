@@ -46,10 +46,10 @@
         </h:panelGroup>
     </h:panelGroup>
     <!-- TODO style these like buttons -->
-    <h:panelGroup id="p-authentication" rendered="#{userSession.user == null}">
+    <h:panelGroup id="p-authentication" rendered="#{userSession.user == null}" styleClass="align-right">
         <!-- TODO add login outcome -->
-        <h:link id="l-login" value="#{labels.login}" styleClass="btn btn-primary" outcome="/view/public/home"/>
-        <h:button id="b-register" value="#{labels.register}" styleClass="btn btn-primary" outcome="pretty:register"/>
+        <h:link id="l-login" value="#{labels.login}" styleClass="button btn btn-primary" outcome="pretty:login"/>
+        <h:button id="b-register" value="#{labels.register}" styleClass="button btn btn-primary" outcome="pretty:register"/>
     </h:panelGroup>
 </ui:composition>
 </html>

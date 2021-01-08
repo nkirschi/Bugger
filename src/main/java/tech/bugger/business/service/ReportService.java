@@ -19,7 +19,6 @@ public class ReportService {
 
     private static final Log log = Log.forClass(ReportService.class);
 
-    @Inject
     NotificationService notificationService;
 
     @Inject

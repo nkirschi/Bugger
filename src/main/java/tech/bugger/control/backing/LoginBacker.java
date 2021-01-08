@@ -2,13 +2,11 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -20,34 +18,73 @@ import javax.inject.Named;
 @Named
 public class LoginBacker {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(LoginBacker.class);
 
+    /**
+     * The user that is being logged in.
+     */
     private User user;
+
+    /**
+     * The URL to which the user will be redirected after log in, if present.
+     */
     private String redirectURL;
 
-    @Inject
-    private AuthenticationService authenticationService;
+    /**
+     * The user's username input.
+     */
+    private String username;
 
-    @Inject
-    private UserSession session;
+    /**
+     * The user's password input.
+     */
+    private String password;
 
+    /**
+     * The service providing access to workflows regarding authentication.
+     */
+    private final AuthenticationService authenticationService;
+
+    /**
+     * The current user session.
+     */
+    private final UserSession session;
+
+    /**
+     * The current faces context.
+     */
+    private final FacesContext fctx;
+
+    /**
+     * Constructs a new login page backing bean with the necessary dependencies.
+     *
+     * @param authenticationService The authentication service to use.
+     * @param session               The current {@link UserSession}.
+     * @param fctx                  The current faces context.
+     */
     @Inject
-    private FacesContext fctx;
+    public LoginBacker(final AuthenticationService authenticationService, final UserSession session,
+                       final FacesContext fctx) {
+        this.authenticationService = authenticationService;
+        this.session = session;
+        this.fctx = fctx;
+    }
 
     /**
      * Initializes the login page. If a user is already logged in, they are redirected to the home page.
      */
-    public void init() {
+    @PostConstruct
+    void init() {
+        if (session.getUser() != null) {
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+        }
 
-    }
+        String url = fctx.getExternalContext().getRequestParameterMap().get("url");
 
-    /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
-     *
-     * @param feedback The feedback with details on what to display.
-     */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
-
+        redirectURL = (url != null) ? url : "home";
     }
 
     /**
@@ -57,7 +94,12 @@ public class LoginBacker {
      * @return the name of the page to be redirected to.
      */
     public String login() {
-        return null;
+        user = authenticationService.authenticate(username, password);
+        if (user == null) {
+            return null;
+        }
+        session.setUser(user);
+        return redirectURL;
     }
 
     /**
@@ -70,7 +112,7 @@ public class LoginBacker {
     /**
      * @param redirectURL The redirectURL to set.
      */
-    public void setRedirectURL(String redirectURL) {
+    public void setRedirectURL(final String redirectURL) {
         this.redirectURL = redirectURL;
     }
 
@@ -84,8 +126,40 @@ public class LoginBacker {
     /**
      * @param user The user to set.
      */
-    public void setUser(User user) {
+    public void setUser(final User user) {
         this.user = user;
+    }
+
+    /**
+     * @return The username.
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * Sets the username the user enters in the login form..
+     *
+     * @param username The user's username.
+     */
+    public void setUsername(final String username) {
+        this.username = username;
+    }
+
+    /**
+     * @return The password.
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Sets the un-hashed password the user enters in the login form..
+     *
+     * @param password The user's password.
+     */
+    public void setPassword(final String password) {
+        this.password = password;
     }
 
 }
