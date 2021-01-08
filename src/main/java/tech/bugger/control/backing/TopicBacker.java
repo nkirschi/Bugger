@@ -127,6 +127,7 @@ public class TopicBacker implements Serializable {
 
             @Override
             protected int totalSize() {
+                System.out.println("Einträge: " + topicService.getNumberOfReports(topic, openReportShown, closedReportShown));
                 return topicService.getNumberOfReports(topic, openReportShown, closedReportShown);
             }
         };

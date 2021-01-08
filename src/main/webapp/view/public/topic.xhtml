@@ -45,25 +45,25 @@
                 <b:pagitable paginator="#{topicBacker.reports}">
                     <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
                     <b:column title="#{labels.col_id}" paginator="#{topicBacker.reports}" key="id">
-                        <h:outputText value="#{var}"/>
+                        <h:outputText value="#{var.id}"/>
                     </b:column>
                     <b:column title="#{labels.col_title}" paginator="#{topicBacker.reports}" key="title">
-                        <h:outputText value="#{var}"/>
+                        <h:outputText value="#{var.title}"/>
                     </b:column>
                     <b:column title="#{labels.col_type}}" paginator="#{topicBacker.reports}" key="type">
-                        <h:outputText value="#{var}"/>
+                        <h:outputText value="#{var.type}"/>
                     </b:column>
                     <b:column title="#{labels.col_severity}" paginator="#{topicBacker.reports}" key="severity">
-                        <h:outputText value="#{var}"/>
+                        <h:outputText value="#{var.severity}"/>
                     </b:column>
                     <b:column title="#{labels.col_version}" paginator="#{topicBacker.reports}" key="version">
-                        <h:outputText value="#{var}"/>
+                        <h:outputText value="#{var.version}"/>
                     </b:column>
                     <b:column title="#{labels.col_duplicate}" paginator="#{topicBacker.reports}" key="duplicate_of">
-                        <h:outputText value="#{var}"/>
+                        <h:outputText value="#{var.duplicateOf}"/>
                     </b:column>
                     <b:column title="#{labels.col_relevance}" paginator="#{topicBacker.reports}" key="forced_relevance" >
-                        <h:outputText value="#{var}"/>
+                        <h:outputText value="#{var.forcedRelevance}"/>
                     </b:column>
                     <b:column title="#{labels.col_change}" paginator="#{topicBacker.reports}" key="last_modified">
                         <h:outputText value="#{var.authorship.modifier}"/>
