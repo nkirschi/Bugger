@@ -3,15 +3,13 @@ package tech.bugger.control.backing;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.NotificationService;
 import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Notification;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -25,54 +23,89 @@ import java.time.ZonedDateTime;
 @ViewScoped
 @Named
 public class HomeBacker implements Serializable {
-    @Serial
-    private static final long serialVersionUID = -6982333692294902179L;
+
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(HomeBacker.class);
 
+    @Serial
+    private static final long serialVersionUID = -6982333692294902179L;
+
+    /**
+     * The paginated inbox containing all notifications for the user.
+     */
     private Paginator<Notification> inbox;
+
+    /**
+     * The paginated list of all topics.
+     */
     private Paginator<Topic> topics;
-    private Notification notificationToBeDeleted;
-    private Notification notificationRead;
 
-    @Inject
-    private UserSession session;
+    /**
+     * The session containing the currently logged in user.
+     */
+    private final UserSession session;
 
-    @Inject
-    private transient NotificationService notificationService;
+    /**
+     * The service performing tasks concerning notifications.
+     */
+    private final NotificationService notificationService;
 
+    /**
+     * The service performing tasks concerning topics.
+     */
+    private final TopicService topicService;
+
+    /**
+     * Constructs a new home page backing bean.
+     *
+     * @param session The current user session.
+     * @param notificationService The notification service to use.
+     * @param topicService The topic service to use.
+     */
     @Inject
-    private transient TopicService topicService;
+    public HomeBacker(final UserSession session, final NotificationService notificationService,
+                      final TopicService topicService) {
+        this.session = session;
+        this.notificationService = notificationService;
+        this.topicService = topicService;
+    }
 
     /**
      * Initializes the paginators for notifications and topics as inner classes.
      */
     @PostConstruct
-    public void init() {
+    void init() {
+        topics = new Paginator<>("title", Selection.PageSize.NORMAL) {
+            @Override
+            protected Iterable<Topic> fetch() {
+                return topicService.selectTopics(getSelection());
+            }
 
+            @Override
+            protected int totalSize() {
+                return topicService.countTopics();
+            }
+        };
     }
 
     /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
+     * Irreversibly deletes the notification.
      *
-     * @param feedback The feedback with details on what to display.
+     * @param notification The notification to be deleted.
      */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
+    public void deleteNotification(final Notification notification) {
 
     }
 
     /**
-     * Irreversibly deletes the current {@code notificationToBeDeleted}.
-     */
-    public void deleteNotification() {
-
-    }
-
-    /**
-     * Marks the current {@code notificationRead} as read.
+     * Marks the notification as read and redirects the user to the area of interest.
      *
+     * @param notification The notification to be opened.
      * @return A String that is used to redirect a user to the post of the opened notification.
      */
-    public String openNotification() {
+    public String openNotification(final Notification notification) {
         return null;
     }
 
@@ -82,7 +115,7 @@ public class HomeBacker implements Serializable {
      * @param topic The topic in question.
      * @return {@code true} if the user is subscribed to the topic, {@code false} otherwise.
      */
-    public boolean isSubscribed(Topic topic) {
+    public boolean isSubscribed(final Topic topic) {
         return false;
     }
 
@@ -93,8 +126,8 @@ public class HomeBacker implements Serializable {
      * @param topic The topic in question.
      * @return The time stamp of the last action as a {@code ZonedDateTime}.
      */
-    public ZonedDateTime lastChange(Topic topic) {
-        return null;
+    public ZonedDateTime lastChange(final Topic topic) {
+        return topicService.lastChange(topic);
     }
 
     /**
@@ -111,31 +144,4 @@ public class HomeBacker implements Serializable {
         return topics;
     }
 
-    /**
-     * @return The notificationToBeDeleted.
-     */
-    public Notification getNotificationToBeDeleted() {
-        return notificationToBeDeleted;
-    }
-
-    /**
-     * @param notificationToBeDeleted The notificationToBeDeleted to set.
-     */
-    public void setNotificationToBeDeleted(Notification notificationToBeDeleted) {
-        this.notificationToBeDeleted = notificationToBeDeleted;
-    }
-
-    /**
-     * @return The notificationRead.
-     */
-    public Notification getNotificationRead() {
-        return notificationRead;
-    }
-
-    /**
-     * @param notificationRead The notificationRead to set.
-     */
-    public void setNotificationRead(Notification notificationRead) {
-        this.notificationRead = notificationRead;
-    }
 }

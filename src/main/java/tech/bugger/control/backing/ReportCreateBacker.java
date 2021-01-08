@@ -25,7 +25,6 @@ import javax.servlet.http.Part;
 import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -48,7 +47,7 @@ public class ReportCreateBacker implements Serializable {
     /**
      * The ID of the topic to create the report in.
      */
-    private Integer topicID;
+    private int topicID;
 
     /**
      * The report to create.
@@ -149,9 +148,13 @@ public class ReportCreateBacker implements Serializable {
      * not exist.
      */
     public void init() {
-        if (topicID == null) {
+        try {
+            String param = ectx.getRequestParameterMap().get("id");
+            System.out.println(param);
+            topicID = Integer.parseInt(param);
+        } catch (NumberFormatException e) {
+            // Topic ID parameter not given or invalid.
             redirectTo404Page();
-            return;
         }
 
         User user = session.getUser();
@@ -178,7 +181,7 @@ public class ReportCreateBacker implements Serializable {
      */
     public String create() {
         if (reportService.createReport(report, firstPost)) {
-            return "report.xhtml?r=" + report.getId();
+            return "report.xhtml?id=" + report.getId();
         } else {
             return null;
         }
@@ -249,7 +252,7 @@ public class ReportCreateBacker implements Serializable {
      *
      * @return The ID of the topic the report is to be created in.
      */
-    public Integer getTopicID() {
+    public int getTopicID() {
         return topicID;
     }
 
@@ -258,7 +261,7 @@ public class ReportCreateBacker implements Serializable {
      *
      * @param topicID The ID of the topic the report is to be created in.
      */
-    public void setTopicID(final Integer topicID) {
+    public void setTopicID(final int topicID) {
         this.topicID = topicID;
     }
 
