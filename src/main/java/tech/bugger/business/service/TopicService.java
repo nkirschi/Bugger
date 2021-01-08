@@ -1,4 +1,5 @@
 package tech.bugger.business.service;
+
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Report;
@@ -15,6 +16,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -387,6 +389,22 @@ public class TopicService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return lastChange;
+    }
+
+    /**
+     * Discover all topics in the system.
+     * @return A list of all topic titles.
+     */
+    public List<String> discoverTopics() {
+        List<String> topicTitles = Collections.emptyList();
+        try (Transaction tx = transactionManager.begin()) {
+            topicTitles = tx.newTopicGateway().discoverTopics();
+            tx.commit();
+        }catch (TransactionException e) {
+            log.error("Error when fetching top ten users.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return topicTitles;
     }
 
 }
