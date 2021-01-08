@@ -20,13 +20,14 @@
     <h:body>
         <h:panelGroup layout="block">
             <ui:include src="/WEB-INF/template/header.xhtml" id="header"/>
-            <h:panelGroup styleClass="titlebar" id="titlebar">
-                <h:outputLabel value="#{title}" styleClass="h1" id="title"/>
+            <h:panelGroup layout="block"
+                          id="messages"
+                          styleClass="alert#{headerBacker.determineAlertClass()}"
+                          rendered="#{not empty facesContext.messageList}">
+                <h:messages id="m_global" globalOnly="true" layout="table"/>
             </h:panelGroup>
-            <h:panelGroup layout="block" id="messagesArea">
-                <h:messages id="m_global" globalOnly="true"/>
-            </h:panelGroup>
-            <h:panelGroup styleClass="content" layout="block" id="contentPanel">
+            <h:panelGroup layout="block" id="content">
+                <h:outputText value="#{title}" styleClass="h1" id="title"/>
                 <ui:insert name="content"/>
             </h:panelGroup>
             <ui:include src="/WEB-INF/template/footer.xhtml" id="footer">
