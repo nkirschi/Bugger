@@ -184,6 +184,7 @@ public class StatisticsDBGateway implements StatisticsGateway {
                         + "ON     t.report = r.id "
                         + "JOIN   \"user\" AS u "
                         + "ON     r.created_by = u.id "
+                        + "ORDER BY t.relevance_gain DESC "
                         + "LIMIT  10;";
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             ResultSet rs = stmt.executeQuery();
@@ -213,6 +214,7 @@ public class StatisticsDBGateway implements StatisticsGateway {
                         + "FROM   top_users AS t "
                         + "JOIN   \"user\" AS u "
                         + "ON     t.user = u.id "
+                        + "ORDER BY t.earned_relevance DESC "
                         + "LIMIT  10;";
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             ResultSet rs = stmt.executeQuery();

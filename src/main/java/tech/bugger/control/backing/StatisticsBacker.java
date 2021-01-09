@@ -88,15 +88,17 @@ public class StatisticsBacker implements Serializable {
     @PostConstruct
     public void init() {
         String topicId = ectx.getRequestParameterMap().get("t");
-        try {
-            Topic topic = topicService.getTopicByID(Integer.parseInt(topicId));
-            if (topic != null) {
-                reportCriteria.setTopic(topic.getTitle());
-            } else {
-                log.warning("Request parameter t=" + topicId + " is not the ID of an existing topic.");
+        if (topicId != null) {
+            try {
+                Topic topic = topicService.getTopicByID(Integer.parseInt(topicId));
+                if (topic != null) {
+                    reportCriteria.setTopic(topic.getTitle());
+                } else {
+                    log.warning("Request parameter t=" + topicId + " is not the ID of an existing topic.");
+                }
+            } catch (NumberFormatException e) {
+                log.warning("Request parameter t=" + topicId + " is not an integer.", e);
             }
-        } catch (NumberFormatException e) {
-            log.warning("Request parameter t=" + topicId + " is not an integer.", e);
         }
     }
 
@@ -153,7 +155,6 @@ public class StatisticsBacker implements Serializable {
      * @return {@code null} in order to stay on the statistics page.
      */
     public String applyFilters() {
-        System.out.println(reportCriteria);
         return null;
     }
 

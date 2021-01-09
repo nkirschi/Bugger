@@ -14,77 +14,98 @@
 
     <ui:param name="title" value="#{labels.statistics}"/>
     <ui:define name="content">
-        <h:outputLabel value="#{labels.insight_figures}" styleClass="h2" />
-
-        <!-- filters -->
-        <h:form id="f-statistics-filter">
-            <h:outputLabel id="ol-latest-opening-date"
-                           for="it-latest-opening-date"
-                           value="#{labels.latest_opening_date}"/>
-            <h:inputText id="it-latest-opening-date"
-                         value="#{statisticsBacker.reportCriteria.latestOpeningDate}"
-                         a:placeholder="#{labels.date_time_pattern}">
-                <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
-            </h:inputText>
-            <h:message for="it-latest-opening-date" styleClass="text-danger"/>
-
-            <h:outputLabel id="ol-earliest-closing-date"
-                           for="it-earliest-closing-date"
-                           value="#{labels.earliest_closing_date}"/>
-            <h:inputText id="it-earliest-closing-date"
-                         value="#{statisticsBacker.reportCriteria.earliestClosingDate}"
-                         a:placeholder="#{labels.date_time_pattern}">
-                <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
-            </h:inputText>
-            <h:message for="it-earliest-closing-date" styleClass="text-danger"/>
-
-            <h:outputLabel id="ol-topic-filter"
-                           for="s-topic-filter"
-                           value="#{labels.topic}"/>
-            <h:selectOneMenu id="s-topic-filter" value="#{statisticsBacker.reportCriteria.topic}">
-                <f:selectItems value="#{statisticsBacker.getTopicTitles()}"/>
-            </h:selectOneMenu>
-
-            <h:commandButton value="#{labels.apply_filter}" action="#{statisticsBacker.applyFilters}"/>
-        </h:form>
+        <h:outputText value="#{labels.insight_figures}" styleClass="h2"/>
 
         <!-- insight figures -->
-        <h:panelGroup layout="block" styleClass="row">
-            <h:panelGroup layout="block" styleClass="col-4 p-4 text-center">
+        <h:panelGroup value="#{labels.insight_figures_description}"
+                      styleClass="mb-3"/>
+        <h:panelGroup layout="block"
+                      styleClass="row"
+                      id="p-insight-figures">
+            <h:panelGroup layout="block" styleClass="col-9 align-self-center">
                 <h:panelGroup layout="block" styleClass="row">
-                    <h:outputLabel styleClass="display-1" value="#{statisticsBacker.openReportCount()}"/>
-                </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="row">
-                    <h:outputLabel value="#{labels.open_reports}"/>
+                    <h:panelGroup layout="block"
+                                  styleClass="col-4 p-4 text-center">
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:outputLabel styleClass="display-1" value="#{statisticsBacker.openReportCount()}"/>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:outputLabel value="#{labels.open_reports}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block"
+                                  styleClass="col-4 p-4 text-center">
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:outputLabel styleClass="display-1" value="#{statisticsBacker.averageTimeOpen()}">
+                                <f:convertNumber maxFractionDigits="2"/>
+                            </h:outputLabel>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:outputLabel value="#{labels.avg_time_open}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" styleClass="col-4 p-4 text-center">
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:outputLabel styleClass="display-1" value="#{statisticsBacker.averagePostsPerReport()}">
+                                <f:convertNumber maxFractionDigits="2"/>
+                            </h:outputLabel>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:outputLabel value="#{labels.avg_posts_per_report}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
                 </h:panelGroup>
             </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="col-4 p-4 text-center">
-                <h:panelGroup layout="block" styleClass="row">
-                    <h:outputLabel styleClass="display-1" value="#{statisticsBacker.averageTimeOpen()}">
-                        <f:convertNumber maxFractionDigits="2"/>
-                    </h:outputLabel>
-                </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="row">
-                    <h:outputLabel value="#{labels.avg_time_open}"/>
-                </h:panelGroup>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="col-4 p-4 text-center">
-                <h:panelGroup layout="block" styleClass="row">
-                    <h:outputLabel styleClass="display-1" value="#{statisticsBacker.averagePostsPerReport()}">
-                        <f:convertNumber maxFractionDigits="2"/>
-                    </h:outputLabel>
-                </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="row">
-                    <h:outputLabel value="#{labels.avg_posts_per_report}"/>
-                </h:panelGroup>
+            <h:panelGroup layout="block" styleClass="col-3 ps-5">
+                <h:form id="f-insight-figures-filter">
+                    <h:panelGroup id="p-topic-filter" layout="block" styleClass="mb-2">
+                        <h:outputLabel id="ol-topic-filter"
+                                       for="s-topic-filter"
+                                       value="#{labels.topic}"/>
+                        <h:selectOneMenu id="s-topic-filter"
+                                         value="#{statisticsBacker.reportCriteria.topic}"
+                                         styleClass="form-select">
+                            <f:selectItems value="#{statisticsBacker.getTopicTitles()}"/>
+                        </h:selectOneMenu>
+                    </h:panelGroup>
+                    <h:panelGroup id="p-latest-opening-date" layout="block" styleClass="mb-2">
+                        <h:outputLabel id="ol-latest-opening-date"
+                                       for="it-latest-opening-date"
+                                       value="#{labels.latest_opening_date}"/>
+                        <h:inputText id="it-latest-opening-date"
+                                     value="#{statisticsBacker.reportCriteria.latestOpeningDate}"
+                                     a:placeholder="#{labels.date_time_pattern}"
+                                     styleClass="form-control">
+                            <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                        </h:inputText>
+                        <h:message for="it-latest-opening-date" styleClass="text-danger"/>
+                    </h:panelGroup>
+                    <h:panelGroup id="p-earliest-closing-date" layout="block" styleClass="mb-2">
+                        <h:outputLabel id="ol-earliest-closing-date"
+                                       for="it-earliest-closing-date"
+                                       value="#{labels.earliest_closing_date}"/>
+                        <h:inputText id="it-earliest-closing-date"
+                                     value="#{statisticsBacker.reportCriteria.earliestClosingDate}"
+                                     a:placeholder="#{labels.date_time_pattern}"
+                                     styleClass="form-control">
+                            <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                        </h:inputText>
+                        <h:message for="it-earliest-closing-date" styleClass="text-danger"/>
+                    </h:panelGroup>
+                    <h:commandButton value="#{labels.apply_filter}"
+                                     action="#{statisticsBacker.applyFilters}"
+                                     styleClass="btn btn-outline-primary"/>
+                </h:form>
             </h:panelGroup>
         </h:panelGroup>
+        <!-- leaderboards -->
         <h:panelGroup layout="block" styleClass="row">
             <!-- top 10 reports -->
             <h:panelGroup layout="block" styleClass="col-6 p-4">
-                <h:outputLabel value="#{labels.top_ten_reports}" styleClass="h2" />
+                <h:outputLabel value="#{labels.top_ten_reports}" styleClass="h2"/>
                 <!--@elvariable id="report" type="tech.bugger.global.transfer.TopReport"-->
-                <h:dataTable id="t-top-ten-reports" var="report" value="#{statisticsBacker.topReports()}"
+                <h:dataTable id="t-top-ten-reports"
+                             var="report" value="#{statisticsBacker.topReports()}"
                              styleClass="table table-hover">
                     <h:column>
                         <f:facet name="header">#{labels.report}</f:facet>
@@ -106,9 +127,10 @@
             </h:panelGroup>
             <!-- top 10 users -->
             <h:panelGroup layout="block" styleClass="col-6 p-4">
-                <h:outputLabel value="#{labels.top_ten_users}" styleClass="h2" />
+                <h:outputLabel value="#{labels.top_ten_users}" styleClass="h2"/>
                 <!--@elvariable id="user" type="tech.bugger.global.transfer.TopUser"-->
-                <h:dataTable id="t-top-ten-users" var="user" value="#{statisticsBacker.topUsers()}"
+                <h:dataTable id="t-top-ten-users"
+                             var="user" value="#{statisticsBacker.topUsers()}"
                              styleClass="table table-hover">
                     <h:column>
                         <f:facet name="header">#{labels.user}</f:facet>
@@ -118,7 +140,7 @@
                     </h:column>
                     <h:column>
                         <f:facet name="header">#{labels.earned_relevance}</f:facet>
-                        #{user.earnedRelevance}
+                        <h:outputLabel value="#{user.earnedRelevance}"/>
                     </h:column>
                 </h:dataTable>
             </h:panelGroup>
