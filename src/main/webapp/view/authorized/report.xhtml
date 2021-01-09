@@ -77,7 +77,7 @@
                 <h:panelGroup class="col-sm-4" layout="block"/>
                 <h:panelGroup class="col-sm-4" layout="block">
                     <h:panelGroup class="row" layout="block">
-                        <h:outputText value="Delete report?"/>
+                        <h:outputText value="Delete post?"/>
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block">
                         <h:commandButton id="cb-delete-post" action="#{reportBacker.deletePost}" styleClass="button" value="#{labels.delete}"/>
@@ -90,7 +90,30 @@
 
 
         <b:pagitable_post paginator="#{reportBacker.posts}">
-            <h:outputText value="#{var}"/><br/>
+            <h:panelGroup class="row" layout="block" styleClass="align-center">
+                <h:panelGroup class="col-sm-4" layout="block">
+                    <h:panelGroup class="row" layout="block">
+                        <h:outputText id="ot-post-creator" value="#{var.authorship.creator == null ? 'deleted user' : var.authorship.creator.username}"/>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block">
+                        <h:outputText id="ot-post-created-at" value="at #{var.authorship.creationDate}"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-4" layout="block"/>
+                <h:panelGroup class="col-sm-4" layout="block">
+                    <h:commandButton id="cb-delete-post-dialog" action="#{reportBacker.deletePostDialog(var)}" value="#{labels.delete}"/>
+                </h:panelGroup>
+            </h:panelGroup>
+
+            <h:panelGroup class="row" layout="block">
+                <h:outputText value="#{var.content}" escape="false"/>
+            </h:panelGroup>
+
+            <h:panelGrid columns="2">
+                <h:outputText value="ID: #{var.id}"/>
+                <h:outputText value="last modified at #{var.authorship.modifiedDate} by #{var.authorship.modifier.username}"/>
+            </h:panelGrid>
+
         </b:pagitable_post>
 
     </ui:define>
