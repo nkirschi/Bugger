@@ -148,7 +148,10 @@ public class ProfileBacker implements Serializable {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
         }
 
-        sanitizedBiography = MarkdownHandler.toHtml(user.getBiography());
+        if (user.getBiography() != null) {
+            sanitizedBiography = MarkdownHandler.toHtml(user.getBiography());
+        }
+
         if ((session.getUser() != null) && (session.getUser().equals(user))) {
             session.setUser(new User(user));
         }

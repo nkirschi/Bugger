@@ -405,7 +405,7 @@ public class ProfileEditBackerTest {
     @Test
     public void testCloseDeleteDialog() {
         profileEditBacker.setDialog(ProfileEditBacker.DialogType.DELETE);
-        profileEditBacker.closeDeleteDialog();
+        profileEditBacker.closeDialog();
         assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog());
     }
 
@@ -419,7 +419,7 @@ public class ProfileEditBackerTest {
     @Test
     public void testCloseChangeDialog() {
         profileEditBacker.setDialog(ProfileEditBacker.DialogType.UPDATE);
-        profileEditBacker.closeChangeDialog();
+        profileEditBacker.closeDialog();
         assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog());
     }
 }

@@ -43,7 +43,7 @@
                             <h:commandButton id="cb-really-del" value="#{labels['profile_edit.really_del']}"
                                              action="#{profileEditBacker.delete}" styleClass="button"/>
                             <h:commandButton id="cb-cancel-del" value="#{labels.abort}" styleClass="button"
-                                             action="#{profileEditBacker.closeDeleteDialog}" immediate="true"/>
+                                             action="#{profileEditBacker.closeDialog}" immediate="true"/>
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -81,7 +81,7 @@
                             <h:commandButton id="cb-really-change" value="#{labels['profile_edit.really_change']}"
                                              action="#{profileEditBacker.saveChanges}" styleClass="button"/>
                             <h:commandButton id="cb-cancel-change" value="#{labels.abort}" styleClass="button"
-                                             action="#{profileEditBacker.closeChangeDialog}" immediate="true"/>
+                                             action="#{profileEditBacker.closeDialog}" immediate="true"/>
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -153,7 +153,8 @@
                 <h:outputLabel id="o-password-new-repeat" for="i-password-new-repeat"
                                value="#{labels['profile_edit.repeat']}"/>
                 <h:inputSecret id="i-password-new-repeat" value="#{profileEditBacker.passwordNewConfirm}"
-                               styleClass="profile-info" required="#{profileEditBacker.create}">
+                               styleClass="profile-info" required="#{profileEditBacker.create
+                               || !profileEditBacker.passwordNew.blank}">
                     <f:validateLength minimum="#{C.PASSWORD_MIN}" maximum="#{C.PASSWORD_MAX}"/>
                     <f:attribute name="other-input" value="#{password1}"/>
                     <f:validator validatorId="matchingFieldValidator"/>
@@ -192,14 +193,20 @@
                 <h:panelGroup/>
                 <h:message id="m-email" for="it-email"/>
 
-                <h:outputLabel id="o-bio" for="ia-bio" value="#{labels.biography}"/>
+                <h:outputLabel id="o-bio" for="ia-bio" value="#{labels.biography}"
+                               rendered="#{profileEditBacker.dialog != 'PREVIEW'}"/>
                 <h:inputTextarea id="ia-bio" value="#{profileEditBacker.user.biography}" styleClass="profile-info"
-                             escape="false">
+                                 rendered="#{profileEditBacker.dialog != 'PREVIEW'}">
                     <f:validateLength maximum="#{C.SMALL_AREA}"/>
                 </h:inputTextarea>
 
                 <h:panelGroup/>
                 <h:message id="m-bio" for="ia-bio"/>
+
+                <h:outputLabel id="ol-biography" value="#{labels.biography}" for="ot-biography"
+                                   styleClass="profile-info" rendered="#{profileEditBacker.dialog == 'PREVIEW'}"/>
+                <h:outputText id="ot-biography" value="#{profileEditBacker.sanitizedBio}" escape="false"
+                              styleClass="profile-info" rendered="#{profileEditBacker.dialog == 'PREVIEW'}"/>
 
                 <h:outputLabel id="o-language" for="s-language" value="#{labels.language}"/>
                 <h:selectOneMenu id="s-language" value="#{profileEditBacker.user.preferredLanguage}"
@@ -227,6 +234,12 @@
 
             <h:panelGroup id="p-buttons" styleClass="row align-center">
                 <h:panelGroup layout="block" styleClass="col-sm-12">
+                    <h:commandButton id="cb-preview" value="#{labels['profile_edit.preview']}"
+                                     action="#{profileEditBacker.openPreviewDialog}" styleClass="button"
+                                     rendered="#{profileEditBacker.dialog != 'PREVIEW'}"/>
+                    <h:commandButton id="cb-stop-preview" value="#{labels['profile_edit.stop_preview']}"
+                                     action="#{profileEditBacker.closeDialog}" styleClass="button"
+                                     rendered="#{profileEditBacker.dialog == 'PREVIEW'}"/>
                     <h:commandButton id="cb-apply" value="#{labels['profile_edit.apply_changes']}"
                                      action="#{profileEditBacker.openChangeDialog}" styleClass="button"/>
                     <h:commandButton id="cb-delete" value="#{labels['profile_edit.delete']}"
