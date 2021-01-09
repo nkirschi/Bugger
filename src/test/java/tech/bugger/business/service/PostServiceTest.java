@@ -190,7 +190,7 @@ public class PostServiceTest {
     public void deletePostWhenPostIsFirstPost() throws Exception {
         doReturn(testPost).when(postGateway).getFirstPost(any());
         assertDoesNotThrow(() -> postService.deletePost(testPost));
-        verify(reportGateway).deleteReport(any());
+        verify(reportGateway).delete(any());
     }
 
     @Test

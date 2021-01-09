@@ -193,7 +193,7 @@ public class PostService {
         try (Transaction tx = transactionManager.begin()) {
             Post firstPost = tx.newPostGateway().getFirstPost(report);
             if (post.equals(firstPost)) {
-                tx.newReportGateway().deleteReport(report);
+                tx.newReportGateway().delete(report);
             } else {
                 tx.newPostGateway().deletePost(post);
             }

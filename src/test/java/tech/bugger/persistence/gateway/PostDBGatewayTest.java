@@ -164,11 +164,14 @@ public class PostDBGatewayTest {
     @Test
     public void testSelectPostsOfReportWhenReportIDIsNull() {
         validSelection();
-        assertThrows(IllegalArgumentException.class, () -> gateway.selectPostsOfReport(new Report(), testSelection));
+        Report report = new Report();
+        report.setId(null);
+        assertThrows(IllegalArgumentException.class, () -> gateway.selectPostsOfReport(report, testSelection));
     }
 
     @Test
     public void testSelectPostsOfReportWhenThereAreSome() throws Exception {
+        DBExtension.emptyDatabase();
         validSelection();
         testSelection.setSortedBy("id");
         testReport.setId(100);
@@ -180,6 +183,7 @@ public class PostDBGatewayTest {
 
     @Test
     public void testSelectPostsOfReportWhenThereAreNone() throws Exception {
+        DBExtension.emptyDatabase();
         validSelection();
         testReport.setId(100);
         insertReport();
@@ -210,6 +214,7 @@ public class PostDBGatewayTest {
 
     @Test
     public void testSelectPostsOfReportWhenSortedByCreatedAtDescending() throws Exception {
+        DBExtension.emptyDatabase();
         insertReport();
         numberOfPosts = 1;
         for (int i = 0; i < 10; i++) {
