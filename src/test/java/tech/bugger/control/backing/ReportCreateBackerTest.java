@@ -126,7 +126,6 @@ public class ReportCreateBackerTest {
 
     @Test
     public void testInitWhenNoUser() throws Exception {
-        doReturn(null).when(session).getUser();
         reportCreateBacker.setTopicID(1);
         reportCreateBacker.init();
         verify(ectx).redirect(any());
@@ -135,8 +134,6 @@ public class ReportCreateBackerTest {
 
     @Test
     public void testInitWhenNoTopic() throws Exception {
-        doReturn(mock(User.class)).when(session).getUser();
-        doReturn(null).when(topicService).getTopicByID(anyInt());
         reportCreateBacker.setTopicID(1);
         reportCreateBacker.init();
         verify(ectx).redirect(any());
@@ -145,9 +142,6 @@ public class ReportCreateBackerTest {
 
     @Test
     public void testInitWhenBanned() throws Exception {
-        doReturn(mock(User.class)).when(session).getUser();
-        doReturn(mock(Topic.class)).when(topicService).getTopicByID(anyInt());
-        doReturn(true).when(topicService).isBanned(any(), any());
         reportCreateBacker.setTopicID(1);
         reportCreateBacker.init();
         verify(ectx).redirect(any());

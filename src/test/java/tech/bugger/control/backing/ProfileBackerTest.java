@@ -10,7 +10,6 @@ import org.mockito.MockitoAnnotations;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
-import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 

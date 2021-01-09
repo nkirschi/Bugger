@@ -3,7 +3,6 @@ package tech.bugger.control.backing;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
@@ -11,7 +10,6 @@ import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
@@ -23,9 +21,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import org.commonmark.parser.Parser;
-import org.commonmark.renderer.html.HtmlRenderer;
+import java.util.Objects;
 
 /**
  * Backing bean for the profile edit page.
@@ -103,7 +99,7 @@ public class ProfileEditBacker implements Serializable {
     private Part tempAvatar;
 
     /**
-     * The user's sanitized biography
+     * The user's sanitized biography.
      */
     private String sanitizedBio;
 
@@ -175,6 +171,7 @@ public class ProfileEditBacker implements Serializable {
             emailNew = user.getEmailAddress();
             usernameNew = user.getUsername();
             passwordNew = "";
+            passwordNewConfirm = "";
         }
     }
 
@@ -215,7 +212,7 @@ public class ProfileEditBacker implements Serializable {
     public void saveChanges() {
         boolean successful;
 
-        if (!passwordNew.isBlank() && passwordNewConfirm.equals(passwordNew)) {
+        if (!passwordNew.isBlank() && Objects.equals(passwordNew, passwordNewConfirm)) {
             authenticationService.hashPassword(user, passwordNew);
         } else if (!passwordNew.isBlank()) {
             closeDialog();
@@ -441,7 +438,7 @@ public class ProfileEditBacker implements Serializable {
     /**
      * @param sanitizedBio The new biography to set.
      */
-    public void setSanitizedBio(String sanitizedBio) {
+    public void setSanitizedBio(final String sanitizedBio) {
         this.sanitizedBio = sanitizedBio;
     }
 
