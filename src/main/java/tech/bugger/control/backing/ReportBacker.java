@@ -39,14 +39,9 @@ public class ReportBacker implements Serializable {
         DELETE_REPORT,
 
         /**
-         * Open the report.
+         * Open or close the report.
          */
-        OPEN,
-
-        /**
-         * Close the report.
-         */
-        CLOSE,
+        OPEN_CLOSE,
 
         /**
          * Mark the report as a duplicate of another report.
@@ -168,6 +163,7 @@ public class ReportBacker implements Serializable {
         report.setSeverity(Report.Severity.MINOR);
         report.setTitle("ZA WARUDO - Toki wo tomare");
         report.setType(Report.Type.FEATURE);
+        report.setClosingDate(ZonedDateTime.now());
         User user = session.getUser();
         boolean maySee = false;
         // TODO add proper checks for mods, banned users
@@ -207,7 +203,19 @@ public class ReportBacker implements Serializable {
      */
     public String displayDialog(final ReportPageDialog dialog) {
         currentDialog = dialog;
+        log.info("Displaying dialog " + dialog + ".");
         return null;
+    }
+
+    /**
+     * Displays the dialog for deleting a post and remembers which post to delete.
+     *
+     * @param post The post to delete.
+     * @return {@code null} to reload the page.
+     */
+    public String deletePostDialog(Post post) {
+        postToBeDeleted = post;
+        return displayDialog(ReportPageDialog.DELETE_POST);
     }
 
     /**
@@ -262,6 +270,7 @@ public class ReportBacker implements Serializable {
      */
     public void toggleOpenClosed() {
         if (report.getClosingDate() == null) {
+            report.setClosingDate(ZonedDateTime.now());
             reportService.close(report);
         } else {
             reportService.open(report);
@@ -297,12 +306,10 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     * Deletes the selected post irreversibly. If it is the first post, this deletes the whole report.
-     *
-     * @param post The post to be deleted.
+     * Deletes the {@code postToBeDeleted} irreversibly. If it is the first post, this deletes the whole report.
      */
-    public void deletePost(final Post post) {
-        postService.deletePost(post);
+    public void deletePost() {
+        postService.deletePost(postToBeDeleted);
     }
 
     /**
@@ -426,6 +433,10 @@ public class ReportBacker implements Serializable {
      */
     public void setReportID(final int reportID) {
         this.reportID = reportID;
+    }
+
+    public ReportPageDialog[] getDialogs() {
+        return ReportPageDialog.values();
     }
 
 }

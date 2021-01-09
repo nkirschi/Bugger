@@ -7,30 +7,87 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:b="http://tech.bugger/tags"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
 >
 <!--@elvariable id="var" type="tech.bugger.global.transfer.Post"-->
 <ui:composition template="../../WEB-INF/template/main.xhtml">
     <ui:param name="title" value="#{reportBacker.report.title}"/>
+    <f:metadata>
+        <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
+    </f:metadata>
     <ui:define name="content">
-        <h:form>
+        <h:form id="f-report">
             <h:panelGrid columns="5">
                 <h:outputText id="ot-id" value="ID: #{reportBacker.report.id}"/>
-                <h:outputText id="ot-status" value="Status: #{reportBacker.report.closingDate == null ? 'open' : 'closed'}"/>
+                <h:outputText id="ot-status" value="Status: #{reportBacker.report.closingDate == null ? 'open' : 'closed at '.concat(reportBacker.report.closingDate)}"/>
                 <h:outputText id="ot-type" value="Type: #{reportBacker.report.type}"/>
                 <h:outputText id="ot-severity" value="Severity: #{reportBacker.report.severity}"/>
                 <h:outputText id="ot-version" value="Version: #{reportBacker.report.version}"/>
             </h:panelGrid>
             <h:panelGrid columns="2">
                 <h:outputText id="ot-creator"
-                              value="#{reportBacker.report.authorship.creator == null ? 'deleted user' : reportBacker.report.authorship.creator.username}"/>
-                <h:outputText id="ot-created-at" value="#{reportBacker.report.authorship.creationDate}"/>
+                              value="created by: #{reportBacker.report.authorship.creator == null ? 'deleted user' : reportBacker.report.authorship.creator.username}"/>
+                <h:outputText id="ot-created-at" value="at #{reportBacker.report.authorship.creationDate}"/>
 
                 <h:outputText id="ot-modifier"
-                              value="#{reportBacker.report.authorship.modifier == null ? 'deleted user' : reportBacker.report.authorship.modifier.username}"
+                              value="last modified by: #{reportBacker.report.authorship.modifier == null ? 'deleted user' : reportBacker.report.authorship.modifier.username}"
                               rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
-                <h:outputText id="ot-modified-at" value="#{reportBacker.report.authorship.modifiedDate}" rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
+                <h:outputText id="ot-modified-at" value="at #{reportBacker.report.authorship.modifiedDate}" rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
+            </h:panelGrid>
+            <h:panelGrid>
+                <h:commandButton id="cb-open-close-report-dialog" action="#{reportBacker.displayDialog('OPEN_CLOSE')}" value="#{reportBacker.report.closingDate == null ? 'Close' : 'Open'}"/>
+                <h:commandButton id="cb-delete-report-dialog" action="#{reportBacker.displayDialog('DELETE_REPORT')}" value="Delete"/>
             </h:panelGrid>
         </h:form>
+
+        <h:form id="f-delete-report" rendered="#{reportBacker.currentDialog == 'DELETE_REPORT'}">
+            <h:panelGroup class="row" layout="block" styleClass="align-center">
+                <h:panelGroup class="col-sm-4" layout="block"/>
+                <h:panelGroup class="col-sm-4" layout="block">
+                    <h:panelGroup class="row" layout="block">
+                        <h:outputText value="Delete report?"/>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block">
+                        <h:commandButton id="cb-delete-report" action="#{reportBacker.delete}" styleClass="button" value="#{labels.delete}"/>
+                        <h:commandButton id="cb-delete-report-cancel" action="#{reportBacker.displayDialog(null)}" styleClass="button" value="#{labels.cancel}"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-4" layout="block"/>
+            </h:panelGroup>
+        </h:form>
+
+        <h:form id="f-open-close-report" rendered="#{reportBacker.currentDialog == 'OPEN_CLOSE'}">
+            <h:panelGroup class="row" layout="block" styleClass="align-center">
+                <h:panelGroup class="col-sm-4" layout="block"/>
+                <h:panelGroup class="col-sm-4" layout="block">
+                    <h:panelGroup class="row" layout="block">
+                        <h:outputText value="Open/Close report?"/>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block">
+                        <h:commandButton id="cb-open-close-report" action="#{reportBacker.toggleOpenClosed}" styleClass="button" value="#{reportBacker.report.closingDate == null ? 'Close' : 'Open'}"/>
+                        <h:commandButton id="cb-open-close-report-cancel" action="#{reportBacker.displayDialog(null)}" styleClass="button" value="#{labels.cancel}"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-4" layout="block"/>
+            </h:panelGroup>
+        </h:form>
+
+        <h:form id="f-delete-post" rendered="#{reportBacker.currentDialog == 'DELETE_POST'}">
+            <h:panelGroup class="row" layout="block" styleClass="align-center">
+                <h:panelGroup class="col-sm-4" layout="block"/>
+                <h:panelGroup class="col-sm-4" layout="block">
+                    <h:panelGroup class="row" layout="block">
+                        <h:outputText value="Delete report?"/>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block">
+                        <h:commandButton id="cb-delete-post" action="#{reportBacker.deletePost}" styleClass="button" value="#{labels.delete}"/>
+                        <h:commandButton id="cb-delete-post-cancel" action="#{reportBacker.displayDialog(null)}" styleClass="button" value="#{labels.cancel}"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-4" layout="block"/>
+            </h:panelGroup>
+        </h:form>
+
         <b:pagitable_post paginator="#{reportBacker.posts}">
             <h:outputText value="#{var}"/><br/>
         </b:pagitable_post>
