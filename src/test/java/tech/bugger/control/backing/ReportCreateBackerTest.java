@@ -12,15 +12,12 @@ import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
-import tech.bugger.business.util.Paginator;
 import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 
 import javax.enterprise.event.Event;
@@ -33,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,14 +37,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class ReportCreateBackerTest {
@@ -115,13 +109,9 @@ public class ReportCreateBackerTest {
 
     @Test
     public void testInit() {
-        User userMock = mock(User.class);
-        doReturn(userMock).when(session).getUser();
-        Topic topicMock = mock(Topic.class);
-        doReturn(topicMock).when(topicService).getTopicByID(1);
         reportCreateBacker.setTopicID(1);
         reportCreateBacker.init();
-        assertEquals(userMock, reportCreateBacker.getReport().getAuthorship().getCreator());
+        assertEquals(1, reportCreateBacker.getReport().getTopic());
     }
 
     @Test
@@ -151,7 +141,7 @@ public class ReportCreateBackerTest {
     @Test
     public void testCreateWhenFine() {
         doReturn(true).when(reportService).createReport(any(), any());
-        assertTrue(reportCreateBacker.create().endsWith("report.xhtml?r=" + testReport.getId()));
+        assertTrue(reportCreateBacker.create().endsWith("report.xhtml?id=" + testReport.getId()));
     }
 
     @Test
