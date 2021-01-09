@@ -151,19 +151,21 @@ public class ReportBacker implements Serializable {
     @PostConstruct
     void init() {
         // TODO : reportID Übergabe-Gedöns richtig
-        reportID = 100;
-        // TODO getReportByID
-        report = new Report();
-        report.setId(reportID);
-        User author = new User();
-        author.setUsername("diobrando");
-        ZonedDateTime creationDate = ZonedDateTime.now();
-        report.setAuthorship(new Authorship(author, creationDate, null, null));
-        report.setVersion("ORAORAORA");
-        report.setSeverity(Report.Severity.MINOR);
-        report.setTitle("ZA WARUDO - Toki wo tomare");
-        report.setType(Report.Type.FEATURE);
-        report.setClosingDate(ZonedDateTime.now());
+        reportID = 110;
+        report = reportService.getReportByID(reportID);
+
+//        report = new Report();
+//        report.setId(reportID);
+//        User author = new User();
+//        author.setUsername("diobrando");
+//        ZonedDateTime creationDate = ZonedDateTime.now();
+//        report.setAuthorship(new Authorship(author, creationDate, null, null));
+//        report.setVersion("ORAORAORA");
+//        report.setSeverity(Report.Severity.MINOR);
+//        report.setTitle("ZA WARUDO - Toki wo tomare");
+//        report.setType(Report.Type.FEATURE);
+//        report.setClosingDate(ZonedDateTime.now());
+
         User user = session.getUser();
         boolean maySee = false;
         // TODO add proper checks for mods, banned users
@@ -273,6 +275,7 @@ public class ReportBacker implements Serializable {
             report.setClosingDate(ZonedDateTime.now());
             reportService.close(report);
         } else {
+            report.setClosingDate(null);
             reportService.open(report);
         }
     }
