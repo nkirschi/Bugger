@@ -17,6 +17,7 @@ import javax.inject.Named;
 import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 
 /**
  * Backing bean for the report page.
@@ -159,7 +160,14 @@ public class ReportBacker implements Serializable {
         // TODO getReportByID
         report = new Report();
         report.setId(reportID);
-        report.setAuthorship(new Authorship(null, null, null, null));
+        User author = new User();
+        author.setUsername("diobrando");
+        ZonedDateTime creationDate = ZonedDateTime.now();
+        report.setAuthorship(new Authorship(author, creationDate, null, null));
+        report.setVersion("ORAORAORA");
+        report.setSeverity(Report.Severity.MINOR);
+        report.setTitle("ZA WARUDO - Toki wo tomare");
+        report.setType(Report.Type.FEATURE);
         User user = session.getUser();
         boolean maySee = false;
         // TODO add proper checks for mods, banned users
@@ -188,6 +196,7 @@ public class ReportBacker implements Serializable {
                 return reportService.getNumberOfPosts(report);
             }
         };
+        log.info("Paginator initialized with Selection " + posts.getSelection() + " and items " + posts.getWrappedData());
     }
 
     /**

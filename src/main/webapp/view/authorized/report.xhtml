@@ -8,10 +8,29 @@
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:b="http://tech.bugger/tags"
 >
-<!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
+<!--@elvariable id="var" type="tech.bugger.global.transfer.Post"-->
 <ui:composition template="../../WEB-INF/template/main.xhtml">
-    <ui:param name="title" value="Report"/>
+    <ui:param name="title" value="#{reportBacker.report.title}"/>
     <ui:define name="content">
+        <h:form>
+            <h:panelGrid columns="5">
+                <h:outputText id="ot-id" value="ID: #{reportBacker.report.id}"/>
+                <h:outputText id="ot-status" value="Status: #{reportBacker.report.closingDate == null ? 'open' : 'closed'}"/>
+                <h:outputText id="ot-type" value="Type: #{reportBacker.report.type}"/>
+                <h:outputText id="ot-severity" value="Severity: #{reportBacker.report.severity}"/>
+                <h:outputText id="ot-version" value="Version: #{reportBacker.report.version}"/>
+            </h:panelGrid>
+            <h:panelGrid columns="2">
+                <h:outputText id="ot-creator"
+                              value="#{reportBacker.report.authorship.creator == null ? 'deleted user' : reportBacker.report.authorship.creator.username}"/>
+                <h:outputText id="ot-created-at" value="#{reportBacker.report.authorship.creationDate}"/>
+
+                <h:outputText id="ot-modifier"
+                              value="#{reportBacker.report.authorship.modifier == null ? 'deleted user' : reportBacker.report.authorship.modifier.username}"
+                              rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
+                <h:outputText id="ot-modified-at" value="#{reportBacker.report.authorship.modifiedDate}" rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
+            </h:panelGrid>
+        </h:form>
         <b:pagitable_post paginator="#{reportBacker.posts}">
             <h:outputText value="#{var}"/><br/>
         </b:pagitable_post>
