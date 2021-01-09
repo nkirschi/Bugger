@@ -3,6 +3,7 @@ package tech.bugger.global.transfer;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 /**
  * DTO representing a report.
@@ -286,8 +287,14 @@ public class Report implements Serializable {
      */
     @Override
     public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Report)) {
+            return false;
+        }
+        Report that = (Report) other;
+        return Objects.equals(id, that.id);
     }
 
     /**

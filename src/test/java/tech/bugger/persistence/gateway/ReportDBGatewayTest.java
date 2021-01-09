@@ -57,7 +57,7 @@ public class ReportDBGatewayTest {
         authorship.getModifier().setId(1);
         report = new Report(0, "App crashes", Report.Type.HINT, Report.Severity.SEVERE, "1.4.1",
                 new Authorship(null, ZonedDateTime.now(), null, ZonedDateTime.now()), null,
-                null, null, 0);
+                null, null, 1);
     }
 
     @AfterEach
@@ -121,7 +121,8 @@ public class ReportDBGatewayTest {
     @Test
     public void testUpdate() throws Exception {
         report.setId(100);
-        doReturn(1).when(report).getTopic();
+        report.setTopic(1);
+        // doReturn(1).when(report).getTopic();
         gateway.update(report);
 
         Report reportFromDatabase = gateway.find(100);
@@ -191,7 +192,8 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testCountPostsWhenReportIDIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> gateway.countPosts(new Report()));
+        report.setId(null);
+        assertThrows(IllegalArgumentException.class, () -> gateway.countPosts(null));
     }
 
     @Test
@@ -210,6 +212,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testCountPostsWhenThereAreNone() throws Exception {
+        DBExtension.emptyDatabase();
         insertReport();
         report.setId(100);
         assertEquals(0, gateway.countPosts(report));
@@ -217,6 +220,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testCountPostsWhenThereAreSome() throws Exception {
+        DBExtension.emptyDatabase();
         insertReport();
         insertPosts(100, 34);
         report.setId(100);
@@ -230,7 +234,8 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testDeleteReportWhenReportIDIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> gateway.delete(new Report()));
+        report.setId(null);
+        assertThrows(IllegalArgumentException.class, () -> gateway.delete(null));
     }
 
     @Test
@@ -327,7 +332,9 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testOpenReportWhenReportIDIsNull() {
-        assertThrows(IllegalArgumentException.class, ()  -> gateway.openReport(new Report()));
+        Report report = new Report();
+        report.setId(null);
+        assertThrows(IllegalArgumentException.class, ()  -> gateway.openReport(report));
     }
 
     @Test
