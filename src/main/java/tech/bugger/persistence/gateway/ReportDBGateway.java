@@ -263,7 +263,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void deleteReport(final Report report) throws NotFoundException {
+    public void delete(final Report report) throws NotFoundException {
         if (report == null) {
             log.error("Cannot delete report null.");
             throw new IllegalArgumentException("Report cannot be null.");

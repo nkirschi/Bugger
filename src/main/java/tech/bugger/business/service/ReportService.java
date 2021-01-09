@@ -278,7 +278,7 @@ public class ReportService {
      */
     public void deleteReport(final Report report) {
         try (Transaction tx = transactionManager.begin()) {
-            tx.newReportGateway().deleteReport(report);
+            tx.newReportGateway().delete(report);
             tx.commit();
         } catch (NotFoundException e) {
             log.error("Could not find report " + report + ".", e);

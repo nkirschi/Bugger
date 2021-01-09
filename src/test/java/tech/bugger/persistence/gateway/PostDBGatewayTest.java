@@ -104,8 +104,6 @@ public class PostDBGatewayTest {
         assertThrows(StoreException.class, () -> new PostDBGateway(connectionSpy).create(post));
     }
 
-}
-
     public void validSelection() {
         testSelection = new Selection(42, 0, Selection.PageSize.NORMAL, "id", true);
     }

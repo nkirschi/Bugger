@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.postgresql.util.PSQLException;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Authorship;
@@ -21,8 +20,6 @@ import java.sql.*;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -228,12 +225,12 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testDeleteReportWhenReportIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> gateway.deleteReport(null));
+        assertThrows(IllegalArgumentException.class, () -> gateway.delete(null));
     }
 
     @Test
     public void testDeleteReportWhenReportIDIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> gateway.deleteReport(new Report()));
+        assertThrows(IllegalArgumentException.class, () -> gateway.delete(new Report()));
     }
 
     @Test
@@ -241,20 +238,20 @@ public class ReportDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         report.setId(100);
-        assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy, userGateway).deleteReport(report));
+        assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy, userGateway).delete(report));
     }
 
     @Test
     public void testDeleteReportWhenReportDoesNotExist() {
         report.setId(11);
-        assertThrows(NotFoundException.class, () -> gateway.deleteReport(report));
+        assertThrows(NotFoundException.class, () -> gateway.delete(report));
     }
 
     @Test
     public void testDeleteReport() throws Exception {
         insertReport();
         report.setId(100);
-        gateway.deleteReport(report);
+        gateway.delete(report);
         assertTrue(isGone(100));
     }
 
@@ -262,8 +259,8 @@ public class ReportDBGatewayTest {
     public void testDeleteReportTwice() throws Exception {
         insertReport();
         report.setId(100);
-        gateway.deleteReport(report);
-        assertThrows(NotFoundException.class, () -> gateway.deleteReport(report));
+        gateway.delete(report);
+        assertThrows(NotFoundException.class, () -> gateway.delete(report));
     }
 
     @Test
