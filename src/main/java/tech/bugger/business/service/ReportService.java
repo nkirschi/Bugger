@@ -348,7 +348,18 @@ public class ReportService {
      * @return A list containing the selected posts.
      */
     public List<Post> getPostsFor(final Report report, final Selection selection) {
-        return null;
+        List<Post> posts = null;
+        try (Transaction tx = transactionManager.begin()) {
+            posts = tx.newPostGateway().selectPostsOfReport(report, selection);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when finding posts for report " + report + " with selection " + selection + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (NotFoundException e) {
+            log.error("Could not find posts for report " + report + " with selection " + selection + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        }
+        return posts;
     }
 
     /**
