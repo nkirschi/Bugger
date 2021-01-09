@@ -6,50 +6,52 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:f="http://xmlns.jcp.org/jsf/core">
 <ui:composition>
-    <h:panelGroup styleClass="header">
-        <h:panelGroup styleClass="row" layout="block">
-            <h:link outcome="pretty:home" id="l-logo-header">
-                <h:graphicImage id="g-logo-header" library="images" name="bugger.png" width="80" height="80"/>
+    <h:panelGroup id="header" layout="block">
+        <h:panelGroup layout="block">
+            <h:link outcome="pretty:home" id="l-logo">
+                <h:graphicImage id="g-logo" library="images" name="bugger.png"/>
             </h:link>
             <h:outputText value="#{applicationSettings.organization.name}" id="ot-comp-name"
                           styleClass="organizationName"/>
-            <h:form styleClass="headerMenu" rendered="#{userSession.user != null}">
-                <h:commandLink value="Avatar-Menu" action="#{headerBacker.toggleMenu}" immediate="true"/>
-            </h:form>
         </h:panelGroup>
-    </h:panelGroup>
-    <h:panelGroup styleClass="dropdown" rendered="#{headerBacker.displayMenu and userSession.user != null}"
-                  id="p-user-menu">
-        <h:panelGroup styleClass="row" layout="block">
-            <h:outputText value="#{headerBacker.user.firstName}" id="ot-first-name"/>
+        <!-- TODO style these like buttons -->
+        <h:panelGroup id="p-authentication" rendered="#{userSession.user == null}">
+            <!-- TODO add login outcome -->
+            <h:link id="l-login" value="#{labels.login}" styleClass="button btn btn-primary" outcome="pretty:login"/>
+            <h:link id="b-register" value="#{labels.register}" styleClass="button btn btn-primary" outcome="pretty:register"/>
         </h:panelGroup>
-        <h:panelGroup styleClass="row" layout="block">
-            <h:outputText value="#{headerBacker.user.lastName}" id="ot-last-name"/>
+        <h:form styleClass="headerMenu" rendered="#{userSession.user != null}">
+            <h:commandLink value="Avatar-Menu" action="#{headerBacker.toggleMenu}" immediate="true"/>
+        </h:form>
+        <h:panelGroup rendered="#{headerBacker.displayMenu and userSession.user != null}"
+                      id="p-user-menu">
+            <h:panelGroup styleClass="row" layout="block">
+                <h:outputText value="#{headerBacker.user.firstName}" id="ot-first-name"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="row" layout="block">
+                <h:outputText value="#{headerBacker.user.lastName}" id="ot-last-name"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="row" layout="block">
+                <h:outputText value="#{headerBacker.user.username}" id="ot-username"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="row" layout="block">
+                <h:outputText value="(Admin)" id="ot-role" rendered="#{headerBacker.user.administrator}"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="row" layout="block">
+                <h:link value="#{labels.administration}" outcome="pretty:admin"
+                        rendered="#{headerBacker.user.administrator}" id="l-configuration"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="row" layout="block">
+                <!-- logout -->
+            </h:panelGroup>
+            <h:panelGroup styleClass="row" layout="block">
+                <h:form>
+                    <h:link value="Profile" id="l-profile" outcome="pretty:profile">
+                        <f:param name="u" value="#{userSession.user.username}"/>
+                    </h:link>
+                </h:form>
+            </h:panelGroup>
         </h:panelGroup>
-        <h:panelGroup styleClass="row" layout="block">
-            <h:outputText value="#{headerBacker.user.username}" id="ot-username"/>
-        </h:panelGroup>
-        <h:panelGroup styleClass="row" layout="block">
-            <h:outputText value="(Admin)" id="ot-role" rendered="#{headerBacker.user.administrator}"/>
-        </h:panelGroup>
-        <h:panelGroup styleClass="row" layout="block">
-            <h:link value="#{labels.administration}" href="../restr/admin.xhtml"
-                    rendered="#{headerBacker.user.administrator}" id="l-configuration"/>
-        </h:panelGroup>
-        <h:panelGroup styleClass="row" layout="block">
-            <!-- logout -->
-        </h:panelGroup>
-        <h:panelGroup styleClass="row" layout="block">
-            <h:link value="Profile" href="../authorized/profile.xhtml" id="l-profile">
-                <f:param name="u" value="#{userSession.user.username}"/>
-            </h:link>
-        </h:panelGroup>
-    </h:panelGroup>
-    <!-- TODO style these like buttons -->
-    <h:panelGroup id="p-authentication" rendered="#{userSession.user == null}" styleClass="align-right">
-        <!-- TODO add login outcome -->
-        <h:link id="l-login" value="#{labels.login}" styleClass="button btn btn-primary" outcome="pretty:login"/>
-        <h:button id="b-register" value="#{labels.register}" styleClass="button btn btn-primary" outcome="pretty:register"/>
     </h:panelGroup>
 </ui:composition>
 </html>

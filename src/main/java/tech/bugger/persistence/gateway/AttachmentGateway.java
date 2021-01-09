@@ -32,6 +32,8 @@ public interface AttachmentGateway {
     /**
      * Inserts an attachment into the attachment storage.
      *
+     * Sets the ID of {@ode attachment} that was assigned upon insertion by the attachment storage.
+     *
      * @param attachment The attachment to insert.
      */
     public void create(Attachment attachment);

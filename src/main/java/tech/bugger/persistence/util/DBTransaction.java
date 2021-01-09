@@ -149,7 +149,7 @@ public class DBTransaction implements Transaction {
     @Override
     public ReportGateway newReportGateway() {
         checkState();
-        return new ReportDBGateway(connection);
+        return new ReportDBGateway(connection, newUserGateway());
     }
 
     /**

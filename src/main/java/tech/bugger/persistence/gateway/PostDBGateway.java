@@ -10,8 +10,13 @@ import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,7 +53,7 @@ public class PostDBGateway implements PostGateway {
      * {@inheritDoc}
      */
     @Override
-    public Post findPost(final int id) {
+    public Post find(final int id) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -57,16 +62,40 @@ public class PostDBGateway implements PostGateway {
      * {@inheritDoc}
      */
     @Override
-    public void createPost(final Post post) {
-        // TODO Auto-generated method stub
+    public void create(final Post post) {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO post (content, created_by, last_modified_by, report)"
+                        + "VALUES (?, ?, ?, ?);",
+                PreparedStatement.RETURN_GENERATED_KEYS
+        )) {
+            User creator = post.getAuthorship().getCreator();
+            User modifier = post.getAuthorship().getModifier();
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .string(post.getContent())
+                    .object(creator == null ? null : creator.getId(), Types.INTEGER)
+                    .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
+                    .integer(post.getReport().get().getId())
+                    .toStatement();
+            statement.executeUpdate();
 
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                post.setId(generatedKeys.getInt("id"));
+            } else {
+                log.error("Error while retrieving new post ID.");
+                throw new StoreException("Error while retrieving new post ID.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating post.", e);
+            throw new StoreException("Error while creating post.", e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void updatePost(final Post post) {
+    public void update(final Post post) {
         // TODO Auto-generated method stub
 
     }

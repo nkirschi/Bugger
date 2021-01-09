@@ -16,6 +16,7 @@ import tech.bugger.persistence.util.TransactionManager;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -204,7 +205,18 @@ public class ReportService {
      * @return The report with that ID if it exists, {@code null} if there is no report with that ID.
      */
     public Report getReportByID(int id) {
-        return null;
+        try (Transaction tx = transactionManager.begin()) {
+            Report report = tx.newReportGateway().find(id);
+            tx.commit();
+            return report;
+        } catch (NotFoundException e) {
+            log.debug("Report not found.", e);
+            return null;
+        } catch (TransactionException e) {
+            log.error("Error while searching for report.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            return null;
+        }
     }
 
     /**
@@ -213,9 +225,26 @@ public class ReportService {
      *
      * @param report    The report to be created.
      * @param firstPost The first post of the report.
+     * @return {@code true} iff creating the report succeeded.
      */
-    public void createReport(Report report, Post firstPost) {
-
+    public boolean createReport(final Report report, final Post firstPost) {
+        // Notifications will be dealt with when implementing the subscriptions feature.
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().create(report);
+            boolean postCreated = postService.createPostWithTransaction(firstPost, tx);
+            if (postCreated) {
+                tx.commit();
+                log.info("Report created successfully.");
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("report_created"), Feedback.Type.INFO));
+            } else {
+                tx.abort();
+            }
+            return postCreated;
+        } catch (TransactionException e) {
+            log.error("Error while creating a new report", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
+            return false;
+        }
     }
 
     /**
@@ -223,9 +252,23 @@ public class ReportService {
      * NotificationService}.
      *
      * @param report The report to update.
+     * @return {@code true} iff updating the report succeeded.
      */
-    public void updateReport(Report report) {
-
+    public boolean updateReport(Report report) {
+        // Notifications will be dealt with when implementing the subscriptions feature.
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().update(report);
+            tx.commit();
+            return true;
+        } catch (NotFoundException e) {
+            log.error("Report to be updated could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            return false;
+        } catch (TransactionException e) {
+            log.error("Error while updating a report.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
+            return false;
+        }
     }
 
     /**

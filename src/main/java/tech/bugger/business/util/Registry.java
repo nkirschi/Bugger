@@ -5,9 +5,9 @@ import tech.bugger.persistence.util.ConnectionPool;
 import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.PropertiesReader;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
 /**
  * Registry for application-wide access to shared dependencies.
  */
-@Singleton
+@ApplicationScoped
 public class Registry {
 
     /**
@@ -199,7 +199,17 @@ public class Registry {
     @Produces
     @RegistryKey
     public ResourceBundle getBundle(final InjectionPoint ip, final UserSession userSession) {
-        String key = extractKey(ip);
+        return getBundle(extractKey(ip), userSession);
+    }
+
+    /**
+     * Returns the {@link ResourceBundle} registered for the given key.
+     *
+     * @param key         The key of the desired resource bundle.
+     * @param userSession The current user session yielding locale information.
+     * @return The resource bundle associated with {@code key}.
+     */
+    public ResourceBundle getBundle(String key, final UserSession userSession) {
         try {
             return ResourceBundle.getBundle("tech.bugger.i18n." + key, userSession.getLocale());
         } catch (MissingResourceException e) {

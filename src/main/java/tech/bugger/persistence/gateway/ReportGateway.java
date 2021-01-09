@@ -32,7 +32,7 @@ public interface ReportGateway {
      * @return The report identified by the ID.
      * @throws NotFoundException The report could not be found.
      */
-    public Report getReportByID(int id) throws NotFoundException;
+    public Report find(int id) throws NotFoundException;
 
     /**
      * Retrieves a list of reports of a topic that match the given selection criteria, including or excluding open or
@@ -51,9 +51,11 @@ public interface ReportGateway {
     /**
      * Inserts a report into the report storage.
      *
+     * Sets the ID of {@ode report} that was assigned upon insertion by the report storage.
+     *
      * @param report The report to insert.
      */
-    public void createReport(Report report);
+    public void create(Report report);
 
     /**
      * Updates a report's attributes in the report storage.
@@ -61,7 +63,7 @@ public interface ReportGateway {
      * @param report The report to update.
      * @throws NotFoundException The report could not be found.
      */
-    public void updateReport(Report report) throws NotFoundException;
+    public void update(Report report) throws NotFoundException;
 
     /**
      * Deletes a report from the report storage.
@@ -69,7 +71,7 @@ public interface ReportGateway {
      * @param report The report to delete.
      * @throws NotFoundException The report could not be found.
      */
-    public void deleteReport(Report report) throws NotFoundException;
+    public void delete(Report report) throws NotFoundException;
 
     /**
      * Closes a report in the report storage.
@@ -86,15 +88,6 @@ public interface ReportGateway {
      * @throws NotFoundException The report could not be found.
      */
     public void openReport(Report report) throws NotFoundException;
-
-    /**
-     * Moves a report to a new topic.
-     *
-     * @param report      The report to move.
-     * @param destination The topic to move the report to.
-     * @throws NotFoundException The report or the topic could not be found.
-     */
-    public void moveReport(Report report, Topic destination) throws NotFoundException;
 
     /**
      * Marks a report as a duplicate of another report.

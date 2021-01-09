@@ -1,13 +1,14 @@
 package tech.bugger.business.internal;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Locale;
+import tech.bugger.global.transfer.User;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
-import tech.bugger.global.transfer.User;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Locale;
 
 /**
  * Internal bean holding details of the session of a user.
