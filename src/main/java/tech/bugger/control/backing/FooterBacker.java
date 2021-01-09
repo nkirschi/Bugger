@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Locale;
 
 /**
  * Backing Bean for the footer.
@@ -20,21 +21,50 @@ public class FooterBacker implements Serializable {
     private static final long serialVersionUID = 4849101262721339096L;
 
     /**
-     * The current Language.
+     * The current UserSession.
+     */
+    private UserSession session;
+
+    /**
+     * The current selected language.
      */
     private Language language;
 
     /**
-     * The current UserSession.
+     * Whether the help is displayed for the current page.
      */
+    private boolean helpDisplayed;
+
     @Inject
-    private UserSession session;
+    public FooterBacker(final UserSession session) {
+        this.session = session;
+        // TODO this is ugly. Maybe consider storing Locale#getLanguageTag in DB, reversable via Locale#forLanguageTag
+        if (Locale.ENGLISH.getLanguage().equals(session.getLocale().getLanguage())) {
+            language = Language.ENGLISH;
+        } else if (Locale.GERMAN.getLanguage().equals(session.getLocale().getLanguage())) {
+            language = Language.GERMAN;
+        }
+    }
 
     /**
      * Changes language. The change is effective for the whole session.
      */
     public void changeLanguage() {
+        session.setLocale(switch (language) {
+            case ENGLISH -> Locale.ENGLISH;
+            case GERMAN -> Locale.GERMAN;
+        });
+    }
 
+    /**
+     * Toggles the help popup.
+     */
+    public void toggleHelp() {
+        helpDisplayed = !helpDisplayed;
+    }
+
+    public Language[] getAvailableLanguages() {
+        return Language.values();
     }
 
     /**
@@ -49,6 +79,24 @@ public class FooterBacker implements Serializable {
      */
     public void setLanguage(final Language language) {
         this.language = language;
+    }
+
+    /**
+     * Returns whether the help is displayed for the current page.
+     *
+     * @return {@code true} iff the help popup is displayed.
+     */
+    public boolean isHelpDisplayed() {
+        return helpDisplayed;
+    }
+
+    /**
+     * Sets whether the help is displayed for the current page.
+     *
+     * @param helpDisplayed Whether the help popup shall be displayed.
+     */
+    public void setHelpDisplayed(final boolean helpDisplayed) {
+        this.helpDisplayed = helpDisplayed;
     }
 
 }

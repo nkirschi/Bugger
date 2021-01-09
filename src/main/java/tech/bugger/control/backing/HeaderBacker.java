@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
 
 
 /**
@@ -60,7 +61,7 @@ public class HeaderBacker implements Serializable {
     @PostConstruct
     void init() {
         user = session.getUser();
-        closeMenu();
+        displayMenu = Boolean.parseBoolean(fctx.getExternalContext().getRequestParameterMap().get("d"));
     }
 
     /**
@@ -106,7 +107,7 @@ public class HeaderBacker implements Serializable {
      * @return The determined alert class.
      */
     public String determineAlertClass() {
-        if (!fctx.getMessageList().isEmpty()) {
+        if (!fctx.getMessageList(null).isEmpty()) {
             FacesMessage.Severity maxSeverity = fctx.getMessageList().stream().map(FacesMessage::getSeverity)
                                                     .max(FacesMessage.Severity::compareTo).get();
             if (maxSeverity.equals(FacesMessage.SEVERITY_ERROR)) {
@@ -120,6 +121,10 @@ public class HeaderBacker implements Serializable {
             }
         }
         return "";
+    }
+
+    public int getCurrentYear() {
+        return LocalDate.now().getYear();
     }
 
     /**
