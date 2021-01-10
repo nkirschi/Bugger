@@ -6,15 +6,18 @@ import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
-import tech.bugger.global.transfer.*;
+import tech.bugger.global.transfer.Post;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -150,37 +153,25 @@ public class ReportBacker implements Serializable {
      */
     @PostConstruct
     void init() {
-        // TODO : reportID Übergabe-Gedöns richtig
-        reportID = 110;
+        ExternalContext ext = fctx.getExternalContext();
+        if (!ext.getRequestParameterMap().containsKey("r")) {
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+        }
+        try {
+            reportID = Integer.parseInt(ext.getRequestParameterMap().get("r"));
+        } catch (NumberFormatException e) {
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+        }
         report = reportService.getReportByID(reportID);
-
-//        report = new Report();
-//        report.setId(reportID);
-//        User author = new User();
-//        author.setUsername("diobrando");
-//        ZonedDateTime creationDate = ZonedDateTime.now();
-//        report.setAuthorship(new Authorship(author, creationDate, null, null));
-//        report.setVersion("ORAORAORA");
-//        report.setSeverity(Report.Severity.MINOR);
-//        report.setTitle("ZA WARUDO - Toki wo tomare");
-//        report.setType(Report.Type.FEATURE);
-//        report.setClosingDate(ZonedDateTime.now());
-
         User user = session.getUser();
         boolean maySee = false;
-        // TODO add proper checks for mods, banned users
         if (applicationSettings.getConfiguration().isGuestReading()) {
             maySee = true;
-        } else if (user != null) {
+        } else if (user != null && !isBanned()) {
             maySee = true;
         }
-        // TODO proper redirect
         if (!maySee) {
-            try {
-                fctx.getExternalContext().redirect("pretty:home");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
         currentDialog = null;
         posts = new Paginator<>("created_at", Selection.PageSize.NORMAL) {
@@ -194,7 +185,8 @@ public class ReportBacker implements Serializable {
                 return reportService.getNumberOfPosts(report);
             }
         };
-        log.info("Paginator initialized with Selection " + posts.getSelection() + " and items " + posts.getWrappedData());
+        log.debug("Paginator initialized with Selection " + posts.getSelection() + " and items "
+                + posts.getWrappedData());
     }
 
     /**
@@ -215,7 +207,7 @@ public class ReportBacker implements Serializable {
      * @param post The post to delete.
      * @return {@code null} to reload the page.
      */
-    public String deletePostDialog(Post post) {
+    public String deletePostDialog(final Post post) {
         postToBeDeleted = post;
         return displayDialog(ReportPageDialog.DELETE_POST);
     }
@@ -278,6 +270,7 @@ public class ReportBacker implements Serializable {
             report.setClosingDate(null);
             reportService.open(report);
         }
+        displayDialog(null);
     }
 
     /**
@@ -330,7 +323,7 @@ public class ReportBacker implements Serializable {
      * @param post The post in question.
      * @return {@code true} iff the user is privileged.
      */
-    public boolean isPrivileged(final Post post) {
+    public boolean privilegedForPost(final Post post) {
         return postService.isPrivileged(session.getUser(), post);
     }
 
@@ -436,10 +429,6 @@ public class ReportBacker implements Serializable {
      */
     public void setReportID(final int reportID) {
         this.reportID = reportID;
-    }
-
-    public ReportPageDialog[] getDialogs() {
-        return ReportPageDialog.values();
     }
 
 }

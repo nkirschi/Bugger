@@ -34,8 +34,10 @@
                               rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
                 <h:outputText id="ot-modified-at" value="#{labels.report_at} #{reportBacker.report.authorship.modifiedDate}" rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
             </h:panelGrid>
-            <h:panelGrid>
+            <h:panelGrid rendered="#{reportBacker.privileged}">
                 <h:commandButton id="cb-open-close-report-dialog" action="#{reportBacker.displayDialog('OPEN_CLOSE')}" value="#{reportBacker.report.closingDate == null ? labels.report_action_close : labels.report_action_open}"/>
+                <!-- TODO redirect to report edit page -->
+                <h:commandButton id="cb-edit-report" value="#{labels.edit}"/>
                 <h:commandButton id="cb-delete-report-dialog" action="#{reportBacker.displayDialog('DELETE_REPORT')}" value="#{labels.delete}"/>
             </h:panelGrid>
         </h:form>
@@ -98,7 +100,7 @@
                     <h:outputText id="ot-post-creator" value="#{var.authorship.creator == null ? labels.deleted_user : var.authorship.creator.username}"/>
                     <h:outputText id="ot-post-created-at" value="#{labels.report_at} #{var.authorship.creationDate}"/>
                 </h:panelGrid>
-                <h:panelGrid columns="2">
+                <h:panelGrid columns="2" rendered="#{reportBacker.privilegedForPost(var)}">
                     <!-- TODO redirect to post edit page -->
                     <h:commandButton id="cb-edit-post" value="#{labels.edit}"/>
                     <h:commandButton id="cb-delete-post-dialog" action="#{reportBacker.deletePostDialog(var)}" value="#{labels.delete}"/>
