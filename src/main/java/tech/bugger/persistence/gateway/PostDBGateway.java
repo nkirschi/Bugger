@@ -36,7 +36,7 @@ public class PostDBGateway implements PostGateway {
     /**
      * Database connection used by this gateway.
      */
-    private Connection conn;
+    private final Connection conn;
 
     /**
      * Constructs a new post gateway with the given database connection.
