@@ -273,9 +273,10 @@ public class ReportDBGateway implements ReportGateway {
             throw new IllegalArgumentException("Report ID cannot be null.");
         }
 
-        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM report * WHERE id = " + report.getId()
-                + " RETURNING *")) {
-            ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM report WHERE id = ? RETURNING *;")) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(report.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 if (rs.getInt("id") != report.getId()) {
                     throw new InternalError("Wrong report deleted! Please investigate! Expected: " + report
