@@ -107,7 +107,7 @@ public class PostDBGateway implements PostGateway {
             throw new IllegalArgumentException("Post cannot be null.");
         }
 
-        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM post WHERE id = ? RETURNING *")) {
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM post WHERE id = ? RETURNING *;")) {
             PreparedStatement statement = new StatementParametrizer(stmt)
                     .integer(post.getId()).toStatement();
             ResultSet rs = statement.executeQuery();
@@ -139,10 +139,12 @@ public class PostDBGateway implements PostGateway {
             throw new IllegalArgumentException("Report ID cannot be null.");
         }
 
-        String sql = "SELECT * FROM post WHERE report = " + report.getId() + " ORDER BY created_at ASC LIMIT 1;";
-        Post firstPost = null;
+        String sql = "SELECT * FROM post WHERE report = ? ORDER BY created_at ASC LIMIT 1;";
+        Post firstPost;
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(report.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 // TODO authorship, attachments
                 firstPost = new Post(rs.getInt("id"), rs.getString("content"), new Lazy<>(report), null, null);
