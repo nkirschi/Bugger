@@ -16,7 +16,6 @@ import tech.bugger.persistence.util.TransactionManager;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -204,7 +203,7 @@ public class ReportService {
      * @param id The ID of the desired report.
      * @return The report with that ID if it exists, {@code null} if there is no report with that ID.
      */
-    public Report getReportByID(int id) {
+    public Report getReportByID(final int id) {
         try (Transaction tx = transactionManager.begin()) {
             Report report = tx.newReportGateway().find(id);
             tx.commit();
@@ -254,7 +253,7 @@ public class ReportService {
      * @param report The report to update.
      * @return {@code true} iff updating the report succeeded.
      */
-    public boolean updateReport(Report report) {
+    public boolean updateReport(final Report report) {
         // Notifications will be dealt with when implementing the subscriptions feature.
         try (Transaction tx = transactionManager.begin()) {
             tx.newReportGateway().update(report);
