@@ -21,7 +21,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Objects;
 
 /**
  * Backing bean for the profile edit page.
@@ -209,6 +208,8 @@ public class ProfileEditBacker implements Serializable {
 
     /**
      * Applies and saves the changes made.
+     *
+     * @return {@code null} to reload the page.
      */
     public String saveChanges() {
         if (!passwordNew.isBlank()) {
@@ -267,6 +268,8 @@ public class ProfileEditBacker implements Serializable {
     /**
      * Irreversibly deletes the user, logs them out and redirects to the home page. Their created reports and posts will
      * still remain.
+     *
+     * @return {@code null} to reload the page.
      */
     public String delete() {
         if (!profileService.matchingPassword(session.getUser(), password)) {
