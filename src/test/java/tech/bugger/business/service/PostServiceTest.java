@@ -141,7 +141,7 @@ public class PostServiceTest {
     }
 
     @Test
-    public void testCreatePostWithTransactionWhenFine() {
+    public void testCreatePostWithTransactionWhenFine() throws Exception {
         PostService serviceSpy = spy(service);
         lenient().doReturn(true).when(serviceSpy).isAttachmentListValid(any());
         assertTrue(serviceSpy.createPostWithTransaction(testPost1, tx));
@@ -150,7 +150,7 @@ public class PostServiceTest {
     }
 
     @Test
-    public void testCreatePostWithTransactionWhenInvalid() {
+    public void testCreatePostWithTransactionWhenInvalid() throws Exception {
         PostService serviceSpy = spy(service);
         lenient().doReturn(false).when(serviceSpy).isAttachmentListValid(any());
         assertFalse(serviceSpy.createPostWithTransaction(testPost1, tx));

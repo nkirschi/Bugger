@@ -131,7 +131,7 @@ public class ReportServiceTest {
     }
 
     @Test
-    public void testCreateReportWhenPostCreationFails() {
+    public void testCreateReportWhenPostCreationFails() throws Exception {
         doReturn(false).when(postService).createPostWithTransaction(any(), any());
         assertFalse(service.createReport(testReport, testFirstPost));
         verify(tx).abort();

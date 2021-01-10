@@ -96,7 +96,7 @@ public class PostService {
      */
     private boolean isAttachmentNameValid(final String name) {
         return Arrays.stream(applicationSettings.getConfiguration().getAllowedFileExtensions().split(","))
-                .anyMatch(suffix -> name.endsWith(suffix));
+                .anyMatch(name::endsWith);
     }
 
     /**
@@ -140,7 +140,7 @@ public class PostService {
      * @return {@code true} iff creating the post succeeded.
      * @throws TransactionException The transaction could not be committed successfully.
      */
-    boolean createPostWithTransaction(final Post post, final Transaction tx) {
+    boolean createPostWithTransaction(final Post post, final Transaction tx) throws TransactionException {
         boolean valid = isAttachmentListValid(post.getAttachments());
         if (valid) {
             tx.newPostGateway().create(post);
