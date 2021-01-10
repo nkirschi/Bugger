@@ -1,28 +1,24 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.ReportService;
-import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
-import tech.bugger.business.util.Registry;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 import javax.annotation.PostConstruct;
-import javax.enterprise.event.Event;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.IOException;
-import java.io.Serial;
-import java.io.Serializable;
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.service.ReportService;
+import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.Registry;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
 
 /**
  * Backing Bean for the report edit page.
@@ -31,13 +27,33 @@ import java.util.ResourceBundle;
 @Named
 public class ReportEditBacker implements Serializable {
 
-    /**
-     * The {@link Log} instance associated with this class for logging purposes.
-     */
-    private static final Log log = Log.forClass(ReportEditBacker.class);
-
     @Serial
     private static final long serialVersionUID = -1310546265441099227L;
+
+    /**
+     * The topic service giving access to topics.
+     */
+    private final TopicService topicService;
+
+    /**
+     * The report service creating reports.
+     */
+    private final ReportService reportService;
+
+    /**
+     * The current user session.
+     */
+    private final UserSession session;
+
+    /**
+     * The current {@link ExternalContext}.
+     */
+    private final FacesContext fctx;
+
+    /**
+     * Resource bundle for feedback message.
+     */
+    private final ResourceBundle messagesBundle;
 
     /**
      * The ID of the report to edit.
@@ -70,54 +86,21 @@ public class ReportEditBacker implements Serializable {
     private boolean privileged;
 
     /**
-     * The topic service giving access to topics.
-     */
-    private transient TopicService topicService;
-
-    /**
-     * The report service creating reports.
-     */
-    private transient ReportService reportService;
-
-    /**
-     * The current user session.
-     */
-    private UserSession session;
-
-    /**
-     * The current {@link ExternalContext}.
-     */
-    private FacesContext fctx;
-
-    /**
-     * Feedback event for user feedback.
-     */
-    private transient Event<Feedback> feedbackEvent;
-
-    /**
-     * Resource bundle for feedback message.
-     */
-    private transient ResourceBundle messagesBundle;
-
-    /**
      * Constructs a new report editing page backing bean with the necessary dependencies.
      *
-     * @param topicService        The topic service to use.
-     * @param reportService       The report service to use.
-     * @param session             The current user session.
-     * @param fctx                The current {@link FacesContext} of the application.
-     * @param feedbackEvent       The feedback event to use for user feedback.
-     * @param registry            The dependency registry to use.
+     * @param topicService  The topic service to use.
+     * @param reportService The report service to use.
+     * @param session       The current user session.
+     * @param fctx          The current {@link FacesContext} of the application.
+     * @param registry      The dependency registry to use.
      */
     @Inject
     public ReportEditBacker(final TopicService topicService, final ReportService reportService,
-                            final UserSession session, final FacesContext fctx,
-                            final Event<Feedback> feedbackEvent, final Registry registry) {
+                            final UserSession session, final FacesContext fctx, final Registry registry) {
         this.topicService = topicService;
         this.reportService = reportService;
         this.session = session;
         this.fctx = fctx;
-        this.feedbackEvent = feedbackEvent;
         this.messagesBundle = registry.getBundle("messages", session);
         this.privileged = false;
     }
@@ -144,13 +127,12 @@ public class ReportEditBacker implements Serializable {
 
             privileged = user != null && currentTopic != null
                     && (user.equals(report.getAuthorship().getCreator())
-                        || user.isAdministrator()
-                        || topicService.isModerator(user, currentTopic));
+                    || user.isAdministrator()
+                    || topicService.isModerator(user, currentTopic));
         }
 
         if (!privileged) {
             redirectTo404Page();
-            return;
         }
     }
 
@@ -198,7 +180,7 @@ public class ReportEditBacker implements Serializable {
     public String saveChanges() {
         report.setTopic(destinationID);
         if (reportService.updateReport(report)) {
-            return "report.xhtml?r=" + report.getId();
+            return "pretty:report?r=" + report.getId();
         } else {
             return null;
         }
@@ -278,7 +260,7 @@ public class ReportEditBacker implements Serializable {
      *
      * @param report The report to edit.
      */
-    public void setReport(Report report) {
+    public void setReport(final Report report) {
         this.report = report;
     }
 
@@ -296,7 +278,7 @@ public class ReportEditBacker implements Serializable {
      *
      * @param currentTopic The current topic.
      */
-    public void setCurrentTopic(Topic currentTopic) {
+    public void setCurrentTopic(final Topic currentTopic) {
         this.currentTopic = currentTopic;
     }
 
@@ -314,7 +296,7 @@ public class ReportEditBacker implements Serializable {
      *
      * @param destinationID The ID of topic to move the report to.
      */
-    public void setDestinationID(int destinationID) {
+    public void setDestinationID(final int destinationID) {
         this.destinationID = destinationID;
     }
 
@@ -329,9 +311,10 @@ public class ReportEditBacker implements Serializable {
 
     /**
      * Sets the ID of the report to edit.
+     *
      * @param reportID The ID of the report to edit.
      */
-    public void setReportID(int reportID) {
+    public void setReportID(final int reportID) {
         this.reportID = reportID;
     }
 

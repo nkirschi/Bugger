@@ -46,6 +46,16 @@
         <pattern value="/report-create"/>
         <view-id value="/faces/view/auth/report-create.xhtml"/>
     </url-mapping>-->
+    <url-mapping id="report">
+        <pattern value="/report"/>
+        <query-param name="r">#{r}</query-param>
+        <view-id value="/faces/view/public/report.xhtml"/>
+    </url-mapping>
+    <url-mapping id="report-edit">
+        <pattern value="/report-edit"/>
+        <query-param name="id">#{id}</query-param>
+        <view-id value="/faces/view/restr/report-edit.xhtml"/>
+    </url-mapping>
     <url-mapping id="topic">
         <pattern value="/topic"/>
         <view-id value="/faces/view/public/topic.xhtml"/>

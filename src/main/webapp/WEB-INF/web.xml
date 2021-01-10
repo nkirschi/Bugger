@@ -17,6 +17,7 @@
         <servlet-name>Faces Servlet</servlet-name>
         <url-pattern>/faces/*</url-pattern>
         <url-pattern>/admin</url-pattern>
+        <url-pattern>/report-edit</url-pattern>
     </servlet-mapping>
 
     <context-param>
