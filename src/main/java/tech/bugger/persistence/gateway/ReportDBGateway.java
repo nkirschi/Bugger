@@ -338,9 +338,11 @@ public class ReportDBGateway implements ReportGateway {
             throw new IllegalArgumentException("Report ID cannot be null.");
         }
 
-        String sql = "UPDATE report SET closed_at = null WHERE id = " + report.getId() + ";";
+        String sql = "UPDATE report SET closed_at = null WHERE id = ?;";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            int affectedRows = stmt.executeUpdate();
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(report.getId()).toStatement();
+            int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
                 log.error("Report to open " + report + " cannot be found.");
                 throw new NotFoundException("Report to open " + report + " cannot be found.");
