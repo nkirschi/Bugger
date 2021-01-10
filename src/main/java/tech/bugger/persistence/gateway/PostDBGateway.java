@@ -203,7 +203,6 @@ public class PostDBGateway implements PostGateway {
                 + " LEFT JOIN \"user\" AS author ON p.created_by = author.id"
                 + " LEFT JOIN \"user\" AS modifier ON p.last_modified_by = modifier.id"
                 + " WHERE p.report = " + report.getId()
-                // + " GROUP BY p.id"
                 + " ORDER BY p." + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
                 + " LIMIT " + selection.getPageSize().getSize()
                 + " OFFSET " + selection.getCurrentPage() * selection.getPageSize().getSize() + ";";
