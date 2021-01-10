@@ -309,10 +309,11 @@ public class ReportDBGateway implements ReportGateway {
             throw new IllegalArgumentException("Report closing date cannot be null.");
         }
 
-        String sql = "UPDATE report SET closed_at = '" + Timestamp.from(report.getClosingDate().toInstant())
-                + "' WHERE id = " + report.getId() + ";";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            int affectedRows = stmt.executeUpdate();
+        try (PreparedStatement stmt = conn.prepareStatement("UPDATE report SET closed_at = ? WHERE id = ?;")) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .string("'" + Timestamp.from(report.getClosingDate().toInstant()) + "'")
+                    .integer(report.getId()).toStatement();
+            int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
                 log.error("Report to close " + report + " cannot be found.");
                 throw new NotFoundException("Report to close " + report + " cannot be found.");
