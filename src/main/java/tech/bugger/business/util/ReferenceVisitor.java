@@ -56,17 +56,18 @@ public class ReferenceVisitor extends AbstractVisitor {
     /**
      * The endpoint URL for a user reference.
      */
-    private static final String USER_ENDPOINT = "/user/";
+    private static final String USER_ENDPOINT = "/profile?u=";
 
     /**
      * The endpoint URL for a post reference.
      */
+    // TODO: What should we do here?
     private static final String POST_ENDPOINT = "/post/";
 
     /**
      * The endpoint URL for a report reference.
      */
-    private static final String REPORT_ENDPOINT = "/report/";
+    private static final String REPORT_ENDPOINT = "/report?r=";
 
     /**
      * Searches for references in {@link Text} nodes, extracts them and renders them as {@link Link} nodes.

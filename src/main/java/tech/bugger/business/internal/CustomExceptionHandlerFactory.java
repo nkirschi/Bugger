@@ -22,7 +22,7 @@ public class CustomExceptionHandlerFactory extends ExceptionHandlerFactory {
          *
          * @param exceptionHandler The exceptionHandler being wrapped.
          */
-        public CustomExceptionHandler(ExceptionHandler exceptionHandler) {
+        public CustomExceptionHandler(final ExceptionHandler exceptionHandler) {
             this.exceptionHandler = exceptionHandler;
         }
 
@@ -58,7 +58,7 @@ public class CustomExceptionHandlerFactory extends ExceptionHandlerFactory {
      *
      * @param exceptionHandlerFactory The exceptionHandlerFactory to wrap.
      */
-    public CustomExceptionHandlerFactory(ExceptionHandlerFactory exceptionHandlerFactory) {
+    public CustomExceptionHandlerFactory(final ExceptionHandlerFactory exceptionHandlerFactory) {
         this.exceptionHandlerFactory = exceptionHandlerFactory;
     }
 
@@ -69,4 +69,5 @@ public class CustomExceptionHandlerFactory extends ExceptionHandlerFactory {
     public ExceptionHandler getExceptionHandler() {
         return new CustomExceptionHandler(exceptionHandlerFactory.getExceptionHandler());
     }
+
 }
