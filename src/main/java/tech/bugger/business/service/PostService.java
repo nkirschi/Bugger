@@ -10,18 +10,13 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
-import tech.bugger.persistence.util.Transaction;
-import tech.bugger.persistence.util.TransactionManager;
-import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import java.sql.Connection;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -90,7 +85,7 @@ public class PostService {
      *
      * @param post The post to update.
      */
-    public void updatePost(Post post) {
+    public void updatePost(final Post post) {
     }
 
     /**
@@ -99,7 +94,7 @@ public class PostService {
      * @param name The attachment name to check the validity of.
      * @return Whether the attachment name is valid.
      */
-    private boolean isAttachmentNameValid(String name) {
+    private boolean isAttachmentNameValid(final String name) {
         return Arrays.stream(applicationSettings.getConfiguration().getAllowedFileExtensions().split(","))
                 .anyMatch(suffix -> name.endsWith(suffix));
     }
@@ -107,10 +102,10 @@ public class PostService {
     /**
      * Checks whether a list of attachments is allowed for a post according to the current application configuration.
      *
-      * @param attachments The list of attachments to check the validity of.
+     * @param attachments The list of attachments to check the validity of.
      * @return Whether the list of attachments is valid.
      */
-    public boolean isAttachmentListValid(List<Attachment> attachments) {
+    public boolean isAttachmentListValid(final List<Attachment> attachments) {
         int maxAttachments = applicationSettings.getConfiguration().getMaxAttachmentsPerPost();
         if (attachments.size() > maxAttachments) {
             log.info("Trying to create post with too many attachments.");
@@ -213,7 +208,7 @@ public class PostService {
      * @param id The ID of the post to be returned.
      * @return The post with the specified ID if it exists, {@code null} if no post with that ID exists.
      */
-    public Post getPostByID(int id) {
+    public Post getPostByID(final int id) {
         return null;
     }
 
@@ -223,7 +218,7 @@ public class PostService {
      * @param post The post in question.
      * @return A list of attachments that may be empty.
      */
-    public List<Attachment> getAttachmentsForPost(Post post) {
+    public List<Attachment> getAttachmentsForPost(final Post post) {
         return null;
     }
 
@@ -232,7 +227,7 @@ public class PostService {
      *
      * @param attachment The attachment to be created.
      */
-    public void createAttachment(Attachment attachment) {
+    public void createAttachment(final Attachment attachment) {
 
     }
 
@@ -241,7 +236,7 @@ public class PostService {
      *
      * @param attachments The list of attachments to be created.
      */
-    public void createMultipleAttachments(List<Attachment> attachments) {
+    public void createMultipleAttachments(final List<Attachment> attachments) {
 
     }
 
