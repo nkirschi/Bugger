@@ -35,12 +35,12 @@ public class ReportDBGateway implements ReportGateway {
     /**
      * Database connection used by this gateway.
      */
-    private Connection conn;
+    private final Connection conn;
 
     /**
      * User gateway used for finding users.
      */
-    private UserGateway userGateway;
+    private final UserGateway userGateway;
 
     /**
      * Constructs a new report gateway with the given database connection.
