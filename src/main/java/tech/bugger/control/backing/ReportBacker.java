@@ -156,13 +156,19 @@ public class ReportBacker implements Serializable {
         ExternalContext ext = fctx.getExternalContext();
         if (!ext.getRequestParameterMap().containsKey("r")) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
         }
         try {
             reportID = Integer.parseInt(ext.getRequestParameterMap().get("r"));
         } catch (NumberFormatException e) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
         }
         report = reportService.getReportByID(reportID);
+        if (report == null) {
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
+        }
         User user = session.getUser();
         boolean maySee = false;
         if (applicationSettings.getConfiguration().isGuestReading()) {
@@ -172,6 +178,7 @@ public class ReportBacker implements Serializable {
         }
         if (!maySee) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+            return;
         }
         currentDialog = null;
         posts = new Paginator<>("created_at", Selection.PageSize.NORMAL) {
