@@ -18,25 +18,25 @@
     <ui:define name="content">
         <h:form id="f-report">
             <h:panelGrid columns="5">
-                <h:outputText id="ot-id" value="ID: #{reportBacker.report.id}"/>
-                <h:outputText id="ot-status" value="Status: #{reportBacker.report.closingDate == null ? 'open' : 'closed at '.concat(reportBacker.report.closingDate)}"/>
-                <h:outputText id="ot-type" value="Type: #{reportBacker.report.type}"/>
-                <h:outputText id="ot-severity" value="Severity: #{reportBacker.report.severity}"/>
-                <h:outputText id="ot-version" value="Version: #{reportBacker.report.version}"/>
+                <h:outputText id="ot-id" value="#{labels.id}: #{reportBacker.report.id}"/>
+                <h:outputText id="ot-status" value="#{labels.status}: #{reportBacker.report.closingDate == null ? labels.report_status_open : labels.report_status_closed.concat(' ').concat(reportBacker.report.closingDate)}"/>
+                <h:outputText id="ot-type" value="#{labels.report_type}: #{labels['report_type.'.concat(reportBacker.report.type)]}"/>
+                <h:outputText id="ot-severity" value="#{labels.report_severity}: #{labels['report_severity.'.concat(reportBacker.report.severity)]}"/>
+                <h:outputText id="ot-version" value="#{labels.report_version}: #{reportBacker.report.version}"/>
             </h:panelGrid>
             <h:panelGrid columns="2">
                 <h:outputText id="ot-creator"
-                              value="created by: #{reportBacker.report.authorship.creator == null ? 'deleted user' : reportBacker.report.authorship.creator.username}"/>
-                <h:outputText id="ot-created-at" value="at #{reportBacker.report.authorship.creationDate}"/>
+                              value="#{labels.report_created_by}: #{reportBacker.report.authorship.creator == null ? labels.deleted_user : reportBacker.report.authorship.creator.username}"/>
+                <h:outputText id="ot-created-at" value="#{labels.report_at} #{reportBacker.report.authorship.creationDate}"/>
 
                 <h:outputText id="ot-modifier"
-                              value="last modified by: #{reportBacker.report.authorship.modifier == null ? 'deleted user' : reportBacker.report.authorship.modifier.username}"
+                              value="#{labels.report_last_modified_by}: #{reportBacker.report.authorship.modifier == null ? labels.deleted_user : reportBacker.report.authorship.modifier.username}"
                               rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
-                <h:outputText id="ot-modified-at" value="at #{reportBacker.report.authorship.modifiedDate}" rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
+                <h:outputText id="ot-modified-at" value="#{labels.report_at} #{reportBacker.report.authorship.modifiedDate}" rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
             </h:panelGrid>
             <h:panelGrid>
-                <h:commandButton id="cb-open-close-report-dialog" action="#{reportBacker.displayDialog('OPEN_CLOSE')}" value="#{reportBacker.report.closingDate == null ? 'Close' : 'Open'}"/>
-                <h:commandButton id="cb-delete-report-dialog" action="#{reportBacker.displayDialog('DELETE_REPORT')}" value="Delete"/>
+                <h:commandButton id="cb-open-close-report-dialog" action="#{reportBacker.displayDialog('OPEN_CLOSE')}" value="#{reportBacker.report.closingDate == null ? labels.report_action_close : labels.report_action_open}"/>
+                <h:commandButton id="cb-delete-report-dialog" action="#{reportBacker.displayDialog('DELETE_REPORT')}" value="#{labels.delete}"/>
             </h:panelGrid>
         </h:form>
 
@@ -45,7 +45,7 @@
                 <h:panelGroup class="col-sm-4" layout="block"/>
                 <h:panelGroup class="col-sm-4" layout="block">
                     <h:panelGroup class="row" layout="block">
-                        <h:outputText value="Delete report?"/>
+                        <h:outputText value="#{labels.report_delete_dialog}"/>
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block">
                         <h:commandButton id="cb-delete-report" action="#{reportBacker.delete}" styleClass="button" value="#{labels.delete}"/>
@@ -61,10 +61,10 @@
                 <h:panelGroup class="col-sm-4" layout="block"/>
                 <h:panelGroup class="col-sm-4" layout="block">
                     <h:panelGroup class="row" layout="block">
-                        <h:outputText value="Open/Close report?"/>
+                        <h:outputText value="#{reportBacker.report.closingDate == null ? labels.report_close_dialog : labels.report_open_dialog}"/>
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block">
-                        <h:commandButton id="cb-open-close-report" action="#{reportBacker.toggleOpenClosed}" styleClass="button" value="#{reportBacker.report.closingDate == null ? 'Close' : 'Open'}"/>
+                        <h:commandButton id="cb-open-close-report" action="#{reportBacker.toggleOpenClosed}" styleClass="button" value="#{reportBacker.report.closingDate == null ? labels.report_action_close : labels.report_action_open}"/>
                         <h:commandButton id="cb-open-close-report-cancel" action="#{reportBacker.displayDialog(null)}" styleClass="button" value="#{labels.cancel}"/>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -77,7 +77,9 @@
                 <h:panelGroup class="col-sm-4" layout="block"/>
                 <h:panelGroup class="col-sm-4" layout="block">
                     <h:panelGroup class="row" layout="block">
-                        <h:outputText value="Delete post?"/>
+                        <h:outputFormat value="#{labels.report_delete_post_dialog}">
+                            <f:param value="#{reportBacker.postToBeDeleted.id}"/>
+                        </h:outputFormat>
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block">
                         <h:commandButton id="cb-delete-post" action="#{reportBacker.deletePost}" styleClass="button" value="#{labels.delete}"/>
@@ -88,8 +90,22 @@
             </h:panelGroup>
         </h:form>
 
+        <!-- TODO dialog for marking a duplicate -->
 
         <b:pagitable_post paginator="#{reportBacker.posts}">
+            <h:panelGrid columns="2">
+                <h:panelGrid columns="1">
+                    <h:outputText id="ot-post-creator" value="#{var.authorship.creator == null ? labels.deleted_user : var.authorship.creator.username}"/>
+                    <h:outputText id="ot-post-created-at" value="#{labels.report_at} #{var.authorship.creationDate}"/>
+                </h:panelGrid>
+                <h:panelGrid columns="2">
+                    <!-- TODO redirect to post edit page -->
+                    <h:commandButton id="cb-edit-post" value="#{labels.edit}"/>
+                    <h:commandButton id="cb-delete-post-dialog" action="#{reportBacker.deletePostDialog(var)}" value="#{labels.delete}"/>
+                </h:panelGrid>
+            </h:panelGrid>
+
+            <!--
             <h:panelGroup class="row" layout="block" styleClass="align-center">
                 <h:panelGroup class="col-sm-4" layout="block">
                     <h:panelGroup class="row" layout="block">
@@ -104,18 +120,35 @@
                     <h:commandButton id="cb-delete-post-dialog" action="#{reportBacker.deletePostDialog(var)}" value="#{labels.delete}"/>
                 </h:panelGroup>
             </h:panelGroup>
+            -->
 
+            <h:panelGrid columns="1">
+                <h:outputText value="#{var.content}" escape="false"/>
+            </h:panelGrid>
+
+            <!--
             <h:panelGroup class="row" layout="block">
                 <h:outputText value="#{var.content}" escape="false"/>
             </h:panelGroup>
+            -->
 
             <h:panelGrid columns="2">
-                <h:outputText value="ID: #{var.id}"/>
-                <h:outputText value="last modified at #{var.authorship.modifiedDate} by #{var.authorship.modifier.username}"/>
+                <h:outputText value="#{labels.id}: #{var.id}"/>
+                <h:outputText value="#{labels.report_last_modified_by} #{var.authorship.modifier == null ? labels.deleted_user : var.authorship.modifier.username} #{labels.report_at} #{var.authorship.modifiedDate}"
+                              rendered="#{var.authorship.modifiedDate != null}"
+                />
             </h:panelGrid>
 
-        </b:pagitable_post>
+            <!-- TODO put attachments into post in gateway
+            <ui:repeat value="#{var.attachments}" var="attachment">
+                <h:panelGrid columns="2">
+                    <h:outputText id="ot-attachment-name" value="#{attachment.name}"/>
+                    <h:commandButton id="cb-attachment-download" value="Download"/>
+                </h:panelGrid>
+            </ui:repeat>
+            -->
 
+        </b:pagitable_post>
     </ui:define>
 </ui:composition>
 
