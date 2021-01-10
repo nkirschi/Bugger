@@ -67,11 +67,12 @@ public class ReportDBGateway implements ReportGateway {
         }
 
         int count = 0;
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM post WHERE report = "
-                + report.getId())) {
-            ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) AS count FROM post WHERE report = ?;")) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(report.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
             if (rs.next()) {
-                count = rs.getInt(1);
+                count = rs.getInt("count");
             }
         } catch (SQLException e) {
             log.error("Error when counting posts of report " + report + ".", e);
