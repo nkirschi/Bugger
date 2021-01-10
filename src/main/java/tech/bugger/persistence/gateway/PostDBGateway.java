@@ -8,6 +8,7 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
+import tech.bugger.global.util.Pagitable;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
@@ -202,15 +203,20 @@ public class PostDBGateway implements PostGateway {
                 + " FROM post AS p"
                 + " LEFT JOIN \"user\" AS author ON p.created_by = author.id"
                 + " LEFT JOIN \"user\" AS modifier ON p.last_modified_by = modifier.id"
-                + " WHERE p.report = " + report.getId()
-                + " ORDER BY p." + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
-                + " LIMIT " + selection.getPageSize().getSize()
-                + " OFFSET " + selection.getCurrentPage() * selection.getPageSize().getSize() + ";";
-
+                + " WHERE p.report = ?"
+                + " ORDER BY p.? ?"
+                + " LIMIT ?"
+                + " OFFSET ?;";
         List<Post> selectedPosts = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         Lazy<Report> reportLazy = new Lazy<>(report);
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(report.getId())
+                    .string(selection.getSortedBy())
+                    .string(selection.isAscending() ? "ASC" : "DESC")
+                    .integer(Pagitable.getItemLimit(selection))
+                    .integer(Pagitable.getItemOffset(selection)).toStatement();
+            ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 User author = null;
                 if (rs.getInt("p_created_by") != 0) {
