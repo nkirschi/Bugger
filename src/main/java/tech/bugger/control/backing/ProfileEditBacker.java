@@ -150,6 +150,7 @@ public class ProfileEditBacker implements Serializable {
 
         if (session.getUser() == null) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+            return;
         }
         dialog = DialogType.NONE;
 
@@ -209,39 +210,34 @@ public class ProfileEditBacker implements Serializable {
     /**
      * Applies and saves the changes made.
      */
-    public void saveChanges() {
-        boolean successful;
-
-        if (!passwordNew.isBlank() && Objects.equals(passwordNew, passwordNewConfirm)) {
-            authenticationService.hashPassword(user, passwordNew);
-        } else if (!passwordNew.isBlank()) {
-            closeDialog();
-            return;
+    public String saveChanges() {
+        if (!passwordNew.isBlank()) {
+            if (passwordNew.equals(passwordNewConfirm)) {
+                authenticationService.hashPassword(user, passwordNew);
+            } else {
+                closeDialog();
+                return null;
+            }
         }
 
         if (!profileService.matchingPassword(session.getUser(), password)) {
             closeDialog();
-            return;
+            return null;
         }
 
         user.setUsername(usernameNew);
         if (create) {
             user.setEmailAddress(emailNew);
-            successful = profileService.createUser(user);
+            profileService.createUser(user);
         } else {
-            if (!emailNew.equals(user.getEmailAddress())) {
-                if (!updateEmail(user, emailNew)) {
-                    closeDialog();
-                    return;
-                }
+            if (!emailNew.equals(user.getEmailAddress()) && !updateEmail(user, emailNew)) {
+                closeDialog();
+                return null;
             }
-
-            successful = profileService.updateUser(user);
+            profileService.updateUser(user);
         }
 
-        if (successful) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:profile");
-        }
+        return null;
     }
 
     /**
@@ -272,10 +268,10 @@ public class ProfileEditBacker implements Serializable {
      * Irreversibly deletes the user, logs them out and redirects to the home page. Their created reports and posts will
      * still remain.
      */
-    public void delete() {
+    public String delete() {
         if (!profileService.matchingPassword(session.getUser(), password)) {
             closeDialog();
-            return;
+            return null;
         }
 
         if (profileService.deleteUser(user)) {
@@ -283,8 +279,10 @@ public class ProfileEditBacker implements Serializable {
                 session.invalidateSession();
             }
 
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+            return "pretty:home";
         }
+
+        return null;
     }
 
     /**

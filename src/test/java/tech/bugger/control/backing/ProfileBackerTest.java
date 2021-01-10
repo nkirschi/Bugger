@@ -19,11 +19,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import java.time.ZonedDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
@@ -116,9 +112,6 @@ public class ProfileBackerTest {
 
     @Test
     public void testInitKeyNotPresent() {
-        // Since ext.redirect is mocked, it just tries and then executes the rest of the method.
-        when(map.get(PARAMETER)).thenReturn(user.getUsername());
-        when(profileService.getUserByUsername(anyString())).thenReturn(user);
         profileBacker.init();
         verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
     }
@@ -127,9 +120,26 @@ public class ProfileBackerTest {
     public void testInitUsernameTooLong() {
         when(map.containsKey(PARAMETER)).thenReturn(true);
         when(map.get(PARAMETER)).thenReturn(LONG_USERNAME);
-        when(profileService.getUserByUsername(anyString())).thenReturn(user);
         profileBacker.init();
         verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
+    }
+
+    @Test
+    public void testInitUserNull() {
+        when(map.containsKey(PARAMETER)).thenReturn(true);
+        when(map.get(PARAMETER)).thenReturn(user.getUsername());
+        profileBacker.init();
+        verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
+    }
+
+    @Test
+    public void testInitUserBioNull() {
+        when(map.containsKey(PARAMETER)).thenReturn(true);
+        when(map.get(PARAMETER)).thenReturn(user.getUsername());
+        when(profileService.getUserByUsername(user.getUsername())).thenReturn(user);
+        user.setBiography(null);
+        profileBacker.init();
+        assertNull(profileBacker.getSanitizedBiography());
     }
 
     @Test

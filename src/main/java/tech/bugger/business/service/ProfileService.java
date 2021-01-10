@@ -337,8 +337,7 @@ public class ProfileService {
             if (admins == 0) {
                 log.error("No administrators could be found in the database");
                 throw new InternalError("No administrators could be found in the database");
-            }
-            if (admins == 1) {
+            } else if (admins == 1) {
                 log.error("The last administrator cannot be deleted");
                 feedback.fire(new Feedback(messages.getString("delete_last_admin"), Feedback.Type.ERROR));
             }

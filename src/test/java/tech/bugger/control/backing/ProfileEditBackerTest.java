@@ -203,10 +203,8 @@ public class ProfileEditBackerTest {
 
     @Test
     public void testInitSessionUserNull() {
-        //Necessary since method execution continues after first call to handleNavigation().
-        when(session.getUser()).thenReturn(null).thenReturn(user);
         profileEditBacker.init();
-        verify(navHandler, times(2)).handleNavigation(any(), any(), any());
+        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
@@ -225,7 +223,6 @@ public class ProfileEditBackerTest {
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(profileService, times(1)).createUser(any());
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
@@ -255,7 +252,6 @@ public class ProfileEditBackerTest {
         profileEditBacker.setEmailNew(user.getEmailAddress());
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
@@ -279,7 +275,7 @@ public class ProfileEditBackerTest {
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(authenticationService, times(1)).updateEmail(any(), any(), any());
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
+        verify(profileService, times(1)).updateUser(user);
     }
 
     @Test
@@ -329,10 +325,9 @@ public class ProfileEditBackerTest {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         when(profileService.deleteUser(user)).thenReturn(true);
         profileEditBacker.setUser(user);
-        profileEditBacker.delete();
+        assertEquals("pretty:home", profileEditBacker.delete());
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(profileService, times(1)).deleteUser(user);
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
@@ -357,11 +352,10 @@ public class ProfileEditBackerTest {
         when(profileService.deleteUser(user)).thenReturn(true);
         when(session.getUser()).thenReturn(user);
         profileEditBacker.setUser(user);
-        profileEditBacker.delete();
+        assertEquals("pretty:home", profileEditBacker.delete());
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(profileService, times(1)).deleteUser(user);
         verify(session, times(1)).invalidateSession();
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
