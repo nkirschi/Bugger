@@ -101,15 +101,16 @@ public class PostDBGateway implements PostGateway {
      * {@inheritDoc}
      */
     @Override
-    public void deletePost(final Post post) throws NotFoundException {
+    public void delete(final Post post) throws NotFoundException {
         if (post == null) {
             log.error("Cannot delete post null.");
             throw new IllegalArgumentException("Post cannot be null.");
         }
 
-        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM post * WHERE id = " + post.getId()
-                + " RETURNING *")) {
-            ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM post WHERE id = ? RETURNING *")) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(post.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 if (rs.getInt("id") != post.getId()) {
                     throw new InternalError("Wrong post deleted! Please investigate! Expected: " + post + ", actual: "

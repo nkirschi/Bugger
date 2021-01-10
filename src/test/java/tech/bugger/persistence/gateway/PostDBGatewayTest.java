@@ -235,7 +235,7 @@ public class PostDBGatewayTest {
         insertReport();
         numberOfPosts = 1;
         insertPosts(100);
-        gateway.deletePost(makeTestPost(100));
+        gateway.delete(makeTestPost(100));
         assertTrue(isGone(100));
     }
 
@@ -244,17 +244,17 @@ public class PostDBGatewayTest {
         insertReport();
         numberOfPosts = 1;
         insertPosts(100);
-        gateway.deletePost(makeTestPost(100));
-        assertThrows(NotFoundException.class, () -> gateway.deletePost(makeTestPost(100)));
+        gateway.delete(makeTestPost(100));
+        assertThrows(NotFoundException.class, () -> gateway.delete(makeTestPost(100)));
     }
 
     @Test
     public void testDeletePostWhenPostDoesNotExist() {
-        assertThrows(NotFoundException.class, () -> gateway.deletePost(makeTestPost(4)));
+        assertThrows(NotFoundException.class, () -> gateway.delete(makeTestPost(4)));
     }
 
     @Test
     public void testDeletePostWhenPostIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> gateway.deletePost(null));
+        assertThrows(IllegalArgumentException.class, () -> gateway.delete(null));
     }
 }

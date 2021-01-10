@@ -1,6 +1,5 @@
 package tech.bugger.business.service;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,17 +19,11 @@ import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentGateway;
 import tech.bugger.persistence.gateway.PostGateway;
-import tech.bugger.persistence.gateway.PostDBGateway;
 import tech.bugger.persistence.gateway.ReportGateway;
-import tech.bugger.persistence.gateway.TopicGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.event.Event;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,7 +37,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
@@ -197,7 +189,7 @@ public class PostServiceTest {
     public void deletePostWhenPostIsNotFirstPost() throws Exception {
         doReturn(null).when(postGateway).getFirstPost(any());
         assertDoesNotThrow(() -> postService.deletePost(testPost));
-        verify(postGateway).deletePost(any());
+        verify(postGateway).delete(any());
     }
 
     @Test
@@ -209,7 +201,7 @@ public class PostServiceTest {
 
     @Test
     public void deletePostWhenNotFound() throws Exception {
-        doThrow(NotFoundException.class).when(postGateway).deletePost(any());
+        doThrow(NotFoundException.class).when(postGateway).delete(any());
         assertDoesNotThrow(() -> postService.deletePost(testPost));
         verify(feedbackEvent).fire(any());
     }

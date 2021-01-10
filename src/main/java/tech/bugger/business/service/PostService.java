@@ -190,7 +190,7 @@ public class PostService {
             if (post.equals(firstPost)) {
                 tx.newReportGateway().delete(report);
             } else {
-                tx.newPostGateway().deletePost(post);
+                tx.newPostGateway().delete(post);
             }
             tx.commit();
         } catch (NotFoundException e) {

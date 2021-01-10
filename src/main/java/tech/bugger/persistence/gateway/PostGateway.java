@@ -54,7 +54,7 @@ public interface PostGateway {
      * @param post The post to delete.
      * @throws NotFoundException The post could not be found.
      */
-    void deletePost(Post post) throws NotFoundException;
+    void delete(Post post) throws NotFoundException;
 
     /**
      * Retrieves the first post of the given report.
