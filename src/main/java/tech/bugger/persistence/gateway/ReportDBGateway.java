@@ -172,13 +172,13 @@ public class ReportDBGateway implements ReportGateway {
         ZonedDateTime modified = null;
         ZonedDateTime closed = null;
         User creator = null;
-        Integer creatorID = rs.getInt("created_by");
-        if (!rs.wasNull()) {
+        Integer creatorID = rs.getObject("created_by", Integer.class);
+        if (creatorID != null) {
             creator = userGateway.getUserByID(creatorID);
         }
         User modifier = null;
-        Integer modifierID = rs.getInt("last_modified_by");
-        if (!rs.wasNull()) {
+        Integer modifierID = rs.getObject("last_modified_by", Integer.class);
+        if (modifierID != null) {
             modifier = userGateway.getUserByID(modifierID);
         }
         if (rs.getTimestamp("created_at") != null) {
