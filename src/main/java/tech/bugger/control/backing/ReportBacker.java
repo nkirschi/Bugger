@@ -170,12 +170,12 @@ public class ReportBacker implements Serializable {
             }
             reportID = reportService.findReportOfPost(postID);
         } else {
-            if (!ext.getRequestParameterMap().containsKey("r")) {
+            if (!ext.getRequestParameterMap().containsKey("id")) {
                 fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
                 return;
             }
             try {
-                reportID = Integer.parseInt(ext.getRequestParameterMap().get("r"));
+                reportID = Integer.parseInt(ext.getRequestParameterMap().get("id"));
             } catch (NumberFormatException e) {
                 fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
                 return;
