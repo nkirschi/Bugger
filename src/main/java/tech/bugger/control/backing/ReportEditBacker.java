@@ -179,6 +179,7 @@ public class ReportEditBacker implements Serializable {
      */
     public String saveChanges() {
         report.setTopic(destinationID);
+
         if (reportService.updateReport(report)) {
             return "pretty:report?r=" + report.getId();
         } else {
@@ -212,7 +213,9 @@ public class ReportEditBacker implements Serializable {
      */
     private boolean canMoveToTopic() {
         Topic destination = topicService.getTopicByID(destinationID);
-        if (destination == null || topicService.isBanned(session.getUser(), destination)) {
+        User user = session.getUser();
+
+        if (destination == null || user == null || topicService.isBanned(user, destination)) {
             String message = MessageFormat.format(messagesBundle.getString("report_edit_topic_not_found"),
                     destinationID);
             fctx.addMessage("f-report-edit:it-topic", new FacesMessage(message));

@@ -75,6 +75,7 @@ public class ReportEditBackerTest {
     @Test
     public void testSaveChangesWithConfirmWhenCanMove() {
         reportEditBacker.setDestinationID(42);
+        doReturn(new User()).when(session).getUser();
         doReturn(testTopic).when(topicService).getTopicByID(anyInt());
         doReturn(false).when(topicService).isBanned(any(), any());
         assertNull(reportEditBacker.saveChangesWithConfirm());
