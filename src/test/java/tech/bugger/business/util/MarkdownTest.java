@@ -94,7 +94,8 @@ public class MarkdownTest {
         String keyword = "42069";
         String md = "## Hello ##" + keyword + " and hello world!";
         String html = MarkdownHandler.toHtml(md);
-        assertEquals("<h2>Hello <a href=\"/post/" + keyword + "\" title=\"" + keyword + "\">##" + keyword + "</a> and hello world!</h2>\n", html);
+        assertEquals("<h2>Hello <a href=\"/report?p=" + keyword + "#post-" + keyword + "\" title=\"" + keyword
+                + "\">##" + keyword + "</a> and hello world!</h2>\n", html);
     }
 
     @Test
@@ -144,7 +145,7 @@ public class MarkdownTest {
         String keyword = "456";
         String md = "##" + keyword;
         String html = MarkdownHandler.toHtml(md);
-        assertEquals("<p><a href=\"/post/" + keyword + "\" title=\"" + keyword + "\">"
+        assertEquals("<p><a href=\"/report?p=" + keyword + "#post-" + keyword + "\" title=\"" + keyword + "\">"
                 + "##" + keyword + "</a></p>\n", html);
     }
 
