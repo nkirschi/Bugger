@@ -66,7 +66,7 @@ public class ReferenceVisitor extends AbstractVisitor {
     /**
      * The endpoint URL for a report reference.
      */
-    private static final String REPORT_ENDPOINT = "/report?r=%1$s";
+    private static final String REPORT_ENDPOINT = "/report?id=%1$s";
 
     /**
      * Searches for references in {@link Text} nodes, extracts them and renders them as {@link Link} nodes.
