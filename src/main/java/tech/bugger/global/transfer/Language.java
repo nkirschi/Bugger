@@ -24,10 +24,12 @@ public enum Language {
      * @return The appropriate {@link Language} to choose.
      */
     public static Language of(final Locale locale) {
-        if (locale.equals(Locale.GERMAN)) {
+        if (locale.getLanguage().equals(Locale.GERMAN.getLanguage())) {
             return GERMAN;
-        } else {
+        } else if (locale.getLanguage().equals(Locale.ENGLISH.getLanguage())) {
             return ENGLISH;
+        } else {
+            return null;
         }
     }
 

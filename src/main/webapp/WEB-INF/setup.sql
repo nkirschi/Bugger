@@ -261,7 +261,7 @@ CREATE VIEW topic_last_activity (topic, last_activity) AS
     GROUP BY t.id;
 
 CREATE VIEW report_relevance (report, relevance) AS
-    SELECT r.id, SUM(v.weight)
+    SELECT r.id, COALESCE(SUM(v.weight), 0)
     FROM report AS r
     LEFT OUTER JOIN relevance_vote AS v
     ON r.id = v.report
@@ -274,11 +274,25 @@ CREATE VIEW user_num_posts (author, num_posts) AS
     ON u.id = p.created_by
     GROUP BY u.id;
 
-CREATE VIEW top_reports (report, recent_relevance_gain) AS
-    SELECT r.id, SUM(v.weight)
+CREATE VIEW last_day_votes (report, weight) AS
+    SELECT report, weight
+    FROM relevance_vote
+    WHERE voted_at > NOW() - '24 hours'::interval;
+
+CREATE VIEW top_reports (report, relevance_gain) AS
+    SELECT r.id, COALESCE(SUM(v.weight), 0)
     FROM report AS r
-    LEFT OUTER JOIN relevance_vote AS v
+    LEFT OUTER JOIN last_day_votes AS v
     ON r.id = v.report
-    WHERE v.voted_at > NOW() - '24 hours'::interval
     GROUP BY r.id
-    ORDER BY SUM(v.weight) DESC, r.id ASC;
+    ORDER BY COALESCE(SUM(v.weight), 0) DESC, r.id ASC;
+
+CREATE VIEW top_users ("user", earned_relevance) AS
+    SELECT u.id, COALESCE(SUM(s.relevance), 0)
+    FROM "user" AS u
+    LEFT OUTER JOIN report AS r
+    ON r.created_by = u.id
+    LEFT OUTER JOIN report_relevance AS s
+    ON r.id = s.report
+    GROUP BY u.id
+    ORDER BY COALESCE(SUM(s.relevance), 0) DESC, u.id ASC;

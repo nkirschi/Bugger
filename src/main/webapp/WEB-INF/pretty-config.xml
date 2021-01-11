@@ -60,4 +60,12 @@
         <pattern value="/topic"/>
         <view-id value="/faces/view/public/topic.xhtml"/>
     </url-mapping>
+    <url-mapping id="report">
+        <pattern value="/report"/>
+        <view-id value="/faces/view/public/report.xhtml"/>
+    </url-mapping>
+    <url-mapping id="statistics">
+        <pattern value="/statistics"/>
+        <view-id value="/faces/view/public/statistics.xhtml"/>
+    </url-mapping>
 </pretty-config>

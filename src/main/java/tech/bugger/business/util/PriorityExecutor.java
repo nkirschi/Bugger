@@ -60,7 +60,7 @@ public final class PriorityExecutor {
      * Calling this method blocks until either all tasks have been terminated or the given timeout has been reached.
      *
      * @param timeoutMillis The maximum time in milliseconds to wait for remaining task execution completion.
-     * @return {@code} true iff all remaining tasks have been completed without timeout.
+     * @return {@code true} iff all remaining tasks have been completed without timeout.
      * @throws InterruptedException if interrupted whilst awaiting termination.
      */
     public boolean shutdown(final int timeoutMillis) throws InterruptedException {
@@ -74,7 +74,7 @@ public final class PriorityExecutor {
      * Calling this method blocks until either all tasks have been terminated or the given timeout has been reached.
      *
      * @param timeoutMillis The maximum time in milliseconds to wait for remaining task execution completion.
-     * @return {@code} true iff all remaining tasks have been completed without timeout.
+     * @return {@code true} iff all remaining tasks have been completed without timeout.
      * @throws InterruptedException if interrupted whilst awaiting termination.
      */
     public boolean kill(final int timeoutMillis) throws InterruptedException {
