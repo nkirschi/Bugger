@@ -148,4 +148,13 @@ public interface ReportGateway {
      */
     void removeVote(Report report, User user) throws NotFoundException;
 
+    /**
+     * Find the ID of the report containing the post with the specified ID.
+     *
+     * @param postID The post ID.
+     * @return The report ID.
+     * @throws NotFoundException The report was not found.
+     */
+    int findReportOfPost(int postID) throws NotFoundException;
+
 }

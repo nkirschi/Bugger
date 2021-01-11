@@ -390,4 +390,25 @@ public class ReportService {
         }
     }
 
+    /**
+     * Find ID of the report containing the post with the specified ID.
+     *
+     * @param postID The post ID.
+     * @return The report ID.
+     */
+    public int findReportOfPost(final int postID) {
+        int reportID = 0;
+        try (Transaction tx = transactionManager.begin()) {
+            reportID = tx.newReportGateway().findReportOfPost(postID);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Could not find report containing post with ID " + postID + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when finding report containing post with ID " + postID + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return reportID;
+    }
+
 }

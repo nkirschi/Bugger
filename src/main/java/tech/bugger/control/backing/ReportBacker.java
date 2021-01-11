@@ -21,6 +21,7 @@ import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 /**
  * Backing bean for the report page.
@@ -64,6 +65,11 @@ public class ReportBacker implements Serializable {
      * The report ID.
      */
     private int reportID;
+
+    /**
+     * The post ID.
+     */
+    private int postID;
 
     /**
      * The report.
@@ -154,15 +160,26 @@ public class ReportBacker implements Serializable {
     @PostConstruct
     void init() {
         ExternalContext ext = fctx.getExternalContext();
-        if (!ext.getRequestParameterMap().containsKey("r")) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-            return;
-        }
-        try {
-            reportID = Integer.parseInt(ext.getRequestParameterMap().get("r"));
-        } catch (NumberFormatException e) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-            return;
+        postID = -1;
+        if (ext.getRequestParameterMap().containsKey("p")) {
+            try {
+                postID = Integer.parseInt(ext.getRequestParameterMap().get("p"));
+            } catch (NumberFormatException e) {
+                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+                return;
+            }
+            reportID = reportService.findReportOfPost(postID);
+        } else {
+            if (!ext.getRequestParameterMap().containsKey("r")) {
+                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+                return;
+            }
+            try {
+                reportID = Integer.parseInt(ext.getRequestParameterMap().get("r"));
+            } catch (NumberFormatException e) {
+                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+                return;
+            }
         }
         report = reportService.getReportByID(reportID);
         if (report == null) {
@@ -194,6 +211,18 @@ public class ReportBacker implements Serializable {
         };
         log.debug("Paginator initialized with Selection " + posts.getSelection() + " and items "
                 + posts.getWrappedData());
+        if (postID > -1) {
+            Post post = new Post(postID, null, null, null, null);
+            while (!((List<Post>) posts.getWrappedData()).contains(post)) {
+                try {
+                    posts.nextPage();
+                } catch (IllegalStateException e) {
+                    log.error("Could not find post with ID " + postID + " when displaying report page.");
+                    fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+                    return;
+                }
+            }
+        }
     }
 
     /**
@@ -436,6 +465,24 @@ public class ReportBacker implements Serializable {
      */
     public void setReportID(final int reportID) {
         this.reportID = reportID;
+    }
+
+    /**
+     * Returns the post ID.
+     *
+     * @return The post ID.
+     */
+    public int getPostID() {
+        return postID;
+    }
+
+    /**
+     * Sets the post ID.
+     *
+     * @param postID The post ID to set.
+     */
+    public void setPostID(final int postID) {
+        this.postID = postID;
     }
 
 }

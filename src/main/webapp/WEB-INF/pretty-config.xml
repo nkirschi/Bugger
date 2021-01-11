@@ -45,6 +45,7 @@
     <url-mapping id="report">
         <pattern value="/report"/>
         <query-param name="r">#{reportBacker.reportID}</query-param>
+        <query-param name="p">#{reportBacker.postID}</query-param>
         <view-id value="/faces/view/authorized/report.xhtml"/>
     </url-mapping>
     <!--<url-mapping id="report-create">

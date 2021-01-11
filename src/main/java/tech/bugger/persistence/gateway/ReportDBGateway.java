@@ -408,4 +408,23 @@ public class ReportDBGateway implements ReportGateway {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int findReportOfPost(final int postID) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT report FROM post WHERE id = ?;")) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(postID).toStatement();
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("report");
+            } else {
+                throw new NotFoundException("The report containing post with ID " + postID + "could not be found.");
+            }
+        } catch (SQLException e) {
+            throw new StoreException("Error when finding report containing post with ID " + postID + ".");
+        }
+    }
+
 }
