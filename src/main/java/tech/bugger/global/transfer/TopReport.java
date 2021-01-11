@@ -1,9 +1,15 @@
 package tech.bugger.global.transfer;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * DTO representing a top report entry.
  */
-public final class TopReport {
+public final class TopReport implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 5819489567437071885L;
 
     /**
      * The report ID.
@@ -23,7 +29,7 @@ public final class TopReport {
     /**
      * The relevance recently gained by the report.
      */
-    private int relevanceGain;
+    private final int relevanceGain;
 
     /**
      * Constructs a new top report from  the specified parameters.

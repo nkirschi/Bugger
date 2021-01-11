@@ -1,5 +1,6 @@
 package tech.bugger.global.transfer;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 
@@ -7,6 +8,9 @@ import java.time.OffsetDateTime;
  * Common criteria for filtering reports.
  */
 public class ReportCriteria implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1157074471636575887L;
 
     /**
      * The topic to only consider reports in.

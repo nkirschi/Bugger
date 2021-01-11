@@ -1,9 +1,15 @@
 package tech.bugger.global.transfer;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * DTO representing a top user entry.
  */
-public final class TopUser {
+public final class TopUser implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -2911767883152502483L;
 
     /**
      * The username of the top user.
