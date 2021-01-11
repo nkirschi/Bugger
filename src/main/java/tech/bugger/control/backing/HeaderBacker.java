@@ -30,10 +30,9 @@ public class HeaderBacker implements Serializable {
     private User user;
 
     /**
-     * The current UserSession.
+     * The current user session..
      */
-    @Inject
-    private UserSession session;
+    private final UserSession session;
 
     /**
      * {@code true} if the Menu should be displayed, {@code false} otherwise.
@@ -43,15 +42,17 @@ public class HeaderBacker implements Serializable {
     /**
      * The current {@link FacesContext} of the application.
      */
-    private FacesContext fctx;
+    private final FacesContext fctx;
 
     /**
      * Constructs a new header backing bean.
      *
-     * @param fctx The current {@link FacesContext} of the application.
+     * @param session The currently active {@link UserSession}.
+     * @param fctx    The current {@link FacesContext} of the application.
      */
     @Inject
-    public HeaderBacker(final FacesContext fctx) {
+    public HeaderBacker(final UserSession session, final FacesContext fctx) {
+        this.session = session;
         this.fctx = fctx;
     }
 
@@ -109,7 +110,7 @@ public class HeaderBacker implements Serializable {
     public String determineAlertClass() {
         if (!fctx.getMessageList(null).isEmpty()) {
             FacesMessage.Severity maxSeverity = fctx.getMessageList().stream().map(FacesMessage::getSeverity)
-                                                    .max(FacesMessage.Severity::compareTo).get();
+                                                    .max(FacesMessage.Severity::compareTo).orElseThrow();
             if (maxSeverity.equals(FacesMessage.SEVERITY_ERROR)) {
                 return " alert-danger";
             } else if (maxSeverity.equals(FacesMessage.SEVERITY_WARN)) {
@@ -123,6 +124,11 @@ public class HeaderBacker implements Serializable {
         return "";
     }
 
+    /**
+     * Returns the current year in the gregorian calendar.
+     *
+     * @return The current year as integer.
+     */
     public int getCurrentYear() {
         return LocalDate.now().getYear();
     }

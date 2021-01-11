@@ -23,10 +23,10 @@ public class FooterBacker implements Serializable {
     /**
      * The current UserSession.
      */
-    private UserSession session;
+    private final UserSession session;
 
     /**
-     * The current selected language.
+     * The currently selected language.
      */
     private Language language;
 
@@ -35,6 +35,11 @@ public class FooterBacker implements Serializable {
      */
     private boolean helpDisplayed;
 
+    /**
+     * Constructs a new footer backing bean with the necessary dependencies.
+     *
+     * @param session The current user session.
+     */
     @Inject
     public FooterBacker(final UserSession session) {
         this.session = session;
@@ -50,10 +55,12 @@ public class FooterBacker implements Serializable {
      * Changes language. The change is effective for the whole session.
      */
     public void changeLanguage() {
-        session.setLocale(switch (language) {
-            case ENGLISH -> Locale.ENGLISH;
-            case GERMAN -> Locale.GERMAN;
-        });
+        session.setLocale(
+                switch (language) {
+                    case ENGLISH -> Locale.ENGLISH;
+                    case GERMAN -> Locale.GERMAN;
+                }
+        );
     }
 
     /**
@@ -63,18 +70,27 @@ public class FooterBacker implements Serializable {
         helpDisplayed = !helpDisplayed;
     }
 
+    /**
+     * Yields the available languages to select.
+     *
+     * @return An array of supported website languages.
+     */
     public Language[] getAvailableLanguages() {
         return Language.values();
     }
 
     /**
-     * @return The language.
+     * Returns the currently selected language.
+     *
+     * @return The selected language.
      */
     public Language getLanguage() {
         return language;
     }
 
     /**
+     * Sets the currently selected language.
+     *
      * @param language The language to set.
      */
     public void setLanguage(final Language language) {

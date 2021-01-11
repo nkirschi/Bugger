@@ -1,46 +1,94 @@
 package tech.bugger.global.transfer;
 
+/**
+ * DTO representing a top report entry.
+ */
 public final class TopReport {
 
-    private int id;
+    /**
+     * The report ID.
+     */
+    private final int id;
 
-    private String title;
+    /**
+     * The report title.
+     */
+    private final String title;
 
-    private String creator;
+    /**
+     * The report creator username.
+     */
+    private final String creator;
 
+    /**
+     * The relevance recently gained by the report.
+     */
     private int relevanceGain;
 
-    public TopReport(int id, String title, String creator, int relevanceGain) {
+    /**
+     * Constructs a new top report from  the specified parameters.
+     *
+     * @param id            The report ID.
+     * @param title         The report title.
+     * @param creator       The report creator username.
+     * @param relevanceGain The relevance recently gained by the report.
+     */
+    public TopReport(final int id, final String title, final String creator, final int relevanceGain) {
         this.id = id;
         this.title = title;
         this.creator = creator;
         this.relevanceGain = relevanceGain;
     }
 
+    /**
+     * Return the ID of this top report.
+     *
+     * @return The report ID.
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Returns the title of this top report.
+     *
+     * @return The report title.
+     */
     public String getTitle() {
         return title;
     }
 
+    /**
+     * Returns the creator username of this top report.
+     *
+     * @return The report creator.
+     */
     public String getCreator() {
         return creator;
     }
 
+    /**
+     * Returns the relevance recently gained by this top report.
+     *
+     * @return The recent relevance gain.
+     */
     public int getRelevanceGain() {
         return relevanceGain;
     }
 
+    /**
+     * Converts this top report into a human-readable string representation.
+     *
+     * @return A human-readable string representation of this top report.
+     */
     @Override
     public String toString() {
-        return "TopReport{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", creator='" + creator + '\'' +
-                ", relevanceGain=" + relevanceGain +
-                '}';
+        return "TopReport{"
+                + "id=" + id
+                + ", title='" + title + '\''
+                + ", creator='" + creator + '\''
+                + ", relevanceGain=" + relevanceGain
+                + '}';
     }
 
 }

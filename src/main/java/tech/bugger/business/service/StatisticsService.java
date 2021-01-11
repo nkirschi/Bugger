@@ -86,15 +86,16 @@ public class StatisticsService {
      * @return The average time a report matching the {@code criteria} remains open.
      */
     public Duration averageTimeOpen(final ReportCriteria criteria) {
+        Duration d = null;
         try (Transaction tx = transactionManager.begin()) {
-            Duration d = tx.newStatisticsGateway().getAverageTimeToClose(criteria);
+            d = tx.newStatisticsGateway().getAverageTimeToClose(criteria);
             tx.commit();
             return d;
         } catch (TransactionException e) {
             log.error("Error when determining average activity duration of reports.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
-        return null;
+        return d;
     }
 
     /**
@@ -103,8 +104,8 @@ public class StatisticsService {
      * @param criteria The criteria reports must fulfill to be taken into consideration.
      * @return The average number of posts per report of those matching the {@code criteria}.
      */
-    public double averagePostsPerReport(final ReportCriteria criteria) {
-        double avgPostsPerReport = 0;
+    public Double averagePostsPerReport(final ReportCriteria criteria) {
+        Double avgPostsPerReport = null;
         try (Transaction tx = transactionManager.begin()) {
             avgPostsPerReport = tx.newStatisticsGateway().getAveragePostsPerReport(criteria);
             tx.commit();

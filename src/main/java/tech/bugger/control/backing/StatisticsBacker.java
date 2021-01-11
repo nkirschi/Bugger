@@ -1,5 +1,6 @@
 package tech.bugger.control.backing;
 
+import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.StatisticsService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.global.transfer.ReportCriteria;
@@ -39,14 +40,29 @@ public class StatisticsBacker implements Serializable {
     private static final double SECONDS_IN_A_MINUTE = 60.0;
 
     /**
+     * Symbol to use when no meaningful value can be displayed.
+     */
+    private static final String NO_VALUE_INDICATOR = "-";
+
+    /**
      * The statistics service providing logic.
      */
-    private StatisticsService statisticsService;
+    private final StatisticsService statisticsService;
 
     /**
      * The topic service providing help.
      */
-    private TopicService topicService;
+    private final TopicService topicService;
+
+    /**
+     * The current user session.
+     */
+    private final UserSession userSession;
+
+    /**
+     * Reference to the current {@link ExternalContext}.
+     */
+    private final ExternalContext ectx;
 
     /**
      * The current report filters.
@@ -54,23 +70,21 @@ public class StatisticsBacker implements Serializable {
     private ReportCriteria reportCriteria;
 
     /**
-     * Reference to the current {@link ExternalContext}.
-     */
-    private ExternalContext ectx;
-
-    /**
      * Constructs a new statistics page backing bean with the necessary dependencies.
      *
      * @param statisticsService The statistics service to use.
      * @param topicService      The topic service to use.
+     * @param userSession       The currently active user session.
      * @param ectx              The current {@link ExternalContext} of the application.
      */
     @Inject
     public StatisticsBacker(final StatisticsService statisticsService,
                             final TopicService topicService,
+                            final UserSession userSession,
                             final ExternalContext ectx) {
         this.statisticsService = statisticsService;
         this.topicService = topicService;
+        this.userSession = userSession;
         this.ectx = ectx;
         this.reportCriteria = new ReportCriteria("", null, null);
     }
@@ -116,9 +130,13 @@ public class StatisticsBacker implements Serializable {
      *
      * @return The average time a report remains open.
      */
-    public double averageTimeOpen() {
+    public String averageTimeOpen() {
         Duration duration = statisticsService.averageTimeOpen(reportCriteria);
-        return duration.toMinutes() / SECONDS_IN_A_MINUTE; // with decimal places
+        if (duration != null) {
+            return String.format(userSession.getLocale(), "%.2f", duration.toMinutes() / SECONDS_IN_A_MINUTE);
+        } else {
+            return NO_VALUE_INDICATOR;
+        }
     }
 
     /**
@@ -126,8 +144,13 @@ public class StatisticsBacker implements Serializable {
      *
      * @return The average number of posts.
      */
-    public double averagePostsPerReport() {
-        return statisticsService.averagePostsPerReport(reportCriteria);
+    public String averagePostsPerReport() {
+        Double avgPosts = statisticsService.averagePostsPerReport(reportCriteria);
+        if (avgPosts != null) {
+            return String.format(userSession.getLocale(), "%.2f", avgPosts);
+        } else {
+            return NO_VALUE_INDICATOR;
+        }
     }
 
     /**

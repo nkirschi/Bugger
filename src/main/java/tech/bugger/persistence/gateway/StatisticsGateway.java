@@ -34,7 +34,7 @@ public interface StatisticsGateway {
      * @param criteria The criteria reports must fulfill to be taken into consideration.
      * @return The average number of posts of the reports in question.
      */
-    double getAveragePostsPerReport(ReportCriteria criteria);
+    Double getAveragePostsPerReport(ReportCriteria criteria);
 
     /**
      * Retrieves the list of those ten reports that gained the most relevance in the last 24 hours.
