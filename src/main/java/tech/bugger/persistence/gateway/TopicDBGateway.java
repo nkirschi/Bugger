@@ -13,6 +13,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -61,7 +62,8 @@ public class TopicDBGateway implements TopicGateway {
     public int countReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
         int numberOfReports = 0;
         if (showOpenReports) {
-            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM report WHERE topic = ? AND closed_at IS NULL;")) {
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM report WHERE topic = ? AND "
+                    + "closed_at IS NULL;")) {
                 ResultSet resultSet = new StatementParametrizer(stmt)
                         .integer(topic.getId()).toStatement().executeQuery();
                 int numReports = 0;
@@ -75,7 +77,8 @@ public class TopicDBGateway implements TopicGateway {
             }
         }
         if (showClosedReports) {
-            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM report WHERE topic = ? AND closed_at IS NOT NULL;")) {
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM report WHERE topic = ? AND "
+                    + "closed_at IS NOT NULL;")) {
                 ResultSet resultSet = new StatementParametrizer(stmt)
                         .integer(topic.getId()).toStatement().executeQuery();
                 int numReports = 0;
@@ -113,9 +116,35 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int countModerators(final Topic topic) {
-        // TODO Auto-generated method stub
-        return 0;
+    public int countModerators(final Topic topic) throws NotFoundException {
+        if (topic.getId() == null) {
+            log.error("The topic ID cannot be null!.");
+            throw new IllegalArgumentException("The topic ID cannot be null!.");
+        }
+
+        int moderators = 0;
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(t.moderator) AS num_mods FROM "
+                + "topic_moderation AS t WHERE t.topic = ?;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(topic.getId())
+                    .toStatement().executeQuery();
+
+            if (rs.next()) {
+                moderators = rs.getInt("num_mods");
+            }
+
+            if (moderators == 0) {
+                log.error("The topic with id " + topic.getId() + " could not the found or it has no moderators.");
+                throw new NotFoundException("The topic with id " + topic.getId() + " could not the found or it has no "
+                        + "moderators.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while counting the number of moderators for the topic with id " + topic.getId(), e);
+            throw new StoreException("Error while counting the number of moderators for the topic with id "
+                    + topic.getId(), e);
+        }
+
+        return moderators;
     }
 
     /**
@@ -193,8 +222,23 @@ public class TopicDBGateway implements TopicGateway {
      */
     @Override
     public void createTopic(final Topic topic) {
-        // TODO Auto-generated method stub
-
+        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO topic (title, description) "
+                + "VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+            new StatementParametrizer(stmt)
+                    .string(topic.getTitle())
+                    .string(topic.getDescription())
+                    .toStatement().executeUpdate();
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                topic.setId(rs.getInt("id"));
+            } else {
+                log.error("Could not read new topic data.");
+                throw new StoreException("Could not read new topic data.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while trying to insert a new topic into the database.", e);
+            throw new StoreException("Error while trying to insert a new topic into the database.", e);
+        }
     }
 
     /**
@@ -242,18 +286,62 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void promoteModerator(final Topic topic, final User user) {
-        // TODO Auto-generated method stub
+    public void promoteModerator(final Topic topic, final User user) throws NotFoundException {
+        if (user.getId() == null || topic.getId() == null) {
+            log.error("The user or topic ID cannot be null!");
+            throw new IllegalArgumentException("The user or topic ID cannot be null!");
+        }
 
+        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO topic_moderation (moderator, topic) "
+                + "VALUES (?, ?);")) {
+            new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(topic.getId())
+                    .toStatement().executeUpdate();
+        } catch (SQLException e) {
+            // The SQLState 23503 signifies that the insert or update value of a foreign key is invalid.
+            if (e.getSQLState().equals("23503")) {
+                log.error("No user with id " + user.getId() + " or topic with id " + topic.getId() + " could be "
+                        + "found in the database.");
+                throw new NotFoundException("No user with id " + user.getId() + " or topic with id " + topic.getId()
+                        + " could be found in the database.");
+            }
+
+            log.error("Error while trying to promote the user with id " + user.getId() + " as a moderator for the "
+                    + "topic with id " + topic.getId(), e);
+            throw new StoreException("Error while trying to promote the user with id " + user.getId() + " as a "
+                    + "moderator for the topic with id " + topic.getId(), e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void demoteModerator(final Topic topic, final User user) {
-        // TODO Auto-generated method stub
+    public void demoteModerator(final Topic topic, final User user) throws NotFoundException {
+        if (user.getId() == null || topic.getId() == null) {
+            throw new IllegalArgumentException("The user or topic ID cannot be null!");
+        }
 
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM topic_moderation WHERE topic = ? AND "
+                + "moderator = ?;")) {
+            int modified = new StatementParametrizer(stmt)
+                    .integer(topic.getId())
+                    .integer(user.getId())
+                    .toStatement().executeUpdate();
+
+            if (modified == 0) {
+                log.error("No moderator with the user id " + user.getId() + " could be found for the topic with "
+                        + "id " + topic.getId());
+                throw new NotFoundException("No moderator with the user id " + user.getId() + " could be found for the "
+                        + "topic with id " + topic.getId());
+            }
+        } catch (SQLException e) {
+            log.error("Error while trying to demote the user with id " + user.getId() + " as a moderator for the "
+                    + "topic with id " + topic.getId(), e);
+            throw new StoreException("Error while trying to demote the user with id " + user.getId() + " as a moderator"
+                    + " for the topic with id " + topic.getId(), e);
+        }
     }
 
     /**

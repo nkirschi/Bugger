@@ -7,16 +7,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
+
+import com.ocpsoft.pretty.faces.util.StringUtils;
 import tech.bugger.global.transfer.Language;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.time.ZoneId;
-import java.util.List;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
@@ -103,8 +98,23 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public boolean isModerator(final User user, final Topic topic) {
-        // TODO Auto-generated method stub
-        return false;
+        if (user.getId() == null || topic.getId() == null) {
+            throw new IllegalArgumentException("The user or topic ID cannot be null!");
+        }
+
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM topic_moderation WHERE moderator = ? "
+                + "AND topic = ?;")) {
+            ResultSet resultSet = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(topic.getId())
+                    .toStatement().executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            log.error("Error while checking if the user with id " + user.getId() + " is a moderator of the topic "
+                    + "with id " + topic.getId(), e);
+            throw new StoreException("Error while checking if the user with id " + user.getId() + " is a moderator of "
+                    + "the topic with id " + topic.getId(), e);
+        }
     }
 
     /**
@@ -201,9 +211,35 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<User> getSelectedModerators(final Topic topic, final Selection selection) {
-        // TODO Auto-generated method stub
-        return null;
+    public List<User> getSelectedModerators(final Topic topic, final Selection selection) throws NotFoundException {
+        if (selection == null || topic.getId() == null) {
+            log.error("The selection or or topic ID cannot be null!.");
+            throw new IllegalArgumentException("The selection or or topic ID cannot be null!.");
+        } else if (StringUtils.isBlank(selection.getSortedBy())) {
+            log.error("Error when trying to get moderators sorted by nothing.");
+            throw new IllegalArgumentException("The selection needs to have a column to sort by.");
+        }
+
+        List<User> moderators = new ArrayList<>(Math.max(0, selection.getTotalSize()));
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT u.* FROM \"user\" AS u, topic_moderation AS t WHERE "
+                + "t.topic = ? AND u.id = t.moderator LIMIT ? OFFSET ?;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(topic.getId())
+                    .integer(selection.getPageSize().getSize())
+                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
+                    .toStatement().executeQuery();
+            while (rs.next()) {
+                moderators.add(getUserFromResultSet(rs));
+            }
+            if (moderators.size() == 0) {
+                log.error("The topic with id " + topic.getId() + " has no moderators.");
+                throw new NotFoundException("The topic with id " + topic.getId() + " has no moderators.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while loading the moderators of the topic with id " + topic.getId(), e);
+            throw new StoreException("Error while loading the moderators of the topic with id " + topic.getId(), e);
+        }
+        return moderators;
     }
 
     /**

@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,16 +16,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Language;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.spy;
@@ -36,23 +36,29 @@ import static org.mockito.Mockito.doReturn;
 @ExtendWith(LogExtension.class)
 public class UserDBGatewayTest {
 
-    private UserDBGateway gateway;
+    private UserGateway userGateway;
+    private TopicGateway topicGateway;
 
     private Connection connection;
 
     private User user;
     private User admin;
+    private Topic topic;
+    private Selection selection;
 
     @BeforeEach
     public void setUp() throws Exception {
         connection = DBExtension.getConnection();
-        gateway = new UserDBGateway(connection);
+        userGateway = new UserDBGateway(connection);
+        topicGateway = new TopicDBGateway(connection);
 
         user = new User(2, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         admin = new User(3, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@admin.de", "Helgo", "Brötchen", new Lazy<>(new byte[]{1, 2, 3, 4}),
                 new byte[]{1}, "Ich bin der Administrator hier!", Language.ENGLISH, User.ProfileVisibility.MINIMAL,
                 ZonedDateTime.now(), null, true);
+        topic = new Topic(null, "title", "description");
+        selection = new Selection(2, 0, Selection.PageSize.NORMAL, "id", true);
     }
 
     @AfterEach
@@ -68,9 +74,9 @@ public class UserDBGatewayTest {
 
     @Test
     public void testCreateUserAndGetUser() throws Exception {
-        gateway.createUser(user);
+        userGateway.createUser(user);
 
-        User copyFromDatabase = gateway.getUserByID(user.getId());
+        User copyFromDatabase = userGateway.getUserByID(user.getId());
         assertAll(() -> assertNotNull(user.getId()),
                 () -> assertEquals(user.getId(), copyFromDatabase.getId()),
                 () -> assertEquals(user.getUsername(), copyFromDatabase.getUsername()),
@@ -98,7 +104,7 @@ public class UserDBGatewayTest {
     @Test
     public void testCreateUserAbsentAvatar() {
         user.setAvatar(new Lazy<>(() -> null));
-        assertThrows(IllegalArgumentException.class, () -> gateway.createUser(user));
+        assertThrows(IllegalArgumentException.class, () -> userGateway.createUser(user));
     }
 
     @Test
@@ -115,7 +121,7 @@ public class UserDBGatewayTest {
 
     @Test
     public void testGetUserByIdNotFound() {
-        assertThrows(NotFoundException.class, () -> gateway.getUserByID(42));
+        assertThrows(NotFoundException.class, () -> userGateway.getUserByID(42));
     }
 
     @Test
@@ -127,11 +133,11 @@ public class UserDBGatewayTest {
 
     @Test
     public void testUpdateUser() throws Exception {
-        gateway.createUser(user);
+        userGateway.createUser(user);
         user.setLastName("Heinrich");
-        gateway.updateUser(user);
+        userGateway.updateUser(user);
 
-        User copyFromDatabase = gateway.getUserByID(user.getId());
+        User copyFromDatabase = userGateway.getUserByID(user.getId());
         assertAll(() -> assertEquals(user.getId(), copyFromDatabase.getId()),
                 () -> assertEquals(user.getUsername(), copyFromDatabase.getUsername()),
                 () -> assertEquals(user.getPasswordHash(), copyFromDatabase.getPasswordHash()),
@@ -160,31 +166,31 @@ public class UserDBGatewayTest {
     @Test
     public void testUpdateUserNotExists() {
         user.setId(42);
-        assertThrows(NotFoundException.class, () -> gateway.updateUser(user));
+        assertThrows(NotFoundException.class, () -> userGateway.updateUser(user));
     }
 
     @Test
     public void testUpdateUserNullId() {
         user.setId(null);
-        assertThrows(IllegalArgumentException.class, () -> gateway.updateUser(user));
+        assertThrows(IllegalArgumentException.class, () -> userGateway.updateUser(user));
     }
 
     @Test
     public void testUpdateUserAbsentAvatar() {
         user.setId(1);
         user.setAvatar(new Lazy<>(() -> null));
-        assertThrows(IllegalArgumentException.class, () -> gateway.updateUser(user));
+        assertThrows(IllegalArgumentException.class, () -> userGateway.updateUser(user));
     }
 
     @Test
     public void testGetUserByEmailNotFound() {
-        assertThrows(NotFoundException.class, () -> gateway.getUserByEmail("t@t.tk"));
+        assertThrows(NotFoundException.class, () -> userGateway.getUserByEmail("t@t.tk"));
     }
 
     @Test
     public void testGetUserByEmailFound() throws Exception {
-        gateway.createUser(user);
-        assertEquals(user, gateway.getUserByEmail("test@test.de"));
+        userGateway.createUser(user);
+        assertEquals(user, userGateway.getUserByEmail("test@test.de"));
     }
 
     @Test
@@ -196,13 +202,13 @@ public class UserDBGatewayTest {
 
     @Test
     public void testGetUserByUsernameNotFound() {
-        assertThrows(NotFoundException.class, () -> gateway.getUserByUsername("testuser"));
+        assertThrows(NotFoundException.class, () -> userGateway.getUserByUsername("testuser"));
     }
 
     @Test
     public void testGetUserByUsernameFound() throws Exception {
-        gateway.createUser(user);
-        assertEquals(user, gateway.getUserByUsername("testuser"));
+        userGateway.createUser(user);
+        assertEquals(user, userGateway.getUserByUsername("testuser"));
     }
 
     @Test
@@ -214,16 +220,16 @@ public class UserDBGatewayTest {
 
     @Test
     public void testGetNumberOfAdmins() {
-        gateway.createUser(user);
-        gateway.createUser(admin);
+        userGateway.createUser(user);
+        userGateway.createUser(admin);
         //One inserted admin plus default admin.
-        assertEquals(2, gateway.getNumberOfAdmins());
+        assertEquals(2, userGateway.getNumberOfAdmins());
     }
 
     @Test
     public void testGetNumberOfAdminsNoAdmins() throws SQLException {
         deleteAllUsers();
-        assertEquals(0, gateway.getNumberOfAdmins());
+        assertEquals(0, userGateway.getNumberOfAdmins());
     }
 
     @Test
@@ -249,15 +255,15 @@ public class UserDBGatewayTest {
 
     @Test
     public void testGetUserByID() throws NotFoundException {
-        gateway.createUser(user);
-        User helga = gateway.getUserByID(user.getId());
+        userGateway.createUser(user);
+        User helga = userGateway.getUserByID(user.getId());
         assertEquals(user, helga);
     }
 
     @Test
     public void testGetUserByIDNotFound() {
         assertThrows(NotFoundException.class,
-                () -> gateway.getUserByID(2222)
+                () -> userGateway.getUserByID(2222)
         );
     }
 
@@ -272,14 +278,14 @@ public class UserDBGatewayTest {
 
     @Test
     public void testGetNumberOfPosts() throws NotFoundException {
-        gateway.createUser(user);
-        assertEquals(0, gateway.getNumberOfPosts(user));
+        userGateway.createUser(user);
+        assertEquals(0, userGateway.getNumberOfPosts(user));
     }
 
     @Test
     public void testGetNumberOfPostNoEntries() {
         assertThrows(NotFoundException.class,
-                () -> gateway.getNumberOfPosts(user)
+                () -> userGateway.getNumberOfPosts(user)
         );
     }
 
@@ -294,17 +300,17 @@ public class UserDBGatewayTest {
 
     @Test
     public void testDeleteUser() throws NotFoundException {
-        gateway.createUser(user);
-        gateway.deleteUser(user);
+        userGateway.createUser(user);
+        userGateway.deleteUser(user);
         assertThrows(NotFoundException.class,
-                () -> gateway.getUserByID(user.getId())
+                () -> userGateway.getUserByID(user.getId())
         );
     }
 
     @Test
     public void testDeleteUserNotFound() {
         assertThrows(NotFoundException.class,
-                () -> gateway.deleteUser(user)
+                () -> userGateway.deleteUser(user)
         );
     }
 
@@ -314,6 +320,96 @@ public class UserDBGatewayTest {
         doThrow(SQLException.class).when(connSpy).prepareStatement(any());
         assertThrows(StoreException.class,
                 () -> new UserDBGateway(connSpy).deleteUser(user)
+        );
+    }
+
+    @Test
+    public void testIsModerator() throws NotFoundException {
+        topicGateway.createTopic(topic);
+        userGateway.createUser(user);
+        topicGateway.promoteModerator(topic, user);
+        assertTrue(userGateway.isModerator(user, topic));
+    }
+
+    @Test
+    public void testIsModeratorTopicIdNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.isModerator(user, topic)
+        );
+    }
+
+    @Test
+    public void testIsModeratorUserIdNull() {
+        user.setId(null);
+        topic.setId(1);
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.isModerator(user, topic)
+        );
+    }
+
+    @Test
+    public void testIsModeratorSQLException() throws SQLException {
+        user.setId(1);
+        topic.setId(1);
+        Connection connSpy = spy(connection);
+        doThrow(SQLException.class).when(connSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new UserDBGateway(connSpy).isModerator(user, topic)
+        );
+    }
+
+    @Test
+    public void testGetSelectedModerators() throws NotFoundException {
+        topicGateway.createTopic(topic);
+        userGateway.createUser(user);
+        userGateway.createUser(admin);
+        List<User> users = new ArrayList<>();
+        users.add(user);
+        users.add(admin);
+        topicGateway.promoteModerator(topic, user);
+        topicGateway.promoteModerator(topic, admin);
+        assertEquals(users, userGateway.getSelectedModerators(topic, selection));
+    }
+
+    @Test
+    public void testGetSelectedModeratorsNoEntries() throws NotFoundException {
+        topicGateway.createTopic(topic);
+        assertThrows(NotFoundException.class,
+                () -> userGateway.getSelectedModerators(topic, selection)
+        );
+    }
+
+    @Test
+    public void testGetSelectedModeratorsTopicIdNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.getSelectedModerators(topic, selection)
+        );
+    }
+
+    @Test
+    public void testGetSelectedModeratorsSelectionNull() {
+        topic.setId(1);
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.getSelectedModerators(topic, null)
+        );
+    }
+
+    @Test
+    public void testGetSelectedModeratorsNotSorted() {
+        selection.setSortedBy("");
+        topic.setId(1);
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.getSelectedModerators(topic, selection)
+        );
+    }
+
+    @Test
+    public void testGetSelectedModeratorsSQLException() throws SQLException {
+        topic.setId(1);
+        Connection connSpy = spy(connection);
+        doThrow(SQLException.class).when(connSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new UserDBGateway(connSpy).getSelectedModerators(topic, selection)
         );
     }
 
