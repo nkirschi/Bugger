@@ -308,6 +308,9 @@ public class TopicDBGateway implements TopicGateway {
         return 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> discoverTopics() {
         List<String> topicTitles = new ArrayList<>();

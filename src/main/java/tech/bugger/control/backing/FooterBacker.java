@@ -43,12 +43,7 @@ public class FooterBacker implements Serializable {
     @Inject
     public FooterBacker(final UserSession session) {
         this.session = session;
-        // TODO this is ugly. Maybe consider storing Locale#getLanguageTag in DB, reversable via Locale#forLanguageTag
-        if (Locale.ENGLISH.getLanguage().equals(session.getLocale().getLanguage())) {
-            language = Language.ENGLISH;
-        } else if (Locale.GERMAN.getLanguage().equals(session.getLocale().getLanguage())) {
-            language = Language.GERMAN;
-        }
+        language = Language.of(session.getLocale());
     }
 
     /**

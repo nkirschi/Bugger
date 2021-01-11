@@ -121,7 +121,7 @@ public class StatisticsBacker implements Serializable {
      *
      * @return The total number of reports.
      */
-    public int openReportCount() {
+    public int getOpenReportCount() {
         return statisticsService.countOpenReports(reportCriteria);
     }
 
@@ -130,7 +130,7 @@ public class StatisticsBacker implements Serializable {
      *
      * @return The average time a report remains open.
      */
-    public String averageTimeOpen() {
+    public String getAverageTimeOpen() {
         Duration duration = statisticsService.averageTimeOpen(reportCriteria);
         if (duration != null) {
             return String.format(userSession.getLocale(), "%.2f", duration.toMinutes() / SECONDS_IN_A_MINUTE);
@@ -144,7 +144,7 @@ public class StatisticsBacker implements Serializable {
      *
      * @return The average number of posts.
      */
-    public String averagePostsPerReport() {
+    public String getAveragePostsPerReport() {
         Double avgPosts = statisticsService.averagePostsPerReport(reportCriteria);
         if (avgPosts != null) {
             return String.format(userSession.getLocale(), "%.2f", avgPosts);
@@ -159,7 +159,7 @@ public class StatisticsBacker implements Serializable {
      *
      * @return The top ten users.
      */
-    public List<TopUser> topUsers() {
+    public List<TopUser> getTopUsers() {
         return statisticsService.topTenUsers();
     }
 
@@ -168,17 +168,8 @@ public class StatisticsBacker implements Serializable {
      *
      * @return The top ten reports.
      */
-    public List<TopReport> topReports() {
+    public List<TopReport> getTopReports() {
         return statisticsService.topTenReports();
-    }
-
-    /**
-     * Applies the specified filters and refreshes the displayed data.
-     *
-     * @return {@code null} in order to stay on the statistics page.
-     */
-    public String applyFilters() {
-        return null;
     }
 
     /**

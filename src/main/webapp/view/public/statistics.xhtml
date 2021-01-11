@@ -23,7 +23,7 @@
                     <h:panelGroup layout="block"
                                   styleClass="col-4 p-4 text-center">
                         <h:panelGroup layout="block" styleClass="row">
-                            <h:outputLabel styleClass="display-1" value="#{statisticsBacker.openReportCount()}"/>
+                            <h:outputLabel styleClass="display-1" value="#{statisticsBacker.openReportCount}"/>
                         </h:panelGroup>
                         <h:panelGroup layout="block" styleClass="row">
                             <h:outputLabel value="#{labels.open_reports}"/>
@@ -32,7 +32,7 @@
                     <h:panelGroup layout="block"
                                   styleClass="col-4 p-4 text-center">
                         <h:panelGroup layout="block" styleClass="row">
-                            <h:outputLabel styleClass="display-1" value="#{statisticsBacker.averageTimeOpen()}">
+                            <h:outputLabel styleClass="display-1" value="#{statisticsBacker.averageTimeOpen}">
                                 <f:convertNumber maxFractionDigits="2"/>
                             </h:outputLabel>
                         </h:panelGroup>
@@ -42,7 +42,7 @@
                     </h:panelGroup>
                     <h:panelGroup layout="block" styleClass="col-4 p-4 text-center">
                         <h:panelGroup layout="block" styleClass="row">
-                            <h:outputLabel styleClass="display-1" value="#{statisticsBacker.averagePostsPerReport()}">
+                            <h:outputLabel styleClass="display-1" value="#{statisticsBacker.averagePostsPerReport}">
                                 <f:convertNumber maxFractionDigits="2"/>
                             </h:outputLabel>
                         </h:panelGroup>
@@ -61,7 +61,7 @@
                         <h:selectOneMenu id="s-topic-filter"
                                          value="#{statisticsBacker.reportCriteria.topic}"
                                          styleClass="form-select">
-                            <f:selectItems value="#{statisticsBacker.getTopicTitles()}"/>
+                            <f:selectItems value="#{statisticsBacker.topicTitles}"/>
                         </h:selectOneMenu>
                     </h:panelGroup>
                     <h:panelGroup id="p-latest-opening-date" layout="block" styleClass="mb-2">
@@ -89,7 +89,6 @@
                         <h:message for="it-earliest-closing-date" styleClass="text-danger"/>
                     </h:panelGroup>
                     <h:commandButton value="#{labels.apply_filter}"
-                                     action="#{statisticsBacker.applyFilters}"
                                      styleClass="btn btn-outline-primary"/>
                 </h:form>
             </h:panelGroup>
@@ -101,7 +100,7 @@
                 <h:outputLabel value="#{labels.top_ten_reports}" styleClass="h2"/>
                 <!--@elvariable id="report" type="tech.bugger.global.transfer.TopReport"-->
                 <h:dataTable id="t-top-ten-reports"
-                             var="report" value="#{statisticsBacker.topReports()}"
+                             var="report" value="#{statisticsBacker.topReports}"
                              styleClass="table table-hover">
                     <h:column>
                         <f:facet name="header">#{labels.report}</f:facet>
@@ -126,7 +125,7 @@
                 <h:outputLabel value="#{labels.top_ten_users}" styleClass="h2"/>
                 <!--@elvariable id="user" type="tech.bugger.global.transfer.TopUser"-->
                 <h:dataTable id="t-top-ten-users"
-                             var="user" value="#{statisticsBacker.topUsers()}"
+                             var="user" value="#{statisticsBacker.topUsers}"
                              styleClass="table table-hover">
                     <h:column>
                         <f:facet name="header">#{labels.user}</f:facet>

@@ -90,7 +90,6 @@ public class StatisticsService {
         try (Transaction tx = transactionManager.begin()) {
             d = tx.newStatisticsGateway().getAverageTimeToClose(criteria);
             tx.commit();
-            return d;
         } catch (TransactionException e) {
             log.error("Error when determining average activity duration of reports.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
