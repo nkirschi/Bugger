@@ -204,7 +204,7 @@ public class PostDBGateway implements PostGateway {
                 + " LEFT JOIN \"user\" AS author ON p.created_by = author.id"
                 + " LEFT JOIN \"user\" AS modifier ON p.last_modified_by = modifier.id"
                 + " WHERE p.report = ?"
-                + " ORDER BY p.? ?"
+                + " ORDER BY p." + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
                 + " LIMIT ?"
                 + " OFFSET ?;";
         List<Post> selectedPosts = new ArrayList<>(Math.max(0, selection.getTotalSize()));
@@ -212,8 +212,6 @@ public class PostDBGateway implements PostGateway {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             PreparedStatement statement = new StatementParametrizer(stmt)
                     .integer(report.getId())
-                    .string(selection.getSortedBy())
-                    .string(selection.isAscending() ? "ASC" : "DESC")
                     .integer(Pagitable.getItemLimit(selection))
                     .integer(Pagitable.getItemOffset(selection)).toStatement();
             ResultSet rs = statement.executeQuery();
