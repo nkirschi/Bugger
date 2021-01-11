@@ -5,6 +5,8 @@
  */
 
 DROP VIEW IF EXISTS top_reports;
+DROP VIEW IF EXISTS top_users;
+DROP VIEW IF EXISTS last_day_votes;
 DROP VIEW IF EXISTS user_num_posts;
 DROP VIEW IF EXISTS report_relevance;
 DROP VIEW IF EXISTS topic_last_activity;

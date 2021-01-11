@@ -1,24 +1,27 @@
 package tech.bugger.control.backing;
 
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 /**
  * Backing bean for the report page.
@@ -27,125 +30,222 @@ import java.io.Serializable;
 @Named
 public class ReportBacker implements Serializable {
 
+    public enum ReportPageDialog {
+
+        /**
+         * Delete a post.
+         */
+        DELETE_POST,
+
+        /**
+         * Delete the report.
+         */
+        DELETE_REPORT,
+
+        /**
+         * Open or close the report.
+         */
+        OPEN_CLOSE,
+
+        /**
+         * Mark the report as a duplicate of another report.
+         */
+        DUPLICATE
+    }
+
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(ReportBacker.class);
+
     @Serial
     private static final long serialVersionUID = 7260516443406682026L;
 
+    /**
+     * The report ID.
+     */
     private int reportID;
+
+    /**
+     * The post ID.
+     */
+    private int postID;
+
+    /**
+     * The report.
+     */
     private Report report;
+
+    /**
+     * The paginated list of posts.
+     */
     private Paginator<Post> posts;
+
+    /**
+     * The ID of the report the current report is potentially a duplicate of.
+     */
     private int duplicateOfID;
+
+    /**
+     * The overwriting relevance.
+     */
     private Integer overwritingRelevance;
+
+    /**
+     * The post to be deleted.
+     */
     private Post postToBeDeleted;
 
-    private boolean displayDeletePostDialog;
-    private boolean displayDeleteReportDialog;
-    private boolean displayOpenCloseDialog;
-    private boolean displayDuplicateDialog;
+    /**
+     * The currently displayed dialog.
+     */
+    private ReportPageDialog currentDialog;
 
-    @Inject
-    private transient ReportService reportService;
+    /**
+     * The application settings cache.
+     */
+    private final ApplicationSettings applicationSettings;
 
-    @Inject
-    private transient PostService postService;
+    /**
+     * The report service providing logic.
+     */
+    private final ReportService reportService;
 
-    @Inject
-    private transient TopicService topicService;
+    /**
+     * The post service providing logic.
+     */
+    private final PostService postService;
 
-    @Inject
-    private transient UserSession session;
+    /**
+     * The topic service providing logic.
+     */
+    private final TopicService topicService;
 
+    /**
+     * The user session.
+     */
+    private final UserSession session;
+
+    /**
+     * The current {@link FacesContext}.
+     */
+    private final FacesContext fctx;
+
+    /**
+     * Constructs a new report page backing bean with the necessary dependencies.
+     *
+     * @param applicationSettings The application settings cache.
+     * @param reportService       The report service to use.
+     * @param postService         The post service to use.
+     * @param topicService        The topic service to use.
+     * @param session             The user session.
+     * @param fctx                The current {@link FacesContext} of the application.
+     */
     @Inject
-    private transient FacesContext fctx;
+    public ReportBacker(final ApplicationSettings applicationSettings, final ReportService reportService,
+                        final PostService postService, final TopicService topicService, final UserSession session,
+                        final FacesContext fctx) {
+        this.applicationSettings = applicationSettings;
+        this.reportService = reportService;
+        this.postService = postService;
+        this.topicService = topicService;
+        this.session = session;
+        this.fctx = fctx;
+    }
 
     /**
      * Initializes the report page. Loads the first few posts of the report to display them. Also checks if the user is
      * allowed to view the report. If not, acts as if the page did not exist.
      */
     @PostConstruct
-    private void init() {
+    void init() {
+        ExternalContext ext = fctx.getExternalContext();
+        postID = -1;
+        if (ext.getRequestParameterMap().containsKey("p")) {
+            try {
+                postID = Integer.parseInt(ext.getRequestParameterMap().get("p"));
+            } catch (NumberFormatException e) {
+                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+                return;
+            }
+            reportID = reportService.findReportOfPost(postID);
+        } else {
+            if (!ext.getRequestParameterMap().containsKey("id")) {
+                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+                return;
+            }
+            try {
+                reportID = Integer.parseInt(ext.getRequestParameterMap().get("id"));
+            } catch (NumberFormatException e) {
+                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+                return;
+            }
+        }
+        report = reportService.getReportByID(reportID);
+        if (report == null) {
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
+        }
+        User user = session.getUser();
+        boolean maySee = false;
+        if (applicationSettings.getConfiguration().isGuestReading()) {
+            maySee = true;
+        } else if (user != null && !isBanned()) {
+            maySee = true;
+        }
+        if (!maySee) {
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+            return;
+        }
+        currentDialog = null;
+        posts = new Paginator<>("created_at", Selection.PageSize.NORMAL) {
+            @Override
+            protected Iterable<Post> fetch() {
+                return reportService.getPostsFor(report, getSelection());
+            }
 
+            @Override
+            protected int totalSize() {
+                return reportService.getNumberOfPosts(report);
+            }
+        };
+        log.debug("Paginator initialized with Selection " + posts.getSelection() + " and items "
+                + posts.getWrappedData());
+        if (postID > -1) {
+            Post post = new Post(postID, null, null, null, null);
+            while (!((List<Post>) posts.getWrappedData()).contains(post)) {
+                try {
+                    posts.nextPage();
+                } catch (IllegalStateException e) {
+                    log.error("Could not find post with ID " + postID + " when displaying report page.");
+                    fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+                    return;
+                }
+            }
+        }
     }
 
     /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
+     * Displays the specified dialog and reloads the page. {@code null} closes the dialog.
      *
-     * @param feedback The feedback with details on what to display.
-     */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
-
-    }
-
-    /**
-     * Opens the delete post dialog.
-     *
+     * @param dialog The dialog to display.
      * @return {@code null} to reload the page.
      */
-    public String openDeletePostDialog() {
+    public String displayDialog(final ReportPageDialog dialog) {
+        currentDialog = dialog;
+        log.info("Displaying dialog " + dialog + ".");
         return null;
     }
 
     /**
-     * Closes the delete post dialog.
+     * Displays the dialog for deleting a post and remembers which post to delete.
      *
+     * @param post The post to delete.
      * @return {@code null} to reload the page.
      */
-    public String closeDeletePostDialog() {
-        return null;
-    }
-
-    /**
-     * Opens the delete report dialog.
-     *
-     * @return {@code null} to reload the page.
-     */
-    public String openDeleteReportDialog() {
-        return null;
-    }
-
-    /**
-     * Closes the delete report dialog.
-     *
-     * @return {@code null} to reload the page.
-     */
-    public String closeDeleteReportDialog() {
-        return null;
-    }
-
-    /**
-     * Opens the dialog for opening or closing the report.
-     *
-     * @return {@code null} to reload the page.
-     */
-    public String openOpenCloseDialog() {
-        return null;
-    }
-
-    /**
-     * Closes the dialog for opening or closing the report.
-     *
-     * @return {@code null} to reload the page.
-     */
-    public String closeOpenCloseDialog() {
-        return null;
-    }
-
-    /**
-     * Opens the dialog for marking the report as a duplicate of another report.
-     *
-     * @return {@code null} to reload the page.
-     */
-    public String openDuplicateDialog() {
-        return null;
-    }
-
-    /**
-     * Closes the dialog for marking the report as a duplicate of another report.
-     *
-     * @return {@code null} to reload the page.
-     */
-    public String closeDuplicateDialog() {
-        return null;
+    public String deletePostDialog(final Post post) {
+        postToBeDeleted = post;
+        return displayDialog(ReportPageDialog.DELETE_POST);
     }
 
     /**
@@ -199,13 +299,21 @@ public class ReportBacker implements Serializable {
      * Opens a closed report and closes an open one.
      */
     public void toggleOpenClosed() {
+        if (report.getClosingDate() == null) {
+            report.setClosingDate(ZonedDateTime.now());
+            reportService.close(report);
+        } else {
+            report.setClosingDate(null);
+            reportService.open(report);
+        }
+        displayDialog(null);
     }
 
     /**
      * Deletes the report along with all its posts irreversibly.
      */
     public void delete() {
-
+        reportService.deleteReport(report);
     }
 
     /**
@@ -230,10 +338,10 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     * Deletes the selected post irreversibly. If it is the first post, this deletes the whole report.
+     * Deletes the {@code postToBeDeleted} irreversibly. If it is the first post, this deletes the whole report.
      */
     public void deletePost() {
-
+        postService.deletePost(postToBeDeleted);
     }
 
     /**
@@ -242,7 +350,17 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user is privileged and {@code false} otherwise.
      */
     public boolean isPrivileged() {
-        return false;
+        return reportService.isPrivileged(session.getUser(), report);
+    }
+
+    /**
+     * Checks if the user is privileged for the post.
+     *
+     * @param post The post in question.
+     * @return {@code true} iff the user is privileged.
+     */
+    public boolean privilegedForPost(final Post post) {
+        return postService.isPrivileged(session.getUser(), post);
     }
 
     /**
@@ -273,7 +391,7 @@ public class ReportBacker implements Serializable {
     /**
      * @param report The report to set.
      */
-    public void setReport(Report report) {
+    public void setReport(final Report report) {
         this.report = report;
     }
 
@@ -287,7 +405,7 @@ public class ReportBacker implements Serializable {
     /**
      * @param duplicateOfID The duplicateOfID to set.
      */
-    public void setDuplicateOfID(int duplicateOfID) {
+    public void setDuplicateOfID(final int duplicateOfID) {
         this.duplicateOfID = duplicateOfID;
     }
 
@@ -301,7 +419,7 @@ public class ReportBacker implements Serializable {
     /**
      * @param postToBeDeleted The postToBeDeleted to set.
      */
-    public void setPostToBeDeleted(Post postToBeDeleted) {
+    public void setPostToBeDeleted(final Post postToBeDeleted) {
         this.postToBeDeleted = postToBeDeleted;
     }
 
@@ -313,37 +431,18 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     * @return The displayDeletePostDialog.
+     * Gets the current dialog.
+     *
+     * @return The current dialog.
      */
-    public boolean isDisplayDeletePostDialog() {
-        return displayDeletePostDialog;
-    }
-
-    /**
-     * @return The displayDeleteReportDialog.
-     */
-    public boolean isDisplayDeleteReportDialog() {
-        return displayDeleteReportDialog;
-    }
-
-    /**
-     * @return The displayOpenCloseDialog.
-     */
-    public boolean isDisplayOpenCloseDialog() {
-        return displayOpenCloseDialog;
-    }
-
-    /**
-     * @return The displayDuplicateDialog.
-     */
-    public boolean isDisplayDuplicateDialog() {
-        return displayDuplicateDialog;
+    public ReportPageDialog getCurrentDialog() {
+        return currentDialog;
     }
 
     /**
      * @param overwritingRelevance The overwritingRelevance to set.
      */
-    public void setOverwritingRelevance(Integer overwritingRelevance) {
+    public void setOverwritingRelevance(final Integer overwritingRelevance) {
         this.overwritingRelevance = overwritingRelevance;
     }
 
@@ -364,7 +463,26 @@ public class ReportBacker implements Serializable {
     /**
      * @param reportID The reportID to set.
      */
-    public void setReportID(int reportID) {
+    public void setReportID(final int reportID) {
         this.reportID = reportID;
     }
+
+    /**
+     * Returns the post ID.
+     *
+     * @return The post ID.
+     */
+    public int getPostID() {
+        return postID;
+    }
+
+    /**
+     * Sets the post ID.
+     *
+     * @param postID The post ID to set.
+     */
+    public void setPostID(final int postID) {
+        this.postID = postID;
+    }
+
 }

@@ -1,12 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
-<ui:composition template="/WEB-INF/template/main.xhtml">
+<ui:composition template="/WEB-INF/template/main.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="Constants"/>
     </f:metadata>
@@ -41,7 +38,7 @@
                              value="#{adminBacker.organization.name}"
                              a:maxlength="#{Constants.SMALL_FIELD}"
                              a:placeholder="#{labels.organization_name_placeholder}"
-                             styleClass="form-control#{component.valid ? '' : ' error'}">
+                             styleClass="form-control#{component.valid ? '' : ' border-danger'}">
                     <f:validateLength maximum="#{Constants.SMALL_FIELD}"/>
                 </h:inputText>
                 <h:panelGroup/>
@@ -49,7 +46,7 @@
                     <h:outputLabel id="ot-name-hint"
                                   value="#{labels.organization_name_hint}"
                                   styleClass="small form-text text-muted"/>
-                    <h:message for="it-name" styleClass="error"/>
+                    <h:message for="it-name" styleClass="text-danger"/>
                 </h:panelGroup>
 
                 <!-- organization logo (later) -->
@@ -70,18 +67,18 @@
                     </h:panelGroup>
                 </h:panelGrid>
                 <h:panelGroup/>
-                <h:message for="i-logo" styleClass="error"/>
+                <h:message for="i-logo" styleClass="text-danger"/>
 
                 <!-- organization theme -->
                 <h:outputLabel id="o-theme" for="s-theme" value="#{labels.theme}"/>
                 <h:selectOneMenu id="s-theme"
-                                 styleClass="form-control#{component.valid ? '' : ' error'}"
+                                 styleClass="form-control#{component.valid ? '' : ' border-danger'}"
                                  value="#{adminBacker.organization.theme}">
                     <f:selectItems value="#{adminBacker.availableThemes}"/>
                 </h:selectOneMenu>
                 <h:panelGroup/>
                 <h:panelGroup>
-                    <h:message for="s-theme" styleClass="error"/>
+                    <h:message for="s-theme" styleClass="text-danger"/>
                     <h:outputLabel id="ot-theme-hint"
                                   value="#{labels.organization_theme_hint}"
                                   styleClass="small form-text text-muted"/>
@@ -92,33 +89,33 @@
                 <h:inputTextarea id="it-imprint"
                                  value="#{adminBacker.organization.imprint}"
                                  a:maxlength="#{Constants.LARGE_AREA}"
-                                 styleClass="form-control#{component.valid ? '' : ' error'}">
+                                 styleClass="form-control#{component.valid ? '' : ' border-danger'}">
                     <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
                 </h:inputTextarea>
                 <h:panelGroup/>
-                <h:message for="it-imprint" styleClass="error"/>
+                <h:message for="it-imprint" styleClass="text-danger"/>
 
                 <!-- organization privacy policy (Markdown) -->
                 <h:outputLabel id="o-privacy-policy" for="it-privacy-policy" value="#{labels.privacy_policy}"/>
                 <h:inputTextarea id="it-privacy-policy"
                                  value="#{adminBacker.organization.privacyPolicy}"
                                  a:maxlength="#{Constants.LARGE_AREA}"
-                                 styleClass="form-control#{component.valid ? '' : ' error'}">
+                                 styleClass="form-control#{component.valid ? '' : ' border-danger'}">
                     <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
                 </h:inputTextarea>
                 <h:panelGroup/>
-                <h:message for="it-privacy-policy" styleClass="error"/>
+                <h:message for="it-privacy-policy" styleClass="text-danger"/>
 
                 <!-- organization support information (Markdown) -->
                 <h:outputLabel id="o-support-info" for="it-support-info" value="#{labels.support_info}"/>
                 <h:inputTextarea id="it-support-info"
                                  value="#{adminBacker.organization.supportInfo}"
                                  a:maxlength="#{Constants.LARGE_AREA}"
-                                 styleClass="form-control#{component.valid ? '' : ' error'}">
+                                 styleClass="form-control#{component.valid ? '' : ' border-danger'}">
                     <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
                 </h:inputTextarea>
                 <h:panelGroup/>
-                <h:message for="it-support-info" styleClass="error"/>
+                <h:message for="it-support-info" styleClass="text-danger"/>
             </h:panelGrid>
             <h:commandButton value="#{labels.save}"
                              action="#{adminBacker.saveOrganization}"
@@ -140,7 +137,7 @@
                                    value="#{labels.guest_reading_detail}"/>
                 </h:panelGroup>
                 <h:panelGroup/>
-                <h:message for="s-guest-reading" styleClass="error"/>
+                <h:message for="s-guest-reading" styleClass="text-danger"/>
 
                 <!-- closed report policy -->
                 <h:outputText value="#{labels.closed_report_posting}"/>
@@ -152,7 +149,7 @@
                                    value="#{labels.closed_report_posting_detail}"/>
                 </h:panelGroup>
                 <h:panelGroup/>
-                <h:message for="s-closed-report-posting" styleClass="error"/>
+                <h:message for="s-closed-report-posting" styleClass="text-danger"/>
 
                 <!-- user e-mail address format -->
                 <h:outputLabel id="o-user-email-format"
@@ -162,12 +159,12 @@
                              value="#{adminBacker.configuration.userEmailFormat}"
                              validator="regexValidator"
                              a:maxlength="#{Constants.LARGE_FIELD}"
-                             styleClass="form-control#{component.valid ? '' : ' error'}">
+                             styleClass="form-control#{component.valid ? '' : ' border-danger'}">
                     <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>
                 </h:inputText>
                 <h:panelGroup/>
                 <h:panelGroup>
-                    <h:message for="s-user-email-format" styleClass="error"/>
+                    <h:message for="s-user-email-format" styleClass="text-danger"/>
                     <h:outputLabel id="ot-user-email-format-hint"
                                   value="#{labels.user_email_format_hint}"
                                   styleClass="small form-text text-muted"/>
@@ -181,13 +178,13 @@
                 <h:inputText id="it-voting-weight-definition"
                              value="#{adminBacker.configuration.votingWeightDefinition}"
                              a:maxlength="#{Constants.LARGE_FIELD}"
-                             styleClass="form-control#{component.valid ? '' : ' error'}">
+                             styleClass="form-control#{component.valid ? '' : ' border-danger'}">
                     <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>
                     <f:validateRegex pattern="#{Constants.INTEGER_LIST_REGEX}"/>
                 </h:inputText>
                 <h:panelGrid/>
                 <h:panelGrid>
-                    <h:message for="it-voting-weight-definition" styleClass="error"/>
+                    <h:message for="it-voting-weight-definition" styleClass="text-danger"/>
                     <h:outputLabel id="ot-voting-weight-definition-hint"
                                   value="#{labels.voting_weight_definition_hint}"
                                   styleClass="small form-text text-muted"/>
@@ -200,13 +197,13 @@
                 <h:inputTextarea id="it-allowed-file-extensions"
                                  value="#{adminBacker.configuration.allowedFileExtensions}"
                                  a:maxlength="#{Constants.SMALL_AREA}"
-                                 styleClass="form-control#{component.valid ? '' : ' error'}">
+                                 styleClass="form-control#{component.valid ? '' : ' border-danger'}">
                     <f:validateLength maximum="#{Constants.SMALL_AREA}"/>
                     <f:validateRegex pattern="#{Constants.EXTENSION_LIST_REGEX}"/>
                 </h:inputTextarea>
                 <h:panelGroup/>
                 <h:panelGroup>
-                    <h:message for="it-allowed-file-extensions" styleClass="error"/>
+                    <h:message for="it-allowed-file-extensions" styleClass="text-danger"/>
                     <h:outputLabel id="ot-allowed-file-extensions-hint"
                                   value="#{labels.allowed_file_extensions_hint}"
                                   styleClass="small form-text text-muted"/>
@@ -218,13 +215,13 @@
                                value="#{labels.max_attachments_per_post}"/>
                 <h:inputText id="it-max-attachments-per-post"
                              value="#{adminBacker.configuration.maxAttachmentsPerPost}"
-                             styleClass="form-control#{component.valid ? '' : ' error'}"
+                             styleClass="form-control#{component.valid ? '' : ' border-danger'}"
                              a:maxlength="#{Constants.SMALL_FIELD}"
                              validatorMessage="#{messages.validate_nonnegative_number}">
                     <f:validateLongRange minimum="0" maximum="#{Constants.SMALL_FIELD}"/>
                 </h:inputText>
                 <h:panelGroup/>
-                <h:message for="it-max-attachments-per-post" styleClass="error"/>
+                <h:message for="it-max-attachments-per-post" styleClass="text-danger"/>
             </h:panelGrid>
             <h:commandButton value="#{labels.save}"
                              action="#{adminBacker.saveConfiguration}"
@@ -232,4 +229,3 @@
         </h:form>
     </ui:define>
 </ui:composition>
-</html>

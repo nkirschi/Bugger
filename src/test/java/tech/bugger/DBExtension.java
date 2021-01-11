@@ -52,6 +52,11 @@ public class DBExtension implements BeforeAllCallback, AfterAllCallback, BeforeE
         applyScript(minimalSQL);
     }
 
+    public static void emptyDatabase() {
+        applyScript(eraseSQL);
+        applyScript(setupSQL);
+    }
+
     private static void applyScript(String sql) {
         try (Connection conn = pg.getPostgresDatabase().getConnection();
              Statement stmt = conn.createStatement()) {

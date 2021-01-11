@@ -9,8 +9,9 @@ import java.io.Serial;
  * Checks requests on user authentication.
  */
 public class TrespassListener implements PhaseListener {
+
     @Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -6409448769566271889L;
 
     /**
      * Returns the ID of the phase this listener is hooking in.
@@ -28,7 +29,7 @@ public class TrespassListener implements PhaseListener {
      * @param event The notification that the processing for the phase {@link #getPhaseId()} is about to begin.
      */
     @Override
-    public void beforePhase(PhaseEvent event) {
+    public void beforePhase(final PhaseEvent event) {
     }
 
     /**
@@ -37,7 +38,7 @@ public class TrespassListener implements PhaseListener {
      * @param event The notification that the processing for the phase {@link #getPhaseId()} has just been completed.
      */
     @Override
-    public void afterPhase(PhaseEvent event) {
-
+    public void afterPhase(final PhaseEvent event) {
     }
+
 }
