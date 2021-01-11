@@ -42,7 +42,7 @@ public class PostService {
     /**
      * The current application settings.
      */
-    private ApplicationSettings applicationSettings;
+    private final ApplicationSettings applicationSettings;
 
     /**
      * Transaction manager used for creating transactions.
