@@ -3,11 +3,13 @@ package tech.bugger.global.transfer;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 /**
  * DTO representing a report.
  */
 public class Report implements Serializable {
+
     @Serial
     private static final long serialVersionUID = -8063035819918388897L;
 
@@ -51,19 +53,58 @@ public class Report implements Serializable {
         SEVERE
     }
 
-    private int id;
-    private String title;
-    private Type type;
-    private Severity severity;
-    private String version;
-    private Authorship authorship;
-    private ZonedDateTime closingDate;
-    private Integer duplicateOf;
-    private Integer forcedRelevance;
-    private int topic;
+    /**
+     * The report ID.
+     */
+    private Integer id;
 
     /**
-     * Constructs a new report from the specified parameters.
+     * The report title.
+     */
+    private String title;
+
+    /**
+     * The report type.
+     */
+    private Type type;
+
+    /**
+     * The report severity.
+     */
+    private Severity severity;
+
+    /**
+     * The associated software version of the report.
+     */
+    private String version;
+
+    /**
+     * The authorship of the report.
+     */
+    private Authorship authorship;
+
+    /**
+     * The date and time when the report was closed.
+     */
+    private ZonedDateTime closingDate;
+
+    /**
+     * The ID of the report this report is a duplicate of.
+     */
+    private Integer duplicateOf;
+
+    /**
+     * The forced relevance value of the report.
+     */
+    private Integer forcedRelevance;
+
+    /**
+     * The ID of the topic this report is in.
+     */
+    private Integer topic;
+
+    /**
+     * Constructs a new report.
      *
      * @param id The report ID.
      * @param title The report title.
@@ -76,8 +117,9 @@ public class Report implements Serializable {
      * @param forcedRelevance The relevance value to override the calculated relevance.
      * @param topic The topic the report belongs to, loaded lazily.
      */
-    public Report(int id, String title, Type type, Severity severity, String version, Authorship authorship,
-                  ZonedDateTime closingDate, Integer duplicateOf, Integer forcedRelevance, int topic) {
+    public Report(final Integer id, final String title, final Type type, final Severity severity, final String version,
+                  final Authorship authorship, final ZonedDateTime closingDate, final Integer duplicateOf,
+                  final Integer forcedRelevance, final Integer topic) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -102,7 +144,7 @@ public class Report implements Serializable {
      *
      * @return The report ID.
      */
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -111,7 +153,7 @@ public class Report implements Serializable {
      *
      * @param id The report ID to be set.
      */
-    public void setId(int id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
@@ -129,7 +171,7 @@ public class Report implements Serializable {
      *
      * @param title The report title to be set.
      */
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -147,7 +189,7 @@ public class Report implements Serializable {
      *
      * @param type The report type to be set.
      */
-    public void setType(Type type) {
+    public void setType(final Type type) {
         this.type = type;
     }
 
@@ -165,7 +207,7 @@ public class Report implements Serializable {
      *
      * @param severity The report severity to be set.
      */
-    public void setSeverity(Severity severity) {
+    public void setSeverity(final Severity severity) {
         this.severity = severity;
     }
 
@@ -183,7 +225,7 @@ public class Report implements Serializable {
      *
      * @param version The associated version to be set.
      */
-    public void setVersion(String version) {
+    public void setVersion(final String version) {
         this.version = version;
     }
 
@@ -201,7 +243,7 @@ public class Report implements Serializable {
      *
      * @param authorship The report authorship metadata to be set.
      */
-    public void setAuthorship(Authorship authorship) {
+    public void setAuthorship(final Authorship authorship) {
         this.authorship = authorship;
     }
 
@@ -219,7 +261,7 @@ public class Report implements Serializable {
      *
      * @param closingDate The report closing date.
      */
-    public void setClosingDate(ZonedDateTime closingDate) {
+    public void setClosingDate(final ZonedDateTime closingDate) {
         this.closingDate = closingDate;
     }
 
@@ -237,7 +279,7 @@ public class Report implements Serializable {
      *
      * @param duplicateOf The original report to be set
      */
-    public void setDuplicateOf(Integer duplicateOf) {
+    public void setDuplicateOf(final Integer duplicateOf) {
         this.duplicateOf = duplicateOf;
     }
 
@@ -255,7 +297,7 @@ public class Report implements Serializable {
      *
      * @param forcedRelevance The forced relevance to be set.
      */
-    public void setForcedRelevance(Integer forcedRelevance) {
+    public void setForcedRelevance(final Integer forcedRelevance) {
         this.forcedRelevance = forcedRelevance;
     }
 
@@ -264,7 +306,7 @@ public class Report implements Serializable {
      *
      * @return The associated topic.
      */
-    public int getTopic() {
+    public Integer getTopic() {
         return topic;
     }
 
@@ -273,7 +315,7 @@ public class Report implements Serializable {
      *
      * @param topic The associated topic to be set.
      */
-    public void setTopic(int topic) {
+    public void setTopic(final Integer topic) {
         this.topic = topic;
     }
 
@@ -284,9 +326,15 @@ public class Report implements Serializable {
      * @return {@code true} iff {@code other} is a semantically equivalent report.
      */
     @Override
-    public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Report)) {
+            return false;
+        }
+        Report that = (Report) other;
+        return Objects.equals(id, that.id);
     }
 
     /**

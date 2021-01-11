@@ -19,7 +19,7 @@ public interface PostGateway {
      * @return The post identified by the ID.
      * @throws NotFoundException The post could not be found.
      */
-    public Post find(int id) throws NotFoundException;
+    Post find(int id) throws NotFoundException;
 
     /**
      * Retrieves the list of posts of a report that match the given selection criteria.
@@ -29,7 +29,7 @@ public interface PostGateway {
      * @return The list of posts of the report that match {@code selection}.
      * @throws NotFoundException The report could not be found.
      */
-    public List<Post> getPostsOfReport(Report report, Selection selection) throws NotFoundException;
+    List<Post> selectPostsOfReport(Report report, Selection selection) throws NotFoundException;
 
     /**
      * Inserts a post into the post storage.
@@ -38,7 +38,7 @@ public interface PostGateway {
      *
      * @param post The post to insert.
      */
-    public void create(Post post);
+    void create(Post post);
 
     /**
      * Updates a post's attributes in the post storage.
@@ -46,7 +46,7 @@ public interface PostGateway {
      * @param post The post to update.
      * @throws NotFoundException The post could not be found.
      */
-    public void update(Post post) throws NotFoundException;
+    void update(Post post) throws NotFoundException;
 
     /**
      * Deletes a post from the post storage.
@@ -54,6 +54,14 @@ public interface PostGateway {
      * @param post The post to delete.
      * @throws NotFoundException The post could not be found.
      */
-    public void delete(Post post) throws NotFoundException;
+    void delete(Post post) throws NotFoundException;
+
+    /**
+     * Retrieves the first post of the given report.
+     *
+     * @param report The report in question.
+     * @return The first post of the report.
+     */
+    Post getFirstPost(Report report) throws NotFoundException;
 
 }
