@@ -311,7 +311,7 @@ public class ReportDBGateway implements ReportGateway {
 
         try (PreparedStatement stmt = conn.prepareStatement("UPDATE report SET closed_at = ? WHERE id = ?;")) {
             PreparedStatement statement = new StatementParametrizer(stmt)
-                    .string("'" + Timestamp.from(report.getClosingDate().toInstant()) + "'")
+                    .object(Timestamp.from(report.getClosingDate().toInstant()))
                     .integer(report.getId()).toStatement();
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
