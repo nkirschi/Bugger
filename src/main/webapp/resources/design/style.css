@@ -37,8 +37,13 @@
     position: fixed;
     top: 100px;
     left: 50%;
-    margin-left: -200px;
-    width: 400px;
+    transform: translateX(-50%);
+    max-width: 400px;
+}
+
+.alert {
+    display: block;
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
 }
 
 .dialog {
