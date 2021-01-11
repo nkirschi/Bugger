@@ -3,7 +3,7 @@ package tech.bugger.control.backing;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.global.transfer.Language;
 
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
@@ -13,7 +13,7 @@ import java.util.Locale;
 /**
  * Backing Bean for the footer.
  */
-@RequestScoped
+@SessionScoped
 @Named
 public class FooterBacker implements Serializable {
 

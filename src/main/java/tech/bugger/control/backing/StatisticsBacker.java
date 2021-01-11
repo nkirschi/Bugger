@@ -153,7 +153,6 @@ public class StatisticsBacker implements Serializable {
      * @return The total number of reports.
      */
     public int getOpenReportCount() {
-        log.debug("getOpenReportCount");
         return statisticsService.countOpenReports(reportCriteria);
     }
 
@@ -163,7 +162,6 @@ public class StatisticsBacker implements Serializable {
      * @return The average time a report remains open.
      */
     public String getAverageTimeOpen() {
-        log.debug("getAverageTimeOpen");
         Duration duration = statisticsService.averageTimeOpen(reportCriteria);
         if (duration != null) {
             return String.format(userSession.getLocale(), "%.2f", duration.toMinutes() / SECONDS_IN_A_MINUTE);
@@ -178,7 +176,6 @@ public class StatisticsBacker implements Serializable {
      * @return The average number of posts.
      */
     public String getAveragePostsPerReport() {
-        log.debug("getAveragePostsPerReport");
         Double avgPosts = statisticsService.averagePostsPerReport(reportCriteria);
         if (avgPosts != null) {
             return String.format(userSession.getLocale(), "%.2f", avgPosts);
@@ -194,7 +191,6 @@ public class StatisticsBacker implements Serializable {
      * @return The top ten users.
      */
     public List<TopUser> getTopUsers() {
-        log.debug("getTopUsers");
         return statisticsService.topTenUsers();
     }
 
@@ -204,7 +200,6 @@ public class StatisticsBacker implements Serializable {
      * @return The top ten reports.
      */
     public List<TopReport> getTopReports() {
-        log.debug("getTopReports");
         return statisticsService.topTenReports();
     }
 
@@ -214,7 +209,6 @@ public class StatisticsBacker implements Serializable {
      * @return A list of all topic titles.
      */
     public List<String> getTopicTitles() {
-        log.debug("getTopicTitles");
         List<String> topicTitles = topicService.discoverTopics();
         topicTitles.add(0, ""); // empty string for no restriction to topic (JSF doesn't like null)
         return topicTitles;
