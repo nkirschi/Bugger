@@ -35,7 +35,7 @@
 
 #messages {
     position: fixed;
-    top: 100px;
+    top: 120px;
     left: 50%;
     transform: translateX(-50%);
     max-width: 400px;

@@ -3,6 +3,8 @@ package tech.bugger.control.backing;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.StatisticsService;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.ReportCriteria;
 import tech.bugger.global.transfer.TopReport;
 import tech.bugger.global.transfer.TopUser;
@@ -10,6 +12,7 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
@@ -18,6 +21,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Backing bean for the statistics page.
@@ -65,6 +69,16 @@ public class StatisticsBacker implements Serializable {
     private final ExternalContext ectx;
 
     /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Registry for application dependencies.
+     */
+    private final Registry registry;
+
+    /**
      * The current report filters.
      */
     private ReportCriteria reportCriteria;
@@ -75,16 +89,22 @@ public class StatisticsBacker implements Serializable {
      * @param statisticsService The statistics service to use.
      * @param topicService      The topic service to use.
      * @param userSession       The currently active user session.
+     * @param feedbackEvent     The feedback Event for user feedback.
+     * @param registry          The application-wide registry for resources.
      * @param ectx              The current {@link ExternalContext} of the application.
      */
     @Inject
     public StatisticsBacker(final StatisticsService statisticsService,
                             final TopicService topicService,
                             final UserSession userSession,
+                            final Event<Feedback> feedbackEvent,
+                            final Registry registry,
                             final ExternalContext ectx) {
         this.statisticsService = statisticsService;
         this.topicService = topicService;
         this.userSession = userSession;
+        this.feedbackEvent = feedbackEvent;
+        this.registry = registry;
         this.ectx = ectx;
         this.reportCriteria = new ReportCriteria("", null, null);
     }
@@ -117,11 +137,23 @@ public class StatisticsBacker implements Serializable {
     }
 
     /**
+     * Applies the current filters to the insight figures.
+     *
+     * @return {@code null} in order to reload the page.
+     */
+    public String applyFilters() {
+        ResourceBundle messagesBundle = registry.getBundle("messages", userSession);
+        feedbackEvent.fire(new Feedback(messagesBundle.getString("filters_applied"), Feedback.Type.INFO));
+        return null;
+    }
+
+    /**
      * Returns the number of open reports matching the current filter criteria.
      *
      * @return The total number of reports.
      */
     public int getOpenReportCount() {
+        log.debug("getOpenReportCount");
         return statisticsService.countOpenReports(reportCriteria);
     }
 
@@ -131,6 +163,7 @@ public class StatisticsBacker implements Serializable {
      * @return The average time a report remains open.
      */
     public String getAverageTimeOpen() {
+        log.debug("getAverageTimeOpen");
         Duration duration = statisticsService.averageTimeOpen(reportCriteria);
         if (duration != null) {
             return String.format(userSession.getLocale(), "%.2f", duration.toMinutes() / SECONDS_IN_A_MINUTE);
@@ -145,6 +178,7 @@ public class StatisticsBacker implements Serializable {
      * @return The average number of posts.
      */
     public String getAveragePostsPerReport() {
+        log.debug("getAveragePostsPerReport");
         Double avgPosts = statisticsService.averagePostsPerReport(reportCriteria);
         if (avgPosts != null) {
             return String.format(userSession.getLocale(), "%.2f", avgPosts);
@@ -160,6 +194,7 @@ public class StatisticsBacker implements Serializable {
      * @return The top ten users.
      */
     public List<TopUser> getTopUsers() {
+        log.debug("getTopUsers");
         return statisticsService.topTenUsers();
     }
 
@@ -169,6 +204,7 @@ public class StatisticsBacker implements Serializable {
      * @return The top ten reports.
      */
     public List<TopReport> getTopReports() {
+        log.debug("getTopReports");
         return statisticsService.topTenReports();
     }
 
@@ -178,6 +214,7 @@ public class StatisticsBacker implements Serializable {
      * @return A list of all topic titles.
      */
     public List<String> getTopicTitles() {
+        log.debug("getTopicTitles");
         List<String> topicTitles = topicService.discoverTopics();
         topicTitles.add(0, ""); // empty string for no restriction to topic (JSF doesn't like null)
         return topicTitles;
