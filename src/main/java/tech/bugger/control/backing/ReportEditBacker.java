@@ -193,9 +193,7 @@ public class ReportEditBacker implements Serializable {
      * @return Whether to display the warning.
      */
     public boolean isDisplayNoModerationWarning() {
-        if (destinationID == currentTopic.getId()) {
-            return false;
-        } else {
+        if (destinationID != currentTopic.getId()) {
             Topic destination = topicService.getTopicByID(destinationID);
             User user = session.getUser();
             return user != null
@@ -203,6 +201,7 @@ public class ReportEditBacker implements Serializable {
                     && topicService.isModerator(user, currentTopic)
                     && !topicService.isModerator(user, destination);
         }
+        return false;
     }
 
     /**
@@ -221,9 +220,8 @@ public class ReportEditBacker implements Serializable {
             fctx.addMessage("f-report-edit:it-topic", new FacesMessage(message));
             destinationID = currentTopic.getId();
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
 
     /**

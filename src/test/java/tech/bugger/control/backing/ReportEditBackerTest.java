@@ -75,7 +75,7 @@ public class ReportEditBackerTest {
     @Test
     public void testSaveChangesWithConfirmWhenCanMove() {
         reportEditBacker.setDestinationID(42);
-        doReturn(new User()).when(session).getUser();
+        doReturn(mock(User.class)).when(session).getUser();
         doReturn(testTopic).when(topicService).getTopicByID(anyInt());
         doReturn(false).when(topicService).isBanned(any(), any());
         assertNull(reportEditBacker.saveChangesWithConfirm());
@@ -85,10 +85,31 @@ public class ReportEditBackerTest {
     @Test
     public void testSaveChangesWithConfirmWhenCannotMove() {
         reportEditBacker.setDestinationID(42);
+        doReturn(mock(User.class)).when(session).getUser();
         doReturn(null).when(topicService).getTopicByID(42);
         assertNull(reportEditBacker.saveChangesWithConfirm());
         assertFalse(reportEditBacker.isDisplayConfirmDialog());
         verify(fctx).addMessage(any(), any());
+    }
+
+    @Test
+    public void testSaveChangesWithConfirmWhenNotLoggedIn() {
+        reportEditBacker.setDestinationID(42);
+        doReturn(testTopic).when(topicService).getTopicByID(anyInt());
+        doReturn(null).when(session).getUser();
+        assertNull(reportEditBacker.saveChangesWithConfirm());
+        assertFalse(reportEditBacker.isDisplayConfirmDialog());
+        verify(fctx).addMessage(any(), any());
+    }
+
+    @Test
+    public void testSaveChangesWithConfirmWhenBanned() {
+        reportEditBacker.setDestinationID(42);
+        doReturn(mock(User.class)).when(session).getUser();
+        doReturn(testTopic).when(topicService).getTopicByID(anyInt());
+        doReturn(true).when(topicService).isBanned(any(), any());
+        assertNull(reportEditBacker.saveChangesWithConfirm());
+        assertFalse(reportEditBacker.isDisplayConfirmDialog());
     }
 
     @Test
@@ -104,9 +125,44 @@ public class ReportEditBackerTest {
     }
 
     @Test
-    public void testIsDisplayNoModerationWarningWhenFalse() {
+    public void testIsDisplayNoModerationWarningWhenNotChanged() {
         reportEditBacker.setCurrentTopic(testTopic);
         reportEditBacker.setDestinationID(testTopic.getId());
+        assertFalse(reportEditBacker.isDisplayNoModerationWarning());
+    }
+
+    @Test
+    public void testIsDisplayNoModerationWarningWhenNotLoggedIn() {
+        doReturn(null).when(session).getUser();
+        assertFalse(reportEditBacker.isDisplayNoModerationWarning());
+    }
+
+    @Test
+    public void testIsDisplayNoModerationWarningWhenInvalidDestination() {
+        reportEditBacker.setDestinationID(42);
+        doReturn(mock(User.class)).when(session).getUser();
+        doReturn(null).when(topicService).getTopicByID(42);
+        assertFalse(reportEditBacker.isDisplayNoModerationWarning());
+    }
+
+    @Test
+    public void testIsDisplayNoModerationWarningWhenCurrentTopicNotMod() {
+        reportEditBacker.setDestinationID(42);
+        Topic destination = mock(Topic.class);
+        doReturn(destination).when(topicService).getTopicByID(42);
+        doReturn(false).when(topicService).isModerator(any(), eq(testTopic));
+        doReturn(mock(User.class)).when(session).getUser();
+        assertFalse(reportEditBacker.isDisplayNoModerationWarning());
+    }
+
+    @Test
+    public void testIsDisplayNoModerationWarningWhenNewTopicMod() {
+        reportEditBacker.setDestinationID(42);
+        Topic destination = mock(Topic.class);
+        doReturn(destination).when(topicService).getTopicByID(42);
+        doReturn(true).when(topicService).isModerator(any(), eq(testTopic));
+        doReturn(true).when(topicService).isModerator(any(), eq(destination));
+        doReturn(mock(User.class)).when(session).getUser();
         assertFalse(reportEditBacker.isDisplayNoModerationWarning());
     }
 
