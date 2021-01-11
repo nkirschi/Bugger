@@ -1,6 +1,7 @@
 package tech.bugger.control.servlet;
 
 import org.jboss.weld.context.http.Http;
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.global.transfer.Attachment;
@@ -12,6 +13,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Serial;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Custom servlet that serves post attachments.
@@ -20,6 +23,18 @@ public class AttachmentServlet extends MediaServlet {
 
     @Serial
     private static final long serialVersionUID = -1911464315254552535L;
+
+    /**
+     * The current application settings.
+     */
+    @Inject
+    private ApplicationSettings applicationSettings;
+
+    /**
+     * The current user session.
+     */
+    @Inject
+    private UserSession session;
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.
@@ -43,6 +58,12 @@ public class AttachmentServlet extends MediaServlet {
      */
     @Override
     protected void handleRequest(HttpServletRequest request, HttpServletResponse response) {
+        if (!applicationSettings.getConfiguration().isGuestReading() && session.getUser() == null) {
+            log.debug("Refusing to serve attachmentt to anonymous user.");
+            redirectToNotFoundPage(response);
+            return;
+        }
+
         // Retrieve the attachment ID from the request.
         int attachmentID = 0;
         try {
@@ -52,8 +73,6 @@ public class AttachmentServlet extends MediaServlet {
             redirectToNotFoundPage(response);
             return;
         }
-
-        // TODO: Check if user is allowed to download attachment.
 
         // Fetch the requested attachment.
         Attachment attachment = postService.getAttachmentByID(attachmentID);
@@ -66,11 +85,10 @@ public class AttachmentServlet extends MediaServlet {
         // Initialize servlet response.
         response.reset();
         enableClientCaching(response);
-        // TODO: Attachment name might break this header.
-        response.setHeader("Content-disposition", "attachment; filename=" + attachment.getName());
+
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + attachment.getName() + '\"');
         response.setContentType(attachment.getMimetype());
         response.setContentLength(attachment.getContent().get().length);
-        // TODO: Caching like in
 
         // Write attachment content to response.
         try {

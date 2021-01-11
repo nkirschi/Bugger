@@ -69,11 +69,8 @@ public abstract class MediaServlet extends HttpServlet {
      * @param response The response to add headers to.
      */
     protected void enableClientCaching(HttpServletResponse response) {
-        // TODO: Finalize client caching.
         long expiry = new Date().getTime() + CACHE_AGE * 1000;
         response.setDateHeader("Expires", expiry);
-        // TODO: necessary?
-        // response.setHeader("Last-Modified", "Wed, 11 Jan 1984 08:00:00 GMT");
     }
 
 }

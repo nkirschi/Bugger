@@ -1,0 +1,62 @@
+package tech.bugger.control.servlet;
+
+import tech.bugger.business.internal.ApplicationSettings;
+import tech.bugger.business.service.PostService;
+import tech.bugger.global.transfer.Attachment;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.Serial;
+
+/**
+ * Custom servlet that serves the organization logo.
+ */
+public class LogoServlet extends MediaServlet {
+
+    @Serial
+    private static final long serialVersionUID = -1911464315254552535L;
+
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
+    private static final Log log = Log.forClass(LogoServlet.class);
+
+    /**
+     * The current application settings.
+     */
+    @Inject
+    private ApplicationSettings applicationSettings;
+
+    /**
+     * Handles a request for the organization logo.
+     *
+     * @param request  The request to handle.
+     * @param response The response to return to the client.
+     */
+    @Override
+    protected void handleRequest(HttpServletRequest request, HttpServletResponse response) {
+        byte[] logo = applicationSettings.getOrganization().getLogo();
+        if (logo == null) {
+            log.debug("Organization logo does not exist.");
+            redirectToNotFoundPage(response);
+            return;
+        }
+
+        // Initialize servlet response.
+        response.reset();
+        enableClientCaching(response);
+
+        // Write image to response.
+        try {
+            response.getOutputStream().write(logo);
+        } catch (IOException e) {
+            log.error("Could not write servlet response.", e);
+        }
+    }
+
+}

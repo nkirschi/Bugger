@@ -1,5 +1,7 @@
 package tech.bugger.control.servlet;
 
+import tech.bugger.business.internal.ApplicationSettings;
+import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.global.transfer.Attachment;
@@ -28,6 +30,18 @@ public class AvatarServlet extends MediaServlet {
     private static final Log log = Log.forClass(AvatarServlet.class);
 
     /**
+     * The current application settings.
+     */
+    @Inject
+    private ApplicationSettings applicationSettings;
+
+    /**
+     * The current user session.
+     */
+    @Inject
+    private UserSession session;
+
+    /**
      * The post service providing attachments.
      */
     @Inject
@@ -45,6 +59,12 @@ public class AvatarServlet extends MediaServlet {
      */
     @Override
     protected void handleRequest(HttpServletRequest request, HttpServletResponse response) {
+        if (!applicationSettings.getConfiguration().isGuestReading() && session.getUser() == null) {
+            log.debug("Refusing to serve avatar picture to anonymous user.");
+            redirectToNotFoundPage(response);
+            return;
+        }
+
         // Retrieve user ID and image type from the request.
         int userID = 0;
         try {
@@ -56,7 +76,6 @@ public class AvatarServlet extends MediaServlet {
         }
         boolean serveThumbnail = "thumbnail".equals(request.getParameter("type"));
 
-        // TODO: Check if user is allowed to download avatar.
 
         // Fetch the requested image.
         User user = profileService.getUser(userID);
