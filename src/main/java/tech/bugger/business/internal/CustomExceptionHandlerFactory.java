@@ -13,16 +13,19 @@ public class CustomExceptionHandlerFactory extends ExceptionHandlerFactory {
     /**
      * Enables customized handling of exceptions.
      */
-    private class CustomExceptionHandler extends ExceptionHandlerWrapper {
+    private static class CustomExceptionHandler extends ExceptionHandlerWrapper {
 
-        private ExceptionHandler exceptionHandler;
+        /**
+         * The wrapped exception handler.
+         */
+        private final ExceptionHandler exceptionHandler;
 
         /**
          * Constructs a new {@code CustomExceptionHandler} wrapping an {@code ExceptionHandler}.
          *
          * @param exceptionHandler The exceptionHandler being wrapped.
          */
-        public CustomExceptionHandler(final ExceptionHandler exceptionHandler) {
+        CustomExceptionHandler(final ExceptionHandler exceptionHandler) {
             this.exceptionHandler = exceptionHandler;
         }
 
@@ -41,10 +44,13 @@ public class CustomExceptionHandlerFactory extends ExceptionHandlerFactory {
          */
         @Override
         public void handle() throws FacesException {
-
         }
+
     }
 
+    /**
+     * The wrapped exception handler factory.
+     */
     private ExceptionHandlerFactory exceptionHandlerFactory;
 
     /**
