@@ -157,15 +157,17 @@ public class StatisticsDBGateway implements StatisticsGateway {
     @Override
     public List<TopReport> getTopTenReports() {
         List<TopReport> topTenReports = new ArrayList<>();
+        // @formatter:off
         String query =
-                "SELECT * "
-                        + "FROM   top_reports AS t "
-                        + "JOIN   report AS r "
-                        + "ON     t.report = r.id "
-                        + "JOIN   \"user\" AS u "
-                        + "ON     r.created_by = u.id "
-                        + "ORDER BY t.relevance_gain DESC "
-                        + "LIMIT  10;";
+                "SELECT   * "
+              + "FROM     top_reports AS t "
+              + "JOIN     report AS r "
+              + "ON       t.report = r.id "
+              + "JOIN     \"user\" AS u "
+              + "ON       r.created_by = u.id "
+              + "ORDER BY t.relevance_gain DESC "
+              + "LIMIT    10;";
+        // @formatter:on
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
@@ -189,13 +191,15 @@ public class StatisticsDBGateway implements StatisticsGateway {
     @Override
     public List<TopUser> getTopTenUsers() {
         List<TopUser> topTenUsers = new ArrayList<>();
+        // @formatter:off
         String query =
-                "SELECT * "
-                        + "FROM   top_users AS t "
-                        + "JOIN   \"user\" AS u "
-                        + "ON     t.user = u.id "
-                        + "ORDER BY t.earned_relevance DESC "
-                        + "LIMIT  10;";
+                "SELECT   * "
+              + "FROM     top_users AS t "
+              + "JOIN     \"user\" AS u "
+              + "ON       t.user = u.id "
+              + "ORDER BY t.earned_relevance DESC "
+              + "LIMIT    10;";
+        // @formatter:on
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
