@@ -16,7 +16,6 @@ import tech.bugger.persistence.util.TransactionManager;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -84,7 +83,8 @@ public class ReportService {
      * @param user   The user who will subscribe to the report.
      * @param report The report receiving the subscription.
      */
-    public void subscribeToReport(User user, Report report) {
+    public void subscribeToReport(final User user, final Report report) {
+
     }
 
     /**
@@ -93,7 +93,7 @@ public class ReportService {
      * @param user   The user whose subscription is to be removed.
      * @param report The report the user is subscribed to.
      */
-    public void unsubscribeFromReport(User user, Report report) {
+    public void unsubscribeFromReport(final User user, final Report report) {
 
     }
 
@@ -102,8 +102,17 @@ public class ReportService {
      *
      * @param report The report to be closed.
      */
-    public void close(Report report) {
-
+    public void close(final Report report) {
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().closeReport(report);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Could not find report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when closing report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -111,8 +120,17 @@ public class ReportService {
      *
      * @param report The report to be opened.
      */
-    public void open(Report report) {
-
+    public void open(final Report report) {
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().openReport(report);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Could not find report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when opening report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -122,7 +140,7 @@ public class ReportService {
      * @param report The report to be moved.
      * @param topic  The topic where the report is to be moved to.
      */
-    public void move(Report report, Topic topic) {
+    public void move(final Report report, final Topic topic) {
 
     }
 
@@ -132,7 +150,7 @@ public class ReportService {
      * @param report The report the relevance of which is to be increased.
      * @param user   The user voting on the report.
      */
-    public void upvote(Report report, User user) {
+    public void upvote(final Report report, final User user) {
 
     }
 
@@ -142,7 +160,7 @@ public class ReportService {
      * @param report The report the relevance of which is to be decreased.
      * @param user   The user voting on the report.
      */
-    public void downvote(Report report, User user) {
+    public void downvote(final Report report, final User user) {
 
     }
 
@@ -152,7 +170,7 @@ public class ReportService {
      * @param report The report the vote of the user of which is to be removed.
      * @param user   The user whose vote is to be removed.
      */
-    public void removeVote(Report report, User user) {
+    public void removeVote(final Report report, final User user) {
 
     }
 
@@ -163,7 +181,7 @@ public class ReportService {
      * @param user   The user in question.
      * @return {@code true} if they have voted to increase the relevance, {@code false} otherwise.
      */
-    public boolean hasUpvoted(Report report, User user) {
+    public boolean hasUpvoted(final Report report, final User user) {
         return false;
     }
 
@@ -174,7 +192,7 @@ public class ReportService {
      * @param user   The user in question.
      * @return {@code true} if they have voted to decrease the relevance, {@code false} otherwise.
      */
-    public boolean hasDownvoted(Report report, User user) {
+    public boolean hasDownvoted(final Report report, final User user) {
         return false;
     }
 
@@ -185,7 +203,7 @@ public class ReportService {
      * @param id The ID of the desired report.
      * @return The report with that ID if it exists, {@code null} if there is no report with that ID.
      */
-    public Report getReportByID(int id) {
+    public Report getReportByID(final int id) {
         try (Transaction tx = transactionManager.begin()) {
             Report report = tx.newReportGateway().find(id);
             tx.commit();
@@ -235,7 +253,7 @@ public class ReportService {
      * @param report The report to update.
      * @return {@code true} iff updating the report succeeded.
      */
-    public boolean updateReport(Report report) {
+    public boolean updateReport(final Report report) {
         // Notifications will be dealt with when implementing the subscriptions feature.
         try (Transaction tx = transactionManager.begin()) {
             tx.newReportGateway().update(report);
@@ -257,8 +275,17 @@ public class ReportService {
      *
      * @param report The report to be deleted.
      */
-    public void deleteReport(Report report) {
-
+    public void deleteReport(final Report report) {
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().delete(report);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Could not find report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when deleting report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -267,7 +294,7 @@ public class ReportService {
      * @param duplicate     The report which is a duplicate.
      * @param duplicateOfID The ID of the report the other report is a duplicate of.
      */
-    public void markDuplicate(Report duplicate, int duplicateOfID) {
+    public void markDuplicate(final Report duplicate, final int duplicateOfID) {
 
     }
 
@@ -276,7 +303,7 @@ public class ReportService {
      *
      * @param report The report to be unmarked.
      */
-    public void unmarkDuplicate(Report report) {
+    public void unmarkDuplicate(final Report report) {
 
     }
 
@@ -287,7 +314,7 @@ public class ReportService {
      * @param report    The report the relevance of which is to be overwritten.
      * @param relevance The new value of the relevance.
      */
-    public void overwriteRelevance(Report report, Integer relevance) {
+    public void overwriteRelevance(final Report report, final Integer relevance) {
         // if relevance == null, restore original relevance value
     }
 
@@ -297,8 +324,19 @@ public class ReportService {
      * @param report The report in question.
      * @return The number of posts as an {@code int}.
      */
-    public int getNumberOfPosts(Report report) {
-        return 0;
+    public int getNumberOfPosts(final Report report) {
+        int numberOfPosts = 0;
+        try (Transaction tx = transactionManager.begin()) {
+            numberOfPosts = tx.newReportGateway().countPosts(report);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Could not find report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when counting posts of report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return numberOfPosts;
     }
 
     /**
@@ -308,8 +346,19 @@ public class ReportService {
      * @param selection Information on which posts to get.
      * @return A list containing the selected posts.
      */
-    public List<Post> getPostsFor(Report report, Selection selection) {
-        return null;
+    public List<Post> getPostsFor(final Report report, final Selection selection) {
+        List<Post> posts = null;
+        try (Transaction tx = transactionManager.begin()) {
+            posts = tx.newPostGateway().selectPostsOfReport(report, selection);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when finding posts for report " + report + " with selection " + selection + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (NotFoundException e) {
+            log.error("Could not find posts for report " + report + " with selection " + selection + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        }
+        return posts;
     }
 
     /**
@@ -319,8 +368,47 @@ public class ReportService {
      * @param report The report in question.
      * @return The time stamp of the last action as a {@code ZonedDateTime}.
      */
-    public ZonedDateTime lastChange(Report report) {
+    public ZonedDateTime lastChange(final Report report) {
         return null;
+    }
+
+    /**
+     * Returns whether the user is privileged for the report in terms of editing rights.
+     *
+     * @param user The user in question.
+     * @param report The report in question.
+     * @return {@code true} iff the user is privileged.
+     */
+    public boolean isPrivileged(final User user, final Report report) {
+        // TODO add checks for mods, banned users
+        if (user == null) {
+            return false;
+        } else if (user.isAdministrator()) {
+            return true;
+        } else {
+            return user.equals(report.getAuthorship().getCreator());
+        }
+    }
+
+    /**
+     * Find ID of the report containing the post with the specified ID.
+     *
+     * @param postID The post ID.
+     * @return The report ID.
+     */
+    public int findReportOfPost(final int postID) {
+        int reportID = 0;
+        try (Transaction tx = transactionManager.begin()) {
+            reportID = tx.newReportGateway().findReportOfPost(postID);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Could not find report containing post with ID " + postID + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when finding report containing post with ID " + postID + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return reportID;
     }
 
 }

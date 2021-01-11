@@ -1,13 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.time.ZoneId;
-import java.util.List;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
@@ -18,6 +10,15 @@ import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.time.ZoneId;
+import java.util.List;
 
 /**
  * User gateway that gives access to user stored in a database.
@@ -79,16 +80,30 @@ public class UserDBGateway implements UserGateway {
      * @throws SQLException Some parsing error occurred.
      */
     static User getUserFromResultSet(final ResultSet rs) throws SQLException {
-        return new User(rs.getInt("id"), rs.getString("username"),
-                rs.getString("password_hash"), rs.getString("password_salt"),
-                rs.getString("hashing_algorithm"), rs.getString("email_address"),
-                rs.getString("first_name"), rs.getString("last_name"),
-                new Lazy<>(rs.getBytes("avatar")), rs.getBytes("avatar_thumbnail"),
-                rs.getString("biography"), Language.valueOf(rs.getString("preferred_language").toUpperCase()),
-                User.ProfileVisibility.valueOf(rs.getString("profile_visibility").toUpperCase()),
-                rs.getTimestamp("registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
-                rs.getObject("forced_voting_weight", Integer.class), rs.getBoolean("is_admin"));
+        return getUserFromResultSet("", rs);
     }
+
+    /**
+     * Parses the given {@link ResultSet} and returns the corresponding {@link User}.
+     *
+     * @param prefix The prefix to put in front of the column names.
+     * @param rs The {@link ResultSet} to parse.
+     * @return The parsed {@link User}.
+     * @throws SQLException Some parsing error occurred.
+     */
+    static User getUserFromResultSet(final String prefix, final ResultSet rs) throws SQLException {
+        return new User(rs.getInt(prefix + "id"), rs.getString(prefix + "username"),
+                rs.getString(prefix + "password_hash"), rs.getString(prefix + "password_salt"),
+                rs.getString(prefix + "hashing_algorithm"), rs.getString(prefix + "email_address"),
+                rs.getString(prefix + "first_name"), rs.getString(prefix + "last_name"),
+                new Lazy<>(rs.getBytes(prefix + "avatar")), rs.getBytes(prefix + "avatar_thumbnail"),
+                rs.getString(prefix + "biography"),
+                Language.valueOf(rs.getString(prefix + "preferred_language").toUpperCase()),
+                User.ProfileVisibility.valueOf(rs.getString(prefix + "profile_visibility").toUpperCase()),
+                rs.getTimestamp(prefix + "registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
+                rs.getObject(prefix + "forced_voting_weight", Integer.class), rs.getBoolean(prefix + "is_admin"));
+    }
+
 
     /**
      * {@inheritDoc}

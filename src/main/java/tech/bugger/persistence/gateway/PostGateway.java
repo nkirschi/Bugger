@@ -28,7 +28,7 @@ public interface PostGateway {
      * @return The list of posts of the report that match {@code selection}.
      * @throws NotFoundException The report could not be found.
      */
-    List<Post> getPostsOfReport(Report report, Selection selection) throws NotFoundException;
+    List<Post> selectPostsOfReport(Report report, Selection selection) throws NotFoundException;
 
     /**
      * Inserts a post into the post storage.
@@ -54,5 +54,13 @@ public interface PostGateway {
      * @throws NotFoundException The post could not be found.
      */
     void delete(Post post) throws NotFoundException;
+
+    /**
+     * Retrieves the first post of the given report.
+     *
+     * @param report The report in question.
+     * @return The first post of the report.
+     */
+    Post getFirstPost(Report report) throws NotFoundException;
 
 }

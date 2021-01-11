@@ -167,7 +167,7 @@ public class TopicBacker implements Serializable {
     @PostConstruct
     public void init() {
 
-        /**
+        /*
         if ((!ext.getRequestParameterMap().containsKey("t"))) {
             try {
                 ext.redirect("public/home.xhtml");
@@ -621,4 +621,5 @@ public class TopicBacker implements Serializable {
     public void setUserModSuggestions(final List<User> userModSuggestions) {
         this.userModSuggestions = userModSuggestions;
     }
+
 }

@@ -22,7 +22,7 @@ public interface ReportGateway {
      * @return The number of posts of the report.
      * @throws NotFoundException The report could not be found.
      */
-    int getNumberOfPosts(Report report) throws NotFoundException;
+    int countPosts(Report report) throws NotFoundException;
 
     /**
      * Retrieves a report by its ID.
@@ -45,7 +45,7 @@ public interface ReportGateway {
      * @throws NotFoundException The topic could not be found.
      */
     List<Report> getSelectedReports(Topic topic, Selection selection, boolean showOpenReports,
-                                    boolean showClosedReports) throws NotFoundException;
+                                           boolean showClosedReports) throws NotFoundException;
 
     /**
      * Inserts a report into the report storage.
@@ -146,5 +146,14 @@ public interface ReportGateway {
      * @throws NotFoundException The report, the user, or the vote could not be found.
      */
     void removeVote(Report report, User user) throws NotFoundException;
+
+    /**
+     * Find the ID of the report containing the post with the specified ID.
+     *
+     * @param postID The post ID.
+     * @return The report ID.
+     * @throws NotFoundException The report was not found.
+     */
+    int findReportOfPost(int postID) throws NotFoundException;
 
 }
