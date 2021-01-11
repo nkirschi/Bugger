@@ -1,11 +1,10 @@
 package tech.bugger.persistence.gateway;
 
+import java.util.List;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.persistence.exception.NotFoundException;
-
-import java.util.List;
 
 /**
  * A post gateway allows to query and modify a persistent storage of posts.
@@ -33,8 +32,8 @@ public interface PostGateway {
 
     /**
      * Inserts a post into the post storage.
-     *
-     * Sets the ID of {@ode post} that was assigned upon insertion by the post storage.
+     * <p>
+     * Sets the ID of {@code post} that was assigned upon insertion by the post storage.
      *
      * @param post The post to insert.
      */

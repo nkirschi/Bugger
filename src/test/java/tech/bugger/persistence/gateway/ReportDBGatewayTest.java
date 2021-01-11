@@ -45,13 +45,15 @@ public class ReportDBGatewayTest {
 
     private Report report;
 
+    private Topic topic;
+
     @BeforeEach
     public void setUp() throws Exception {
         DBExtension.insertMinimalTestData();
         connection = DBExtension.getConnection();
         gateway = new ReportDBGateway(connection, userGateway);
 
-        Topic topic = new Topic(1, "topictitle", "topicdescription");
+        topic = new Topic(1, "topictitle", "topicdescription");
         Authorship authorship = new Authorship(new User(), ZonedDateTime.now(), new User(), ZonedDateTime.now());
         authorship.getCreator().setId(1);
         authorship.getModifier().setId(1);
@@ -121,8 +123,7 @@ public class ReportDBGatewayTest {
     @Test
     public void testUpdate() throws Exception {
         report.setId(100);
-        report.setTopic(1);
-        // doReturn(1).when(report).getTopic();
+        report.setTopic(topic.getId());
         gateway.update(report);
 
         Report reportFromDatabase = gateway.find(100);
@@ -163,8 +164,10 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testCreate() throws Exception {
+        report.setTopic(topic.getId());
         gateway.create(report);
-        assertEquals(report, find(report.getId()));
+        Report created = find(report.getId());
+        assertEquals(report.getId(), created.getId());
     }
 
     @Test

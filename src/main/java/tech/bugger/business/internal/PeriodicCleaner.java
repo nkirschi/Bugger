@@ -6,6 +6,10 @@ import tech.bugger.global.util.Log;
  * Periodically running task for maintenance purposes.
  */
 public class PeriodicCleaner implements Runnable {
+
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(PeriodicCleaner.class);
 
     /**
@@ -17,4 +21,5 @@ public class PeriodicCleaner implements Runnable {
     public void run() {
         // TODO
     }
+
 }
