@@ -1,7 +1,6 @@
 package tech.bugger.persistence.gateway;
 
 import tech.bugger.global.transfer.Authorship;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
@@ -218,11 +217,11 @@ public class PostDBGateway implements PostGateway {
             while (rs.next()) {
                 User author = null;
                 if (rs.getInt("p_created_by") != 0) {
-                    author = parseUserFromResultSetWithPrefix("author_", rs);
+                    author = UserDBGateway.getUserFromResultSet("author_", rs);
                 }
                 User modifier = null;
                 if (rs.getInt("p_last_modified_by") != 0) {
-                    modifier = parseUserFromResultSetWithPrefix("modifier_", rs);
+                    modifier = UserDBGateway.getUserFromResultSet("modifier_", rs);
                 }
                 ZonedDateTime creationDate = null;
                 if (rs.getTimestamp("p_created_at") != null) {
@@ -242,25 +241,6 @@ public class PostDBGateway implements PostGateway {
         }
 
         return selectedPosts;
-    }
-
-    private User parseUserFromResultSetWithPrefix(final String prefix, final ResultSet rs) throws SQLException {
-        String langStr = rs.getString(prefix + "preferred_language").toUpperCase();
-        Language lang = Language.ENGLISH;
-
-        if (!langStr.isBlank()) {
-            lang = Language.valueOf(langStr);
-        }
-
-        return new User(rs.getInt(prefix + "id"), rs.getString(prefix + "username"),
-                rs.getString(prefix + "password_hash"), rs.getString(prefix + "password_salt"),
-                rs.getString(prefix + "hashing_algorithm"), rs.getString(prefix + "email_address"),
-                rs.getString(prefix + "first_name"), rs.getString(prefix + "last_name"),
-                new Lazy<>(rs.getBytes(prefix + "avatar")), rs.getBytes(prefix + "avatar_thumbnail"),
-                rs.getString(prefix + "biography"), lang,
-                User.ProfileVisibility.valueOf(rs.getString(prefix + "profile_visibility").toUpperCase()),
-                rs.getTimestamp(prefix + "registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
-                rs.getObject(prefix + "forced_voting_weight", Integer.class), rs.getBoolean(prefix + "is_admin"));
     }
 
 }
