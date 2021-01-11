@@ -95,9 +95,9 @@ public class PostService {
      * @param name The attachment name to check the validity of.
      * @return Whether the attachment name is valid.
      */
-    private boolean isAttachmentNameValid(String name) {
+    public boolean isAttachmentNameValid(String name) {
         return Arrays.stream(applicationSettings.getConfiguration().getAllowedFileExtensions().split(","))
-                .anyMatch(suffix -> name.endsWith(suffix));
+                .anyMatch(suffix -> name.endsWith(suffix.trim()));
     }
 
     /**

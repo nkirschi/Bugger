@@ -90,18 +90,21 @@
         </h:form>
 
         <!-- Renders the profile owner's user information. -->
-        <h:form id="f-profile-edit" rendered="#{userSession.user != null and userSession.user.administrator
-        or userSession.user.id == profileEditBacker.user.id}">
+        <h:form id="f-profile-edit"
+                rendered="#{userSession.user != null and userSession.user.administrator
+                            or userSession.user.id == profileEditBacker.user.id}"
+                enctype="multipart/form-data">
 
-            <!-- TODO uncomment this and change once servlet has been implemented -->
-            <!--
             <h:panelGroup layout="block" id="p-avatar" styleClass="row p-avatar">
-                <h:graphicImage id="g-avatar" value="" styleClass="g-avatar" alt="The user's avatar"/>
+                <h:graphicImage id="g-avatar"
+                                value="avatar?id=#{profileEditBacker.user.id}"
+                                styleClass="g-avatar"
+                                alt="The user's avatar"/>
             </h:panelGroup>
 
             <h:panelGroup layout="block" id="p-upload" styleClass="row p-avatar">
-                <h:inputFile id="i-upload" validator="imageValidator" value="#{labels['profile_edit.change_avatar']}"
-                             binding="#{profileEditBacker.tempAvatar}">
+                <h:outputLabel id="o-upload" for="i-upload" value="#{labels['profile_edit.change_avatar']}"/>
+                <h:inputFile id="i-upload" validator="imageValidator" value="#{profileEditBacker.tempAvatar}">
                     <f:validator validatorId="imageValidator"/>
                 </h:inputFile>
             </h:panelGroup>
@@ -112,7 +115,6 @@
                 <h:commandButton id="cb-delete-avatar" value="#{labels['profile_edit.del_avatar']}"
                                  action="#{profileEditBacker.deleteAvatar}" styleClass="button"/>
             </h:panelGroup>
-        -->
 
             <h:panelGrid id="p-profile-info" columns="2">
                 <h:outputLabel id="o-visibility" for="s-visibility" value="#{labels['profile_edit.visibility']}"/>

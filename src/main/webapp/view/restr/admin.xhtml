@@ -55,11 +55,7 @@
                 <!-- organization logo (later) -->
                 <h:outputLabel id="o-logo" for="g-logo" value="#{labels.logo}"/>
                 <h:panelGrid columns="1">
-                    <!-- TODO upgrade to real image from DB -->
-                    <h:graphicImage id="g-logo"
-                                    library="images"
-                                    name="bugger.png"
-                                    width="100" height="100"/>
+                    <h:graphicImage id="g-logo" value="logo" width="100" height="100"/>
                     <h:inputFile id="i-logo"
                                  validator="imageValidator"
                                  valueChangeListener="#{adminBacker.uploadLogo}"
