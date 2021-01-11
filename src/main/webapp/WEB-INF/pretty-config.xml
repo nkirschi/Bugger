@@ -25,7 +25,7 @@
         <query-param name="token">#{token}</query-param>
         <query-param name="c">#{profileEditBacker.create}</query-param>
         <query-param name="e">#{e}</query-param>
-        <view-id value="/faces/view/public/profile-edit.xhtml"/>
+        <view-id value="/faces/view/restr/profile-edit.xhtml"/>
     </url-mapping>
     <url-mapping id="profile">
         <pattern value="/profile"/>
@@ -52,11 +52,6 @@
         <pattern value="/report-create"/>
         <view-id value="/faces/view/auth/report-create.xhtml"/>
     </url-mapping>-->
-    <url-mapping id="report">
-        <pattern value="/report"/>
-        <query-param name="r">#{r}</query-param>
-        <view-id value="/faces/view/public/report.xhtml"/>
-    </url-mapping>
     <url-mapping id="report-edit">
         <pattern value="/report-edit"/>
         <query-param name="id">#{id}</query-param>
@@ -65,10 +60,6 @@
     <url-mapping id="topic">
         <pattern value="/topic"/>
         <view-id value="/faces/view/public/topic.xhtml"/>
-    </url-mapping>
-    <url-mapping id="report">
-        <pattern value="/report"/>
-        <view-id value="/faces/view/public/report.xhtml"/>
     </url-mapping>
     <url-mapping id="statistics">
         <pattern value="/statistics"/>
