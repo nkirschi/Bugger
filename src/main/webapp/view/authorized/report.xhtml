@@ -10,7 +10,7 @@
       xmlns:b="http://tech.bugger/tags"
 >
 <!--@elvariable id="var" type="tech.bugger.global.transfer.Post"-->
-<ui:composition template="../../WEB-INF/template/main.xhtml">
+<ui:composition template="/WEB-INF/template/main.xhtml">
     <ui:param name="title" value="#{reportBacker.report.title}"/>
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
@@ -95,7 +95,7 @@
         <!-- TODO dialog for marking a duplicate -->
 
         <b:pagitable_post paginator="#{reportBacker.posts}">
-            <h:panelGrid columns="2">
+            <h:panelGrid columns="2" styleClass="card-header">
                 <h:panelGrid columns="1">
                     <h:outputText id="ot-post-creator" value="#{var.authorship.creator == null ? labels.deleted_user : var.authorship.creator.username}"/>
                     <h:outputText id="ot-post-created-at" value="#{labels.report_at} #{var.authorship.creationDate}"/>
@@ -124,7 +124,7 @@
             </h:panelGroup>
             -->
 
-            <h:panelGrid columns="1">
+            <h:panelGrid columns="1" styleClass="card-body">
                 <h:outputText value="#{var.content}" escape="false"/>
             </h:panelGrid>
 
@@ -134,7 +134,7 @@
             </h:panelGroup>
             -->
 
-            <h:panelGrid columns="2">
+            <h:panelGrid columns="2" styleClass="card-footer">
                 <h:outputText value="#{labels.id}: #{var.id}"/>
                 <h:outputText value="#{labels.report_last_modified_by} #{var.authorship.modifier == null ? labels.deleted_user : var.authorship.modifier.username} #{labels.report_at} #{var.authorship.modifiedDate}"
                               rendered="#{var.authorship.modifiedDate != null}"
