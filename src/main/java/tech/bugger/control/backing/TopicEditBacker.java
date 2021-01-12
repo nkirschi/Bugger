@@ -1,16 +1,21 @@
 package tech.bugger.control.backing;
 
+import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.IOException;
 
 /**
  * Backing bean for the topic edit page.
@@ -19,22 +24,82 @@ import javax.inject.Named;
 @Named
 public class TopicEditBacker {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(TopicEditBacker.class);
 
+    /**
+     * The ID of the Topic to edit.
+     */
     private int topicID;
+
+    /**
+     * The Topic to edit.
+     */
     private Topic topic;
 
-    @Inject
-    private TopicService topicService;
+    /**
+     * The Topic Service user to edit topics.
+     */
+    private transient TopicService topicService;
+
+    /**
+     * The current faces context.
+     */
+    private FacesContext fctx;
+
+    /**
+     * The current external context.
+     */
+    private ExternalContext ext;
+
+    /**
+     * The current user session.
+     */
+    private UserSession session;
+
+    /**
+     * Topic description sanitized for display.
+     */
+    private String sanitizedDescription;
 
     @Inject
-    private FacesContext fctx;
+    TopicEditBacker(final TopicService topicService, final FacesContext fctx, final UserSession session) {
+        this.topicService = topicService;
+        this.fctx = fctx;
+        this.session = session;
+    }
 
     /**
      * Initializes the topic edit page. Also checks if the user is allowed to edit the topic. If not, acts as if the
      * page did not exist.
      */
     public void init() {
+        log.info("starting init...");
+        ext = fctx.getExternalContext();
+        User user = session.getUser();
+        if (!user.isAdministrator()) {
+            redirectTo404Page();
+            return;
+        }
+        if ((ext.getRequestParameterMap().containsKey("id")) && ext.getRequestParameterMap().get("id") != null) {
+            try {
+                log.info("id found");
+                topicID = Integer.parseInt(fctx.getExternalContext().getRequestParameterMap().get("id"));
+            } catch (NumberFormatException e) {
+                log.info("id invalid");
+                // Report ID parameter not valid.
+                redirectTo404Page();
+                return;
+            }
+            topic = topicService.getTopicByID(topicID);
+        } else {
+            log.info("No id found.");
+            topic = new Topic();
+        }
+        sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
+        log.info("init finished.");
     }
 
     /**
@@ -42,13 +107,34 @@ public class TopicEditBacker {
      *
      * @param feedback The feedback with details on what to display.
      */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
+    public void displayFeedback(@Observes @Any final Feedback feedback) {
     }
 
     /**
      * Saves and applies the changes made.
+     *
+     * @return The page to navigate to.
      */
-    public void saveChanges() {
+    public String saveChanges() {
+        if (topicService.updateTopic(topic)) {
+            return "topic.xhtml?id=" + topic.getId();
+        } else {
+            log.info("no changes saved");
+            return null;
+        }
+    }
+
+    /**
+     * Redirects the user to a 404 page.
+     */
+    private void redirectTo404Page() {
+        // This will be subject to change when the error page is implemented.
+        try {
+            ExternalContext ectx = fctx.getExternalContext();
+            ectx.redirect(ectx.getRequestContextPath() + "/faces/view/public/error.xhtml");
+        } catch (IOException e) {
+            throw new InternalError("Redirection to error page failed.");
+        }
     }
 
     /**
@@ -61,7 +147,7 @@ public class TopicEditBacker {
     /**
      * @param topicID The topicID to set.
      */
-    public void setTopicID(int topicID) {
+    public void setTopicID(final int topicID) {
         this.topicID = topicID;
     }
 
@@ -72,10 +158,14 @@ public class TopicEditBacker {
         return topic;
     }
 
+    public String getSanitizedDescription() {
+        return sanitizedDescription;
+    }
+
     /**
      * @param topic The topic to set.
      */
-    public void setTopic(Topic topic) {
+    public void setTopic(final Topic topic) {
         this.topic = topic;
     }
 

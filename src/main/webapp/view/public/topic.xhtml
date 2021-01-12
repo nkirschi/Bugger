@@ -19,13 +19,11 @@
                 <h:panelGroup class="col-sm-8" layout="block">
                     <h:outputLabel value="#{labels.description}"/>
                     <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
-                    <h:panelGroup class="row" layout="block">
-                        <!-- rendered="#{userSession.user.administrator}" -->
+                    <h:panelGroup class="row" layout="block" rendered="#{userSession.user.administrator}">
                         <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button" value="#{labels.delete_topic}"/>
-                        <!-- rendered="#{userSession.user.administrator}" -->
-                        <h:button id="b-edit" outcome="/restr/topic-edit.xhtml" value="#{labels.edit_topic}">
-                            <ui:param name="topic" value="#{topicBacker.topicID}"/>
-                        </h:button>
+                        <h:link id="l-edit" outcome="/view/restr/topic-edit.xhtml" value="#{labels.edit_topic}" styleClass="button">
+                            <ui:param name="id" value="#{topicBacker.topicID}"/>
+                        </h:link>
                     </h:panelGroup>
                     <!-- statistik link -->
                     <h:panelGroup class="row" layout="block">

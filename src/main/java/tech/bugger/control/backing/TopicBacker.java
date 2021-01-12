@@ -14,6 +14,7 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.faces.context.ExternalContext;
@@ -30,7 +31,7 @@ import java.util.List;
 /**
  * Backing bean for the topic page.
  */
-@ViewScoped
+@RequestScoped
 @Named
 public class TopicBacker implements Serializable {
 
@@ -130,38 +131,41 @@ public class TopicBacker implements Serializable {
     /**
      * The current user session.
      */
-    @Inject
     private UserSession session;
 
     /**
      * A transient topic service.
      */
-    @Inject
     private transient TopicService topicService;
 
     /**
      * A trransient report service.
      */
-    @Inject
     private transient ReportService reportService;
 
     /**
      * A transient search service.
      */
-    @Inject
     private transient SearchService searchService;
 
     /**
      * The current faces context.
      */
-    @Inject
     private FacesContext fctx;
 
     /**
      * The current external context.
      */
-    @Inject
     private ExternalContext ext;
+
+    @Inject
+    TopicBacker(final TopicService topicService, final ReportService reportService, final SearchService searchService, final FacesContext fctx, final UserSession session) {
+        this.topicService = topicService;
+        this.reportService = reportService;
+        this.searchService = searchService;
+        this.fctx = fctx;
+        this.session = session;
+    }
 
     /**
      * Initializes the topic page. By default, only open reports are shown. Also checks if the user is allowed to view
@@ -169,26 +173,16 @@ public class TopicBacker implements Serializable {
      */
     @PostConstruct
     public void init() {
-
-        /**
-        if ((!ext.getRequestParameterMap().containsKey("t"))) {
-            try {
-                ext.redirect("public/home.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
+        ext = fctx.getExternalContext();
+        if ((!ext.getRequestParameterMap().containsKey("id"))) {
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
         try {
-            topicID = Integer.parseInt(ext.getRequestParameterMap().get("t"));
+            topicID = Integer.parseInt(ext.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
-            try {
-                ext.redirect("public/home.xhtml");
-            } catch (IOException e2) {
-                throw new InternalError("Error while redirecting.", e2);
-            }
-        } **/
-
-        topicID = 1;
+            log.info("---------> t = " + ext.getRequestParameterMap().get("id"));
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+        }
 
         topic = topicService.getTopicByID(topicID);
         if (topic == null) {
