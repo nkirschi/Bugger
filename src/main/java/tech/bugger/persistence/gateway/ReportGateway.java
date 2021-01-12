@@ -63,7 +63,7 @@ public interface ReportGateway {
      * @param selection The search criteria to apply.
      * @return The list of duplicates of {@code report}, filtered accordingly.
      */
-    List<Report> getSelectedDuplicates(Report report, Selection selection);
+    List<Report> selectDuplicates(Report report, Selection selection);
 
     /**
      * Inserts a report into the report storage.

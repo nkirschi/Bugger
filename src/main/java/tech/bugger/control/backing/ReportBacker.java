@@ -177,11 +177,11 @@ public class ReportBacker implements Serializable {
             }
         }
         report = reportService.getReportByID(reportID);
-        duplicateOfID = report.getDuplicateOf();
         if (report == null) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
             return;
         }
+        duplicateOfID = report.getDuplicateOf();
         User user = session.getUser();
         boolean maySee = false;
         if (applicationSettings.getConfiguration().isGuestReading()) {
@@ -453,14 +453,18 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     * @return The posts.
+     * Returns the paginator managing all posts of the currently shown report.
+     *
+     * @return The paginator managing the posts.
      */
     public Paginator<Post> getPosts() {
         return posts;
     }
 
     /**
-     * @return The posts.
+     * Returns the paginator managing all duplicates of the currently shown report.
+     *
+     * @return The paginator managing the duplicates.
      */
     public Paginator<Report> getDuplicates() {
         return duplicates;

@@ -184,9 +184,9 @@ public class ReportServiceTest {
     }
 
     @Test
-    public void testGetDuplicatesForSuccess() {
+    public void testSelectDuplicatesSuccess() {
         List<Report> reports = List.of(new Report(), new Report());
-        doReturn(reports).when(reportGateway).getSelectedDuplicates(any(), any());
+        doReturn(reports).when(reportGateway).selectDuplicates(any(), any());
         assertEquals(reports, service.getDuplicatesFor(testReport, mock(Selection.class)));
     }
 

@@ -236,7 +236,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<Report> getSelectedDuplicates(final Report report, final Selection selection) {
+    public List<Report> selectDuplicates(final Report report, final Selection selection) {
         List<Report> selectedDuplicates = new ArrayList<>();
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT r1.* FROM report r1"

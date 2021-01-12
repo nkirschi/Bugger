@@ -355,8 +355,7 @@ public class Report implements Serializable {
      */
     @Override
     public int hashCode() {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        return Objects.hash(id);
     }
 
     /**
@@ -366,8 +365,18 @@ public class Report implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "Report{"
+                + "id=" + id
+                + ", title='" + title + '\''
+                + ", type=" + type
+                + ", severity=" + severity
+                + ", version='" + version + '\''
+                + ", authorship=" + authorship
+                + ", closingDate=" + closingDate
+                + ", duplicateOf=" + duplicateOf
+                + ", forcedRelevance=" + forcedRelevance
+                + ", topic=" + topic
+                + '}';
     }
 
 }

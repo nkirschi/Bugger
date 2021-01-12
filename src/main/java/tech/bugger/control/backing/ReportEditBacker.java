@@ -178,13 +178,18 @@ public class ReportEditBacker implements Serializable {
      * @return The page to navigate to.
      */
     public String saveChanges() {
-        report.setTopic(destinationID);
+        boolean success = true;
 
-        if (reportService.updateReport(report)) {
-            return "pretty:report?r=" + report.getId();
-        } else {
-            return null;
+        if (destinationID != report.getTopic()) {
+            report.setTopic(destinationID);
+            success = reportService.move(report);
         }
+
+        if (success) {
+            success = reportService.updateReport(report);
+        }
+
+        return success ? "pretty:report" : null;
     }
 
     /**

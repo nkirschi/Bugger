@@ -21,7 +21,7 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 /**
- * Service providing methods related to reports. A {@code Feedback} event is fired, if unexpected circumstances occur.
+ * Service providing methods related to reports. A {@link Feedback} event is fired, if unexpected circumstances occur.
  */
 @ApplicationScoped
 public class ReportService {
@@ -236,7 +236,34 @@ public class ReportService {
     }
 
     /**
-     * Updates an existing report and notifies users about the change. Notifications are handled by the {@code
+     * Moves a given existing report to another topic and notifies users about the change. Notifications are handled by
+     * the {@link NotificationService}.
+     *
+     * @param report The report to move.
+     * @return {@code true} iff moving the report succeeded.
+     */
+    public boolean move(final Report report) {
+        // Notifications will be dealt with when implementing the subscriptions feature.
+        log.debug("Moving report " + report + ".");
+        boolean success = false;
+
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().update(report);
+            tx.commit();
+            success = true;
+        } catch (NotFoundException e) {
+            log.error("Report to be updated could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while updating a report.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
+        }
+
+        return success;
+    }
+
+    /**
+     * Updates an existing report and notifies users about the change. Notifications are handled by the {@link
      * NotificationService}.
      *
      * @param report The report to update.
@@ -394,7 +421,7 @@ public class ReportService {
         List<Report> reports = Collections.emptyList();
 
         try (Transaction tx = transactionManager.begin()) {
-            reports = tx.newReportGateway().getSelectedDuplicates(report, selection);
+            reports = tx.newReportGateway().selectDuplicates(report, selection);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error when finding duplicates for report " + report + " with selection " + selection + ".", e);

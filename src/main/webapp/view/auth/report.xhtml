@@ -34,6 +34,71 @@
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>
+
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{reportBacker.currentDialog == 'DELETE_REPORT'}">
+            <h:form id="f-delete-report">
+                <h:panelGroup class="row" layout="block" styleClass="align-center">
+                    <h:panelGroup class="col-sm-4" layout="block"/>
+                    <h:panelGroup class="col-sm-4" layout="block">
+                        <h:panelGroup class="row" layout="block">
+                            <h:outputText value="#{labels.report_delete_dialog}"/>
+                        </h:panelGroup>
+                        <h:panelGroup class="row" layout="block">
+                            <h:commandButton id="cb-delete-report" action="#{reportBacker.delete}" styleClass="button"
+                                             value="#{labels.delete}"/>
+                            <h:commandButton id="cb-delete-report-cancel" action="#{reportBacker.displayDialog(null)}"
+                                             styleClass="button" value="#{labels.cancel}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup class="col-sm-4" layout="block"/>
+                </h:panelGroup>
+            </h:form>
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{reportBacker.currentDialog == 'OPEN_CLOSE'}">
+            <h:form id="f-open-close-report">
+                <h:panelGroup class="row" layout="block" styleClass="align-center">
+                    <h:panelGroup class="col-sm-4" layout="block"/>
+                    <h:panelGroup class="col-sm-4" layout="block">
+                        <h:panelGroup class="row" layout="block">
+                            <h:outputText
+                                    value="#{reportBacker.report.closingDate == null ? labels.report_close_dialog : labels.report_open_dialog}"/>
+                        </h:panelGroup>
+                        <h:panelGroup class="row" layout="block">
+                            <h:commandButton id="cb-open-close-report" action="#{reportBacker.toggleOpenClosed}"
+                                             styleClass="button"
+                                             value="#{reportBacker.report.closingDate == null ? labels.report_action_close : labels.report_action_open}"/>
+                            <h:commandButton id="cb-open-close-report-cancel"
+                                             action="#{reportBacker.displayDialog(null)}"
+                                             styleClass="button" value="#{labels.cancel}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup class="col-sm-4" layout="block"/>
+                </h:panelGroup>
+            </h:form>
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{reportBacker.currentDialog == 'DELETE_POST'}">
+            <h:form id="f-delete-post">
+                <h:panelGroup class="row" layout="block" styleClass="align-center">
+                    <h:panelGroup class="col-sm-4" layout="block"/>
+                    <h:panelGroup class="col-sm-4" layout="block">
+                        <h:panelGroup class="row" layout="block">
+                            <h:outputFormat value="#{labels.report_delete_post_dialog}">
+                                <f:param value="#{reportBacker.postToBeDeleted.id}"/>
+                            </h:outputFormat>
+                        </h:panelGroup>
+                        <h:panelGroup class="row" layout="block">
+                            <h:commandButton id="cb-delete-post" action="#{reportBacker.deletePost}" styleClass="button"
+                                             value="#{labels.delete}"/>
+                            <h:commandButton id="cb-delete-post-cancel" action="#{reportBacker.displayDialog(null)}"
+                                             styleClass="button" value="#{labels.cancel}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup class="col-sm-4" layout="block"/>
+                </h:panelGroup>
+            </h:form>
+        </h:panelGroup>
     </ui:define>
 
     <ui:define name="content">
@@ -80,7 +145,9 @@
                 <h:commandButton id="cb-open-close-report-dialog" action="#{reportBacker.displayDialog('OPEN_CLOSE')}"
                                  value="#{reportBacker.report.closingDate == null ? labels.report_action_close : labels.report_action_open}"/>
                 <!-- TODO redirect to report edit page -->
-                <h:commandButton id="cb-edit-report" value="#{labels.edit}"/>
+                <h:link id="cb-edit-report" value="#{labels.edit}" outcome="pretty:report-edit" styleClass="button">
+                    <f:param name="id" value="#{reportBacker.report.id}"/>
+                </h:link>
                 <h:commandButton id="cb-delete-report-dialog" action="#{reportBacker.displayDialog('DELETE_REPORT')}"
                                  value="#{labels.delete}"/>
                 <h:commandButton id="cb-mark-duplicate" action="#{reportBacker.displayDialog('DUPLICATE')}"
@@ -89,64 +156,6 @@
                                  value="#{labels.report_unmark_duplicate}"
                                  rendered="#{reportBacker.report.duplicateOf != null}"/>
             </h:panelGrid>
-        </h:form>
-
-        <h:form id="f-delete-report" rendered="#{reportBacker.currentDialog == 'DELETE_REPORT'}">
-            <h:panelGroup class="row" layout="block" styleClass="align-center">
-                <h:panelGroup class="col-sm-4" layout="block"/>
-                <h:panelGroup class="col-sm-4" layout="block">
-                    <h:panelGroup class="row" layout="block">
-                        <h:outputText value="#{labels.report_delete_dialog}"/>
-                    </h:panelGroup>
-                    <h:panelGroup class="row" layout="block">
-                        <h:commandButton id="cb-delete-report" action="#{reportBacker.delete}" styleClass="button"
-                                         value="#{labels.delete}"/>
-                        <h:commandButton id="cb-delete-report-cancel" action="#{reportBacker.displayDialog(null)}"
-                                         styleClass="button" value="#{labels.cancel}"/>
-                    </h:panelGroup>
-                </h:panelGroup>
-                <h:panelGroup class="col-sm-4" layout="block"/>
-            </h:panelGroup>
-        </h:form>
-
-        <h:form id="f-open-close-report" rendered="#{reportBacker.currentDialog == 'OPEN_CLOSE'}">
-            <h:panelGroup class="row" layout="block" styleClass="align-center">
-                <h:panelGroup class="col-sm-4" layout="block"/>
-                <h:panelGroup class="col-sm-4" layout="block">
-                    <h:panelGroup class="row" layout="block">
-                        <h:outputText
-                                value="#{reportBacker.report.closingDate == null ? labels.report_close_dialog : labels.report_open_dialog}"/>
-                    </h:panelGroup>
-                    <h:panelGroup class="row" layout="block">
-                        <h:commandButton id="cb-open-close-report" action="#{reportBacker.toggleOpenClosed}"
-                                         styleClass="button"
-                                         value="#{reportBacker.report.closingDate == null ? labels.report_action_close : labels.report_action_open}"/>
-                        <h:commandButton id="cb-open-close-report-cancel" action="#{reportBacker.displayDialog(null)}"
-                                         styleClass="button" value="#{labels.cancel}"/>
-                    </h:panelGroup>
-                </h:panelGroup>
-                <h:panelGroup class="col-sm-4" layout="block"/>
-            </h:panelGroup>
-        </h:form>
-
-        <h:form id="f-delete-post" rendered="#{reportBacker.currentDialog == 'DELETE_POST'}">
-            <h:panelGroup class="row" layout="block" styleClass="align-center">
-                <h:panelGroup class="col-sm-4" layout="block"/>
-                <h:panelGroup class="col-sm-4" layout="block">
-                    <h:panelGroup class="row" layout="block">
-                        <h:outputFormat value="#{labels.report_delete_post_dialog}">
-                            <f:param value="#{reportBacker.postToBeDeleted.id}"/>
-                        </h:outputFormat>
-                    </h:panelGroup>
-                    <h:panelGroup class="row" layout="block">
-                        <h:commandButton id="cb-delete-post" action="#{reportBacker.deletePost}" styleClass="button"
-                                         value="#{labels.delete}"/>
-                        <h:commandButton id="cb-delete-post-cancel" action="#{reportBacker.displayDialog(null)}"
-                                         styleClass="button" value="#{labels.cancel}"/>
-                    </h:panelGroup>
-                </h:panelGroup>
-                <h:panelGroup class="col-sm-4" layout="block"/>
-            </h:panelGroup>
         </h:form>
 
         <b:pagitable_post paginator="#{reportBacker.posts}">
