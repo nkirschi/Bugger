@@ -173,7 +173,7 @@ public class TopicBacker implements Serializable {
     @PostConstruct
     public void init() {
 
-        if ((!ext.getRequestParameterMap().containsKey("t"))) {
+        if ((!ext.getRequestParameterMap().containsKey("id"))) {
             try {
                 ext.redirect("public/home.xhtml");
             } catch (IOException e) {
@@ -213,7 +213,7 @@ public class TopicBacker implements Serializable {
                 return topicService.getNumberOfReports(topic, openReportShown, closedReportShown);
             }
         };
-    }
+    }}
 
     /**
      * Returns the relevance of a certain report.
