@@ -6,6 +6,7 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.global.util.Pagitable;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
@@ -127,8 +128,8 @@ public class ReportDBGateway implements ReportGateway {
         }
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM report WHERE topic = ? " + filter
                 + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
-                + " LIMIT " + selection.getPageSize().getSize()
-                + " OFFSET " + selection.getCurrentPage() * selection.getPageSize().getSize() + ";")) {
+                + " LIMIT " + Pagitable.getItemLimit(selection)
+                + " OFFSET " + Pagitable.getItemOffset(selection) + ";")) {
             ResultSet rs = new StatementParametrizer(stmt).integer(topic.getId()).toStatement().executeQuery();
             while (rs.next()) {
                 log.info("found a Report!");

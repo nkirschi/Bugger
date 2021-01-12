@@ -51,7 +51,7 @@
                     <b:column title="#{labels.col_title}" paginator="#{topicBacker.reports}" key="title">
                         <h:outputText value="#{var.title}"/>
                     </b:column>
-                    <b:column title="#{labels.col_type}}" paginator="#{topicBacker.reports}" key="type">
+                    <b:column title="#{labels.col_type}" paginator="#{topicBacker.reports}" key="type">
                         <h:outputText value="#{var.type}"/>
                     </b:column>
                     <b:column title="#{labels.col_severity}" paginator="#{topicBacker.reports}" key="severity">
@@ -66,8 +66,8 @@
                     <b:column title="#{labels.col_relevance}" paginator="#{topicBacker.reports}" key="forced_relevance" >
                         <h:outputText value="#{var.forcedRelevance}"/>
                     </b:column>
-                    <b:column title="#{labels.col_change}" paginator="#{topicBacker.reports}" key="last_modified">
-                        <h:outputText value="#{var.authorship.modifier}"/>
+                    <b:column title="#{labels.col_change}" paginator="#{topicBacker.reports}" key="last_modified_at">
+                        <h:outputText value="#{var.authorship.creationDate}"/>
                     </b:column>
                 </b:pagitable>
             </h:panelGroup>
