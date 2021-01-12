@@ -77,7 +77,9 @@
             <h:panelGroup styleClass="row" layout="block">
                 <!-- logout -->
                 <h:form>
-                    <h:commandButton value="TODO:Logout" styleClass="btn btn-primary" />
+                    <h:commandButton value="#{labels.logout}" action="#{headerBacker.logout}" styleClass="btn btn-primary">
+                        <f:param name="d" value="#{headerBacker.displayMenu}" />
+                    </h:commandButton>
                 </h:form>
             </h:panelGroup>
         </h:panelGroup>
