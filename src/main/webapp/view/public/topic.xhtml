@@ -46,7 +46,9 @@
                 <b:pagitable paginator="#{topicBacker.reports}">
                     <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
                     <b:column title="#{labels.col_id}" paginator="#{topicBacker.reports}" key="id">
-                        <h:outputText value="#{var.id}"/>
+                        <h:link outcome="pretty:report" value="##{var.id}">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
                     </b:column>
                     <b:column title="#{labels.col_title}" paginator="#{topicBacker.reports}" key="title">
                         <h:outputText value="#{var.title}"/>

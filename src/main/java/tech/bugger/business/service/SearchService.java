@@ -1,12 +1,15 @@
 package tech.bugger.business.service;
 
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Any;
@@ -14,19 +17,47 @@ import javax.inject.Inject;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Service providing methods related to searching for specific topics, reports and users. A {@code Feedback} event is
  * fired, if unexpected circumstances occur.
  */
-@Dependent
+@ApplicationScoped
 public class SearchService {
 
     private static final Log log = Log.forClass(SearchService.class);
 
+    /**
+     * Transaction manager used for creating transactions.
+     */
+    private final TransactionManager transactionManager;
+
+    /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Resource bundle for feedback messages.
+     */
+    private final ResourceBundle messagesBundle;
+
+    /**
+     * Constructs a new topic service with the given dependencies.
+     *
+     * @param transactionManager The transaction manager to use for creating transactions.
+     * @param feedbackEvent      The feedback event to use for user feedback.
+     * @param messagesBundle     The resource bundle for feedback messages.
+     */
     @Inject
-    @Any
-    Event<Feedback> feedback;
+    public SearchService(final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
+                         final @RegistryKey("messages") ResourceBundle messagesBundle) {
+        this.transactionManager = transactionManager;
+        this.feedbackEvent = feedbackEvent;
+        this.messagesBundle = messagesBundle;
+    }
+
 
     /**
      * Returns at most the first five results when searching the data source for users.

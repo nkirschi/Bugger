@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Backing bean for the topic page.
  */
-@RequestScoped
+@ViewScoped
 @Named
 public class TopicBacker implements Serializable {
 
