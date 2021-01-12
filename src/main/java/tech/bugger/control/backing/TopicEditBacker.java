@@ -8,6 +8,7 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
@@ -38,6 +39,11 @@ public class TopicEditBacker {
      * The Topic to edit.
      */
     private Topic topic;
+
+    /**
+     * Whether the user is being created by an administrator or not.
+     */
+    private boolean create;
 
     /**
      * The Topic Service user to edit topics.
@@ -75,8 +81,9 @@ public class TopicEditBacker {
      * Initializes the topic edit page. Also checks if the user is allowed to edit the topic. If not, acts as if the
      * page did not exist.
      */
+    @PostConstruct
     public void init() {
-        log.info("starting init...");
+        log.info("starting TopicEditBacker init...");
         ext = fctx.getExternalContext();
         User user = session.getUser();
         if (!user.isAdministrator()) {
@@ -94,11 +101,15 @@ public class TopicEditBacker {
                 return;
             }
             topic = topicService.getTopicByID(topicID);
+            sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
+            create = false;
         } else {
             log.info("No id found.");
             topic = new Topic();
+            sanitizedDescription = "";
+            create = true;
         }
-        sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
+
         log.info("init finished.");
     }
 
@@ -115,12 +126,22 @@ public class TopicEditBacker {
      *
      * @return The page to navigate to.
      */
-    public String saveChanges() {
-        if (topicService.updateTopic(topic)) {
-            return "topic.xhtml?id=" + topic.getId();
+    public void saveChanges() {
+        boolean success;
+        System.out.println("Phase 0");
+        topic.setDescription(sanitizedDescription);
+        System.out.println("Phase 1");
+        if (create) {
+            success = topicService.createTopic(topic);
+            System.out.println("Phase 2");
         } else {
-            log.info("no changes saved");
-            return null;
+            success = topicService.updateTopic(topic);
+            System.out.println("Phase 3");
+        }
+        if (success) {
+            System.out.println("Phase 4");
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:topic");
+            System.out.println("Phase 5");
         }
     }
 
@@ -158,8 +179,18 @@ public class TopicEditBacker {
         return topic;
     }
 
+    /**
+     * @return The sanitized Description.
+     */
     public String getSanitizedDescription() {
         return sanitizedDescription;
+    }
+
+    /**
+     * @param sanitizedDescription The sanitizedDescription to set.
+     */
+    public void setSanitizedDescription(String sanitizedDescription) {
+        this.sanitizedDescription = sanitizedDescription;
     }
 
     /**

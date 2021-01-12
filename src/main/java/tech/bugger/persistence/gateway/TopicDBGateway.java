@@ -137,8 +137,8 @@ public class TopicDBGateway implements TopicGateway {
             if (rs.next()) {
                 topic = getTopicFromResultSet(rs);
             } else {
-                log.error("No user with id " + id + " could be found in the database");
-                throw new NotFoundException("No user with id " + id + " could be found in the database.");
+                log.error("No topic with id " + id + " could be found in the database");
+                throw new NotFoundException("No topic with id " + id + " could be found in the database.");
             }
         } catch (SQLException e) {
             log.error("Error while searching for user with id " + id, e);
@@ -202,6 +202,7 @@ public class TopicDBGateway implements TopicGateway {
             statement.executeUpdate();
             ResultSet generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next()) {
+                log.info("Gateway: setting ID");
                 topic.setId(generatedKeys.getInt("id"));
             } else {
                 log.error("Error while retrieving new topic ID.");
@@ -219,10 +220,11 @@ public class TopicDBGateway implements TopicGateway {
     @Override
     public void updateTopic(final Topic topic) throws NotFoundException {
         try (PreparedStatement stmt = conn.prepareStatement(
-                "UPDATE report "
+                "UPDATE topic "
                         + "SET title = ?, description = ?"
                         + "WHERE id = ?;"
         )) {
+            System.out.println("UPDATE: "  + topic.getTitle() + ", " + topic.getDescription() + ", " + topic.getId());
             int rowsAffected = new StatementParametrizer(stmt)
                     .string(topic.getTitle())
                     .string(topic.getDescription())

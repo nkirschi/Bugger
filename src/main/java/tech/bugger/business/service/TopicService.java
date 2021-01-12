@@ -127,7 +127,7 @@ public class TopicService {
             transaction.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The topic with id " + topicID + " could not be found.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            throw new tech.bugger.business.exception.NotFoundException(messagesBundle.getString("not_found_error"), e);
         } catch (TransactionException e) {
             log.error("Error while loading the topic with id " + topicID, e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
@@ -151,8 +151,8 @@ public class TopicService {
         } catch (TransactionException | NotFoundException e) {
             log.error("Error while creating a new Topic.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
-            return false;
         }
+        return false;
     }
 
     /**

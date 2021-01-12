@@ -173,6 +173,7 @@ public class TopicBacker implements Serializable {
      */
     @PostConstruct
     public void init() {
+        log.info("starting TopicBacker init...");
         ext = fctx.getExternalContext();
         if ((!ext.getRequestParameterMap().containsKey("id"))) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
@@ -183,7 +184,6 @@ public class TopicBacker implements Serializable {
             log.info("---------> t = " + ext.getRequestParameterMap().get("id"));
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
-
         topic = topicService.getTopicByID(topicID);
         if (topic == null) {
             try {

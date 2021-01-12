@@ -21,8 +21,8 @@
                     <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
                     <h:panelGroup class="row" layout="block" rendered="#{userSession.user.administrator}">
                         <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button" value="#{labels.delete_topic}"/>
-                        <h:link id="l-edit" outcome="/view/restr/topic-edit.xhtml" value="#{labels.edit_topic}" styleClass="button">
-                            <ui:param name="id" value="#{topicBacker.topicID}"/>
+                        <h:link id="l-edit" outcome="pretty:topic-edit" value="#{labels.edit_topic}" styleClass="button">
+                            <f:param name="id" value="#{topicBacker.topicID}"/>
                         </h:link>
                     </h:panelGroup>
                     <!-- statistik link -->

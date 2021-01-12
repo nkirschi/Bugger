@@ -6,7 +6,7 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:f="http://xmlns.jcp.org/jsf/core">
 <ui:composition template="../../WEB-INF/template/main.xhtml">
-    <ui:param name="title" value="#{labels.topic_edit_title}#{topicEditBacker.topic.title}"/>
+    <ui:param name="title" value="#{labels.topic_edit_title}.#{topicEditBacker.topic.title}"/>
 
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
@@ -24,7 +24,7 @@
                 <h:panelGroup/>
                 <h:message for="it-description"/>
             </h:panelGrid>
-            <h:commandButton value="#{labels.topic_edit_submit}" action="#{topicEditBacker.saveChanges}"/>
+            <h:commandButton value="#{labels.topic_edit_submit}" action="#{topicEditBacker.saveChanges}" styleClass="button"/>
         </h:form>
     </ui:define>
 </ui:composition>
