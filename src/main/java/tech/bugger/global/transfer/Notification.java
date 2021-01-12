@@ -3,11 +3,13 @@ package tech.bugger.global.transfer;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 /**
  * DTO representing a notification.
  */
 public class Notification implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 3155085031027042714L;
 
@@ -41,20 +43,58 @@ public class Notification implements Serializable {
         EDITED_POST
     }
 
-    private int id;
+    /**
+     * The notification ID.
+     */
+    private Integer id;
+
+    /**
+     * The user responsible for the action causing this notification.
+     */
     private User actuator;
+
+    /**
+     * The user receiving this notification.
+     */
     private User recipient;
+
+    /**
+     * The type of this notification.
+     */
     private Type type;
+
+    /**
+     * The date of this notification.
+     */
     private ZonedDateTime date;
+
+    /**
+     * Whether this notification was read.
+     */
     private boolean read;
+
+    /**
+     * Whether this notification was sent.
+     */
     private boolean sent;
 
+    /**
+     * The associated topic.
+     */
     private Topic topic;
+
+    /**
+     * The associated report.
+     */
     private Report report;
+
+    /**
+     * The associated post.
+     */
     private Post post;
 
     /**
-     * Constructs a new notification from the speicified parameters.
+     * Constructs a new notification from the specified parameters.
      *
      * @param id        The notification ID.
      * @param actuator  The notification actuator.
@@ -67,8 +107,9 @@ public class Notification implements Serializable {
      * @param report    The associated report.
      * @param post      The associated post.
      */
-    public Notification(int id, User actuator, User recipient, Type type, ZonedDateTime date, boolean read,
-                        boolean sent, Topic topic, Report report, Post post) {
+    public Notification(final Integer id, final User actuator, final User recipient, final Type type,
+                        final ZonedDateTime date, final boolean read, final boolean sent, final Topic topic,
+                        final Report report, final Post post) {
         this.id = id;
         this.actuator = actuator;
         this.recipient = recipient;
@@ -86,7 +127,7 @@ public class Notification implements Serializable {
      *
      * @return The notification ID.
      */
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -95,7 +136,7 @@ public class Notification implements Serializable {
      *
      * @param id The notification ID to be set.
      */
-    public void setId(int id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
@@ -114,7 +155,7 @@ public class Notification implements Serializable {
      *
      * @param actuator The notification actuator to be set.
      */
-    public void setActuator(User actuator) {
+    public void setActuator(final User actuator) {
         this.actuator = actuator;
     }
 
@@ -132,7 +173,7 @@ public class Notification implements Serializable {
      *
      * @param recipient The notification recipient to be set.
      */
-    public void setRecipient(User recipient) {
+    public void setRecipient(final User recipient) {
         this.recipient = recipient;
     }
 
@@ -150,7 +191,7 @@ public class Notification implements Serializable {
      *
      * @param type The notification type to be set.
      */
-    public void setType(Type type) {
+    public void setType(final Type type) {
         this.type = type;
     }
 
@@ -168,7 +209,7 @@ public class Notification implements Serializable {
      *
      * @param date The notification creation date to be set.
      */
-    public void setDate(ZonedDateTime date) {
+    public void setDate(final ZonedDateTime date) {
         this.date = date;
     }
 
@@ -186,7 +227,7 @@ public class Notification implements Serializable {
      *
      * @param read Whether this notification is marked as read.
      */
-    public void setRead(boolean read) {
+    public void setRead(final boolean read) {
         this.read = read;
     }
 
@@ -204,7 +245,7 @@ public class Notification implements Serializable {
      *
      * @param sent Whether this notification is marked as sent.
      */
-    public void setSent(boolean sent) {
+    public void setSent(final boolean sent) {
         this.sent = sent;
     }
 
@@ -222,7 +263,7 @@ public class Notification implements Serializable {
      *
      * @param topic The associated topic.
      */
-    public void setTopic(Topic topic) {
+    public void setTopic(final Topic topic) {
         this.topic = topic;
     }
 
@@ -240,7 +281,7 @@ public class Notification implements Serializable {
      *
      * @param report The associated report.
      */
-    public void setReport(Report report) {
+    public void setReport(final Report report) {
         this.report = report;
     }
 
@@ -258,7 +299,7 @@ public class Notification implements Serializable {
      *
      * @param post The associated post.
      */
-    public void setPost(Post post) {
+    public void setPost(final Post post) {
         this.post = post;
     }
 
@@ -269,9 +310,15 @@ public class Notification implements Serializable {
      * @return {@code true} iff {@code other} is a semantically equivalent notification.
      */
     @Override
-    public boolean equals(Object other) {
-        // TODO Auto-generated method stub
-        return super.equals(other);
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Notification)) {
+            return false;
+        }
+        Notification notification = (Notification) other;
+        return Objects.equals(this.id, notification.id);
     }
 
     /**
@@ -282,8 +329,7 @@ public class Notification implements Serializable {
      */
     @Override
     public int hashCode() {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        return Objects.hash(id);
     }
 
     /**
@@ -293,8 +339,9 @@ public class Notification implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "Notification{ID = " + id + ", actuator = " + actuator + ", recipient = " + recipient + ", type = "
+                + type + ", date = " + date + ", read = " + read + ", sent = " + sent + ", topic = " + topic
+                + ", report = " + report + ", post = " + post + "}";
     }
 
 }
