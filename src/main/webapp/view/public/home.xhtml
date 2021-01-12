@@ -6,7 +6,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:b="http://tech.bugger/tags"
+      xmlns:b="http://tech.bugger/tags" xmlns:f="http://java.sun.com/jsf/core"
 >
 <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
 <ui:composition template="../../WEB-INF/template/main.xhtml">
@@ -16,7 +16,11 @@
         <h:link id="l-create" value="#{labels.topic_edit_add}" outcome="pretty:topic-edit"
                 rendered="#{userSession.user.administrator}" styleClass="button"/>
         <b:pagitable paginator="#{homeBacker.topics}">
-            <b:column title="Title" paginator="#{homeBacker.topics}" key="title"><h:outputText value="#{var.title}"/></b:column>
+            <b:column title="Title" paginator="#{homeBacker.topics}" key="title">
+                <h:link value="#{var.title}" outcome="pretty:topic">
+                    <f:param name="id" value="#{var.id}"/>
+                </h:link>
+            </b:column>
             <b:column title="Description" paginator="#{homeBacker.topics}" key="description"><h:outputText value="#{var.description}" escape="false"/></b:column>
             <b:column title="Last activity" paginator="#{homeBacker.topics}" key="last_activity"><h:outputText value="#{var.lastActivity}"/></b:column>
         </b:pagitable>

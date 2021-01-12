@@ -63,11 +63,6 @@ public class TopicEditBacker implements Serializable {
     private FacesContext fctx;
 
     /**
-     * The current external context.
-     */
-    private ExternalContext ext;
-
-    /**
      * The current user session.
      */
     private UserSession session;
@@ -91,7 +86,7 @@ public class TopicEditBacker implements Serializable {
     @PostConstruct
     public void init() {
         log.info("starting TopicEditBacker init...");
-        ext = fctx.getExternalContext();
+        ExternalContext ext = fctx.getExternalContext();
         User user = session.getUser();
         if (!user.isAdministrator()) {
             redirectTo404Page();
@@ -128,7 +123,7 @@ public class TopicEditBacker implements Serializable {
      *
      * @return The page to navigate to.
      */
-    public String saveChanges() {
+    public String saveChanges() throws IOException {
         boolean success = false;
         topic.setDescription(sanitizedDescription);
         if (create) {
@@ -138,10 +133,12 @@ public class TopicEditBacker implements Serializable {
         }
         if (success) {
             log.debug(topic.toString());
-            return "/faces/view/public/topic.xhtml?id=" + topic.getId();
+            ExternalContext ext = fctx.getExternalContext();
+            ext.redirect(ext.getRequestContextPath() + "/faces/view/public/topic.xhtml?id=" + topic.getId());
         } else {
-            return "error";
+            redirectTo404Page();
         }
+        return"";
     }
 
     /**
