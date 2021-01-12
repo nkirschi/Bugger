@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -234,8 +235,8 @@ public class UserDBGateway implements UserGateway {
         }
 
         List<User> moderators = new ArrayList<>(Math.max(0, selection.getTotalSize()));
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT u.* FROM \"user\" AS u, topic_moderation AS t WHERE "
-                + "t.topic = ? AND u.id = t.moderator LIMIT ? OFFSET ?;")) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT u.* FROM \"user\" AS u, topic_moderation AS t "
+                + "WHERE t.topic = ? AND u.id = t.moderator LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(topic.getId())
                     .integer(selection.getPageSize().getSize())
@@ -245,7 +246,7 @@ public class UserDBGateway implements UserGateway {
                 moderators.add(getUserFromResultSet(rs));
             }
             if (moderators.size() == 0) {
-                log.error("The topic with id " + topic.getId() + " has no moderators.");
+                log.warning("The topic with id " + topic.getId() + " has no moderators.");
                 throw new NotFoundException("The topic with id " + topic.getId() + " has no moderators.");
             }
         } catch (SQLException e) {

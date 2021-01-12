@@ -18,9 +18,8 @@ public interface UserGateway {
      * @param user  The user whose moderation status to check.
      * @param topic The topic whose moderators to search.
      * @return Whether {@code user} is a moderator of {@code topic}.
-     * @throws NotFoundException The user or the topic could not be found.
      */
-    boolean isModerator(User user, Topic topic) throws NotFoundException;
+    boolean isModerator(User user, Topic topic);
 
     /**
      * Looks up if a user is banned from a given topic.

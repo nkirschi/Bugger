@@ -74,7 +74,7 @@
                 </b:pagitable>
             </h:panelGroup>
         </h:panelGroup>
-        <h:form id="f-delTopic" rendered="#{topicBacker.displayDeleteDialog}">
+        <h:form id="f-delTopic" rendered="#{topicBacker.displayDialog == 'DELETE'}">
             <h:panelGroup class="row" layout="block" styleClass="align-center">
                 <h:panelGroup class="col-sm-4" layout="block"/>
                 <h:panelGroup class="col-sm-4" layout="block">
@@ -83,7 +83,7 @@
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block">
                         <h:commandButton id="cb-delTopic" action="#{topicBacker.delete}" styleClass="button" value="#{labels.delete}" immediate="true"/>
-                        <h:commandButton id="cb-abortDelTopic" action="#{topicBacker.closeDeleteDialog}" styleClass="button" value="#{labels.cancel}" immediate="true"/>
+                        <h:commandButton id="cb-abortDelTopic" action="#{topicBacker.closeDialog}" styleClass="button" value="#{labels.cancel}" immediate="true"/>
                     </h:panelGroup>
                 </h:panelGroup>
             <h:panelGroup class="col-sm-4" layout="block"/>

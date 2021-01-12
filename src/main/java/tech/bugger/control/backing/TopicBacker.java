@@ -40,6 +40,41 @@ public class TopicBacker implements Serializable {
     private static final Log log = Log.forClass(ProfileBacker.class);
 
     /**
+     * The type of popup dialog to be rendered on the topic page.
+     */
+    enum DialogType {
+        /**
+         * No dialogs are to be rendered.
+         */
+        NONE,
+
+        /**
+         * The dialog top delete the topic is to be rendered.
+         */
+        DELETE,
+
+        /**
+         * The dialog to promote a user to a moderator is to be rendered.
+         */
+        MOD,
+
+        /**
+         * The dialog to demote a moderator is to be rendered.
+         */
+        UNMOD,
+
+        /**
+         * The dialog to ban a user from the topic is to be rendered.
+         */
+        BAN,
+
+        /**
+         * The dialog to unban a user is to be rendered.
+         */
+        UNBAN
+    }
+
+    /**
      * ID of the currently displayed topic.
      */
     private int topicID;
@@ -95,34 +130,14 @@ public class TopicBacker implements Serializable {
     private boolean closedReportShown; // default: false
 
     /**
-     * Weather or not the Ban dialog should be shown.
-     */
-    private boolean displayBanDialog;
-
-    /**
-     * Weather or not the un-ban dialog should be shown.
-     */
-    private boolean displayUnbanDialog;
-
-    /**
-     * Weather or not the make mod dialog should be shown.
-     */
-    private boolean displayModDialog;
-
-    /**
-     * Weather or not the un-make mod dialog should be shown.
-     */
-    private boolean displayUnmodDialog;
-
-    /**
-     * Weather or not the delete topic dialog should be shown.
-     */
-    private boolean displayDeleteDialog;
-
-    /**
      * A senitized form of the description, ready for display.
      */
     private String sanitizedDescription;
+
+    /**
+     * The type of popup dialog to be rendered.
+     */
+    private DialogType displayDialog;
 
     /**
      * The current user session.
@@ -195,10 +210,23 @@ public class TopicBacker implements Serializable {
                 throw new InternalError("Error while redirecting.", e);
             }
         }
-        displayDeleteDialog = false;
+        displayDialog = DialogType.NONE;
         openReportShown = true;
         closedReportShown = false;
         sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
+
+        moderators = new Paginator<>("username", Selection.PageSize.NORMAL) {
+            @Override
+            protected Iterable<User> fetch() {
+                return topicService.getSelectedModerators(topic, getSelection());
+            }
+
+            @Override
+            protected int totalSize() {
+                return topicService.getNumberOfModerators(topic);
+            }
+        };
+
         reports = new Paginator<>("title", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Report> fetch() {
@@ -241,15 +269,6 @@ public class TopicBacker implements Serializable {
     }
 
     /**
-     * Opens the ban dialog.
-     *
-     * @return {@code null} to reload the page.
-     */
-    public String openBanDialog() {
-        return null;
-    }
-
-    /**
      * Apply the current filter to the report pagination.
      */
     public void applyFilters() {
@@ -257,11 +276,12 @@ public class TopicBacker implements Serializable {
     }
 
     /**
-     * Closes the ban dialog.
+     * Opens the ban dialog.
      *
      * @return {@code null} to reload the page.
      */
-    public String closeBanDialog() {
+    public String openBanDialog() {
+        displayDialog = DialogType.BAN;
         return null;
     }
 
@@ -271,15 +291,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openUnbanDialog() {
-        return null;
-    }
-
-    /**
-     * Closes the unban dialog.
-     *
-     * @return {@code null} to reload the page.
-     */
-    public String closeUnbanDialog() {
+        displayDialog = DialogType.UNBAN;
         return null;
     }
 
@@ -289,15 +301,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openModDialog() {
-        return null;
-    }
-
-    /**
-     * Closes the dialog for promoting a user to a moderator of the topic.
-     *
-     * @return {@code null} to reload the page.
-     */
-    public String closeModDialog() {
+        displayDialog = DialogType.MOD;
         return null;
     }
 
@@ -307,15 +311,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openUnmodDialog() {
-        return null;
-    }
-
-    /**
-     * Closes the dialog for demoting a moderator of the topic.
-     *
-     * @return {@code null} to reload the page.
-     */
-    public String closeUnmodDialog() {
+        displayDialog = DialogType.UNMOD;
         return null;
     }
 
@@ -325,17 +321,17 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openDeleteDialog() {
-        displayDeleteDialog = true;
+        displayDialog = DialogType.NONE;
         return null;
     }
 
     /**
-     * Opens the delete topic dialog.
+     * Closes any open dialog.
      *
      * @return {@code null} to reload the page.
      */
-    public String closeDeleteDialog() {
-        displayDeleteDialog = false;
+    public String closeDialog() {
+        displayDialog = DialogType.NONE;
         return null;
     }
 
@@ -345,7 +341,11 @@ public class TopicBacker implements Serializable {
      * @return {@code true} if the user is a moderator, {@code false} otherwise.
      */
     public boolean isModerator() {
-        return false;
+        User user = session.getUser();
+        if (user == null) {
+            return false;
+        }
+        return user.isAdministrator() || topicService.isModerator(user, topic);
     }
 
     /**
@@ -391,15 +391,25 @@ public class TopicBacker implements Serializable {
      * possible if they already are a moderator.
      */
     public void makeModerator() {
+        if (!isModerator()) {
+            log.error("A user was able to to use the promote or demote moderator functionality even though "
+                    + "they had no moderator status!");
+            return;
+        }
+        topicService.makeModerator(userToBeModded, topic);
     }
 
     /**
      * Removes the moderator status of the user specified in {@code unmodUser}. This is not possible if they are an
      * administrator.
-     *
-     * @param user The user to remove as moderator.
      */
-    public void removeModerator(final User user) {
+    public void removeModerator() {
+        if (!isModerator()) {
+            log.error("A user was able to to use the promote or demote moderator functionality even though "
+                    + "they had no moderator status!");
+            return;
+        }
+        topicService.removeModerator(userToBeModded, topic);
     }
 
     /**
@@ -560,41 +570,6 @@ public class TopicBacker implements Serializable {
     }
 
     /**
-     * @return The displayBanDialog.
-     */
-    public boolean isDisplayBanDialog() {
-        return displayBanDialog;
-    }
-
-    /**
-     * @return The displayUnbanDialog.
-     */
-    public boolean isDisplayUnbanDialog() {
-        return displayUnbanDialog;
-    }
-
-    /**
-     * @return The displayModDialog.
-     */
-    public boolean isDisplayModDialog() {
-        return displayModDialog;
-    }
-
-    /**
-     * @return The displayUnmodDialog.
-     */
-    public boolean isDisplayUnmodDialog() {
-        return displayUnmodDialog;
-    }
-
-    /**
-     * @return The displayDeleteDialog.
-     */
-    public boolean isDisplayDeleteDialog() {
-        return displayDeleteDialog;
-    }
-
-    /**
      * @return The userBanSuggestions.
      */
     public List<User> getUserBanSuggestions() {
@@ -620,6 +595,20 @@ public class TopicBacker implements Serializable {
      */
     public void setUserModSuggestions(final List<User> userModSuggestions) {
         this.userModSuggestions = userModSuggestions;
+    }
+
+    /**
+     * @return The DialogType.
+     */
+    public DialogType getDisplayDialog() {
+        return displayDialog;
+    }
+
+    /**
+     * @param displayDialog The DialogType to set.
+     */
+    public void setDisplayDialog(final DialogType displayDialog) {
+        this.displayDialog = displayDialog;
     }
 
 }

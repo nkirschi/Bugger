@@ -9,6 +9,7 @@ import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
@@ -350,7 +351,13 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user is privileged and {@code false} otherwise.
      */
     public boolean isPrivileged() {
-        return reportService.isPrivileged(session.getUser(), report);
+        User user = session.getUser();
+        if (user == null || report == null) {
+            return false;
+        }
+        Topic topic = new Topic(report.getTopic(), "", "");
+        return user.isAdministrator() || topicService.isModerator(user, topic)
+                || user.equals(report.getAuthorship().getCreator());
     }
 
     /**

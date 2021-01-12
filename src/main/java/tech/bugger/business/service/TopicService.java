@@ -9,6 +9,7 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
@@ -87,17 +88,53 @@ public class TopicService {
      * @param topic    The topic which the user is to be made a moderator of.
      */
     public void makeModerator(final String username, final Topic topic) {
-
+        try (Transaction tx = transactionManager.begin()) {
+            UserGateway gateway = tx.newUserGateway();
+            User user = gateway.getUserByUsername(username);
+            if (gateway.isModerator(user, topic)) {
+                log.debug("The user with id " + user.getId() + " is already a moderator of the topic with id "
+                        + topic.getId());
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("is_moderator"), Feedback.Type.INFO));
+            } else {
+                tx.newTopicGateway().promoteModerator(topic, user);
+            }
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("The user with the username " + username + " or the topic with id " + topic.getId()
+                    + " could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while promoting the user with the username " + username + " to a moderator for the "
+                    + "topic with id " + topic.getId(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
      * Removes the moderator status of a moderator of a topic. Cannot be applied to administrators.
      *
-     * @param user  The user who is about to lose moderator privileges.
+     * @param username  The username of the user who is about to lose moderator privileges.
      * @param topic The topic which the user is a moderator of.
      */
-    public void removeModerator(final User user, final Topic topic) {
-
+    public void removeModerator(final String username, final Topic topic) {
+        try (Transaction tx = transactionManager.begin()) {
+            User user = tx.newUserGateway().getUserByUsername(username);
+            try {
+                tx.newTopicGateway().demoteModerator(topic, user);
+            } catch (NotFoundException e) {
+                log.warning("No moderator with the username " + username + " could be found for the topic with id "
+                        + topic.getId(), e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("no_mod_found"), Feedback.Type.INFO));
+            }
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("The user with the username " + username + " could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while promoting the user with the username " + username + " to a moderator for the "
+                    + "topic with id " + topic.getId(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -235,7 +272,17 @@ public class TopicService {
      * @return A list of users containing the selected results.
      */
     public List<User> getSelectedModerators(final Topic topic, final Selection selection) {
-        return null;
+        List<User> users = null;
+        try (Transaction tx = transactionManager.begin()) {
+            users = tx.newUserGateway().getSelectedModerators(topic, selection);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.warning("The topic with id " + topic.getId() + " has no moderators.", e);
+        } catch (TransactionException e) {
+            log.error("Error while loading the selected moderators for the topic with id " + topic.getId(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return users;
     }
 
     /**
@@ -279,7 +326,17 @@ public class TopicService {
      * @return The number of moderators.
      */
     public int getNumberOfModerators(final Topic topic) {
-        return 0;
+        int numberMods = 0;
+        try (Transaction transaction = transactionManager.begin()) {
+            numberMods = transaction.newTopicGateway().countModerators(topic);
+            transaction.commit();
+        } catch (NotFoundException e) {
+            log.warning("No moderators could be found for the topic with id " + topic.getId(), e);
+        } catch (TransactionException e) {
+            log.error("Error while counting the number of moderators for the topic with id " + topic.getId(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return numberMods;
     }
 
     /**
@@ -337,7 +394,16 @@ public class TopicService {
      * @return {@code true} if the user is a moderator, {@code false} otherwise.
      */
     public boolean isModerator(final User user, final Topic topic) {
-        return false;
+        boolean isMod = false;
+        try (Transaction tx = transactionManager.begin()) {
+            isMod = tx.newUserGateway().isModerator(user, topic);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while checking the moderator status of the user with id " + user.getId() + " for the "
+                    + "topic with id " + topic.getId(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return isMod;
     }
 
     /**

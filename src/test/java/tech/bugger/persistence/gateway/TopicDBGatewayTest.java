@@ -25,10 +25,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
@@ -330,6 +327,19 @@ class TopicDBGatewayTest {
     }
 
     @Test
+    public void testPromoteModeratorSQLException() throws SQLException {
+        topic.setId(2);
+        user.setId(3);
+        Connection connectionSpy = spy(connection);
+        SQLException mockException = mock(SQLException.class);
+        doThrow(mockException).when(connectionSpy).prepareStatement(any());
+        when(mockException.getSQLState()).thenReturn("");
+        assertThrows(StoreException.class,
+                () -> new TopicDBGateway(connectionSpy).promoteModerator(topic, user)
+        );
+    }
+
+    @Test
     public void testPromoteModeratorNoTopic() {
         userGateway.createUser(user);
         topic.setId(1);
@@ -433,6 +443,20 @@ class TopicDBGatewayTest {
     public void testCountModeratorsTopicIdNull() {
         assertThrows(IllegalArgumentException.class,
                 () -> topicGateway.countModerators(topic)
+        );
+    }
+
+    @Test
+    public void testCountModeratorsNoModerators() throws SQLException {
+        topic.setId(1);
+        ResultSet resultSetMock = mock(ResultSet.class);
+        PreparedStatement stmtMock = mock(PreparedStatement.class);
+        Connection connectionSpy = spy(connection);
+        doReturn(false).when(resultSetMock).next();
+        doReturn(resultSetMock).when(stmtMock).executeQuery();
+        doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
+        assertThrows(NotFoundException.class,
+                () -> new TopicDBGateway(connectionSpy).countModerators(topic)
         );
     }
 

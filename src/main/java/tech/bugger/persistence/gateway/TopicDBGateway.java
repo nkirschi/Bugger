@@ -133,8 +133,8 @@ public class TopicDBGateway implements TopicGateway {
             }
 
             if (moderators == 0) {
-                log.error("The topic with id " + topic.getId() + " could not the found or it has no moderators.");
-                throw new NotFoundException("The topic with id " + topic.getId() + " could not the found or it has no "
+                log.warning("The topic with id " + topic.getId() + " could not the found or has no moderators.");
+                throw new NotFoundException("The topic with id " + topic.getId() + " could not the found or has no "
                         + "moderators.");
             }
         } catch (SQLException e) {
@@ -330,7 +330,7 @@ public class TopicDBGateway implements TopicGateway {
                     .toStatement().executeUpdate();
 
             if (modified == 0) {
-                log.error("No moderator with the user id " + user.getId() + " could be found for the topic with "
+                log.warning("No moderator with the user id " + user.getId() + " could be found for the topic with "
                         + "id " + topic.getId());
                 throw new NotFoundException("No moderator with the user id " + user.getId() + " could be found for the "
                         + "topic with id " + topic.getId());
