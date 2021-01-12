@@ -123,6 +123,13 @@ public class Notification implements Serializable {
     }
 
     /**
+     * Constructs an empty notification.
+     */
+    public Notification() {
+        this(null, null, null, null, null, false, false, null, null, null);
+    }
+
+    /**
      * Returns the ID of this notification.
      *
      * @return The notification ID.
