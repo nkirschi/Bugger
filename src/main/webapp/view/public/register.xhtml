@@ -89,9 +89,10 @@
                             </h:panelGroup>
 
                             <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
-                                <h:commandButton value="#{labels['register.submit']}" styleClass="btn btn-primary"
-                                                 action="#{registerBacker.register}" type="submit"/>
-                                <h:link value="#{labels['login.title']}" outcome="pretty:login"
+                                <h:commandButton id="cb-register" value="#{labels['register.submit']}"
+                                                 styleClass="btn btn-primary" type="submit"
+                                                 action="#{registerBacker.register}"/>
+                                <h:link id="l-login" value="#{labels['login.title']}" outcome="pretty:login"
                                         styleClass="btn btn-secondary"/>
                             </h:panelGroup>
                         </h:panelGroup>

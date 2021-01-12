@@ -15,6 +15,10 @@
         <query-param name="token">#{token}</query-param>
         <view-id value="/faces/view/public/password-set.xhtml"/>
     </url-mapping>
+    <url-mapping id="password-forgot">
+        <pattern value="/password-forgot"/>
+        <view-id value="/faces/view/public/password-forgot.xhtml"/>
+    </url-mapping>
     <url-mapping id="login">
         <pattern value="/login"/>
         <query-param name="url">#{loginBacker.redirectURL}</query-param>
