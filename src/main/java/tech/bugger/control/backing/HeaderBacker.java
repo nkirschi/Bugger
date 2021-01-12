@@ -2,6 +2,7 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
@@ -21,6 +22,11 @@ import java.time.LocalDate;
 @Named
 public class HeaderBacker implements Serializable {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
+    private static final Log log = Log.forClass(HeaderBacker.class);
+
     @Serial
     private static final long serialVersionUID = 7342292657804667855L;
 
@@ -30,7 +36,7 @@ public class HeaderBacker implements Serializable {
     private User user;
 
     /**
-     * The current user session..
+     * The current user session.
      */
     private final UserSession session;
 
@@ -63,6 +69,18 @@ public class HeaderBacker implements Serializable {
     void init() {
         user = session.getUser();
         displayMenu = Boolean.parseBoolean(fctx.getExternalContext().getRequestParameterMap().get("d"));
+    }
+
+    /**
+     * Logs out the user and redirects to the homepage.
+     *
+     * @return {@code pretty:home}
+     */
+    public String logout() {
+        log.debug("Logout called for user " + session.getUser() + ".");
+        session.setUser(null);
+        session.invalidateSession();
+        return "pretty:home";
     }
 
     /**
