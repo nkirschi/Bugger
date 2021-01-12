@@ -20,7 +20,7 @@ public interface SubscriptionGateway {
      * @throws NotFoundException  The user or the topic could not be found.
      * @throws DuplicateException The user was already subscribed to the topic.
      */
-    public void subscribe(Topic topic, User subscriber) throws NotFoundException, DuplicateException;
+    void subscribe(Topic topic, User subscriber) throws NotFoundException, DuplicateException;
 
     /**
      * Adds a subscriber to a report.
@@ -30,7 +30,7 @@ public interface SubscriptionGateway {
      * @throws NotFoundException  The user or the report could not be found.
      * @throws DuplicateException The user was already subscribed to the report.
      */
-    public void subscribe(Report report, User subscriber) throws NotFoundException, DuplicateException;
+    void subscribe(Report report, User subscriber) throws NotFoundException, DuplicateException;
 
     /**
      * Adds a subscriber to another user. Does nothing if the user is already subscribed to the report.
@@ -42,7 +42,7 @@ public interface SubscriptionGateway {
      * @throws DuplicateException     The user was already subscribed to the user.
      * @throws SelfReferenceException The two users are the same.
      */
-    public void subscribe(User subscribeTo, User subscriber) throws NotFoundException, DuplicateException,
+    void subscribe(User subscribeTo, User subscriber) throws NotFoundException, DuplicateException,
             SelfReferenceException;
 
     /**
@@ -52,7 +52,7 @@ public interface SubscriptionGateway {
      * @param subscriber The user to unsubscribe from the topic.
      * @throws NotFoundException The user or the topic could not be found or the user was not subscribed to the topic.
      */
-    public void unsubscribe(Topic topic, User subscriber) throws NotFoundException;
+    void unsubscribe(Topic topic, User subscriber) throws NotFoundException;
 
     /**
      * Removes the subscription of a user to a report.
@@ -62,7 +62,7 @@ public interface SubscriptionGateway {
      * @throws NotFoundException The user or the report could not be found or the user was not subscribed to the
      *                           report.
      */
-    public void unsubscribe(Report report, User subscriber) throws NotFoundException;
+    void unsubscribe(Report report, User subscriber) throws NotFoundException;
 
     /**
      * Removes the subscription of a user to another user.
@@ -72,7 +72,7 @@ public interface SubscriptionGateway {
      * @throws NotFoundException One of the users could not be found or {@code subscriber} was not subscribed to {@code
      *                           subscribedTo}.
      */
-    public void unsubscribe(User subscribedTo, User subscriber) throws NotFoundException;
+    void unsubscribe(User subscribedTo, User subscriber) throws NotFoundException;
 
     /**
      * Removes all subscriptions of a user to reports.
@@ -80,7 +80,7 @@ public interface SubscriptionGateway {
      * @param user The user to unsubscribe from all reports.
      * @throws NotFoundException The user could not be found.
      */
-    public void unsubscribeAllReports(User user) throws NotFoundException;
+    void unsubscribeAllReports(User user) throws NotFoundException;
 
     /**
      * Removes all subscriptions of a user to topics.
@@ -88,7 +88,7 @@ public interface SubscriptionGateway {
      * @param user The user to unsubscribe from all topics.
      * @throws NotFoundException The user could not be found.
      */
-    public void unsubscribeAllTopics(User user) throws NotFoundException;
+    void unsubscribeAllTopics(User user) throws NotFoundException;
 
     /**
      * Removes all subscriptions of a user to other users.
@@ -96,7 +96,7 @@ public interface SubscriptionGateway {
      * @param user The user to unsubscribe from all users.
      * @throws NotFoundException The user could not be found.
      */
-    public void unsubscribeAllUsers(User user) throws NotFoundException;
+    void unsubscribeAllUsers(User user) throws NotFoundException;
 
     /**
      * Checks whether a user is subscribed to a topic.
@@ -106,7 +106,7 @@ public interface SubscriptionGateway {
      * @return Whether {@code user} is subscribed to {@code topic}.
      * @throws NotFoundException The user or the topic could not be found.
      */
-    public boolean isSubscribed(User user, Topic topic) throws NotFoundException;
+    boolean isSubscribed(User user, Topic topic) throws NotFoundException;
 
     /**
      * Checks whether a user is subscribed to a report.
@@ -116,7 +116,7 @@ public interface SubscriptionGateway {
      * @return Whether {@code user} is subscribed to {@code report}.
      * @throws NotFoundException The user or the report could not be found.
      */
-    public boolean isSubscribed(User user, Report report) throws NotFoundException;
+    boolean isSubscribed(User user, Report report) throws NotFoundException;
 
     /**
      * Checks whether a user is subscribed to another user.
@@ -126,6 +126,6 @@ public interface SubscriptionGateway {
      * @return Whether {@code subscriber} is subscribed to {@code subscribedTo}.
      * @throws NotFoundException One of the users could not be found.
      */
-    public boolean isSubscribed(User subscriber, User subscribedTo) throws NotFoundException;
+    boolean isSubscribed(User subscriber, User subscribedTo) throws NotFoundException;
 
 }

@@ -6,6 +6,7 @@ import java.io.Serial;
  * Exception indicating something is incorrectly referencing itself.
  */
 public class SelfReferenceException extends Exception {
+
     @Serial
     private static final long serialVersionUID = -7793828426342576821L;
 
@@ -14,21 +15,19 @@ public class SelfReferenceException extends Exception {
      */
     public SelfReferenceException() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
      * Constructs a {@link SelfReferenceException} with the specified detail message and cause.
-     *
+     * <p>
      * Note that the detail message associated with {@code cause} is <i>not</i> automatically incorporated in this
      * exception's detail message.
      *
      * @param message The detail message describing this particular exception.
-     * @param cause The cause for this particular exception.
+     * @param cause   The cause for this particular exception.
      */
-    public SelfReferenceException(String message, Throwable cause) {
+    public SelfReferenceException(final String message, final Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -36,9 +35,8 @@ public class SelfReferenceException extends Exception {
      *
      * @param message The detail message describing this particular exception.
      */
-    public SelfReferenceException(String message) {
+    public SelfReferenceException(final String message) {
         super(message);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -47,9 +45,8 @@ public class SelfReferenceException extends Exception {
      *
      * @param cause The cause for this particular exception.
      */
-    public SelfReferenceException(Throwable cause) {
+    public SelfReferenceException(final Throwable cause) {
         super(cause);
-        // TODO Auto-generated constructor stub
     }
 
 }

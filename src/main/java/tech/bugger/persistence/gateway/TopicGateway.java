@@ -154,4 +154,11 @@ public interface TopicGateway {
      */
     void demoteModerator(Topic topic, User user) throws NotFoundException;
 
+    /**
+     * Discovers all topics in the system.
+     *
+     * @return The list of all topic titles.
+     */
+    List<String> discoverTopics();
+
 }

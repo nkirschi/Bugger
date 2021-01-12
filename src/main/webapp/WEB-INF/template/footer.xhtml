@@ -1,18 +1,53 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
-<ui:composition>
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:h="http://xmlns.jcp.org/jsf/html"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:f="http://xmlns.jcp.org/jsf/core">
     <!--@elvariable id="helpKey" type="java.lang.String"-->
-    <h:panelGroup layout="block" id="footer">
-        <h:outputLabel value="#{labels.copyright} ©2021 Bugger" styleClass="footerElement"/>
-        <h:link outcome="/view/public/home" value="#{labels.statistics}" styleClass="footerElement"/>
-        <h:link outcome="/view/public/home" value="#{labels.imprint}" styleClass="footerElement"/>
-        <h:link outcome="/view/public/home" value="#{labels.privacy_policy}" styleClass="footerElement"/>
-        <h:link outcome="/view/public/home" value="#{labels.help}" styleClass="footerElement"/>
-        <!-- Language -->
+    <h:panelGroup layout="block"
+                  id="footer"
+                  styleClass="d-flex justify-content-between align-items-center p-3">
+        <h:panelGroup layout="block"
+                      id="p-copyright">
+            <h:outputText value="©#{headerBacker.currentYear} #{labels.app_name}"/>
+        </h:panelGroup>
+        <h:panelGroup layout="block"
+                      id="p-menu"
+                      styleClass="d-flex justify-content-center">
+            <h:link outcome="pretty:statistics"
+                    value="#{labels.statistics}"
+                    styleClass="mx-3"/>
+            <!-- TODO add links -->
+            <h:link outcome="pretty:home"
+                    value="#{labels.imprint}"
+                    styleClass="mx-3"/>
+            <h:link outcome="pretty:home"
+                    value="#{labels.privacy_policy}"
+                    styleClass="mx-3"/>
+        </h:panelGroup>
+        <h:panelGroup layout="block"
+                      id="p-help"
+                      styleClass="d-flex justify-content-end">
+            <h:form styleClass="d-flex" id="f-language">
+                <h:selectOneMenu value="#{footerBacker.language}"
+                                 id="s-language"
+                                 styleClass="form-control form-select me-2">
+                    <f:selectItems value="#{footerBacker.availableLanguages}"
+                                   var="language"
+                                   itemValue="#{language}"
+                    itemLabel="#{labels['lang.' += language]}"/>
+                </h:selectOneMenu>
+                <h:commandButton value="#{labels.ok}"
+                                 id="cb-language"
+                                 action="#{footerBacker.changeLanguage}"
+                                 styleClass="btn btn-outline-primary me-4"/>
+            </h:form>
+            <h:form id="f-help">
+                <h:commandButton value="#{labels.help}"
+                                 styleClass="btn btn-secondary"
+                                 id="cb-help"
+                                 action="#{footerBacker.toggleHelp}"/>
+            </h:form>
+        </h:panelGroup>
     </h:panelGroup>
 </ui:composition>
-</html>

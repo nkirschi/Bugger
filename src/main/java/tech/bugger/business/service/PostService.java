@@ -5,15 +5,16 @@ import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Post;
+import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.text.MessageFormat;
@@ -41,7 +42,7 @@ public class PostService {
     /**
      * The current application settings.
      */
-    private ApplicationSettings applicationSettings;
+    private final ApplicationSettings applicationSettings;
 
     /**
      * Transaction manager used for creating transactions.
@@ -84,7 +85,7 @@ public class PostService {
      *
      * @param post The post to update.
      */
-    public void updatePost(Post post) {
+    public void updatePost(final Post post) {
     }
 
     /**
@@ -93,18 +94,18 @@ public class PostService {
      * @param name The attachment name to check the validity of.
      * @return Whether the attachment name is valid.
      */
-    private boolean isAttachmentNameValid(String name) {
+    private boolean isAttachmentNameValid(final String name) {
         return Arrays.stream(applicationSettings.getConfiguration().getAllowedFileExtensions().split(","))
-                .anyMatch(suffix -> name.endsWith(suffix));
+                .anyMatch(name::endsWith);
     }
 
     /**
      * Checks whether a list of attachments is allowed for a post according to the current application configuration.
      *
-      * @param attachments The list of attachments to check the validity of.
+     * @param attachments The list of attachments to check the validity of.
      * @return Whether the list of attachments is valid.
      */
-    public boolean isAttachmentListValid(List<Attachment> attachments) {
+    public boolean isAttachmentListValid(final List<Attachment> attachments) {
         int maxAttachments = applicationSettings.getConfiguration().getMaxAttachmentsPerPost();
         if (attachments.size() > maxAttachments) {
             log.info("Trying to create post with too many attachments.");
@@ -139,7 +140,7 @@ public class PostService {
      * @return {@code true} iff creating the post succeeded.
      * @throws TransactionException The transaction could not be committed successfully.
      */
-    boolean createPostWithTransaction(final Post post, final Transaction tx) {
+    boolean createPostWithTransaction(final Post post, final Transaction tx) throws TransactionException {
         boolean valid = isAttachmentListValid(post.getAttachments());
         if (valid) {
             tx.newPostGateway().create(post);
@@ -178,8 +179,27 @@ public class PostService {
      *
      * @param post The post to be deleted.
      */
-    public void deletePost(Post post) {
-
+    public void deletePost(final Post post) {
+        if (post == null) {
+            log.error("Cannot delete post null.");
+            throw new IllegalArgumentException("Post cannot be null.");
+        }
+        Report report = post.getReport().get();
+        try (Transaction tx = transactionManager.begin()) {
+            Post firstPost = tx.newPostGateway().getFirstPost(report);
+            if (post.equals(firstPost)) {
+                tx.newReportGateway().delete(report);
+            } else {
+                tx.newPostGateway().delete(post);
+            }
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Post to be deleted " + post + " not found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when deleting post " + post + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -188,7 +208,7 @@ public class PostService {
      * @param id The ID of the post to be returned.
      * @return The post with the specified ID if it exists, {@code null} if no post with that ID exists.
      */
-    public Post getPostByID(int id) {
+    public Post getPostByID(final int id) {
         return null;
     }
 
@@ -198,7 +218,7 @@ public class PostService {
      * @param post The post in question.
      * @return A list of attachments that may be empty.
      */
-    public List<Attachment> getAttachmentsForPost(Post post) {
+    public List<Attachment> getAttachmentsForPost(final Post post) {
         return null;
     }
 
@@ -207,7 +227,7 @@ public class PostService {
      *
      * @param attachment The attachment to be created.
      */
-    public void createAttachment(Attachment attachment) {
+    public void createAttachment(final Attachment attachment) {
 
     }
 
@@ -216,7 +236,7 @@ public class PostService {
      *
      * @param attachments The list of attachments to be created.
      */
-    public void createMultipleAttachments(List<Attachment> attachments) {
+    public void createMultipleAttachments(final List<Attachment> attachments) {
 
     }
 
@@ -229,8 +249,15 @@ public class PostService {
      * @param post The post in question.
      * @return {@code true} if the user is allowed to modify the post, {@code false} otherwise.
      */
-    public boolean isPrivileged(User user, Post post) {
-        return false;
+    public boolean isPrivileged(final User user, final Post post) {
+        // TODO add moderator check, ban check
+        if (user == null) {
+            return false;
+        } else if (user.isAdministrator()) {
+            return true;
+        } else {
+            return user.equals(post.getAuthorship().getCreator());
+        }
     }
 
 }

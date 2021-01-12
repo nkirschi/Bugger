@@ -6,6 +6,7 @@ import java.io.Serial;
  * Exception indicating something already was there unexpectedly.
  */
 public class DuplicateException extends Exception {
+
     @Serial
     private static final long serialVersionUID = 2481138688747787858L;
 
@@ -14,7 +15,6 @@ public class DuplicateException extends Exception {
      */
     public DuplicateException() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -26,9 +26,8 @@ public class DuplicateException extends Exception {
      * @param message The detail message describing this particular exception.
      * @param cause The cause for this particular exception.
      */
-    public DuplicateException(String message, Throwable cause) {
+    public DuplicateException(final String message, final Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -36,9 +35,8 @@ public class DuplicateException extends Exception {
      *
      * @param message The detail message describing this particular exception.
      */
-    public DuplicateException(String message) {
+    public DuplicateException(final String message) {
         super(message);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -47,9 +45,8 @@ public class DuplicateException extends Exception {
      *
      * @param cause The cause for this particular exception.
      */
-    public DuplicateException(Throwable cause) {
+    public DuplicateException(final Throwable cause) {
         super(cause);
-        // TODO Auto-generated constructor stub
     }
 
 }
