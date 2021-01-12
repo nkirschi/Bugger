@@ -13,9 +13,6 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
@@ -172,14 +169,6 @@ public class TopicBacker implements Serializable {
      */
     @PostConstruct
     public void init() {
-
-        if ((!ext.getRequestParameterMap().containsKey("id"))) {
-            try {
-                ext.redirect("public/home.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
-        log.info("starting TopicBacker init...");
         ext = fctx.getExternalContext();
         if ((!ext.getRequestParameterMap().containsKey("id"))) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
@@ -213,7 +202,7 @@ public class TopicBacker implements Serializable {
                 return topicService.getNumberOfReports(topic, openReportShown, closedReportShown);
             }
         };
-    }}
+    }
 
     /**
      * Returns the relevance of a certain report.

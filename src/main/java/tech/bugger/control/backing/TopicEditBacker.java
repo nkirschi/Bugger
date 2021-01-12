@@ -126,22 +126,19 @@ public class TopicEditBacker {
      *
      * @return The page to navigate to.
      */
-    public void saveChanges() {
+    public String saveChanges() {
+        log.debug("-----> saving Changes now!");
         boolean success = false;
-        System.out.println("Phase 0");
         topic.setDescription(sanitizedDescription);
-        System.out.println("Phase 1");
         if (create) {
             success = topicService.createTopic(topic);
-            System.out.println("Phase 2");
         } else {
             success = topicService.updateTopic(topic);
-            System.out.println("Phase 3");
         }
         if (success) {
-            System.out.println("Phase 4");
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:topic");
-            System.out.println("Phase 5");
+            return "view/public/topic.xhtml?id=" + topic.getId();
+        } else {
+            return "error";
         }
     }
 
