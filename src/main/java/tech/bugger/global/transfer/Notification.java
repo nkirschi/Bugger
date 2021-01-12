@@ -51,12 +51,12 @@ public class Notification implements Serializable {
     /**
      * The user responsible for the action causing this notification.
      */
-    private User actuator;
+    private Integer actuatorID;
 
     /**
      * The user receiving this notification.
      */
-    private User recipient;
+    private Integer recipientID;
 
     /**
      * The type of this notification.
@@ -81,45 +81,45 @@ public class Notification implements Serializable {
     /**
      * The associated topic.
      */
-    private Topic topic;
+    private Integer topicID;
 
     /**
      * The associated report.
      */
-    private Report report;
+    private Integer reportID;
 
     /**
      * The associated post.
      */
-    private Post post;
+    private Integer postID;
 
     /**
      * Constructs a new notification from the specified parameters.
      *
-     * @param id        The notification ID.
-     * @param actuator  The notification actuator.
-     * @param recipient The notification recipient.
-     * @param type      The notification type.
-     * @param date      The notification creation date.
-     * @param read      Whether the notification is marked as read.
-     * @param sent      Whether the notification is marked as send.
-     * @param topic     The associated topic.
-     * @param report    The associated report.
-     * @param post      The associated post.
+     * @param id          The notification ID.
+     * @param actuatorID  The notification actuator.
+     * @param recipientID The notification recipient.
+     * @param type        The notification type.
+     * @param date        The notification creation date.
+     * @param read        Whether the notification is marked as read.
+     * @param sent        Whether the notification is marked as send.
+     * @param topicID     The associated topic.
+     * @param reportID    The associated report.
+     * @param postID      The associated post.
      */
-    public Notification(final Integer id, final User actuator, final User recipient, final Type type,
-                        final ZonedDateTime date, final boolean read, final boolean sent, final Topic topic,
-                        final Report report, final Post post) {
+    public Notification(final Integer id, final Integer actuatorID, final Integer recipientID, final Type type,
+                        final ZonedDateTime date, final boolean read, final boolean sent, final Integer topicID,
+                        final Integer reportID, final Integer postID) {
         this.id = id;
-        this.actuator = actuator;
-        this.recipient = recipient;
+        this.actuatorID = actuatorID;
+        this.recipientID = recipientID;
         this.type = type;
         this.date = date;
         this.read = read;
         this.sent = sent;
-        this.topic = topic;
-        this.report = report;
-        this.post = post;
+        this.topicID = topicID;
+        this.reportID = reportID;
+        this.postID = postID;
     }
 
     /**
@@ -127,6 +127,16 @@ public class Notification implements Serializable {
      */
     public Notification() {
         this(null, null, null, null, null, false, false, null, null, null);
+    }
+
+    /**
+     * Constructs a new notification as deep clone of the given notification.
+     *
+     * @param notification The user to clone.
+     */
+    public Notification(final Notification notification) {
+        this(notification.id, notification.actuatorID, notification.recipientID, notification.type, notification.date,
+                notification.read, notification.sent, notification.topicID, notification.reportID, notification.postID);
     }
 
     /**
@@ -153,17 +163,17 @@ public class Notification implements Serializable {
      *
      * @return The notification actuator.
      */
-    public User getActuator() {
-        return actuator;
+    public Integer getActuatorID() {
+        return actuatorID;
     }
 
     /**
      * Sets the actuator of this notification.
      *
-     * @param actuator The notification actuator to be set.
+     * @param actuatorID The notification actuator to be set.
      */
-    public void setActuator(final User actuator) {
-        this.actuator = actuator;
+    public void setActuatorID(final Integer actuatorID) {
+        this.actuatorID = actuatorID;
     }
 
     /**
@@ -171,17 +181,17 @@ public class Notification implements Serializable {
      *
      * @return The notification recipient.
      */
-    public User getRecipient() {
-        return recipient;
+    public Integer getRecipientID() {
+        return recipientID;
     }
 
     /**
      * Sets the recipient of this notification.
      *
-     * @param recipient The notification recipient to be set.
+     * @param recipientID The notification recipient to be set.
      */
-    public void setRecipient(final User recipient) {
-        this.recipient = recipient;
+    public void setRecipientID(final Integer recipientID) {
+        this.recipientID = recipientID;
     }
 
     /**
@@ -261,17 +271,17 @@ public class Notification implements Serializable {
      *
      * @return The associated topic.
      */
-    public Topic getTopic() {
-        return topic;
+    public Integer getTopicID() {
+        return topicID;
     }
 
     /**
      * Sets the topic this notification is associated with.
      *
-     * @param topic The associated topic.
+     * @param topicID The associated topic.
      */
-    public void setTopic(final Topic topic) {
-        this.topic = topic;
+    public void setTopic(final Integer topicID) {
+        this.topicID = topicID;
     }
 
     /**
@@ -279,17 +289,17 @@ public class Notification implements Serializable {
      *
      * @return The associated report.
      */
-    public Report getReport() {
-        return report;
+    public Integer getReportID() {
+        return reportID;
     }
 
     /**
      * Sets the report this notification is associated with.
      *
-     * @param report The associated report.
+     * @param reportID The associated report.
      */
-    public void setReport(final Report report) {
-        this.report = report;
+    public void setReportID(final Integer reportID) {
+        this.reportID = reportID;
     }
 
     /**
@@ -297,17 +307,17 @@ public class Notification implements Serializable {
      *
      * @return The associated post.
      */
-    public Post getPost() {
-        return post;
+    public Integer getPost() {
+        return postID;
     }
 
     /**
      * Sets the post this notification is associated with.
      *
-     * @param post The associated post.
+     * @param postID The associated post.
      */
-    public void setPost(final Post post) {
-        this.post = post;
+    public void setPostID(final Integer postID) {
+        this.postID = postID;
     }
 
     /**
@@ -346,9 +356,9 @@ public class Notification implements Serializable {
      */
     @Override
     public String toString() {
-        return "Notification{ID = " + id + ", actuator = " + actuator + ", recipient = " + recipient + ", type = "
-                + type + ", date = " + date + ", read = " + read + ", sent = " + sent + ", topic = " + topic
-                + ", report = " + report + ", post = " + post + "}";
+        return "Notification{ID = " + id + ", actuator = " + actuatorID + ", recipient = " + recipientID + ", type = "
+                + type + ", date = " + date + ", read = " + read + ", sent = " + sent + ", topic = " + topicID
+                + ", report = " + reportID + ", post = " + postID + "}";
     }
 
 }
