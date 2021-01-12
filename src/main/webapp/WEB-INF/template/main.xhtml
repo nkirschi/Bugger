@@ -22,9 +22,18 @@
             <ui:include src="/WEB-INF/template/header.xhtml" id="header"/>
             <h:panelGroup layout="block"
                           id="messages"
-                          styleClass="alert#{headerBacker.determineAlertClass()}"
                           rendered="#{not empty facesContext.messageList}">
-                <h:messages id="m_global" globalOnly="true" layout="table"/>
+                <h:messages id="m_global"
+                            globalOnly="true"
+                            layout="table"
+                            fatalClass="alert alert-danger"
+                            errorClass="alert alert-danger"
+                            warnClass="alert alert-warning"
+                            infoClass="alert alert-success"/>
+            </h:panelGroup>
+            <ui:insert name="dialogs"/>
+            <h:panelGroup layout="block" id="help" styleClass="dialog" rendered="#{footerBacker.helpDisplayed}">
+                <ui:insert name="help"/>
             </h:panelGroup>
             <h:panelGroup layout="block" id="content">
                 <h:outputText value="#{title}" styleClass="h1" id="title"/>

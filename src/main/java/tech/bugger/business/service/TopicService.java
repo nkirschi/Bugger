@@ -1,4 +1,5 @@
 package tech.bugger.business.service;
+
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.*;
@@ -12,6 +13,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -45,8 +47,8 @@ public class TopicService {
      * Constructs a new topic service with the given dependencies.
      *
      * @param transactionManager The transaction manager to use for creating transactions.
-     * @param feedbackEvent The feedback event to use for user feedback.
-     * @param messagesBundle The resource bundle for feedback messages.
+     * @param feedbackEvent      The feedback event to use for user feedback.
+     * @param messagesBundle     The resource bundle for feedback messages.
      */
     @Inject
     public TopicService(final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
@@ -181,7 +183,7 @@ public class TopicService {
      *
      * @param topic The topic to be deleted.
      */
-    public void deleteTopic(Topic topic) {
+    public void deleteTopic(final Topic topic) {
         try (Transaction transaction = transactionManager.begin()) {
             transaction.newTopicGateway().deleteTopic(topic);
             transaction.commit();
@@ -232,7 +234,8 @@ public class TopicService {
                                            final boolean showClosedReports) {
         List<Report> reports = null;
         try (Transaction transaction = transactionManager.begin()) {
-            reports = transaction.newReportGateway().getSelectedReports(topic, selection, showOpenReports, showClosedReports);
+            reports = transaction.newReportGateway()
+                                 .getSelectedReports(topic, selection, showOpenReports, showClosedReports);
             transaction.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The topic could not be found.", e);
@@ -407,6 +410,23 @@ public class TopicService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return lastChange;
+    }
+
+    /**
+     * Discover all topics in the system.
+     *
+     * @return A list of all topic titles.
+     */
+    public List<String> discoverTopics() {
+        List<String> topicTitles = Collections.emptyList();
+        try (Transaction tx = transactionManager.begin()) {
+            topicTitles = tx.newTopicGateway().discoverTopics();
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when discovering all topics.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return topicTitles;
     }
 
 }

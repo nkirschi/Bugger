@@ -1,25 +1,27 @@
 package tech.bugger.control.backing;
 
+import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.StatisticsService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
-import tech.bugger.global.transfer.Report;
+import tech.bugger.business.util.Registry;
+import tech.bugger.global.transfer.ReportCriteria;
+import tech.bugger.global.transfer.TopReport;
+import tech.bugger.global.transfer.TopUser;
 import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
-import javax.faces.context.FacesContext;
+import javax.enterprise.event.Event;
+import javax.faces.context.ExternalContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
-import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Backing bean for the statistics page.
@@ -28,25 +30,84 @@ import java.util.List;
 @Named
 public class StatisticsBacker implements Serializable {
 
-    private static final Log log = Log.forClass(StatisticsBacker.class);
     @Serial
     private static final long serialVersionUID = 4674890962518519299L;
 
-    private int topicID;
-    private Topic topic;
-    private ZonedDateTime latestCreationDateAverageTimeToClose;
-    private ZonedDateTime earliestClosingDateAverageTimeToClose;
-    private ZonedDateTime earliestCreationDateTopTenUsers;
-    private ZonedDateTime latestDateTopTenUsers;
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
+    private static final Log log = Log.forClass(StatisticsBacker.class);
 
-    @Inject
-    private transient StatisticsService statisticsService;
+    /**
+     * Constant for the number of seconds in a minute. In case someone forgets :)
+     */
+    private static final double SECONDS_IN_A_MINUTE = 60.0;
 
-    @Inject
-    private FacesContext fctx;
+    /**
+     * Symbol to use when no meaningful value can be displayed.
+     */
+    private static final String NO_VALUE_INDICATOR = "-";
 
+    /**
+     * The statistics service providing logic.
+     */
+    private final StatisticsService statisticsService;
+
+    /**
+     * The topic service providing help.
+     */
+    private final TopicService topicService;
+
+    /**
+     * The current user session.
+     */
+    private final UserSession userSession;
+
+    /**
+     * Reference to the current {@link ExternalContext}.
+     */
+    private final ExternalContext ectx;
+
+    /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Registry for application dependencies.
+     */
+    private final Registry registry;
+
+    /**
+     * The current report filters.
+     */
+    private ReportCriteria reportCriteria;
+
+    /**
+     * Constructs a new statistics page backing bean with the necessary dependencies.
+     *
+     * @param statisticsService The statistics service to use.
+     * @param topicService      The topic service to use.
+     * @param userSession       The currently active user session.
+     * @param feedbackEvent     The feedback Event for user feedback.
+     * @param registry          The application-wide registry for resources.
+     * @param ectx              The current {@link ExternalContext} of the application.
+     */
     @Inject
-    private transient TopicService topicService;
+    public StatisticsBacker(final StatisticsService statisticsService,
+                            final TopicService topicService,
+                            final UserSession userSession,
+                            final Event<Feedback> feedbackEvent,
+                            final Registry registry,
+                            final ExternalContext ectx) {
+        this.statisticsService = statisticsService;
+        this.topicService = topicService;
+        this.userSession = userSession;
+        this.feedbackEvent = feedbackEvent;
+        this.registry = registry;
+        this.ectx = ectx;
+        this.reportCriteria = new ReportCriteria("", null, null);
+    }
 
     /**
      * Initializes the statistics page. The total number of reports, average number of posts per report and average time
@@ -60,41 +121,67 @@ public class StatisticsBacker implements Serializable {
      */
     @PostConstruct
     public void init() {
+        String topicId = ectx.getRequestParameterMap().get("t");
+        if (topicId != null) {
+            try {
+                Topic topic = topicService.getTopicByID(Integer.parseInt(topicId));
+                if (topic != null) {
+                    reportCriteria.setTopic(topic.getTitle());
+                } else {
+                    log.warning("Request parameter t=" + topicId + " is not the ID of an existing topic.");
+                }
+            } catch (NumberFormatException e) {
+                log.warning("Request parameter t=" + topicId + " is not an integer.", e);
+            }
+        }
     }
 
     /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
+     * Applies the current filters to the insight figures.
      *
-     * @param feedback The feedback with details on what to display.
+     * @return {@code null} in order to reload the page.
      */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
+    public String applyFilters() {
+        ResourceBundle messagesBundle = registry.getBundle("messages", userSession);
+        feedbackEvent.fire(new Feedback(messagesBundle.getString("filters_applied"), Feedback.Type.INFO));
+        return null;
     }
 
     /**
-     * Returns the total number of reports, either system-wide or for a specific topic.
+     * Returns the number of open reports matching the current filter criteria.
      *
      * @return The total number of reports.
      */
-    public int totalReportCount() {
-        return 0;
+    public int getOpenReportCount() {
+        return statisticsService.countOpenReports(reportCriteria);
     }
 
     /**
-     * Returns the average number of posts per report, either system-wide or for the reports of a specific topic.
-     *
-     * @return The average number of posts.
-     */
-    public double averagePostsPerReport() {
-        return 0.0;
-    }
-
-    /**
-     * Returns the average time a report remains open, either system-wide or for the reports of a specific topic.
+     * Returns the average time a report matching the current filter criteria remains open.
      *
      * @return The average time a report remains open.
      */
-    public Duration averageTimeOpen() {
-        return null;
+    public String getAverageTimeOpen() {
+        Duration duration = statisticsService.averageTimeOpen(reportCriteria);
+        if (duration != null) {
+            return String.format(userSession.getLocale(), "%.2f", duration.toMinutes() / SECONDS_IN_A_MINUTE);
+        } else {
+            return NO_VALUE_INDICATOR;
+        }
+    }
+
+    /**
+     * Returns the average number of posts per report of those matching the current filter criteria.
+     *
+     * @return The average number of posts.
+     */
+    public String getAveragePostsPerReport() {
+        Double avgPosts = statisticsService.averagePostsPerReport(reportCriteria);
+        if (avgPosts != null) {
+            return String.format(userSession.getLocale(), "%.2f", avgPosts);
+        } else {
+            return NO_VALUE_INDICATOR;
+        }
     }
 
     /**
@@ -103,8 +190,8 @@ public class StatisticsBacker implements Serializable {
      *
      * @return The top ten users.
      */
-    public List<User> topUsers() {
-        return null;
+    public List<TopUser> getTopUsers() {
+        return statisticsService.topTenUsers();
     }
 
     /**
@@ -112,103 +199,37 @@ public class StatisticsBacker implements Serializable {
      *
      * @return The top ten reports.
      */
-    public List<Report> topReports() {
-        return null;
+    public List<TopReport> getTopReports() {
+        return statisticsService.topTenReports();
     }
 
     /**
-     * Gets all topics and adds a {@code null} element for selecting filters.
+     * Retrieves the titles of all topics in the system.
      *
-     * @return A list containing all topics. One entry is {@code null}.
+     * @return A list of all topic titles.
      */
-    public List<Topic> getTopics() {
-        return null;
+    public List<String> getTopicTitles() {
+        List<String> topicTitles = topicService.discoverTopics();
+        topicTitles.add(0, ""); // empty string for no restriction to topic (JSF doesn't like null)
+        return topicTitles;
     }
 
     /**
-     * Applies the specified filters and refreshes the displayed data.
-     */
-    public void applyFilters() {
-        // get statistics again
-    }
-
-    /**
-     * Returns the sum of the relevance scores of all reports one particular user has created.
+     * Returns the current report filters.
      *
-     * @param user The user in question.
-     * @return The total relevance as an {@code int}.
+     * @return The configured report criteria.
      */
-    public int getTotalRelevanceForUser(User user) {
-        return 0;
+    public ReportCriteria getReportCriteria() {
+        return reportCriteria;
     }
 
     /**
-     * @return The topic.
+     * Sets the current report filters.
+     *
+     * @param reportCriteria The new report criteria.
      */
-    public Topic getTopic() {
-        return topic;
+    public void setReportCriteria(final ReportCriteria reportCriteria) {
+        this.reportCriteria = reportCriteria;
     }
 
-    /**
-     * @param topic The topic to set.
-     */
-    public void setTopic(Topic topic) {
-        this.topic = topic;
-    }
-
-    /**
-     * @return The latestCreationDateAverageTimeToClose.
-     */
-    public ZonedDateTime getLatestCreationDateAverageTimeToClose() {
-        return latestCreationDateAverageTimeToClose;
-    }
-
-    /**
-     * @param latestCreationDateAverageTimeToClose The latestCreationDateAverageTimeToClose to set.
-     */
-    public void setLatestCreationDateAverageTimeToClose(ZonedDateTime latestCreationDateAverageTimeToClose) {
-        this.latestCreationDateAverageTimeToClose = latestCreationDateAverageTimeToClose;
-    }
-
-    /**
-     * @return The earliestClosingDateAverageTimeToClose.
-     */
-    public ZonedDateTime getEarliestClosingDateAverageTimeToClose() {
-        return earliestClosingDateAverageTimeToClose;
-    }
-
-    /**
-     * @param earliestClosingDateAverageTimeToClose The earliestClosingDateAverageTimeToClose to set.
-     */
-    public void setEarliestClosingDateAverageTimeToClose(ZonedDateTime earliestClosingDateAverageTimeToClose) {
-        this.earliestClosingDateAverageTimeToClose = earliestClosingDateAverageTimeToClose;
-    }
-
-    /**
-     * @return The earliestCreationDateTopTenUsers.
-     */
-    public ZonedDateTime getEarliestCreationDateTopTenUsers() {
-        return earliestCreationDateTopTenUsers;
-    }
-
-    /**
-     * @param earliestCreationDateTopTenUsers The earliestCreationDateTopTenUsers to set.
-     */
-    public void setEarliestCreationDateTopTenUsers(ZonedDateTime earliestCreationDateTopTenUsers) {
-        this.earliestCreationDateTopTenUsers = earliestCreationDateTopTenUsers;
-    }
-
-    /**
-     * @return The latestDateTopTenUsers.
-     */
-    public ZonedDateTime getLatestDateTopTenUsers() {
-        return latestDateTopTenUsers;
-    }
-
-    /**
-     * @param latestDateTopTenUsers The latestDateTopTenUsers to set.
-     */
-    public void setLatestDateTopTenUsers(ZonedDateTime latestDateTopTenUsers) {
-        this.latestDateTopTenUsers = latestDateTopTenUsers;
-    }
 }

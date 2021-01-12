@@ -1,6 +1,10 @@
 package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
@@ -14,6 +18,13 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
 
 /**
  * Topic gateway that gives access to topics stored in a database.
@@ -58,10 +69,11 @@ public class TopicDBGateway implements TopicGateway {
     public int countReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
         int numberOfReports = 0;
         if (showOpenReports) {
-            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM report WHERE topic = ? AND closed_at IS NULL;")) {
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM report "
+                    + "WHERE topic = ? AND closed_at IS NULL;")) {
                 ResultSet resultSet = new StatementParametrizer(stmt)
                         .integer(topic.getId()).toStatement().executeQuery();
-                int numReports = 0;
+                int numReports;
                 if (resultSet.next()) {
                     numReports = resultSet.getInt(1);
                     numberOfReports += numReports;
@@ -72,10 +84,11 @@ public class TopicDBGateway implements TopicGateway {
             }
         }
         if (showClosedReports) {
-            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM report WHERE topic = ? AND closed_at IS NOT NULL;")) {
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM report "
+                    + "WHERE topic = ? AND closed_at IS NOT NULL;")) {
                 ResultSet resultSet = new StatementParametrizer(stmt)
                         .integer(topic.getId()).toStatement().executeQuery();
-                int numReports = 0;
+                int numReports;
                 if (resultSet.next()) {
                     numReports = resultSet.getInt(1);
                     numberOfReports += numReports;
@@ -245,8 +258,8 @@ public class TopicDBGateway implements TopicGateway {
     @Override
     public void deleteTopic(final Topic topic) {
         try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM \"topic\" WHERE id = ?;")) {
-            ResultSet rs = new StatementParametrizer(stmt)
-                    .integer(topic.getId()).toStatement().executeQuery();
+            new StatementParametrizer(stmt)
+                    .integer(topic.getId()).toStatement().executeUpdate();
         } catch (SQLException e) {
             log.error("Error while deleting the topic with id " + topic.getId(), e);
             throw new StoreException("Error while deleting the topic with id " + topic.getId(), e);
@@ -339,6 +352,24 @@ public class TopicDBGateway implements TopicGateway {
     public int countPosts(final Topic topic) {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<String> discoverTopics() {
+        List<String> topicTitles = new ArrayList<>();
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT title FROM topic ORDER BY title;")) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                topicTitles.add(rs.getString("title"));
+            }
+        } catch (SQLException e) {
+            log.error("Error while discovering all topics.", e);
+            throw new StoreException("Error while discovering all topics.", e);
+        }
+        return topicTitles;
     }
 
 }

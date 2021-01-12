@@ -1,15 +1,22 @@
 package tech.bugger.business.util;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import org.junit.jupiter.api.Test;
 import tech.bugger.business.exception.CorruptImageException;
 
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ImagesTest {
+
+    @Test
+    public void testConstructorAccess() throws NoSuchMethodException {
+        Constructor<Images> constructor = Images.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        Throwable e = assertThrows(InvocationTargetException.class, constructor::newInstance);
+        assertEquals(UnsupportedOperationException.class, e.getCause().getClass());
+    }
 
     @Test
     public void testGenerateThumbnail() throws IOException, CorruptImageException {
@@ -28,4 +35,5 @@ public class ImagesTest {
                 () -> Images.generateThumbnail(new byte[10])
         );
     }
+
 }

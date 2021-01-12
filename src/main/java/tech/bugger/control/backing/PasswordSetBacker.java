@@ -98,9 +98,9 @@ public class PasswordSetBacker {
         }
 
         token = authenticationService.findToken(fctx.getExternalContext().getRequestParameterMap().get("token"));
-        if (isValidToken()) {
-            log.debug("Showing Password-Set page with token " + token + '.');
-        } else {
+        log.debug("Showing Password-Set page with token " + token + '.');
+
+        if (!isValidToken()) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
     }

@@ -41,6 +41,8 @@ public class ReportServiceTest {
 
     private ReportService service;
 
+    private ReportService reportService;
+
     @Mock
     private NotificationService notificationService;
 
@@ -69,6 +71,8 @@ public class ReportServiceTest {
     @BeforeEach
     public void setUp() {
         service = new ReportService(notificationService, postService, transactionManager, feedbackEvent,
+                ResourceBundleMocker.mock(""));
+        reportService = new ReportService(notificationService, postService, transactionManager, feedbackEvent,
                 ResourceBundleMocker.mock(""));
         List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
         testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
@@ -127,7 +131,7 @@ public class ReportServiceTest {
     }
 
     @Test
-    public void testCreateReportWhenPostCreationFails() {
+    public void testCreateReportWhenPostCreationFails() throws Exception {
         doReturn(false).when(postService).createPostWithTransaction(any(), any());
         assertFalse(service.createReport(testReport, testFirstPost));
         verify(tx).abort();
@@ -141,4 +145,22 @@ public class ReportServiceTest {
         verify(feedbackEvent).fire(any());
     }
 
+    public void testClose() {
+    }
+
+    @Test
+    void open() {
+    }
+
+    @Test
+    void deleteReport() {
+    }
+
+    @Test
+    void getNumberOfPosts() {
+    }
+
+    @Test
+    void getPostsFor() {
+    }
 }

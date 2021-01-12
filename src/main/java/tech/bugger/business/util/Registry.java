@@ -209,7 +209,7 @@ public class Registry {
      * @param userSession The current user session yielding locale information.
      * @return The resource bundle associated with {@code key}.
      */
-    public ResourceBundle getBundle(String key, final UserSession userSession) {
+    public ResourceBundle getBundle(final String key, final UserSession userSession) {
         try {
             return ResourceBundle.getBundle("tech.bugger.i18n." + key, userSession.getLocale());
         } catch (MissingResourceException e) {

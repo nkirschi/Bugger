@@ -36,12 +36,12 @@ public class ReportDBGateway implements ReportGateway {
     /**
      * Database connection used by this gateway.
      */
-    private Connection conn;
+    private final Connection conn;
 
     /**
      * User gateway used for finding users.
      */
-    private UserGateway userGateway;
+    private final UserGateway userGateway;
 
     /**
      * Constructs a new report gateway with the given database connection.
@@ -58,9 +58,28 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfPosts(final Report report) {
-        // TODO Auto-generated method stub
-        return 0;
+    public int countPosts(final Report report) {
+        if (report == null) {
+            log.error("Cannot count posts of report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot count posts of report with ID null.");
+            throw new IllegalArgumentException("Report ID must not be null.");
+        }
+
+        int count = 0;
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) AS count FROM post WHERE report = ?;")) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(report.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt("count");
+            }
+        } catch (SQLException e) {
+            log.error("Error when counting posts of report " + report + ".", e);
+            throw new StoreException("Error when counting posts of report " + report + ".", e);
+        }
+        return count;
     }
 
     /**
@@ -156,13 +175,13 @@ public class ReportDBGateway implements ReportGateway {
         ZonedDateTime modified = null;
         ZonedDateTime closed = null;
         User creator = null;
-        Integer creatorID = rs.getInt("created_by");
-        if (!rs.wasNull()) {
+        Integer creatorID = rs.getObject("created_by", Integer.class);
+        if (creatorID != null) {
             creator = userGateway.getUserByID(creatorID);
         }
         User modifier = null;
-        Integer modifierID = rs.getInt("last_modified_by");
-        if (!rs.wasNull()) {
+        Integer modifierID = rs.getObject("last_modified_by", Integer.class);
+        if (modifierID != null) {
             modifier = userGateway.getUserByID(modifierID);
         }
         if (rs.getTimestamp("created_at") != null) {
@@ -248,15 +267,32 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void delete(final Report report) {
-        // TODO Auto-generated method stub
-    }
+    public void delete(final Report report) throws NotFoundException {
+        if (report == null) {
+            log.error("Cannot delete report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot delete report with ID null");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void closeReport(final Report report) {
-        // TODO Auto-generated method stub
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM report WHERE id = ? RETURNING *;")) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(report.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                if (rs.getInt("id") != report.getId()) {
+                    throw new InternalError("Wrong report deleted! Please investigate! Expected: " + report
+                            + ", actual ID: " + rs.getInt("id"));
+                }
+            } else {
+                log.error("Report to delete " + report + " not found.");
+                throw new NotFoundException("Report to delete " + report + " not found.");
+            }
+        } catch (SQLException e) {
+            log.error("Error when deleting report " + report + ".", e);
+            throw new StoreException("Error when deleting report " + report + ".", e);
+        }
 
     }
 
@@ -264,8 +300,60 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void openReport(final Report report) {
-        // TODO Auto-generated method stub
+    public void closeReport(final Report report) throws NotFoundException {
+        if (report == null) {
+            log.error("Cannot close report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot close report with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        } else if (report.getClosingDate() == null) {
+            log.error("Cannot close report with closing date null.");
+            throw new IllegalArgumentException("Report closing date cannot be null.");
+        }
+
+        try (PreparedStatement stmt = conn.prepareStatement("UPDATE report SET closed_at = ? WHERE id = ?;")) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .object(Timestamp.from(report.getClosingDate().toInstant()))
+                    .integer(report.getId()).toStatement();
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                log.error("Report to close " + report + " cannot be found.");
+                throw new NotFoundException("Report to close " + report + " cannot be found.");
+            }
+        } catch (SQLException e) {
+            log.error("Error when closing report " + report + ".", e);
+            throw new StoreException("Error when closing report " + report + ".", e);
+        }
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void openReport(final Report report) throws NotFoundException {
+        if (report == null) {
+            log.error("Cannot open report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot open report with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
+
+        String sql = "UPDATE report SET closed_at = null WHERE id = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(report.getId()).toStatement();
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                log.error("Report to open " + report + " cannot be found.");
+                throw new NotFoundException("Report to open " + report + " cannot be found.");
+            }
+        } catch (SQLException e) {
+            log.error("Error when opening report " + report + ".", e);
+            throw new StoreException("Error when opening report " + report + ".", e);
+        }
 
     }
 
@@ -321,6 +409,25 @@ public class ReportDBGateway implements ReportGateway {
     public void removeVote(final Report report, final User user) {
         // TODO Auto-generated method stub
 
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int findReportOfPost(final int postID) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT report FROM post WHERE id = ?;")) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(postID).toStatement();
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("report");
+            } else {
+                throw new NotFoundException("The report containing post with ID " + postID + "could not be found.");
+            }
+        } catch (SQLException e) {
+            throw new StoreException("Error when finding report containing post with ID " + postID + ".");
+        }
     }
 
 }

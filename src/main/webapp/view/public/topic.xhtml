@@ -8,7 +8,7 @@
       xmlns:b="http://tech.bugger/tags">
 
 <ui:composition template="/WEB-INF/template/main.xhtml">
-    <ui:param name="title" value="#{(labels.topic_page).concat(' ').concat(topicBacker.topic.title)}"/>
+    <ui:param name="title" value="#{(labels.topic_page).concat(': ').concat(topicBacker.topic.title)}"/>
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
@@ -17,7 +17,7 @@
             <h:panelGroup class="row" layout="block">
                 <h:panelGroup class="col-sm-2" layout="block"/>
                 <h:panelGroup class="col-sm-8" layout="block">
-                    <h:outputLabel value="#{labels.description}"/>
+                    <h:outputLabel value="#{labels.description}:&nbsp;"/>
                     <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
                     <h:panelGroup class="row" layout="block" rendered="#{userSession.user.administrator}">
                         <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button" value="#{labels.delete_topic}"/>
@@ -27,11 +27,11 @@
                     </h:panelGroup>
                     <!-- statistik link -->
                     <h:panelGroup class="row" layout="block">
-                        <h:outputLabel value="#{labels.topic_show_open_reports}"/>
+                        <h:outputLabel value="#{labels.topic_show_open_reports}:"/>
                         <h:selectBooleanCheckbox id="s-showOpen" value="#{topicBacker.openReportShown}"/>
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block">
-                        <h:outputLabel value="#{labels.topic_show_closed_reports}"/>
+                        <h:outputLabel value="#{labels.topic_show_closed_reports}:"/>
                         <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"/>
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block">

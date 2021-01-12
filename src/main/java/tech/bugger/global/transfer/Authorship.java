@@ -11,6 +11,7 @@ import java.util.Objects;
  * Instances are indented to be standalone objects but rather thought of to be associated with some content object.
  */
 public class Authorship implements Serializable {
+
     @Serial
     private static final long serialVersionUID = -1621253242478497728L;
 
@@ -42,7 +43,8 @@ public class Authorship implements Serializable {
      * @param modifier     The last modifier of the associated content.
      * @param modifiedDate The last modification date of the associated content.
      */
-    public Authorship(final User creator, final ZonedDateTime creationDate, final User modifier, final ZonedDateTime modifiedDate) {
+    public Authorship(final User creator, final ZonedDateTime creationDate, final User modifier,
+                      final ZonedDateTime modifiedDate) {
         this.creator = creator;
         this.creationDate = creationDate;
         this.modifier = modifier;

@@ -42,10 +42,26 @@
         <pattern value="/admin"/>
         <view-id value="/faces/view/restr/admin.xhtml"/>
     </url-mapping>
+    <url-mapping id="report">
+        <pattern value="/report"/>
+        <query-param name="id">#{reportBacker.reportID}</query-param>
+        <query-param name="p">#{reportBacker.postID}</query-param>
+        <view-id value="/faces/view/authorized/report.xhtml"/>
+    </url-mapping>
     <!--<url-mapping id="report-create">
         <pattern value="/report-create"/>
         <view-id value="/faces/view/auth/report-create.xhtml"/>
     </url-mapping>-->
+    <url-mapping id="report">
+        <pattern value="/report"/>
+        <query-param name="r">#{r}</query-param>
+        <view-id value="/faces/view/public/report.xhtml"/>
+    </url-mapping>
+    <url-mapping id="report-edit">
+        <pattern value="/report-edit"/>
+        <query-param name="id">#{id}</query-param>
+        <view-id value="/faces/view/restr/report-edit.xhtml"/>
+    </url-mapping>
     <url-mapping id="topic">
         <pattern value="/topic"/>
         <query-param name="id">#{topicBacker.topicID}</query-param>
@@ -55,5 +71,13 @@
         <pattern value="/topic-edit"/>
         <query-param name="id">#{topicEditBacker.topicID}</query-param>
         <view-id value="/faces/view/restr/topic-edit.xhtml"/>
+    </url-mapping>
+    <url-mapping id="report">
+        <pattern value="/report"/>
+        <view-id value="/faces/view/public/report.xhtml"/>
+    </url-mapping>
+    <url-mapping id="statistics">
+        <pattern value="/statistics"/>
+        <view-id value="/faces/view/public/statistics.xhtml"/>
     </url-mapping>
 </pretty-config>
