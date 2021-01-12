@@ -1,8 +1,8 @@
-.h1, .h2, .h3, .h4, .h5, .h6 {
-    display: block;
-}
+/**
+ * Template
+ */
 
-#header {
+#p-header {
     position: fixed;
     height: 80px;
     top: 0;
@@ -13,7 +13,7 @@
     background: #fff;
 }
 
-#footer {
+#p-footer {
     position: fixed;
     height: 50px;
     bottom: 0;
@@ -25,7 +25,7 @@
     background: #fff;
 }
 
-#content {
+#p-content {
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
     overflow: auto;
     padding: 40px;
@@ -33,12 +33,28 @@
     max-width: 1200px;
 }
 
-#messages {
+#p-messages {
     position: fixed;
     top: 120px;
     left: 50%;
     transform: translateX(-50%);
     max-width: 400px;
+}
+
+#p-search-bar {
+    flex: 9999;
+    max-width: 1200px;
+}
+
+#p-profile-menu {
+    position: absolute;
+    padding: 10px;
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
+    right: 20px;
+    top: 65px;
+    z-index: 9999;
+    background: #fff;
+    width: 200px;
 }
 
 .alert {
@@ -58,28 +74,28 @@
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
 }
 
-.dialog + #content {
+.dialog + #p-content {
     filter: blur(10px);
     opacity: 0.5;
     pointer-events: none;
 }
 
-.headerMenu {
-    display: inline-block;
-    margin-right: 50px;
-    margin-top: 30px;
-    float: right;
+
+/**
+ * Content
+ */
+
+.flex-basis-0 {
+    flex-basis: 0;
 }
 
-#p-profile-menu {
-    position: absolute;
-    padding: 10px;
-    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
-    right: 20px;
-    top: 65px;
-    z-index: 9999;
-    background: #fff;
-    width: 200px;
+
+/**
+ * Content
+ */
+
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    display: block;
 }
 
 .title {
@@ -98,10 +114,6 @@
 .align-center {
     display: flex;
     justify-content: center;
-}
-
-.button {
-    margin: 1%;
 }
 
 .style-button {

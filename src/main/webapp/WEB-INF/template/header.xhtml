@@ -3,10 +3,10 @@
         xmlns:h="http://xmlns.jcp.org/jsf/html"
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
         xmlns:f="http://xmlns.jcp.org/jsf/core">
-    <h:panelGroup id="header" layout="block" styleClass="d-flex justify-content-between p-3">
+    <h:panelGroup id="p-header" layout="block" styleClass="d-flex p-3">
         <h:panelGroup layout="block"
                       id="p-organization"
-                      styleClass="d-flex justify-content-start align-items-center h-100">
+                      styleClass="d-flex justify-content-start flex-grow-1 flex-basis-0 align-items-center h-100">
             <h:link outcome="pretty:home" id="l-logo" styleClass="h-100 me-3">
                 <h:graphicImage id="g-logo" library="images" name="bugger.png" styleClass="h-100 w-auto"/>
             </h:link>
@@ -17,7 +17,7 @@
         <h:panelGroup layout="block"
                       id="p-search-bar"
                       styleClass="d-flex justify-content-center align-items-center mx-5 px-5 col">
-            <h:form styleClass="d-flex justify-content-center align-items-center col mx-5 px-5"
+            <h:form styleClass="d-flex justify-content-center align-items-center col"
                     id="f-search">
                 <h:inputText styleClass="form-control form-text mt-0 me-3"
                              id="it-search"/>
@@ -28,7 +28,7 @@
         </h:panelGroup>
         <h:panelGroup layout="block"
                       id="p-authentication"
-                      styleClass="d-flex justify-content-end align-items-center"
+                      styleClass="d-flex justify-content-end align-items-center flex-grow-1 flex-basis-0"
                       rendered="#{userSession.user == null}">
             <h:link id="l-login"
                     value="#{labels.login}"

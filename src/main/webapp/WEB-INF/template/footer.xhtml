@@ -3,17 +3,17 @@
         xmlns:h="http://xmlns.jcp.org/jsf/html"
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
         xmlns:f="http://xmlns.jcp.org/jsf/core">
-    <!--@elvariable id="helpKey" type="java.lang.String"-->
     <h:panelGroup layout="block"
-                  id="footer"
-                  styleClass="d-flex justify-content-between align-items-center p-3">
+                  id="p-footer"
+                  styleClass="d-flex align-items-center p-3">
         <h:panelGroup layout="block"
-                      id="p-copyright">
+                      id="p-copyright"
+                        styleClass="d-flex justify-content-start flex-grow-1 flex-basis-0 text-center">
             <h:outputText value="©#{headerBacker.currentYear} #{labels.app_name}"/>
         </h:panelGroup>
         <h:panelGroup layout="block"
                       id="p-menu"
-                      styleClass="d-flex justify-content-center">
+                      styleClass="d-flex justify-content-center flex-grow-1 flex-basis-0 text-center">
             <h:link outcome="pretty:statistics"
                     value="#{labels.statistics}"
                     styleClass="mx-3"/>
@@ -26,8 +26,8 @@
                     styleClass="mx-3"/>
         </h:panelGroup>
         <h:panelGroup layout="block"
-                      id="p-help"
-                      styleClass="d-flex justify-content-end">
+                      id="p-accessibility"
+                      styleClass="d-flex justify-content-end flex-grow-1 flex-basis-0 text-center">
             <h:form styleClass="d-flex" id="f-language">
                 <h:selectOneMenu value="#{footerBacker.language}"
                                  id="s-language"
