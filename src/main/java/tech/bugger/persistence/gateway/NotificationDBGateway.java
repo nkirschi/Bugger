@@ -4,6 +4,7 @@ import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
 
@@ -11,6 +12,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -77,16 +80,40 @@ public class NotificationDBGateway implements NotificationGateway {
 
     /**
      * {@inheritDoc}
-     * @param id
      */
     @Override
-    public Notification find(final int id) {
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM notification WHERE id = ?;")) {
-
+    public Notification find(final int id) throws NotFoundException {
+        String sql = "SELECT * FROM notification WHERE notification.id = ?;";
+        Notification notification;
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(id).toStatement();
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                ZonedDateTime date = null;
+                if (rs.getTimestamp("created_at") != null) {
+                    date = rs.getTimestamp("created_at").toInstant().atZone(ZoneId.systemDefault());
+                }
+                notification = new Notification(
+                        rs.getObject("id", Integer.class),
+                        rs.getObject("causer", Integer.class),
+                        rs.getObject("recipient", Integer.class),
+                        Notification.Type.valueOf(rs.getString("type")),
+                        date,
+                        rs.getBoolean("\"read\""),
+                        rs.getBoolean("sent"),
+                        rs.getObject("topic", Integer.class),
+                        rs.getObject("report", Integer.class),
+                        rs.getObject("post", Integer.class));
+            } else {
+                log.error("Unable to find notification with ID " + id + ".");
+                throw new NotFoundException("Unable to find notification with ID " + id + ".");
+            }
         } catch (SQLException e) {
             log.error("Error when finding notification with ID " + id + ".", e);
             throw new StoreException("Error when finding notification with ID " + id + ".", e);
         }
+        return notification;
     }
 
     /**
