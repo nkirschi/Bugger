@@ -10,6 +10,22 @@
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
 
+    <ui:define name="dialogs">
+        <h:panelGroup id="p-confirm" layout="block" styleClass="dialog"
+                      rendered="#{reportEditBacker.displayConfirmDialog}">
+            <h:form id="f-confirm-dialogs">
+                <h:outputText value="#{labels.report_edit_move_warning}"
+                              rendered="#{not reportEditBacker.displayNoModerationWarning}"/>
+                <h:outputText value="#{labels.report_edit_no_moderation_warning}"
+                              rendered="#{reportEditBacker.displayNoModerationWarning}"/>
+                <h:commandButton value="#{labels.report_edit_confirm}" action="#{reportEditBacker.saveChanges}">
+                    <f:param name="id" value="#{reportBacker.report.id}"/>
+                </h:commandButton>
+                <h:commandButton value="#{labels.report_edit_cancel}" action="#{reportEditBacker.closeConfirmDialog}"/>
+            </h:form>
+        </h:panelGroup>
+    </ui:define>
+
     <ui:define name="content">
         <h:form id="f-report-edit"
                 enctype="multipart/form-data"
@@ -49,18 +65,6 @@
             </h:panelGrid>
 
             <h:commandButton value="#{labels.report_edit_submit}" action="#{reportEditBacker.saveChangesWithConfirm}"/>
-
-            <h:panelGroup id="p-confirm" rendered="#{reportEditBacker.displayConfirmDialog}">
-                <h:outputText value="#{labels.report_edit_move_warning}"
-                              rendered="#{not reportEditBacker.displayNoModerationWarning}"/>
-                <h:outputText value="#{labels.report_edit_no_moderation_warning}"
-                              rendered="#{reportEditBacker.displayNoModerationWarning}"/>
-                <h:commandButton value="#{labels.report_edit_confirm}" action="#{reportEditBacker.saveChanges}">
-                    <f:param name="id" value="#{reportBacker.report.id}"/>
-                </h:commandButton>
-                <h:commandButton value="#{labels.report_edit_cancel}" action="#{reportEditBacker.closeConfirmDialog}"/>
-            </h:panelGroup>
         </h:form>
     </ui:define>
 </ui:composition>
-        </html>
