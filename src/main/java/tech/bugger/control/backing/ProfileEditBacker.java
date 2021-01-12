@@ -235,7 +235,10 @@ public class ProfileEditBacker implements Serializable {
                 closeDialog();
                 return null;
             }
-            profileService.updateUser(user);
+
+            if (profileService.updateUser(user)) {
+                closeDialog();
+            }
         }
 
         return null;

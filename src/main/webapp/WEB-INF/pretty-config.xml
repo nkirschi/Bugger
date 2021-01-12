@@ -30,7 +30,7 @@
     <url-mapping id="profile">
         <pattern value="/profile"/>
         <query-param name="u">#{profileBacker.username}</query-param>
-        <view-id value="/faces/view/authorized/profile.xhtml"/>
+        <view-id value="/faces/view/public/profile.xhtml"/>
     </url-mapping>
     <url-mapping id="search">
         <pattern value="/search"/>

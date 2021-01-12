@@ -324,7 +324,7 @@ public class ProfileService {
      * Checks if the given user is the last administrator.
      *
      * @param user The user to be checked.
-     * @return {@code true} iff the user
+     * @return {@code true} iff the user is the last administrator.
      */
     private boolean isLastAdmin(final User user) {
         if (!user.isAdministrator()) {
