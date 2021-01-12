@@ -19,14 +19,14 @@ public interface NotificationGateway {
      * @return The number of notifications the user has received.
      * @throws NotFoundException The user could not be found.
      */
-    int getNumberOfNotificationsForUser(User user) throws NotFoundException;
+    int countNotifications(User user) throws NotFoundException;
 
     /**
      * Inserts a given notification into the notification storage.
      *
      * @param notification The notification to insert.
      */
-    void createNotification(Notification notification);
+    void create(Notification notification);
 
     /**
      * Inserts a whole list of notifications into the notification storage all at once.
@@ -42,7 +42,7 @@ public interface NotificationGateway {
      * @return The notification identified by the ID.
      * @throws NotFoundException The notification could not be found.
      */
-    Notification getNotificationByID(int id) throws NotFoundException;
+    Notification find(int id) throws NotFoundException;
 
     /**
      * Retrieves the list of a user's notifications that match the given selection criteria.
