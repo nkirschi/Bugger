@@ -151,7 +151,6 @@ public class ReportDBGateway implements ReportGateway {
                 + " OFFSET " + Pagitable.getItemOffset(selection) + ";")) {
             ResultSet rs = new StatementParametrizer(stmt).integer(topic.getId()).toStatement().executeQuery();
             while (rs.next()) {
-                log.info("found a Report!");
                 selectedReports.add(getReportFromResultSet(rs));
             }
         } catch (SQLException | NotFoundException e) {

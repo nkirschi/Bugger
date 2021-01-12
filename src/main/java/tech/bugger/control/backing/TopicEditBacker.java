@@ -85,7 +85,9 @@ public class TopicEditBacker implements Serializable {
      */
     @PostConstruct
     public void init() {
-        log.info("starting TopicEditBacker init...");
+        if (session.getUser() == null) {
+            redirectTo404Page();
+        }
         ExternalContext ext = fctx.getExternalContext();
         User user = session.getUser();
         if (!user.isAdministrator()) {
