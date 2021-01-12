@@ -1,6 +1,5 @@
 package tech.bugger.control.servlet;
 
-import org.jboss.weld.context.http.Http;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
@@ -8,13 +7,10 @@ import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.util.Log;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Serial;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Custom servlet that serves post attachments.
@@ -57,7 +53,7 @@ public class AttachmentServlet extends MediaServlet {
      * @param response The response to return to the client.
      */
     @Override
-    protected void handleRequest(HttpServletRequest request, HttpServletResponse response) {
+    protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response) {
         if (!applicationSettings.getConfiguration().isGuestReading() && session.getUser() == null) {
             log.debug("Refusing to serve attachmentt to anonymous user.");
             redirectToNotFoundPage(response);
@@ -65,7 +61,7 @@ public class AttachmentServlet extends MediaServlet {
         }
 
         // Retrieve the attachment ID from the request.
-        int attachmentID = 0;
+        int attachmentID;
         try {
             attachmentID = Integer.parseInt(request.getParameter("id"));
         } catch (NumberFormatException e) {

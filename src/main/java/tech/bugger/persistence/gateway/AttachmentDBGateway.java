@@ -1,11 +1,7 @@
 package tech.bugger.persistence.gateway;
 
-import org.ocpsoft.rewrite.config.Not;
 import tech.bugger.global.transfer.Attachment;
-import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
@@ -16,9 +12,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -34,7 +27,7 @@ public class AttachmentDBGateway implements AttachmentGateway {
     /**
      * Database connection used by this gateway.
      */
-    private Connection conn;
+    private final Connection conn;
 
     /**
      * Constructs a new attachment gateway with the given database connection.

@@ -5,7 +5,6 @@ import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Post;
-import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
@@ -15,7 +14,6 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.text.MessageFormat;
@@ -86,7 +84,7 @@ public class PostService {
      *
      * @param post The post to update.
      */
-    public void updatePost(Post post) {
+    public void updatePost(final Post post) {
     }
 
     /**
@@ -95,7 +93,7 @@ public class PostService {
      * @param name The attachment name to check the validity of.
      * @return Whether the attachment name is valid.
      */
-    public boolean isAttachmentNameValid(String name) {
+    public boolean isAttachmentNameValid(final String name) {
         return Arrays.stream(applicationSettings.getConfiguration().getAllowedFileExtensions().split(","))
                 .anyMatch(suffix -> name.endsWith(suffix.trim()));
     }
@@ -106,7 +104,7 @@ public class PostService {
       * @param attachments The list of attachments to check the validity of.
      * @return Whether the list of attachments is valid.
      */
-    public boolean isAttachmentListValid(List<Attachment> attachments) {
+    public boolean isAttachmentListValid(final List<Attachment> attachments) {
         int maxAttachments = applicationSettings.getConfiguration().getMaxAttachmentsPerPost();
         if (attachments.size() > maxAttachments) {
             log.info("Trying to create post with too many attachments.");
@@ -180,7 +178,7 @@ public class PostService {
      *
      * @param post The post to be deleted.
      */
-    public void deletePost(Post post) {
+    public void deletePost(final Post post) {
 
     }
 
@@ -190,7 +188,7 @@ public class PostService {
      * @param id The ID of the post to be returned.
      * @return The post with the specified ID if it exists, {@code null} if no post with that ID exists.
      */
-    public Post getPostByID(int id) {
+    public Post getPostByID(final int id) {
         return null;
     }
 
@@ -200,7 +198,7 @@ public class PostService {
      * @param id The ID of the attachment to be returned.
      * @return The attachment with the specified ID if it exists, {@code null} if no attachment with that ID exists.
      */
-    public Attachment getAttachmentByID(int id) {
+    public Attachment getAttachmentByID(final int id) {
         try (Transaction tx = transactionManager.begin()) {
             Attachment attachment = tx.newAttachmentGateway().find(id);
             tx.commit();
@@ -221,7 +219,7 @@ public class PostService {
      * @param post The post in question.
      * @return A list of attachments that may be empty.
      */
-    public List<Attachment> getAttachmentsForPost(Post post) {
+    public List<Attachment> getAttachmentsForPost(final Post post) {
         return null;
     }
 
@@ -230,7 +228,7 @@ public class PostService {
      *
      * @param attachment The attachment to be created.
      */
-    public void createAttachment(Attachment attachment) {
+    public void createAttachment(final Attachment attachment) {
 
     }
 
@@ -239,7 +237,7 @@ public class PostService {
      *
      * @param attachments The list of attachments to be created.
      */
-    public void createMultipleAttachments(List<Attachment> attachments) {
+    public void createMultipleAttachments(final List<Attachment> attachments) {
 
     }
 
@@ -252,7 +250,7 @@ public class PostService {
      * @param post The post in question.
      * @return {@code true} if the user is allowed to modify the post, {@code false} otherwise.
      */
-    public boolean isPrivileged(User user, Post post) {
+    public boolean isPrivileged(final User user, final Post post) {
         return false;
     }
 

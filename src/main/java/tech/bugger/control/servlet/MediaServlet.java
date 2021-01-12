@@ -12,9 +12,9 @@ import java.util.Date;
 public abstract class MediaServlet extends HttpServlet {
 
     /**
-     * The time in seconds clients should cache content.
+     * The time in milliseconds clients should cache content.
      */
-    private static final int CACHE_AGE = 10 * 60;
+    private static final int CACHE_AGE = 10 * 60 * 1000;
 
     /**
      * Handles a media request.
@@ -31,8 +31,7 @@ public abstract class MediaServlet extends HttpServlet {
      * @param response The response to return to the client.
      */
     @Override
-    protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response) {
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
         handleRequest(request, response);
     }
 
@@ -43,8 +42,7 @@ public abstract class MediaServlet extends HttpServlet {
      * @param response The response to return to the client.
      */
     @Override
-    protected void doPost(HttpServletRequest request,
-                          HttpServletResponse response) {
+    protected void doPost(final HttpServletRequest request, final HttpServletResponse response) {
 
         handleRequest(request, response);
     }
@@ -54,7 +52,7 @@ public abstract class MediaServlet extends HttpServlet {
      *
      * @param response The response to perform the redirect.
      */
-    protected void redirectToNotFoundPage(HttpServletResponse response) {
+    protected void redirectToNotFoundPage(final HttpServletResponse response) {
         try {
             // TODO: Redirect to our own error page.
             response.sendError(HttpServletResponse.SC_NOT_FOUND); // 404.
@@ -68,8 +66,8 @@ public abstract class MediaServlet extends HttpServlet {
      *
      * @param response The response to add headers to.
      */
-    protected void enableClientCaching(HttpServletResponse response) {
-        long expiry = new Date().getTime() + CACHE_AGE * 1000;
+    protected void enableClientCaching(final HttpServletResponse response) {
+        long expiry = new Date().getTime() + CACHE_AGE;
         response.setDateHeader("Expires", expiry);
     }
 

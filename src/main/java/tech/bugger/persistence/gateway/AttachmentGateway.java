@@ -18,7 +18,7 @@ public interface AttachmentGateway {
      * @return The attachment identified by the ID.
      * @throws NotFoundException The attachment could not be found.
      */
-    public Attachment find(int id) throws NotFoundException;
+    Attachment find(int id) throws NotFoundException;
 
     /**
      * Retrieves the list of attachments of a given post.
@@ -27,7 +27,7 @@ public interface AttachmentGateway {
      * @return The list of attachments of the post.
      * @throws NotFoundException The post could not be found.
      */
-    public List<Attachment> getAttachmentsForPost(Post post) throws NotFoundException;
+    List<Attachment> getAttachmentsForPost(Post post) throws NotFoundException;
 
     /**
      * Inserts an attachment into the attachment storage.
@@ -36,7 +36,7 @@ public interface AttachmentGateway {
      *
      * @param attachment The attachment to insert.
      */
-    public void create(Attachment attachment);
+    void create(Attachment attachment);
 
     /**
      * Updates an attachment's attributes in the attachment storage.
@@ -44,7 +44,7 @@ public interface AttachmentGateway {
      * @param attachment The attachment to update.
      * @throws NotFoundException The attachment could not be found.
      */
-    public void update(Attachment attachment) throws NotFoundException;
+    void update(Attachment attachment) throws NotFoundException;
 
     /**
      * Deletes an attachment from the attachment storage.
@@ -52,6 +52,6 @@ public interface AttachmentGateway {
      * @param attachment The attachment to delete.
      * @throws NotFoundException The attachment could not be found.
      */
-    public void delete(Attachment attachment) throws NotFoundException;
+    void delete(Attachment attachment) throws NotFoundException;
 
 }
