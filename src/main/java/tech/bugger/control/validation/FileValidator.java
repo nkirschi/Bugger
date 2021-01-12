@@ -12,6 +12,7 @@ import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.servlet.http.Part;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
@@ -47,8 +48,7 @@ public class FileValidator implements Validator<Part> {
      * @param messagesBundle The resource bundle for feedback messages.
      */
     @Inject
-    public FileValidator(final PostService postService,
-                         @RegistryKey("messages") final ResourceBundle messagesBundle) {
+    public FileValidator(final PostService postService, @RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.postService = postService;
         this.messagesBundle = messagesBundle;
     }
@@ -64,13 +64,20 @@ public class FileValidator implements Validator<Part> {
     @Override
     public void validate(FacesContext fctx, UIComponent component, Part part) {
         if (part.getSize() > MAX_FILE_SIZE * 1000 * 1000) {
-            String message = MessageFormat.format(messagesBundle.getString("file_validator.file_size_too_large"),
+            String message = MessageFormat.format(messagesBundle.getString("image_validator.file_size_too_large"),
                     MAX_FILE_SIZE);
             throw new ValidatorException(new FacesMessage(message));
         }
         if (!postService.isAttachmentNameValid(part.getSubmittedFileName())) {
             throw new ValidatorException(new FacesMessage(
                     messagesBundle.getString("file_validator.invalid_extension")));
+        }
+
+        try {
+            part.getInputStream();
+        } catch (IOException e) {
+            throw new ValidatorException(new FacesMessage(
+                    messagesBundle.getString("file_validator.file_corrupt")));
         }
     }
 }
