@@ -151,8 +151,28 @@ public class TopicDBGateway implements TopicGateway {
      */
     @Override
     public int countBannedUsers(final Topic topic) {
-        // TODO Auto-generated method stub
-        return 0;
+        if (topic.getId() == null) {
+            log.error("The topic ID cannot be null!.");
+            throw new IllegalArgumentException("The topic ID cannot be null!.");
+        }
+
+        int banned = 0;
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(t.outcast) AS num_mods FROM "
+                + "topic_ban AS t WHERE t.topic = ?;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(topic.getId())
+                    .toStatement().executeQuery();
+
+            if (rs.next()) {
+                banned = rs.getInt("num_mods");
+            }
+
+        } catch (SQLException e) {
+            log.error("Error while counting the banned users for the topic with id " + topic.getId(), e);
+            throw new StoreException("Error while counting the banned users for the topic with id " + topic.getId(), e);
+        }
+
+        return banned;
     }
 
     /**
@@ -267,18 +287,62 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void banUser(final Topic topic, final User user) {
-        // TODO Auto-generated method stub
+    public void banUser(final Topic topic, final User user) throws NotFoundException {
+        if (user.getId() == null || topic.getId() == null) {
+            log.error("The user or topic ID cannot be null!");
+            throw new IllegalArgumentException("The user or topic ID cannot be null!");
+        }
 
+        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO topic_ban (outcast, topic) "
+                + "VALUES (?, ?);")) {
+            new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(topic.getId())
+                    .toStatement().executeUpdate();
+        } catch (SQLException e) {
+            // The SQLState 23503 signifies that the insert or update value of a foreign key is invalid.
+            if (e.getSQLState().equals("23503")) {
+                log.error("No user with id " + user.getId() + " or topic with id " + topic.getId() + " could be "
+                        + "found in the database.");
+                throw new NotFoundException("No user with id " + user.getId() + " or topic with id " + topic.getId()
+                        + " could be found in the database.");
+            }
+
+            log.error("Error while trying to ban the user with id " + user.getId() + " from the topic with id "
+                    + topic.getId(), e);
+            throw new StoreException("Error while trying to ban the user with id " + user.getId() + " from the topic "
+                    + "with id " + topic.getId(), e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void unbanUser(final Topic topic, final User user) {
-        // TODO Auto-generated method stub
+    public void unbanUser(final Topic topic, final User user) throws NotFoundException {
+        if (user.getId() == null || topic.getId() == null) {
+            throw new IllegalArgumentException("The user or topic ID cannot be null!");
+        }
 
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM topic_ban WHERE topic = ? AND "
+                + "outcast = ?;")) {
+            int modified = new StatementParametrizer(stmt)
+                    .integer(topic.getId())
+                    .integer(user.getId())
+                    .toStatement().executeUpdate();
+
+            if (modified == 0) {
+                log.warning("No user with id " + user.getId() + " is banned from the topic with id "
+                        + topic.getId());
+                throw new NotFoundException("No user with id " + user.getId() + " is banned from the topic with id "
+                        + topic.getId());
+            }
+        } catch (SQLException e) {
+            log.error("Error while trying to unban the user with id " + user.getId() + " for the topic with id "
+                    + topic.getId(), e);
+            throw new StoreException("Error while trying to unban the user with id " + user.getId() + " for the topic "
+                    + "with id " + topic.getId(), e);
+        }
     }
 
     /**

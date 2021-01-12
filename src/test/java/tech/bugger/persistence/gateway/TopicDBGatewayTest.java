@@ -23,9 +23,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
@@ -510,6 +519,147 @@ class TopicDBGatewayTest {
         assertThrows(StoreException.class,
                 () -> new TopicDBGateway(connectionSpy).getModeratedTopics(user, selection)
         );
+    }
+
+    @Test
+    public void testBanUser() throws NotFoundException {
+        userGateway.createUser(user);
+        topicGateway.createTopic(topic1);
+        topicGateway.banUser(topic1, user);
+        assertTrue(userGateway.isBanned(user, topic1));
+    }
+
+    @Test
+    public void testBanUserForeignKeyViolationTopic() {
+        topic1.setId(1);
+        userGateway.createUser(user);
+        assertThrows(NotFoundException.class,
+                () -> topicGateway.banUser(topic1, user)
+        );
+    }
+
+    @Test
+    public void testBanUserForeignKeyViolationUser() {
+        user.setId(5);
+        topicGateway.createTopic(topic1);
+        assertThrows(NotFoundException.class,
+                () -> topicGateway.banUser(topic1, user)
+        );
+    }
+
+    @Test
+    public void testBanUserUserIdNull() {
+        topic1.setId(1);
+        assertThrows(IllegalArgumentException.class,
+                () -> topicGateway.banUser(topic1, user)
+        );
+    }
+
+    @Test
+    public void testBanUserTopicIdNull() {
+        user.setId(1);
+        assertThrows(IllegalArgumentException.class,
+                () -> topicGateway.banUser(topic1, user)
+        );
+    }
+
+    @Test
+    public void testBanUserSQLException() throws SQLException {
+        userGateway.createUser(user);
+        topicGateway.createTopic(topic1);
+        Connection connectionSpy = spy(connection);
+        SQLException mockException = mock(SQLException.class);
+        doThrow(mockException).when(connectionSpy).prepareStatement(any());
+        when(mockException.getSQLState()).thenReturn("");
+        assertThrows(StoreException.class,
+                () -> new TopicDBGateway(connectionSpy).banUser(topic1, user)
+        );
+    }
+
+    @Test
+    public void testUnbanUser() throws NotFoundException {
+        userGateway.createUser(user);
+        topicGateway.createTopic(topic1);
+        topicGateway.banUser(topic1, user);
+        topicGateway.unbanUser(topic1, user);
+        assertFalse(userGateway.isBanned(user, topic1));
+    }
+
+    @Test
+    public void testUnbanUserNotFound() {
+        userGateway.createUser(user);
+        topicGateway.createTopic(topic1);
+        assertThrows(NotFoundException.class,
+                () -> topicGateway.unbanUser(topic1, user)
+        );
+    }
+
+    @Test
+    public void testUnbanUserUserIdNull() {
+        topicGateway.createTopic(topic1);
+        assertThrows(IllegalArgumentException.class,
+                () -> topicGateway.unbanUser(topic1, user)
+        );
+    }
+
+    @Test
+    public void testUnbanUserTopicIdNull() {
+        userGateway.createUser(user);
+        assertThrows(IllegalArgumentException.class,
+                () -> topicGateway.unbanUser(topic1, user)
+        );
+    }
+
+    @Test
+    public void testUnbanUserSQLException() throws SQLException {
+        userGateway.createUser(user);
+        topicGateway.createTopic(topic1);
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new TopicDBGateway(connectionSpy).unbanUser(topic1, user)
+        );
+    }
+
+    @Test
+    public void testCountBannedUsers() throws NotFoundException {
+        topicGateway.createTopic(topic1);
+        userGateway.createUser(user);
+        topicGateway.banUser(topic1, user);
+        user.setUsername("Helgi");
+        user.setEmailAddress("helgi@test.de");
+        userGateway.createUser(user);
+        topicGateway.banUser(topic1, user);
+        assertEquals(2, topicGateway.countBannedUsers(topic1));
+    }
+
+    @Test
+    public void testCountBannedUsersTopicIdNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> topicGateway.countBannedUsers(topic1)
+        );
+    }
+
+    @Test
+    public void testCountBannedUsersSQLException() throws SQLException {
+        topicGateway.createTopic(topic1);
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new TopicDBGateway(connectionSpy).countBannedUsers(topic1)
+        );
+    }
+
+    @Test
+    public void testCountBannedUsersResultSetNull() throws SQLException {
+        topic1.setId(1);
+        ResultSet resultSetMock = mock(ResultSet.class);
+        PreparedStatement stmtMock = mock(PreparedStatement.class);
+        Connection connectionSpy = spy(connection);
+        doReturn(false).when(resultSetMock).next();
+        doReturn(resultSetMock).when(stmtMock).executeQuery();
+        doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
+        assertEquals(0, new TopicDBGateway(connectionSpy).countBannedUsers(topic1));
     }
 
 }

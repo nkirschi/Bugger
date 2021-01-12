@@ -226,13 +226,7 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public List<User> getSelectedModerators(final Topic topic, final Selection selection) throws NotFoundException {
-        if (selection == null || topic.getId() == null) {
-            log.error("The selection or topic ID cannot be null!.");
-            throw new IllegalArgumentException("The selection or topic ID cannot be null!.");
-        } else if (StringUtils.isBlank(selection.getSortedBy())) {
-            log.error("Error when trying to get moderators sorted by nothing.");
-            throw new IllegalArgumentException("The selection needs to have a column to sort by.");
-        }
+        validTopicSelection(topic, selection);
 
         List<User> moderators = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.* FROM \"user\" AS u, topic_moderation AS t "
@@ -263,8 +257,46 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public List<User> getSelectedBannedUsers(final Topic topic, final Selection selection) {
-        // TODO Auto-generated method stub
-        return null;
+        validTopicSelection(topic, selection);
+
+        List<User> banned = new ArrayList<>(Math.max(0, selection.getTotalSize()));
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT u.* FROM \"user\" AS u, topic_ban AS t "
+                + "WHERE t.topic = ? AND u.id = t.outcast LIMIT ? OFFSET ?;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(topic.getId())
+                    .integer(selection.getPageSize().getSize())
+                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
+                    .toStatement().executeQuery();
+
+            while (rs.next()) {
+                banned.add(getUserFromResultSet(rs));
+            }
+
+            if (banned.size() == 0) {
+                log.debug("No users banned for the topic with id " + topic.getId());
+            }
+        } catch (SQLException e) {
+            log.error("Error while loading the banned users for the topic with id " + topic.getId(), e);
+            throw new StoreException("Error while loading the banned users for the topic with id " + topic.getId(), e);
+        }
+
+        return banned;
+    }
+
+    /**
+     * Checks if a given topic and selection are valid.
+     *
+     * @param topic The topic to check.
+     * @param selection The selection to check.
+     */
+    private void validTopicSelection(Topic topic, Selection selection) {
+        if (selection == null || topic.getId() == null) {
+            log.error("The selection or topic ID cannot be null!.");
+            throw new IllegalArgumentException("The selection or topic ID cannot be null!.");
+        } else if (StringUtils.isBlank(selection.getSortedBy())) {
+            log.error("Error when trying to get moderators sorted by nothing.");
+            throw new IllegalArgumentException("The selection needs to have a column to sort by.");
+        }
     }
 
     /**
@@ -434,8 +466,23 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public boolean isBanned(final User user, final Topic topic) {
-        // TODO Auto-generated method stub
-        return false;
+        if (user.getId() == null || topic.getId() == null) {
+            throw new IllegalArgumentException("The user or topic ID cannot be null!");
+        }
+
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM topic_ban WHERE outcast = ? "
+                + "AND topic = ?;")) {
+            ResultSet resultSet = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(topic.getId())
+                    .toStatement().executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            log.error("Error while checking if the user with id " + user.getId() + " is banned from the topic "
+                    + "with id " + topic.getId(), e);
+            throw new StoreException("Error while checking if the user with id " + user.getId() + " is banned from "
+                    + "the topic with id " + topic.getId(), e);
+        }
     }
 
 }

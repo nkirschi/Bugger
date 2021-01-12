@@ -25,10 +25,11 @@ import tech.bugger.persistence.exception.StoreException;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.spy;
@@ -459,6 +460,76 @@ public class UserDBGatewayTest {
         doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
         assertEquals(0, new UserDBGateway(connectionSpy).getNumberOfModeratedTopics(user));
         reset(connectionSpy, stmtMock);
+    }
+
+    @Test
+    public void testGetSelectedBannedUsers() throws NotFoundException {
+        topicGateway.createTopic(topic);
+        userGateway.createUser(user);
+        userGateway.createUser(admin);
+        List<User> users = new ArrayList<>();
+        users.add(user);
+        users.add(admin);
+        topicGateway.banUser(topic, user);
+        topicGateway.banUser(topic, admin);
+        assertEquals(users, userGateway.getSelectedBannedUsers(topic, selection));
+    }
+
+    @Test
+    public void testGetSelectedBannedUsersNoneBanned() throws NotFoundException {
+        topicGateway.createTopic(topic);
+        assertEquals(0, userGateway.getSelectedBannedUsers(topic, selection).size());
+    }
+
+    @Test
+    public void testGetSelectedBannedUsersSQLException() throws SQLException {
+        topic.setId(1);
+        Connection connSpy = spy(connection);
+        doThrow(SQLException.class).when(connSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new UserDBGateway(connSpy).getSelectedBannedUsers(topic, selection)
+        );
+    }
+
+    @Test
+    public void testIsBanned() throws NotFoundException {
+        topicGateway.createTopic(topic);
+        userGateway.createUser(user);
+        topicGateway.banUser(topic, user);
+        assertTrue(userGateway.isBanned(user, topic));
+    }
+
+    @Test
+    public void testIsBannedNotBanned() throws NotFoundException {
+        topicGateway.createTopic(topic);
+        userGateway.createUser(user);
+        assertFalse(userGateway.isBanned(user, topic));
+    }
+
+    @Test
+    public void testIsBannedUserIdNull() {
+        user.setId(null);
+        topic.setId(1);
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.isBanned(user, topic)
+        );
+    }
+
+    @Test
+    public void testIsBannedTopicIdNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.isBanned(user, topic)
+        );
+    }
+
+    @Test
+    public void testIsBannedSQLException() throws SQLException {
+        topic.setId(1);
+        Connection connSpy = spy(connection);
+        doThrow(SQLException.class).when(connSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new UserDBGateway(connSpy).isBanned(user, topic)
+        );
     }
 
 }
