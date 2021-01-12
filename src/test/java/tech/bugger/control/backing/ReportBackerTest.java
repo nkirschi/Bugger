@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.ApplicationSettings;
@@ -89,14 +88,60 @@ public class ReportBackerTest {
     }
 
     @Test
+    public void testIsPrivilegedNot() {
+        Authorship authorship = new Authorship(new User(user), ZonedDateTime.now(), null, null);
+        user.setId(2);
+        report.setAuthorship(authorship);
+        reportBacker.setReport(report);
+        when(session.getUser()).thenReturn(user);
+        assertFalse(reportBacker.isPrivileged());
+    }
+
+    @Test
     public void testIsPrivilegedUserNull() {
         reportBacker.setReport(report);
         assertFalse(reportBacker.isPrivileged());
     }
 
     @Test
-    public void testIsPrivilegedTopicNull() {
+    public void testIsPrivilegedReportNull() {
         when(session.getUser()).thenReturn(user);
         assertFalse(reportBacker.isPrivileged());
     }
+
+    @Test
+    public void testIsPrivilegedUserBanned() {
+        reportBacker.setReport(report);
+        when(session.getUser()).thenReturn(user);
+        when(topicService.isBanned(any(), any())).thenReturn(true);
+        assertFalse(reportBacker.isPrivileged());
+    }
+
+    @Test
+    public void testIsBanned() {
+        reportBacker.setReport(report);
+        when(session.getUser()).thenReturn(user);
+        when(topicService.isBanned(any(), any())).thenReturn(true);
+        assertTrue(reportBacker.isBanned());
+    }
+
+    @Test
+    public void testIsBannedFalse() {
+        reportBacker.setReport(report);
+        when(session.getUser()).thenReturn(user);
+        assertFalse(reportBacker.isBanned());
+    }
+
+    @Test
+    public void testIsBannedUserNull() {
+        reportBacker.setReport(report);
+        assertFalse(reportBacker.isBanned());
+    }
+
+    @Test
+    public void testIsBannedReportNull() {
+        when(session.getUser()).thenReturn(user);
+        assertFalse(reportBacker.isBanned());
+    }
+
 }

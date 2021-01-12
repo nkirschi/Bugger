@@ -289,7 +289,7 @@ public class UserDBGateway implements UserGateway {
      * @param topic The topic to check.
      * @param selection The selection to check.
      */
-    private void validTopicSelection(Topic topic, Selection selection) {
+    private void validTopicSelection(final Topic topic, final Selection selection) {
         if (selection == null || topic.getId() == null) {
             log.error("The selection or topic ID cannot be null!.");
             throw new IllegalArgumentException("The selection or topic ID cannot be null!.");
@@ -437,7 +437,7 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfModeratedTopics(User user) {
+    public int getNumberOfModeratedTopics(final User user) {
         if (user.getId() == null) {
             throw new IllegalArgumentException("User ID may not be null!");
         }

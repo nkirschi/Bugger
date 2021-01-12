@@ -233,11 +233,25 @@ public class ReportEditBacker implements Serializable {
      */
     public boolean isPrivileged() {
         User user = session.getUser();
-        if (user == null || currentTopic == null) {
+        if (user == null || currentTopic == null || topicService.isBanned(user, currentTopic)) {
             return false;
         }
         return user.isAdministrator() || topicService.isModerator(user, currentTopic)
                 || user.equals(report.getAuthorship().getCreator());
+    }
+
+    /**
+     * Checks if the user is banned from the topic the report is located in.
+     *
+     * @return {@code true} if the user is banned and {@code false} otherwise.
+     */
+    public boolean isBanned() {
+        User user = session.getUser();
+        if (user == null || currentTopic == null) {
+            return false;
+        }
+        Topic topic = new Topic(report.getTopic(), "", "");
+        return topicService.isBanned(user, topic);
     }
 
     /**

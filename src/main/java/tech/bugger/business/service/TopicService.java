@@ -68,7 +68,8 @@ public class TopicService {
      * @param username The username of the user to be banned.
      * @param topic    The topic which the user is to be banned from.
      */
-    public void ban(final String username, final Topic topic) {
+    public boolean ban(final String username, final Topic topic) {
+        return false;
     }
 
     /**
@@ -77,8 +78,8 @@ public class TopicService {
      * @param user  The user to be unbanned.
      * @param topic The topic which the user is to be unbanned from.
      */
-    public void unban(final User user, final Topic topic) {
-
+    public boolean unban(final String user, final Topic topic) {
+        return false;
     }
 
     /**

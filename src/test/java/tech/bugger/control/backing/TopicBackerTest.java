@@ -22,6 +22,7 @@ import javax.faces.context.FacesContext;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
@@ -188,6 +189,90 @@ public class TopicBackerTest {
         topicBacker.removeModerator();
         assertEquals(TopicBacker.DialogType.UNMOD, topicBacker.getDisplayDialog());
         verify(topicService).removeModerator(USERNAME, topic);
+    }
+
+    @Test
+    public void testIsBanned() {
+        topicBacker.setTopic(topic);
+        when(session.getUser()).thenReturn(user);
+        when(topicService.isBanned(user, topic)).thenReturn(true);
+        assertTrue(topicBacker.isBanned());
+    }
+
+    @Test
+    public void testIsBannedUserNull() {
+        assertFalse(topicBacker.isBanned());
+    }
+
+    @Test
+    public void testIsBannedNotBanned() {
+        topicBacker.setTopic(topic);
+        when(session.getUser()).thenReturn(user);
+        assertFalse(topicBacker.isBanned());
+    }
+
+    @Test
+    public void testBanUser() {
+        user.setAdministrator(true);
+        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.setTopic(topic);
+        when(session.getUser()).thenReturn(user);
+        when(topicService.ban(USERNAME, topic)).thenReturn(true);
+        topicBacker.banUser();
+        assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog());
+        verify(topicService).ban(USERNAME, topic);
+    }
+
+    @Test
+    public void testBanUserNotPrivileged() {
+        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.setTopic(topic);
+        topicBacker.banUser();
+        verify(topicService, times(0)).ban(USERNAME, topic);
+    }
+
+    @Test
+    public void testBanUserUnsuccessful() {
+        user.setAdministrator(true);
+        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.setTopic(topic);
+        topicBacker.setDisplayDialog(TopicBacker.DialogType.BAN);
+        when(session.getUser()).thenReturn(user);
+        topicBacker.banUser();
+        assertEquals(TopicBacker.DialogType.BAN, topicBacker.getDisplayDialog());
+        verify(topicService).ban(USERNAME, topic);
+    }
+
+    @Test
+    public void testUnbanUser() {
+        user.setAdministrator(true);
+        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.setTopic(topic);
+        when(session.getUser()).thenReturn(user);
+        when(topicService.unban(USERNAME, topic)).thenReturn(true);
+        topicBacker.unbanUser();
+        assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog());
+        verify(topicService).unban(USERNAME, topic);
+    }
+
+    @Test
+    public void testUnbanUserNotPrivileged() {
+        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.setTopic(topic);
+        topicBacker.unbanUser();
+        verify(topicService, times(0)).unban(USERNAME, topic);
+    }
+
+    @Test
+    public void testUnbanUserUnsuccessful() {
+        user.setAdministrator(true);
+        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.setTopic(topic);
+        topicBacker.setDisplayDialog(TopicBacker.DialogType.UNBAN);
+        when(session.getUser()).thenReturn(user);
+        topicBacker.unbanUser();
+        assertEquals(TopicBacker.DialogType.UNBAN, topicBacker.getDisplayDialog());
+        verify(topicService).unban(USERNAME, topic);
     }
 
 }

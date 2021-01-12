@@ -354,7 +354,11 @@ public class TopicBacker implements Serializable {
      * @return {@code true} if the user is banned, {@code false} otherwise.
      */
     public boolean isBanned() {
-        return false;
+        User user = session.getUser();
+        if (user == null) {
+            return false;
+        }
+        return topicService.isBanned(user, topic);
     }
 
     /**
@@ -376,14 +380,28 @@ public class TopicBacker implements Serializable {
      * moderators cannot be banned.
      */
     public void banUser() {
+        if (!isModerator()) {
+            log.error("A user was able to use the ban user functionality even though they were no moderator!");
+            return;
+        }
+
+        if (topicService.ban(userToBeBanned, topic)) {
+            displayDialog = DialogType.NONE;
+        }
     }
 
     /**
-     * Unbans the user specified in {@code unbanUser}.
-     *
-     * @param user The user to unban.
+     * Unbans the user specified whose username is specified in the attribute {@code userToBeBanned}.
      */
-    public void unbanUser(final User user) {
+    public void unbanUser() {
+        if (!isModerator()) {
+            log.error("A user was able to use the unban user functionality even though they were no moderator!");
+            return;
+        }
+
+        if (topicService.unban(userToBeBanned, topic)) {
+            displayDialog = DialogType.NONE;
+        }
     }
 
     /**
@@ -392,8 +410,7 @@ public class TopicBacker implements Serializable {
      */
     public void makeModerator() {
         if (!isModerator()) {
-            log.error("A user was able to to use the promote or demote moderator functionality even though "
-                    + "they had no moderator status!");
+            log.error("A user was able to use the promote functionality even though they were no moderator!");
             return;
         }
 
@@ -408,8 +425,7 @@ public class TopicBacker implements Serializable {
      */
     public void removeModerator() {
         if (!isModerator()) {
-            log.error("A user was able to to use the promote or demote moderator functionality even though "
-                    + "they had no moderator status!");
+            log.error("A user was able to use the demote functionality even though they were no moderator!");
             return;
         }
 

@@ -352,7 +352,7 @@ public class ReportBacker implements Serializable {
      */
     public boolean isPrivileged() {
         User user = session.getUser();
-        if (user == null || report == null) {
+        if (user == null || report == null || topicService.isBanned(user, new Topic(report.getTopic(), "", ""))) {
             return false;
         }
         Topic topic = new Topic(report.getTopic(), "", "");
@@ -371,21 +371,17 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     * Checks if the user is a moderator of the topic the report is located in.
-     *
-     * @return {@code true} if the user is a moderator and {@code false} otherwise.
-     */
-    public boolean isModerator() {
-        return false;
-    }
-
-    /**
      * Checks if the user is banned from the topic the report is located in.
      *
      * @return {@code true} if the user is banned and {@code false} otherwise.
      */
     public boolean isBanned() {
-        return false;
+        User user = session.getUser();
+        if (user == null || report == null) {
+            return false;
+        }
+        Topic topic = new Topic(report.getTopic(), "", "");
+        return topicService.isBanned(user, topic);
     }
 
     /**

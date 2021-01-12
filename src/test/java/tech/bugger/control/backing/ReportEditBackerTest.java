@@ -229,6 +229,17 @@ public class ReportEditBackerTest {
     }
 
     @Test
+    public void testIsPrivilegedFalse() {
+        Authorship authorship = new Authorship(new User(user), ZonedDateTime.now(), null, null);
+        user.setId(5);
+        testReport.setAuthorship(authorship);
+        reportEditBacker.setReport(testReport);
+        reportEditBacker.setCurrentTopic(testTopic);
+        when(session.getUser()).thenReturn(user);
+        assertFalse(reportEditBacker.isPrivileged());
+    }
+
+    @Test
     public void testIsPrivilegedUserNull() {
         reportEditBacker.setCurrentTopic(testTopic);
         assertFalse(reportEditBacker.isPrivileged());
@@ -238,6 +249,41 @@ public class ReportEditBackerTest {
     public void testIsPrivilegedTopicNull() {
         when(session.getUser()).thenReturn(user);
         assertFalse(reportEditBacker.isPrivileged());
+    }
+
+    @Test
+    public void testIsPrivilegedUserBanned() {
+        reportEditBacker.setCurrentTopic(testTopic);
+        when(session.getUser()).thenReturn(user);
+        when(topicService.isBanned(user, testTopic)).thenReturn(true);
+        assertFalse(reportEditBacker.isPrivileged());
+    }
+
+    @Test
+    public void testIsBanned() {
+        reportEditBacker.setCurrentTopic(testTopic);
+        when(session.getUser()).thenReturn(user);
+        when(topicService.isBanned(user, testTopic)).thenReturn(true);
+        assertTrue(reportEditBacker.isBanned());
+    }
+
+    @Test
+    public void testIsBannedFalse() {
+        reportEditBacker.setCurrentTopic(testTopic);
+        when(session.getUser()).thenReturn(user);
+        assertFalse(reportEditBacker.isBanned());
+    }
+
+    @Test
+    public void testIsBannedUserNull() {
+        reportEditBacker.setCurrentTopic(testTopic);
+        assertFalse(reportEditBacker.isBanned());
+    }
+
+    @Test
+    public void testIsBannedTopicNull() {
+        when(session.getUser()).thenReturn(user);
+        assertFalse(reportEditBacker.isBanned());
     }
 
 }
