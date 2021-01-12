@@ -139,6 +139,7 @@ public class ProfileBacker implements Serializable {
         if ((!ext.getRequestParameterMap().containsKey("u")) || (ext.getRequestParameterMap().get("u").length()
                 > Constants.USERNAME_MAX)) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+            return;
         }
 
         username = ext.getRequestParameterMap().get("u");
@@ -146,6 +147,7 @@ public class ProfileBacker implements Serializable {
 
         if (user == null) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
         }
 
         sanitizedBiography = MarkdownHandler.toHtml(user.getBiography());

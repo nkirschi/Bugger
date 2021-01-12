@@ -14,8 +14,10 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -35,6 +37,11 @@ public class ProfileEditBacker implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 8894621041245160359L;
+
+    /**
+     * Path to the default avatar.
+     */
+    private static final String DEFAULT_AVATAR = "/resources/images/bugger.png";
 
     /**
      * The type of popup dialog to be rendered on the profile page.
@@ -89,7 +96,17 @@ public class ProfileEditBacker implements Serializable {
     /**
      * The new avatar to be set.
      */
-    private Part tempAvatar;
+    private Part uploadedAvatar;
+
+    /**
+     * Whether to delete the existing avatar.
+     */
+    private boolean deleteAvatar;
+
+    /**
+     * The default avatar to use for user that do not have their own avatar set.
+     */
+    private Lazy<byte[]> defaultAvatar;
 
     /**
      * The type of popup dialog to be rendered.
@@ -159,6 +176,17 @@ public class ProfileEditBacker implements Serializable {
             emailNew = user.getEmailAddress();
             usernameNew = user.getUsername();
         }
+
+        deleteAvatar = false;
+        defaultAvatar = new Lazy<>(() -> {
+            try {
+                ServletContext sctx = (ServletContext) ext.getContext();
+                return sctx.getResourceAsStream(DEFAULT_AVATAR).readAllBytes();
+            } catch (IOException e) {
+                log.warning("Default avatar could not be loaded", e);
+                return new byte[0];
+            }
+        });
     }
 
     /**
@@ -261,29 +289,20 @@ public class ProfileEditBacker implements Serializable {
     }
 
     /**
-     * Irreversibly deletes the user's avatar.
+     * Converts the uploaded avatar in {@code uploadedAvatar} to a {@code byte[]}, creates a thumbnail,
+     * and puts it into the user.
      */
-    public void deleteAvatar() {
-        //TODO needs to be changed to default pictures in Milestone 2
-        user.setAvatar(new Lazy<>(new byte[0]));
-        user.setAvatarThumbnail(new byte[0]);
-    }
-
-    /**
-     * Converts the uploaded avatar in {@code tempAvatar} to a {@code byte[]} and puts it into the user.
-     */
-    public void uploadAvatar() {
-        Lazy<byte[]> image = (profileService.uploadAvatar(tempAvatar));
+    boolean uploadAvatar() {
+        Lazy<byte[]> image = deleteAvatar ? defaultAvatar : profileService.uploadAvatar(uploadedAvatar);
         if (image != null) {
-            user.setAvatar(image);
-            byte[] thumbnail = (profileService.generateThumbnail(image.get()));
-            //TODO needs to be changed to default thumbnail in Milestone 2
-            user.setAvatarThumbnail(thumbnail == null ? new byte[0] : thumbnail);
-        } else {
-            //TODO needs to be changed to default pictures in Milestone 2
-            user.setAvatar(new Lazy<>(new byte[0]));
-            user.setAvatarThumbnail(new byte[0]);
+            byte[] thumbnail = profileService.generateThumbnail(image.get());
+            if (thumbnail != null) {
+                user.setAvatar(image);
+                user.setAvatarThumbnail(thumbnail);
+                return true;
+            }
         }
+        return false;
     }
 
     /**
@@ -304,6 +323,11 @@ public class ProfileEditBacker implements Serializable {
      * Opens the dialog that is displayed if an administrator edits another user's profile.
      */
     public void openChangeDialog() {
+        if (uploadedAvatar != null || deleteAvatar) {
+            if (!uploadAvatar()) {
+                return;
+            }
+        }
         dialog = DialogType.UPDATE;
     }
 
@@ -399,17 +423,53 @@ public class ProfileEditBacker implements Serializable {
     }
 
     /**
-     * @return The tempAvatar.
+     * @return The uploaded avatar.
      */
-    public Part getTempAvatar() {
-        return tempAvatar;
+    public Part getUploadedAvatar() {
+        return uploadedAvatar;
     }
 
     /**
-     * @param tempAvatar The tempAvatar to set.
+     * @param uploadedAvatar The uploaded avatar to set.
      */
-    public void setTempAvatar(final Part tempAvatar) {
-        this.tempAvatar = tempAvatar;
+    public void setUploadedAvatar(final Part uploadedAvatar) {
+        this.uploadedAvatar = uploadedAvatar;
+    }
+
+    /**
+     * Returns the default avatar.
+     *
+     * @return The default avatar.
+     */
+    public Lazy<byte[]> getDefaultAvatar() {
+        return defaultAvatar;
+    }
+
+    /**
+     * Sets the default avatar.
+     *
+     * @param defaultAvatar The default avatar to set.
+     */
+    public void setDefaultAvatar(Lazy<byte[]> defaultAvatar) {
+        this.defaultAvatar = defaultAvatar;
+    }
+
+    /**
+     * Returns whether to delete the existing avatar.
+     *
+     * @return Whether to delete the existing avatar.
+     */
+    public boolean isDeleteAvatar() {
+        return this.deleteAvatar;
+    }
+
+    /**
+     * Sets whether to delete the existing avatar.
+     *
+     * @param deleteAvatar Whether to delete the existing avatar.
+     */
+    public void setDeleteAvatar(boolean deleteAvatar) {
+        this.deleteAvatar = deleteAvatar;
     }
 
     /**
@@ -431,6 +491,15 @@ public class ProfileEditBacker implements Serializable {
      */
     public boolean isCreate() {
         return create;
+    }
+
+    /**
+     * Sets whether the user is being created by an administrator.
+     *
+     * @param create Whether the user is being created by an administrator.
+     */
+    public void setCreate(boolean create) {
+        this.create = create;
     }
 
 }

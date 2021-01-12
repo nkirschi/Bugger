@@ -20,16 +20,25 @@ import javax.faces.application.Application;
 import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
@@ -101,7 +110,8 @@ public class ProfileEditBackerTest {
                 () -> assertEquals(user, profileEditBacker.getUser()),
                 () -> assertEquals(user.getEmailAddress(), profileEditBacker.getEmailNew()),
                 () -> assertEquals(user.getUsername(), profileEditBacker.getUsernameNew()),
-                () -> assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog())
+                () -> assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog()),
+                () -> assertEquals(false, profileEditBacker.isDeleteAvatar())
         );
     }
 
@@ -207,6 +217,33 @@ public class ProfileEditBackerTest {
         when(session.getUser()).thenReturn(null).thenReturn(user);
         profileEditBacker.init();
         verify(navHandler, times(2)).handleNavigation(any(), any(), any());
+    }
+
+    @Test
+    public void testInitDefaultAvatar() throws Exception {
+        when(session.getUser()).thenReturn(user);
+        when(profileService.getUser(user.getId())).thenReturn(user);
+        ServletContext sctx = mock(ServletContext.class);
+        when(ext.getContext()).thenReturn(sctx);
+        InputStream is = mock(InputStream.class);
+        when(sctx.getResourceAsStream(any())).thenReturn(is);
+        byte[] testBytes = new byte[] {1, 2, 3, 4};
+        when(is.readAllBytes()).thenReturn(testBytes);
+        profileEditBacker.init();
+        assertArrayEquals(testBytes, profileEditBacker.getDefaultAvatar().get());
+    }
+
+    @Test
+    public void testInitDefaultAvatarWhenFails() throws Exception {
+        when(session.getUser()).thenReturn(user);
+        when(profileService.getUser(user.getId())).thenReturn(user);
+        ServletContext sctx = mock(ServletContext.class);
+        when(ext.getContext()).thenReturn(sctx);
+        InputStream is = mock(InputStream.class);
+        when(sctx.getResourceAsStream(any())).thenReturn(is);
+        when(is.readAllBytes()).thenThrow(IOException.class);
+        profileEditBacker.init();
+        assertArrayEquals(new byte[0], profileEditBacker.getDefaultAvatar().get());
     }
 
     @Test
@@ -345,24 +382,14 @@ public class ProfileEditBackerTest {
     }
 
     @Test
-    public void testDeleteAvatar() {
-        profileEditBacker.setUser(user);
-        profileEditBacker.deleteAvatar();
-        assertAll(
-                () -> assertEquals(0, user.getAvatar().get().length),
-                () -> assertEquals(0, user.getAvatarThumbnail().length)
-        );
-    }
-
-    @Test
     public void testUploadAvatar() {
         Lazy<byte[]> avatar = new Lazy<>(new byte[]{1, 2, 3, 4});
         byte[] thumbnail = new byte[]{1, 2, 3, 4};
         when(profileService.uploadAvatar(any())).thenReturn(avatar);
         when(profileService.generateThumbnail(any())).thenReturn(thumbnail);
         profileEditBacker.setUser(user);
-        profileEditBacker.uploadAvatar();
         assertAll(
+                () -> assertTrue(profileEditBacker.uploadAvatar()),
                 () -> assertEquals(avatar.get(), user.getAvatar().get()),
                 () -> assertEquals(thumbnail, user.getAvatarThumbnail())
         );
@@ -371,14 +398,32 @@ public class ProfileEditBackerTest {
     }
 
     @Test
+    public void testUploadAvatarWhenDelete() {
+        Lazy<byte[]> avatar = new Lazy<>(new byte[]{1, 2, 3, 4});
+        byte[] thumbnail = new byte[]{1, 2, 3, 4};
+        when(profileService.generateThumbnail(any())).thenReturn(thumbnail);
+        profileEditBacker.setDefaultAvatar(avatar);
+        profileEditBacker.setDeleteAvatar(true);
+        profileEditBacker.setUser(user);
+        assertAll(
+                () -> assertTrue(profileEditBacker.uploadAvatar()),
+                () -> assertEquals(avatar.get(), user.getAvatar().get()),
+                () -> assertEquals(thumbnail, user.getAvatarThumbnail())
+        );
+        verify(profileService, times(1)).generateThumbnail(any());
+    }
+
+    @Test
     public void testUploadAvatarGenerateThumbnailFails() {
+        Lazy<byte[]> oldAvatar = user.getAvatar();
+        byte[] oldThumbnail = user.getAvatarThumbnail();
         Lazy<byte[]> avatar = new Lazy<>(new byte[]{1, 2, 3, 4});
         when(profileService.uploadAvatar(any())).thenReturn(avatar);
         profileEditBacker.setUser(user);
-        profileEditBacker.uploadAvatar();
         assertAll(
-                () -> assertEquals(avatar.get(), user.getAvatar().get()),
-                () -> assertEquals(0, user.getAvatarThumbnail().length)
+                () -> assertFalse(profileEditBacker.uploadAvatar()),
+                () -> assertEquals(oldAvatar, user.getAvatar()),
+                () -> assertEquals(oldThumbnail, user.getAvatarThumbnail())
         );
         verify(profileService, times(1)).uploadAvatar(any());
         verify(profileService, times(1)).generateThumbnail(any());
@@ -386,11 +431,13 @@ public class ProfileEditBackerTest {
 
     @Test
     public void testUploadAvatarFails() {
+        Lazy<byte[]> oldAvatar = user.getAvatar();
+        byte[] oldThumbnail = user.getAvatarThumbnail();
         profileEditBacker.setUser(user);
-        profileEditBacker.uploadAvatar();
         assertAll(
-                () -> assertEquals(0, user.getAvatar().get().length),
-                () -> assertEquals(0, user.getAvatarThumbnail().length)
+                () -> assertFalse(profileEditBacker.uploadAvatar()),
+                () -> assertEquals(oldAvatar, user.getAvatar()),
+                () -> assertEquals(oldThumbnail, user.getAvatarThumbnail())
         );
         verify(profileService, times(1)).uploadAvatar(any());
     }
@@ -411,9 +458,33 @@ public class ProfileEditBackerTest {
 
     @Test
     public void testOpenChangeDialog() {
+        profileEditBacker.setUploadedAvatar(null);
+        profileEditBacker.setDeleteAvatar(false);
         profileEditBacker.setDialog(ProfileEditBacker.DialogType.NONE);
         profileEditBacker.openChangeDialog();
         assertEquals(ProfileEditBacker.DialogType.UPDATE, profileEditBacker.getDialog());
+    }
+
+    @Test
+    public void testOpenChangeDialogWhenUploadFailed() {
+        ProfileEditBacker spyBacker = spy(profileEditBacker);
+        spyBacker.setUploadedAvatar(null);
+        spyBacker.setDeleteAvatar(true);
+        doReturn(false).when(spyBacker).uploadAvatar();
+        spyBacker.setDialog(ProfileEditBacker.DialogType.NONE);
+        spyBacker.openChangeDialog();
+        assertEquals(ProfileEditBacker.DialogType.NONE, spyBacker.getDialog());
+    }
+
+    @Test
+    public void testOpenChangeDialogWhenUploadSuccessful() {
+        ProfileEditBacker spyBacker = spy(profileEditBacker);
+        spyBacker.setUploadedAvatar(null);
+        spyBacker.setDeleteAvatar(true);
+        doReturn(true).when(spyBacker).uploadAvatar();
+        spyBacker.setDialog(ProfileEditBacker.DialogType.NONE);
+        spyBacker.openChangeDialog();
+        assertEquals(ProfileEditBacker.DialogType.UPDATE, spyBacker.getDialog());
     }
 
     @Test

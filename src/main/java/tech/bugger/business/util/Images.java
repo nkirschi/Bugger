@@ -54,9 +54,7 @@ public class Images {
             imageBuff.getGraphics().drawImage(scaledImage, 0, 0, null);
 
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-            ImageIO.write(imageBuff, "jpg", buffer);
-
+            ImageIO.write(imageBuff, "png", buffer);
             return buffer.toByteArray();
         } catch (IOException e) {
             throw new CorruptImageException("The image could not be converted to a thumbnail.", e);

@@ -425,7 +425,7 @@ public class ProfileService {
         try {
             return new Lazy<>(avatar.getInputStream().readAllBytes());
         } catch (IOException e) {
-            log.error("Error while uploading an avatar.", e);
+            log.debug("Error while uploading an avatar.", e);
             feedback.fire(new Feedback(messages.getString("upload_avatar"), Feedback.Type.ERROR));
         }
         return null;
@@ -441,7 +441,7 @@ public class ProfileService {
         try {
             return Images.generateThumbnail(image);
         } catch (CorruptImageException e) {
-            log.error("Error while trying to generate a thumbnail.", e);
+            log.debug("Error while trying to generate a thumbnail.", e);
             feedback.fire(new Feedback(messages.getString("generate_thumbnail"), Feedback.Type.ERROR));
         }
         return null;
