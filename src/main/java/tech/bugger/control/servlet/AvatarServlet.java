@@ -62,7 +62,7 @@ public class AvatarServlet extends MediaServlet {
         }
 
         // Retrieve user ID and image type from the request.
-        int userID = 0;
+        int userID;
         try {
             userID = Integer.parseInt(request.getParameter("id"));
         } catch (NumberFormatException e) {

@@ -55,7 +55,7 @@ public class AttachmentServlet extends MediaServlet {
     @Override
     protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response) {
         if (!applicationSettings.getConfiguration().isGuestReading() && session.getUser() == null) {
-            log.debug("Refusing to serve attachmentt to anonymous user.");
+            log.debug("Refusing to serve attachment to anonymous user.");
             redirectToNotFoundPage(response);
             return;
         }

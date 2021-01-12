@@ -2,7 +2,6 @@ package tech.bugger.control.validation;
 
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.util.RegistryKey;
-import tech.bugger.global.util.Log;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -23,11 +22,6 @@ import java.util.ResourceBundle;
 public class FileValidator implements Validator<Part> {
 
     /**
-     * The {@link Log} instance associated with this class for logging purposes.
-     */
-    private static final Log log = Log.forClass(FileValidator.class);
-
-    /**
      * The maximum file size in megabytes allowed for uploaded files.
      */
     private static final int MAX_FILE_SIZE = 10;
@@ -35,7 +29,7 @@ public class FileValidator implements Validator<Part> {
     /**
      * The post service for validating filenames.
      */
-    private PostService postService;
+    private final PostService postService;
 
     /**
      * Resource bundle for feedback messages.

@@ -31,7 +31,7 @@ public interface AttachmentGateway {
     /**
      * Inserts an attachment into the attachment storage.
      * <p>
-     * Sets the ID of {@ode attachment} that was assigned upon insertion by the attachment storage.
+     * Sets the ID of {@code attachment} that was assigned upon insertion by the attachment storage.
      *
      * @param attachment The attachment to insert.
      */

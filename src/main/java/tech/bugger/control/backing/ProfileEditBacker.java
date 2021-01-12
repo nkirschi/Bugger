@@ -291,6 +291,8 @@ public class ProfileEditBacker implements Serializable {
     /**
      * Converts the uploaded avatar in {@code uploadedAvatar} to a {@code byte[]}, creates a thumbnail,
      * and puts it into the user.
+     *
+     * @return {@code true} iff the avatar was successfully processed.
      */
     boolean uploadAvatar() {
         Lazy<byte[]> image = deleteAvatar ? defaultAvatar : profileService.uploadAvatar(uploadedAvatar);
@@ -450,7 +452,7 @@ public class ProfileEditBacker implements Serializable {
      *
      * @param defaultAvatar The default avatar to set.
      */
-    public void setDefaultAvatar(Lazy<byte[]> defaultAvatar) {
+    public void setDefaultAvatar(final Lazy<byte[]> defaultAvatar) {
         this.defaultAvatar = defaultAvatar;
     }
 
@@ -468,7 +470,7 @@ public class ProfileEditBacker implements Serializable {
      *
      * @param deleteAvatar Whether to delete the existing avatar.
      */
-    public void setDeleteAvatar(boolean deleteAvatar) {
+    public void setDeleteAvatar(final boolean deleteAvatar) {
         this.deleteAvatar = deleteAvatar;
     }
 
@@ -498,7 +500,7 @@ public class ProfileEditBacker implements Serializable {
      *
      * @param create Whether the user is being created by an administrator.
      */
-    public void setCreate(boolean create) {
+    public void setCreate(final boolean create) {
         this.create = create;
     }
 
