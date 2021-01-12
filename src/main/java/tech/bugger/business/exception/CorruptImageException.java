@@ -6,6 +6,7 @@ import java.io.Serial;
  * Exception indicating an image is corrupted.
  */
 public class CorruptImageException extends Exception {
+
     @Serial
     private static final long serialVersionUID = 1900286228042129388L;
 
@@ -14,21 +15,19 @@ public class CorruptImageException extends Exception {
      */
     public CorruptImageException() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
      * Constructs a {@link CorruptImageException} with the specified detail message and cause.
-     *
+     * <p>
      * Note that the detail message associated with {@code cause} is <i>not</i> automatically incorporated in this
      * exception's detail message.
      *
      * @param message The detail message describing this particular exception.
      * @param cause   The cause for this particular exception.
      */
-    public CorruptImageException(String message, Throwable cause) {
+    public CorruptImageException(final String message, final Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -36,9 +35,8 @@ public class CorruptImageException extends Exception {
      *
      * @param message The detail message describing this particular exception.
      */
-    public CorruptImageException(String message) {
+    public CorruptImageException(final String message) {
         super(message);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -47,9 +45,8 @@ public class CorruptImageException extends Exception {
      *
      * @param cause The cause for this particular exception.
      */
-    public CorruptImageException(Throwable cause) {
+    public CorruptImageException(final Throwable cause) {
         super(cause);
-        // TODO Auto-generated constructor stub
     }
 
 }

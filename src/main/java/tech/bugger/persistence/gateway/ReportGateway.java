@@ -1,5 +1,7 @@
 package tech.bugger.persistence.gateway;
 
+import java.util.List;
+import java.util.Optional;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
@@ -7,9 +9,6 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.SelfReferenceException;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * A report gateway allows to query and modify a persistent storage of reports.
@@ -23,7 +22,7 @@ public interface ReportGateway {
      * @return The number of posts of the report.
      * @throws NotFoundException The report could not be found.
      */
-    public int getNumberOfPosts(Report report) throws NotFoundException;
+    int countPosts(Report report) throws NotFoundException;
 
     /**
      * Retrieves a report by its ID.
@@ -32,7 +31,7 @@ public interface ReportGateway {
      * @return The report identified by the ID.
      * @throws NotFoundException The report could not be found.
      */
-    public Report find(int id) throws NotFoundException;
+    Report find(int id) throws NotFoundException;
 
     /**
      * Retrieves a list of reports of a topic that match the given selection criteria, including or excluding open or
@@ -45,17 +44,17 @@ public interface ReportGateway {
      * @return The list of reports of {@code topic}, filtered accordingly.
      * @throws NotFoundException The topic could not be found.
      */
-    public List<Report> getSelectedReports(Topic topic, Selection selection, boolean showOpenReports,
+    List<Report> getSelectedReports(Topic topic, Selection selection, boolean showOpenReports,
                                            boolean showClosedReports) throws NotFoundException;
 
     /**
      * Inserts a report into the report storage.
-     *
-     * Sets the ID of {@ode report} that was assigned upon insertion by the report storage.
+     * <p>
+     * Sets the ID of {@code report} that was assigned upon insertion by the report storage.
      *
      * @param report The report to insert.
      */
-    public void create(Report report);
+    void create(Report report);
 
     /**
      * Updates a report's attributes in the report storage.
@@ -63,7 +62,7 @@ public interface ReportGateway {
      * @param report The report to update.
      * @throws NotFoundException The report could not be found.
      */
-    public void update(Report report) throws NotFoundException;
+    void update(Report report) throws NotFoundException;
 
     /**
      * Deletes a report from the report storage.
@@ -71,7 +70,7 @@ public interface ReportGateway {
      * @param report The report to delete.
      * @throws NotFoundException The report could not be found.
      */
-    public void delete(Report report) throws NotFoundException;
+    void delete(Report report) throws NotFoundException;
 
     /**
      * Closes a report in the report storage.
@@ -79,7 +78,7 @@ public interface ReportGateway {
      * @param report The report to close.
      * @throws NotFoundException The report could not be found.
      */
-    public void closeReport(Report report) throws NotFoundException;
+    void closeReport(Report report) throws NotFoundException;
 
     /**
      * Opens a report in the report storage.
@@ -87,7 +86,7 @@ public interface ReportGateway {
      * @param report The report to open.
      * @throws NotFoundException The report could not be found.
      */
-    public void openReport(Report report) throws NotFoundException;
+    void openReport(Report report) throws NotFoundException;
 
     /**
      * Marks a report as a duplicate of another report.
@@ -98,7 +97,7 @@ public interface ReportGateway {
      * @throws NotFoundException      The duplicate or the original could not be found.
      * @throws SelfReferenceException The ID of {@code duplicate} is the same as {@code originalID}.
      */
-    public void markDuplicate(Report duplicate, int originalID) throws NotFoundException, SelfReferenceException;
+    void markDuplicate(Report duplicate, int originalID) throws NotFoundException, SelfReferenceException;
 
     /**
      * Removes the mark of duplication from a report.
@@ -106,7 +105,7 @@ public interface ReportGateway {
      * @param report The report to unmark as duplicate.
      * @throws NotFoundException The report could not be found.
      */
-    public void unmarkDuplicate(Report report) throws NotFoundException;
+    void unmarkDuplicate(Report report) throws NotFoundException;
 
     /**
      * Overwrites the calculated relevance of a report by a fixed relevance value or removes the override, restoring the
@@ -117,7 +116,7 @@ public interface ReportGateway {
      *                  the override if empty.
      * @throws NotFoundException The report could not be found.
      */
-    public void overwriteRelevance(Report report, Optional<Integer> relevance) throws NotFoundException;
+    void overwriteRelevance(Report report, Optional<Integer> relevance) throws NotFoundException;
 
     /**
      * Stores an upvote, i.e. a positive vote for the relevance, of a report by a user.
@@ -127,7 +126,7 @@ public interface ReportGateway {
      * @throws DuplicateException A vote on the report by the user already existed.
      * @throws NotFoundException  The report or the user could not be found.
      */
-    public void upvote(Report report, User user) throws DuplicateException, NotFoundException;
+    void upvote(Report report, User user) throws DuplicateException, NotFoundException;
 
     /**
      * Stores an downvote, i.e. a negative vote for the relevance, of a report by a user.
@@ -137,7 +136,7 @@ public interface ReportGateway {
      * @throws DuplicateException A vote on the report by the user already existed.
      * @throws NotFoundException  The report or the user could not be found.
      */
-    public void downvote(Report report, User user) throws DuplicateException, NotFoundException;
+    void downvote(Report report, User user) throws DuplicateException, NotFoundException;
 
     /**
      * Removes a user's vote on a report.
@@ -146,5 +145,15 @@ public interface ReportGateway {
      * @param user   The user who gave the vote.
      * @throws NotFoundException The report, the user, or the vote could not be found.
      */
-    public void removeVote(Report report, User user) throws NotFoundException;
+    void removeVote(Report report, User user) throws NotFoundException;
+
+    /**
+     * Find the ID of the report containing the post with the specified ID.
+     *
+     * @param postID The post ID.
+     * @return The report ID.
+     * @throws NotFoundException The report was not found.
+     */
+    int findReportOfPost(int postID) throws NotFoundException;
+
 }

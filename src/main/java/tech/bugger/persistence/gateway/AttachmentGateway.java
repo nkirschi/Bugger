@@ -1,10 +1,9 @@
 package tech.bugger.persistence.gateway;
 
+import java.util.List;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.persistence.exception.NotFoundException;
-
-import java.util.List;
 
 /**
  * An attachment gateway allows to query and modify a persistent storage of post attachments.
@@ -31,7 +30,7 @@ public interface AttachmentGateway {
 
     /**
      * Inserts an attachment into the attachment storage.
-     *
+     * <p>
      * Sets the ID of {@ode attachment} that was assigned upon insertion by the attachment storage.
      *
      * @param attachment The attachment to insert.

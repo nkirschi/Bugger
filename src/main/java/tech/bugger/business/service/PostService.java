@@ -5,6 +5,7 @@ import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Post;
+import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
@@ -41,7 +42,7 @@ public class PostService {
     /**
      * The current application settings.
      */
-    private ApplicationSettings applicationSettings;
+    private final ApplicationSettings applicationSettings;
 
     /**
      * Transaction manager used for creating transactions.
@@ -101,7 +102,7 @@ public class PostService {
     /**
      * Checks whether a list of attachments is allowed for a post according to the current application configuration.
      *
-      * @param attachments The list of attachments to check the validity of.
+     * @param attachments The list of attachments to check the validity of.
      * @return Whether the list of attachments is valid.
      */
     public boolean isAttachmentListValid(final List<Attachment> attachments) {
@@ -139,7 +140,7 @@ public class PostService {
      * @return {@code true} iff creating the post succeeded.
      * @throws TransactionException The transaction could not be committed successfully.
      */
-    boolean createPostWithTransaction(final Post post, final Transaction tx) {
+    boolean createPostWithTransaction(final Post post, final Transaction tx) throws TransactionException {
         boolean valid = isAttachmentListValid(post.getAttachments());
         if (valid) {
             tx.newPostGateway().create(post);
@@ -179,7 +180,26 @@ public class PostService {
      * @param post The post to be deleted.
      */
     public void deletePost(final Post post) {
-
+        if (post == null) {
+            log.error("Cannot delete post null.");
+            throw new IllegalArgumentException("Post cannot be null.");
+        }
+        Report report = post.getReport().get();
+        try (Transaction tx = transactionManager.begin()) {
+            Post firstPost = tx.newPostGateway().getFirstPost(report);
+            if (post.equals(firstPost)) {
+                tx.newReportGateway().delete(report);
+            } else {
+                tx.newPostGateway().delete(post);
+            }
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Post to be deleted " + post + " not found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when deleting post " + post + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -251,7 +271,14 @@ public class PostService {
      * @return {@code true} if the user is allowed to modify the post, {@code false} otherwise.
      */
     public boolean isPrivileged(final User user, final Post post) {
-        return false;
+        // TODO add moderator check, ban check
+        if (user == null) {
+            return false;
+        } else if (user.isAdministrator()) {
+            return true;
+        } else {
+            return user.equals(post.getAuthorship().getCreator());
+        }
     }
 
 }

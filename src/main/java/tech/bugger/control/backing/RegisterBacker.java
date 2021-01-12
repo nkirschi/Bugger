@@ -96,6 +96,7 @@ public class RegisterBacker {
     void init() {
         if (session.getUser() != null) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+            return;
         }
 
         user = new User();

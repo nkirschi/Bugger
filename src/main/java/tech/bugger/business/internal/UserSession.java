@@ -35,8 +35,6 @@ public class UserSession implements Serializable {
      */
     @PostConstruct
     public void init() {
-        // TODO: fctx is null whenever session was not created by JSF, but by a servlet request.
-        // The locale must not be null, otherwise the resource bundle will fail. Do we handle it like this?
         FacesContext fctx = FacesContext.getCurrentInstance();
         if (fctx != null) {
             locale = fctx.getExternalContext().getRequestLocale();

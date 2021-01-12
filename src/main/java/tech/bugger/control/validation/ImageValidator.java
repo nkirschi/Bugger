@@ -1,7 +1,5 @@
 package tech.bugger.control.validation;
 
-import tech.bugger.business.exception.CorruptImageException;
-import tech.bugger.business.service.PostService;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.util.Log;
 
@@ -14,10 +12,7 @@ import javax.faces.validator.ValidatorException;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.servlet.http.Part;
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
@@ -72,14 +67,14 @@ public class ImageValidator implements Validator<Part> {
      * @throws ValidatorException If validation fails.
      */
     @Override
-    public void validate(FacesContext fctx, UIComponent component, Part part) {
+    public void validate(final FacesContext fctx, final UIComponent component, final Part part) {
         if (part.getSize() > MAX_FILE_SIZE * 1000 * 1000) {
             String message = MessageFormat.format(messagesBundle.getString("file_validator.file_size_too_large"),
                     MAX_FILE_SIZE);
             throw new ValidatorException(new FacesMessage(message));
         }
 
-        /*try {
+        try {
             BufferedImage img = ImageIO.read(part.getInputStream());
             if (img == null) {
                 throw new ValidatorException(new FacesMessage(
@@ -93,7 +88,7 @@ public class ImageValidator implements Validator<Part> {
         } catch (IOException e) {
             throw new ValidatorException(new FacesMessage(
                     messagesBundle.getString("image_validator.image_corrupt")));
-        }*/
+        }
     }
 
 }

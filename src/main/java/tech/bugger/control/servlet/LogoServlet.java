@@ -1,12 +1,8 @@
 package tech.bugger.control.servlet;
 
 import tech.bugger.business.internal.ApplicationSettings;
-import tech.bugger.business.service.PostService;
-import tech.bugger.global.transfer.Attachment;
-import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,7 +35,7 @@ public class LogoServlet extends MediaServlet {
      * @param response The response to return to the client.
      */
     @Override
-    protected void handleRequest(HttpServletRequest request, HttpServletResponse response) {
+    protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response) {
         byte[] logo = applicationSettings.getOrganization().getLogo();
         if (logo == null) {
             log.debug("Organization logo does not exist.");

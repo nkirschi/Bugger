@@ -6,6 +6,7 @@ import java.io.Serial;
  * Exception indicating something went wrong when trying to store something in the database.
  */
 public class StoreException extends RuntimeException {
+
     @Serial
     private static final long serialVersionUID = -1850502033299171433L;
 
@@ -14,21 +15,19 @@ public class StoreException extends RuntimeException {
      */
     public StoreException() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
      * Constructs a {@link StoreException} with the specified detail message and cause.
-     *
+     * <p>
      * Note that the detail message associated with {@code cause} is <i>not</i> automatically incorporated in this
      * exception's detail message.
      *
      * @param message The detail message describing this particular exception.
-     * @param cause The cause for this particular exception.
+     * @param cause   The cause for this particular exception.
      */
-    public StoreException(String message, Throwable cause) {
+    public StoreException(final String message, final Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -36,9 +35,8 @@ public class StoreException extends RuntimeException {
      *
      * @param message The detail message describing this particular exception.
      */
-    public StoreException(String message) {
+    public StoreException(final String message) {
         super(message);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -47,10 +45,8 @@ public class StoreException extends RuntimeException {
      *
      * @param cause The cause for this particular exception.
      */
-    public StoreException(Throwable cause) {
+    public StoreException(final Throwable cause) {
         super(cause);
-        // TODO Auto-generated constructor stub
     }
-
 
 }

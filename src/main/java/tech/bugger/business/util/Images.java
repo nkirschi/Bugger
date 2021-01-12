@@ -1,24 +1,24 @@
 package tech.bugger.business.util;
 
-import tech.bugger.business.exception.CorruptImageException;
-import tech.bugger.global.util.Log;
-
-import javax.imageio.ImageIO;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import javax.imageio.ImageIO;
+import tech.bugger.business.exception.CorruptImageException;
 
 /**
  * Utility class for image processing.
  */
-public class Images {
+public final class Images {
 
     /**
-     * The {@link Log} instance associated with this class for logging purposes.
+     * Prevents instantiation of this utility class.
      */
-    private static final Log log = Log.forClass(Images.class);
+    private Images() {
+        throw new UnsupportedOperationException(); // for reflection abusers
+    }
 
     /**
      * The width of the thumbnail.

@@ -45,6 +45,7 @@ public class FileValidator implements Validator<Part> {
     /**
      * Constructs a new file validator with the necessary dependencies.
      *
+     * @param postService    The post service to use.
      * @param messagesBundle The resource bundle for feedback messages.
      */
     @Inject
@@ -62,7 +63,7 @@ public class FileValidator implements Validator<Part> {
      * @throws ValidatorException If validation fails.
      */
     @Override
-    public void validate(FacesContext fctx, UIComponent component, Part part) {
+    public void validate(final FacesContext fctx, final UIComponent component, final Part part) {
         if (part.getSize() > MAX_FILE_SIZE * 1000 * 1000) {
             String message = MessageFormat.format(messagesBundle.getString("image_validator.file_size_too_large"),
                     MAX_FILE_SIZE);
@@ -80,4 +81,5 @@ public class FileValidator implements Validator<Part> {
                     messagesBundle.getString("file_validator.file_corrupt")));
         }
     }
+
 }

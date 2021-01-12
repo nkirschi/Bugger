@@ -56,17 +56,17 @@ public class ReferenceVisitor extends AbstractVisitor {
     /**
      * The endpoint URL for a user reference.
      */
-    private static final String USER_ENDPOINT = "/user/";
+    private static final String USER_ENDPOINT = "/profile?u=%1$s";
 
     /**
      * The endpoint URL for a post reference.
      */
-    private static final String POST_ENDPOINT = "/post/";
+    private static final String POST_ENDPOINT = "/report?p=%1$s#post-%1$s";
 
     /**
      * The endpoint URL for a report reference.
      */
-    private static final String REPORT_ENDPOINT = "/report/";
+    private static final String REPORT_ENDPOINT = "/report?id=%1$s";
 
     /**
      * Searches for references in {@link Text} nodes, extracts them and renders them as {@link Link} nodes.
@@ -131,7 +131,7 @@ public class ReferenceVisitor extends AbstractVisitor {
     private Node parseLink(final String sequence, final String refId, final String dest) {
         // Users can also contain other characters
         if (isInteger(refId) || (sequence.equals(USER_REFERENCE) && PATTERN_USER.matcher(refId).matches())) {
-            Link node = new Link(dest + refId, refId);
+            Link node = new Link(String.format(dest, refId), refId);
             node.appendChild(new Text(sequence + refId));
             return node;
         } else {

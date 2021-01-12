@@ -19,21 +19,21 @@ public interface NotificationGateway {
      * @return The number of notifications the user has received.
      * @throws NotFoundException The user could not be found.
      */
-    public int getNumberOfNotificationsForUser(User user) throws NotFoundException;
+    int getNumberOfNotificationsForUser(User user) throws NotFoundException;
 
     /**
      * Inserts a given notification into the notification storage.
      *
      * @param notification The notification to insert.
      */
-    public void createNotification(Notification notification);
+    void createNotification(Notification notification);
 
     /**
      * Inserts a whole list of notifications into the notification storage all at once.
      *
      * @param notifications The list of notifications to insert.
      */
-    public void createNotificationBulk(List<Notification> notifications);
+    void createNotificationBulk(List<Notification> notifications);
 
     /**
      * Retrieves a notification by its ID.
@@ -42,7 +42,7 @@ public interface NotificationGateway {
      * @return The notification identified by the ID.
      * @throws NotFoundException The notification could not be found.
      */
-    public Notification getNotificationByID(int id) throws NotFoundException;
+    Notification getNotificationByID(int id) throws NotFoundException;
 
     /**
      * Retrieves the list of a user's notifications that match the given selection criteria.
@@ -52,7 +52,7 @@ public interface NotificationGateway {
      * @return The list of the user's notifications that match {@code selection}.
      * @throws NotFoundException The user could not be found.
      */
-    public List<Notification> getNotificationsForUser(User user, Selection selection) throws NotFoundException;
+    List<Notification> getNotificationsForUser(User user, Selection selection) throws NotFoundException;
 
     /**
      * Updates a notification's attributes in the notification storage.
@@ -60,7 +60,7 @@ public interface NotificationGateway {
      * @param notification The notification to update.
      * @throws NotFoundException The notification could not be found.
      */
-    public void updateNotification(Notification notification) throws NotFoundException;
+    void updateNotification(Notification notification) throws NotFoundException;
 
     /**
      * Deletes a notification from the notification storage.
@@ -68,7 +68,7 @@ public interface NotificationGateway {
      * @param notification The notification to delete.
      * @throws NotFoundException The notification could not be found.
      */
-    public void deleteNotification(Notification notification) throws NotFoundException;
+    void deleteNotification(Notification notification) throws NotFoundException;
 
     /**
      * Marks a notification as read in the notification storage.
@@ -76,7 +76,7 @@ public interface NotificationGateway {
      * @param notification The notification to mark as read.
      * @throws NotFoundException The notification could not be found.
      */
-    public void markAsRead(Notification notification) throws NotFoundException;
+    void markAsRead(Notification notification) throws NotFoundException;
 
     /**
      * Marks a notification as sent in the notification storage.
@@ -84,6 +84,6 @@ public interface NotificationGateway {
      * @param notification The notification to mark as sent.
      * @throws NotFoundException The notification could not be found.
      */
-    public void markAsSent(Notification notification) throws NotFoundException;
+    void markAsSent(Notification notification) throws NotFoundException;
 
 }
