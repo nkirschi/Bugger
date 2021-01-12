@@ -1,47 +1,41 @@
 package tech.bugger.business.service;
 
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
+import javax.enterprise.event.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tech.bugger.LogExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.PostGateway;
 import tech.bugger.persistence.gateway.ReportGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.event.Event;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
 public class ReportServiceTest {
 
     private ReportService service;
-
-    private ReportService reportService;
 
     @Mock
     private NotificationService notificationService;
@@ -72,8 +66,6 @@ public class ReportServiceTest {
     public void setUp() {
         service = new ReportService(notificationService, postService, transactionManager, feedbackEvent,
                 ResourceBundleMocker.mock(""));
-        reportService = new ReportService(notificationService, postService, transactionManager, feedbackEvent,
-                ResourceBundleMocker.mock(""));
         List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
         testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
         testReport = new Report(200, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
@@ -85,7 +77,7 @@ public class ReportServiceTest {
     }
 
     @Test
-    public void testGetReportByIDWhenExists() throws Exception{
+    public void testGetReportByIDWhenExists() throws Exception {
         testReport.setId(100);
         doReturn(testReport).when(reportGateway).find(anyInt());
         assertEquals(testReport, service.getReportByID(100));
@@ -123,6 +115,7 @@ public class ReportServiceTest {
         assertFalse(service.updateReport(testReport));
     }
 
+    @Test
     public void testCreateReportWhenFine() throws Exception {
         doReturn(true).when(postService).createPostWithTransaction(any(), any());
         assertTrue(service.createReport(testReport, testFirstPost));
@@ -145,22 +138,83 @@ public class ReportServiceTest {
         verify(feedbackEvent).fire(any());
     }
 
-    public void testClose() {
+    @Test
+    public void testMarkDuplicateSuccess() {
+        assertTrue(service.markDuplicate(testReport, 100));
     }
 
     @Test
-    void open() {
+    public void testMarkDuplicateWhenSelfReference() throws Exception {
+        doThrow(SelfReferenceException.class).when(reportGateway).markDuplicate(testReport, testReport.getId());
+        assertFalse(service.markDuplicate(testReport, testReport.getId()));
+        verify(feedbackEvent).fire(any());
     }
 
     @Test
-    void deleteReport() {
+    public void testMarkDuplicateWhenNotFound() throws Exception {
+        doThrow(NotFoundException.class).when(reportGateway).markDuplicate(any(), anyInt());
+        assertFalse(service.markDuplicate(testReport, 100));
+        verify(feedbackEvent).fire(any());
     }
 
     @Test
-    void getNumberOfPosts() {
+    public void testMarkDuplicateWhenCommitFails() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertFalse(service.markDuplicate(testReport, 100));
+        verify(feedbackEvent).fire(any());
     }
 
     @Test
-    void getPostsFor() {
+    public void testUnmarkDuplicateSuccess() {
+        assertTrue(service.unmarkDuplicate(testReport));
     }
+
+    @Test
+    public void testUnmarkDuplicateWhenNotFound() throws Exception {
+        doThrow(NotFoundException.class).when(reportGateway).unmarkDuplicate(testReport);
+        assertFalse(service.unmarkDuplicate(testReport));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testUnmarkDuplicateWhenCommitFails() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertFalse(service.unmarkDuplicate(testReport));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetDuplicatesForSuccess() {
+        List<Report> reports = List.of(new Report(), new Report());
+        doReturn(reports).when(reportGateway).getSelectedDuplicates(any(), any());
+        assertEquals(reports, service.getDuplicatesFor(testReport, mock(Selection.class)));
+    }
+
+    @Test
+    public void testGetDuplicatesForWhenCommitFails() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertEquals(List.of(), service.getDuplicatesFor(testReport, mock(Selection.class)));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetNumberOfDuplicatesSuccess() throws Exception {
+        doReturn(2).when(reportGateway).countDuplicates(testReport);
+        assertEquals(2, service.getNumberOfDuplicates(testReport));
+    }
+
+    @Test
+    public void testGetNumberOfDuplicatesWhenNotFound() throws Exception {
+        doThrow(NotFoundException.class).when(reportGateway).countDuplicates(testReport);
+        assertEquals(0, service.getNumberOfDuplicates(testReport));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetNumberOfDuplicatesWhenCommitFails() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertEquals(0, service.getNumberOfDuplicates(testReport));
+        verify(feedbackEvent).fire(any());
+    }
+
 }

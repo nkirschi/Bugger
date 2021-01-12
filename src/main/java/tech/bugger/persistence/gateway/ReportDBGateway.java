@@ -210,7 +210,8 @@ public class ReportDBGateway implements ReportGateway {
             throw new IllegalArgumentException("Report ID must not be null.");
         }
 
-        int count = 0;
+        int count;
+
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) AS count FROM report r1 "
                 + "JOIN report r2 ON r1.duplicate_of = r2.id WHERE r2.id = ?")) {
             ResultSet rs = new StatementParametrizer(stmt)
@@ -227,6 +228,7 @@ public class ReportDBGateway implements ReportGateway {
             log.error("Error when counting posts of report " + report + ".", e);
             throw new StoreException("Error when counting posts of report " + report + ".", e);
         }
+
         return count;
     }
 
@@ -235,10 +237,12 @@ public class ReportDBGateway implements ReportGateway {
      */
     @Override
     public List<Report> getSelectedDuplicates(final Report report, final Selection selection) {
-        List<Report> selectedReports = new ArrayList<>();
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT r1.* FROM report r1 "
-                + "JOIN report r2 ON r1.duplicate_of = r2.id WHERE r2.id = ? "
-                + "ORDER BY r1.id LIMIT ? OFFSET ?")) {
+        List<Report> selectedDuplicates = new ArrayList<>();
+
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT r1.* FROM report r1"
+                + " JOIN report r2 ON r1.duplicate_of = r2.id WHERE r2.id = ?"
+                + " ORDER BY r1.id " + (selection.isAscending() ? "ASC" : "DESC")
+                + " LIMIT ? OFFSET ?")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(report.getId())
                     .integer(Pagitable.getItemLimit(selection))
@@ -247,13 +251,14 @@ public class ReportDBGateway implements ReportGateway {
 
             while (rs.next()) {
                 log.debug("Found a Duplicate!");
-                selectedReports.add(getReportFromResultSet(rs));
+                selectedDuplicates.add(getReportFromResultSet(rs));
             }
         } catch (SQLException | NotFoundException e) {
             log.error("Error while searching for duplicates of report with id " + report.getId(), e);
             throw new StoreException("Error while searching duplicates of report with id " + report.getId(), e);
         }
-        return selectedReports;
+
+        return selectedDuplicates;
     }
 
     /**

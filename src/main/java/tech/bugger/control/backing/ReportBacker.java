@@ -205,7 +205,7 @@ public class ReportBacker implements Serializable {
                 return reportService.getNumberOfPosts(report);
             }
         };
-        duplicates = new Paginator<>("", Selection.PageSize.SMALL) {
+        duplicates = new Paginator<>("ID", Selection.PageSize.SMALL) {
             @Override
             protected Iterable<Report> fetch() {
                 return reportService.getDuplicatesFor(report, getSelection());
@@ -341,7 +341,7 @@ public class ReportBacker implements Serializable {
      * Marks the report as a duplicate of another report. This automatically closes the report.
      */
     public void markDuplicate() {
-        if (duplicateOfID != null && reportService.markDuplicate(report, duplicateOfID)) {
+        if (duplicateOfID != null && isPrivileged() && reportService.markDuplicate(report, duplicateOfID)) {
             close();
             displayDialog(null);
         }
@@ -351,7 +351,7 @@ public class ReportBacker implements Serializable {
      * Removes the marking signifying that the report is a duplicate of another one.
      */
     public void unmarkDuplicate() {
-        if (reportService.unmarkDuplicate(report)) {
+        if (isPrivileged() && reportService.unmarkDuplicate(report)) {
             duplicateOfID = null;
         }
     }
