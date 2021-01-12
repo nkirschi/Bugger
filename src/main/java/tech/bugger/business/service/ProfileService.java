@@ -234,14 +234,14 @@ public class ProfileService {
      */
     public int getVotingWeightForUser(final User user) {
         int votingWeight = 0;
+
         if (user.getForcedVotingWeight() != null) {
             return user.getForcedVotingWeight();
         }
+
         int numPosts = getNumberOfPostsForUser(user);
         if (numPosts == 0) {
-            log.error("No voting weight could be calculated for the user with id " + user.getId()
-                    + " as the number of posts could not be calculated");
-            return votingWeight;
+            votingWeight = 1;
         } else {
             String[] votingDef = applicationSettings.getConfiguration().getVotingWeightDefinition().split(",");
             if (votingDef.length == 0) {
@@ -249,6 +249,7 @@ public class ProfileService {
                 feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
                 return votingWeight;
             }
+
             try {
                 int[] votingWeightDef = Arrays.stream(votingDef).mapToInt(Integer::parseInt).sorted().toArray();
                 votingWeight = calculateVotingWeight(numPosts, votingWeightDef);
@@ -257,6 +258,7 @@ public class ProfileService {
                 feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
             }
         }
+
         return votingWeight;
     }
 
@@ -413,6 +415,26 @@ public class ProfileService {
         }
 
         return user;
+    }
+
+    /**
+     * Counts the number of topics moderated by {@code user}.
+     *
+     * @param user The user to search for.
+     * @return The number of topics moderated by the given user.
+     */
+    public int getNumberOfModeratedTopics(final User user) {
+        int moderatedTopics = 0;
+
+        try (Transaction tx = transactionManager.begin()) {
+            moderatedTopics = tx.newUserGateway().getNumberOfModeratedTopics(user);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while counting the topics moderated by the user with id " + user.getId(), e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return moderatedTopics;
     }
 
     /**

@@ -413,4 +413,38 @@ public class TopicDBGateway implements TopicGateway {
         return topicTitles;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Topic> getModeratedTopics(final User user, final Selection selection) {
+        if (selection == null || user.getId() == null) {
+            log.error("The selection or user ID cannot be null!.");
+            throw new IllegalArgumentException("The selection or user ID cannot be null!.");
+        } else if (StringUtils.isBlank(selection.getSortedBy())) {
+            log.error("Error when trying to get topics sorted by nothing.");
+            throw new IllegalArgumentException("The selection needs to have a column to sort by.");
+        }
+
+        List<Topic> moderatedTopics = new ArrayList<>(Math.max(0, selection.getTotalSize()));
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT t.* FROM topic AS t, topic_moderation AS m "
+                + "WHERE t.id = m.topic AND m.moderator = ? LIMIT ? OFFSET ?;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(selection.getPageSize().getSize())
+                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
+                    .toStatement().executeQuery();
+
+            while (rs.next()) {
+                moderatedTopics.add(getTopicFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            log.error("Error while trying to load the topics moderated by the user with id " + user.getId(), e);
+            throw new StoreException("Error while trying to load the topics moderated by the user with id "
+                    + user.getId(), e);
+        }
+
+        return moderatedTopics;
+    }
+
 }

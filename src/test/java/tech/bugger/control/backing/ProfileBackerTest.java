@@ -10,7 +10,9 @@ import org.mockito.MockitoAnnotations;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
+import tech.bugger.business.service.TopicService;
 import tech.bugger.global.transfer.Language;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
 
 import javax.faces.application.Application;
@@ -24,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
@@ -38,6 +41,9 @@ public class ProfileBackerTest {
 
     @Mock
     private ProfileService profileService;
+
+    @Mock
+    private TopicService topicService;
 
     @Mock
     private UserSession session;
@@ -84,7 +90,10 @@ public class ProfileBackerTest {
         profileBacker.init();
         assertAll(
                 () -> assertEquals(user, profileBacker.getUser()),
-                () -> assertEquals(profileBacker.getDisplayDialog(), ProfileBacker.DialogType.NONE)
+                () -> assertEquals(profileBacker.getDisplayDialog(), ProfileBacker.DialogType.NONE),
+                () -> assertEquals(Selection.PageSize.SMALL,
+                        profileBacker.getModeratedTopics().getSelection().getPageSize()),
+                () -> assertEquals("title", profileBacker.getModeratedTopics().getSelection().getSortedBy())
         );
     }
 
@@ -120,9 +129,6 @@ public class ProfileBackerTest {
 
     @Test
     public void testInitKeyNotPresent() {
-        // Since ext.redirect is mocked, it just tries and then executes the rest of the method.
-        when(map.get(PARAMETER)).thenReturn(user.getUsername());
-        when(profileService.getUserByUsername(anyString())).thenReturn(user);
         profileBacker.init();
         verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
     }
@@ -131,9 +137,26 @@ public class ProfileBackerTest {
     public void testInitUsernameTooLong() {
         when(map.containsKey(PARAMETER)).thenReturn(true);
         when(map.get(PARAMETER)).thenReturn(LONG_USERNAME);
-        when(profileService.getUserByUsername(anyString())).thenReturn(user);
         profileBacker.init();
         verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
+    }
+
+    @Test
+    public void testInitUserNull() {
+        when(map.containsKey(PARAMETER)).thenReturn(true);
+        when(map.get(PARAMETER)).thenReturn(user.getUsername());
+        profileBacker.init();
+        verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
+    }
+
+    @Test
+    public void testInitUserBioNull() {
+        when(map.containsKey(PARAMETER)).thenReturn(true);
+        when(map.get(PARAMETER)).thenReturn(user.getUsername());
+        when(profileService.getUserByUsername(user.getUsername())).thenReturn(user);
+        user.setBiography(null);
+        profileBacker.init();
+        assertNull(profileBacker.getSanitizedBiography());
     }
 
     @Test

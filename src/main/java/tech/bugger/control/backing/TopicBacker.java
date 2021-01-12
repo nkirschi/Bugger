@@ -215,7 +215,7 @@ public class TopicBacker implements Serializable {
         closedReportShown = false;
         sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
 
-        moderators = new Paginator<>("username", Selection.PageSize.NORMAL) {
+        moderators = new Paginator<>("username", Selection.PageSize.SMALL) {
             @Override
             protected Iterable<User> fetch() {
                 return topicService.getSelectedModerators(topic, getSelection());
@@ -321,7 +321,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openDeleteDialog() {
-        displayDialog = DialogType.NONE;
+        displayDialog = DialogType.DELETE;
         return null;
     }
 
@@ -396,7 +396,10 @@ public class TopicBacker implements Serializable {
                     + "they had no moderator status!");
             return;
         }
-        topicService.makeModerator(userToBeModded, topic);
+
+        if (topicService.makeModerator(userToBeModded, topic)) {
+            displayDialog = DialogType.NONE;
+        }
     }
 
     /**
@@ -409,7 +412,10 @@ public class TopicBacker implements Serializable {
                     + "they had no moderator status!");
             return;
         }
-        topicService.removeModerator(userToBeModded, topic);
+
+        if (topicService.removeModerator(userToBeModded, topic)) {
+            displayDialog = DialogType.NONE;
+        }
     }
 
     /**

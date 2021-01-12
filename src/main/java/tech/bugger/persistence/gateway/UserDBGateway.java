@@ -227,8 +227,8 @@ public class UserDBGateway implements UserGateway {
     @Override
     public List<User> getSelectedModerators(final Topic topic, final Selection selection) throws NotFoundException {
         if (selection == null || topic.getId() == null) {
-            log.error("The selection or or topic ID cannot be null!.");
-            throw new IllegalArgumentException("The selection or or topic ID cannot be null!.");
+            log.error("The selection or topic ID cannot be null!.");
+            throw new IllegalArgumentException("The selection or topic ID cannot be null!.");
         } else if (StringUtils.isBlank(selection.getSortedBy())) {
             log.error("Error when trying to get moderators sorted by nothing.");
             throw new IllegalArgumentException("The selection needs to have a column to sort by.");
@@ -242,9 +242,11 @@ public class UserDBGateway implements UserGateway {
                     .integer(selection.getPageSize().getSize())
                     .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
                     .toStatement().executeQuery();
+
             while (rs.next()) {
                 moderators.add(getUserFromResultSet(rs));
             }
+
             if (moderators.size() == 0) {
                 log.warning("The topic with id " + topic.getId() + " has no moderators.");
                 throw new NotFoundException("The topic with id " + topic.getId() + " has no moderators.");
@@ -397,6 +399,34 @@ public class UserDBGateway implements UserGateway {
             throw new StoreException("Error while searching for number of posts of the user with id "
                     + user.getId(), e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getNumberOfModeratedTopics(User user) {
+        if (user.getId() == null) {
+            throw new IllegalArgumentException("User ID may not be null!");
+        }
+
+        int moderatedTopics = 0;
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(t.topic) AS num_topics FROM "
+                + "topic_moderation AS t WHERE t.moderator = ?;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .toStatement().executeQuery();
+
+            if (rs.next()) {
+                moderatedTopics = rs.getInt("num_topics");
+            }
+        } catch (SQLException e) {
+            log.error("Error while counting the moderated topics for the user with id " + user.getId(), e);
+            throw new StoreException("Error while counting the moderated topics for the user with id " + user.getId(),
+                    e);
+        }
+
+        return moderatedTopics;
     }
 
     /**

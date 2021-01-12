@@ -23,7 +23,12 @@ import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.spy;
@@ -411,6 +416,49 @@ public class UserDBGatewayTest {
         assertThrows(StoreException.class,
                 () -> new UserDBGateway(connSpy).getSelectedModerators(topic, selection)
         );
+    }
+
+    @Test
+    public void testGetNumberOfModeratedTopics() throws NotFoundException {
+        userGateway.createUser(user);
+        topicGateway.createTopic(topic);
+        topicGateway.promoteModerator(topic, user);
+        assertEquals(1, userGateway.getNumberOfModeratedTopics(user));
+    }
+
+    @Test
+    public void testGetNumberOfModeratedTopicsNone() {
+        userGateway.createUser(user);
+        assertEquals(0, userGateway.getNumberOfModeratedTopics(user));
+    }
+
+    @Test
+    public void testGetNumberOfModeratorsUserIdNull() {
+        user.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.getNumberOfModeratedTopics(user)
+        );
+    }
+
+    @Test
+    public void testGetNumberOfModeratorsSQLException() throws SQLException {
+        Connection connSpy = spy(connection);
+        doThrow(SQLException.class).when(connSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new UserDBGateway(connSpy).getNumberOfModeratedTopics(user)
+        );
+    }
+
+    @Test
+    public void testGetNumberOfModeratorsNoResult() throws SQLException {
+        ResultSet resultSetMock = mock(ResultSet.class);
+        PreparedStatement stmtMock = mock(PreparedStatement.class);
+        Connection connectionSpy = spy(connection);
+        doReturn(false).when(resultSetMock).next();
+        doReturn(resultSetMock).when(stmtMock).executeQuery();
+        doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
+        assertEquals(0, new UserDBGateway(connectionSpy).getNumberOfModeratedTopics(user));
+        reset(connectionSpy, stmtMock);
     }
 
 }

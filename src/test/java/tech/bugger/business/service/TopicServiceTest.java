@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import tech.bugger.LogExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Language;
@@ -26,11 +27,16 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@ExtendWith(LogExtension.class)
 class TopicServiceTest {
 
     private TopicService topicService;
@@ -162,17 +168,43 @@ class TopicServiceTest {
     }
 
     @Test
-    public void testMakeModeratorNotFound() throws NotFoundException {
+    public void testMakeModeratorIsAdmin() throws NotFoundException {
+        user.setAdministrator(true);
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        topicService.makeModerator(user.getUsername(), testTopic1);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testMakeModeratorUserNotFound() throws NotFoundException {
         doThrow(NotFoundException.class).when(userGateway).getUserByUsername(user.getUsername());
         topicService.makeModerator(user.getUsername(), testTopic1);
         verify(feedbackEvent).fire(any());
     }
 
     @Test
-    public void testMakeModeratorTransactionException() throws TransactionException {
+    public void testMakeModeratorPromoteNotFound() throws NotFoundException {
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        doThrow(NotFoundException.class).when(topicGateway).promoteModerator(testTopic1, user);
+        assertFalse(topicService.makeModerator(user.getUsername(), testTopic1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testMakeModeratorTransactionException() throws TransactionException, NotFoundException {
         doThrow(TransactionException.class).when(tx).commit();
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
         topicService.makeModerator(user.getUsername(), testTopic1);
         verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testMakeModeratorTransactionExceptionUserAdmin() throws TransactionException, NotFoundException {
+        doThrow(TransactionException.class).when(tx).commit();
+        user.setAdministrator(true);
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        topicService.makeModerator(user.getUsername(), testTopic1);
+        verify(feedbackEvent, times(2)).fire(any());
     }
 
     @Test
@@ -191,6 +223,14 @@ class TopicServiceTest {
     }
 
     @Test
+    public void testRemoveModeratorUserAdmin() throws NotFoundException {
+        user.setAdministrator(true);
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        topicService.removeModerator(user.getUsername(), testTopic1);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
     public void testRemoveModeratorNotFound() throws NotFoundException {
         doThrow(NotFoundException.class).when(userGateway).getUserByUsername(any());
         topicService.removeModerator(user.getUsername(), testTopic1);
@@ -198,8 +238,9 @@ class TopicServiceTest {
     }
 
     @Test
-    public void testRemoveModeratorTransactionException() throws TransactionException {
+    public void testRemoveModeratorTransactionException() throws TransactionException, NotFoundException {
         doThrow(TransactionException.class).when(tx).commit();
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
         topicService.removeModerator(user.getUsername(), testTopic1);
         verify(feedbackEvent).fire(any());
     }
@@ -263,6 +304,24 @@ class TopicServiceTest {
     public void testIsModeratorTransactionException() throws TransactionException {
         doThrow(TransactionException.class).when(tx).commit();
         assertFalse(topicService.isModerator(user, testTopic1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetModeratedTopics() {
+        List<Topic> topics = new ArrayList<>();
+        topics.add(testTopic1);
+        topics.add(testTopic2);
+        topics.add(testTopic3);
+        when(topicGateway.getModeratedTopics(user, testSelection)).thenReturn(topics);
+        assertEquals(topics, topicService.getModeratedTopics(user, testSelection));
+        verify(topicGateway).getModeratedTopics(user, testSelection);
+    }
+
+    @Test
+    public void testGetModeratedTopicsTransactionException() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertTrue(topicService.getModeratedTopics(user, testSelection).isEmpty());
         verify(feedbackEvent).fire(any());
     }
 

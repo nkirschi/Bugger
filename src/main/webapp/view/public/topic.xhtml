@@ -5,7 +5,8 @@
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:b="http://tech.bugger/tags">
+      xmlns:b="http://tech.bugger/tags"
+      xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
 
 <ui:composition template="/WEB-INF/template/main.xhtml">
     <ui:param name="title" value="#{(labels.topic_page).concat(': ').concat(topicBacker.topic.title)}"/>
@@ -13,19 +14,100 @@
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
     <ui:define name="content">
+
+        <!-- Renders the popup dialog to promote a user to a moderator. -->
+        <h:form id="f-promote-mod" rendered="#{topicBacker.displayDialog == 'MOD'}">
+            <h:panelGroup layout="block" styleClass="row">
+                <h:panelGroup layout="block" styleClass="col-sm-2"/>
+                <h:panelGroup layout="block" styleClass="col-sm-8">
+                    <h:panelGroup id="p-promote-mod" layout="block" styleClass="row">
+                        <h:panelGroup layout="block" styleClass="col-sm-12">
+                            <h:outputText id="ot-promote-mod" styleClass="h2" value="#{labels.topic_promote_mod}"/>
+                            <h:outputText id="ot-promote-mod-info" value="#{labels.topic_promote_mod_info}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup id="p-username" layout="block" styleClass="row align-center">
+                        <h:panelGroup id="p-username-label" layout="block" styleClass="col-sm-3">
+                            <h:outputLabel id="ol-username" value="#{labels.username}" for="it-username"/>
+                        </h:panelGroup>
+                        <h:panelGroup id="p-username-input" layout="block" styleClass="col-sm-6">
+                            <h:inputText id="it-username" value="#{topicBacker.userToBeModded}" required="true"
+                                         a:maxlength="#{C.USERNAME_MAX}">
+                                <f:validateLength maximum="#{C.USERNAME_MAX}"/>
+                            </h:inputText>
+                        </h:panelGroup>
+                        <h:panelGroup id="p-username-message" layout="block" styleClass="col-sm-3">
+                            <h:message for="it-username"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" styleClass="row align-center">
+                        <h:panelGroup layout="block" styleClass="col-sm-12">
+                            <h:commandButton id="cb-promote" value="#{labels.topic_promote_mod}"
+                                             action="#{topicBacker.makeModerator}" styleClass="button"/>
+                            <h:commandButton id="cb-abort-promote" value="#{labels.abort}" styleClass="button"
+                                             action="#{topicBacker.closeDialog}" immediate="true"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="col-sm-2"/>
+            </h:panelGroup>
+        </h:form>
+
+        <!-- Renders the popup dialog to demote a moderator. -->
+        <h:form id="f-demote-mod" rendered="#{topicBacker.displayDialog == 'UNMOD'}">
+            <h:panelGroup layout="block" styleClass="row">
+                <h:panelGroup layout="block" styleClass="col-sm-2"/>
+                <h:panelGroup layout="block" styleClass="col-sm-8">
+                    <h:panelGroup id="p-demote-mod" layout="block" styleClass="row">
+                        <h:panelGroup layout="block" styleClass="col-sm-12">
+                            <h:outputText id="ot-deomote-mod" styleClass="h2" value="#{labels.topic_demote_mod}"/>
+                            <h:outputText id="ot-deomote-mod-info" value="#{labels.topic_demote_mod_info}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup id="p-username-mod" layout="block" styleClass="row align-center">
+                        <h:panelGroup id="p-username-mod-label" layout="block" styleClass="col-sm-3">
+                            <h:outputLabel id="ol-username-mod" value="#{labels.username}" for="it-username-mod"/>
+                        </h:panelGroup>
+                        <h:panelGroup id="p-username-mod-input" layout="block" styleClass="col-sm-6">
+                            <h:inputText id="it-username-mod" value="#{topicBacker.userToBeModded}" required="true"
+                                         a:maxlength="#{C.USERNAME_MAX}">
+                                <f:validateLength maximum="#{C.USERNAME_MAX}"/>
+                            </h:inputText>
+                        </h:panelGroup>
+                        <h:panelGroup id="p-username-mod-message" layout="block" styleClass="col-sm-3">
+                            <h:message for="it-username-mod"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" styleClass="row align-center">
+                        <h:panelGroup layout="block" styleClass="col-sm-12">
+                            <h:commandButton id="cb-demote" value="#{labels.topic_demote_mod}"
+                                             action="#{topicBacker.removeModerator}" styleClass="button"/>
+                            <h:commandButton id="cb-abort-demote" value="#{labels.abort}" styleClass="button"
+                                             action="#{topicBacker.closeDialog}" immediate="true"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="col-sm-2"/>
+            </h:panelGroup>
+        </h:form>
+
         <h:form id="f-topic">
             <h:panelGroup class="row" layout="block">
-                <h:panelGroup class="col-sm-2" layout="block"/>
-                <h:panelGroup class="col-sm-8" layout="block">
-                    <h:outputLabel value="#{labels.description}:&nbsp;"/>
-                    <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
-                    <h:panelGroup class="row" layout="block">
-                        <!-- rendered="#{userSession.user.administrator}" -->
-                        <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button" value="#{labels.delete_topic}"/>
-                        <!-- rendered="#{userSession.user.administrator}" -->
-                        <h:button id="b-edit" outcome="/restr/topic-edit.xhtml" value="#{labels.edit_topic}">
-                            <ui:param name="topic" value="#{topicBacker.topicID}"/>
-                        </h:button>
+                <h:panelGroup class="col-sm-12" layout="block">
+                    <h:panelGroup layout="block" styleClass="row">
+                        <h:panelGroup layout="block" styleClass="col-sm-9">
+                            <h:outputLabel value="#{labels.description}:&nbsp;"/>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="col-sm-3 align-right">
+                            <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button" value="#{labels.delete_topic}" rendered="#{userSession.user.administrator}"/>
+                            <!-- TODO say no to buttons -->
+                            <h:button id="b-edit" outcome="/restr/topic-edit.xhtml" value="#{labels.edit_topic}" rendered="#{userSession.user.administrator}">
+                                <ui:param name="topic" value="#{topicBacker.topicID}"/>
+                            </h:button>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" styleClass="row">
+                        <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
                     </h:panelGroup>
                     <!-- statistik link -->
                     <h:panelGroup class="row" layout="block">
@@ -37,12 +119,41 @@
                         <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"/>
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block">
-                        <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}" styleClass="button" value="#{labels.apply_filter}"/>
+                        <h:panelGroup layout="block" styleClass="col-sm-12">
+                            <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}" styleClass="button" value="#{labels.apply_filter}"/>
+                        </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:panelGroup class="col-sm-2" layout="block"/>
             </h:panelGroup>
         </h:form>
+
+        <!-- A paginated list of moderators for this topic. -->
+        <h:outputText id="ot-moderators" styleClass="h2" value="#{labels.topic_moderators}"/>
+        <h:panelGroup class="row" layout="block" id="p-moderators">
+            <h:panelGroup layout="block" id="p-moderators-pagination" styleClass="col-sm-9">
+                <b:pagitable paginator="#{topicBacker.moderators}" simple="true">
+                    <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
+                    <h:column>
+                        <h:link value="#{var.username}" outcome="pretty:profile">
+                            <f:param name="u" value="#{var.username}"/>
+                        </h:link>
+                    </h:column>
+                </b:pagitable>
+            </h:panelGroup>
+            <h:panelGroup id="p-moderator-status" layout="block" styleClass="col-sm-3">
+                <h:form id="f-moderator-status">
+                    <h:commandLink id="l-promote" action="#{topicBacker.openModDialog}" styleClass="button"
+                                   rendered="#{topicBacker.moderator}">
+                        <h:graphicImage id="g-promote" value="/resources/images/add.png" alt="Button to promote moderators"/>
+                    </h:commandLink>
+                    <h:commandLink id="l-demote" action="#{topicBacker.openUnmodDialog}" styleClass="button"
+                                   rendered="#{topicBacker.moderator and topicBacker.moderators.selection.totalSize gt 0}">
+                        <h:graphicImage id="g-demote" value="/resources/images/delete.png" alt="Button to demote moderators"/>
+                    </h:commandLink>
+                </h:form>
+            </h:panelGroup>
+        </h:panelGroup>
+
         <h:panelGroup class="row" layout="block">
             <h:panelGroup class="col-sm-12" layout="block">
                 <b:pagitable paginator="#{topicBacker.reports}">
@@ -82,8 +193,8 @@
                         <h:outputText value="#{labels.delete_affirm}"/>
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block">
-                        <h:commandButton id="cb-delTopic" action="#{topicBacker.delete}" styleClass="button" value="#{labels.delete}" immediate="true"/>
-                        <h:commandButton id="cb-abortDelTopic" action="#{topicBacker.closeDialog}" styleClass="button" value="#{labels.cancel}" immediate="true"/>
+                        <h:commandButton id="cb-delTopic" action="#{topicBacker.delete}" styleClass="button" value="#{labels.delete}"/>
+                        <h:commandButton id="cb-abortDelTopic" action="#{topicBacker.closeDialog}" styleClass="button" value="#{labels.cancel}"/>
                     </h:panelGroup>
                 </h:panelGroup>
             <h:panelGroup class="col-sm-4" layout="block"/>

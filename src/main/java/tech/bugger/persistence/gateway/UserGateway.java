@@ -143,4 +143,12 @@ public interface UserGateway {
      */
     void deleteUser(User user) throws NotFoundException;
 
+    /**
+     * Retrieves the number of topics where a user has moderator status.
+     *
+     * @param user The user whose moderated topics are to be counted.
+     * @return The number of topics that {@code user} is moderating.
+     */
+    int getNumberOfModeratedTopics(User user);
+
 }

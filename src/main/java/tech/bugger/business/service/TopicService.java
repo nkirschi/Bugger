@@ -86,19 +86,26 @@ public class TopicService {
      *
      * @param username The username of the user to be made a moderator.
      * @param topic    The topic which the user is to be made a moderator of.
+     * @return {@code true} if the user has successfully been promoted to a moderator or {@code false} if not.
      */
-    public void makeModerator(final String username, final Topic topic) {
+    public boolean makeModerator(final String username, final Topic topic) {
         try (Transaction tx = transactionManager.begin()) {
             UserGateway gateway = tx.newUserGateway();
             User user = gateway.getUserByUsername(username);
-            if (gateway.isModerator(user, topic)) {
+
+            if (gateway.isModerator(user, topic) || user.isAdministrator()) {
                 log.debug("The user with id " + user.getId() + " is already a moderator of the topic with id "
                         + topic.getId());
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("is_moderator"), Feedback.Type.INFO));
+                tx.commit();
             } else {
                 tx.newTopicGateway().promoteModerator(topic, user);
+                tx.commit();
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("operation_successful"),
+                        Feedback.Type.INFO));
+                return true;
             }
-            tx.commit();
+
         } catch (NotFoundException e) {
             log.error("The user with the username " + username + " or the topic with id " + topic.getId()
                     + " could not be found.", e);
@@ -108,6 +115,8 @@ public class TopicService {
                     + "topic with id " + topic.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
+        return false;
     }
 
     /**
@@ -115,26 +124,47 @@ public class TopicService {
      *
      * @param username  The username of the user who is about to lose moderator privileges.
      * @param topic The topic which the user is a moderator of.
+     * @return {@code true} if the user has successfully been demoted as a moderator or {@code false} if not.
      */
-    public void removeModerator(final String username, final Topic topic) {
+    public boolean removeModerator(final String username, final Topic topic) {
         try (Transaction tx = transactionManager.begin()) {
-            User user = tx.newUserGateway().getUserByUsername(username);
+
+            User user;
+
+            try {
+                user = tx.newUserGateway().getUserByUsername(username);
+            } catch (NotFoundException e) {
+                log.error("The user with the username " + username + " could not be found.", e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+                return false;
+            }
+
+            if (user.isAdministrator()) {
+                log.debug("An administrator cannot be demoted as a moderator.");
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("mod_admin"), Feedback.Type.WARNING));
+                tx.commit();
+                return false;
+            }
+
             try {
                 tx.newTopicGateway().demoteModerator(topic, user);
+                tx.commit();
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("operation_successful"),
+                        Feedback.Type.INFO));
+                return true;
             } catch (NotFoundException e) {
                 log.warning("No moderator with the username " + username + " could be found for the topic with id "
                         + topic.getId(), e);
-                feedbackEvent.fire(new Feedback(messagesBundle.getString("no_mod_found"), Feedback.Type.INFO));
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("no_mod_found"), Feedback.Type.WARNING));
             }
-            tx.commit();
-        } catch (NotFoundException e) {
-            log.error("The user with the username " + username + " could not be found.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+
         } catch (TransactionException e) {
             log.error("Error while promoting the user with the username " + username + " to a moderator for the "
                     + "topic with id " + topic.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
+        return false;
     }
 
     /**
@@ -473,6 +503,25 @@ public class TopicService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return topicTitles;
+    }
+
+    /**
+     * Returns all topics moderated by the given user for a given selection.
+     *
+     * @param user The user in question.
+     * @param selection The given selection.
+     * @return A list of topics moderated by the user.
+     */
+    public List<Topic> getModeratedTopics(final User user, final Selection selection) {
+        List<Topic> moderatedTopics = Collections.emptyList();
+        try (Transaction tx = transactionManager.begin()) {
+            moderatedTopics = tx.newTopicGateway().getModeratedTopics(user, selection);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while loading the topics moderated by the user with id " + user.getId(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return moderatedTopics;
     }
 
 }

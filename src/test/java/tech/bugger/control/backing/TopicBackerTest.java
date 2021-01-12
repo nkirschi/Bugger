@@ -85,6 +85,12 @@ public class TopicBackerTest {
     }
 
     @Test
+    public void testOpenDeleteDialog() {
+        topicBacker.openDeleteDialog();
+        assertEquals(TopicBacker.DialogType.DELETE, topicBacker.getDisplayDialog());
+    }
+
+    @Test
     public void testCloseDialog() {
         topicBacker.setDisplayDialog(TopicBacker.DialogType.BAN);
         topicBacker.closeDialog();
@@ -108,6 +114,13 @@ public class TopicBackerTest {
     }
 
     @Test
+    public void testIsModeratorNoModerator() {
+        topicBacker.setTopic(topic);
+        when(session.getUser()).thenReturn(user);
+        assertFalse(topicBacker.isModerator());
+    }
+
+    @Test
     public void testIsModeratorUserNull() {
         topicBacker.setTopic(topic);
         assertFalse(topicBacker.isModerator());
@@ -119,7 +132,9 @@ public class TopicBackerTest {
         topicBacker.setUserToBeModded(USERNAME);
         topicBacker.setTopic(topic);
         when(session.getUser()).thenReturn(user);
+        when(topicService.makeModerator(USERNAME, topic)).thenReturn(true);
         topicBacker.makeModerator();
+        assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog());
         verify(topicService).makeModerator(USERNAME, topic);
     }
 
@@ -132,12 +147,26 @@ public class TopicBackerTest {
     }
 
     @Test
+    public void testMakeModeratorUnsuccessful() {
+        user.setAdministrator(true);
+        topicBacker.setUserToBeModded(USERNAME);
+        topicBacker.setTopic(topic);
+        topicBacker.setDisplayDialog(TopicBacker.DialogType.MOD);
+        when(session.getUser()).thenReturn(user);
+        topicBacker.makeModerator();
+        assertEquals(TopicBacker.DialogType.MOD, topicBacker.getDisplayDialog());
+        verify(topicService).makeModerator(USERNAME, topic);
+    }
+
+    @Test
     public void testRemoveModerator() {
         user.setAdministrator(true);
         topicBacker.setUserToBeModded(USERNAME);
         topicBacker.setTopic(topic);
         when(session.getUser()).thenReturn(user);
+        when(topicService.removeModerator(USERNAME, topic)).thenReturn(true);
         topicBacker.removeModerator();
+        assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog());
         verify(topicService).removeModerator(USERNAME, topic);
     }
 
@@ -147,6 +176,18 @@ public class TopicBackerTest {
         topicBacker.setTopic(topic);
         topicBacker.removeModerator();
         verify(topicService, times(0)).removeModerator(USERNAME, topic);
+    }
+
+    @Test
+    public void testRemoveModeratorUnsuccessful() {
+        user.setAdministrator(true);
+        topicBacker.setUserToBeModded(USERNAME);
+        topicBacker.setTopic(topic);
+        topicBacker.setDisplayDialog(TopicBacker.DialogType.UNMOD);
+        when(session.getUser()).thenReturn(user);
+        topicBacker.removeModerator();
+        assertEquals(TopicBacker.DialogType.UNMOD, topicBacker.getDisplayDialog());
+        verify(topicService).removeModerator(USERNAME, topic);
     }
 
 }
