@@ -84,6 +84,21 @@ public class StatisticsBacker implements Serializable {
     private ReportCriteria reportCriteria;
 
     /**
+     * The top ten reports.
+     */
+    private List<TopReport> topReports;
+
+    /**
+     * The top ten users.
+     */
+    private List<TopUser> topUsers;
+
+    /**
+     * The available topic titles.
+     */
+    private List<String> topicTitles;
+
+    /**
      * Constructs a new statistics page backing bean with the necessary dependencies.
      *
      * @param statisticsService The statistics service to use.
@@ -110,23 +125,26 @@ public class StatisticsBacker implements Serializable {
     }
 
     /**
-     * Initializes the statistics page. The total number of reports, average number of posts per report and average time
-     * a report remains open are shown system-wide by default. If the user navigated to the statistics page from the
-     * page of a particular topic, those statistics are restricted to reports in that particular topic instead.
-     * Additionally, those statistics are not restricted to a certain time frame by default.
+     * Constructs a new statistics page.
      *
-     * Furthermore, a list with the ten reports that have gained the most relevance in the last 24 hours is shown.
-     * Another list contains the ten users with the greatest sums of the relevance scores of their reports. By default,
-     * that second list is not restricted to a certain time frame for the creation date of the reports.
+     * If a topic ID is given as request parameter, the criteria are restricted to that topic.
      */
     @PostConstruct
     public void init() {
+        reportCriteria.setTopic(parseTopicParameter());
+        topReports = statisticsService.topTenReports();
+        topUsers = statisticsService.topTenUsers();
+        topicTitles = topicService.discoverTopics();
+        topicTitles.add(0, ""); // empty string for no restriction to topic (JSF doesn't like null)
+    }
+
+    private String parseTopicParameter() {
         String topicId = ectx.getRequestParameterMap().get("t");
         if (topicId != null) {
             try {
                 Topic topic = topicService.getTopicByID(Integer.parseInt(topicId));
                 if (topic != null) {
-                    reportCriteria.setTopic(topic.getTitle());
+                    return topic.getTitle();
                 } else {
                     log.warning("Request parameter t=" + topicId + " is not the ID of an existing topic.");
                 }
@@ -134,6 +152,7 @@ public class StatisticsBacker implements Serializable {
                 log.warning("Request parameter t=" + topicId + " is not an integer.", e);
             }
         }
+        return "";
     }
 
     /**
@@ -185,22 +204,22 @@ public class StatisticsBacker implements Serializable {
     }
 
     /**
+     * Returns the ten reports that have gained the most relevance in the last 24 hours system-wide.
+     *
+     * @return The top ten reports.
+     */
+    public List<TopReport> getTopReports() {
+        return topReports;
+    }
+
+    /**
      * Returns the ten users with the most relevance summed up over their created reports, either all-time or for a
      * specific time frame regarding the creation date of the reports.
      *
      * @return The top ten users.
      */
     public List<TopUser> getTopUsers() {
-        return statisticsService.topTenUsers();
-    }
-
-    /**
-     * Returns the ten reports that have gained the most relevance in the last 24 hours system-wide.
-     *
-     * @return The top ten reports.
-     */
-    public List<TopReport> getTopReports() {
-        return statisticsService.topTenReports();
+        return topUsers;
     }
 
     /**
@@ -209,8 +228,6 @@ public class StatisticsBacker implements Serializable {
      * @return A list of all topic titles.
      */
     public List<String> getTopicTitles() {
-        List<String> topicTitles = topicService.discoverTopics();
-        topicTitles.add(0, ""); // empty string for no restriction to topic (JSF doesn't like null)
         return topicTitles;
     }
 
