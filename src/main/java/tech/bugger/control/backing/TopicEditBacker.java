@@ -14,21 +14,28 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * Backing bean for the topic edit page.
  */
-@RequestScoped
+@ViewScoped
 @Named
-public class TopicEditBacker {
+public class TopicEditBacker implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -129399064226820566L;
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.
      */
-    private static final Log log = Log.forClass(TopicEditBacker.class);
+    private static final
+    Log log = Log.forClass(TopicEditBacker.class);
 
     /**
      * The ID of the Topic to edit.
@@ -92,10 +99,8 @@ public class TopicEditBacker {
         }
         if ((ext.getRequestParameterMap().containsKey("id")) && ext.getRequestParameterMap().get("id") != null) {
             try {
-                log.info("id found");
                 topicID = Integer.parseInt(fctx.getExternalContext().getRequestParameterMap().get("id"));
             } catch (NumberFormatException e) {
-                log.info("id invalid");
                 // Report ID parameter not valid.
                 redirectTo404Page();
                 return;
@@ -104,13 +109,10 @@ public class TopicEditBacker {
             sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
             create = false;
         } else {
-            log.info("No id found.");
             topic = new Topic();
             sanitizedDescription = "";
             create = true;
         }
-
-        log.info("init finished.");
     }
 
     /**
@@ -127,7 +129,6 @@ public class TopicEditBacker {
      * @return The page to navigate to.
      */
     public String saveChanges() {
-        log.debug("-----> saving Changes now!");
         boolean success = false;
         topic.setDescription(sanitizedDescription);
         if (create) {
@@ -136,7 +137,8 @@ public class TopicEditBacker {
             success = topicService.updateTopic(topic);
         }
         if (success) {
-            return "view/public/topic.xhtml?id=" + topic.getId();
+            log.debug(topic.toString());
+            return "/faces/view/public/topic.xhtml?id=" + topic.getId();
         } else {
             return "error";
         }

@@ -176,7 +176,6 @@ public class TopicBacker implements Serializable {
         try {
             topicID = Integer.parseInt(ext.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
-            log.info("---------> t = " + ext.getRequestParameterMap().get("id"));
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
         topic = topicService.getTopicByID(topicID);
