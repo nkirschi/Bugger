@@ -1,20 +1,41 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html
-        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition template="/WEB-INF/template/main.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:b="http://tech.bugger/tags">
 
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:b="http://tech.bugger/tags"
->
-<!--@elvariable id="var" type="tech.bugger.global.transfer.Post"-->
-<ui:composition template="/WEB-INF/template/main.xhtml">
     <ui:param name="title" value="#{reportBacker.report.title}"/>
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
+
+    <ui:define name="dialogs">
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{reportBacker.currentDialog == 'DUPLICATE'}">
+            <h:outputText value="#{labels.report_duplicate_dialog_title}" styleClass="h2"/>
+            <h:panelGroup layout="block" styleClass="mb-3">
+                <h:outputText id="ot-duplicate" value="#{labels.report_duplicate_dialog_desc}"/>
+            </h:panelGroup><!--converterMessage="#{messages.validate_nonnegative_number}"-->
+            <h:form id="f-duplicate">
+                <h:panelGroup layout="block" styleClass="mb-3 input-group">
+                    <h:outputLabel styleClass="input-group-text" id="ol-username-icon">#</h:outputLabel>
+                    <h:inputText id="it-duplicate" value="#{reportBacker.duplicateOfID}"
+                                 styleClass="form-control#{component.valid ? '' : ' border-danger'}"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="mb-3">
+                    <h:message for="it-duplicate" styleClass="text-danger"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="mb-3 d-flex justify-content-center">
+                    <h:commandButton id="cb-duplicate-submit" styleClass="hide" action="#{reportBacker.markDuplicate}"/>
+                    <h:commandButton id="cb-abort-duplicate" value="#{labels.cancel}"
+                                     styleClass="btn btn-secondary me-3" action="#{reportBacker.displayDialog(null)}"/>
+                    <h:commandButton id="cb-duplicate" value="#{labels.ok}" styleClass="btn btn-primary"
+                                     action="#{reportBacker.markDuplicate}"/>
+                </h:panelGroup>
+            </h:form>
+        </h:panelGroup>
+    </ui:define>
+
     <ui:define name="content">
         <h:form id="f-report">
             <h:panelGrid columns="5">
@@ -23,9 +44,26 @@
                               value="#{labels.status}: #{reportBacker.report.closingDate == null ? labels.report_status_open : labels.report_status_closed.concat(' ').concat(reportBacker.report.closingDate)}"/>
                 <h:outputText id="ot-type"
                               value="#{labels.report_type}: #{labels['report_type.'.concat(reportBacker.report.type)]}"/>
+                <h:outputLabel id="ol-duplicate-desc" rendered="#{reportBacker.report.duplicateOf != null}"
+                               value="#{labels.report_original}: "/>
+                <h:link id="l-duplicate" outcome="pretty:report" rendered="#{reportBacker.report.duplicateOf != null}"
+                        value="##{reportBacker.report.duplicateOf}">
+                    <f:param name="id" value="#{reportBacker.report.duplicateOf}"/>
+                </h:link>
                 <h:outputText id="ot-severity"
                               value="#{labels.report_severity}: #{labels['report_severity.'.concat(reportBacker.report.severity)]}"/>
                 <h:outputText id="ot-version" value="#{labels.report_version}: #{reportBacker.report.version}"/>
+                <h:outputLabel id="ol-duplicates" rendered="#{not empty reportBacker.duplicates}"
+                               value="#{labels.report_duplicates}: "/>
+                <b:pagitable id="p-duplicates" paginator="#{reportBacker.duplicates}" simple="true"
+                             rendered="#{not empty reportBacker.duplicates}">
+                    <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
+                    <h:column>
+                        <h:link outcome="pretty:report" value="##{var.id}">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
+                    </h:column>
+                </b:pagitable>
             </h:panelGrid>
             <h:panelGrid columns="2">
                 <h:outputText id="ot-creator"
@@ -47,6 +85,11 @@
                 <h:commandButton id="cb-edit-report" value="#{labels.edit}"/>
                 <h:commandButton id="cb-delete-report-dialog" action="#{reportBacker.displayDialog('DELETE_REPORT')}"
                                  value="#{labels.delete}"/>
+                <h:commandButton id="cb-mark-duplicate" action="#{reportBacker.displayDialog('DUPLICATE')}"
+                                 value="#{labels.report_mark_duplicate}"/>
+                <h:commandButton id="cb-unmark-duplicate" action="#{reportBacker.unmarkDuplicate}"
+                                 value="#{labels.report_unmark_duplicate}"
+                                 rendered="#{reportBacker.report.duplicateOf != null}"/>
             </h:panelGrid>
         </h:form>
 
@@ -108,9 +151,8 @@
             </h:panelGroup>
         </h:form>
 
-        <!-- TODO dialog for marking a duplicate -->
-
         <b:pagitable_post paginator="#{reportBacker.posts}">
+            <!--@elvariable id="var" type="tech.bugger.global.transfer.Post"-->
             <!-- https://stackoverflow.com/questions/18358604/how-to-use-el-with-uirepeat-var-in-id-attribute-of-a-jsf-component -->
             <div class="card" id="post-#{var.id}">
                 <h:panelGrid columns="2" styleClass="card-header">
@@ -175,5 +217,3 @@
         </b:pagitable_post>
     </ui:define>
 </ui:composition>
-
-</html>

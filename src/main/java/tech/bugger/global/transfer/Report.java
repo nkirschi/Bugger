@@ -106,16 +106,16 @@ public class Report implements Serializable {
     /**
      * Constructs a new report.
      *
-     * @param id The report ID.
-     * @param title The report title.
-     * @param type The report type.
-     * @param severity The report severity.
-     * @param version The version the report is associated with.
-     * @param authorship The report authorship metadata.
-     * @param closingDate The closing date of the report.
-     * @param duplicateOf The report this report is a duplicate of, loaded lazily.
+     * @param id              The report ID.
+     * @param title           The report title.
+     * @param type            The report type.
+     * @param severity        The report severity.
+     * @param version         The version the report is associated with.
+     * @param authorship      The report authorship metadata.
+     * @param closingDate     The closing date of the report.
+     * @param duplicateOf     The report this report is a duplicate of, loaded lazily.
      * @param forcedRelevance The relevance value to override the calculated relevance.
-     * @param topic The topic the report belongs to, loaded lazily.
+     * @param topic           The topic the report belongs to, loaded lazily.
      */
     public Report(final Integer id, final String title, final Type type, final Severity severity, final String version,
                   final Authorship authorship, final ZonedDateTime closingDate, final Integer duplicateOf,
@@ -137,6 +137,16 @@ public class Report implements Serializable {
      */
     public Report() {
         this(0, "", Type.BUG, Severity.MINOR, "", new Authorship(null, null, null, null), null, null, null, 0);
+    }
+
+    /**
+     * Constructs a new report as deep clone of the given report.
+     *
+     * @param report The report to clone.
+     */
+    public Report(final Report report) {
+        this(report.id, report.title, report.type, report.severity, report.version, report.authorship,
+                report.closingDate, report.duplicateOf, report.forcedRelevance, report.topic);
     }
 
     /**

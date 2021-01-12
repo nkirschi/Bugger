@@ -1,24 +1,24 @@
 package tech.bugger.business.service;
 
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.ResourceBundle;
 
 /**
  * Service providing methods related to reports. A {@code Feedback} event is fired, if unexpected circumstances occur.
@@ -131,17 +131,6 @@ public class ReportService {
             log.error("Error when opening report " + report + ".", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
-    }
-
-    /**
-     * Moves a report to another topic and notifies users about the movement. Notifications are handled by the {@code
-     * NotificationService}.
-     *
-     * @param report The report to be moved.
-     * @param topic  The topic where the report is to be moved to.
-     */
-    public void move(final Report report, final Topic topic) {
-
     }
 
     /**
@@ -293,18 +282,51 @@ public class ReportService {
      *
      * @param duplicate     The report which is a duplicate.
      * @param duplicateOfID The ID of the report the other report is a duplicate of.
+     * @return {@code true} iff updating the report succeeded.
      */
-    public void markDuplicate(final Report duplicate, final int duplicateOfID) {
+    public boolean markDuplicate(final Report duplicate, final int duplicateOfID) {
+        boolean valid = false;
 
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().markDuplicate(duplicate, duplicateOfID);
+            tx.commit();
+            valid = true;
+        } catch (SelfReferenceException e) {
+            log.error("Cannot mark report " + duplicate + " as original report of itself.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("self_reference_error"), Feedback.Type.ERROR));
+        } catch (NotFoundException e) {
+            log.error("Could not find report " + duplicate + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when marking report " + duplicate + " as duplicate.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return valid;
     }
 
     /**
      * Unmarks the report as a duplicate of another report.
      *
      * @param report The report to be unmarked.
+     * @return {@code true} iff updating the report succeeded.
      */
-    public void unmarkDuplicate(final Report report) {
+    public boolean unmarkDuplicate(final Report report) {
+        boolean valid = false;
 
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().unmarkDuplicate(report);
+            tx.commit();
+            valid = true;
+        } catch (NotFoundException e) {
+            log.error("Could not find report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when marking report " + report + " as duplicate.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return valid;
     }
 
     /**
@@ -362,6 +384,50 @@ public class ReportService {
     }
 
     /**
+     * Returns all duplicates of a given report.
+     *
+     * @param report    The report the duplicates of which are desired.
+     * @param selection Information on which duplicates to get.
+     * @return A list containing the selected duplicates.
+     */
+    public List<Report> getDuplicatesFor(final Report report, final Selection selection) {
+        List<Report> reports = Collections.emptyList();
+
+        try (Transaction tx = transactionManager.begin()) {
+            reports = tx.newReportGateway().getSelectedDuplicates(report, selection);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when finding duplicates for report " + report + " with selection " + selection + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return reports;
+    }
+
+    /**
+     * Returns the number of duplicates of a given report.
+     *
+     * @param report The report the number of duplicates of which are desired.
+     * @return The number of duplicates of the given {@code report}.
+     */
+    public int getNumberOfDuplicates(final Report report) {
+        int duplicates = 0;
+
+        try (Transaction tx = transactionManager.begin()) {
+            duplicates = tx.newReportGateway().countDuplicates(report);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Could not find report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when counting duplicates of report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return duplicates;
+    }
+
+    /**
      * Returns the time stamp of the last action in one particular report. Creating, editing and moving a report as well
      * as creating and editing posts count as actions.
      *
@@ -375,7 +441,7 @@ public class ReportService {
     /**
      * Returns whether the user is privileged for the report in terms of editing rights.
      *
-     * @param user The user in question.
+     * @param user   The user in question.
      * @param report The report in question.
      * @return {@code true} iff the user is privileged.
      */
