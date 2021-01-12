@@ -10,9 +10,7 @@ import tech.bugger.global.util.Log;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
-import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
 import java.util.HashMap;

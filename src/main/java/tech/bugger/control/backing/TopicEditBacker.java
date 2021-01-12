@@ -9,7 +9,6 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.faces.context.ExternalContext;
@@ -140,7 +139,7 @@ public class TopicEditBacker implements Serializable {
         } else {
             redirectTo404Page();
         }
-        return"";
+        return "";
     }
 
     /**
@@ -187,7 +186,7 @@ public class TopicEditBacker implements Serializable {
     /**
      * @param sanitizedDescription The sanitizedDescription to set.
      */
-    public void setSanitizedDescription(String sanitizedDescription) {
+    public void setSanitizedDescription(final String sanitizedDescription) {
         this.sanitizedDescription = sanitizedDescription;
     }
 

@@ -350,7 +350,7 @@ public class TopicBacker implements Serializable {
 
     /**
      * Irreversibly deletes the topic.
-     *
+     * @return {@code pretty:home} to redirect to home.
      */
     public String delete() {
         topicService.deleteTopic(topic);
