@@ -201,8 +201,9 @@ public class TopicDBGateway implements TopicGateway {
                     .toStatement();
             statement.executeUpdate();
             ResultSet generatedKeys = statement.getGeneratedKeys();
+            log.info("Gateway: Key?");
             if (generatedKeys.next()) {
-                log.info("Gateway: setting ID");
+                log.info("Gateway: Key! setting ID");
                 topic.setId(generatedKeys.getInt("id"));
             } else {
                 log.error("Error while retrieving new topic ID.");

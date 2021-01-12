@@ -117,17 +117,19 @@ public class ReportDBGateway implements ReportGateway {
         List<Report> selectedReports = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         String filter = ";";
         if (!showClosedReports) {
-            filter = "AND closed_at IS NULL;";
+            filter = "AND closed_at IS NULL";
         }
         if (!showOpenReports) {
-            filter = "AND closed_at IS NOT NULL;";
+            filter = "AND closed_at IS NOT NULL";
         }
         if (!showClosedReports && !showOpenReports) {
             return selectedReports;
         }
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM report WHERE topic = ? " + filter)) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM report WHERE topic = ? " + filter
+                + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
+                + " LIMIT " + selection.getPageSize().getSize()
+                + " OFFSET " + selection.getCurrentPage() * selection.getPageSize().getSize() + ";")) {
             ResultSet rs = new StatementParametrizer(stmt).integer(topic.getId()).toStatement().executeQuery();
-
             while (rs.next()) {
                 log.info("found a Report!");
                 selectedReports.add(getReportFromResultSet(rs));

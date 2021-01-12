@@ -127,7 +127,7 @@ public class TopicEditBacker {
      * @return The page to navigate to.
      */
     public void saveChanges() {
-        boolean success;
+        boolean success = false;
         System.out.println("Phase 0");
         topic.setDescription(sanitizedDescription);
         System.out.println("Phase 1");
