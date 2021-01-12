@@ -131,7 +131,7 @@ public final class ConnectionPool {
      * @throws IllegalStateException if the connection pool has already been shut down.
      */
     public synchronized Connection getConnection() {
-        if (isShutDown()) {
+        if (shutDown) {
             throw new IllegalStateException("Connection pool has already been shut down.");
         }
 
@@ -143,9 +143,9 @@ public final class ConnectionPool {
                 awaitConnections();
             }
         }
-        Connection connection = availableConnections.poll();
+        Connection connection = availableConnections.remove();
         usedConnections.add(connection);
-        log.debug("Connection acquired.");
+        log.debug("Connection " + connection.hashCode() + " acquired.");
         return connection;
     }
 
@@ -177,22 +177,22 @@ public final class ConnectionPool {
      * @throws IllegalStateException if the connection pool has already been shut down.
      */
     public synchronized void releaseConnection(final Connection connection) {
-        if (isShutDown()) {
+        if (shutDown) {
             throw new IllegalStateException("Connection pool has already been shut down.");
         } else if (connection == null) {
             throw new IllegalArgumentException("Connection to release must not be null.");
         } else if (!usedConnections.contains(connection)) {
             throw new IllegalArgumentException("Connection does not belong to this pool.");
+        } else if (isClosed(connection)) {
+            throw new IllegalStateException("Connection to release is already closed.");
         }
 
+        rollback(connection);
+
         usedConnections.remove(connection);
-        if (isClosed(connection)) {
-            increaseConnections(1); // replace closed connection
-            log.debug("Closed connection replaced.");
-        } else {
-            availableConnections.add(connection);
-            log.debug("Connection released.");
-        }
+        availableConnections.add(connection);
+        log.debug("Connection " + connection.hashCode() + " released.");
+
         balanceConnections();
         notifyAll();
     }
@@ -203,6 +203,14 @@ public final class ConnectionPool {
         } catch (SQLException e) {
             log.warning("Database error when checking connection close status.", e);
             return true; // treat corrupt connection as closed
+        }
+    }
+
+    private void rollback(final Connection connection) {
+        try {
+            connection.rollback();
+        } catch (SQLException e) {
+            log.warning("Error when defensively rolling back connection to be released.", e);
         }
     }
 
@@ -222,23 +230,14 @@ public final class ConnectionPool {
      * @throws IllegalStateException if the connection pool has already been shut down.
      */
     public void shutdown() {
-        if (isShutDown()) {
-            throw new IllegalStateException("Connection pool has already been shut down.");
+        if (!shutDown) {
+            log.debug("Shutting down connection pool.");
+            availableConnections.addAll(usedConnections);
+            decreaseConnections(availableConnections.size());
+            shutDown = true;
+        } else {
+            log.debug("Connection pool already shut down. Doing nothing.");
         }
-
-        log.debug("Shutting down connection pool.");
-        availableConnections.addAll(usedConnections);
-        decreaseConnections(availableConnections.size());
-        shutDown = true;
-    }
-
-    /**
-     * Returns whether the connection pool is shut down and not available for use anymore.
-     *
-     * @return {@code true} iff the connection pool has been already shut down.
-     */
-    public boolean isShutDown() {
-        return shutDown;
     }
 
     private void increaseConnections(final int increaseAmount) {

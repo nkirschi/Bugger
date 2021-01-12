@@ -213,10 +213,7 @@ public class SystemLifetimeListener implements ServletContextListener {
     }
 
     private void cleanUpDatabaseConnections() {
-        ConnectionPool dbPool = registry.getConnectionPool("db");
-        if (!dbPool.isShutDown()) {
-            dbPool.shutdown();
-        }
+        registry.getConnectionPool("db").shutdown();
     }
 
     private void terminateMailingTasks(final boolean immediately) {
