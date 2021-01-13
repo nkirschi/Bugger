@@ -6,6 +6,9 @@ import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -63,6 +66,16 @@ public class NotificationService implements Serializable {
      * @param notification The notification to be deleted.
      */
     public void deleteNotification(final Notification notification) {
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newNotificationGateway().delete(notification);
+            tx.commit();
+        } catch (NotFoundException e) {
+           log.error("Could not find notification to delete " + notification + ".", e);
+           feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when deleting notification " + notification + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -71,7 +84,17 @@ public class NotificationService implements Serializable {
      * @param notification The notification to be marked as read.
      */
     public void markAsRead(final Notification notification) {
-
+        notification.setRead(false);
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newNotificationGateway().update(notification);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Could not find notification to mark as read " + notification + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when marking notification " + notification + " as sent.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -80,8 +103,16 @@ public class NotificationService implements Serializable {
      * @param user The user in question.
      * @return The number of notifications as an {@code int}.
      */
-    public int getNumberOfNotificationsFor(final User user) {
-        return 0;
+    public int countNotifications(final User user) {
+        int numberOfNotifications = 0;
+        try (Transaction tx = transactionManager.begin()) {
+            numberOfNotifications = tx.newNotificationGateway().countNotifications(user);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when counting notifications for user " + user + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return numberOfNotifications;
     }
 
     /**
@@ -91,8 +122,17 @@ public class NotificationService implements Serializable {
      * @param selection Information on which notifications to return.
      * @return A list containing the requested notifications.
      */
-    public List<Notification> getNotificationsFor(final User user, final Selection selection) {
-        return null;
+    public List<Notification> selectNotifications(final User user, final Selection selection) {
+        List<Notification> selectedNotifications;
+        try (Transaction tx = transactionManager.begin()) {
+            selectedNotifications = tx.newNotificationGateway().selectNotifications(user, selection);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when selecting notifications for user " + user + "with selection " + selection + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            selectedNotifications = null;
+        }
+        return selectedNotifications;
     }
 
     /**
@@ -102,6 +142,13 @@ public class NotificationService implements Serializable {
      * @param notification The notification based on which new notifications are to be created.
      */
     public void createNotification(final Notification notification) {
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newNotificationGateway().create(notification);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when creating notification " + notification + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**

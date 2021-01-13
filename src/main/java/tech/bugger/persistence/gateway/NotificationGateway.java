@@ -17,9 +17,8 @@ public interface NotificationGateway {
      *
      * @param user The user whose notifications to count.
      * @return The number of notifications the user has received.
-     * @throws NotFoundException The user could not be found.
      */
-    int countNotifications(User user) throws NotFoundException;
+    int countNotifications(User user);
 
     /**
      * Inserts a given notification into the notification storage.
@@ -52,7 +51,7 @@ public interface NotificationGateway {
      * @return The list of the user's notifications that match {@code selection}.
      * @throws NotFoundException The user could not be found.
      */
-    List<Notification> selectNotifications(User user, Selection selection) throws NotFoundException;
+    List<Notification> selectNotifications(User user, Selection selection);
 
     /**
      * Updates a notification's attributes in the notification storage.
