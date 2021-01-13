@@ -138,8 +138,8 @@ public class StatisticsBacker implements Serializable {
     @PostConstruct
     public void init() {
         reportCriteria.setTopic(parseTopicParameter());
-        topReports = statisticsService.topTenReports();
-        topUsers = statisticsService.topTenUsers();
+        topReports = statisticsService.determineTopTenReports();
+        topUsers = statisticsService.determineTopTenUsers();
         topicTitles = topicService.discoverTopics();
         topicTitles.add(0, ""); // empty string for no restriction to topic (JSF doesn't like null)
         decimalFormat = NumberFormat.getInstance(userSession.getLocale());
