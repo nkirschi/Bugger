@@ -97,12 +97,12 @@ public class TopicBacker implements Serializable {
     /**
      * List of users similar to the entered name, for modding porpoise.
      */
-    private List<User> userBanSuggestions;
+    private List<String> userBanSuggestions;
 
     /**
      * List of users similar to the entered name, for banning porpoise.
      */
-    private List<User> userModSuggestions;
+    private List<String> userModSuggestions;
 
     /**
      * Paginator for reports in the Topic.
@@ -265,20 +265,20 @@ public class TopicBacker implements Serializable {
 
     /**
      * Enables suggestions for users to be banned.
-     *
-     * @return {@code null} to stay on the same page.
      */
-    public String searchBanUsers() {
-        return null;
+    public void searchBanUsers() {
+        if ((userToBeBanned != null) && (!userToBeBanned.isBlank())) {
+            userBanSuggestions = searchService.getUserBanSuggestions(userToBeBanned, topic);
+        }
     }
 
     /**
      * Enables suggestions for users to be made moderators.
-     *
-     * @return {@code null} to stay on the same page.
      */
-    public String searchModUsers() {
-        return null;
+    public void searchModUsers() {
+        if ((userToBeModded != null) && (!userToBeModded.isBlank())) {
+            userModSuggestions = searchService.getUserModSuggestions(userToBeModded, topic);
+        }
     }
 
     /**
@@ -607,28 +607,28 @@ public class TopicBacker implements Serializable {
     /**
      * @return The userBanSuggestions.
      */
-    public List<User> getUserBanSuggestions() {
+    public List<String> getUserBanSuggestions() {
         return userBanSuggestions;
     }
 
     /**
      * @param userBanSuggestions The userBanSuggestions to set.
      */
-    public void setUserBanSuggestions(final List<User> userBanSuggestions) {
+    public void setUserBanSuggestions(final List<String> userBanSuggestions) {
         this.userBanSuggestions = userBanSuggestions;
     }
 
     /**
      * @return The userModSuggestions.
      */
-    public List<User> getUserModSuggestions() {
+    public List<String> getUserModSuggestions() {
         return userModSuggestions;
     }
 
     /**
      * @param userModSuggestions The userModSuggestions to set.
      */
-    public void setUserModSuggestions(final List<User> userModSuggestions) {
+    public void setUserModSuggestions(final List<String> userModSuggestions) {
         this.userModSuggestions = userModSuggestions;
     }
 

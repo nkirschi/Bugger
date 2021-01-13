@@ -19,9 +19,13 @@ import tech.bugger.global.util.Lazy;
 
 import javax.faces.context.FacesContext;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
@@ -272,6 +276,54 @@ public class TopicBackerTest {
         topicBacker.unbanUser();
         assertEquals(TopicBacker.DialogType.UNBAN, topicBacker.getDisplayDialog());
         verify(topicService).unban(USERNAME, topic);
+    }
+
+    @Test
+    public void testSearchBanUsers() {
+        List<String> users = new ArrayList<>();
+        users.add(user.getUsername());
+        when(searchService.getUserBanSuggestions(any(), any())).thenReturn(users);
+        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.searchBanUsers();
+        assertEquals(users, topicBacker.getUserBanSuggestions());
+        verify(searchService).getUserBanSuggestions(any(), any());
+    }
+
+    @Test
+    public void testSearchBanUsersStringNull() {
+        topicBacker.searchBanUsers();
+        verify(searchService, times(0)).getUserBanSuggestions(any(), any());
+    }
+
+    @Test
+    public void testSearchBanUsersStringBlank() {
+        topicBacker.setUserToBeBanned("");
+        topicBacker.searchBanUsers();
+        verify(searchService, times(0)).getUserBanSuggestions(any(), any());
+    }
+
+    @Test
+    public void testSearchModUsers() {
+        List<String> users = new ArrayList<>();
+        users.add(user.getUsername());
+        when(searchService.getUserModSuggestions(any(), any())).thenReturn(users);
+        topicBacker.setUserToBeModded(USERNAME);
+        topicBacker.searchModUsers();
+        assertEquals(users, topicBacker.getUserModSuggestions());
+        verify(searchService).getUserModSuggestions(any(), any());
+    }
+
+    @Test
+    public void testSearchModUsersStringNull() {
+        topicBacker.searchModUsers();
+        verify(searchService, times(0)).getUserModSuggestions(any(), any());
+    }
+
+    @Test
+    public void testSearchModUsersStringBlank() {
+        topicBacker.setUserToBeModded("");
+        topicBacker.searchModUsers();
+        verify(searchService, times(0)).getUserModSuggestions(any(), any());
     }
 
 }

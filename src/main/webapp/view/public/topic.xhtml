@@ -169,10 +169,19 @@
                                      a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
                                      #{component.valid ? 'is-valid' : 'is-invalid'}">
                             <f:validateLength maximum="#{C.USERNAME_MAX}"/>
+                            <f:ajax listener="#{topicBacker.searchModUsers}" event="keyup"
+                                    render="p-mod-suggestions"/>
                         </h:inputText>
                         <h:panelGroup id="p-username-message" layout="block" styleClass="invalid-tooltip right">
                             <h:message for="it-username"/>
                         </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup id="p-mod-suggestions" layout="block">
+                        <ui:repeat value="#{topicBacker.userModSuggestions}" var="user">
+                            <h:panelGrid columns="1">
+                                #{user}
+                            </h:panelGrid>
+                        </ui:repeat>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="align-center">
@@ -232,10 +241,19 @@
                                          a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
                                          #{component.valid ? 'is-valid' : 'is-invalid'}">
                                 <f:validateLength maximum="#{C.USERNAME_MAX}"/>
+                                <f:ajax listener="#{topicBacker.searchBanUsers}" event="keyup"
+                                        render="p-ban-suggestions"/>
                             </h:inputText>
                             <h:panelGroup id="p-username-ban-message" layout="block" styleClass="invalid-tooltip right">
                                 <h:message for="it-username-ban"/>
                             </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup id="p-ban-suggestions" layout="block">
+                            <ui:repeat value="#{topicBacker.userBanSuggestions}" var="user">
+                                <h:panelGrid columns="1">
+                                    #{user}
+                                </h:panelGrid>
+                            </ui:repeat>
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
