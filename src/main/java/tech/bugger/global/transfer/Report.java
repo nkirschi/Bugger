@@ -99,6 +99,11 @@ public class Report implements Serializable {
     private Integer forcedRelevance;
 
     /**
+     * The relevance of the report, based on votes.
+     */
+    private Integer calculatedRelevance;
+
+    /**
      * The ID of the topic this report is in.
      */
     private Integer topic;
@@ -317,6 +322,24 @@ public class Report implements Serializable {
      */
     public void setTopic(final Integer topic) {
         this.topic = topic;
+    }
+
+    /**
+     * Returns the relevance if this report.
+     *
+     * @return The relevance of this topic.
+     */
+    public Integer getCalculatedRelevance() {
+        return calculatedRelevance;
+    }
+
+    /**
+     * Sets the relevance of this report at a specified value.
+     *
+     * @param relevance The new relevance of this topic.
+     */
+    public void setCalculatedRelevance(final Integer relevance) {
+        this.calculatedRelevance = relevance;
     }
 
     /**

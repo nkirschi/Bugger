@@ -108,6 +108,16 @@ public interface ReportGateway {
     void unmarkDuplicate(Report report) throws NotFoundException;
 
     /**
+     * Return the current relevance of a specified report.
+     *
+     * @param report The report to calculate on.
+     * @return The current relevance.
+     *
+     * @throws NotFoundException The report could not be found.
+     */
+    Integer getRelevance(Report report) throws NotFoundException;
+
+    /**
      * Overwrites the calculated relevance of a report by a fixed relevance value or removes the override, restoring the
      * calculated relevance.
      *
@@ -123,20 +133,22 @@ public interface ReportGateway {
      *
      * @param report The report to upvote.
      * @param user   The upvoting user.
+     * @param votingWeight The users voting weight.
      * @throws DuplicateException A vote on the report by the user already existed.
      * @throws NotFoundException  The report or the user could not be found.
      */
-    void upvote(Report report, User user) throws DuplicateException, NotFoundException;
+    void upvote(Report report, User user, Integer votingWeight) throws DuplicateException, NotFoundException;
 
     /**
      * Stores an downvote, i.e. a negative vote for the relevance, of a report by a user.
      *
      * @param report The report to downvote.
      * @param user   The downvoting user.
+     * @param votingWeight The users voting weight.
      * @throws DuplicateException A vote on the report by the user already existed.
      * @throws NotFoundException  The report or the user could not be found.
      */
-    void downvote(Report report, User user) throws DuplicateException, NotFoundException;
+    void downvote(Report report, User user, Integer votingWeight) throws DuplicateException, NotFoundException;
 
     /**
      * Removes a user's vote on a report.

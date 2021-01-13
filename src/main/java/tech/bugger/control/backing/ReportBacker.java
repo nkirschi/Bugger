@@ -254,7 +254,7 @@ public class ReportBacker implements Serializable {
      * @return the relevance of the report.
      */
     public int getRelevance() {
-        return 0;
+        return reportService.getRelevance(report);
     }
 
     /**
@@ -266,15 +266,25 @@ public class ReportBacker implements Serializable {
     /**
      * Increases the relevance of the report by the user's voting weight.
      */
-    public void upvote() {
-
+    public String upvote() {
+        reportService.upvote(report, session.getUser());
+        return null;
     }
 
     /**
      * Decreases the relevance of the report by the user's voting weight.
      */
-    public void downvote() {
+    public String downvote() {
+        reportService.downvote(report, session.getUser());
+        return null;
+    }
 
+    /**
+     * Removes a vote from a report.
+     */
+    public String removeVote() {
+        reportService.removeVote(report, session.getUser());
+        return null;
     }
 
     /**
@@ -283,7 +293,7 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user has voted up and {@code false} otherwise.
      */
     public boolean hasUpvoted() {
-        return false;
+        return reportService.hasUpvoted(report, session.getUser());
     }
 
     /**
@@ -292,7 +302,7 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user has voted down and {@code false} otherwise.
      */
     public boolean hasDownvoted() {
-        return false;
+        return reportService.hasDownvoted(report, session.getUser());
     }
 
     /**

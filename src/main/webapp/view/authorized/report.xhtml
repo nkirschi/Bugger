@@ -1,22 +1,26 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html
-        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:b="http://tech.bugger/tags"
->
 <!--@elvariable id="var" type="tech.bugger.global.transfer.Post"-->
-<ui:composition template="/WEB-INF/template/main.xhtml">
+<ui:composition template="/WEB-INF/template/main.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:b="http://tech.bugger/tags">
     <ui:param name="title" value="#{reportBacker.report.title}"/>
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
     <ui:define name="content">
         <h:form id="f-report">
+            <h:panelGroup>
+                <h:commandButton value="UPVOTE" action="#{reportBacker.removeVote}" rendered="#{reportBacker.hasUpvoted}" styleClass="vote_cast"/>
+                <h:commandButton value="UPVOTE" action="#{reportBacker.upvote}" rendered="#{!reportBacker.hasUpvoted}" styleClass="vote_not_cast"/>
+                <h:commandButton value="DOWNVOTE" action="#{reportBacker.removeVote}" rendered="#{reportBacker.hasDownvoted}" styleClass="vote_cast"/>
+                <h:commandButton value="DOWNVOTE" action="#{reportBacker.downvote}" rendered="#{!reportBacker.hasDownvoted}" styleClass="vote_not_cast"/>
+                <h:outputLabel value="Current Relevance:"/>
+                <h:outputLabel value="#{reportBacker.relevance}"/>
+                <h:outputLabel value="Is Forced: "/>
+                <h:outputLabel value="#{reportBacker.isForced}"/>
+            </h:panelGroup>
             <h:panelGrid columns="5">
                 <h:outputText id="ot-id" value="#{labels.id}: #{reportBacker.report.id}"/>
                 <h:outputText id="ot-status"
@@ -175,5 +179,3 @@
         </b:pagitable_post>
     </ui:define>
 </ui:composition>
-
-</html>

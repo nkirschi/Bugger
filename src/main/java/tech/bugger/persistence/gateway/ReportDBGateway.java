@@ -135,17 +135,16 @@ public class ReportDBGateway implements ReportGateway {
     public List<Report> getSelectedReports(final Topic topic, final Selection selection, final boolean showOpenReports,
                                            final boolean showClosedReports) {
         List<Report> selectedReports = new ArrayList<>(Math.max(0, selection.getTotalSize()));
-        String filter = ";";
-        if (!showClosedReports) {
-            filter = "AND closed_at IS NULL";
-        }
-        if (!showOpenReports) {
-            filter = "AND closed_at IS NOT NULL";
-        }
+        String filter = "";
         if (!showClosedReports && !showOpenReports) {
             return selectedReports;
+        } else if (!showClosedReports) {
+            filter = "AND closed_at IS NULL";
+        } else if (!showOpenReports) {
+            filter = "AND closed_at IS NOT NULL";
         }
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM report WHERE topic = ? " + filter
+                + " AS r LEFT OUTER JOIN report_relevance AS v ON r.id = v.report"
                 + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
                 + " LIMIT " + Pagitable.getItemLimit(selection)
                 + " OFFSET " + Pagitable.getItemOffset(selection) + ";")) {
@@ -161,6 +160,7 @@ public class ReportDBGateway implements ReportGateway {
     }
 
     private Report getReportFromResultSet(final ResultSet rs) throws SQLException, NotFoundException {
+        System.out.println(rs.getInt("relevance"));
         Report report = new Report();
         report.setId(rs.getInt("id"));
         report.setTitle(rs.getString("title"));
@@ -170,6 +170,7 @@ public class ReportDBGateway implements ReportGateway {
         report.setForcedRelevance(rs.getInt("forced_relevance"));
         report.setTopic(rs.getInt("topic"));
         report.setDuplicateOf(rs.getInt("duplicate_of"));
+        report.setCalculatedRelevance((rs.getInt("relevance")));
         ZonedDateTime created = null;
         ZonedDateTime modified = null;
         ZonedDateTime closed = null;
@@ -353,7 +354,6 @@ public class ReportDBGateway implements ReportGateway {
             log.error("Error when opening report " + report + ".", e);
             throw new StoreException("Error when opening report " + report + ".", e);
         }
-
     }
 
     /**
@@ -378,27 +378,91 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public void overwriteRelevance(final Report report, final Optional<Integer> relevance) {
-        // TODO Auto-generated method stub
-
+    public Integer getRelevance(Report report) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT relevance FROM report_votes WHERE report = ? "
+                + " AS r LEFT OUTER JOIN report_relevance AS v ON r.id = v.report")) {
+            ResultSet rs = new StatementParametrizer(stmt).integer(report.getId()).toStatement().executeQuery();
+            if (rs.next()) {
+                return rs.getInt("relevance");
+            } else {
+                log.error("While calculating relevance for report " + report + " cannot be found.");
+                throw new NotFoundException("While calculating relevance for report " + report + " cannot be found.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while calculating relevance for report " + report.getId(), e);
+            throw new StoreException("Error while calculating relevance for report " + report.getId(), e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void upvote(final Report report, final User user) {
-        // TODO Auto-generated method stub
+    public void overwriteRelevance(final Report report, final Optional<Integer> relevance) throws NotFoundException {
+        if (report == null) {
+            log.error("Cannot overwrite relevance if report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot overwrite relevance if report ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
 
+        String sql = "UPDATE report SET forced_relevance = ? WHERE id = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(relevance.orElse(null))
+                    .integer(report.getId()).toStatement();
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                log.error("Report to edit relevance " + report + " cannot be found.");
+                throw new NotFoundException("Report to edit relevance " + report + " cannot be found.");
+            }
+        } catch (SQLException e) {
+            log.error("Error when editing relevance of report " + report + ".", e);
+            throw new StoreException("Error when editing relevance of report " + report + ".", e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void downvote(final Report report, final User user) {
-        // TODO Auto-generated method stub
+    public void upvote(final Report report, final User user, Integer votingWeight) {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO report_vote (voter, report, weight)"
+                        + "VALUES (?, ?, ?);"
+        )) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(report.getId())
+                    .integer(votingWeight)
+                    .toStatement();
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error while casting upvote.", e);
+            throw new StoreException("Error while casting upvote.", e);
+        }
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void downvote(final Report report, final User user, final Integer votingWeight) {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO report_vote (voter, report, weight)"
+                        + "VALUES (?, ?, ?);"
+        )) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(report.getId())
+                    .integer(0 - votingWeight)
+                    .toStatement();
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error while casting downvote.", e);
+            throw new StoreException("Error while casting downvote.", e);
+        }
     }
 
     /**
@@ -406,8 +470,23 @@ public class ReportDBGateway implements ReportGateway {
      */
     @Override
     public void removeVote(final Report report, final User user) {
-        // TODO Auto-generated method stub
+        if (report == null) {
+            log.error("Cannot delete report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot delete report with ID null");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
 
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM report_vote WHERE voter = ? report = ? RETURNING *;")) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(report.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+        } catch (SQLException e) {
+            log.error("Error when deleting report " + report + ".", e);
+            throw new StoreException("Error when deleting report " + report + ".", e);
+        }
     }
 
     /**

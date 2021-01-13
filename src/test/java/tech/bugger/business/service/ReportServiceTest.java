@@ -44,6 +44,9 @@ public class ReportServiceTest {
     private ReportService reportService;
 
     @Mock
+    private ProfileService profileService;
+
+    @Mock
     private NotificationService notificationService;
 
     @Mock
@@ -70,9 +73,9 @@ public class ReportServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new ReportService(notificationService, postService, transactionManager, feedbackEvent,
+        service = new ReportService(notificationService, postService, profileService, transactionManager, feedbackEvent,
                 ResourceBundleMocker.mock(""));
-        reportService = new ReportService(notificationService, postService, transactionManager, feedbackEvent,
+        reportService = new ReportService(notificationService, postService, profileService, transactionManager, feedbackEvent,
                 ResourceBundleMocker.mock(""));
         List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
         testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
