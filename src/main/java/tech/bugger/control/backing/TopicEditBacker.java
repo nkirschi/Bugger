@@ -33,8 +33,7 @@ public class TopicEditBacker implements Serializable {
     /**
      * The {@link Log} instance associated with this class for logging purposes.
      */
-    private static final
-    Log log = Log.forClass(TopicEditBacker.class);
+    private static final Log log = Log.forClass(TopicEditBacker.class);
 
     /**
      * The ID of the Topic to edit.
@@ -112,20 +111,12 @@ public class TopicEditBacker implements Serializable {
     }
 
     /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
-     *
-     * @param feedback The feedback with details on what to display.
-     */
-    public void displayFeedback(@Observes @Any final Feedback feedback) {
-    }
-
-    /**
      * Saves and applies the changes made.
      *
      * @return The page to navigate to.
      */
     public String saveChanges() throws IOException {
-        boolean success = false;
+        boolean success;
         topic.setDescription(sanitizedDescription);
         if (create) {
             success = topicService.createTopic(topic);

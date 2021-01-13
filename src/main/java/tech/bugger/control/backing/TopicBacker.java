@@ -120,42 +120,38 @@ public class TopicBacker implements Serializable {
     private boolean displayDeleteDialog;
 
     /**
-     * A senitized form of the description, ready for display.
+     * A sanitized form of the description, ready for display.
      */
     private String sanitizedDescription;
 
     /**
      * The current user session.
      */
-    private UserSession session;
+    private final UserSession session;
 
     /**
      * A transient topic service.
      */
-    private transient TopicService topicService;
+    private final transient TopicService topicService;
 
     /**
-     * A trransient report service.
+     * A transient report service.
      */
-    private transient ReportService reportService;
+    private final transient ReportService reportService;
 
     /**
      * A transient search service.
      */
-    private transient SearchService searchService;
+    private final transient SearchService searchService;
 
     /**
      * The current faces context.
      */
-    private FacesContext fctx;
-
-    /**
-     * The current external context.
-     */
-    private ExternalContext ext;
+    private final FacesContext fctx;
 
     @Inject
-    TopicBacker(final TopicService topicService, final ReportService reportService, final SearchService searchService, final FacesContext fctx, final UserSession session) {
+    TopicBacker(final TopicService topicService, final ReportService reportService, final SearchService searchService,
+                final FacesContext fctx, final UserSession session) {
         this.topicService = topicService;
         this.reportService = reportService;
         this.searchService = searchService;
@@ -169,7 +165,7 @@ public class TopicBacker implements Serializable {
      */
     @PostConstruct
     public void init() {
-        ext = fctx.getExternalContext();
+        ExternalContext ext = fctx.getExternalContext();
         if ((!ext.getRequestParameterMap().containsKey("id"))) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
@@ -350,6 +346,7 @@ public class TopicBacker implements Serializable {
 
     /**
      * Irreversibly deletes the topic.
+     *
      * @return {@code pretty:home} to redirect to home.
      */
     public String delete() {
@@ -510,34 +507,6 @@ public class TopicBacker implements Serializable {
     }
 
     /**
-     * @return the session
-     */
-    public UserSession getSession() {
-        return session;
-    }
-
-    /**
-     * @param session the session to set
-     */
-    public void setSession(final UserSession session) {
-        this.session = session;
-    }
-
-    /**
-     * @return the topicService
-     */
-    public TopicService getTopicService() {
-        return topicService;
-    }
-
-    /**
-     * @param topicService the topicService to set
-     */
-    public void setTopicService(final TopicService topicService) {
-        this.topicService = topicService;
-    }
-
-    /**
      * @return The topicID.
      */
     public int getTopicID() {
@@ -613,4 +582,5 @@ public class TopicBacker implements Serializable {
     public void setUserModSuggestions(final List<User> userModSuggestions) {
         this.userModSuggestions = userModSuggestions;
     }
+
 }

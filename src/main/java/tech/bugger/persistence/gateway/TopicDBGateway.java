@@ -228,7 +228,6 @@ public class TopicDBGateway implements TopicGateway {
                         + "SET title = ?, description = ?"
                         + "WHERE id = ?;"
         )) {
-            System.out.println("UPDATE: "  + topic.getTitle() + ", " + topic.getDescription() + ", " + topic.getId());
             int rowsAffected = new StatementParametrizer(stmt)
                     .string(topic.getTitle())
                     .string(topic.getDescription())
