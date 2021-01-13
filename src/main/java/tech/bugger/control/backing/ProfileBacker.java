@@ -149,7 +149,10 @@ public class ProfileBacker implements Serializable {
             return;
         }
 
-        sanitizedBiography = MarkdownHandler.toHtml(user.getBiography());
+        if (user.getBiography() != null) {
+            sanitizedBiography = MarkdownHandler.toHtml(user.getBiography());
+        }
+
         if ((session.getUser() != null) && (session.getUser().equals(user))) {
             session.setUser(new User(user));
         }

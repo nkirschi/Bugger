@@ -112,6 +112,21 @@ public class ProfileServiceTest {
     }
 
     @Test
+    public void testDeleteUserAdmin() {
+        testUser.setAdministrator(true);
+        when(userGateway.getNumberOfAdmins()).thenReturn(THE_ANSWER);
+        assertTrue(service.deleteUser(testUser));
+    }
+
+    @Test
+    public void testDeleteUserLasAdmin() {
+        testUser.setAdministrator(true);
+        when(userGateway.getNumberOfAdmins()).thenReturn(1);
+        assertFalse(service.deleteUser(testUser));
+        verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
     public void testDeleteUserNotFound() throws NotFoundException {
         doThrow(NotFoundException.class).when(userGateway).deleteUser(testUser);
         assertTrue(service.deleteUser(testUser));

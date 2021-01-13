@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -82,6 +83,7 @@ public class ProfileEditBackerTest {
     private static final String CREATE = "c";
     private static final String EDIT = "e";
     private static final String EMAIL = "test@test.de";
+    private static final String PASSWORD = "password";
     private Token emailToken;
     private Field createUser;
 
@@ -94,6 +96,9 @@ public class ProfileEditBackerTest {
         MockitoAnnotations.openMocks(this);
         createUser = profileEditBacker.getClass().getDeclaredField("create");
         createUser.setAccessible(true);
+        profileEditBacker.setPasswordNew("");
+        profileEditBacker.setPasswordNewConfirm("");
+        profileEditBacker.setUsernameNew(user.getUsername());
         when(fctx.getExternalContext()).thenReturn(ext);
         when(fctx.getApplication()).thenReturn(application);
         when(application.getNavigationHandler()).thenReturn(navHandler);
@@ -213,10 +218,8 @@ public class ProfileEditBackerTest {
 
     @Test
     public void testInitSessionUserNull() {
-        //Necessary since method execution continues after first call to handleNavigation().
-        when(session.getUser()).thenReturn(null).thenReturn(user);
         profileEditBacker.init();
-        verify(navHandler, times(2)).handleNavigation(any(), any(), any());
+        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
@@ -258,16 +261,17 @@ public class ProfileEditBackerTest {
         createUser.setBoolean(profileEditBacker, true);
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         when(profileService.createUser(any())).thenReturn(true);
+        profileEditBacker.setUser(user);
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(profileService, times(1)).createUser(any());
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
     public void testSaveChangesCreateUnsuccessful() throws IllegalAccessException {
         createUser.setBoolean(profileEditBacker, true);
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
+        profileEditBacker.setUser(user);
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(profileService, times(1)).createUser(any());
@@ -290,7 +294,6 @@ public class ProfileEditBackerTest {
         profileEditBacker.setEmailNew(user.getEmailAddress());
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
@@ -314,7 +317,7 @@ public class ProfileEditBackerTest {
         profileEditBacker.saveChanges();
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(authenticationService, times(1)).updateEmail(any(), any(), any());
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
+        verify(profileService, times(1)).updateUser(user);
     }
 
     @Test
@@ -342,14 +345,31 @@ public class ProfileEditBackerTest {
     }
 
     @Test
+    public void testSaveChangesNewPassword() {
+        profileEditBacker.setPasswordNew(PASSWORD);
+        profileEditBacker.setPasswordNewConfirm(PASSWORD);
+        profileEditBacker.setUser(user);
+        profileEditBacker.saveChanges();
+        verify(authenticationService, times(1)).hashPassword(user, PASSWORD);
+    }
+
+    @Test
+    public void testSaveChangesNewPasswordNotMatching() {
+        profileEditBacker.setPasswordNew(PASSWORD);
+        profileEditBacker.setUser(user);
+        profileEditBacker.saveChanges();
+        verify(authenticationService, times(0)).hashPassword(user, PASSWORD);
+        verify(profileService, times(0)).matchingPassword(any(), any());
+    }
+
+    @Test
     public void testDelete() {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         when(profileService.deleteUser(user)).thenReturn(true);
         profileEditBacker.setUser(user);
-        profileEditBacker.delete();
+        assertEquals("pretty:home", profileEditBacker.delete());
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(profileService, times(1)).deleteUser(user);
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
@@ -374,11 +394,10 @@ public class ProfileEditBackerTest {
         when(profileService.deleteUser(user)).thenReturn(true);
         when(session.getUser()).thenReturn(user);
         profileEditBacker.setUser(user);
-        profileEditBacker.delete();
+        assertEquals("pretty:home", profileEditBacker.delete());
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(profileService, times(1)).deleteUser(user);
         verify(session, times(1)).invalidateSession();
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
     }
 
     @Test
@@ -450,13 +469,6 @@ public class ProfileEditBackerTest {
     }
 
     @Test
-    public void testCloseDeleteDialog() {
-        profileEditBacker.setDialog(ProfileEditBacker.DialogType.DELETE);
-        profileEditBacker.closeDeleteDialog();
-        assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog());
-    }
-
-    @Test
     public void testOpenChangeDialog() {
         profileEditBacker.setUploadedAvatar(null);
         profileEditBacker.setDeleteAvatar(false);
@@ -487,10 +499,30 @@ public class ProfileEditBackerTest {
         assertEquals(ProfileEditBacker.DialogType.UPDATE, spyBacker.getDialog());
     }
 
+    public void testOpenPreviewDialog() {
+        profileEditBacker.setUser(user);
+        profileEditBacker.openPreviewDialog();
+        assertAll(
+                () -> assertEquals(ProfileEditBacker.DialogType.PREVIEW, profileEditBacker.getDialog()),
+                () -> assertNotNull(profileEditBacker.getSanitizedBio())
+        );
+    }
+
+    @Test
+    public void testOpenPreviewDialogBioNull() {
+        user.setBiography(null);
+        profileEditBacker.setUser(user);
+        profileEditBacker.openPreviewDialog();
+        assertAll(
+                () -> assertEquals(ProfileEditBacker.DialogType.PREVIEW, profileEditBacker.getDialog()),
+                () -> assertNull(profileEditBacker.getSanitizedBio())
+        );
+    }
+
     @Test
     public void testCloseChangeDialog() {
         profileEditBacker.setDialog(ProfileEditBacker.DialogType.UPDATE);
-        profileEditBacker.closeChangeDialog();
+        profileEditBacker.closeDialog();
         assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog());
     }
 }
