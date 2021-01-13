@@ -102,45 +102,45 @@
     </ui:define>
 
     <ui:define name="content">
-        <h:form id="f-report">
-            <h:panelGrid columns="5">
-                <h:outputText id="ot-id" value="#{labels.id}: #{reportBacker.report.id}"/>
-                <h:outputText id="ot-status"
-                              value="#{labels.status}: #{reportBacker.report.closingDate == null ? labels.report_status_open : labels.report_status_closed.concat(' ').concat(reportBacker.report.closingDate)}"/>
-                <h:outputText id="ot-type"
-                              value="#{labels.report_type}: #{labels['report_type.'.concat(reportBacker.report.type)]}"/>
-                <h:outputLabel id="ol-duplicate-desc" rendered="#{reportBacker.report.duplicateOf != null}"
-                               value="#{labels.report_original}: "/>
-                <h:link id="l-duplicate" outcome="pretty:report" rendered="#{reportBacker.report.duplicateOf != null}"
-                        value="##{reportBacker.report.duplicateOf}">
-                    <f:param name="id" value="#{reportBacker.report.duplicateOf}"/>
-                </h:link>
-                <h:outputText id="ot-severity"
-                              value="#{labels.report_severity}: #{labels['report_severity.'.concat(reportBacker.report.severity)]}"/>
-                <h:outputText id="ot-version" value="#{labels.report_version}: #{reportBacker.report.version}"/>
-                <b:pagitable id="p-duplicates" paginator="#{reportBacker.duplicates}" simple="true"
-                             rendered="#{not reportBacker.duplicates.isEmpty()}">
-                    <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
-                    <b:column title="#{labels.report_duplicates}" paginator="#{reportBacker.duplicates}" key="ID">
-                        <h:link outcome="pretty:report" value="##{var.id}">
-                            <f:param name="id" value="#{var.id}"/>
-                        </h:link>
-                    </b:column>
-                </b:pagitable>
-            </h:panelGrid>
-            <h:panelGrid columns="2">
-                <h:outputText id="ot-creator"
-                              value="#{labels.report_created_by}: #{reportBacker.report.authorship.creator == null ? labels.deleted_user : reportBacker.report.authorship.creator.username}"/>
-                <h:outputText id="ot-created-at"
-                              value="#{labels.report_at} #{reportBacker.report.authorship.creationDate}"/>
+        <h:panelGrid columns="5">
+            <h:outputText id="ot-id" value="#{labels.id}: #{reportBacker.report.id}"/>
+            <h:outputText id="ot-status"
+                          value="#{labels.status}: #{reportBacker.report.closingDate == null ? labels.report_status_open : labels.report_status_closed.concat(' ').concat(reportBacker.report.closingDate)}"/>
+            <h:outputText id="ot-type"
+                          value="#{labels.report_type}: #{labels['report_type.'.concat(reportBacker.report.type)]}"/>
+            <h:outputLabel id="ol-duplicate-desc" rendered="#{reportBacker.report.duplicateOf != null}"
+                           value="#{labels.report_original}: "/>
+            <h:link id="l-duplicate" outcome="pretty:report" rendered="#{reportBacker.report.duplicateOf != null}"
+                    value="##{reportBacker.report.duplicateOf}">
+                <f:param name="id" value="#{reportBacker.report.duplicateOf}"/>
+            </h:link>
+            <h:outputText id="ot-severity"
+                          value="#{labels.report_severity}: #{labels['report_severity.'.concat(reportBacker.report.severity)]}"/>
+            <h:outputText id="ot-version" value="#{labels.report_version}: #{reportBacker.report.version}"/>
+            <b:pagitable id="p-duplicates" paginator="#{reportBacker.duplicates}" simple="true"
+                         rendered="#{not reportBacker.duplicates.isEmpty()}">
+                <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
+                <b:column title="#{labels.report_duplicates}" paginator="#{reportBacker.duplicates}" key="ID">
+                    <h:link outcome="pretty:report" value="##{var.id}">
+                        <f:param name="id" value="#{var.id}"/>
+                    </h:link>
+                </b:column>
+            </b:pagitable>
+        </h:panelGrid>
+        <h:panelGrid columns="2">
+            <h:outputText id="ot-creator"
+                          value="#{labels.report_created_by}: #{reportBacker.report.authorship.creator == null ? labels.deleted_user : reportBacker.report.authorship.creator.username}"/>
+            <h:outputText id="ot-created-at"
+                          value="#{labels.report_at} #{reportBacker.report.authorship.creationDate}"/>
 
-                <h:outputText id="ot-modifier"
-                              value="#{labels.report_last_modified_by}: #{reportBacker.report.authorship.modifier == null ? labels.deleted_user : reportBacker.report.authorship.modifier.username}"
-                              rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
-                <h:outputText id="ot-modified-at"
-                              value="#{labels.report_at} #{reportBacker.report.authorship.modifiedDate}"
-                              rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
-            </h:panelGrid>
+            <h:outputText id="ot-modifier"
+                          value="#{labels.report_last_modified_by}: #{reportBacker.report.authorship.modifier == null ? labels.deleted_user : reportBacker.report.authorship.modifier.username}"
+                          rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
+            <h:outputText id="ot-modified-at"
+                          value="#{labels.report_at} #{reportBacker.report.authorship.modifiedDate}"
+                          rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
+        </h:panelGrid>
+        <h:form id="f-report">
             <h:panelGrid rendered="#{reportBacker.privileged}">
                 <h:commandButton id="cb-open-close-report-dialog" action="#{reportBacker.displayDialog('OPEN_CLOSE')}"
                                  value="#{reportBacker.report.closingDate == null ? labels.report_action_close : labels.report_action_open}"/>

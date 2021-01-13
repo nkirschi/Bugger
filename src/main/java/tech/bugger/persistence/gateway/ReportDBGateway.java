@@ -435,10 +435,11 @@ public class ReportDBGateway implements ReportGateway {
             throw new SelfReferenceException("Reports cannot mark themselves as original report.");
         }
 
-        String sql = "UPDATE report SET duplicate_of = ? WHERE id = ?;";
+        String sql = "UPDATE report SET duplicate_of = ? WHERE id = ? OR duplicate_of = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             int affectedRows = new StatementParametrizer(stmt)
                     .integer(originalID)
+                    .integer(duplicate.getId())
                     .integer(duplicate.getId())
                     .toStatement().executeUpdate();
             if (affectedRows == 0) {

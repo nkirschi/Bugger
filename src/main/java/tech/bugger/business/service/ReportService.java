@@ -3,6 +3,7 @@ package tech.bugger.business.service;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -312,10 +313,30 @@ public class ReportService {
      * @return {@code true} iff updating the report succeeded.
      */
     public boolean markDuplicate(final Report duplicate, final int duplicateOfID) {
+        if (duplicate.getId() == duplicateOfID) {
+            log.error("Cannot mark report " + duplicate + " as original report of itself.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("self_reference_error"), Feedback.Type.ERROR));
+            return false;
+        }
+
+        int originalID = duplicateOfID;
+        Report original = getReportByID(originalID);
+        if (original == null) {
+            log.error("Could not find report " + duplicate + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            return false;
+        } else if (Objects.equals(original.getDuplicateOf(), duplicate.getId())) {
+            log.error("Cannot mark report " + duplicate + " as original report of itself.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("self_reference_error"), Feedback.Type.ERROR));
+            return false;
+        } else if (original.getDuplicateOf() != null) {
+            originalID = original.getDuplicateOf();
+        }
+
         boolean valid = false;
 
         try (Transaction tx = transactionManager.begin()) {
-            tx.newReportGateway().markDuplicate(duplicate, duplicateOfID);
+            tx.newReportGateway().markDuplicate(duplicate, originalID);
             tx.commit();
             valid = true;
         } catch (SelfReferenceException e) {

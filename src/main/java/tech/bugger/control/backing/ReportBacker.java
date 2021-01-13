@@ -205,7 +205,7 @@ public class ReportBacker implements Serializable {
                 return reportService.getNumberOfPosts(report);
             }
         };
-        duplicates = new Paginator<>("ID", Selection.PageSize.SMALL) {
+        duplicates = new Paginator<>("ID", Selection.PageSize.TINY) {
             @Override
             protected Iterable<Report> fetch() {
                 return reportService.getDuplicatesFor(report, getSelection());
@@ -344,6 +344,7 @@ public class ReportBacker implements Serializable {
         if (duplicateOfID != null && isPrivileged() && reportService.markDuplicate(report, duplicateOfID)) {
             close();
             displayDialog(null);
+            duplicates.update();
         }
     }
 
