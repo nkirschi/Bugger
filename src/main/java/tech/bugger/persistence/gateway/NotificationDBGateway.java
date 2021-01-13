@@ -74,7 +74,36 @@ public class NotificationDBGateway implements NotificationGateway {
      */
     @Override
     public void create(final Notification notification) {
-        // TODO Auto-generated method stub
+        if (notification == null) {
+            log.error("Cannot create notification null.");
+            throw new IllegalArgumentException("Notification cannot be null.");
+        }
+
+        String sql = "INSERT INTO notification (sent, read, type, recipient, causer, topic, report, post)"
+                + " VALUES (?, ?, ?::notification_type, ?, ?, ?, ?, ?);";
+        try (PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .bool(notification.isSent())
+                    .bool(notification.isRead())
+                    .string(notification.getType().name())
+                    .integer(notification.getRecipientID())
+                    .integer(notification.getActuatorID())
+                    .integer(notification.getTopicID())
+                    .integer(notification.getReportID())
+                    .integer(notification.getPost()).toStatement();
+            statement.executeUpdate();
+
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                notification.setId(generatedKeys.getInt("id"));
+            } else {
+                log.error("Error while retrieving new ID for notification " + notification + ".");
+                throw new StoreException("Error while retrieving new ID for notification " + notification + ".");
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating notification " + notification + ".", e);
+            throw new StoreException("Error while creating notification " + notification + ".", e);
+        }
 
     }
 
@@ -120,7 +149,7 @@ public class NotificationDBGateway implements NotificationGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<Notification> getNotificationsForUser(User user, Selection selection) {
+    public List<Notification> selectNotifications(final User user, final Selection selection) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -129,7 +158,7 @@ public class NotificationDBGateway implements NotificationGateway {
      * {@inheritDoc}
      */
     @Override
-    public void updateNotification(Notification notification) {
+    public void update(final Notification notification) {
         // TODO Auto-generated method stub
 
     }
@@ -138,7 +167,7 @@ public class NotificationDBGateway implements NotificationGateway {
      * {@inheritDoc}
      */
     @Override
-    public void deleteNotification(Notification notification) {
+    public void delete(final Notification notification) {
         // TODO Auto-generated method stub
 
     }
@@ -147,7 +176,7 @@ public class NotificationDBGateway implements NotificationGateway {
      * {@inheritDoc}
      */
     @Override
-    public void markAsRead(Notification notification) {
+    public void markAsRead(final Notification notification) {
         // TODO Auto-generated method stub
 
     }
@@ -156,7 +185,7 @@ public class NotificationDBGateway implements NotificationGateway {
      * {@inheritDoc}
      */
     @Override
-    public void markAsSent(Notification notification) {
+    public void markAsSent(final Notification notification) {
         // TODO Auto-generated method stub
 
     }
@@ -165,7 +194,7 @@ public class NotificationDBGateway implements NotificationGateway {
      * {@inheritDoc}
      */
     @Override
-    public void createNotificationBulk(List<Notification> notifications) {
+    public void createNotificationBulk(final List<Notification> notifications) {
         // TODO Auto-generated method stub
 
     }

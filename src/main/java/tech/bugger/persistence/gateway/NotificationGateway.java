@@ -52,7 +52,7 @@ public interface NotificationGateway {
      * @return The list of the user's notifications that match {@code selection}.
      * @throws NotFoundException The user could not be found.
      */
-    List<Notification> getNotificationsForUser(User user, Selection selection) throws NotFoundException;
+    List<Notification> selectNotifications(User user, Selection selection) throws NotFoundException;
 
     /**
      * Updates a notification's attributes in the notification storage.
@@ -60,7 +60,7 @@ public interface NotificationGateway {
      * @param notification The notification to update.
      * @throws NotFoundException The notification could not be found.
      */
-    void updateNotification(Notification notification) throws NotFoundException;
+    void update(Notification notification) throws NotFoundException;
 
     /**
      * Deletes a notification from the notification storage.
@@ -68,7 +68,7 @@ public interface NotificationGateway {
      * @param notification The notification to delete.
      * @throws NotFoundException The notification could not be found.
      */
-    void deleteNotification(Notification notification) throws NotFoundException;
+    void delete(Notification notification) throws NotFoundException;
 
     /**
      * Marks a notification as read in the notification storage.
