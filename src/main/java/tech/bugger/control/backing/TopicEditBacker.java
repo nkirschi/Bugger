@@ -2,7 +2,6 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
@@ -50,17 +49,17 @@ public class TopicEditBacker implements Serializable {
     /**
      * The Topic Service user to edit topics.
      */
-    private transient TopicService topicService;
+    private final transient TopicService topicService;
 
     /**
      * The current faces context.
      */
-    private FacesContext fctx;
+    private final FacesContext fctx;
 
     /**
      * The current user session.
      */
-    private UserSession session;
+    private final UserSession session;
 
     @Inject
     TopicEditBacker(final TopicService topicService, final FacesContext fctx, final UserSession session) {
