@@ -184,16 +184,15 @@ public class ReportDBGateway implements ReportGateway {
     public List<Report> getSelectedReports(final Topic topic, final Selection selection, final boolean showOpenReports,
                                            final boolean showClosedReports) {
         List<Report> selectedReports = new ArrayList<>(Math.max(0, selection.getTotalSize()));
-        String filter = ";";
-        if (!showClosedReports) {
-            filter = "AND closed_at IS NULL";
-        }
-        if (!showOpenReports) {
-            filter = "AND closed_at IS NOT NULL";
-        }
+        String filter = "";
         if (!showClosedReports && !showOpenReports) {
             return selectedReports;
+        } else if (!showClosedReports) {
+            filter = "AND closed_at IS NULL";
+        } else if (!showOpenReports) {
+            filter = "AND closed_at IS NOT NULL";
         }
+
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM report WHERE topic = ? " + filter
                 + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
                 + " LIMIT " + Pagitable.getItemLimit(selection)
