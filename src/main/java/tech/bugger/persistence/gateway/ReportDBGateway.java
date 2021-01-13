@@ -187,9 +187,9 @@ public class ReportDBGateway implements ReportGateway {
             ResultSet rs = new StatementParametrizer(stmt).integer(topic.getId()).toStatement().executeQuery();
 
             while (rs.next()) {
-                log.info("found a Report!");
                 selectedReports.add(getReportFromResultSet(rs));
             }
+            log.debug("Found " + selectedReports.size() + " reports!");
         } catch (SQLException | NotFoundException e) {
             log.error("Error while searching for reports in topic with id " + topic.getId(), e);
             throw new StoreException("Error while searching reports in topic with id " + topic.getId(), e);
@@ -250,9 +250,9 @@ public class ReportDBGateway implements ReportGateway {
                     .toStatement().executeQuery();
 
             while (rs.next()) {
-                log.debug("Found a Duplicate!");
                 selectedDuplicates.add(getReportFromResultSet(rs));
             }
+            log.debug("Found " + selectedDuplicates.size() + " duplicates!");
         } catch (SQLException | NotFoundException e) {
             log.error("Error while searching for duplicates of report with id " + report.getId(), e);
             throw new StoreException("Error while searching duplicates of report with id " + report.getId(), e);
