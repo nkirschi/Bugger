@@ -13,84 +13,8 @@
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
+
     <ui:define name="content">
-
-        <!-- Renders the popup dialog to promote a user to a moderator. -->
-        <h:form id="f-promote-mod" rendered="#{topicBacker.displayDialog == 'MOD'}">
-            <h:panelGroup layout="block" styleClass="row">
-                <h:panelGroup layout="block" styleClass="col-sm-2"/>
-                <h:panelGroup layout="block" styleClass="col-sm-8">
-                    <h:panelGroup id="p-promote-mod" layout="block" styleClass="row">
-                        <h:panelGroup layout="block" styleClass="col-sm-12">
-                            <h:outputText id="ot-promote-mod" styleClass="h2" value="#{labels.topic_promote_mod}"/>
-                            <h:outputText id="ot-promote-mod-info" value="#{labels.topic_promote_mod_info}"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup id="p-username" layout="block" styleClass="row align-center">
-                        <h:panelGroup id="p-username-label" layout="block" styleClass="col-sm-3">
-                            <h:outputLabel id="ol-username" value="#{labels.username}" for="it-username"/>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-username-input" layout="block" styleClass="col-sm-6">
-                            <h:inputText id="it-username" value="#{topicBacker.userToBeModded}" required="true"
-                                         a:maxlength="#{C.USERNAME_MAX}">
-                                <f:validateLength maximum="#{C.USERNAME_MAX}"/>
-                            </h:inputText>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-username-message" layout="block" styleClass="col-sm-3">
-                            <h:message for="it-username"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="row align-center">
-                        <h:panelGroup layout="block" styleClass="col-sm-12">
-                            <h:commandButton id="cb-promote" value="#{labels.topic_promote_mod}"
-                                             action="#{topicBacker.makeModerator}" styleClass="button"/>
-                            <h:commandButton id="cb-abort-promote" value="#{labels.abort}" styleClass="button"
-                                             action="#{topicBacker.closeDialog}" immediate="true"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="col-sm-2"/>
-            </h:panelGroup>
-        </h:form>
-
-        <!-- Renders the popup dialog to demote a moderator. -->
-        <h:form id="f-demote-mod" rendered="#{topicBacker.displayDialog == 'UNMOD'}">
-            <h:panelGroup layout="block" styleClass="row">
-                <h:panelGroup layout="block" styleClass="col-sm-2"/>
-                <h:panelGroup layout="block" styleClass="col-sm-8">
-                    <h:panelGroup id="p-demote-mod" layout="block" styleClass="row">
-                        <h:panelGroup layout="block" styleClass="col-sm-12">
-                            <h:outputText id="ot-deomote-mod" styleClass="h2" value="#{labels.topic_demote_mod}"/>
-                            <h:outputText id="ot-deomote-mod-info" value="#{labels.topic_demote_mod_info}"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup id="p-username-mod" layout="block" styleClass="row align-center">
-                        <h:panelGroup id="p-username-mod-label" layout="block" styleClass="col-sm-3">
-                            <h:outputLabel id="ol-username-mod" value="#{labels.username}" for="it-username-mod"/>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-username-mod-input" layout="block" styleClass="col-sm-6">
-                            <h:inputText id="it-username-mod" value="#{topicBacker.userToBeModded}" required="true"
-                                         a:maxlength="#{C.USERNAME_MAX}">
-                                <f:validateLength maximum="#{C.USERNAME_MAX}"/>
-                            </h:inputText>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-username-mod-message" layout="block" styleClass="col-sm-3">
-                            <h:message for="it-username-mod"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="row align-center">
-                        <h:panelGroup layout="block" styleClass="col-sm-12">
-                            <h:commandButton id="cb-demote" value="#{labels.topic_demote_mod}"
-                                             action="#{topicBacker.removeModerator}" styleClass="button"/>
-                            <h:commandButton id="cb-abort-demote" value="#{labels.abort}" styleClass="button"
-                                             action="#{topicBacker.closeDialog}" immediate="true"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="col-sm-2"/>
-            </h:panelGroup>
-        </h:form>
-
         <h:form id="f-topic">
             <h:panelGroup class="row" layout="block">
                 <h:panelGroup class="col-sm-12" layout="block">
@@ -154,6 +78,33 @@
             </h:panelGroup>
         </h:panelGroup>
 
+        <!-- A paginated list of users banned from this topic. -->
+        <h:outputText id="ot-banned" styleClass="h2" value="#{labels.topic_banned}"/>
+        <h:panelGroup class="row" layout="block" id="p-banned">
+            <h:panelGroup layout="block" id="p-banned-pagination" styleClass="col-sm-9">
+                <b:pagitable paginator="#{topicBacker.bannedUsers}" simple="true">
+                    <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
+                    <h:column>
+                        <h:link value="#{var.username}" outcome="pretty:profile">
+                            <f:param name="u" value="#{var.username}"/>
+                        </h:link>
+                    </h:column>
+                </b:pagitable>
+            </h:panelGroup>
+            <h:panelGroup id="p-banned-status" layout="block" styleClass="col-sm-3">
+                <h:form id="f-banned-status">
+                    <h:commandLink id="l-ban" action="#{topicBacker.openBanDialog}" styleClass="button"
+                                   rendered="#{topicBacker.moderator}">
+                        <h:graphicImage id="g-ban" value="/resources/images/add.png" alt="Button to ban users"/>
+                    </h:commandLink>
+                    <h:commandLink id="l-unban" action="#{topicBacker.openUnbanDialog}" styleClass="button"
+                                   rendered="#{topicBacker.moderator and topicBacker.bannedUsers.selection.totalSize gt 0}">
+                        <h:graphicImage id="g-unban" value="/resources/images/delete.png" alt="Button to unban users"/>
+                    </h:commandLink>
+                </h:form>
+            </h:panelGroup>
+        </h:panelGroup>
+
         <h:panelGroup class="row" layout="block">
             <h:panelGroup class="col-sm-12" layout="block">
                 <b:pagitable paginator="#{topicBacker.reports}">
@@ -201,5 +152,136 @@
             </h:panelGroup>
         </h:form>
     </ui:define>
+
+    <ui:define name="dialogs">
+        <!-- Renders the popup dialog to promote a user to a moderator. -->
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{topicBacker.displayDialog == 'MOD'}">
+            <h:form id="f-promote-mod">
+                <h:outputText id="ot-promote-mod" styleClass="h2" value="#{labels.topic_promote_mod}"/>
+                <h:panelGroup layout="block" styleClass="mb-3">
+                    <h:outputText id="ot-promote-mod-info" value="#{labels.topic_promote_mod_info}"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:outputLabel id="ol-username" value="#{labels.username}" for="it-username"
+                                   styleClass="form-label"/>
+                    <h:panelGroup id="p-username-input" layout="block" styleClass="input-group has-validation">
+                        <h:inputText id="it-username" value="#{topicBacker.userToBeModded}" required="true"
+                                     a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
+                                     #{component.valid ? 'is-valid' : 'is-invalid'}">
+                            <f:validateLength maximum="#{C.USERNAME_MAX}"/>
+                        </h:inputText>
+                        <h:panelGroup id="p-username-message" layout="block" styleClass="invalid-tooltip right">
+                            <h:message for="it-username"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="align-center">
+                    <h:commandButton id="cb-promote" value="#{labels.topic_promote_mod}"
+                                     action="#{topicBacker.makeModerator}" styleClass="button"/>
+                    <h:commandButton id="cb-abort-promote" value="#{labels.abort}" styleClass="button"
+                                     action="#{topicBacker.closeDialog}" immediate="true"/>
+                </h:panelGroup>
+            </h:form>
+        </h:panelGroup>
+
+        <!-- Renders the popup dialog to demote a moderator. -->
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{topicBacker.displayDialog == 'UNMOD'}">
+            <h:form id="f-demote-mod">
+                <h:outputText id="ot-deomote-mod" styleClass="h2" value="#{labels.topic_demote_mod}"/>
+                <h:panelGroup layout="block" styleClass="mb-3">
+                    <h:outputText id="ot-deomote-mod-info" value="#{labels.topic_demote_mod_info}"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup id="p-username-mod" layout="block" styleClass="row align-center">
+                        <h:outputLabel id="ol-username-mod" value="#{labels.username}" for="it-username-mod"
+                                       styleClass="form-label"/>
+                        <h:panelGroup id="p-username-mod-input" layout="block" styleClass="input-group has-validation">
+                            <h:inputText id="it-username-mod" value="#{topicBacker.userToBeModded}" required="true"
+                                         a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
+                                         #{component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:validateLength maximum="#{C.USERNAME_MAX}"/>
+                            </h:inputText>
+                            <h:panelGroup id="p-username-mod-message" layout="block" styleClass="invalid-tooltip right">
+                                <h:message for="it-username-mod"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="align-center">
+                    <h:commandButton id="cb-demote" value="#{labels.topic_demote_mod}"
+                                     action="#{topicBacker.removeModerator}" styleClass="button"/>
+                    <h:commandButton id="cb-abort-demote" value="#{labels.abort}" styleClass="button"
+                                     action="#{topicBacker.closeDialog}" immediate="true"/>
+                </h:panelGroup>
+            </h:form>
+        </h:panelGroup>
+
+        <!-- Renders the popup dialog to ban a user. -->
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{topicBacker.displayDialog == 'BAN'}">
+            <h:form id="f-ban">
+                <h:outputText id="ot-ban" styleClass="h2" value="#{labels.topic_ban}"/>
+                <h:panelGroup layout="block" styleClass="mb-3">
+                    <h:outputText id="ot-ban-info" value="#{labels.topic_ban_info}"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup id="p-username-ban" layout="block" styleClass="row align-center">
+                        <h:outputLabel id="ol-username-ban" value="#{labels.username}" for="it-username-ban"
+                                       styleClass="form-label"/>
+                        <h:panelGroup id="p-username-ban-input" layout="block" styleClass="input-group has-validation">
+                            <h:inputText id="it-username-ban" value="#{topicBacker.userToBeBanned}" required="true"
+                                         a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
+                                         #{component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:validateLength maximum="#{C.USERNAME_MAX}"/>
+                            </h:inputText>
+                            <h:panelGroup id="p-username-ban-message" layout="block" styleClass="invalid-tooltip right">
+                                <h:message for="it-username-ban"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="align-center">
+                    <h:commandButton id="cb-ban" value="#{labels.topic_ban}"
+                                     action="#{topicBacker.banUser}" styleClass="button"/>
+                    <h:commandButton id="cb-abort-ban" value="#{labels.abort}" styleClass="button"
+                                     action="#{topicBacker.closeDialog}" immediate="true"/>
+                </h:panelGroup>
+            </h:form>
+        </h:panelGroup>
+
+        <!-- Renders the popup dialog to unban a user. -->
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{topicBacker.displayDialog == 'UNBAN'}">
+            <h:form id="f-unban">
+                <h:outputText id="ot-unban" styleClass="h2" value="#{labels.topic_unban}"/>
+                <h:panelGroup layout="block" styleClass="mb-3">
+                    <h:outputText id="ot-unban-info" value="#{labels.topic_unban_info}"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup id="p-username-unban" layout="block" styleClass="row align-center">
+                        <h:outputLabel id="ol-username-unban" value="#{labels.username}" for="it-username-unban"
+                                       styleClass="form-label"/>
+                        <h:panelGroup id="p-username-unban-input" layout="block"
+                                      styleClass="input-group has-validation">
+                            <h:inputText id="it-username-unban" value="#{topicBacker.userToBeBanned}" required="true"
+                                         a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
+                                         #{component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:validateLength maximum="#{C.USERNAME_MAX}"/>
+                            </h:inputText>
+                            <h:panelGroup id="p-username-unban-message" layout="block"
+                                          styleClass="invalid-tooltip right">
+                                <h:message for="it-username-unban"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="align-center">
+                    <h:commandButton id="cb-unban" value="#{labels.topic_unban}"
+                                     action="#{topicBacker.unbanUser}" styleClass="button"/>
+                    <h:commandButton id="cb-abort-unban" value="#{labels.abort}" styleClass="button"
+                                     action="#{topicBacker.closeDialog}" immediate="true"/>
+                </h:panelGroup>
+            </h:form>
+        </h:panelGroup>
+    </ui:define>
+
 </ui:composition>
 </html>

@@ -30,9 +30,9 @@
                                     <h:inputText id="it-username" value="#{loginBacker.username}" required="true"
                                                  maxlength="#{C.SMALL_FIELD}" styleClass="form-control
                                                  #{component.valid ? 'is-valid' : 'is-invalid'}"/>
-                                </h:panelGroup>
-                                <h:panelGroup layout="block" styleClass="invalid-tooltip right">
-                                    <h:message for="it-username"/>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip right">
+                                        <h:message for="it-username"/>
+                                    </h:panelGroup>
                                 </h:panelGroup>
                             </h:panelGroup>
 
@@ -47,9 +47,9 @@
                                                    : 'is-invalid'}">
                                         <f:validateLength maximum="#{C.PASSWORD_MAX}"/>
                                     </h:inputSecret>
-                                </h:panelGroup>
-                                <h:panelGroup layout="block" styleClass="invalid-tooltip right">
-                                    <h:message for="it-password"/>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip right">
+                                        <h:message for="it-password"/>
+                                    </h:panelGroup>
                                 </h:panelGroup>
                             </h:panelGroup>
 
