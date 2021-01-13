@@ -110,6 +110,15 @@
 
         <!-- TODO dialog for marking a duplicate -->
 
+        <h:link id="cb-add-post"
+                outcome="pretty:post-edit"
+                value="#{labels.post_create}"
+                styleClass="style-button"
+                rendered="#{!reportBacker.banned}">
+            <f:param name="r" value="#{reportBacker.reportID}"/>
+            <f:param name="c" value="1"/>
+        </h:link>
+
         <b:pagitable_post paginator="#{reportBacker.posts}">
             <!-- https://stackoverflow.com/questions/18358604/how-to-use-el-with-uirepeat-var-in-id-attribute-of-a-jsf-component -->
             <div class="card" id="post-#{var.id}">
@@ -121,8 +130,12 @@
                                       value="#{labels.report_at} #{var.authorship.creationDate}"/>
                     </h:panelGrid>
                     <h:panelGrid columns="2" rendered="#{reportBacker.privilegedForPost(var)}">
-                        <!-- TODO redirect to post edit page -->
-                        <h:commandButton id="cb-edit-post" value="#{labels.edit}"/>
+                        <h:link id="cb-edit-post"
+                                outcome="pretty:post-edit"
+                                value="#{labels.edit}"
+                                styleClass="style-button">
+                            <f:param name="p" value="#{var.id}"/>
+                        </h:link>
                         <h:commandButton id="cb-delete-post-dialog" action="#{reportBacker.deletePostDialog(var)}"
                                          value="#{labels.delete}"/>
                     </h:panelGrid>
@@ -149,12 +162,6 @@
                     <h:outputText value="#{var.content}" escape="false"/>
                 </h:panelGrid>
 
-                <!--
-                <h:panelGroup class="row" layout="block">
-                    <h:outputText value="#{var.content}" escape="false"/>
-                </h:panelGroup>
-                -->
-
                 <h:panelGrid columns="2" styleClass="card-footer">
                     <h:outputText value="#{labels.id}: #{var.id}"/>
                     <h:outputText
@@ -163,14 +170,16 @@
                     />
                 </h:panelGrid>
 
-                <!-- TODO put attachments into post in gateway
-                <ui:repeat value="#{var.attachments}" var="attachment">
-                    <h:panelGrid columns="2">
-                        <h:outputText id="ot-attachment-name" value="#{attachment.name}"/>
-                        <h:commandButton id="cb-attachment-download" value="Download"/>
-                    </h:panelGrid>
-                </ui:repeat>
-                -->
+                <ul>
+                    <ui:repeat var="attachment" value="#{var.attachments}">
+                       <li>
+                           <!-- TODO: Correct path to attachment servlet -->
+                           <h:link outcome="attachment" value="#{attachment.name}">
+                               <f:param name="id" value="#{attachment.id}"/>
+                           </h:link>
+                       </li>
+                    </ui:repeat>
+                </ul>
             </div>
         </b:pagitable_post>
     </ui:define>

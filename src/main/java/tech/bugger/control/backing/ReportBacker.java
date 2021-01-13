@@ -350,7 +350,7 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user is privileged and {@code false} otherwise.
      */
     public boolean isPrivileged() {
-        return reportService.isPrivileged(session.getUser(), report);
+        return reportService.canModify(session.getUser(), report);
     }
 
     /**
@@ -360,7 +360,7 @@ public class ReportBacker implements Serializable {
      * @return {@code true} iff the user is privileged.
      */
     public boolean privilegedForPost(final Post post) {
-        return postService.isPrivileged(session.getUser(), post);
+        return postService.canModify(session.getUser(), post);
     }
 
     /**

@@ -1,15 +1,21 @@
 package tech.bugger.persistence.gateway;
 
+import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.StatementParametrizer;
+import tech.bugger.persistence.util.Transaction;
+import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.inject.spi.CDI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -426,5 +432,20 @@ public class ReportDBGateway implements ReportGateway {
             throw new StoreException("Error when finding report containing post with ID " + postID + ".");
         }
     }
+
+    /*public static Report find(int id) {
+        TransactionManager transactionManager = CDI.current().select(TransactionManager.class).get();
+        try (Transaction tx = transactionManager.begin()) {
+            Report report = tx.newReportGateway().find(id);
+            tx.commit();
+            return report;
+        } catch (NotFoundException e) {
+            log.debug("Report not found.", e);
+            return null;
+        } catch (TransactionException e) {
+            log.error("Error while searching for report.", e);
+            return null;
+        }
+    }*/
 
 }

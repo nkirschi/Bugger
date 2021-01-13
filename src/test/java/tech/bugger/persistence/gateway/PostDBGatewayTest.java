@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Authorship;
@@ -37,6 +38,12 @@ public class PostDBGatewayTest {
 
     private PostDBGateway gateway;
 
+    @Mock
+    private UserGateway userGateway;
+
+    @Mock
+    private AttachmentGateway attachmentGateway;
+
     private Connection connection;
 
     private Report report;
@@ -51,7 +58,7 @@ public class PostDBGatewayTest {
     public void setUp() throws Exception {
         DBExtension.insertMinimalTestData();
         connection = DBExtension.getConnection();
-        gateway = new PostDBGateway(connection);
+        gateway = new PostDBGateway(connection, userGateway, attachmentGateway);
 
         report = new Report(100, "title", Report.Type.BUG, Report.Severity.MINOR, "", null, null, null, null, 0);
         Authorship authorship = new Authorship(new User(), ZonedDateTime.now(), new User(), ZonedDateTime.now());
@@ -94,14 +101,16 @@ public class PostDBGatewayTest {
         doReturn(stmtMock).when(connectionSpy).prepareStatement(any(), anyInt());
         when(stmtMock.getGeneratedKeys()).thenReturn(rsMock);
         when(rsMock.next()).thenReturn(false);
-        assertThrows(StoreException.class, () -> new PostDBGateway(connectionSpy).create(post));
+        assertThrows(StoreException.class,
+                () -> new PostDBGateway(connectionSpy, userGateway, attachmentGateway).create(post));
     }
 
     @Test
     public void testCreateWhenDatabaseError() throws Exception {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any(), anyInt());
-        assertThrows(StoreException.class, () -> new PostDBGateway(connectionSpy).create(post));
+        assertThrows(StoreException.class,
+                () -> new PostDBGateway(connectionSpy, userGateway, attachmentGateway).create(post));
     }
 
     public void validSelection() {
@@ -191,7 +200,7 @@ public class PostDBGatewayTest {
     }
 
     @Test
-    public void testSelectPostsOfReportWhenReportDoesNotExist() {
+    public void testSelectPostsOfReportWhenReportDoesNotExist() throws Exception {
         validSelection();
         testReport.setId(12);
         assertTrue(gateway.selectPostsOfReport(testReport, testSelection).isEmpty());

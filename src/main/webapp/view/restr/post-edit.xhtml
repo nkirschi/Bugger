@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      lang="#{userSession.locale.language}" xml:lang="#{userSession.locale.language}">
+
+<ui:composition template="../../WEB-INF/template/main.xhtml">
+    <ui:param name="title" value="#{postEditBacker.create ? labels.post_create : labels.post_edit}"/>
+
+    <f:metadata>
+        <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
+    </f:metadata>
+
+    <ui:define name="content">
+        <h:form id="f-edit-post"
+                enctype="multipart/form-data">
+            <h:panelGroup styleClass="row" layout="block" >
+                <h:outputLabel id="o-post-content" for="it-content" value="#{labels.post_content}"/>
+                <h:inputTextarea id="it-content" value="#{postEditBacker.post.content}"
+                                 required="true" styleClass="form-control" rows="10">
+                    <f:validateLength maximum="#{C.SMALL_AREA}"/>
+                </h:inputTextarea>
+                <h:panelGroup/>
+                <h:message for="it-content"/>
+            </h:panelGroup>
+
+            <ul>
+                <ui:repeat var="attachment" value="#{postEditBacker.attachments}">
+                    <li><h:outputText value="#{attachment.name}"></h:outputText></li>
+                </ui:repeat>
+            </ul>
+
+            <h:panelGroup styleClass="row"
+                          layout="block"
+                          rendered="#{postEditBacker.attachments.size()
+                                      lt applicationSettings.configuration.maxAttachmentsPerPost}">
+                <h:outputLabel id="o-attachment" for="it-attachment" value="#{labels.add_attachment}"/>
+                <h:inputFile id="it-attachment" value="#{postEditBacker.lastAttachmentUploaded}">
+                    <f:validator validatorId="fileValidator"/>
+                </h:inputFile>
+                <h:panelGroup/>
+                <h:message for="it-attachment"/>
+                <h:commandButton id="cb-add-attachment"
+                                 value="#{labels.add_attachment}"
+                                 action="#{postEditBacker.uploadAttachment}"/>
+            </h:panelGroup>
+
+            <h:panelGroup styleClass="row" layout="block">
+                <h:commandButton id="cb-remove-attachments"
+                                 value="#{labels.remove_all_attachments}"
+                                 action="#{postEditBacker.deleteAllAttachments}"/>
+            </h:panelGroup>
+
+            <h:commandButton value="#{postEditBacker.create ? labels.post_create : labels.post_save_changes}"
+                             action="#{postEditBacker.saveChanges}"/>
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

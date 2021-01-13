@@ -18,6 +18,7 @@
         <url-pattern>/faces/*</url-pattern>
         <url-pattern>/admin</url-pattern>
         <url-pattern>/report-edit</url-pattern>
+        <url-pattern>/post-edit</url-pattern>
     </servlet-mapping>
 
     <context-param>

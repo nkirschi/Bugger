@@ -373,13 +373,13 @@ public class ReportService {
     }
 
     /**
-     * Returns whether the user is privileged for the report in terms of editing rights.
+     * Returns whether the user is allowed to modify (edit or delete) a given report.
      *
      * @param user The user in question.
      * @param report The report in question.
-     * @return {@code true} iff the user is privileged.
+     * @return {@code true} iff the user is allowed to modify the report.
      */
-    public boolean isPrivileged(final User user, final Report report) {
+    public boolean canModify(final User user, final Report report) {
         // TODO add checks for mods, banned users
         if (user == null) {
             return false;
@@ -388,6 +388,18 @@ public class ReportService {
         } else {
             return user.equals(report.getAuthorship().getCreator());
         }
+    }
+
+    /**
+     * Returns whether the user is allowed to post in a given report.
+     *
+     * @param user The user in question.
+     * @param report The report in question.
+     * @return {@code true} iff the user is allowed to post in the report.
+     */
+    public boolean canPostInReport(final User user, final Report report) {
+        // TODO add checks for banned users
+        return true;
     }
 
     /**

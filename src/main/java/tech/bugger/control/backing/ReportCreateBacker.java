@@ -193,31 +193,7 @@ public class ReportCreateBacker implements Serializable {
      * the post.
      */
     public void saveAttachment() {
-        if (uploadedAttachment == null) { // user didn't enter attachment
-            return;
-        }
-
-        byte[] content;
-        try {
-            content = uploadedAttachment.getInputStream().readAllBytes();
-        } catch (IOException e) {
-            log.info("Uploaded attachment could not be read", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("attachment_invalid"), Feedback.Type.ERROR));
-            return;
-        }
-
-        Attachment attachment = new Attachment();
-        attachment.setName(uploadedAttachment.getSubmittedFileName());
-        attachment.setContent(new Lazy<>(content));
-        attachment.setMimetype(uploadedAttachment.getContentType());
-        attachment.setPost(new Lazy<>(firstPost));
-
-        attachments.add(attachment);
-        if (postService.isAttachmentListValid(attachments)) {
-            log.debug("Attachment '" + attachment.getName() + "' uploaded.");
-        } else {
-            attachments.remove(attachment);
-        }
+        postService.addAttachment(firstPost, uploadedAttachment);
     }
 
     /**
