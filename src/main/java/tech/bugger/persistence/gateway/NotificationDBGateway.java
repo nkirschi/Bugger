@@ -323,4 +323,23 @@ public class NotificationDBGateway implements NotificationGateway {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Notification> getUnsentNotifications() {
+        List<Notification> notifications;
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM notification WHERE sent = false;")) {
+            ResultSet rs = stmt.executeQuery();
+            notifications = new ArrayList<>();
+            while (rs.next()) {
+                notifications.add(getNotificationFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            log.error("Error when retrieving all unsent notifications.", e);
+            throw new StoreException("Error when retrieving all unsent notifications.", e);
+        }
+        return notifications;
+    }
+
 }

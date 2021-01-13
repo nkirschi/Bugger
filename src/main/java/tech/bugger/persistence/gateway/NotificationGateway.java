@@ -85,4 +85,11 @@ public interface NotificationGateway {
      */
     void markAsSent(Notification notification) throws NotFoundException;
 
+    /**
+     * Returns all unsent notifications.
+     *
+     * @return The unsent notifications
+     */
+    List<Notification> getUnsentNotifications();
+
 }
