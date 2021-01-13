@@ -8,7 +8,10 @@
                       id="p-organization"
                       styleClass="d-flex justify-content-start align-items-center h-100">
             <h:link outcome="pretty:home" id="l-logo" styleClass="h-100 me-3">
-                <h:graphicImage id="g-logo" value="logo" styleClass="h-100 w-auto"/>
+                <h:graphicImage id="g-logo" value="logo" styleClass="h-100 w-auto"
+                                rendered="#{applicationSettings.organization.existsLogo}"/>
+                <h:graphicImage id="g-logo-fallback" library="images" name="bugger.png" styleClass="h-100 w-auto"
+                                rendered="#{not applicationSettings.organization.existsLogo}"/>
             </h:link>
             <h:outputText value="#{applicationSettings.organization.name}"
                           id="ot-comp-name"

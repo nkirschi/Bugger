@@ -15,10 +15,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
-import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -38,11 +36,6 @@ public class ProfileEditBacker implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 8894621041245160359L;
-
-    /**
-     * Path to the default avatar.
-     */
-    private static final String DEFAULT_AVATAR = "/resources/images/bugger.png";
 
     /**
      * The type of popup dialog to be rendered on the profile page.
@@ -108,11 +101,6 @@ public class ProfileEditBacker implements Serializable {
      * Whether to delete the existing avatar.
      */
     private boolean deleteAvatar;
-
-    /**
-     * The default avatar to use for user that do not have their own avatar set.
-     */
-    private Lazy<byte[]> defaultAvatar;
 
     /**
      * The user's sanitized biography.
@@ -192,15 +180,6 @@ public class ProfileEditBacker implements Serializable {
         }
 
         deleteAvatar = false;
-        defaultAvatar = new Lazy<>(() -> {
-            try {
-                ServletContext sctx = (ServletContext) ext.getContext();
-                return sctx.getResourceAsStream(DEFAULT_AVATAR).readAllBytes();
-            } catch (IOException e) {
-                log.warning("Default avatar could not be loaded", e);
-                return new byte[0];
-            }
-        });
     }
 
     /**
@@ -326,9 +305,9 @@ public class ProfileEditBacker implements Serializable {
      * @return {@code true} iff the avatar was successfully processed.
      */
     boolean uploadAvatar() {
-        Lazy<byte[]> image = deleteAvatar ? defaultAvatar : profileService.uploadAvatar(uploadedAvatar);
+        Lazy<byte[]> image = deleteAvatar ? new Lazy<>(new byte[0]) : profileService.uploadAvatar(uploadedAvatar);
         if (image != null) {
-            byte[] thumbnail = profileService.generateThumbnail(image.get());
+            byte[] thumbnail = deleteAvatar ? new byte[0] : profileService.generateThumbnail(image.get());
             if (thumbnail != null) {
                 user.setAvatar(image);
                 user.setAvatarThumbnail(thumbnail);
@@ -465,9 +444,6 @@ public class ProfileEditBacker implements Serializable {
     }
 
     /**
-<<<<<<< HEAD
-     * @return The uploaded avatar.
-=======
      * @return The sanitized biography.
      */
     public String getSanitizedBio() {
@@ -482,8 +458,7 @@ public class ProfileEditBacker implements Serializable {
     }
 
     /**
-     * @return The tempAvatar.
->>>>>>> master
+     * @return The uploaded avatar.
      */
     public Part getUploadedAvatar() {
         return uploadedAvatar;
@@ -494,24 +469,6 @@ public class ProfileEditBacker implements Serializable {
      */
     public void setUploadedAvatar(final Part uploadedAvatar) {
         this.uploadedAvatar = uploadedAvatar;
-    }
-
-    /**
-     * Returns the default avatar.
-     *
-     * @return The default avatar.
-     */
-    public Lazy<byte[]> getDefaultAvatar() {
-        return defaultAvatar;
-    }
-
-    /**
-     * Sets the default avatar.
-     *
-     * @param defaultAvatar The default avatar to set.
-     */
-    public void setDefaultAvatar(final Lazy<byte[]> defaultAvatar) {
-        this.defaultAvatar = defaultAvatar;
     }
 
     /**

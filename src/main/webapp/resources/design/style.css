@@ -122,6 +122,10 @@
     color: black;
 }
 
+.logo-preview {
+    max-width: 200px;
+    max-height: 200px;
+}
 
 .p-avatar {
     width: 50%;

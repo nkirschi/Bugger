@@ -354,6 +354,15 @@ public class User implements Serializable {
     }
 
     /**
+     * Returns whether the avatar is non-empty.
+     *
+     * @return Whether the avatar is non-empty.
+     */
+    public boolean isExistsAvatar() {
+        return avatarThumbnail != null && avatarThumbnail.length > 0;
+    }
+
+    /**
      * Returns the biography of this user.
      *
      * @return The user's biography.

@@ -50,9 +50,13 @@
                 </h:panelGroup>
 
                 <!-- organization logo -->
-                <h:outputLabel id="o-logo" for="g-logo" value="#{labels.logo}"/>
+                <h:outputLabel id="o-logo" for="i-logo" value="#{labels.logo}"/>
                 <h:panelGrid columns="1">
-                    <h:graphicImage id="g-logo" value="logo" width="100" height="100"/>
+                    <h:graphicImage id="g-logo-preview" value="logo" styleClass="logo-preview"
+                                    rendered="#{applicationSettings.organization.existsLogo}"/>
+                    <h:graphicImage id="g-logo-preview-fallback" library="images" name="bugger.png"
+                                    styleClass="logo-preview"
+                                    rendered="#{not applicationSettings.organization.existsLogo}"/>
                     <h:inputFile id="i-logo"
                                  validator="imageValidator"
                                  valueChangeListener="#{adminBacker.uploadLogo}"

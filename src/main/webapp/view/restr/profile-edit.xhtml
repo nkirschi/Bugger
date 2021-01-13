@@ -95,14 +95,18 @@
                 <h:graphicImage id="g-avatar"
                                 value="avatar?id=#{profileEditBacker.user.id}"
                                 styleClass="g-avatar"
-                                alt="The user's avatar"/>
+                                alt="The user's avatar"
+                                rendered="#{profileEditBacker.user.existsAvatar}"/>
+                <h:graphicImage id="g-avatar-fallback"
+                                library="images" name="bugger.png"
+                                styleClass="g-avatar"
+                                alt="The user's avatar"
+                                rendered="#{not profileEditBacker.user.existsAvatar}"/>
             </h:panelGroup>
 
             <h:panelGroup layout="block" id="p-upload" styleClass="row p-avatar">
                 <h:outputLabel id="o-upload" for="i-upload" value="#{labels['profile_edit.change_avatar']}"/>
-                <h:inputFile id="i-upload" validator="imageValidator" value="#{profileEditBacker.uploadedAvatar}">
-                    <!--<f:validator validatorId="imageValidator"/>-->
-                </h:inputFile>
+                <h:inputFile id="i-upload" validator="imageValidator" value="#{profileEditBacker.uploadedAvatar}"/>
             </h:panelGroup>
 
             <!-- <h:panelGroup id="p-avatar-buttons" styleClass="row">

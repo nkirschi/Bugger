@@ -143,7 +143,13 @@
                 <h:graphicImage id="g-avatar"
                                 value="avatar?id=#{profileBacker.user.id}"
                                 styleClass="g-avatar"
-                                alt="The user's avatar"/>
+                                alt="The user's avatar"
+                                rendered="#{profileBacker.user.existsAvatar}"/>
+                <h:graphicImage id="g-avatar-fallback"
+                                library="images" name="bugger.png"
+                                styleClass="g-avatar"
+                                alt="The user's avatar"
+                                rendered="#{not profileBacker.user.existsAvatar}"/>
             </h:panelGroup>
             <h:panelGroup class="row" layout="block" id="p-username">
                 <h:panelGroup class="col-sm-3" id="p-username-label">

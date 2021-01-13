@@ -223,33 +223,6 @@ public class ProfileEditBackerTest {
     }
 
     @Test
-    public void testInitDefaultAvatar() throws Exception {
-        when(session.getUser()).thenReturn(user);
-        when(profileService.getUser(user.getId())).thenReturn(user);
-        ServletContext sctx = mock(ServletContext.class);
-        when(ext.getContext()).thenReturn(sctx);
-        InputStream is = mock(InputStream.class);
-        when(sctx.getResourceAsStream(any())).thenReturn(is);
-        byte[] testBytes = new byte[] {1, 2, 3, 4};
-        when(is.readAllBytes()).thenReturn(testBytes);
-        profileEditBacker.init();
-        assertArrayEquals(testBytes, profileEditBacker.getDefaultAvatar().get());
-    }
-
-    @Test
-    public void testInitDefaultAvatarWhenFails() throws Exception {
-        when(session.getUser()).thenReturn(user);
-        when(profileService.getUser(user.getId())).thenReturn(user);
-        ServletContext sctx = mock(ServletContext.class);
-        when(ext.getContext()).thenReturn(sctx);
-        InputStream is = mock(InputStream.class);
-        when(sctx.getResourceAsStream(any())).thenReturn(is);
-        when(is.readAllBytes()).thenThrow(IOException.class);
-        profileEditBacker.init();
-        assertArrayEquals(new byte[0], profileEditBacker.getDefaultAvatar().get());
-    }
-
-    @Test
     public void testInitGetUserNull() {
         when(session.getUser()).thenReturn(user);
         profileEditBacker.init();
@@ -418,18 +391,14 @@ public class ProfileEditBackerTest {
 
     @Test
     public void testUploadAvatarWhenDelete() {
-        Lazy<byte[]> avatar = new Lazy<>(new byte[]{1, 2, 3, 4});
-        byte[] thumbnail = new byte[]{1, 2, 3, 4};
-        when(profileService.generateThumbnail(any())).thenReturn(thumbnail);
-        profileEditBacker.setDefaultAvatar(avatar);
         profileEditBacker.setDeleteAvatar(true);
         profileEditBacker.setUser(user);
         assertAll(
                 () -> assertTrue(profileEditBacker.uploadAvatar()),
-                () -> assertEquals(avatar.get(), user.getAvatar().get()),
-                () -> assertEquals(thumbnail, user.getAvatarThumbnail())
+                () -> assertArrayEquals(new byte[0], user.getAvatar().get()),
+                () -> assertArrayEquals(new byte[0], user.getAvatarThumbnail())
         );
-        verify(profileService, times(1)).generateThumbnail(any());
+        verify(profileService, times(0)).generateThumbnail(any());
     }
 
     @Test
