@@ -1,9 +1,11 @@
 package tech.bugger.persistence.gateway;
 
+import com.ocpsoft.pretty.faces.util.StringUtils;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.global.util.Pagitable;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
@@ -14,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -119,21 +122,7 @@ public class NotificationDBGateway implements NotificationGateway {
                     .integer(id).toStatement();
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
-                ZonedDateTime date = null;
-                if (rs.getTimestamp("created_at") != null) {
-                    date = rs.getTimestamp("created_at").toInstant().atZone(ZoneId.systemDefault());
-                }
-                notification = new Notification(
-                        rs.getObject("id", Integer.class),
-                        rs.getObject("causer", Integer.class),
-                        rs.getObject("recipient", Integer.class),
-                        Notification.Type.valueOf(rs.getString("type")),
-                        date,
-                        rs.getBoolean("\"read\""),
-                        rs.getBoolean("sent"),
-                        rs.getObject("topic", Integer.class),
-                        rs.getObject("report", Integer.class),
-                        rs.getObject("post", Integer.class));
+                notification = getNotificationFromResultSet(rs);
             } else {
                 log.error("Unable to find notification with ID " + id + ".");
                 throw new NotFoundException("Unable to find notification with ID " + id + ".");
@@ -145,13 +134,66 @@ public class NotificationDBGateway implements NotificationGateway {
         return notification;
     }
 
+    private Notification getNotificationFromResultSet(final ResultSet rs) throws SQLException {
+        Notification notification;
+        ZonedDateTime date = null;
+        if (rs.getTimestamp("created_at") != null) {
+            date = rs.getTimestamp("created_at").toInstant().atZone(ZoneId.systemDefault());
+        }
+        notification = new Notification(
+                rs.getObject("id", Integer.class),
+                rs.getObject("causer", Integer.class),
+                rs.getObject("recipient", Integer.class),
+                Notification.Type.valueOf(rs.getString("type")),
+                date,
+                rs.getBoolean("\"read\""),
+                rs.getBoolean("sent"),
+                rs.getObject("topic", Integer.class),
+                rs.getObject("report", Integer.class),
+                rs.getObject("post", Integer.class));
+        return notification;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public List<Notification> selectNotifications(final User user, final Selection selection) {
-        // TODO Auto-generated method stub
-        return null;
+        if (user == null) {
+            log.error("Cannot select notifications for user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot select notifications for user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (selection == null) {
+            log.error("Cannot select notifications for user " + user + " with selection null.");
+            throw new IllegalArgumentException("Selection cannot be null");
+        } else if (StringUtils.isBlank(selection.getSortedBy())) {
+            log.error("Cannot select notifications for user " + user + " sorted by nothing.");
+            throw new IllegalArgumentException("Sorted by cannot be blank");
+        }
+
+        String sql = "SELECT * FROM notification WHERE recipient = ?"
+                + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
+                + " LIMIT ? OFFSET ?;";
+        List<Notification> selectedNotifications = new ArrayList<>(Math.min(Pagitable.getItemLimit(selection),
+                Math.max(0, selection.getTotalSize())));
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(Pagitable.getItemLimit(selection))
+                    .integer(Pagitable.getItemOffset(selection)).toStatement();
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                selectedNotifications.add(getNotificationFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            log.error("Error while selecting notifications for user " + user + " with selection " + selection
+                    + ".", e);
+            throw new StoreException("Error while selecting notifications for user " + user + " with selection "
+                    + selection + ".", e);
+        }
+        return selectedNotifications;
     }
 
     /**
