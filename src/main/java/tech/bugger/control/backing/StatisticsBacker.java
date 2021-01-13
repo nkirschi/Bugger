@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
+import java.text.NumberFormat;
 import java.time.Duration;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -39,9 +40,9 @@ public class StatisticsBacker implements Serializable {
     private static final Log log = Log.forClass(StatisticsBacker.class);
 
     /**
-     * Constant for the number of seconds in a minute. In case someone forgets :)
+     * Constant for the number of minutes in an hour. In case someone forgets :)
      */
-    private static final double SECONDS_IN_A_MINUTE = 60.0;
+    private static final double MINUTES_IN_AN_HOUR = 60.0;
 
     /**
      * Symbol to use when no meaningful value can be displayed.
@@ -99,6 +100,11 @@ public class StatisticsBacker implements Serializable {
     private List<String> topicTitles;
 
     /**
+     * The format to use for printing decimal numbers.
+     */
+    private NumberFormat decimalFormat;
+
+    /**
      * Constructs a new statistics page backing bean with the necessary dependencies.
      *
      * @param statisticsService The statistics service to use.
@@ -125,7 +131,7 @@ public class StatisticsBacker implements Serializable {
     }
 
     /**
-     * Constructs a new statistics page.
+     * Initializes the statistics page with the data to display.
      *
      * If a topic ID is given as request parameter, the criteria are restricted to that topic.
      */
@@ -136,6 +142,9 @@ public class StatisticsBacker implements Serializable {
         topUsers = statisticsService.topTenUsers();
         topicTitles = topicService.discoverTopics();
         topicTitles.add(0, ""); // empty string for no restriction to topic (JSF doesn't like null)
+        decimalFormat = NumberFormat.getInstance(userSession.getLocale());
+        decimalFormat.setMinimumFractionDigits(0);
+        decimalFormat.setMaximumFractionDigits(2);
     }
 
     private String parseTopicParameter() {
@@ -183,7 +192,7 @@ public class StatisticsBacker implements Serializable {
     public String getAverageTimeOpen() {
         Duration duration = statisticsService.averageTimeOpen(reportCriteria);
         if (duration != null) {
-            return String.format(userSession.getLocale(), "%.2f", duration.toMinutes() / SECONDS_IN_A_MINUTE);
+            return decimalFormat.format(duration.toMinutes() / MINUTES_IN_AN_HOUR);
         } else {
             return NO_VALUE_INDICATOR;
         }
@@ -197,7 +206,7 @@ public class StatisticsBacker implements Serializable {
     public String getAveragePostsPerReport() {
         Double avgPosts = statisticsService.averagePostsPerReport(reportCriteria);
         if (avgPosts != null) {
-            return String.format(userSession.getLocale(), "%.2f", avgPosts);
+            return decimalFormat.format(avgPosts);
         } else {
             return NO_VALUE_INDICATOR;
         }
