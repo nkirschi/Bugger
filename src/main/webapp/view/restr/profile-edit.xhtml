@@ -1,12 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets"
-      lang="#{userSession.locale.language}" xml:lang="#{userSession.locale.language}">
-
-<ui:composition template="/WEB-INF/template/main.xhtml">
+<ui:composition template="/WEB-INF/template/main.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
     <ui:param name="title" value="#{labels['profile_edit.title']}"/>
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
@@ -43,7 +39,7 @@
                             <h:commandButton id="cb-really-del" value="#{labels['profile_edit.really_del']}"
                                              action="#{profileEditBacker.delete}" styleClass="button"/>
                             <h:commandButton id="cb-cancel-del" value="#{labels.abort}" styleClass="button"
-                                             action="#{profileEditBacker.closeDeleteDialog}" immediate="true"/>
+                                             action="#{profileEditBacker.closeDialog}" immediate="true"/>
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -81,7 +77,7 @@
                             <h:commandButton id="cb-really-change" value="#{labels['profile_edit.really_change']}"
                                              action="#{profileEditBacker.saveChanges}" styleClass="button"/>
                             <h:commandButton id="cb-cancel-change" value="#{labels.abort}" styleClass="button"
-                                             action="#{profileEditBacker.closeChangeDialog}" immediate="true"/>
+                                             action="#{profileEditBacker.closeDialog}" immediate="true"/>
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -118,7 +114,6 @@
                 <h:outputLabel id="o-visibility" for="s-visibility" value="#{labels['profile_edit.visibility']}"/>
                 <h:selectOneMenu id="s-visibility" value="#{profileEditBacker.user.profileVisibility}"
                                  required="true">
-                    <f:selectItem itemLabel="#{labels['visibility.'.concat(profileEditBacker.user.profileVisibility)]}"/>
                     <f:selectItems id="s-visibility-values" value="#{profileEditBacker.user.profileVisibilities}"
                                    var="visibility" itemValue="#{visibility}"
                                    itemLabel="#{labels['visibility.'.concat(visibility)]}"/>
@@ -143,7 +138,6 @@
                 <h:outputLabel id="o-password-new" for="i-password-new" value="#{labels['profile_edit.password_new']}"/>
                 <h:inputSecret id="i-password-new" value="#{profileEditBacker.passwordNew}" styleClass="profile-info"
                                binding="#{password1}" required="#{profileEditBacker.create}">
-                    <f:validateLength minimum="#{C.PASSWORD_MIN}" maximum="#{C.PASSWORD_MAX}"/>
                     <f:validator validatorId="passwordRegexValidator"/>
                 </h:inputSecret>
 
@@ -153,8 +147,8 @@
                 <h:outputLabel id="o-password-new-repeat" for="i-password-new-repeat"
                                value="#{labels['profile_edit.repeat']}"/>
                 <h:inputSecret id="i-password-new-repeat" value="#{profileEditBacker.passwordNewConfirm}"
-                               styleClass="profile-info" required="#{profileEditBacker.create}">
-                    <f:validateLength minimum="#{C.PASSWORD_MIN}" maximum="#{C.PASSWORD_MAX}"/>
+                               styleClass="profile-info" required="#{profileEditBacker.create
+                               || !profileEditBacker.passwordNew.blank}">
                     <f:attribute name="other-input" value="#{password1}"/>
                     <f:validator validatorId="matchingFieldValidator"/>
                 </h:inputSecret>
@@ -192,19 +186,24 @@
                 <h:panelGroup/>
                 <h:message id="m-email" for="it-email"/>
 
-                <h:outputLabel id="o-bio" for="ia-bio" value="#{labels.biography}"/>
+                <h:outputLabel id="o-bio" for="ia-bio" value="#{labels.biography}"
+                               rendered="#{profileEditBacker.dialog != 'PREVIEW'}"/>
                 <h:inputTextarea id="ia-bio" value="#{profileEditBacker.user.biography}" styleClass="profile-info"
-                             escape="false">
+                                 rendered="#{profileEditBacker.dialog != 'PREVIEW'}">
                     <f:validateLength maximum="#{C.SMALL_AREA}"/>
                 </h:inputTextarea>
 
                 <h:panelGroup/>
                 <h:message id="m-bio" for="ia-bio"/>
 
+                <h:outputLabel id="ol-biography" value="#{labels.biography}" for="ot-biography"
+                                   styleClass="profile-info" rendered="#{profileEditBacker.dialog == 'PREVIEW'}"/>
+                <h:outputText id="ot-biography" value="#{profileEditBacker.sanitizedBio}" escape="false"
+                              styleClass="profile-info" rendered="#{profileEditBacker.dialog == 'PREVIEW'}"/>
+
                 <h:outputLabel id="o-language" for="s-language" value="#{labels.language}"/>
                 <h:selectOneMenu id="s-language" value="#{profileEditBacker.user.preferredLanguage}"
                                  required="true">
-                    <f:selectItem itemLabel="#{labels['lang.'.concat(profileEditBacker.user.preferredLanguage)]}"/>
                     <f:selectItems id="s-language-values" value="#{profileEditBacker.user.preferredLanguages}"
                                    var="lang" itemValue="#{lang}" itemLabel="#{labels['lang.'.concat(lang)]}"/>
                 </h:selectOneMenu>
@@ -227,6 +226,12 @@
 
             <h:panelGroup id="p-buttons" styleClass="row align-center">
                 <h:panelGroup layout="block" styleClass="col-sm-12">
+                    <h:commandButton id="cb-preview" value="#{labels['profile_edit.preview']}"
+                                     action="#{profileEditBacker.openPreviewDialog}" styleClass="button"
+                                     rendered="#{profileEditBacker.dialog != 'PREVIEW'}"/>
+                    <h:commandButton id="cb-stop-preview" value="#{labels['profile_edit.stop_preview']}"
+                                     action="#{profileEditBacker.closeDialog}" styleClass="button"
+                                     rendered="#{profileEditBacker.dialog == 'PREVIEW'}"/>
                     <h:commandButton id="cb-apply" value="#{labels['profile_edit.apply_changes']}"
                                      action="#{profileEditBacker.openChangeDialog}" styleClass="button"/>
                     <h:commandButton id="cb-delete" value="#{labels['profile_edit.delete']}"
@@ -236,4 +241,3 @@
         </h:form>
     </ui:define>
 </ui:composition>
-</html>
