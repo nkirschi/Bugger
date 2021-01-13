@@ -1,7 +1,6 @@
 package tech.bugger.persistence.gateway;
 
 import tech.bugger.business.service.ReportService;
-import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
@@ -19,7 +18,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -58,7 +56,8 @@ public class PostDBGateway implements PostGateway {
      * @param userGateway       The user gateway to use.
      * @param attachmentGateway The attachment gateway to use.
      */
-    public PostDBGateway(final Connection conn, final UserGateway userGateway, final AttachmentGateway attachmentGateway) {
+    public PostDBGateway(final Connection conn, final UserGateway userGateway,
+                         final AttachmentGateway attachmentGateway) {
         this.conn = conn;
         this.userGateway = userGateway;
         this.attachmentGateway = attachmentGateway;
@@ -76,15 +75,7 @@ public class PostDBGateway implements PostGateway {
                     .integer(id)
                     .toStatement().executeQuery();
             if (rs.next()) {
-                Integer creatorID = rs.getObject("created_by", Integer.class);
-                User creator = creatorID == null ? null : userGateway.getUserByID(creatorID);
-                ZonedDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime()
-                        .atZone(ZoneId.systemDefault());
-                Integer modifierID = rs.getObject("last_modified_by", Integer.class);
-                User modifier = modifierID == null ? null : userGateway.getUserByID(modifierID);
-                ZonedDateTime modifiedAt = rs.getTimestamp("last_modified_at").toLocalDateTime()
-                        .atZone(ZoneId.systemDefault());
-                Authorship authorship = new Authorship(creator, createdAt, modifier, modifiedAt);
+
                 int reportID = rs.getInt("report");
 
                 Post post = new Post(
@@ -94,7 +85,7 @@ public class PostDBGateway implements PostGateway {
                             ReportService reportService = CDI.current().select(ReportService.class).get();
                             return reportService.getReportByID(reportID);
                         }),
-                        authorship,
+                        ReportDBGateway.getAuthorshipFromResultSet(rs, userGateway),
                         null
                 );
                 post.setAttachments(attachmentGateway.getAttachmentsForPost(post));
@@ -301,7 +292,8 @@ public class PostDBGateway implements PostGateway {
                     modificationDate = rs.getTimestamp("p_last_modified_at").toInstant().atZone(ZoneId.systemDefault());
                 }
                 Authorship authorship = new Authorship(author, creationDate, modifier, modificationDate);
-                Post post = new Post(rs.getInt("p_id"), rs.getString("p_content"), reportLazy, authorship, new ArrayList<>());
+                Post post = new Post(rs.getInt("p_id"), rs.getString("p_content"), reportLazy, authorship,
+                        new ArrayList<>());
                 post.setAttachments(attachmentGateway.getAttachmentsForPost(post));
                 selectedPosts.add(post);
             }

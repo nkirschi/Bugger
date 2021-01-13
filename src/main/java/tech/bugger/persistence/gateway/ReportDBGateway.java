@@ -1,21 +1,15 @@
 package tech.bugger.persistence.gateway;
 
-import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
-import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.StatementParametrizer;
-import tech.bugger.persistence.util.Transaction;
-import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.inject.spi.CDI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,6 +54,28 @@ public class ReportDBGateway implements ReportGateway {
     }
 
     /**
+     * Parses the given {@link ResultSet} and returns the corresponding {@link Authorship}.
+     *
+     * @param rs          The {@link ResultSet} to parse.
+     * @param userGateway The {@link UserGateway} to use for fetching users.
+     * @return The parsed {@link Authorship}.
+     * @throws SQLException      Some parsing error occurred.
+     * @throws NotFoundException A user could not be found.
+     */
+    static Authorship getAuthorshipFromResultSet(final ResultSet rs, final UserGateway userGateway)
+            throws SQLException, NotFoundException {
+        Integer creatorID = rs.getObject("created_by", Integer.class);
+        User creator = creatorID == null ? null : userGateway.getUserByID(creatorID);
+        ZonedDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime()
+                .atZone(ZoneId.systemDefault());
+        Integer modifierID = rs.getObject("last_modified_by", Integer.class);
+        User modifier = modifierID == null ? null : userGateway.getUserByID(modifierID);
+        ZonedDateTime modifiedAt = rs.getTimestamp("last_modified_at").toLocalDateTime()
+                .atZone(ZoneId.systemDefault());
+        return new Authorship(creator, createdAt, modifier, modifiedAt);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -99,16 +115,6 @@ public class ReportDBGateway implements ReportGateway {
                     .integer(id)
                     .toStatement().executeQuery();
             if (rs.next()) {
-                Integer creatorID = rs.getObject("created_by", Integer.class);
-                User creator = creatorID == null ? null : userGateway.getUserByID(creatorID);
-                ZonedDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime()
-                        .atZone(ZoneId.systemDefault());
-                Integer modifierID = rs.getObject("last_modified_by", Integer.class);
-                User modifier = modifierID == null ? null : userGateway.getUserByID(modifierID);
-                ZonedDateTime modifiedAt = rs.getTimestamp("last_modified_at").toLocalDateTime()
-                        .atZone(ZoneId.systemDefault());
-                Authorship authorship = new Authorship(creator, createdAt, modifier, modifiedAt);
-
                 Integer forcedRelevance = rs.getObject("forced_relevance", Integer.class);
                 Integer duplicateOf = rs.getObject("duplicate_of", Integer.class);
                 Timestamp closingDate = rs.getTimestamp("closed_at");
@@ -119,7 +125,7 @@ public class ReportDBGateway implements ReportGateway {
                         Report.Type.valueOf(rs.getString("type")),
                         Report.Severity.valueOf(rs.getString("severity")),
                         rs.getString("version"),
-                        authorship,
+                        getAuthorshipFromResultSet(rs, userGateway),
                         closingDate != null ? closingDate.toLocalDateTime().atZone(ZoneId.systemDefault()) : null,
                         duplicateOf,
                         forcedRelevance,
@@ -296,7 +302,6 @@ public class ReportDBGateway implements ReportGateway {
             log.error("Error when deleting report " + report + ".", e);
             throw new StoreException("Error when deleting report " + report + ".", e);
         }
-
     }
 
     /**
@@ -432,20 +437,5 @@ public class ReportDBGateway implements ReportGateway {
             throw new StoreException("Error when finding report containing post with ID " + postID + ".");
         }
     }
-
-    /*public static Report find(int id) {
-        TransactionManager transactionManager = CDI.current().select(TransactionManager.class).get();
-        try (Transaction tx = transactionManager.begin()) {
-            Report report = tx.newReportGateway().find(id);
-            tx.commit();
-            return report;
-        } catch (NotFoundException e) {
-            log.debug("Report not found.", e);
-            return null;
-        } catch (TransactionException e) {
-            log.error("Error while searching for report.", e);
-            return null;
-        }
-    }*/
 
 }

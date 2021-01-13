@@ -78,22 +78,22 @@ public class ReportCreateBacker implements Serializable {
     /**
      * The current application settings.
      */
-    private ApplicationSettings applicationSettings;
+    private final ApplicationSettings applicationSettings;
 
     /**
      * The topic service giving access to topics.
      */
-    private transient TopicService topicService;
+    private final TopicService topicService;
 
     /**
      * The report service creating reports.
      */
-    private transient ReportService reportService;
+    private final ReportService reportService;
 
     /**
      * The post service validating posts and attachments.
      */
-    private transient PostService postService;
+    private final PostService postService;
 
     /**
      * The current user session.
@@ -103,17 +103,17 @@ public class ReportCreateBacker implements Serializable {
     /**
      * The current {@link ExternalContext}.
      */
-    private ExternalContext ectx;
+    private final ExternalContext ectx;
 
     /**
      * Feedback event for user feedback.
      */
-    private transient Event<Feedback> feedbackEvent;
+    private final Event<Feedback> feedbackEvent;
 
     /**
      * Resource bundle for feedback message.
      */
-    private transient ResourceBundle messagesBundle;
+    private final ResourceBundle messagesBundle;
 
     /**
      * Constructs a new report creation page backing bean with the necessary dependencies.
@@ -175,7 +175,7 @@ public class ReportCreateBacker implements Serializable {
 
     /**
      * Saves the new report and its first post to the database.
-     *
+     * <p>
      * On success, the user is redirected to the report page of the newly created report.
      *
      * @return The site to redirect to.
@@ -321,15 +321,6 @@ public class ReportCreateBacker implements Serializable {
      */
     public UserSession getSession() {
         return session;
-    }
-
-    /**
-     * Sets the user session.
-     *
-     * @param session The user session.
-     */
-    public void setSession(final UserSession session) {
-        this.session = session;
     }
 
     /**

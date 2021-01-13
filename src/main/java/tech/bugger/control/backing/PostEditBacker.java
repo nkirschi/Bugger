@@ -4,8 +4,6 @@ import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
-import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
@@ -15,8 +13,6 @@ import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
@@ -36,6 +32,9 @@ import java.util.List;
 @Named
 public class PostEditBacker implements Serializable {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(PostEditBacker.class);
 
     @Serial
@@ -79,27 +78,27 @@ public class PostEditBacker implements Serializable {
     /**
      * The current application settings.
      */
-    private ApplicationSettings applicationSettings;
+    private final ApplicationSettings applicationSettings;
 
     /**
      * The report service creating reports.
      */
-    private transient ReportService reportService;
+    private final ReportService reportService;
 
     /**
      * The post service validating posts and attachments.
      */
-    private transient PostService postService;
+    private final PostService postService;
 
     /**
      * The current user session.
      */
-    private UserSession session;
+    private final UserSession session;
 
     /**
      * The current {@link FacesContext}.
      */
-    private transient FacesContext fctx;
+    private final FacesContext fctx;
 
     /**
      * Constructs a new post editing backing bean with the necessary dependencies.
@@ -214,7 +213,7 @@ public class PostEditBacker implements Serializable {
      * @param param The name of the parameter to parse.
      * @return The integer value of the request parameter, {@code null} if the parameter could not be parsed.
      */
-    private Integer parseRequestParameter(String param) {
+    private Integer parseRequestParameter(final String param) {
         ExternalContext ectx = fctx.getExternalContext();
         try {
             return Integer.parseInt(ectx.getRequestParameterMap().get(param));
@@ -244,7 +243,7 @@ public class PostEditBacker implements Serializable {
      *
      * @param postID The post ID to set.
      */
-    public void setPostID(Integer postID) {
+    public void setPostID(final Integer postID) {
         this.postID = postID;
     }
 
@@ -262,7 +261,7 @@ public class PostEditBacker implements Serializable {
      *
      * @param reportID The report ID to set.
      */
-    public void setReportID(Integer reportID) {
+    public void setReportID(final Integer reportID) {
         this.reportID = reportID;
     }
 
@@ -280,7 +279,7 @@ public class PostEditBacker implements Serializable {
      *
      * @param post The post ID to set.
      */
-    public void setPost(Post post) {
+    public void setPost(final Post post) {
         this.post = post;
     }
 
@@ -294,7 +293,7 @@ public class PostEditBacker implements Serializable {
     /**
      * @param lastAttachmentUploaded The lastAttachmentUploaded to set.
      */
-    public void setLastAttachmentUploaded(Part lastAttachmentUploaded) {
+    public void setLastAttachmentUploaded(final Part lastAttachmentUploaded) {
         this.lastAttachmentUploaded = lastAttachmentUploaded;
     }
 
@@ -312,7 +311,7 @@ public class PostEditBacker implements Serializable {
      *
      * @param attachments The list of attachments to set.
      */
-    public void setAttachments(List<Attachment> attachments) {
+    public void setAttachments(final List<Attachment> attachments) {
         this.attachments = attachments;
     }
 
@@ -330,7 +329,7 @@ public class PostEditBacker implements Serializable {
      *
      * @param create Whether to create or edit a post.
      */
-    public void setCreate(boolean create) {
+    public void setCreate(final boolean create) {
         this.create = create;
     }
 

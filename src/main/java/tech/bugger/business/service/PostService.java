@@ -96,12 +96,12 @@ public class PostService {
             AttachmentGateway attachmentGateway = tx.newAttachmentGateway();
             List<Attachment> newAttachments = post.getAttachments();
             List<Attachment> oldAttachments = attachmentGateway.getAttachmentsForPost(post);
-            for (Attachment oldAttachment: oldAttachments) {
+            for (Attachment oldAttachment : oldAttachments) {
                 if (!newAttachments.contains(oldAttachment)) {
                     attachmentGateway.delete(oldAttachment);
                 }
             }
-            for (Attachment newAttachment: newAttachments) {
+            for (Attachment newAttachment : newAttachments) {
                 if (!oldAttachments.contains(newAttachment)) {
                     attachmentGateway.create(newAttachment);
                 }
