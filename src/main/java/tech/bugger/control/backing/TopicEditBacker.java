@@ -2,15 +2,12 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
@@ -65,11 +62,6 @@ public class TopicEditBacker implements Serializable {
      */
     private UserSession session;
 
-    /**
-     * Topic description sanitized for display.
-     */
-    private String sanitizedDescription;
-
     @Inject
     TopicEditBacker(final TopicService topicService, final FacesContext fctx, final UserSession session) {
         this.topicService = topicService;
@@ -101,11 +93,9 @@ public class TopicEditBacker implements Serializable {
                 return;
             }
             topic = topicService.getTopicByID(topicID);
-            sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
             create = false;
         } else {
             topic = new Topic();
-            sanitizedDescription = "";
             create = true;
         }
     }
@@ -117,7 +107,6 @@ public class TopicEditBacker implements Serializable {
      */
     public String saveChanges() throws IOException {
         boolean success;
-        topic.setDescription(sanitizedDescription);
         if (create) {
             success = topicService.createTopic(topic);
         } else {
@@ -165,20 +154,6 @@ public class TopicEditBacker implements Serializable {
      */
     public Topic getTopic() {
         return topic;
-    }
-
-    /**
-     * @return The sanitized Description.
-     */
-    public String getSanitizedDescription() {
-        return sanitizedDescription;
-    }
-
-    /**
-     * @param sanitizedDescription The sanitizedDescription to set.
-     */
-    public void setSanitizedDescription(final String sanitizedDescription) {
-        this.sanitizedDescription = sanitizedDescription;
     }
 
     /**

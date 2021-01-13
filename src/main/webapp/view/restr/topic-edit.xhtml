@@ -17,7 +17,7 @@
                 <h:panelGroup/>
                 <h:message for="it-title"/>
                 <h:outputLabel id="o-description" for="it-description" value="#{labels.description}"/>
-                <h:inputTextarea id="it-description" value="#{topicEditBacker.sanitizedDescription}" length="#{C.SMALL_FIELD}" escape="false"/>
+                <h:inputTextarea id="it-description" value="#{topicEditBacker.topic.description}" length="#{C.SMALL_FIELD}"/>
                 <h:panelGroup/>
                 <h:message for="it-description"/>
             </h:panelGrid>
