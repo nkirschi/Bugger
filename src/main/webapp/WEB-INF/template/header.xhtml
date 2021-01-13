@@ -7,12 +7,14 @@
         <h:panelGroup layout="block"
                       id="p-organization"
                       styleClass="d-flex justify-content-start flex-grow-1 flex-basis-0 align-items-center h-100">
-            <h:link outcome="pretty:home" id="l-logo" styleClass="h-100 me-3">
-                <h:graphicImage id="g-logo" library="images" name="bugger.png" styleClass="h-100 w-auto"/>
+            <h:link outcome="pretty:home"
+                    id="l-logo"
+                    styleClass="d-flex align-items-center h-100">
+                <h:graphicImage id="g-logo" library="images" name="bugger.png" styleClass="h-100 w-auto me-3"/>
+                <h:outputText value="#{applicationSettings.organization.name}"
+                              id="ot-comp-name"
+                              styleClass="display-6"/>
             </h:link>
-            <h:outputText value="#{applicationSettings.organization.name}"
-                          id="ot-comp-name"
-                          styleClass="display-6"/>
         </h:panelGroup>
         <h:panelGroup layout="block"
                       id="p-search-bar"

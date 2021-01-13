@@ -2,6 +2,10 @@
  * Template
  */
 
+body {
+    background: #fafafa;
+}
+
 #p-header {
     position: fixed;
     height: 80px;
@@ -31,6 +35,7 @@
     padding: 40px;
     margin: 100px auto 70px auto;
     max-width: 1200px;
+    background: #fff;
 }
 
 #p-messages {
@@ -39,6 +44,21 @@
     left: 50%;
     transform: translateX(-50%);
     max-width: 400px;
+}
+
+#l-logo {
+    text-decoration: none;
+    border:none;
+    color: #000;
+    transition: opacity .15s ease-in-out;
+}
+
+#l-logo:hover {
+    opacity: 0.3
+}
+
+#l-logo:hover {
+    opacity: 0.5;
 }
 
 #p-search-bar {
@@ -75,9 +95,10 @@
 }
 
 .dialog + #p-content {
-    filter: blur(10px);
+    filter: blur(4px);
     opacity: 0.5;
     pointer-events: none;
+    box-shadow: none;
 }
 
 
