@@ -1,5 +1,16 @@
 package tech.bugger.persistence.gateway;
 
+import tech.bugger.global.transfer.Authorship;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
+import tech.bugger.global.util.Pagitable;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -175,17 +186,19 @@ public class ReportDBGateway implements ReportGateway {
         List<Report> selectedReports = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         String filter = ";";
         if (!showClosedReports) {
-            filter = "AND closed_at IS NULL;";
+            filter = "AND closed_at IS NULL";
         }
         if (!showOpenReports) {
-            filter = "AND closed_at IS NOT NULL;";
+            filter = "AND closed_at IS NOT NULL";
         }
         if (!showClosedReports && !showOpenReports) {
             return selectedReports;
         }
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM report WHERE topic = ? " + filter)) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM report WHERE topic = ? " + filter
+                + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
+                + " LIMIT " + Pagitable.getItemLimit(selection)
+                + " OFFSET " + Pagitable.getItemOffset(selection) + ";")) {
             ResultSet rs = new StatementParametrizer(stmt).integer(topic.getId()).toStatement().executeQuery();
-
             while (rs.next()) {
                 selectedReports.add(getReportFromResultSet(rs));
             }
