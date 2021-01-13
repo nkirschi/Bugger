@@ -1,5 +1,6 @@
 package tech.bugger.control.backing;
 
+import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Report;
@@ -102,13 +104,20 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testMarkDuplicateValidIsSelectedAndPrivileged() {
+    public void testMarkDuplicateValidIsSelectedAndPrivileged() throws Exception {
         reportBacker.setReport(testReport);
         reportBacker.setDuplicateOfID(100);
         doReturn(true).when(reportService).isPrivileged(any(), any());
         doReturn(true).when(reportService).markDuplicate(any(), eq(100));
+        Paginator<?> duplicates = mock(Paginator.class);
+
+        Field f = ReportBacker.class.getDeclaredField("duplicates");
+        f.setAccessible(true);
+        f.set(reportBacker, duplicates);
+
         reportBacker.markDuplicate();
         verify(reportService).close(any());
+        verify(duplicates).update();
     }
 
     @Test

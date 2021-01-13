@@ -19,7 +19,6 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
-import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.PostGateway;
 import tech.bugger.persistence.gateway.ReportGateway;
@@ -139,29 +138,10 @@ public class ReportServiceTest {
     }
 
     @Test
-    public void testMarkDuplicateSuccess() {
-        assertTrue(service.markDuplicate(testReport, 100));
-    }
-
-    @Test
-    public void testMarkDuplicateWhenSelfReference() throws Exception {
-        doThrow(SelfReferenceException.class).when(reportGateway).markDuplicate(testReport, testReport.getId());
-        assertFalse(service.markDuplicate(testReport, testReport.getId()));
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testMarkDuplicateWhenNotFound() throws Exception {
-        doThrow(NotFoundException.class).when(reportGateway).markDuplicate(any(), anyInt());
-        assertFalse(service.markDuplicate(testReport, 100));
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
     public void testMarkDuplicateWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
         assertFalse(service.markDuplicate(testReport, 100));
-        verify(feedbackEvent).fire(any());
+        verify(feedbackEvent, atLeastOnce()).fire(any());
     }
 
     @Test
