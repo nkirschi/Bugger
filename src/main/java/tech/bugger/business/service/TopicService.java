@@ -9,6 +9,7 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.gateway.TopicGateway;
 import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
@@ -67,18 +68,76 @@ public class TopicService {
      *
      * @param username The username of the user to be banned.
      * @param topic    The topic which the user is to be banned from.
+     * @return {@code true} iff the user with given username has successfully been banned from the topic.
      */
     public boolean ban(final String username, final Topic topic) {
+        try (Transaction tx = transactionManager.begin()) {
+            UserGateway gateway = tx.newUserGateway();
+            User user = gateway.getUserByUsername(username);
+
+            if (user.isAdministrator() || gateway.isModerator(user, topic)) {
+                log.debug("The user with id " + user.getId() + " cannot be banned from the topic.");
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("ban_illegal"), Feedback.Type.ERROR));
+                tx.commit();
+            } else if (gateway.isBanned(user, topic)) {
+                log.debug("The user with id " + user.getId() + " is already banned from the topic with id "
+                        + topic.getId());
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("is_banned"), Feedback.Type.INFO));
+                tx.commit();
+            } else {
+                tx.newTopicGateway().banUser(topic, user);
+                tx.commit();
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("operation_successful"),
+                        Feedback.Type.INFO));
+                return true;
+            }
+
+        } catch (NotFoundException e) {
+            log.error("The user with the username " + username + " or the topic with id " + topic.getId()
+                    + " could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while banning the user with the username " + username + " from the topic with id "
+                    + topic.getId(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
         return false;
     }
 
     /**
      * Unbans a user from a topic.
      *
-     * @param user  The user to be unbanned.
+     * @param username  The user to be unbanned.
      * @param topic The topic which the user is to be unbanned from.
+     * @return {@code true} iff the user with given username has successfully been unbanned from the topic.
      */
-    public boolean unban(final String user, final Topic topic) {
+    public boolean unban(final String username, final Topic topic) {
+        try (Transaction tx = transactionManager.begin()) {
+            User user = getUser(username, tx);
+
+            if (user == null) {
+                tx.commit();
+                return false;
+            }
+
+            try {
+                tx.newTopicGateway().unbanUser(topic, user);
+                tx.commit();
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("operation_successful"),
+                        Feedback.Type.INFO));
+                return true;
+            } catch (NotFoundException e) {
+                log.warning("No banned user with the username " + username + " could be found for the topic with "
+                        + "id " + topic.getId(), e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("no_ban_found"), Feedback.Type.WARNING));
+            }
+        } catch (TransactionException e) {
+            log.error("Error while banning the user with the username " + username + " from the topic with id "
+                    + topic.getId(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
         return false;
     }
 
@@ -100,6 +159,12 @@ public class TopicService {
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("is_moderator"), Feedback.Type.INFO));
                 tx.commit();
             } else {
+                TopicGateway topicGateway = tx.newTopicGateway();
+
+                if (isBanned(user, topic)) {
+                    topicGateway.unbanUser(topic, user);
+                }
+
                 tx.newTopicGateway().promoteModerator(topic, user);
                 tx.commit();
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("operation_successful"),
@@ -130,13 +195,10 @@ public class TopicService {
     public boolean removeModerator(final String username, final Topic topic) {
         try (Transaction tx = transactionManager.begin()) {
 
-            User user;
+            User user = getUser(username, tx);
 
-            try {
-                user = tx.newUserGateway().getUserByUsername(username);
-            } catch (NotFoundException e) {
-                log.error("The user with the username " + username + " could not be found.", e);
-                feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            if (user == null) {
+                tx.commit();
                 return false;
             }
 
@@ -166,6 +228,26 @@ public class TopicService {
         }
 
         return false;
+    }
+
+    /**
+     * Retrieves the user with the given username from the database.
+     *
+     * @param username The username to search for.
+     * @param tx The current transaction.
+     * @return The user if the username could be found in the database or {@code null} if not.
+     */
+    private User getUser(final String username, final Transaction tx) {
+        User user = null;
+
+        try {
+            user = tx.newUserGateway().getUserByUsername(username);
+        } catch (NotFoundException e) {
+            log.error("The user with the username " + username + " could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        }
+
+        return user;
     }
 
     /**
@@ -324,7 +406,17 @@ public class TopicService {
      * @return A list of users containing the selected results.
      */
     public List<User> getSelectedBannedUsers(final Topic topic, final Selection selection) {
-        return null;
+        List<User> users = null;
+        try (Transaction tx = transactionManager.begin()) {
+            users = tx.newUserGateway().getSelectedBannedUsers(topic, selection);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.debug("The topic with id " + topic.getId() + " has no banned users.", e);
+        } catch (TransactionException e) {
+            log.error("Error while loading the banned users for the topic with id " + topic.getId(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return users;
     }
 
     /**
@@ -377,7 +469,17 @@ public class TopicService {
      * @return The number of banned users.
      */
     public int getNumberOfBannedUsers(final Topic topic) {
-        return 0;
+        int bannedUsers = 0;
+        try (Transaction tx = transactionManager.begin()) {
+            bannedUsers = tx.newTopicGateway().countBannedUsers(topic);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.debug("No banned users could be found for the topic with id " + topic.getId(), e);
+        } catch (TransactionException e) {
+            log.error("Error while counting the number of banned users for the topic with id " + topic.getId(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return bannedUsers;
     }
 
     /**
@@ -445,7 +547,16 @@ public class TopicService {
      * @return {@code true} if the user is banned, {@code false} otherwise.
      */
     public boolean isBanned(final User user, final Topic topic) {
-        return false;
+        boolean isBanned = false;
+        try (Transaction tx = transactionManager.begin()) {
+            isBanned = tx.newUserGateway().isBanned(user, topic);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while checking if the user with id " + user.getId() + " is banned from the topic "
+                    + "with id " + topic.getId(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return isBanned;
     }
 
     /**

@@ -33,7 +33,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
@@ -62,9 +67,9 @@ class TopicServiceTest {
 
     private Selection testSelection;
 
-    private Topic testTopic1 = new Topic(1, "Hi", "senberg");
-    private Topic testTopic2 = new Topic(2, "Hi", "performance");
-    private Topic testTopic3 = new Topic(3, "Hi", "de and seek");
+    private final Topic testTopic1 = new Topic(1, "Hi", "senberg");
+    private final Topic testTopic2 = new Topic(2, "Hi", "performance");
+    private final Topic testTopic3 = new Topic(3, "Hi", "de and seek");
 
     private User user;
 
@@ -160,6 +165,15 @@ class TopicServiceTest {
     }
 
     @Test
+    public void testMakeModeratorBanned() throws NotFoundException {
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        when(userGateway.isBanned(user, testTopic1)).thenReturn(true);
+        topicService.makeModerator(user.getUsername(), testTopic1);
+        verify(topicGateway).promoteModerator(testTopic1, user);
+        verify(topicGateway).unbanUser(testTopic1, user);
+    }
+
+    @Test
     public void testMakeModeratorIsModerator() throws NotFoundException {
         when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
         when(userGateway.isModerator(user, testTopic1)).thenReturn(true);
@@ -195,7 +209,7 @@ class TopicServiceTest {
         doThrow(TransactionException.class).when(tx).commit();
         when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
         topicService.makeModerator(user.getUsername(), testTopic1);
-        verify(feedbackEvent).fire(any());
+        verify(feedbackEvent, times(2)).fire(any());
     }
 
     @Test
@@ -322,6 +336,153 @@ class TopicServiceTest {
     public void testGetModeratedTopicsTransactionException() throws TransactionException {
         doThrow(TransactionException.class).when(tx).commit();
         assertTrue(topicService.getModeratedTopics(user, testSelection).isEmpty());
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testBan() throws NotFoundException {
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        assertTrue(topicService.ban(user.getUsername(), testTopic1));
+        verify(topicGateway).banUser(testTopic1, user);
+    }
+
+    @Test
+    public void testBanUserAdmin() throws NotFoundException {
+        user.setAdministrator(true);
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        assertFalse(topicService.ban(user.getUsername(), testTopic1));
+        verify(feedbackEvent).fire(any());
+        verify(topicGateway, times(0)).banUser(testTopic1, user);
+    }
+
+    @Test
+    public void testBanUserModerator() throws NotFoundException {
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        when(userGateway.isModerator(user, testTopic1)).thenReturn(true);
+        assertFalse(topicService.ban(user.getUsername(), testTopic1));
+        verify(feedbackEvent).fire(any());
+        verify(topicGateway, times(0)).banUser(testTopic1, user);
+    }
+
+    @Test
+    public void testBanUserBanned() throws NotFoundException {
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        when(userGateway.isBanned(user, testTopic1)).thenReturn(true);
+        assertFalse(topicService.ban(user.getUsername(), testTopic1));
+        verify(feedbackEvent).fire(any());
+        verify(topicGateway, times(0)).banUser(testTopic1, user);
+    }
+
+    @Test
+    public void testBanUserNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(userGateway).getUserByUsername(user.getUsername());
+        assertFalse(topicService.ban(user.getUsername(), testTopic1));
+        verify(feedbackEvent).fire(any());
+        verify(topicGateway, times(0)).banUser(testTopic1, user);
+    }
+
+    @Test
+    public void testBanUserTopicNotFound() throws NotFoundException {
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        doThrow(NotFoundException.class).when(topicGateway).banUser(testTopic1, user);
+        assertFalse(topicService.ban(user.getUsername(), testTopic1));
+        verify(feedbackEvent).fire(any());
+        verify(topicGateway).banUser(testTopic1, user);
+    }
+
+    @Test
+    public void testBanUserTransactionException() throws TransactionException, NotFoundException {
+        user.setAdministrator(true);
+        doThrow(TransactionException.class).when(tx).commit();
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        assertFalse(topicService.ban(user.getUsername(), testTopic1));
+        verify(feedbackEvent, times(2)).fire(any());
+        verify(topicGateway, times(0)).banUser(testTopic1, user);
+    }
+
+    @Test
+    public void testUnbanUser() throws NotFoundException {
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        assertTrue(topicService.unban(user.getUsername(), testTopic1));
+        verify(topicGateway).unbanUser(testTopic1, user);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testUnbanUserNull() throws NotFoundException {
+        assertFalse(topicService.unban(user.getUsername(), testTopic1));
+        verify(topicGateway, times(0)).unbanUser(testTopic1, user);
+    }
+
+    @Test
+    public void testUnbanUserNotFound() throws NotFoundException {
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        doThrow(NotFoundException.class).when(topicGateway).unbanUser(testTopic1, user);
+        assertFalse(topicService.unban(user.getUsername(), testTopic1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testUnbanUserTransactionException() throws NotFoundException, TransactionException {
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        doThrow(TransactionException.class).when(tx).commit();
+        assertFalse(topicService.unban(user.getUsername(), testTopic1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetSelectedBannedUsers() throws NotFoundException {
+        List<User> users = new ArrayList<>();
+        users.add(user);
+        Selection selection = new Selection(1, 0, Selection.PageSize.SMALL, "id", true);
+        when(userGateway.getSelectedBannedUsers(testTopic1, selection)).thenReturn(users);
+        assertEquals(users, topicService.getSelectedBannedUsers(testTopic1, selection));
+        verify(userGateway).getSelectedBannedUsers(testTopic1, selection);
+    }
+
+    @Test
+    public void testGetSelectedBannedUsersNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(userGateway).getSelectedBannedUsers(any(), any());
+        assertNull(topicService.getSelectedBannedUsers(testTopic1, null));
+    }
+
+    @Test
+    public void testGetSelectedBannedUsersTransactionException() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertTrue(topicService.getSelectedBannedUsers(testTopic1, null).isEmpty());
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetNumberOfBannedUsers() throws NotFoundException {
+        when(topicGateway.countBannedUsers(testTopic1)).thenReturn(5);
+        assertEquals(5, topicService.getNumberOfBannedUsers(testTopic1));
+        verify(topicGateway).countBannedUsers(testTopic1);
+    }
+
+    @Test
+    public void testGetNumberOfBannedUsersNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(topicGateway).countBannedUsers(testTopic1);
+        assertEquals(0, topicService.getNumberOfBannedUsers(testTopic1));
+    }
+
+    @Test
+    public void testGetNumberOfBannedUsersTransactionException() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertEquals(0, topicService.getNumberOfBannedUsers(testTopic1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testIsBanned() {
+        when(userGateway.isBanned(user, testTopic1)).thenReturn(true);
+        assertTrue(topicService.isBanned(user, testTopic1));
+    }
+
+    @Test
+    public void testIsBannedTransactionException() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertFalse(topicService.isBanned(user, testTopic1));
         verify(feedbackEvent).fire(any());
     }
 

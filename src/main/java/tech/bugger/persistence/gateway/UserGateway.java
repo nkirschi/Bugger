@@ -27,9 +27,8 @@ public interface UserGateway {
      * @param user  The user for which to check if they are banned from the topic.
      * @param topic The topic whose banned users to search.
      * @return Whether {@code user} is banned from {@code topic}.
-     * @throws NotFoundException The user or the topic could not be found.
      */
-    boolean isBanned(User user, Topic topic) throws NotFoundException;
+    boolean isBanned(User user, Topic topic);
 
     /**
      * Retrieves the number of posts a user has created.

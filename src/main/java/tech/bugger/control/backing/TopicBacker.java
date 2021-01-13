@@ -227,6 +227,19 @@ public class TopicBacker implements Serializable {
             }
         };
 
+        bannedUsers = new Paginator<>("username", Selection.PageSize.SMALL) {
+
+            @Override
+            protected Iterable<User> fetch() {
+                return topicService.getSelectedBannedUsers(topic, getSelection());
+            }
+
+            @Override
+            protected int totalSize() {
+                return topicService.getNumberOfBannedUsers(topic);
+            }
+        };
+
         reports = new Paginator<>("title", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Report> fetch() {
