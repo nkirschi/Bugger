@@ -437,7 +437,7 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      * {@inheritDoc}
      */
     @Override
-    public boolean isSubscribed(final User subscriber, final User subscribedTo) throws NotFoundException {
+    public boolean isSubscribed(final User subscriber, final User subscribedTo) {
         if (subscribedTo == null) {
             log.error("Cannot determine subscription status to user null.");
             throw new IllegalArgumentException("User cannot be null.");
