@@ -289,8 +289,9 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
                         + " could not be found.");
             }
         } catch (SQLException e) {
-            log.error("Error when unsubscribing user " + subscriber + " from report " + report + ".", e);
-            throw new StoreException("Error when unsubscribing user " + subscriber + " from report " + report + ".", e);
+            log.error("Error when unsubscribing user " + subscriber + " from user " + subscribedTo + ".", e);
+            throw new StoreException("Error when unsubscribing user " + subscriber + " from user " + subscribedTo + ".",
+                    e);
         }
     }
 
@@ -299,8 +300,23 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      */
     @Override
     public void unsubscribeAllReports(final User user) {
-        // TODO Auto-generated method stub
+        if (user == null) {
+            log.error("Cannot unsubscribe from all reports for user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot unsubscribe from all reports for user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
 
+        String sql = "DELETE FROM report_subscription WHERE subscriber = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId()).toStatement();
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error when unsubscribing user " + user + " from all reports.", e);
+            throw new StoreException("Error when unsubscribing user " + user + " from all reports.", e);
+        }
     }
 
     /**
@@ -308,7 +324,23 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      */
     @Override
     public void unsubscribeAllTopics(final User user) {
-        // TODO Auto-generated method stub
+        if (user == null) {
+            log.error("Cannot unsubscribe from all topics for user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot unsubscribe from all topics for user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        String sql = "DELETE FROM topic_subscription WHERE subscriber = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId()).toStatement();
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error when unsubscribing user " + user + " from all topics.", e);
+            throw new StoreException("Error when unsubscribing user " + user + " from all topics.", e);
+        }
 
     }
 
@@ -317,7 +349,23 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      */
     @Override
     public void unsubscribeAllUsers(final User user) {
-        // TODO Auto-generated method stub
+        if (user == null) {
+            log.error("Cannot unsubscribe from all users for user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot unsubscribe from all users for user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        String sql = "DELETE FROM user_subscription WHERE subscriber = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId()).toStatement();
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error when unsubscribing user " + user + " from all users.", e);
+            throw new StoreException("Error when unsubscribing user " + user + " from all users.", e);
+        }
 
     }
 
@@ -326,17 +374,63 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      */
     @Override
     public boolean isSubscribed(final User user, final Topic topic) {
-        // TODO Auto-generated method stub
-        return false;
+        if (topic == null) {
+            log.error("Cannot determine subscription status to topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot determine subscription status to topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        } else if (user == null) {
+            log.error("Cannot determine subscription status of user null to topic " + topic + ".");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot determine subscription status of user with ID null to topic " + topic + ".");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+        String sql = "SELECT * FROM topic_subscription WHERE subscriber = ? AND topic = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(topic.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            log.error("Error when determining subscription status of user " + user + " to topic " + topic + ".", e);
+            throw new StoreException("Error when determining subscription status of user " + user + " to topic "
+                    + topic + ".", e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean isSubscribed(final User user, final Report report) throws NotFoundException {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean isSubscribed(final User user, final Report report) {
+        if (report == null) {
+            log.error("Cannot determine subscription status to report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot determine subscription status to report with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        } else if (user == null) {
+            log.error("Cannot determine subscription status of user null to report " + report + ".");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot determine subscription status of user with ID null to report " + report + ".");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+        String sql = "SELECT * FROM report_subscription WHERE subscriber = ? AND report = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(report.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            log.error("Error when determining subscription status of user " + user + " to report " + report + ".", e);
+            throw new StoreException("Error when determining subscription status of user " + user + " to report "
+                    + report + ".", e);
+        }
     }
 
     /**
@@ -344,8 +438,32 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      */
     @Override
     public boolean isSubscribed(final User subscriber, final User subscribedTo) throws NotFoundException {
-        // TODO Auto-generated method stub
-        return false;
+        if (subscribedTo == null) {
+            log.error("Cannot determine subscription status to user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (subscribedTo.getId() == null) {
+            log.error("Cannot determine subscription status to user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (subscriber == null) {
+            log.error("Cannot determine subscription status of user null to user " + subscribedTo + ".");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (subscriber.getId() == null) {
+            log.error("Cannot determine subscription status of user with ID null to user " + subscribedTo + ".");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+        String sql = "SELECT * FROM user_subscription WHERE subscriber = ? AND subscribee = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(subscriber.getId())
+                    .integer(subscribedTo.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            log.error("Error when determining subscription status of user " + subscriber + " to user " + subscribedTo
+                    + ".", e);
+            throw new StoreException("Error when determining subscription status of user " + subscriber + " to user "
+                    + subscribedTo + ".", e);
+        }
     }
 
 }
