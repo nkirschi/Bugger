@@ -200,9 +200,32 @@ public class NotificationDBGateway implements NotificationGateway {
      * {@inheritDoc}
      */
     @Override
-    public void update(final Notification notification) {
-        // TODO Auto-generated method stub
-
+    public void update(final Notification notification) throws NotFoundException {
+        if (notification == null) {
+            log.error("Cannot update notification null.");
+            throw new IllegalArgumentException("Notification cannot be null.");
+        }
+        String sql = "UPDATE notification SET sent = ?, read = ?, type = ?::notification_type, recipient = ?,"
+                + " causer = ?, topic = ?, report = ?, post = ? WHERE id = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .bool(notification.isSent())
+                    .bool(notification.isRead())
+                    .string(notification.getType().name())
+                    .integer(notification.getRecipientID())
+                    .integer(notification.getActuatorID())
+                    .integer(notification.getTopicID())
+                    .integer(notification.getReportID())
+                    .integer(notification.getPost())
+                    .integer(notification.getId()).toStatement();
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new NotFoundException("notification " + notification + " could not be found.");
+            }
+        } catch (SQLException e) {
+            log.error("Error when updating notification " + notification + ".", e);
+            throw new StoreException("Error when updating notification " + notification + ".", e);
+        }
     }
 
     /**
