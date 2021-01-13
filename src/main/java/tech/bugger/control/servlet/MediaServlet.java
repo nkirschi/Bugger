@@ -4,12 +4,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Date;
 
 /**
  * Custom servlet that serves avatars and avatar thumbnails.
  */
 public abstract class MediaServlet extends HttpServlet {
+
+    @Serial
+    private static final long serialVersionUID = -4981163493957399645L;
 
     /**
      * The time in milliseconds clients should cache content.
@@ -62,13 +66,12 @@ public abstract class MediaServlet extends HttpServlet {
     }
 
     /**
-     * Adds client caching headers to the response.
+     * Defines client caching headers for the response.
      *
      * @param response The response to add headers to.
      */
-    protected void enableClientCaching(final HttpServletResponse response) {
-        long expiry = new Date().getTime() + CACHE_AGE;
-        response.setDateHeader("Expires", expiry);
+    protected void configureClientCaching(final HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-cache");
     }
 
 }

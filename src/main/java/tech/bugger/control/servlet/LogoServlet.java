@@ -45,7 +45,7 @@ public class LogoServlet extends MediaServlet {
 
         // Initialize servlet response.
         response.reset();
-        enableClientCaching(response);
+        configureClientCaching(response);
 
         // Write image to response.
         try {

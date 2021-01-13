@@ -18,7 +18,7 @@ import java.io.Serial;
 public class AttachmentServlet extends MediaServlet {
 
     @Serial
-    private static final long serialVersionUID = -1911464315254552535L;
+    private static final long serialVersionUID = -2411022287149244216L;
 
     /**
      * The current application settings.
@@ -80,7 +80,7 @@ public class AttachmentServlet extends MediaServlet {
 
         // Initialize servlet response.
         response.reset();
-        enableClientCaching(response);
+        configureClientCaching(response);
 
         response.setHeader("Content-Disposition", "attachment; filename=\"" + attachment.getName() + '\"');
         response.setContentType(attachment.getMimetype());
