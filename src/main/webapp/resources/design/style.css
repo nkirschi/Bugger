@@ -138,6 +138,11 @@
     margin: 1%;
 }
 
+.g-avatar-thumbnail {
+    max-width: 50px;
+    max-height: 50px;
+}
+
 .profile-info {
     display: block;
     margin: 0.3em 0 0;

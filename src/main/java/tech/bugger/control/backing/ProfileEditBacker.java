@@ -315,6 +315,7 @@ public class ProfileEditBacker implements Serializable {
             }
         }
         uploadedAvatar = null;
+        deleteAvatar = false;
         return false;
     }
 
