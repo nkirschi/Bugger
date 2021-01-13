@@ -146,7 +146,7 @@ public class NotificationDBGateway implements NotificationGateway {
                 rs.getObject("recipient", Integer.class),
                 Notification.Type.valueOf(rs.getString("type")),
                 date,
-                rs.getBoolean("\"read\""),
+                rs.getBoolean("read"),
                 rs.getBoolean("sent"),
                 rs.getObject("topic", Integer.class),
                 rs.getObject("report", Integer.class),
@@ -265,6 +265,7 @@ public class NotificationDBGateway implements NotificationGateway {
      */
     @Override
     public void markAsRead(final Notification notification) {
+        // TODO either finish or remove
         if (notification == null) {
             log.error("Cannot mark notification null as read.");
             throw new IllegalArgumentException("Notification cannot be null.");
@@ -302,19 +303,20 @@ public class NotificationDBGateway implements NotificationGateway {
         String sql = "INSERT INTO notification (sent, read, type, recipient, causer, topic, report, post)"
                 + " VALUES (?, ?, ?::notification_type, ?, ?, ?, ?, ?);";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            StatementParametrizer parametrizer = new StatementParametrizer(stmt);
             for (Notification notification : notifications) {
-                parametrizer.bool(notification.isSent())
+                PreparedStatement statement = new StatementParametrizer(stmt)
+                        .bool(notification.isSent())
                         .bool(notification.isRead())
                         .string(notification.getType().name())
                         .integer(notification.getRecipientID())
                         .integer(notification.getActuatorID())
                         .integer(notification.getTopicID())
                         .integer(notification.getReportID())
-                        .integer(notification.getPost());
-                parametrizer.toStatement().addBatch();
+                        .integer(notification.getPost())
+                        .toStatement();
+                statement.addBatch();
             }
-            parametrizer.toStatement().executeBatch();
+            stmt.executeBatch();
         } catch (SQLException e) {
             log.error("Error when creating list of notifications " + notifications + ".", e);
             throw new StoreException("Error when creating list of notifications " + notifications + ".", e);

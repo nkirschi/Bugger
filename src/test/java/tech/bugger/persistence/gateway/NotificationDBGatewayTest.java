@@ -10,6 +10,8 @@ import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Report;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,5 +49,17 @@ class NotificationDBGatewayTest {
         notification.setReportID(100);
         notification.setPostID(100);
         assertDoesNotThrow(() -> gateway.create(notification));
+    }
+
+    @Test
+    public void testCreateBulk() {
+        DBExtension.insertMinimalTestData();
+        List<Notification> notifications = new ArrayList<>(20);
+        for (int i = 0; i < 20; i++) {
+            notifications.add(new Notification(null, 2, 1, Notification.Type.NEW_POST, null, false, false, 1, 100, 100));
+        }
+        assertDoesNotThrow(() -> gateway.createNotificationBulk(notifications));
+        assertDoesNotThrow(() -> gateway.find(1));
+        assertDoesNotThrow(() -> gateway.find(20));
     }
 }
