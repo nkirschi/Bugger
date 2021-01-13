@@ -1,13 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:b="http://tech.bugger/tags">
-
-<ui:composition template="/WEB-INF/template/main.xhtml">
+<ui:composition template="/WEB-INF/template/main.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:b="http://tech.bugger/tags">
     <ui:param name="title" value="#{(labels.topic_page).concat(': ').concat(topicBacker.topic.title)}"/>
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
@@ -17,15 +13,13 @@
             <h:panelGroup class="row" layout="block">
                 <h:panelGroup class="col-sm-2" layout="block"/>
                 <h:panelGroup class="col-sm-8" layout="block">
-                    <h:outputLabel value="#{labels.description}:&nbsp;"/>
+                    <h:outputLabel value="#{labels.description}"/>
                     <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
-                    <h:panelGroup class="row" layout="block">
-                        <!-- rendered="#{userSession.user.administrator}" -->
+                    <h:panelGroup class="row" layout="block" rendered="#{userSession.user.administrator}">
                         <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button" value="#{labels.delete_topic}"/>
-                        <!-- rendered="#{userSession.user.administrator}" -->
-                        <h:button id="b-edit" outcome="/restr/topic-edit.xhtml" value="#{labels.edit_topic}">
-                            <ui:param name="topic" value="#{topicBacker.topicID}"/>
-                        </h:button>
+                        <h:link id="l-edit" outcome="pretty:topic-edit" value="#{labels.edit_topic}" styleClass="button">
+                            <f:param name="id" value="#{topicBacker.topicID}"/>
+                        </h:link>
                     </h:panelGroup>
                     <!-- statistik link -->
                     <h:panelGroup class="row" layout="block">
@@ -48,12 +42,14 @@
                 <b:pagitable paginator="#{topicBacker.reports}">
                     <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
                     <b:column title="#{labels.col_id}" paginator="#{topicBacker.reports}" key="id">
-                        <h:outputText value="#{var.id}"/>
+                        <h:link outcome="pretty:report" value="##{var.id}">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
                     </b:column>
                     <b:column title="#{labels.col_title}" paginator="#{topicBacker.reports}" key="title">
                         <h:outputText value="#{var.title}"/>
                     </b:column>
-                    <b:column title="#{labels.col_type}}" paginator="#{topicBacker.reports}" key="type">
+                    <b:column title="#{labels.col_type}" paginator="#{topicBacker.reports}" key="type">
                         <h:outputText value="#{var.type}"/>
                     </b:column>
                     <b:column title="#{labels.col_severity}" paginator="#{topicBacker.reports}" key="severity">
@@ -68,8 +64,8 @@
                     <b:column title="#{labels.col_relevance}" paginator="#{topicBacker.reports}" key="forced_relevance" >
                         <h:outputText value="#{var.forcedRelevance}"/>
                     </b:column>
-                    <b:column title="#{labels.col_change}" paginator="#{topicBacker.reports}" key="last_modified">
-                        <h:outputText value="#{var.authorship.modifier}"/>
+                    <b:column title="#{labels.col_change}" paginator="#{topicBacker.reports}" key="last_modified_at">
+                        <h:outputText value="#{var.authorship.creationDate}"/>
                     </b:column>
                 </b:pagitable>
             </h:panelGroup>
@@ -91,4 +87,3 @@
         </h:form>
     </ui:define>
 </ui:composition>
-</html>
