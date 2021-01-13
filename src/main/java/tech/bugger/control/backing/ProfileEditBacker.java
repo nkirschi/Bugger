@@ -205,7 +205,7 @@ public class ProfileEditBacker implements Serializable {
     /**
      * Applies and saves the changes made.
      *
-     * @return {@code null} to reload the page.
+     * @return The page to redirect to or {@code null} to reload the current page.
      */
     public String saveChanges() {
         if (!passwordNew.isBlank()) {
@@ -237,7 +237,7 @@ public class ProfileEditBacker implements Serializable {
             }
         }
 
-        return null;
+        return "pretty:profile";
     }
 
     /**
