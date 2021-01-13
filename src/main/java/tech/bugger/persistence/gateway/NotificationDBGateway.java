@@ -232,9 +232,32 @@ public class NotificationDBGateway implements NotificationGateway {
      * {@inheritDoc}
      */
     @Override
-    public void delete(final Notification notification) {
-        // TODO Auto-generated method stub
+    public void delete(final Notification notification) throws NotFoundException {
+        if (notification == null) {
+            log.error("Cannot delete notification null.");
+            throw new IllegalArgumentException("Notification cannot be null.");
+        } else if (notification.getId() == null) {
+            log.error("Cannot delete notification with ID null.");
+            throw new IllegalArgumentException("Notification ID cannot be null.");
+        }
 
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM notification WHERE id = ? RETURNING *;")) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(notification.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                if (rs.getInt("id") != notification.getId()) {
+                    throw new InternalError("Wrong notification deleted! Please investigate! Expected: " + notification
+                            + ", actual ID: " + rs.getInt("id"));
+                }
+            } else {
+                log.error("Notification to delete " + notification + " not found.");
+                throw new NotFoundException("Notification to delete " + notification + " not found.");
+            }
+        } catch (SQLException e) {
+            log.error("Error when deleting notification " + notification + ".", e);
+            throw new StoreException("Error when deleting notification " + notification + ".", e);
+        }
     }
 
     /**
@@ -242,8 +265,19 @@ public class NotificationDBGateway implements NotificationGateway {
      */
     @Override
     public void markAsRead(final Notification notification) {
-        // TODO Auto-generated method stub
+        if (notification == null) {
+            log.error("Cannot mark notification null as read.");
+            throw new IllegalArgumentException("Notification cannot be null.");
+        } else if (notification.getId() == null) {
+            log.error("Cannot mark notification with ID null as read.");
+        }
 
+        try (PreparedStatement stmt = conn.prepareStatement("UPDATE notification SET read = true WHERE id = ?;")) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(notification.getId()).toStatement();
+        } catch (SQLException e) {
+            log.error("");
+        }
     }
 
     /**
@@ -260,8 +294,31 @@ public class NotificationDBGateway implements NotificationGateway {
      */
     @Override
     public void createNotificationBulk(final List<Notification> notifications) {
-        // TODO Auto-generated method stub
+        if (notifications == null) {
+            log.error("Cannot create list of notifications null.");
+            throw new IllegalArgumentException("List of notifications cannot be null.");
+        }
 
+        String sql = "INSERT INTO notification (sent, read, type, recipient, causer, topic, report, post)"
+                + " VALUES (?, ?, ?::notification_type, ?, ?, ?, ?, ?);";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            StatementParametrizer parametrizer = new StatementParametrizer(stmt);
+            for (Notification notification : notifications) {
+                parametrizer.bool(notification.isSent())
+                        .bool(notification.isRead())
+                        .string(notification.getType().name())
+                        .integer(notification.getRecipientID())
+                        .integer(notification.getActuatorID())
+                        .integer(notification.getTopicID())
+                        .integer(notification.getReportID())
+                        .integer(notification.getPost());
+                parametrizer.toStatement().addBatch();
+            }
+            parametrizer.toStatement().executeBatch();
+        } catch (SQLException e) {
+            log.error("Error when creating list of notifications " + notifications + ".", e);
+            throw new StoreException("Error when creating list of notifications " + notifications + ".", e);
+        }
     }
 
 }
