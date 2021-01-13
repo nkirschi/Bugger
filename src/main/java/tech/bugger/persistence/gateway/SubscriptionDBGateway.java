@@ -13,16 +13,22 @@ import java.sql.Connection;
  */
 public class SubscriptionDBGateway implements SubscriptionGateway {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(SubscriptionDBGateway.class);
 
-    private Connection conn;
+    /**
+     * Database connection used by this gateway.
+     */
+    private final Connection conn;
 
     /**
      * Constructs a new subscription gateway with the given database connection.
      *
      * @param conn The database connection to use for the gateway.
      */
-    public SubscriptionDBGateway(Connection conn) {
+    public SubscriptionDBGateway(final Connection conn) {
         this.conn = conn;
     }
 
@@ -30,7 +36,7 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      * {@inheritDoc}
      */
     @Override
-    public void subscribe(Topic topic, User subscriber) {
+    public void subscribe(final Topic topic, final User subscriber) {
         // TODO Auto-generated method stub
     }
 
@@ -38,16 +44,7 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      * {@inheritDoc}
      */
     @Override
-    public void subscribe(Report report, User subscriber) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void subscribe(User subscribeTo, User subscriber) {
+    public void subscribe(final Report report, final User subscriber) {
         // TODO Auto-generated method stub
 
     }
@@ -56,7 +53,7 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      * {@inheritDoc}
      */
     @Override
-    public void unsubscribe(Topic topic, User subscriber) {
+    public void subscribe(final User subscribeTo, final User subscriber) {
         // TODO Auto-generated method stub
 
     }
@@ -65,7 +62,7 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      * {@inheritDoc}
      */
     @Override
-    public void unsubscribe(Report report, User subscriber) {
+    public void unsubscribe(final Topic topic, final User subscriber) {
         // TODO Auto-generated method stub
 
     }
@@ -74,7 +71,7 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      * {@inheritDoc}
      */
     @Override
-    public void unsubscribe(User subscribedTo, User subscriber) {
+    public void unsubscribe(final Report report, final User subscriber) {
         // TODO Auto-generated method stub
 
     }
@@ -83,7 +80,7 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      * {@inheritDoc}
      */
     @Override
-    public void unsubscribeAllReports(User user) {
+    public void unsubscribe(final User subscribedTo, final User subscriber) {
         // TODO Auto-generated method stub
 
     }
@@ -92,7 +89,7 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      * {@inheritDoc}
      */
     @Override
-    public void unsubscribeAllTopics(User user) {
+    public void unsubscribeAllReports(final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -101,7 +98,7 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      * {@inheritDoc}
      */
     @Override
-    public void unsubscribeAllUsers(User user) {
+    public void unsubscribeAllTopics(final User user) {
         // TODO Auto-generated method stub
 
     }
@@ -110,16 +107,16 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      * {@inheritDoc}
      */
     @Override
-    public boolean isSubscribed(User user, Topic topic) {
+    public void unsubscribeAllUsers(final User user) {
         // TODO Auto-generated method stub
-        return false;
+
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean isSubscribed(User user, Report report) throws NotFoundException {
+    public boolean isSubscribed(final User user, final Topic topic) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -128,7 +125,16 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      * {@inheritDoc}
      */
     @Override
-    public boolean isSubscribed(User subscriber, User subscribedTo) throws NotFoundException {
+    public boolean isSubscribed(final User user, final Report report) throws NotFoundException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isSubscribed(final User subscriber, final User subscribedTo) throws NotFoundException {
         // TODO Auto-generated method stub
         return false;
     }
