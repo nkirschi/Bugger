@@ -3,6 +3,7 @@ package tech.bugger.control.backing;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
+import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
@@ -53,7 +54,12 @@ public class ProfileEditBacker implements Serializable {
         /**
          * The dialog to delete the profile owner's profile is to be rendered.
          */
-        DELETE
+        DELETE,
+
+        /**
+         * The dialog showing a preview of how the user's biography will look on the profile page is to be rendered.
+         */
+        PREVIEW
     }
 
     /**
@@ -90,6 +96,11 @@ public class ProfileEditBacker implements Serializable {
      * The new avatar to be set.
      */
     private Part tempAvatar;
+
+    /**
+     * The user's sanitized biography.
+     */
+    private String sanitizedBio;
 
     /**
      * The type of popup dialog to be rendered.
@@ -138,6 +149,7 @@ public class ProfileEditBacker implements Serializable {
 
         if (session.getUser() == null) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+            return;
         }
         dialog = DialogType.NONE;
 
@@ -158,6 +170,8 @@ public class ProfileEditBacker implements Serializable {
         } else {
             emailNew = user.getEmailAddress();
             usernameNew = user.getUsername();
+            passwordNew = "";
+            passwordNewConfirm = "";
         }
     }
 
@@ -194,28 +208,40 @@ public class ProfileEditBacker implements Serializable {
 
     /**
      * Applies and saves the changes made.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void saveChanges() {
-        boolean successful;
+    public String saveChanges() {
+        if (!passwordNew.isBlank()) {
+            if (passwordNew.equals(passwordNewConfirm)) {
+                authenticationService.hashPassword(user, passwordNew);
+            } else {
+                closeDialog();
+                return null;
+            }
+        }
 
         if (!profileService.matchingPassword(session.getUser(), password)) {
-            return;
+            closeDialog();
+            return null;
         }
 
+        user.setUsername(usernameNew);
         if (create) {
-            successful = profileService.createUser(user);
+            user.setEmailAddress(emailNew);
+            profileService.createUser(user);
         } else {
-            if (!emailNew.equals(user.getEmailAddress())) {
-                if (!updateEmail(user, emailNew)) {
-                    return;
-                }
+            if (!emailNew.equals(user.getEmailAddress()) && !updateEmail(user, emailNew)) {
+                closeDialog();
+                return null;
             }
-            successful = profileService.updateUser(user);
+
+            if (profileService.updateUser(user)) {
+                closeDialog();
+            }
         }
 
-        if (successful) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:profile");
-        }
+        return null;
     }
 
     /**
@@ -245,10 +271,13 @@ public class ProfileEditBacker implements Serializable {
     /**
      * Irreversibly deletes the user, logs them out and redirects to the home page. Their created reports and posts will
      * still remain.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void delete() {
+    public String delete() {
         if (!profileService.matchingPassword(session.getUser(), password)) {
-            return;
+            closeDialog();
+            return null;
         }
 
         if (profileService.deleteUser(user)) {
@@ -256,8 +285,10 @@ public class ProfileEditBacker implements Serializable {
                 session.invalidateSession();
             }
 
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+            return "pretty:home";
         }
+
+        return null;
     }
 
     /**
@@ -294,23 +325,26 @@ public class ProfileEditBacker implements Serializable {
     }
 
     /**
-     * Closes the delete profile dialog.
-     */
-    public void closeDeleteDialog() {
-        dialog = DialogType.NONE;
-    }
-
-    /**
-     * Opens the dialog that is displayed if an administrator edits another user's profile.
+     * Opens the dialog that is displayed if the user wants to save the changes made to the given profile.
      */
     public void openChangeDialog() {
         dialog = DialogType.UPDATE;
     }
 
     /**
-     * Closes the dialog that is displayed if an administrator edits another user's profile.
+     * Opens the dialog that is displayed if the user wants a preview of the biography.
      */
-    public void closeChangeDialog() {
+    public void openPreviewDialog() {
+        if (user.getBiography() != null) {
+            sanitizedBio = MarkdownHandler.toHtml(user.getBiography());
+        }
+        dialog = DialogType.PREVIEW;
+    }
+
+    /**
+     * Closes all open dialogs.
+     */
+    public void closeDialog() {
         dialog = DialogType.NONE;
     }
 
@@ -396,6 +430,20 @@ public class ProfileEditBacker implements Serializable {
      */
     public void setEmailNew(final String emailNew) {
         this.emailNew = emailNew;
+    }
+
+    /**
+     * @return The sanitized biography.
+     */
+    public String getSanitizedBio() {
+        return sanitizedBio;
+    }
+
+    /**
+     * @param sanitizedBio The new biography to set.
+     */
+    public void setSanitizedBio(final String sanitizedBio) {
+        this.sanitizedBio = sanitizedBio;
     }
 
     /**

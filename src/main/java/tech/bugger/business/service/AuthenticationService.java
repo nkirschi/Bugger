@@ -244,13 +244,7 @@ public class AuthenticationService {
             return false;
         }
 
-        String salt = Hasher.generateRandomBytes(configReader.getInt("SALT_LENGTH"));
-        String algorithm = configReader.getString("HASH_ALGO");
-        String hashed = Hasher.hash(password, salt, algorithm);
-
-        user.setPasswordSalt(salt);
-        user.setHashingAlgorithm(algorithm);
-        user.setPasswordHash(hashed);
+        hashPassword(user, password);
 
         try (Transaction tx = transactionManager.begin()) {
             tx.newUserGateway().updateUser(user);
@@ -268,6 +262,22 @@ public class AuthenticationService {
     }
 
     /**
+     * Hashes the given password for the given user.
+     *
+     * @param user     The {@link User} whose password is to be hashed.
+     * @param password The password to be hashed and set.
+     */
+    public void hashPassword(final User user, final String password) {
+        String salt = Hasher.generateRandomBytes(configReader.getInt("SALT_LENGTH"));
+        String algorithm = configReader.getString("HASH_ALGO");
+        String hashed = Hasher.hash(password, salt, algorithm);
+
+        user.setPasswordSalt(salt);
+        user.setHashingAlgorithm(algorithm);
+        user.setPasswordHash(hashed);
+    }
+
+    /**
      * Updates a user's email address by generating a {@link Token} and sending them a confirmation email.
      *
      * @param user The user whose email address is to be updated.
@@ -282,7 +292,7 @@ public class AuthenticationService {
             return false;
         }
 
-        String link = domain + "/profile-edit.xhtml?token=" + token.getValue();
+        String link = domain + "/profile-edit?token=" + token.getValue();
         Mail mail = new MailBuilder()
                 .to(email)
                 .subject(interactionsBundle.getString("email_update_subject"))
