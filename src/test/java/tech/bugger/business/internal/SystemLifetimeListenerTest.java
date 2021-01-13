@@ -30,6 +30,7 @@ import java.io.InputStream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -233,7 +234,7 @@ public class SystemLifetimeListenerTest {
     public void testContextDestroyedShutsDownPriorityExecutor()throws Exception {
         systemLifetimeListenerMock.contextInitialized(sceMock);
         systemLifetimeListenerMock.contextDestroyed(sceMock);
-        verify(priorityExecutorMock).shutdown(anyInt());
+        verify(priorityExecutorMock).shutdown(anyLong());
     }
 
     @Test
