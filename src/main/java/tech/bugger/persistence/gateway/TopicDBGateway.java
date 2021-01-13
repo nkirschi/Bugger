@@ -5,10 +5,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
@@ -16,6 +12,11 @@ import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Topic gateway that gives access to topics stored in a database.
@@ -141,8 +142,8 @@ public class TopicDBGateway implements TopicGateway {
             if (rs.next()) {
                 topic = getTopicFromResultSet(rs);
             } else {
-                log.error("No user with id " + id + " could be found in the database");
-                throw new NotFoundException("No user with id " + id + " could be found in the database.");
+                log.error("No topic with id " + id + " could be found in the database");
+                throw new NotFoundException("No topic with id " + id + " could be found in the database.");
             }
         } catch (SQLException e) {
             log.error("Error while searching for user with id " + id, e);
@@ -194,17 +195,50 @@ public class TopicDBGateway implements TopicGateway {
      */
     @Override
     public void createTopic(final Topic topic) {
-        // TODO Auto-generated method stub
-
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO topic (title, description)"
+                        + "VALUES (?, ?);",
+                PreparedStatement.RETURN_GENERATED_KEYS
+        )) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .string(topic.getTitle())
+                    .string(topic.getDescription())
+                    .toStatement();
+            statement.executeUpdate();
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                topic.setId(generatedKeys.getInt("id"));
+            } else {
+                log.error("Error while retrieving new topic ID.");
+                throw new StoreException("Error while retrieving new topic ID.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating topic.", e);
+            throw new StoreException("Error while creating topic.", e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void updateTopic(final Topic topic) {
-        // TODO Auto-generated method stub
-
+    public void updateTopic(final Topic topic) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "UPDATE topic "
+                        + "SET title = ?, description = ?"
+                        + "WHERE id = ?;"
+        )) {
+            int rowsAffected = new StatementParametrizer(stmt)
+                    .string(topic.getTitle())
+                    .string(topic.getDescription())
+                    .integer(topic.getId())
+                    .toStatement().executeUpdate();
+            if (rowsAffected == 0) {
+                throw new NotFoundException("Topic to be updated could not be found.");
+            }
+        } catch (SQLException e) {
+            throw new StoreException("Error while updating report.", e);
+        }
     }
 
     /**

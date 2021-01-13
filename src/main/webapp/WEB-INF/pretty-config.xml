@@ -61,7 +61,13 @@
     </url-mapping>
     <url-mapping id="topic">
         <pattern value="/topic"/>
+        <query-param name="id">#{id}</query-param>
         <view-id value="/faces/view/public/topic.xhtml"/>
+    </url-mapping>
+    <url-mapping id="topic-edit">
+        <pattern value="/topic-edit"/>
+        <query-param name="id">#{id}</query-param>
+        <view-id value="/faces/view/restr/topic-edit.xhtml"/>
     </url-mapping>
     <url-mapping id="report">
         <pattern value="/report"/>
