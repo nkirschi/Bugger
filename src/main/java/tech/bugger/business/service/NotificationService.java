@@ -1,6 +1,7 @@
 package tech.bugger.business.service;
 
 import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
@@ -8,6 +9,7 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
@@ -46,18 +48,42 @@ public class NotificationService implements Serializable {
     private final ResourceBundle messagesBundle;
 
     /**
+     * Resource bundle for interaction messages.
+     */
+    private final ResourceBundle interactionsBundle;
+
+    /**
+     * The {@link PriorityExecutor} instance to use when sending e-mails.
+     */
+    private final PriorityExecutor priorityExecutor;
+
+    /**
+     * The {@link Mailer} instance to use when sending e-mails.
+     */
+    private final Mailer mailer;
+
+    /**
      * Constructs a new notification service with the given dependencies.
      *
      * @param transactionManager The transaction manager to use for creating transactions.
      * @param feedbackEvent The feedback event to use for user feedback.
      * @param messagesBundle The resource bundle for feedback messages.
+     * @param interactionsBundle The resource bundle for interaction messages.
+     * @param priorityExecutor   The priority executor to use when sending e-mails.
+     * @param mailer             The mailer to use.
      */
     @Inject
     public NotificationService(final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
-                               final @RegistryKey("messages") ResourceBundle messagesBundle) {
+                               final @RegistryKey("messages") ResourceBundle messagesBundle,
+                               @RegistryKey("interactions") final ResourceBundle interactionsBundle,
+                               @RegistryKey("mails") final PriorityExecutor priorityExecutor,
+                               @RegistryKey("main") final Mailer mailer) {
         this.transactionManager = transactionManager;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;
+        this.interactionsBundle = interactionsBundle;
+        this.priorityExecutor = priorityExecutor;
+        this.mailer = mailer;
     }
 
     /**
@@ -155,7 +181,22 @@ public class NotificationService implements Serializable {
      * Queues sending of e-mails for notifications which have not yet been sent.
      */
     public void processUnsentNotifications() {
-
+        List<Notification> unsentNotifications;
+        try (Transaction tx = transactionManager.begin()) {
+            unsentNotifications = tx.newNotificationGateway().getUnsentNotifications();
+            tx.commit();
+        } catch (TransactionException e) {
+            return;
+        }
+        for (Notification notification : unsentNotifications) {
+            User recipient;
+            try (Transaction tx = transactionManager.begin()) {
+                recipient = tx.newUserGateway().getUserByID(notification.getRecipientID());
+            } catch (NotFoundException e) {
+                continue;
+            }
+            String email = recipient.getEmailAddress();
+        }
     }
 
 }
