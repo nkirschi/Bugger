@@ -56,19 +56,24 @@ public class AttachmentDBGateway implements AttachmentGateway {
      */
     private Attachment getUserFromResultSet(final ResultSet rs) throws SQLException {
         int postID = rs.getInt("id");
-        return new Attachment(
+        Attachment attachment = new Attachment(
                 postID,
                 rs.getString("name"),
-                new Lazy<>(() -> {
-                    //PostService postService = CDI.current().select(PostService.class).get();
-                    return null;
-                }),
+                null,
                 rs.getString("mimetype"),
                 new Lazy<>(() -> {
+                    // Lazily retrieve the post of the attachment.
                     PostService postService = CDI.current().select(PostService.class).get();
                     return postService.getPostByID(postID);
                 })
         );
+        attachment.setContent(new Lazy<>(() -> {
+            // Lazily retrieve the content of the attachment.
+            PostService postService = CDI.current().select(PostService.class).get();
+            System.out.println("Fetching attachment content");
+            return postService.getAttachmentContent(attachment);
+        }));
+        return attachment;
     }
 
     /**

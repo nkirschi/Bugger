@@ -12,7 +12,6 @@ import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentGateway;
-import tech.bugger.persistence.gateway.PostGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
@@ -203,6 +202,27 @@ public class PostService {
             log.error("Error while creating a new post.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
             return false;
+        }
+    }
+
+    /**
+     * Returns the content of an attachment.
+     *
+     * @param attachment The attachment whose content to retrieve.
+     * @return The content of the attachment if it was found, {@code null} otherwise.
+     */
+    public byte[] getAttachmentContent(final Attachment attachment) {
+        try (Transaction tx = transactionManager.begin()) {
+            byte[] content = tx.newAttachmentGateway().findContent(attachment);
+            tx.commit();
+            return content;
+        } catch (NotFoundException e) {
+            log.debug("Attachment content not found.", e);
+            return null;
+        } catch (TransactionException e) {
+            log.error("Error while searching for attachment content.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            return null;
         }
     }
 
