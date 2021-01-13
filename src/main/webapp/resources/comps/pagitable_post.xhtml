@@ -15,7 +15,7 @@
                       rendered="#{cc.attrs.paginator.isEmpty()}"/>
 
         <h:form id="f-table" rendered="#{not cc.attrs.paginator.isEmpty()}">
-            <h:panelGrid id="t-entries">
+            <h:panelGrid id="t-entries" styleClass="col-12">
                 <ui:repeat value="#{cc.attrs.paginator}" var="var">
                     <cc:insertChildren/>
                 </ui:repeat>

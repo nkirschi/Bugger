@@ -143,84 +143,97 @@
         <h:form id="f-report">
             <h:panelGrid rendered="#{reportBacker.privileged}">
                 <h:commandButton id="cb-open-close-report-dialog" action="#{reportBacker.displayDialog('OPEN_CLOSE')}"
-                                 value="#{reportBacker.report.closingDate == null ? labels.report_action_close : labels.report_action_open}"/>
+                                 value="#{reportBacker.report.closingDate == null ? labels.report_action_close : labels.report_action_open}"
+                                 styleClass="btn btn-primary"/>
                 <!-- TODO redirect to report edit page -->
-                <h:link id="cb-edit-report" value="#{labels.edit}" outcome="pretty:report-edit" styleClass="button">
+                <h:link id="cb-edit-report" value="#{labels.edit}" outcome="pretty:report-edit"
+                        styleClass="btn btn-secondary">
                     <f:param name="id" value="#{reportBacker.report.id}"/>
                 </h:link>
                 <h:commandButton id="cb-delete-report-dialog" action="#{reportBacker.displayDialog('DELETE_REPORT')}"
-                                 value="#{labels.delete}"/>
+                                 value="#{labels.delete}" styleClass="btn btn-secondary"/>
                 <h:commandButton id="cb-mark-duplicate" action="#{reportBacker.displayDialog('DUPLICATE')}"
-                                 value="#{labels.report_mark_duplicate}"/>
+                                 value="#{labels.report_mark_duplicate}" styleClass="btn btn-secondary"/>
                 <h:commandButton id="cb-unmark-duplicate" action="#{reportBacker.unmarkDuplicate}"
-                                 value="#{labels.report_unmark_duplicate}"
+                                 value="#{labels.report_unmark_duplicate}" styleClass="btn btn-secondary"
                                  rendered="#{reportBacker.report.duplicateOf != null}"/>
             </h:panelGrid>
         </h:form>
 
         <b:pagitable_post paginator="#{reportBacker.posts}">
             <!--@elvariable id="var" type="tech.bugger.global.transfer.Post"-->
-            <!-- https://stackoverflow.com/questions/18358604/how-to-use-el-with-uirepeat-var-in-id-attribute-of-a-jsf-component -->
-            <div class="card" id="post-#{var.id}">
-                <h:panelGrid columns="2" styleClass="card-header">
-                    <h:panelGrid columns="1">
-                        <h:outputText id="ot-post-creator"
-                                      value="#{var.authorship.creator == null ? labels.deleted_user : var.authorship.creator.username}"/>
-                        <h:outputText id="ot-post-created-at"
-                                      value="#{labels.report_at} #{var.authorship.creationDate}"/>
-                    </h:panelGrid>
-                    <h:panelGrid columns="2" rendered="#{reportBacker.privilegedForPost(var)}">
-                        <!-- TODO redirect to post edit page -->
-                        <h:commandButton id="cb-edit-post" value="#{labels.edit}"/>
-                        <h:commandButton id="cb-delete-post-dialog" action="#{reportBacker.deletePostDialog(var)}"
-                                         value="#{labels.delete}"/>
-                    </h:panelGrid>
-                </h:panelGrid>
-
-                <!--
-                <h:panelGroup class="row" layout="block" styleClass="align-center">
-                    <h:panelGroup class="col-sm-4" layout="block">
-                        <h:panelGroup class="row" layout="block">
-                            <h:outputText id="ot-post-creator" value="#{var.authorship.creator == null ? 'deleted user' : var.authorship.creator.username}"/>
-                        </h:panelGroup>
-                        <h:panelGroup class="row" layout="block">
-                            <h:outputText id="ot-post-created-at" value="at #{var.authorship.creationDate}"/>
+            <h:panelGroup layout="block" styleClass="mb-3">
+                <!-- div used here because of: https://stackoverflow.com/questions/18358604/ -->
+                <div class="card" id="post-#{var.id}">
+                    <h:panelGroup layout="block" styleClass="card-header">
+                        <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
+                            <h:panelGroup layout="block" styleClass="align-vcenter">
+                                <h:outputText id="ot-post-creator" styleClass="row"
+                                              value="#{var.authorship.creator == null
+                                              ? labels.deleted_user
+                                              : var.authorship.creator.username}"/>
+                                <h:outputText id="ot-post-created-at" styleClass="row"
+                                              value="#{labels.report_at} #{var.authorship.creationDate}"/>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="align-vcenter"
+                                          rendered="#{reportBacker.privilegedForPost(var)}">
+                                <!-- TODO redirect to post edit page -->
+                                <h:commandButton id="cb-edit-post" value="#{labels.edit}"
+                                                 styleClass="btn btn-secondary"/>
+                                <h:commandButton id="cb-delete-post-dialog"
+                                                 styleClass="btn btn-primary"
+                                                 action="#{reportBacker.deletePostDialog(var)}"
+                                                 value="#{labels.delete}"/>
+                            </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup class="col-sm-4" layout="block"/>
-                    <h:panelGroup class="col-sm-4" layout="block">
-                        <h:commandButton id="cb-delete-post-dialog" action="#{reportBacker.deletePostDialog(var)}" value="#{labels.delete}"/>
+                    <!--
+                    <h:panelGroup class="row" layout="block" styleClass="align-center">
+                        <h:panelGroup class="col-sm-4" layout="block">
+                            <h:panelGroup class="row" layout="block">
+                                <h:outputText id="ot-post-creator" value="#{var.authorship.creator == null ? 'deleted user' : var.authorship.creator.username}"/>
+                            </h:panelGroup>
+                            <h:panelGroup class="row" layout="block">
+                                <h:outputText id="ot-post-created-at" value="at #{var.authorship.creationDate}"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup class="col-sm-4" layout="block"/>
+                        <h:panelGroup class="col-sm-4" layout="block">
+                            <h:commandButton id="cb-delete-post-dialog" action="#{reportBacker.deletePostDialog(var)}" value="#{labels.delete}"/>
+                        </h:panelGroup>
                     </h:panelGroup>
-                </h:panelGroup>
-                -->
+                    -->
 
-                <h:panelGrid columns="1" styleClass="card-body">
-                    <h:outputText value="#{var.content}" escape="false"/>
-                </h:panelGrid>
-
-                <!--
-                <h:panelGroup class="row" layout="block">
-                    <h:outputText value="#{var.content}" escape="false"/>
-                </h:panelGroup>
-                -->
-
-                <h:panelGrid columns="2" styleClass="card-footer">
-                    <h:outputText value="#{labels.id}: #{var.id}"/>
-                    <h:outputText
-                            value="#{labels.report_last_modified_by} #{var.authorship.modifier == null ? labels.deleted_user : var.authorship.modifier.username} #{labels.report_at} #{var.authorship.modifiedDate}"
-                            rendered="#{var.authorship.modifiedDate != null}"
-                    />
-                </h:panelGrid>
-
-                <!-- TODO put attachments into post in gateway
-                <ui:repeat value="#{var.attachments}" var="attachment">
-                    <h:panelGrid columns="2">
-                        <h:outputText id="ot-attachment-name" value="#{attachment.name}"/>
-                        <h:commandButton id="cb-attachment-download" value="Download"/>
+                    <h:panelGrid columns="1" styleClass="card-body">
+                        <h:outputText value="#{var.content}" escape="false"/>
                     </h:panelGrid>
-                </ui:repeat>
-                -->
-            </div>
+
+                    <!--
+                    <h:panelGroup class="row" layout="block">
+                        <h:outputText value="#{var.content}" escape="false"/>
+                    </h:panelGroup>
+                    -->
+
+                    <h:panelGroup styleClass="card-footer">
+                        <h:panelGrid columns="2">
+                            <h:outputText value="#{labels.id}: #{var.id}"/>
+                            <h:outputText
+                                    value="#{labels.report_last_modified_by} #{var.authorship.modifier == null ? labels.deleted_user : var.authorship.modifier.username} #{labels.report_at} #{var.authorship.modifiedDate}"
+                                    rendered="#{var.authorship.modifiedDate != null}"
+                            />
+                        </h:panelGrid>
+                    </h:panelGroup>
+
+                    <!-- TODO put attachments into post in gateway
+                    <ui:repeat value="#{var.attachments}" var="attachment">
+                        <h:panelGrid columns="2">
+                            <h:outputText id="ot-attachment-name" value="#{attachment.name}"/>
+                            <h:commandButton id="cb-attachment-download" value="Download"/>
+                        </h:panelGrid>
+                    </ui:repeat>
+                    -->
+                </div>
+            </h:panelGroup>
         </b:pagitable_post>
     </ui:define>
 </ui:composition>
