@@ -106,7 +106,7 @@ public class ReportService {
             tx.commit();
         } catch (DuplicateException e) {
             log.error("User " + user + " is already subscribed to report " + report + ".");
-            feedbackEvent.fire(new Feedback(messagesBundle.getString(""), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("already_subscribed"), Feedback.Type.ERROR));
         } catch (NotFoundException e) {
             log.error("User " + user + " or report " + report + " not found.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
@@ -145,7 +145,7 @@ public class ReportService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error when user " + user + " is unsubscribing from report " + report + ".");
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
     }
 
