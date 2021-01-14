@@ -393,8 +393,28 @@ public class TopicBacker implements Serializable {
 
     /**
      * Subscribes the user to the topic or unsubscribes them, whichever is applicable.
+     *
+     * @return {@code null}
      */
-    public void toggleTopicSubscription() {
+    public String toggleTopicSubscription() {
+        if (session.getUser() == null) {
+            return null;
+        }
+        if (topicService.isSubscribed(session.getUser(), topic)) {
+            topicService.unsubscribeFromTopic(session.getUser(), topic);
+        } else {
+            topicService.subscribeToTopic(session.getUser(), topic);
+        }
+        return null;
+    }
+
+    /**
+     * Checks whether the user is subscribed to the topic.
+     *
+     * @return {@code true} iff the user is subscribed to the topic.
+     */
+    public boolean isSubscribed() {
+        return topicService.isSubscribed(session.getUser(), topic);
     }
 
     /**

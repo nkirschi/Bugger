@@ -23,6 +23,10 @@
                             <f:param name="id" value="#{topicBacker.topicID}"/>
                         </h:link>
                     </h:panelGroup>
+                    <h:panelGroup class="row" layout="block" rendered="#{userSession.user != null}">
+                        <h:commandButton id="cb-subscribe" action="#{topicBacker.toggleTopicSubscription}" styleClass="button"
+                                         value="#{topicBacker.subscribed ? labels.unsubscribe : labels.subscribe}"/>
+                    </h:panelGroup>
                     <!-- statistik link -->
                     <h:panelGroup class="row" layout="block">
                         <h:outputLabel value="#{labels.topic_show_open_reports}:"/>
