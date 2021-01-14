@@ -77,6 +77,20 @@ public class HomeBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        if (session.getUser() != null) {
+            inbox = new Paginator<>("created_at", Selection.PageSize.NORMAL) {
+                @Override
+                protected Iterable<Notification> fetch() {
+                    return notificationService.selectNotifications(session.getUser(), getSelection());
+                }
+
+                @Override
+                protected int totalSize() {
+                    return notificationService.countNotifications(session.getUser());
+                }
+            };
+            inbox.getSelection().setAscending(false);
+        }
         topics = new Paginator<>("title", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Topic> fetch() {
@@ -94,9 +108,11 @@ public class HomeBacker implements Serializable {
      * Irreversibly deletes the notification.
      *
      * @param notification The notification to be deleted.
+     * @return {@code null}
      */
-    public void deleteNotification(final Notification notification) {
-
+    public String deleteNotification(final Notification notification) {
+        notificationService.deleteNotification(notification);
+        return null;
     }
 
     /**
@@ -106,7 +122,8 @@ public class HomeBacker implements Serializable {
      * @return A String that is used to redirect a user to the post of the opened notification.
      */
     public String openNotification(final Notification notification) {
-        return null;
+        notificationService.markAsRead(notification);
+        return "pretty:report";
     }
 
     /**
@@ -116,7 +133,7 @@ public class HomeBacker implements Serializable {
      * @return {@code true} if the user is subscribed to the topic, {@code false} otherwise.
      */
     public boolean isSubscribed(final Topic topic) {
-        return false;
+        return topicService.isSubscribed(session.getUser(), topic);
     }
 
     /**
