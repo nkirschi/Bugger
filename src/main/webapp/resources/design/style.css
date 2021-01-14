@@ -44,6 +44,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     max-width: 400px;
+    z-index: 9999;
 }
 
 #l-logo {
@@ -103,7 +104,7 @@ body {
 
 
 /**
- * Content
+ * Bootstrap Hacks
  */
 
 .flex-basis-0 {
@@ -140,6 +141,14 @@ body {
 .align-vcenter {
     margin-top: auto;
     margin-bottom: auto;
+}
+
+.img-size-small {
+    max-height: 200px;
+}
+
+.img-size-mini {
+    max-height: 1em;
 }
 
 .style-button {

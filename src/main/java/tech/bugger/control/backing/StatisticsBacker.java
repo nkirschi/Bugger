@@ -142,7 +142,6 @@ public class StatisticsBacker implements Serializable {
         topReports = statisticsService.determineTopTenReports();
         topUsers = statisticsService.determineTopTenUsers();
         topicTitles = topicService.discoverTopics();
-        topicTitles.add(0, ""); // empty string for no restriction to topic (JSF doesn't like null)
         decimalFormat = NumberFormat.getInstance(userSession.getLocale());
         decimalFormat.setMinimumFractionDigits(0);
         decimalFormat.setMaximumFractionDigits(2);
@@ -171,6 +170,7 @@ public class StatisticsBacker implements Serializable {
      * @return {@code null} in order to reload the page.
      */
     public String applyFilters() {
+        System.out.println("TOPIC: " + reportCriteria.getTopic());
         ResourceBundle messagesBundle = registry.getBundle("messages", userSession);
         feedbackEvent.fire(new Feedback(messagesBundle.getString("filters_applied"), Feedback.Type.INFO));
         return null;
