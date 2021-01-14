@@ -61,10 +61,10 @@ public class ProfileService {
     /**
      * Constructs a new profile service with the given dependencies.
      *
-     * @param feedback The feedback event to be used for user feedback.
-     * @param transactionManager The transaction manager to be used for creating transactions.
+     * @param feedback            The feedback event to be used for user feedback.
+     * @param transactionManager  The transaction manager to be used for creating transactions.
      * @param applicationSettings The current application settings.
-     * @param messages The resource bundle to look up feedback messages.
+     * @param messages            The resource bundle to look up feedback messages.
      */
     @Inject
     public ProfileService(final Event<Feedback> feedback, final TransactionManager transactionManager,
@@ -380,6 +380,44 @@ public class ProfileService {
     }
 
     /**
+     * Checks whether a user is subscribed to another user.
+     *
+     * @param subscriber   The user whose subscription to check.
+     * @param subscribedTo he user to which subscriber might be subscribed.
+     * @return Whether subscriber is subscribed to subscribedTo.
+     */
+    public boolean isSubscribed(final User subscriber, final User subscribedTo) {
+        if (subscriber == null) {
+            return false;
+        } else if (subscriber.getId() == null) {
+            log.error("Cannot determine subscription status of user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (subscribedTo == null) {
+            log.error("Cannot determine subscription status to user null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (subscribedTo.getId() == null) {
+            log.error("Cannot determine subscription status to user with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
+
+        boolean status;
+        try (Transaction tx = transactionManager.begin()) {
+            status = tx.newSubscriptionGateway().isSubscribed(subscriber, subscribedTo);
+            tx.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            status = false;
+            log.error("Could not find user " + subscriber + " or user " + subscribedTo + ".", e);
+            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            status = false;
+            log.error("Error when determining subscription status of user " + subscriber + " to user " + subscribedTo
+                    + ".", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return status;
+    }
+
+    /**
      * Updates the avatar of a user and generates a new thumbnail.
      *
      * @param user The user with a new avatar.
@@ -424,7 +462,7 @@ public class ProfileService {
     /**
      * Calculates the voting weight from the given number of posts and the voting weight definition.
      *
-     * @param numPosts The number of posts.
+     * @param numPosts        The number of posts.
      * @param votingWeightDef The voting weight definition.
      * @return The calculated voting weight.
      */
@@ -509,7 +547,7 @@ public class ProfileService {
     /**
      * Changes the given user's administrator status based on the given boolean.
      *
-     * @param user The user to be promoted.
+     * @param user  The user to be promoted.
      * @param admin The administration status to change to.
      */
     private void changeAdminStatus(final User user, final boolean admin) {
@@ -532,7 +570,7 @@ public class ProfileService {
     /**
      * Checks whether the input password is the same as the given user's password.
      *
-     * @param user The user whose password is to be checked.
+     * @param user     The user whose password is to be checked.
      * @param password The password given as input.
      * @return {@code true} iff the input matched the user's hashed password.
      */

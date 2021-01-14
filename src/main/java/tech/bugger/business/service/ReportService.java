@@ -157,6 +157,19 @@ public class ReportService {
      * @return {@code true} iff the user is subscribed to the report.
      */
     public boolean isSubscribed(final User user, final Report report) {
+        if (user == null) {
+            return false;
+        } else if (user.getId() == null) {
+            log.error("Cannot determine subscription status of user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (report == null) {
+            log.error("Cannot determine subscription status to report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot determine subscription status to report with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
+
         boolean status;
         try (Transaction tx = transactionManager.begin()) {
             status = tx.newSubscriptionGateway().isSubscribed(user, report);
