@@ -123,6 +123,9 @@ public class ProfileService {
      * @return Whether the deletion was successful or not.
      */
     public boolean deleteUser(final User user) {
+        if (isLastAdmin(user)) {
+            return false;
+        }
         try (Transaction tx = transactionManager.begin()) {
             tx.newUserGateway().deleteUser(user);
             tx.commit();
@@ -312,26 +315,39 @@ public class ProfileService {
      * @param user The user to be promoted/demoted.
      */
     public void toggleAdmin(final User user) {
-        if (user.isAdministrator()) {
-            try (Transaction transaction = transactionManager.begin()) {
-                int admins = transaction.newUserGateway().getNumberOfAdmins();
-                transaction.commit();
-                if (admins == 0) {
-                    log.error("No administrators could be found in the database");
-                    throw new InternalError("No administrators could be found in the database");
-                } else if (admins == 1) {
-                    log.error("The last administrator cannot be deleted");
-                    feedback.fire(new Feedback(messages.getString("delete_last_admin"), Feedback.Type.ERROR));
-                } else {
-                    changeAdminStatus(user, false);
-                }
-            } catch (TransactionException e) {
-                log.error("Error while counting the number of administrators.", e);
-                feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
-            }
-        } else {
+        if (user.isAdministrator() && !isLastAdmin(user)) {
+            changeAdminStatus(user, false);
+        } else if (!user.isAdministrator()) {
             changeAdminStatus(user, true);
         }
+    }
+
+    /**
+     * Checks if the given user is the last administrator.
+     *
+     * @param user The user to be checked.
+     * @return {@code true} iff the user is the last administrator.
+     */
+    private boolean isLastAdmin(final User user) {
+        if (!user.isAdministrator()) {
+            return false;
+        }
+        int admins = 0;
+        try (Transaction transaction = transactionManager.begin()) {
+            admins = transaction.newUserGateway().getNumberOfAdmins();
+            transaction.commit();
+            if (admins == 0) {
+                log.error("No administrators could be found in the database");
+                throw new InternalError("No administrators could be found in the database");
+            } else if (admins == 1) {
+                log.error("The last administrator cannot be deleted");
+                feedback.fire(new Feedback(messages.getString("delete_last_admin"), Feedback.Type.ERROR));
+            }
+        } catch (TransactionException e) {
+            log.error("Error while counting the number of administrators.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return admins <= 1;
     }
 
     /**

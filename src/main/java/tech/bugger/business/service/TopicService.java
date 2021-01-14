@@ -2,10 +2,10 @@ package tech.bugger.business.service;
 
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
@@ -282,7 +282,7 @@ public class TopicService {
             transaction.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The topic with id " + topicID + " could not be found.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            throw new tech.bugger.business.exception.NotFoundException(messagesBundle.getString("not_found_error"), e);
         } catch (TransactionException e) {
             log.error("Error while loading the topic with id " + topicID, e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
@@ -294,18 +294,42 @@ public class TopicService {
      * Creates a new topic. Only administrators can do that.
      *
      * @param topic The topic to be created.
+     * @return {@code true} iff creating the topic succeeded.
      */
-    public void createTopic(final Topic topic) {
-
+    public boolean createTopic(final Topic topic) {
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newTopicGateway().createTopic(topic);
+            tx.commit();
+            log.info("Topic created successfully.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("topic_created"), Feedback.Type.INFO));
+            return true;
+        } catch (TransactionException | NotFoundException e) {
+            log.error("Error while creating a new Topic.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
+        }
+        return false;
     }
 
     /**
      * Updates an existing topic. Only administrators can do that.
      *
      * @param topic The topic to update.
+     * @return {@code true} iff creating the topic succeeded.
      */
-    public void updateTopic(final Topic topic) {
+    public boolean updateTopic(final Topic topic) {
         // if topic does not exist in database, createTopic instead
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newTopicGateway().updateTopic(topic);
+            tx.commit();
+            return true;
+        } catch (NotFoundException e) {
+            createTopic(topic);
+            return true;
+        } catch (TransactionException e) {
+            log.error("Error while updating a report.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
+            return false;
+        }
     }
 
     /**
