@@ -10,7 +10,10 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
-import tech.bugger.global.transfer.*;
+import tech.bugger.global.transfer.Post;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
@@ -71,8 +74,9 @@ public class ReportService {
      * @param messagesBundle      The resource bundle for feedback messages.
      */
     @Inject
-    public ReportService(final NotificationService notificationService, final PostService postService, final ProfileService profileService,
-                         final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
+    public ReportService(final NotificationService notificationService, final PostService postService,
+                         final ProfileService profileService, final TransactionManager transactionManager,
+                         final Event<Feedback> feedbackEvent,
                          final @RegistryKey("messages") ResourceBundle messagesBundle) {
         this.notificationService = notificationService;
         this.postService = postService;
@@ -140,17 +144,6 @@ public class ReportService {
     }
 
     /**
-     * Moves a report to another topic and notifies users about the movement. Notifications are handled by the {@code
-     * NotificationService}.
-     *
-     * @param report The report to be moved.
-     * @param topic  The topic where the report is to be moved to.
-     */
-    public void move(final Report report, final Topic topic) {
-
-    }
-
-    /**
      * Increases the relevance of the report by the user's current voting weight.
      *
      * @param report The report the relevance of which is to be increased.
@@ -159,19 +152,24 @@ public class ReportService {
     public void upvote(final Report report, final User user) {
         removeVote(report, user);
         Integer votingWeight = profileService.getVotingWeightForUser(user);
-        try (Transaction tx = transactionManager.begin()) {
-            tx.newReportGateway().upvote(report, user, votingWeight);
-            tx.commit();
-        } catch (NotFoundException e) {
-            log.error("Could not find report " + report + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
-        } catch (TransactionException e) {
-            log.error("Error when deleting report " + report + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
-        } catch (DuplicateException e) {
-            e.printStackTrace();
-            //TODO
+        if (votingWeight != null && votingWeight > 0) {
+            try (Transaction tx = transactionManager.begin()) {
+                tx.newReportGateway().upvote(report, user, votingWeight);
+                tx.commit();
+            } catch (NotFoundException e) {
+                log.error("Could not find report " + report + ".", e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            } catch (TransactionException e) {
+                log.error("Error when upvoting report " + report + ".", e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            } catch (DuplicateException e) {
+                log.error("Error when upvoting report " + report + " because a previous vote was not removed.", e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("duplicate_vote"), Feedback.Type.ERROR));
+            }
+        } else {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("voting_weight_zero"), Feedback.Type.INFO));
         }
+
     }
 
     /**
@@ -183,18 +181,22 @@ public class ReportService {
     public void downvote(final Report report, final User user) {
         removeVote(report, user);
         Integer votingWeight = profileService.getVotingWeightForUser(user);
-        try (Transaction tx = transactionManager.begin()) {
-            tx.newReportGateway().downvote(report, user, votingWeight);
-            tx.commit();
-        } catch (NotFoundException e) {
-            log.error("Could not find report " + report + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
-        } catch (TransactionException e) {
-            log.error("Error when deleting report " + report + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
-        } catch (DuplicateException e) {
-            e.printStackTrace();
-            //TODO
+        if (votingWeight != null && votingWeight > 0) {
+            try (Transaction tx = transactionManager.begin()) {
+                tx.newReportGateway().downvote(report, user, votingWeight);
+                tx.commit();
+            } catch (NotFoundException e) {
+                log.error("Could not find report " + report + ".", e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            } catch (TransactionException e) {
+                log.error("Error when downvoting report " + report + ".", e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            } catch (DuplicateException e) {
+                e.printStackTrace();
+                //TODO
+            }
+        } else {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("voting_weight_zero"), Feedback.Type.INFO));
         }
     }
 
@@ -226,7 +228,7 @@ public class ReportService {
      */
     public boolean hasUpvoted(final Report report, final User user) {
         try (Transaction tx = transactionManager.begin()) {
-            boolean upvote = tx.newReportGateway().hasUpvote(user, report);
+            boolean upvote = tx.newReportGateway().hasUpvoted(user, report);
             tx.commit();
             return upvote;
         } catch (TransactionException e) {
@@ -245,7 +247,7 @@ public class ReportService {
      */
     public boolean hasDownvoted(final Report report, final User user) {
         try (Transaction tx = transactionManager.begin()) {
-            boolean upvote = tx.newReportGateway().hasDownvote(user, report);
+            boolean upvote = tx.newReportGateway().hasDownvoted(user, report);
             tx.commit();
             return upvote;
         } catch (TransactionException e) {

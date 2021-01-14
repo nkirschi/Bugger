@@ -127,32 +127,20 @@ public interface ReportGateway {
     /**
      * Finds out weather a specified user has cast an upvote on a specified report.
      *
-     * @param user The user who cast the vote.
+     * @param user   The user who cast the vote.
      * @param report The report under inspection.
      * @return {@code true} iff the user has cast an upvote on the specified report.
      */
-    boolean hasUpvote(User user, Report report);
+    boolean hasUpvoted(User user, Report report);
 
     /**
      * Finds out weather a specified user has cast an downvote on a specified report.
      *
-     * @param user The user who cast the vote.
+     * @param user   The user who cast the vote.
      * @param report The report under inspection.
      * @return {@code true} iff the user has cast an downvote on the specified report.
      */
-    boolean hasDownvote(User user, Report report);
-
-    /**
-     * Return the current relevance of a specified report.
-     *
-     * @param report The report to calculate on.
-     * @return The current relevance.
-     *
-     * @throws NotFoundException The report could not be found.
-     */
-    /**
-    Integer getRelevance(Report report) throws NotFoundException;
-**/
+    boolean hasDownvoted(User user, Report report);
 
     /**
      * Overwrites the calculated relevance of a report by a fixed relevance value or removes the override, restoring the
@@ -167,8 +155,8 @@ public interface ReportGateway {
     /**
      * Stores an upvote, i.e. a positive vote for the relevance, of a report by a user.
      *
-     * @param report The report to upvote.
-     * @param user   The upvoting user.
+     * @param report       The report to upvote.
+     * @param user         The upvoting user.
      * @param votingWeight The users voting weight.
      * @throws DuplicateException A vote on the report by the user already existed.
      * @throws NotFoundException  The report or the user could not be found.
@@ -178,8 +166,8 @@ public interface ReportGateway {
     /**
      * Stores an downvote, i.e. a negative vote for the relevance, of a report by a user.
      *
-     * @param report The report to downvote.
-     * @param user   The downvoting user.
+     * @param report       The report to downvote.
+     * @param user         The downvoting user.
      * @param votingWeight The users voting weight.
      * @throws DuplicateException A vote on the report by the user already existed.
      * @throws NotFoundException  The report or the user could not be found.

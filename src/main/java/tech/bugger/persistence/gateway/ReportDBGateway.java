@@ -98,6 +98,18 @@ public class ReportDBGateway implements ReportGateway {
         return report;
     }
 
+    private Report extractRelevanceFromResultSet(final Report report, final ResultSet rs) throws SQLException {
+        int relevance = rs.getInt("relevance");
+        boolean relevanceOverwritten = false;
+        if (rs.getObject("forced_relevance", Integer.class) != null) {
+            relevance = rs.getInt("forced_relevance");
+            relevanceOverwritten = true;
+        }
+        report.setRelevance(relevance);
+        report.setRelevanceOverwritten(relevanceOverwritten);
+        return report;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -534,7 +546,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public boolean hasUpvote(final User user, final Report report) {
+    public boolean hasUpvoted(final User user, final Report report) {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM relevance_vote WHERE voter = ? AND report = ?;")) {
             PreparedStatement statement = new StatementParametrizer(stmt)
                     .integer(user.getId())
@@ -554,7 +566,7 @@ public class ReportDBGateway implements ReportGateway {
      * {@inheritDoc}
      */
     @Override
-    public boolean hasDownvote(final User user, final Report report) {
+    public boolean hasDownvoted(final User user, final Report report) {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM relevance_vote WHERE voter = ? AND report = ?;")) {
             PreparedStatement statement = new StatementParametrizer(stmt)
                     .integer(user.getId())
@@ -624,7 +636,7 @@ public class ReportDBGateway implements ReportGateway {
             log.error("Cannot delete report with ID null");
             throw new IllegalArgumentException("Report ID cannot be null.");
         }
-        if (hasUpvote(user, report) || hasDownvote(user, report)) {
+        if (hasUpvoted(user, report) || hasDownvoted(user, report)) {
             try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM relevance_vote WHERE voter = ? AND report = ? RETURNING *;")) {
                 PreparedStatement statement = new StatementParametrizer(stmt)
                         .integer(user.getId())

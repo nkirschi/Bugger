@@ -411,7 +411,6 @@ public class ReportBacker implements Serializable {
      */
     public String applyOverwriteRelevance() {
         if (session.getUser().isAdministrator()) {
-            System.out.println(overwriteRelevanceValue);
             reportService.overwriteRelevance(report, overwriteRelevanceValue);
             updateRelevance();
             return null;
