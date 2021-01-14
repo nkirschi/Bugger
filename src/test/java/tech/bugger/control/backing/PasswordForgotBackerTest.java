@@ -19,6 +19,7 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.User;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -112,8 +113,8 @@ public class PasswordForgotBackerTest {
 
     @Test
     public void testForgotPasswordWhenError() {
-        try (MockedStatic<AuthenticationService> serviceMock = mockStatic(AuthenticationService.class)) {
-            serviceMock.when(() -> AuthenticationService.getApplicationPath(any())).thenReturn("https://bugger.tech");
+        try (MockedStatic<JFConfig> configMock = mockStatic(JFConfig.class)) {
+            configMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("https://bugger.tech");
             testUser1.setId(100);
             backer.setUser(testUser1);
             doReturn(true).when(authenticationService).forgotPassword(any(), any());
@@ -126,8 +127,8 @@ public class PasswordForgotBackerTest {
 
     @Test
     public void testForgotPasswordSuccess() {
-        try (MockedStatic<AuthenticationService> serviceMock = mockStatic(AuthenticationService.class)) {
-            serviceMock.when(() -> AuthenticationService.getApplicationPath(any())).thenReturn("https://bugger.tech");
+        try (MockedStatic<JFConfig> configMock = mockStatic(JFConfig.class)) {
+            configMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("https://bugger.tech");
             testUser1.setId(100);
             backer.setUser(testUser1);
             doReturn(false).when(authenticationService).forgotPassword(any(), any());
