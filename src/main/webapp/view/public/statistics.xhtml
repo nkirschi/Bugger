@@ -10,11 +10,11 @@
 
     <ui:param name="title" value="#{labels.statistics}"/>
     <ui:define name="content">
-        <h:outputText value="#{labels.insight_figures}" styleClass="h2"/>
-
         <!-- insight figures -->
-        <h:panelGroup value="#{labels.insight_figures_description}"
-                      styleClass="mb-3"/>
+        <h:outputText value="#{labels.insight_figures}" styleClass="h2"/>
+        <h:panelGroup layout="block" styleClass="mb-3">
+            <h:outputText value="#{labels.insight_figures_description}"/>
+        </h:panelGroup>
         <h:panelGroup layout="block"
                       styleClass="row"
                       id="p-insight-figures">
@@ -99,9 +99,13 @@
             <!-- top 10 reports -->
             <h:panelGroup layout="block" styleClass="col-6 p-4">
                 <h:outputLabel value="#{labels.top_ten_reports}" styleClass="h2"/>
+                <h:panelGroup layout="block" styleClass="mb-3">
+                    <h:outputText value="#{labels.top_ten_reports_description}"/>
+                </h:panelGroup>
                 <!--@elvariable id="report" type="tech.bugger.global.transfer.TopReport"-->
                 <h:dataTable id="t-top-ten-reports"
-                             var="report" value="#{statisticsBacker.topReports}"
+                             var="report"
+                             value="#{statisticsBacker.topReports}"
                              styleClass="table table-hover">
                     <h:column>
                         <f:facet name="header">#{labels.report}</f:facet>
@@ -124,9 +128,13 @@
             <!-- top 10 users -->
             <h:panelGroup layout="block" styleClass="col-6 p-4">
                 <h:outputLabel value="#{labels.top_ten_users}" styleClass="h2"/>
+                <h:panelGroup layout="block" styleClass="mb-3">
+                    <h:outputText value="#{labels.top_ten_users_description}"/>
+                </h:panelGroup>
                 <!--@elvariable id="user" type="tech.bugger.global.transfer.TopUser"-->
                 <h:dataTable id="t-top-ten-users"
-                             var="user" value="#{statisticsBacker.topUsers}"
+                             var="user"
+                             value="#{statisticsBacker.topUsers}"
                              styleClass="table table-hover">
                     <h:column>
                         <f:facet name="header">#{labels.user}</f:facet>

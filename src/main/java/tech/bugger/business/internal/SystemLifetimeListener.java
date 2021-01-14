@@ -55,7 +55,7 @@ public class SystemLifetimeListener implements ServletContextListener {
     /**
      * Maximum time in ms to wait for remaining mailing task execution completion.
      */
-    public static final int TASK_TERMINATION_TIMEOUT_MILLIS = 5000;
+    public static final long TASK_TERMINATION_TIMEOUT_MILLIS = Long.MAX_VALUE;
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.
@@ -213,10 +213,7 @@ public class SystemLifetimeListener implements ServletContextListener {
     }
 
     private void cleanUpDatabaseConnections() {
-        ConnectionPool dbPool = registry.getConnectionPool("db");
-        if (!dbPool.isShutDown()) {
-            dbPool.shutdown();
-        }
+        registry.getConnectionPool("db").shutdown();
     }
 
     private void terminateMailingTasks(final boolean immediately) {

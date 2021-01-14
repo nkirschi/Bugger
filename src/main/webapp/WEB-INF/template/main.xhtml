@@ -12,18 +12,18 @@
 <f:view locale="#{userSession.locale}">
     <h:head>
         <title> Bugger: #{title} </title>
+        <h:outputStylesheet library="design" name="bootstrap.min.css"/>
         <h:outputStylesheet library="design" name="style.css"/>
         <h:outputStylesheet library="design" name="themes/#{applicationSettings.organization.theme}"/>
-        <h:outputStylesheet library="design" name="bootstrap.min.css"/>
     </h:head>
 
     <h:body>
         <h:panelGroup layout="block">
             <ui:include src="/WEB-INF/template/header.xhtml" id="header"/>
             <h:panelGroup layout="block"
-                          id="messages"
+                          id="p-messages"
                           rendered="#{not empty facesContext.messageList}">
-                <h:messages id="m_global"
+                <h:messages id="m-global"
                             globalOnly="true"
                             layout="table"
                             fatalClass="alert alert-danger"
@@ -32,14 +32,14 @@
                             infoClass="alert alert-success"/>
             </h:panelGroup>
             <ui:insert name="dialogs"/>
-            <h:panelGroup layout="block" id="help" styleClass="dialog" rendered="#{footerBacker.helpDisplayed}">
+            <h:panelGroup layout="block" id="p-help" styleClass="dialog" rendered="#{footerBacker.helpDisplayed}">
                 <ui:insert name="help"/>
             </h:panelGroup>
-            <h:panelGroup layout="block" id="content">
+            <h:panelGroup layout="block" id="p-content">
                 <h:outputText value="#{title}" styleClass="h1" id="title"/>
                 <ui:insert name="content"/>
             </h:panelGroup>
-            <ui:include src="/WEB-INF/template/footer.xhtml" id="footer">
+            <ui:include src="/WEB-INF/template/footer.xhtml" id="p-footer">
                 <ui:param name="helpKey" value="#{title}"/>
             </ui:include>
         </h:panelGroup>
