@@ -60,7 +60,14 @@ public class ReportDBGateway implements ReportGateway {
         report.setType(Report.Type.valueOf(rs.getString("type")));
         report.setSeverity(Report.Severity.valueOf(rs.getString("severity")));
         report.setVersion(rs.getString("version"));
-        report.setRelevance(rs.getInt("relevance"));
+        Integer relevance = rs.getInt("relevance");
+        boolean relevanceOverwritten = false;
+        if (rs.getObject("forced_relevance", Integer.class) != null) {
+            relevance = rs.getInt("forced_relevance");
+            relevanceOverwritten = true;
+        }
+        report.setRelevance(relevance);
+        report.setRelevanceOverwritten(relevanceOverwritten);
         report.setTopic(rs.getInt("topic"));
         report.setDuplicateOf(rs.getInt("duplicate_of"));
         ZonedDateTime created = null;
