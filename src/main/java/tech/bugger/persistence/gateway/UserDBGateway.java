@@ -1,5 +1,6 @@
 package tech.bugger.persistence.gateway;
 
+import com.ocpsoft.pretty.faces.util.StringUtils;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
@@ -18,6 +19,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -110,8 +112,23 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public boolean isModerator(final User user, final Topic topic) {
-        // TODO Auto-generated method stub
-        return false;
+        if (user.getId() == null || topic.getId() == null) {
+            throw new IllegalArgumentException("The user or topic ID cannot be null!");
+        }
+
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM topic_moderation WHERE moderator = ? "
+                + "AND topic = ?;")) {
+            ResultSet resultSet = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(topic.getId())
+                    .toStatement().executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            log.error("Error while checking if the user with id " + user.getId() + " is a moderator of the topic "
+                    + "with id " + topic.getId(), e);
+            throw new StoreException("Error while checking if the user with id " + user.getId() + " is a moderator of "
+                    + "the topic with id " + topic.getId(), e);
+        }
     }
 
     /**
@@ -208,9 +225,31 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<User> getSelectedModerators(final Topic topic, final Selection selection) {
-        // TODO Auto-generated method stub
-        return null;
+    public List<User> getSelectedModerators(final Topic topic, final Selection selection) throws NotFoundException {
+        validTopicSelection(topic, selection);
+
+        List<User> moderators = new ArrayList<>(Math.max(0, selection.getTotalSize()));
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT u.* FROM \"user\" AS u, topic_moderation AS t "
+                + "WHERE t.topic = ? AND u.id = t.moderator LIMIT ? OFFSET ?;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(topic.getId())
+                    .integer(selection.getPageSize().getSize())
+                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
+                    .toStatement().executeQuery();
+
+            while (rs.next()) {
+                moderators.add(getUserFromResultSet(rs));
+            }
+
+            if (moderators.size() == 0) {
+                log.warning("The topic with id " + topic.getId() + " has no moderators.");
+                throw new NotFoundException("The topic with id " + topic.getId() + " has no moderators.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while loading the moderators of the topic with id " + topic.getId(), e);
+            throw new StoreException("Error while loading the moderators of the topic with id " + topic.getId(), e);
+        }
+        return moderators;
     }
 
     /**
@@ -218,8 +257,46 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public List<User> getSelectedBannedUsers(final Topic topic, final Selection selection) {
-        // TODO Auto-generated method stub
-        return null;
+        validTopicSelection(topic, selection);
+
+        List<User> banned = new ArrayList<>(Math.max(0, selection.getTotalSize()));
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT u.* FROM \"user\" AS u, topic_ban AS t "
+                + "WHERE t.topic = ? AND u.id = t.outcast LIMIT ? OFFSET ?;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(topic.getId())
+                    .integer(selection.getPageSize().getSize())
+                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
+                    .toStatement().executeQuery();
+
+            while (rs.next()) {
+                banned.add(getUserFromResultSet(rs));
+            }
+
+            if (banned.size() == 0) {
+                log.debug("No users banned for the topic with id " + topic.getId());
+            }
+        } catch (SQLException e) {
+            log.error("Error while loading the banned users for the topic with id " + topic.getId(), e);
+            throw new StoreException("Error while loading the banned users for the topic with id " + topic.getId(), e);
+        }
+
+        return banned;
+    }
+
+    /**
+     * Checks if a given topic and selection are valid.
+     *
+     * @param topic The topic to check.
+     * @param selection The selection to check.
+     */
+    private void validTopicSelection(final Topic topic, final Selection selection) {
+        if (selection == null || topic.getId() == null) {
+            log.error("The selection or topic ID cannot be null!.");
+            throw new IllegalArgumentException("The selection or topic ID cannot be null!.");
+        } else if (StringUtils.isBlank(selection.getSortedBy())) {
+            log.error("Error when trying to get moderators sorted by nothing.");
+            throw new IllegalArgumentException("The selection needs to have a column to sort by.");
+        }
     }
 
     /**
@@ -360,9 +437,52 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
+    public int getNumberOfModeratedTopics(final User user) {
+        if (user.getId() == null) {
+            throw new IllegalArgumentException("User ID may not be null!");
+        }
+
+        int moderatedTopics = 0;
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(t.topic) AS num_topics FROM "
+                + "topic_moderation AS t WHERE t.moderator = ?;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .toStatement().executeQuery();
+
+            if (rs.next()) {
+                moderatedTopics = rs.getInt("num_topics");
+            }
+        } catch (SQLException e) {
+            log.error("Error while counting the moderated topics for the user with id " + user.getId(), e);
+            throw new StoreException("Error while counting the moderated topics for the user with id " + user.getId(),
+                    e);
+        }
+
+        return moderatedTopics;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean isBanned(final User user, final Topic topic) {
-        // TODO Auto-generated method stub
-        return false;
+        if (user.getId() == null || topic.getId() == null) {
+            throw new IllegalArgumentException("The user or topic ID cannot be null!");
+        }
+
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM topic_ban WHERE outcast = ? "
+                + "AND topic = ?;")) {
+            ResultSet resultSet = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(topic.getId())
+                    .toStatement().executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            log.error("Error while checking if the user with id " + user.getId() + " is banned from the topic "
+                    + "with id " + topic.getId(), e);
+            throw new StoreException("Error while checking if the user with id " + user.getId() + " is banned from "
+                    + "the topic with id " + topic.getId(), e);
+        }
     }
 
 }
