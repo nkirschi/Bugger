@@ -99,29 +99,40 @@
     <ui:define name="content">
 
         <!-- Renders the profile owner's user information. -->
-        <h:form id="f-profile-edit" rendered="#{userSession.user != null and userSession.user.administrator
-        or userSession.user.id == profileEditBacker.user.id}">
+        <h:form id="f-profile-edit"
+                rendered="#{userSession.user != null and userSession.user.administrator
+                            or userSession.user.id == profileEditBacker.user.id}"
+                enctype="multipart/form-data">
 
-            <!-- TODO uncomment this and change once servlet has been implemented -->
-            <!--
             <h:panelGroup layout="block" id="p-avatar" styleClass="row p-avatar">
-                <h:graphicImage id="g-avatar" value="" styleClass="g-avatar" alt="The user's avatar"/>
+                <h:graphicImage id="g-avatar"
+                                value="avatar?id=#{profileEditBacker.user.id}"
+                                styleClass="g-avatar"
+                                alt="The user's avatar"
+                                rendered="#{profileEditBacker.user.existsAvatar}"/>
+                <h:graphicImage id="g-avatar-fallback"
+                                library="images" name="bugger.png"
+                                styleClass="g-avatar"
+                                alt="The user's avatar"
+                                rendered="#{not profileEditBacker.user.existsAvatar}"/>
             </h:panelGroup>
 
             <h:panelGroup layout="block" id="p-upload" styleClass="row p-avatar">
-                <h:inputFile id="i-upload" validator="imageValidator" value="#{labels['profile_edit.change_avatar']}"
-                             binding="#{profileEditBacker.tempAvatar}">
-                    <f:validator validatorId="imageValidator"/>
-                </h:inputFile>
+                <h:outputLabel id="o-upload" for="i-upload" value="#{labels['profile_edit.change_avatar']}"/>
+                <h:inputFile id="i-upload" validator="imageValidator" value="#{profileEditBacker.uploadedAvatar}"/>
             </h:panelGroup>
 
-            <h:panelGroup id="p-avatar-buttons" styleClass="row">
-                <h:commandButton id="cb-preview" value="#{labels['profile_edit.preview']}"
-                                 action="#{profileEditBacker.uploadAvatar}" styleClass="button"/>
+            <!-- <h:panelGroup id="p-avatar-buttons" styleClass="row">
                 <h:commandButton id="cb-delete-avatar" value="#{labels['profile_edit.del_avatar']}"
                                  action="#{profileEditBacker.deleteAvatar}" styleClass="button"/>
+            </h:panelGroup> -->
+
+            <h:panelGroup>
+                <h:selectBooleanCheckbox id="s-delete-avatar" value="#{profileEditBacker.deleteAvatar}"/>
+                <h:outputLabel id="o-delete-avatar"
+                               for="s-delete-avatar"
+                               value="#{labels['profile_edit.del_avatar']}"/>
             </h:panelGroup>
-        -->
 
             <h:panelGrid id="p-profile-info" columns="2">
                 <h:outputLabel id="o-visibility" for="s-visibility" value="#{labels['profile_edit.visibility']}"/>

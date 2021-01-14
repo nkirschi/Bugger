@@ -2,6 +2,7 @@ package tech.bugger.persistence.gateway;
 
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Post;
+import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
@@ -26,7 +27,7 @@ public class AttachmentDBGateway implements AttachmentGateway {
     /**
      * Database connection used by this gateway.
      */
-    private Connection conn;
+    private final Connection conn;
 
     /**
      * Constructs a new attachment gateway with the given database connection.
@@ -121,9 +122,27 @@ public class AttachmentDBGateway implements AttachmentGateway {
      * {@inheritDoc}
      */
     @Override
-    public Attachment getContentByID(final int id) {
-        // TODO Auto-generated method stub
-        return null;
+    public Attachment find(final int id) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "SELECT * FROM attachment WHERE id = ?;"
+        )) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(id)
+                    .toStatement().executeQuery();
+            if (rs.next()) {
+                return new Attachment(
+                        id,
+                        rs.getString("name"),
+                        new Lazy<>(rs.getBytes("content")), // TODO: Lazy
+                        rs.getString("mimetype"),
+                        null // TODO: Retrieve post lazily
+                );
+            } else {
+                throw new NotFoundException("Attachment could not be found.");
+            }
+        } catch (SQLException e) {
+            throw new StoreException("Error while retrieving attachment.", e);
+        }
     }
 
     /**

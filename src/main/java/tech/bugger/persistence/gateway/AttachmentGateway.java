@@ -17,7 +17,7 @@ public interface AttachmentGateway {
      * @return The attachment identified by the ID.
      * @throws NotFoundException The attachment could not be found.
      */
-    Attachment getContentByID(int id) throws NotFoundException;
+    Attachment find(int id) throws NotFoundException;
 
     /**
      * Retrieves the list of attachments of a given post.
@@ -31,7 +31,7 @@ public interface AttachmentGateway {
     /**
      * Inserts an attachment into the attachment storage.
      * <p>
-     * Sets the ID of {@ode attachment} that was assigned upon insertion by the attachment storage.
+     * Sets the ID of {@code attachment} that was assigned upon insertion by the attachment storage.
      *
      * @param attachment The attachment to insert.
      */

@@ -160,6 +160,11 @@ body {
     color: black;
 }
 
+.logo-preview {
+    max-width: 200px;
+    max-height: 200px;
+}
+
 .col-sm-2 {
     background-color: #f3f3f3;
     height: 100%;
@@ -180,6 +185,11 @@ body {
     max-height: 100%;
     object-fit: contain;
     margin: 1%;
+}
+
+.g-avatar-thumbnail {
+    max-width: 50px;
+    max-height: 50px;
 }
 
 .profile-info {
