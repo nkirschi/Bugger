@@ -17,6 +17,7 @@ import tech.bugger.global.transfer.Topic;
 
 import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Locale;
@@ -133,7 +134,7 @@ public class StatisticsBackerTest {
     @Test
     public void testGetAveragePostsPerReportWhenAvgNotNull() {
         statisticsBacker.init();
-        doReturn(1.337).when(statisticsService).averagePostsPerReport(any());
+        doReturn(BigDecimal.valueOf(1.337)).when(statisticsService).averagePostsPerReport(any());
         assertEquals("1.34", statisticsBacker.getAveragePostsPerReport());
     }
 

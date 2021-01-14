@@ -13,6 +13,7 @@ import tech.bugger.persistence.util.TransactionManager;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -104,9 +105,9 @@ public class StatisticsService {
      * @return The average number of posts per report of those matching the {@code criteria} or {@code null} if this
      *         average could not be determined.
      */
-    public Double averagePostsPerReport(final ReportCriteria criteria) {
+    public BigDecimal averagePostsPerReport(final ReportCriteria criteria) {
         try (Transaction tx = transactionManager.begin()) {
-            Double avgPostsPerReport = tx.newStatisticsGateway().getAveragePostsPerReport(criteria);
+            BigDecimal avgPostsPerReport = tx.newStatisticsGateway().getAveragePostsPerReport(criteria);
             tx.commit();
             return avgPostsPerReport;
         } catch (TransactionException e) {
@@ -139,15 +140,15 @@ public class StatisticsService {
      * @return The top ten reports.
      */
     public List<TopReport> determineTopTenReports() {
-        List<TopReport> topTenReports = Collections.emptyList();
         try (Transaction tx = transactionManager.begin()) {
-            topTenReports = tx.newStatisticsGateway().getTopTenReports();
+            List<TopReport> topTenReports = tx.newStatisticsGateway().getTopTenReports();
             tx.commit();
+            return topTenReports;
         } catch (TransactionException e) {
             log.error("Error when fetching top ten reports.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
-        return topTenReports;
+        return Collections.emptyList();
     }
 
 }

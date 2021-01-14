@@ -16,6 +16,7 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.event.Event;
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -89,7 +90,7 @@ public class StatisticsServiceTest {
 
     @Test
     public void testAveragePostsPerReportWhenSuccess() {
-        Double d = 1.337;
+        BigDecimal d = BigDecimal.valueOf(1.337);
         doReturn(d).when(statisticsGateway).getAveragePostsPerReport(any());
         assertEquals(d, statisticsService.averagePostsPerReport(null));
         verify(statisticsGateway).getAveragePostsPerReport(any());

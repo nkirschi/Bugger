@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.Duration;
 import java.util.List;
@@ -204,7 +205,7 @@ public class StatisticsBacker implements Serializable {
      * @return The average number of posts.
      */
     public String getAveragePostsPerReport() {
-        Double avgPosts = statisticsService.averagePostsPerReport(reportCriteria);
+        BigDecimal avgPosts = statisticsService.averagePostsPerReport(reportCriteria);
         if (avgPosts != null) {
             return decimalFormat.format(avgPosts);
         } else {
