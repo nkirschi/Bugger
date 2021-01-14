@@ -158,6 +158,10 @@
                                  value="#{labels.report_unmark_duplicate}" styleClass="btn btn-secondary"
                                  rendered="#{reportBacker.report.duplicateOf != null}"/>
             </h:panelGrid>
+            <h:panelGrid rendered="#{userSession.user != null}">
+                <h:commandButton id="cb-subscribe" action="#{reportBacker.toggleReportSubscription}"
+                                 value="#{reportBacker.subscribed ? labels.unsubscribe : labels.subscribe}" styleClass="btn btn-secondary"/>
+            </h:panelGrid>
         </h:form>
 
         <b:pagitable_post paginator="#{reportBacker.posts}">

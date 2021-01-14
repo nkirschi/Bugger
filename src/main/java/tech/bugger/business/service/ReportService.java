@@ -150,6 +150,30 @@ public class ReportService {
     }
 
     /**
+     * Determines the subscription status of the user to the report.
+     *
+     * @param user The user in question.
+     * @param report The report in question.
+     * @return {@code true} iff the user is subscribed to the report.
+     */
+    public boolean isSubscribed(final User user, final Report report) {
+        boolean status;
+        try (Transaction tx = transactionManager.begin()) {
+            status = tx.newSubscriptionGateway().isSubscribed(user, report);
+            tx.commit();
+        } catch (NotFoundException e) {
+            status = false;
+            log.error("Could not find user " + user + " or report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            status = false;
+            log.error("Error when determining subscription status of user " + user + " to report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return status;
+    }
+
+    /**
      * Closes an open report. User receive no notifications about closed reports.
      *
      * @param report The report to be closed.

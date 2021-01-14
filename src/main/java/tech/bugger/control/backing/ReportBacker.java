@@ -266,8 +266,28 @@ public class ReportBacker implements Serializable {
 
     /**
      * Adds or removes a subscription to the report for the user, whichever is applicable.
+     *
+     * @return {@code null}
      */
-    public void toggleReportSubscription() {
+    public String toggleReportSubscription() {
+        if (session.getUser() == null) {
+            return null;
+        }
+        if (reportService.isSubscribed(session.getUser(), report)) {
+            reportService.unsubscribeFromReport(session.getUser(), report);
+        } else {
+            reportService.subscribeToReport(session.getUser(), report);
+        }
+        return null;
+    }
+
+    /**
+     * Returns whether the user is subscribed to the report.
+     *
+     * @return {@code true} iff the user is subscribed to the report.
+     */
+    public boolean isSubscribed() {
+        return reportService.isSubscribed(session.getUser(), report);
     }
 
     /**
