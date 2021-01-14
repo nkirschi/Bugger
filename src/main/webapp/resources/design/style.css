@@ -160,6 +160,21 @@ body {
     color: black;
 }
 
+.logo-preview {
+    max-width: 200px;
+    max-height: 200px;
+}
+
+.col-sm-2 {
+    background-color: #f3f3f3;
+    height: 100%;
+}
+
+.col-sm-8 {
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
+    height: 100%;
+    padding: 1%;
+}
 
 .p-avatar {
     width: 50%;
@@ -170,6 +185,11 @@ body {
     max-height: 100%;
     object-fit: contain;
     margin: 1%;
+}
+
+.g-avatar-thumbnail {
+    max-width: 50px;
+    max-height: 50px;
 }
 
 .profile-info {
@@ -193,4 +213,22 @@ body {
 .sel-float {
     width: auto !important;
     display: inline-block !important;
+}
+
+.trashcan-small {
+    width: 16px;
+    height: 16px;
+}
+
+.search {
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
+    margin: 1%;
+}
+
+.vote-cast {
+    background-color: #0a58ca;
+}
+
+.vote-not-cast {
+    background-color: #157347;
 }

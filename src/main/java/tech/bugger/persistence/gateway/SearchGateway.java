@@ -26,6 +26,46 @@ public interface SearchGateway {
     List<User> getUserResults(String query, Selection selection, boolean showAdmins, boolean showNonAdmins);
 
     /**
+     * Searches for users by their username and filters the results according to given selection criteria.
+     *
+     * @param query The search string to use.
+     * @param limit The maximum amount of usernames to return.
+     * @param topic The topic for which the ban suggestions are to be rendered.
+     * @return The list of usernames that match the search criteria.
+     */
+    List<String> getUserBanSuggestions(String query, int limit, Topic topic);
+
+    /**
+     * Searches for users by their username and filters the results according to given selection criteria.
+     *
+     * @param query The search string to use.
+     * @param limit The maximum amount of usernames to return.
+     * @param topic The topic for which the unban suggestions are to be rendered.
+     * @return The list of usernames that match the search criteria.
+     */
+    List<String> getUserUnbanSuggestions(String query, int limit, Topic topic);
+
+    /**
+     * Searches for users by their username and filters the results according to given selection criteria.
+     *
+     * @param query The search string to use.
+     * @param limit The maximum amount of usernames to return.
+     * @param topic The topic for which the moderation suggestions are to be rendered.
+     * @return The list of usernames that match the search criteria.
+     */
+    List<String> getUserModSuggestions(String query, int limit, Topic topic);
+
+    /**
+     * Searches for users by their username and filters the results according to given selection criteria.
+     *
+     * @param query The search string to use.
+     * @param limit The maximum amount of usernames to return.
+     * @param topic The topic for which the demote moderator suggestions are to be rendered.
+     * @return The list of usernames that match the search criteria.
+     */
+    List<String> getUserUnmodSuggestions(String query, int limit, Topic topic);
+
+    /**
      * Searches for topics by their title and returns the requested result page.
      *
      * @param query     The search string to use.

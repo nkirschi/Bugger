@@ -140,8 +140,16 @@
 
             <!-- The profile owner's user information -->
             <h:panelGroup class="row" layout="block" id="p-avatar" styleClass="p-avatar">
-                <!-- TODO add user avatar once servlet has been implemented -->
-                <h:graphicImage id="g-avatar" value="" styleClass="g-avatar" alt="The user's avatar"/>
+                <h:graphicImage id="g-avatar"
+                                value="avatar?id=#{profileBacker.user.id}"
+                                styleClass="g-avatar"
+                                alt="The user's avatar"
+                                rendered="#{profileBacker.user.existsAvatar}"/>
+                <h:graphicImage id="g-avatar-fallback"
+                                library="images" name="bugger.png"
+                                styleClass="g-avatar"
+                                alt="The user's avatar"
+                                rendered="#{not profileBacker.user.existsAvatar}"/>
             </h:panelGroup>
             <h:panelGroup class="row" layout="block" id="p-username">
                 <h:panelGroup class="col-sm-3" id="p-username-label">
@@ -237,7 +245,12 @@
             <h:panelGroup class="col-sm-12" layout="block" id="p-moderated-pagination">
                 <b:pagitable paginator="#{profileBacker.moderatedTopics}" simple="true">
                     <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
-                    <h:column><h:outputText value="#{var}"/></h:column>
+                    <h:column>
+                        <!-- TODO check if name still fits once implemented in TopicBacker -->
+                        <h:link value="#{var.title}" outcome="pretty:topic">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
+                    </h:column>
                 </b:pagitable>
             </h:panelGroup>
         </h:panelGroup>

@@ -2,9 +2,11 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
+import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Constants;
@@ -123,10 +125,16 @@ public class ProfileBacker implements Serializable {
     private FacesContext fctx;
 
     /**
-     * The profile service providing the business logic.
+     * The profile service providing the business logic for user functionality.
      */
     @Inject
     private transient ProfileService profileService;
+
+    /**
+     * The topic service providing the business logic for topic functionality.
+     */
+    @Inject
+    private transient TopicService topicService;
 
     /**
      * Initializes the profile page. Checks whether this is the user's own profile page.
@@ -157,6 +165,18 @@ public class ProfileBacker implements Serializable {
             session.setUser(new User(user));
         }
         displayDialog = DialogType.NONE;
+
+        moderatedTopics = new Paginator<>("title", Selection.PageSize.SMALL) {
+            @Override
+            protected Iterable<Topic> fetch() {
+                return topicService.getModeratedTopics(user, getSelection());
+            }
+
+            @Override
+            protected int totalSize() {
+                return profileService.getNumberOfModeratedTopics(user);
+            }
+        };
     }
 
     /**

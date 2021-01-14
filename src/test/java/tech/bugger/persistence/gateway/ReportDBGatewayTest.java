@@ -56,7 +56,7 @@ public class ReportDBGatewayTest {
         authorship.getModifier().setId(1);
         report = new Report(0, "App crashes", Report.Type.HINT, Report.Severity.SEVERE, "1.4.1",
                 new Authorship(null, ZonedDateTime.now(), null, ZonedDateTime.now()), null,
-                null, null, 1);
+                null, null, false, 1);
     }
 
     @AfterEach
@@ -152,7 +152,7 @@ public class ReportDBGatewayTest {
         if (rs.next()) {
             return new Report(
                     rs.getInt("id"), rs.getString("title"),
-                    null, null, null, null, null, null, null, 0
+                    null, null, null, null, null, null, null, false, 0
             );
         } else {
             return null;

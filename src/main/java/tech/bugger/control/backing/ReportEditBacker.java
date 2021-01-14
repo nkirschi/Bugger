@@ -82,11 +82,6 @@ public class ReportEditBacker implements Serializable {
     private boolean displayConfirmDialog;
 
     /**
-     * Whether the user is allowed to edit the report.
-     */
-    private boolean privileged;
-
-    /**
      * Constructs a new report editing page backing bean with the necessary dependencies.
      *
      * @param topicService  The topic service to use.
@@ -103,7 +98,6 @@ public class ReportEditBacker implements Serializable {
         this.session = session;
         this.fctx = fctx;
         this.messagesBundle = registry.getBundle("messages", session);
-        this.privileged = false;
     }
 
     /**
@@ -125,16 +119,13 @@ public class ReportEditBacker implements Serializable {
             destinationID = report.getTopic();
             currentTopic = topicService.getTopicByID(destinationID);
             User user = session.getUser();
-
-            privileged = user != null && currentTopic != null
-                    && (user.equals(report.getAuthorship().getCreator())
-                    || user.isAdministrator()
-                    || topicService.isModerator(user, currentTopic));
         }
 
-        if (!privileged) {
+        if (!isPrivileged()) {
             redirectTo404Page();
         }
+
+        report.getAuthorship().setModifier(session.getUser());
     }
 
     /**
@@ -162,23 +153,21 @@ public class ReportEditBacker implements Serializable {
      *
      * @return The page to navigate to.
      */
-    public String saveChangesWithConfirm() {
+    public void saveChangesWithConfirm() {
         if (report.getTopic() == destinationID) {
-            return saveChanges();
+            saveChanges();
+            return;
         }
 
         if (canMoveToTopic()) {
             openConfirmDialog();
         }
-        return null;
     }
 
     /**
      * Saves the changes made into the database.
-     *
-     * @return The page to navigate to.
      */
-    public String saveChanges() {
+    public void saveChanges() {
         boolean success = true;
 
         report.getAuthorship().setModifiedDate(ZonedDateTime.now());
@@ -186,11 +175,17 @@ public class ReportEditBacker implements Serializable {
         if (destinationID != report.getTopic()) {
             report.setTopic(destinationID);
             success = reportService.move(report);
-        } else {
-            success = reportService.updateReport(report);
         }
 
-        return success ? "pretty:report" : null;
+        if (success && reportService.updateReport(report)) {
+            ExternalContext ectx = fctx.getExternalContext();
+            try {
+                ectx.redirect(ectx.getRequestContextPath()
+                        + "/faces/view/auth/report.xhtml?id=" + report.getId());
+            } catch (IOException e) {
+                redirectTo404Page();
+            }
+        }
     }
 
     /**
@@ -250,7 +245,26 @@ public class ReportEditBacker implements Serializable {
      * @return {@code true} if the user may edit the report and {@code false} otherwise.
      */
     public boolean isPrivileged() {
-        return privileged;
+        User user = session.getUser();
+        if (user == null || currentTopic == null || topicService.isBanned(user, currentTopic)) {
+            return false;
+        }
+        return user.isAdministrator() || topicService.isModerator(user, currentTopic)
+                || user.equals(report.getAuthorship().getCreator());
+    }
+
+    /**
+     * Checks if the user is banned from the topic the report is located in.
+     *
+     * @return {@code true} if the user is banned and {@code false} otherwise.
+     */
+    public boolean isBanned() {
+        User user = session.getUser();
+        if (user == null || currentTopic == null) {
+            return false;
+        }
+        Topic topic = new Topic(report.getTopic(), "", "");
+        return topicService.isBanned(user, topic);
     }
 
     /**

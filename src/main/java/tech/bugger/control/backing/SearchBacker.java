@@ -3,7 +3,6 @@ package tech.bugger.control.backing;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
@@ -11,8 +10,6 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
@@ -28,6 +25,7 @@ import java.util.HashMap;
 @ViewScoped
 @Named
 public class SearchBacker implements Serializable {
+
     /**
      * Enumeration of the tabs (and thus the types of results) displayed on the search page.
      */
@@ -48,38 +46,115 @@ public class SearchBacker implements Serializable {
         USER
     }
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(SearchBacker.class);
+
     @Serial
     private static final long serialVersionUID = -1264737473650782156L;
 
+    /**
+     * The current search query.
+     */
     private String query;
+
+    /**
+     * The current tab.
+     */
     private Tab tab;
 
+    /**
+     * The paginator for topic results.
+     */
     private Paginator<Topic> topicResults;
+
+    /**
+     * The paginator for report results.
+     */
     private Paginator<Report> reportResults;
+
+    /**
+     * The paginator for user results.
+     */
     private Paginator<User> userResults;
+
+    /**
+     * The latest creation date to search for.
+     */
     private ZonedDateTime latestCreationDateTime;
+
+    /**
+     * The earliest closing date to search for.
+     */
     private ZonedDateTime earliestClosingDateTime;
+
+    /**
+     * Whether to show open reports in the report search results.
+     */
     private boolean openReportShown;
+
+    /**
+     * Whether to show closed reports in the report search results.
+     */
     private boolean closedReportShown;
+
+    /**
+     * Whether to show reports marked as duplicates in the report search results.
+     */
     private boolean duplicatesShown;
+
+    /**
+     * Whether to search for the query string in posts.
+     */
     private boolean searchInFullText;
+
+    /**
+     * The topic to search for.
+     */
     private Topic searchTopic;
+
+    /**
+     * A hash map containing information for which report type to filter.
+     */
     private HashMap<Report.Type, Boolean> reportTypeFilter; // selectManyCheckbox
+
+    /**
+     * A hash map containing information for which report severity to filter.
+     */
     private HashMap<Report.Severity, Boolean> severityFilter;
 
+    /**
+     * Whether to show administrators in the user search results.
+     */
     private boolean adminShown;
+
+    /**
+     * Whether to show non-administrators in the user search results.
+     */
     private boolean nonAdminShown;
 
+    /**
+     * A transient search service.
+     */
     @Inject
     private transient SearchService searchService;
 
+    /**
+     * A transient topic service.
+     */
     @Inject
     private transient TopicService topicService;
 
+    /**
+     * A transient profile service.
+     */
     @Inject
     private transient ProfileService profileService;
 
+    /**
+     * The current faces context.
+     */
     @Inject
     private FacesContext fctx;
 
@@ -88,14 +163,6 @@ public class SearchBacker implements Serializable {
      */
     @PostConstruct
     public void init() {
-    }
-
-    /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
-     *
-     * @param feedback The feedback with details on what to display.
-     */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
     }
 
     /**
@@ -116,7 +183,7 @@ public class SearchBacker implements Serializable {
      * @param report The report whose relevance is to be returned.
      * @return The relevance as an {@code int}.
      */
-    public int getRelevance(Report report) {
+    public int getRelevance(final Report report) {
         return 0;
     }
 
@@ -126,7 +193,7 @@ public class SearchBacker implements Serializable {
      * @param user The user whose voting weight is to be returned.
      * @return The voting weight as an {@code int}.
      */
-    public int getVotingWeightForUser(User user) {
+    public int getVotingWeightForUser(final User user) {
         return 0;
     }
 
@@ -137,7 +204,7 @@ public class SearchBacker implements Serializable {
      * @param topic The topic in question.
      * @return The time stamp of the last action as a {@code ZonedDateTime}.
      */
-    public ZonedDateTime lastChange(Topic topic) {
+    public ZonedDateTime lastChange(final Topic topic) {
         return null;
     }
 
@@ -148,7 +215,7 @@ public class SearchBacker implements Serializable {
      * @param report The report in question.
      * @return The time stamp of the last action as a {@code ZonedDateTime}.
      */
-    public ZonedDateTime lastChange(Report report) {
+    public ZonedDateTime lastChange(final Report report) {
         return null;
     }
 
@@ -158,7 +225,7 @@ public class SearchBacker implements Serializable {
      * @param topic The topic in question.
      * @return The number of subscribers as an {@code int}.
      */
-    public int getNumberOfSubscribers(Topic topic) {
+    public int getNumberOfSubscribers(final Topic topic) {
         return 0;
     }
 
@@ -168,7 +235,7 @@ public class SearchBacker implements Serializable {
      * @param topic The topic in question.
      * @return The number of posts as an {@code int}.
      */
-    public int getNumberOfPosts(Topic topic) {
+    public int getNumberOfPosts(final Topic topic) {
         return 0;
     }
 
@@ -182,7 +249,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param query The searchQuery to set.
      */
-    public void setQuery(String query) {
+    public void setQuery(final String query) {
         this.query = query;
     }
 
@@ -196,7 +263,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param tab The tab to set.
      */
-    public void setTab(Tab tab) {
+    public void setTab(final Tab tab) {
         this.tab = tab;
     }
 
@@ -210,7 +277,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param latestOpeningDate The latestOpeningDate to set.
      */
-    public void setLatestOpeningDate(ZonedDateTime latestOpeningDate) {
+    public void setLatestOpeningDate(final ZonedDateTime latestOpeningDate) {
         this.latestCreationDateTime = latestOpeningDate;
     }
 
@@ -224,7 +291,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param earliestClosingDate The earliestClosingDate to set.
      */
-    public void setEarliestClosingDate(ZonedDateTime earliestClosingDate) {
+    public void setEarliestClosingDate(final ZonedDateTime earliestClosingDate) {
         this.earliestClosingDateTime = earliestClosingDate;
     }
 
@@ -238,7 +305,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param showOpenReports The showOpenReports to set.
      */
-    public void setOpenReportShown(boolean showOpenReports) {
+    public void setOpenReportShown(final boolean showOpenReports) {
         this.openReportShown = showOpenReports;
     }
 
@@ -252,7 +319,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param showClosedReports The showClosedReports to set.
      */
-    public void setClosedReportShown(boolean showClosedReports) {
+    public void setClosedReportShown(final boolean showClosedReports) {
         this.closedReportShown = showClosedReports;
     }
 
@@ -266,7 +333,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param showDuplicates The showDuplicates to set.
      */
-    public void setDuplicatesShown(boolean showDuplicates) {
+    public void setDuplicatesShown(final boolean showDuplicates) {
         this.duplicatesShown = showDuplicates;
     }
 
@@ -280,7 +347,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param searchInFullText The searchInFullText to set.
      */
-    public void setSearchInFullText(boolean searchInFullText) {
+    public void setSearchInFullText(final boolean searchInFullText) {
         this.searchInFullText = searchInFullText;
     }
 
@@ -294,7 +361,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param searchTopic The searchTopic to set.
      */
-    public void setSearchTopic(Topic searchTopic) {
+    public void setSearchTopic(final Topic searchTopic) {
         this.searchTopic = searchTopic;
     }
 
@@ -308,7 +375,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param reportTypeFilter The reportTypeFilter to set.
      */
-    public void setReportTypeFilter(HashMap<Report.Type, Boolean> reportTypeFilter) {
+    public void setReportTypeFilter(final HashMap<Report.Type, Boolean> reportTypeFilter) {
         this.reportTypeFilter = reportTypeFilter;
     }
 
@@ -322,7 +389,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param severityFilter The severityFilter to set.
      */
-    public void setSeverityFilter(HashMap<Report.Severity, Boolean> severityFilter) {
+    public void setSeverityFilter(final HashMap<Report.Severity, Boolean> severityFilter) {
         this.severityFilter = severityFilter;
     }
 
@@ -336,7 +403,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param showAdmins The showAdmins to set.
      */
-    public void setAdminShown(boolean showAdmins) {
+    public void setAdminShown(final boolean showAdmins) {
         this.adminShown = showAdmins;
     }
 
@@ -350,7 +417,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param showNonAdmins The showNonAdmins to set.
      */
-    public void setNonAdminShown(boolean showNonAdmins) {
+    public void setNonAdminShown(final boolean showNonAdmins) {
         this.nonAdminShown = showNonAdmins;
     }
 
@@ -374,4 +441,5 @@ public class SearchBacker implements Serializable {
     public Paginator<User> getUserResults() {
         return userResults;
     }
+
 }

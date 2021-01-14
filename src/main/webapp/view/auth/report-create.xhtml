@@ -4,6 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:a="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:p="http://java.sun.com/jsf/html"
       lang="#{userSession.locale.language}" xml:lang="#{userSession.locale.language}">
 
 <ui:composition template="../../WEB-INF/template/main.xhtml">
@@ -53,8 +54,6 @@
                 <h:message for="it-post-content"/>
             </h:panelGrid>
 
-            <h:commandButton value="#{labels.create}" action="#{reportCreateBacker.create}"/>
-
             <!-- TODO Adding attachment when post content is empty will trigger a "value is required" message and will
                  not add attachment. -->
             <ul>
@@ -62,6 +61,15 @@
                     <li><h:outputText value="#{attachment.name}"></h:outputText></li>
                 </ui:repeat>
             </ul>
+
+            <h:panelGroup>
+                <h:outputFormat id="first-post-attachments-info"
+                                value="#{labels.post_attachments_info}"
+                                styleClass="small form-text text-muted">
+                    <f:param value="#{applicationSettings.configuration.maxAttachmentsPerPost}"/>
+                    <f:param value="#{C.MAX_ATTACHMENT_FILESIZE}"/>
+                </h:outputFormat>
+            </h:panelGroup>
 
             <h:panelGroup styleClass="row"
                           layout="block"
@@ -83,6 +91,8 @@
                                  value="#{labels.remove_all_attachments}"
                                  action="#{reportCreateBacker.deleteAllAttachments}"/>
             </h:panelGroup>
+
+            <h:commandButton value="#{labels.create}" action="#{reportCreateBacker.create}"/>
         </h:form>
     </ui:define>
 </ui:composition>
