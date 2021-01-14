@@ -106,7 +106,6 @@ public class UserDBGateway implements UserGateway {
                 rs.getObject(prefix + "forced_voting_weight", Integer.class), rs.getBoolean(prefix + "is_admin"));
     }
 
-
     /**
      * {@inheritDoc}
      */

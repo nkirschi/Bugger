@@ -78,22 +78,22 @@ public class ReportCreateBacker implements Serializable {
     /**
      * The current application settings.
      */
-    private ApplicationSettings applicationSettings;
+    private final ApplicationSettings applicationSettings;
 
     /**
      * The topic service giving access to topics.
      */
-    private transient TopicService topicService;
+    private final TopicService topicService;
 
     /**
      * The report service creating reports.
      */
-    private transient ReportService reportService;
+    private final ReportService reportService;
 
     /**
      * The post service validating posts and attachments.
      */
-    private transient PostService postService;
+    private final PostService postService;
 
     /**
      * The current user session.
@@ -103,17 +103,17 @@ public class ReportCreateBacker implements Serializable {
     /**
      * The current {@link ExternalContext}.
      */
-    private ExternalContext ectx;
+    private final ExternalContext ectx;
 
     /**
      * Feedback event for user feedback.
      */
-    private transient Event<Feedback> feedbackEvent;
+    private final Event<Feedback> feedbackEvent;
 
     /**
      * Resource bundle for feedback message.
      */
-    private transient ResourceBundle messagesBundle;
+    private final ResourceBundle messagesBundle;
 
     /**
      * Constructs a new report creation page backing bean with the necessary dependencies.
@@ -177,14 +177,15 @@ public class ReportCreateBacker implements Serializable {
      * Saves the new report and its first post to the database.
      *
      * On success, the user is redirected to the report page of the newly created report.
-     *
-     * @return The site to redirect to.
      */
-    public String create() {
+    public void create() {
         if (reportService.createReport(report, firstPost)) {
-            return "report.xhtml?id=" + report.getId();
-        } else {
-            return null;
+            try {
+                ectx.redirect(ectx.getRequestContextPath()
+                        + "/faces/view/auth/report.xhtml?id=" + report.getId());
+            } catch (IOException e) {
+                redirectTo404Page();
+            }
         }
     }
 
@@ -193,31 +194,7 @@ public class ReportCreateBacker implements Serializable {
      * the post.
      */
     public void saveAttachment() {
-        if (uploadedAttachment == null) { // user didn't enter attachment
-            return;
-        }
-
-        byte[] content;
-        try {
-            content = uploadedAttachment.getInputStream().readAllBytes();
-        } catch (IOException e) {
-            log.info("Uploaded attachment could not be read", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("attachment_invalid"), Feedback.Type.ERROR));
-            return;
-        }
-
-        Attachment attachment = new Attachment();
-        attachment.setName(uploadedAttachment.getSubmittedFileName());
-        attachment.setContent(new Lazy<>(content));
-        attachment.setMimetype(uploadedAttachment.getContentType());
-        attachment.setPost(new Lazy<>(firstPost));
-
-        attachments.add(attachment);
-        if (postService.isAttachmentListValid(attachments)) {
-            log.debug("Attachment '" + attachment.getName() + "' uploaded.");
-        } else {
-            attachments.remove(attachment);
-        }
+        postService.addAttachment(firstPost, uploadedAttachment);
     }
 
     /**
@@ -345,15 +322,6 @@ public class ReportCreateBacker implements Serializable {
      */
     public UserSession getSession() {
         return session;
-    }
-
-    /**
-     * Sets the user session.
-     *
-     * @param session The user session.
-     */
-    public void setSession(final UserSession session) {
-        this.session = session;
     }
 
     /**

@@ -1,5 +1,6 @@
 package tech.bugger.persistence.gateway;
 
+import tech.bugger.business.service.PostService;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.util.Lazy;
@@ -8,10 +9,12 @@ import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
 
+import javax.enterprise.inject.spi.CDI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +39,35 @@ public class AttachmentDBGateway implements AttachmentGateway {
      */
     public AttachmentDBGateway(final Connection conn) {
         this.conn = conn;
+    }
+
+    /**
+     * Parses the given {@link ResultSet} and returns the corresponding {@link Attachment}.
+     *
+     * @param rs The {@link ResultSet} to parse.
+     * @return The parsed {@link Attachment}.
+     * @throws SQLException Some parsing error occurred.
+     */
+    private Attachment getAttachmentFromResultSet(final ResultSet rs) throws SQLException {
+        int postID = rs.getInt("id");
+        Attachment attachment = new Attachment(
+                postID,
+                rs.getString("name"),
+                null,
+                rs.getString("mimetype"),
+                new Lazy<>(() -> {
+                    // Lazily retrieve the post of the attachment.
+                    PostService postService = CDI.current().select(PostService.class).get();
+                    return postService.getPostByID(postID);
+                })
+        );
+        attachment.setContent(new Lazy<>(() -> {
+            // Lazily retrieve the content of the attachment.
+            PostService postService = CDI.current().select(PostService.class).get();
+            System.out.println("Fetching attachment content");
+            return postService.getAttachmentContent(attachment);
+        }));
+        return attachment;
     }
 
     /**
@@ -130,13 +162,7 @@ public class AttachmentDBGateway implements AttachmentGateway {
                     .integer(id)
                     .toStatement().executeQuery();
             if (rs.next()) {
-                return new Attachment(
-                        id,
-                        rs.getString("name"),
-                        new Lazy<>(rs.getBytes("content")), // TODO: Lazy
-                        rs.getString("mimetype"),
-                        null // TODO: Retrieve post lazily
-                );
+                return getAttachmentFromResultSet(rs);
             } else {
                 throw new NotFoundException("Attachment could not be found.");
             }
@@ -149,9 +175,44 @@ public class AttachmentDBGateway implements AttachmentGateway {
      * {@inheritDoc}
      */
     @Override
+    public byte[] findContent(final Attachment attachment) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "SELECT content FROM attachment WHERE id = ?;"
+        )) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(attachment.getId())
+                    .toStatement().executeQuery();
+            if (rs.next()) {
+                return rs.getBytes("content");
+            } else {
+                throw new NotFoundException("Post could not be found.");
+            }
+        } catch (SQLException e) {
+            throw new StoreException("Error while searching for post.", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<Attachment> getAttachmentsForPost(final Post post) {
-        // TODO Auto-generated method stub
-        return null;
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "SELECT * FROM attachment WHERE post = ?;"
+        )) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(post.getId())
+                    .toStatement().executeQuery();
+            List<Attachment> attachments = new ArrayList<>();
+            while (rs.next()) {
+                Attachment attachment = getAttachmentFromResultSet(rs);
+                attachment.setPost(new Lazy<>(post));
+                attachments.add(attachment);
+            }
+            return attachments;
+        } catch (SQLException e) {
+            throw new StoreException("Error while retrieving attachment.", e);
+        }
     }
 
 }

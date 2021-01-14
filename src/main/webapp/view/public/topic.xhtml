@@ -25,6 +25,10 @@
                                     styleClass="button style-button" rendered="#{userSession.user.administrator}">
                                 <f:param name="id" value="#{topicBacker.topicID}"/>
                             </h:link>
+                            <h:link id="l-create-report" outcome="pretty:report-create" value="#{labels.create_report}"
+                                    styleClass="button style-button" rendered="#{not topicBacker.banned}">
+                                <f:param name="id" value="#{topicBacker.topicID}"/>
+                            </h:link>
                         </h:panelGroup>
                     </h:panelGroup>
                     <h:panelGroup layout="block" styleClass="row">

@@ -536,8 +536,9 @@ public class User implements Serializable {
                 + ", firstName='" + firstName + '\''
                 + ", lastName='" + lastName + '\''
                 + ", avatar=" + (avatar == null ? "null"
-                : avatar.toString(a -> String.format("%.100s", Arrays.toString(a))))
-                + ", avatarThumbnail=" + Arrays.toString(avatarThumbnail)
+                : avatar.toString(a -> String.format("%.20s", Arrays.toString(a))))
+                + ", avatarThumbnail=" + (avatar == null ? "null"
+                : String.format("%.20s", Arrays.toString(avatarThumbnail)))
                 + ", biography='" + biography + '\''
                 + ", preferredLanguage=" + preferredLanguage
                 + ", profileVisibility=" + profileVisibility

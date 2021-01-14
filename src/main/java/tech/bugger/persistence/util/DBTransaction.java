@@ -140,7 +140,7 @@ public class DBTransaction implements Transaction {
     @Override
     public PostGateway newPostGateway() {
         checkState();
-        return new PostDBGateway(connection);
+        return new PostDBGateway(connection, newUserGateway(), newAttachmentGateway());
     }
 
     /**

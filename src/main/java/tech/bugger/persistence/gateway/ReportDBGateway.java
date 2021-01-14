@@ -63,31 +63,12 @@ public class ReportDBGateway implements ReportGateway {
         report.setVersion(rs.getString("version"));
         report.setTopic(rs.getInt("topic"));
         report.setDuplicateOf(rs.getInt("duplicate_of"));
-        ZonedDateTime created = null;
-        ZonedDateTime modified = null;
         ZonedDateTime closed = null;
-        User creator = null;
-        Integer creatorID = rs.getObject("created_by", Integer.class);
-        if (creatorID != null) {
-            creator = userGateway.getUserByID(creatorID);
-        }
-        User modifier = null;
-        Integer modifierID = rs.getObject("last_modified_by", Integer.class);
-        if (modifierID != null) {
-            modifier = userGateway.getUserByID(modifierID);
-        }
-        if (rs.getTimestamp("created_at") != null) {
-            created = (rs.getTimestamp("created_at").toInstant().atZone(ZoneId.systemDefault()));
-        }
-        if (rs.getTimestamp("last_modified_at") != null) {
-            modified = (rs.getTimestamp("last_modified_at").toInstant().atZone(ZoneId.systemDefault()));
-        }
         if (rs.getTimestamp("closed_at") != null) {
             closed = (rs.getTimestamp("closed_at").toInstant().atZone(ZoneId.systemDefault()));
         }
         report.setClosingDate(closed);
-        Authorship authorship = new Authorship(creator, created, modifier, modified);
-        report.setAuthorship(authorship);
+        report.setAuthorship(getAuthorshipFromResultSet(rs, userGateway));
         return report;
     }
 
@@ -101,6 +82,28 @@ public class ReportDBGateway implements ReportGateway {
         report.setRelevance(relevance);
         report.setRelevanceOverwritten(relevanceOverwritten);
         return report;
+    }
+
+    /**
+     * Parses the given {@link ResultSet} and returns the corresponding {@link Authorship}.
+     *
+     * @param rs          The {@link ResultSet} to parse.
+     * @param userGateway The {@link UserGateway} to use for fetching users.
+     * @return The parsed {@link Authorship}.
+     * @throws SQLException      Some parsing error occurred.
+     * @throws NotFoundException A user could not be found.
+     */
+    static Authorship getAuthorshipFromResultSet(final ResultSet rs, final UserGateway userGateway)
+            throws SQLException, NotFoundException {
+        Integer creatorID = rs.getObject("created_by", Integer.class);
+        User creator = creatorID == null ? null : userGateway.getUserByID(creatorID);
+        ZonedDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime()
+                .atZone(ZoneId.systemDefault());
+        Integer modifierID = rs.getObject("last_modified_by", Integer.class);
+        User modifier = modifierID == null ? null : userGateway.getUserByID(modifierID);
+        ZonedDateTime modifiedAt = rs.getTimestamp("last_modified_at").toLocalDateTime()
+                .atZone(ZoneId.systemDefault());
+        return new Authorship(creator, createdAt, modifier, modifiedAt);
     }
 
     /**
@@ -145,21 +148,13 @@ public class ReportDBGateway implements ReportGateway {
                     .integer(id)
                     .toStatement().executeQuery();
             if (rs.next()) {
-                Integer creatorID = rs.getObject("created_by", Integer.class);
-                User creator = creatorID == null ? null : userGateway.getUserByID(creatorID);
-                ZonedDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime()
-                        .atZone(ZoneId.systemDefault());
-                Integer modifierID = rs.getObject("last_modified_by", Integer.class);
-                User modifier = modifierID == null ? null : userGateway.getUserByID(modifierID);
-                ZonedDateTime modifiedAt = rs.getTimestamp("last_modified_at").toLocalDateTime()
-                        .atZone(ZoneId.systemDefault());
-                Authorship authorship = new Authorship(creator, createdAt, modifier, modifiedAt);
                 int relevance = rs.getInt("relevance");
                 boolean relevanceOverwritten = false;
                 if (rs.getObject("forced_relevance", Integer.class) != null) {
                     relevance = rs.getInt("forced_relevance");
                     relevanceOverwritten = true;
                 }
+
                 Integer duplicateOf = rs.getObject("duplicate_of", Integer.class);
                 Timestamp closingDate = rs.getTimestamp("closed_at");
 
@@ -169,7 +164,7 @@ public class ReportDBGateway implements ReportGateway {
                         Report.Type.valueOf(rs.getString("type")),
                         Report.Severity.valueOf(rs.getString("severity")),
                         rs.getString("version"),
-                        authorship,
+                        getAuthorshipFromResultSet(rs, userGateway),
                         closingDate != null ? closingDate.toLocalDateTime().atZone(ZoneId.systemDefault()) : null,
                         duplicateOf,
                         relevance,
@@ -291,8 +286,8 @@ public class ReportDBGateway implements ReportGateway {
     @Override
     public void create(final Report report) {
         try (PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO report (title, type, severity, created_by, last_modified_by, topic)"
-                        + "VALUES (?, ?::report_type, ?::report_severity, ?, ?, ?);",
+                "INSERT INTO report (title, type, severity, version, created_by, last_modified_by, topic)"
+                        + "VALUES (?, ?::report_type, ?::report_severity, ?, ?, ?, ?);",
                 PreparedStatement.RETURN_GENERATED_KEYS
         )) {
             User creator = report.getAuthorship().getCreator();
@@ -301,6 +296,7 @@ public class ReportDBGateway implements ReportGateway {
                     .string(report.getTitle())
                     .string(report.getType().name())
                     .string(report.getSeverity().name())
+                    .string(report.getVersion())
                     .object(creator == null ? null : creator.getId(), Types.INTEGER)
                     .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
                     .integer(report.getTopic())
@@ -379,7 +375,6 @@ public class ReportDBGateway implements ReportGateway {
             log.error("Error when deleting report " + report + ".", e);
             throw new StoreException("Error when deleting report " + report + ".", e);
         }
-
     }
 
     /**

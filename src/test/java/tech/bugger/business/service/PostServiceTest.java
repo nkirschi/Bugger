@@ -206,13 +206,13 @@ public class PostServiceTest {
         verify(feedbackEvent).fire(any());
     }
     public void testIsPrivilegedWhenUserIsAnon() {
-        assertFalse(postService.isPrivileged(null, testPost));
+        assertFalse(postService.canModify(null, testPost));
     }
 
     @Test
     public void testIsPrivilegedWhenUserIsAdmin() {
         testUser.setAdministrator(true);
-        assertTrue(postService.isPrivileged(testUser, testPost));
+        assertTrue(postService.canModify(testUser, testPost));
     }
 
     @Test
@@ -220,13 +220,14 @@ public class PostServiceTest {
         testUser.setAdministrator(false);
         Authorship authorship = new Authorship(testUser, null, null, null);
         testPost.setAuthorship(authorship);
-        assertTrue(postService.isPrivileged(testUser, testPost));
+        assertTrue(postService.canModify(testUser, testPost));
     }
 
     @Test
     public void testIsPrivilegedWhenUserIsNotAuthor() {
         testUser.setAdministrator(false);
         testPost.setAuthorship(new Authorship(null, null, null, null));
-        assertFalse(postService.isPrivileged(testUser, testPost));
+        assertFalse(postService.canModify(testUser, testPost));
     }
+
 }

@@ -40,6 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -139,62 +140,17 @@ public class ReportCreateBackerTest {
     }
 
     @Test
-    public void testCreateWhenFine() {
+    public void testCreateWhenFine() throws Exception {
         doReturn(true).when(reportService).createReport(any(), any());
-        assertTrue(reportCreateBacker.create().endsWith("report.xhtml?id=" + testReport.getId()));
+        reportCreateBacker.create();
+        verify(ectx).redirect(anyString());
     }
 
     @Test
-    public void testCreateWhenCreationFails() {
+    public void testCreateWhenCreationFails() throws Exception {
         doReturn(false).when(reportService).createReport(any(), any());
-        assertNull(reportCreateBacker.create());
-    }
-
-    @Test
-    public void testSaveAttachmentWhenFine() throws Exception {
-        Attachment attachment = new Attachment(0, "test.txt", new Lazy<>(new byte[]{1, 2, 3, 4}),
-                "text/plain", new Lazy<>(testFirstPost));
-        doReturn(attachment.getContent().get()).when(inputStream).readAllBytes();
-        doReturn(attachment.getName()).when(uploadedAttachment).getSubmittedFileName();
-        doReturn(attachment.getMimetype()).when(uploadedAttachment).getContentType();
-        doReturn(true).when(postService).isAttachmentListValid(any());
-
-        reportCreateBacker.setAttachments(new ArrayList<>());
-        reportCreateBacker.saveAttachment();
-        assertTrue(reportCreateBacker.getAttachments().contains(attachment));
-    }
-
-    @Test
-    public void testSaveAttachmentWhenNoAttachment() {
-        reportCreateBacker.setUploadedAttachment(null);
-        List<Attachment> attachments = new ArrayList<>();
-        reportCreateBacker.setAttachments(attachments);
-        reportCreateBacker.saveAttachment();
-        assertEquals(attachments, reportCreateBacker.getAttachments());
-    }
-
-    @Test
-    public void testSaveAttachmentWhenAttachmentUnreadable() throws Exception {
-        doThrow(IOException.class).when(inputStream).readAllBytes();
-        List<Attachment> attachments = new ArrayList<>();
-        reportCreateBacker.setAttachments(attachments);
-        reportCreateBacker.saveAttachment();
-        assertEquals(attachments, reportCreateBacker.getAttachments());
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testSaveAttachmentWhenListInvalid() throws Exception {
-        Attachment attachment = new Attachment(0, "test.txt", new Lazy<>(new byte[]{1, 2, 3, 4}),
-                "text/plain", new Lazy<>(testFirstPost));
-        doReturn(attachment.getContent().get()).when(inputStream).readAllBytes();
-        doReturn(attachment.getName()).when(uploadedAttachment).getSubmittedFileName();
-        doReturn(attachment.getMimetype()).when(uploadedAttachment).getContentType();
-        doReturn(false).when(postService).isAttachmentListValid(any());
-
-        reportCreateBacker.setAttachments(new ArrayList<>());
-        reportCreateBacker.saveAttachment();
-        assertFalse(reportCreateBacker.getAttachments().contains(attachment));
+        reportCreateBacker.create();
+        verify(ectx, times(0)).redirect(any());
     }
 
     @Test

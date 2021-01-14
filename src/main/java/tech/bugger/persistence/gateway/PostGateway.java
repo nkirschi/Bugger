@@ -26,7 +26,7 @@ public interface PostGateway {
      * @param report    The report whose posts to look for.
      * @param selection The search criteria to apply.
      * @return The list of posts of the report that match {@code selection}.
-     * @throws NotFoundException The report could not be found.
+     * @throws NotFoundException The report or some post could not be found.
      */
     List<Post> selectPostsOfReport(Report report, Selection selection) throws NotFoundException;
 

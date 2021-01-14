@@ -3,6 +3,7 @@ package tech.bugger.control.backing;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.stream.StreamSupport;
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
@@ -15,6 +16,7 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
@@ -191,14 +193,17 @@ public class ReportBacker implements Serializable {
                 return;
             }
         }
+
         report = reportService.getReportByID(reportID);
         if (report == null) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
             return;
         }
+
         duplicateOfID = report.getDuplicateOf();
         User user = session.getUser();
         boolean maySee = false;
+
         if (applicationSettings.getConfiguration().isGuestReading()) {
             maySee = true;
         } else if (user != null && !isBanned()) {
@@ -209,10 +214,13 @@ public class ReportBacker implements Serializable {
             return;
         }
         currentDialog = null;
+
         posts = new Paginator<>("created_at", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Post> fetch() {
-                return reportService.getPostsFor(report, getSelection());
+                List<Post> posts = reportService.getPostsFor(report, getSelection());
+                posts.forEach(p -> p.setContent(MarkdownHandler.toHtml(p.getContent())));
+                return posts;
             }
 
             @Override
@@ -220,6 +228,7 @@ public class ReportBacker implements Serializable {
                 return reportService.getNumberOfPosts(report);
             }
         };
+
         duplicates = new Paginator<>("ID", Selection.PageSize.TINY) {
             @Override
             protected Iterable<Report> fetch() {
@@ -231,8 +240,7 @@ public class ReportBacker implements Serializable {
                 return reportService.getNumberOfDuplicates(report);
             }
         };
-        log.debug("Paginator initialized with Selection " + posts.getSelection() + " and items "
-                + posts.getWrappedData());
+
         if (postID != null) {
             Post post = new Post(postID, null, null, null, null);
             while (StreamSupport.stream(posts.spliterator(), false).noneMatch(post::equals)) {
@@ -343,7 +351,7 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user has voted up and {@code false} otherwise.
      */
     public boolean hasUpvoted() {
-        if(session.getUser() == null) {
+        if (session.getUser() == null) {
             return reportService.hasUpvoted(report, session.getUser());
         }
         return false;
@@ -355,7 +363,7 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user has voted down and {@code false} otherwise.
      */
     public boolean hasDownvoted() {
-        if(session.getUser() == null) {
+        if (session.getUser() == null) {
             return reportService.hasDownvoted(report, session.getUser());
         }
         return false;
@@ -459,8 +467,8 @@ public class ReportBacker implements Serializable {
      * @return {@code true} iff the user is privileged.
      */
     public boolean privilegedForPost(final Post post) {
-        if(session.getUser() != null) {
-            return postService.isPrivileged(session.getUser(), post);
+        if (session.getUser() != null) {
+            return postService.canModify(session.getUser(), post);
         }
         return false;
     }
@@ -477,6 +485,15 @@ public class ReportBacker implements Serializable {
         }
         Topic topic = new Topic(report.getTopic(), "", "");
         return topicService.isBanned(user, topic);
+    }
+
+    /**
+     * Checks whether the user is currently logged in.
+     *
+     * @return {@code true} if the user is currently logged in and {@code false} otherwise.
+     */
+    public boolean isLoggedIn() {
+        return session.getUser() != null;
     }
 
     /**

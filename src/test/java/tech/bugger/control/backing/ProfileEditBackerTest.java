@@ -365,6 +365,7 @@ public class ProfileEditBackerTest {
     public void testDeleteEqualSessionUser() {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         when(profileService.deleteUser(user)).thenReturn(true);
+
         when(session.getUser()).thenReturn(user);
         profileEditBacker.setUser(user);
         assertEquals("pretty:home", profileEditBacker.delete());

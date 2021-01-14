@@ -20,6 +20,15 @@ public interface AttachmentGateway {
     Attachment find(int id) throws NotFoundException;
 
     /**
+     * Retrieves the content of an attachment.
+     *
+     * @param attachment The attachment whose content to look for.
+     * @return The attachment's content.
+     * @throws NotFoundException The attachment could not be found.
+     */
+    byte[] findContent(Attachment attachment) throws NotFoundException;
+
+    /**
      * Retrieves the list of attachments of a given post.
      *
      * @param post The post whose attachments to look for.

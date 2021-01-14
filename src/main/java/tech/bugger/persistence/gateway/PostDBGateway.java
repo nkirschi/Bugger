@@ -1,5 +1,6 @@
 package tech.bugger.persistence.gateway;
 
+import tech.bugger.business.service.ReportService;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
@@ -12,6 +13,7 @@ import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
 
+import javax.enterprise.inject.spi.CDI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,21 +40,62 @@ public class PostDBGateway implements PostGateway {
     private final Connection conn;
 
     /**
+     * User gateway used for finding users.
+     */
+    private final UserGateway userGateway;
+
+    /**
+     * User gateway used for finding users.
+     */
+    private final AttachmentGateway attachmentGateway;
+
+    /**
      * Constructs a new post gateway with the given database connection.
      *
-     * @param conn The database connection to use for the gateway.
+     * @param conn              The database connection to use for the gateway.
+     * @param userGateway       The user gateway to use.
+     * @param attachmentGateway The attachment gateway to use.
      */
-    public PostDBGateway(final Connection conn) {
+    public PostDBGateway(final Connection conn, final UserGateway userGateway,
+                         final AttachmentGateway attachmentGateway) {
         this.conn = conn;
+        this.userGateway = userGateway;
+        this.attachmentGateway = attachmentGateway;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Post find(final int id) {
-        // TODO Auto-generated method stub
-        return null;
+    public Post find(final int id) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "SELECT * FROM post WHERE id = ?;"
+        )) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(id)
+                    .toStatement().executeQuery();
+            if (rs.next()) {
+
+                int reportID = rs.getInt("report");
+
+                Post post = new Post(
+                        id,
+                        rs.getString("content"),
+                        new Lazy<>(() -> {
+                            ReportService reportService = CDI.current().select(ReportService.class).get();
+                            return reportService.getReportByID(reportID);
+                        }),
+                        ReportDBGateway.getAuthorshipFromResultSet(rs, userGateway),
+                        null
+                );
+                post.setAttachments(attachmentGateway.getAttachmentsForPost(post));
+                return post;
+            } else {
+                throw new NotFoundException("Post could not be found.");
+            }
+        } catch (SQLException e) {
+            throw new StoreException("Error while searching for post.", e);
+        }
     }
 
     /**
@@ -92,9 +135,26 @@ public class PostDBGateway implements PostGateway {
      * {@inheritDoc}
      */
     @Override
-    public void update(final Post post) {
-        // TODO Auto-generated method stub
-
+    public void update(final Post post) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "UPDATE post "
+                        + "SET content = ?, last_modified_by = ?, last_modified_at = NOW() "
+                        + "WHERE id = ?;"
+        )) {
+            User modifier = post.getAuthorship().getModifier();
+            int rowsAffected = new StatementParametrizer(stmt)
+                    .string(post.getContent())
+                    .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
+                    .integer(post.getId())
+                    .toStatement().executeUpdate();
+            if (rowsAffected == 0) {
+                log.error("Post to be updated could not be found.");
+                throw new NotFoundException("Post to be updated could not be found.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while updating post.", e);
+            throw new StoreException("Error while updating post.", e);
+        }
     }
 
     /**
@@ -163,7 +223,7 @@ public class PostDBGateway implements PostGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<Post> selectPostsOfReport(final Report report, final Selection selection) {
+    public List<Post> selectPostsOfReport(final Report report, final Selection selection) throws NotFoundException {
         if (report == null) {
             log.error("Error when selecting posts of report null.");
             throw new IllegalArgumentException("Report cannot be null.");
@@ -232,7 +292,10 @@ public class PostDBGateway implements PostGateway {
                     modificationDate = rs.getTimestamp("p_last_modified_at").toInstant().atZone(ZoneId.systemDefault());
                 }
                 Authorship authorship = new Authorship(author, creationDate, modifier, modificationDate);
-                selectedPosts.add(new Post(rs.getInt("p_id"), rs.getString("p_content"), reportLazy, authorship, null));
+                Post post = new Post(rs.getInt("p_id"), rs.getString("p_content"), reportLazy, authorship,
+                        new ArrayList<>());
+                post.setAttachments(attachmentGateway.getAttachmentsForPost(post));
+                selectedPosts.add(post);
             }
         } catch (SQLException e) {
             log.error("Error when selecting posts of report " + report + " with selection " + selection + ".", e);
