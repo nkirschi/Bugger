@@ -330,8 +330,28 @@ public class TopicDBGateway implements TopicGateway {
      */
     @Override
     public int countSubscribers(final Topic topic) {
-        // TODO Auto-generated method stub
-        return 0;
+        if (topic == null) {
+            log.error("Cannot count subscribers of topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot count subscribers of topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
+
+        int count = 0;
+        String sql = "SELECT COUNT(*) AS count FROM topic_subscription WHERE topic = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(topic.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt("count");
+            }
+        } catch (SQLException e) {
+            log.error("Error when counting subscribers of topic " + topic + ".", e);
+            throw new StoreException("Error when counting subscribers of topic " + topic + ".", e);
+        }
+        return count;
     }
 
     /**
