@@ -1,5 +1,12 @@
 package tech.bugger.control.backing;
 
+import java.util.Locale;
+import javax.enterprise.event.Event;
+import javax.faces.application.Application;
+import javax.faces.application.NavigationHandler;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,14 +21,6 @@ import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.User;
-
-import javax.enterprise.event.Event;
-import javax.faces.application.Application;
-import javax.faces.application.NavigationHandler;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

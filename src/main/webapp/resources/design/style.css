@@ -224,3 +224,11 @@ body {
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
     margin: 1%;
 }
+
+.vote-cast {
+    background-color: #0a58ca;
+}
+
+.vote-not-cast {
+    background-color: #157347;
+}

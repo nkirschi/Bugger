@@ -74,7 +74,7 @@ public class PostServiceTest {
     private Post testPost1;
 
     private User testUser = new User();
-    private Report testReport = new Report(100, "Hi", Report.Type.BUG, Report.Severity.MINOR, "1", null, null, null, null, null);
+    private Report testReport = new Report(100, "Hi", Report.Type.BUG, Report.Severity.MINOR, "1", null, null, null, null, false, null);
     private Post testPost = new Post(300, "Hi", new Lazy<>(testReport), null, null);
 
 
