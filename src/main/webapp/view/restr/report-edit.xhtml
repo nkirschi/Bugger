@@ -29,7 +29,7 @@
     <ui:define name="content">
         <h:form id="f-report-edit"
                 enctype="multipart/form-data"
-                rendered="#{reportEditBacker.isPrivileged()}">
+                rendered="#{reportEditBacker.privileged}">
             <h:panelGrid columns="2">
                 <h:outputLabel id="o-title" for="it-title" value="#{labels.report_title}"/>
                 <h:inputText id="it-title" value="#{reportEditBacker.report.title}" maxlength="#{C.LARGE_FIELD}"
