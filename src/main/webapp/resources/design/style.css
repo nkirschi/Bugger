@@ -137,6 +137,11 @@ body {
     justify-content: center;
 }
 
+.align-vcenter {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
 .style-button {
     text-decoration: none;
     background-color: white;

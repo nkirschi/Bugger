@@ -97,7 +97,8 @@ public class ProfileService {
 
     /**
      * Creates a new user without need for verification. This should only be available for administrators.
-     * Also generates and sets the internal user id inside the given {@code user} object.
+     * Also generates and sets the internal user id inside the given {@code user} object. This also shows a message if
+     * the action was not successful.
      *
      * @param user The user to be created.
      * @return Whether the action was successful or not.
@@ -106,7 +107,6 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newUserGateway().createUser(user);
             tx.commit();
-            feedback.fire(new Feedback(messages.getString("operation_successful"), Feedback.Type.INFO));
             return true;
         } catch (TransactionException e) {
             log.error("User could not be created.", e);

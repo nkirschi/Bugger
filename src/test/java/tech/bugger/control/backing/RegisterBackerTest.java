@@ -108,6 +108,7 @@ public class RegisterBackerTest {
     @Test
     public void testRegisterInvalidUrl() {
         StringBuffer buffer = new StringBuffer("i am not a link");
+        doReturn(true).when(profileService).createUser(any());
         lenient().doReturn(buffer).when(request).getRequestURL();
         assertThrows(InternalError.class, () -> registerBacker.register());
     }

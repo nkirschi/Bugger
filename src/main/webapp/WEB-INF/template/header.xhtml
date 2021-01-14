@@ -35,7 +35,9 @@
             <h:link id="l-login"
                     value="#{labels.login}"
                     styleClass="button btn btn-primary me-3"
-                    outcome="pretty:login"/>
+                    outcome="pretty:login">
+                <f:param name="url" value="#{headerBacker.redirectUrl}"/>
+            </h:link>
             <h:link id="b-register"
                     value="#{labels.register}"
                     styleClass="button btn btn-primary"
@@ -50,7 +52,7 @@
                                  action="#{headerBacker.toggleMenu}"
                                  immediate="true"
                                  styleClass="btn btn#{headerBacker.displayMenu ? '-outline' : ''}-primary">
-                    <f:param name="d" value="#{headerBacker.displayMenu}" />
+                    <f:param name="d" value="#{headerBacker.displayMenu}"/>
                 </h:commandButton>
             </h:form>
         </h:panelGroup>
@@ -79,8 +81,9 @@
             <h:panelGroup styleClass="row" layout="block">
                 <!-- logout -->
                 <h:form>
-                    <h:commandButton value="#{labels.logout}" action="#{headerBacker.logout}" styleClass="btn btn-primary">
-                        <f:param name="d" value="#{headerBacker.displayMenu}" />
+                    <h:commandButton value="#{labels.logout}" action="#{headerBacker.logout}"
+                                     styleClass="btn btn-primary">
+                        <f:param name="d" value="#{headerBacker.displayMenu}"/>
                     </h:commandButton>
                 </h:form>
             </h:panelGroup>
