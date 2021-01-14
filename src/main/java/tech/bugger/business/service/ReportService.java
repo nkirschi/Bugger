@@ -9,6 +9,7 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
@@ -85,7 +86,33 @@ public class ReportService {
      * @param report The report receiving the subscription.
      */
     public void subscribeToReport(final User user, final Report report) {
+        if (user == null) {
+            log.error("Anonymous users cannot subscribe to anything.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot subscribe when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (report == null) {
+            log.error("Cannot subscribe to report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot subscribe to report with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
 
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().subscribe(report, user);
+            tx.commit();
+        } catch (DuplicateException e) {
+            log.error("User " + user + " is already subscribed to report " + report + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString(""), Feedback.Type.ERROR));
+        } catch (NotFoundException e) {
+            log.error("User " + user + " or report " + report + " not found.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when user " + user + " is subscribing to report " + report + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
