@@ -7,7 +7,7 @@ import java.util.Objects;
 
 /**
  * DTO representing content authorship metadata.
- *
+ * <p>
  * Instances are indented to be standalone objects but rather thought of to be associated with some content object.
  */
 public class Authorship implements Serializable {
@@ -49,6 +49,15 @@ public class Authorship implements Serializable {
         this.creationDate = creationDate;
         this.modifier = modifier;
         this.modifiedDate = modifiedDate;
+    }
+
+    /**
+     * Constructs a new authorship as deep clone of the given authorship.
+     *
+     * @param authorship The authorship to clone.
+     */
+    public Authorship(final Authorship authorship) {
+        this(authorship.creator, authorship.creationDate, authorship.modifier, authorship.modifiedDate);
     }
 
     /**

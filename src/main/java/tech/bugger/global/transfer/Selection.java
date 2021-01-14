@@ -15,6 +15,11 @@ public class Selection implements Serializable {
     public enum PageSize {
 
         /**
+         * A tiny amount of entries per page.
+         */
+        TINY(5),
+
+        /**
          * A small amount of entries per page.
          */
         SMALL(10),
