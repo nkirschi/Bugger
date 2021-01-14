@@ -4,6 +4,7 @@ import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Attachment;
+import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
@@ -159,19 +160,28 @@ public class PostService {
      */
     public boolean createPost(final Post post) {
         // Notifications will be dealt with when implementing the subscriptions feature.
+        boolean success;
         try (Transaction tx = transactionManager.begin()) {
-            boolean success = createPostWithTransaction(post, tx);
+            success = createPostWithTransaction(post, tx);
             if (success) {
                 tx.commit();
                 log.info("Post created successfully.");
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("post_created"), Feedback.Type.INFO));
             }
-            return success;
         } catch (TransactionException e) {
             log.error("Error while creating a new post.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
             return false;
         }
+        if (success) {
+            Notification notification = new Notification();
+            notification.setActuatorID(post.getAuthorship().getCreator().getId());
+            notification.setReportID(post.getReport().get().getId());
+            notification.setTopic(post.getReport().get().getTopic());
+            notification.setType(Notification.Type.NEW_POST);
+            notificationService.createNotification(notification);
+        }
+        return success;
     }
 
     /**

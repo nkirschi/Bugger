@@ -270,7 +270,6 @@ public class ReportService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newReportGateway().update(report);
             tx.commit();
-            return true;
         } catch (NotFoundException e) {
             log.error("Report to be updated could not be found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
@@ -280,6 +279,13 @@ public class ReportService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
             return false;
         }
+        Notification notification = new Notification();
+        notification.setActuatorID(report.getAuthorship().getModifier().getId());
+        notification.setReportID(report.getId());
+        notification.setTopic(report.getTopic());
+        notification.setType(Notification.Type.EDITED_REPORT);
+        notificationService.createNotification(notification);
+        return true;
     }
 
     /**
