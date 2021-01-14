@@ -2,6 +2,7 @@ package tech.bugger.business.service;
 
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
@@ -228,22 +229,33 @@ public class ReportService {
      */
     public boolean createReport(final Report report, final Post firstPost) {
         // Notifications will be dealt with when implementing the subscriptions feature.
+        boolean success = false;
         try (Transaction tx = transactionManager.begin()) {
             tx.newReportGateway().create(report);
             boolean postCreated = postService.createPostWithTransaction(firstPost, tx);
             if (postCreated) {
                 tx.commit();
+                success = true;
                 log.info("Report created successfully.");
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("report_created"), Feedback.Type.INFO));
             } else {
                 tx.abort();
             }
-            return postCreated;
         } catch (TransactionException e) {
             log.error("Error while creating a new report", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
             return false;
         }
+        if (success) {
+            Notification notification = new Notification();
+            notification.setReportID(report.getId());
+            notification.setTopic(report.getTopic());
+            notification.setPostID(firstPost.getId());
+            notification.setActuatorID(report.getAuthorship().getCreator().getId());
+            notification.setType(Notification.Type.NEW_REPORT);
+            notificationService.createNotification(notification);
+        }
+        return success;
     }
 
     /**
