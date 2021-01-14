@@ -249,7 +249,7 @@ public class TopicBacker implements Serializable {
         closedReportShown = false;
         sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
 
-        moderators = new Paginator<>("username", Selection.PageSize.SMALL) {
+        moderators = new Paginator<>("username", Selection.PageSize.TINY) {
             @Override
             protected Iterable<User> fetch() {
                 return topicService.getSelectedModerators(topic, getSelection());
@@ -261,7 +261,7 @@ public class TopicBacker implements Serializable {
             }
         };
 
-        bannedUsers = new Paginator<>("username", Selection.PageSize.SMALL) {
+        bannedUsers = new Paginator<>("username", Selection.PageSize.TINY) {
 
             @Override
             protected Iterable<User> fetch() {
@@ -478,6 +478,7 @@ public class TopicBacker implements Serializable {
 
         if (topicService.ban(userBan, topic)) {
             displayDialog = DialogType.NONE;
+            bannedUsers.update();
             return "";
         }
 
@@ -499,6 +500,7 @@ public class TopicBacker implements Serializable {
 
         if (topicService.unban(userBan, topic)) {
             displayDialog = DialogType.NONE;
+            bannedUsers.update();
             return "";
         }
 
@@ -521,6 +523,7 @@ public class TopicBacker implements Serializable {
 
         if (topicService.makeModerator(userMod, topic)) {
             displayDialog = DialogType.NONE;
+            moderators.update();
             return "";
         }
 
@@ -543,6 +546,7 @@ public class TopicBacker implements Serializable {
 
         if (topicService.removeModerator(userMod, topic)) {
             displayDialog = DialogType.NONE;
+            moderators.update();
             return "";
         }
 
