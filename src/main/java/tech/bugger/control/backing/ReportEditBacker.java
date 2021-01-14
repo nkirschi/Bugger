@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.text.MessageFormat;
+import java.time.ZonedDateTime;
 import java.util.ResourceBundle;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -180,12 +181,12 @@ public class ReportEditBacker implements Serializable {
     public String saveChanges() {
         boolean success = true;
 
+        report.getAuthorship().setModifiedDate(ZonedDateTime.now());
+        report.getAuthorship().setModifier(session.getUser());
         if (destinationID != report.getTopic()) {
             report.setTopic(destinationID);
             success = reportService.move(report);
-        }
-
-        if (success) {
+        } else {
             success = reportService.updateReport(report);
         }
 
