@@ -241,6 +241,9 @@ public class ReportBacker implements Serializable {
         updateRelevance();
     }
 
+    /**
+     * Updates the values for the relevance interface.
+     */
     private void updateRelevance() {
         report = reportService.getReportByID(reportID);
         if (report == null) {
