@@ -94,22 +94,35 @@ public class Notification implements Serializable {
     private Integer postID;
 
     /**
+     * The username of the actuator.
+     */
+    private String actuatorUsername;
+
+    /**
+     * The title of the associated report.
+     */
+    private String reportTitle;
+
+    /**
      * Constructs a new notification from the specified parameters.
      *
-     * @param id          The notification ID.
-     * @param actuatorID  The notification actuator.
-     * @param recipientID The notification recipient.
-     * @param type        The notification type.
-     * @param date        The notification creation date.
-     * @param read        Whether the notification is marked as read.
-     * @param sent        Whether the notification is marked as send.
-     * @param topicID     The associated topic.
-     * @param reportID    The associated report.
-     * @param postID      The associated post.
+     * @param id               The notification ID.
+     * @param actuatorID       The notification actuator.
+     * @param recipientID      The notification recipient.
+     * @param type             The notification type.
+     * @param date             The notification creation date.
+     * @param read             Whether the notification is marked as read.
+     * @param sent             Whether the notification is marked as send.
+     * @param topicID          The associated topic.
+     * @param reportID         The associated report.
+     * @param postID           The associated post.
+     * @param actuatorUsername The actuator's username.
+     * @param reportTitle      The title of the associated report.
      */
     public Notification(final Integer id, final Integer actuatorID, final Integer recipientID, final Type type,
                         final ZonedDateTime date, final boolean read, final boolean sent, final Integer topicID,
-                        final Integer reportID, final Integer postID) {
+                        final Integer reportID, final Integer postID, final String actuatorUsername,
+                        final String reportTitle) {
         this.id = id;
         this.actuatorID = actuatorID;
         this.recipientID = recipientID;
@@ -120,13 +133,15 @@ public class Notification implements Serializable {
         this.topicID = topicID;
         this.reportID = reportID;
         this.postID = postID;
+        this.actuatorUsername = actuatorUsername;
+        this.reportTitle = reportTitle;
     }
 
     /**
      * Constructs an empty notification.
      */
     public Notification() {
-        this(null, null, null, null, null, false, false, null, null, null);
+        this(null, null, null, null, null, false, false, null, null, null, null, null);
     }
 
     /**
@@ -136,7 +151,8 @@ public class Notification implements Serializable {
      */
     public Notification(final Notification notification) {
         this(notification.id, notification.actuatorID, notification.recipientID, notification.type, notification.date,
-                notification.read, notification.sent, notification.topicID, notification.reportID, notification.postID);
+                notification.read, notification.sent, notification.topicID, notification.reportID, notification.postID,
+                notification.actuatorUsername, notification.reportTitle);
     }
 
     /**
@@ -280,7 +296,7 @@ public class Notification implements Serializable {
      *
      * @param topicID The associated topic.
      */
-    public void setTopic(final Integer topicID) {
+    public void setTopicID(final Integer topicID) {
         this.topicID = topicID;
     }
 
@@ -307,7 +323,7 @@ public class Notification implements Serializable {
      *
      * @return The associated post.
      */
-    public Integer getPost() {
+    public Integer getPostID() {
         return postID;
     }
 
@@ -318,6 +334,42 @@ public class Notification implements Serializable {
      */
     public void setPostID(final Integer postID) {
         this.postID = postID;
+    }
+
+    /**
+     * Returns the actuator's username.
+     *
+     * @return The actuator's username.
+     */
+    public String getActuatorUsername() {
+        return actuatorUsername;
+    }
+
+    /**
+     * Sets the actuator's username.
+     *
+     * @param actuatorUsername The actuator username to set.
+     */
+    public void setActuatorUsername(final String actuatorUsername) {
+        this.actuatorUsername = actuatorUsername;
+    }
+
+    /**
+     * Returns the title of the associated report.
+     *
+     * @return The report title.
+     */
+    public String getReportTitle() {
+        return reportTitle;
+    }
+
+    /**
+     * Sets the title of the associated report.
+     *
+     * @param reportTitle The report title to set.
+     */
+    public void setReportTitle(final String reportTitle) {
+        this.reportTitle = reportTitle;
     }
 
     /**

@@ -177,7 +177,7 @@ public class PostService {
             Notification notification = new Notification();
             notification.setActuatorID(post.getAuthorship().getCreator().getId());
             notification.setReportID(post.getReport().get().getId());
-            notification.setTopic(post.getReport().get().getTopic());
+            notification.setTopicID(post.getReport().get().getTopic());
             notification.setType(Notification.Type.NEW_POST);
             notificationService.createNotification(notification);
         }

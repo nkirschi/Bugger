@@ -8,6 +8,22 @@
     <ui:param name="title" value="#{labels.home_title}"/>
 
     <ui:define name="content">
+        <h:outputText value="#{labels.home_notifications}" styleClass="h2"/>
+        <b:pagitable paginator="#{homeBacker.inbox}">
+            <!--@elvariable id="var" type="tech.bugger.global.transfer.Notification"-->
+            <b:column title="#{labels.type}" paginator="#{homeBacker.inbox}" key="type">
+                <h:commandButton value="#{labels['notification_type.'.concat(var.type)]}" action="#{homeBacker.openNotification(var)}" styleClass="btn-link">
+                    <f:param name="#{var.postID == null ? 'id' : 'p'}" value="#{var.postID == null ? var.reportID : var.postID}"/>
+                </h:commandButton>
+            </b:column>
+            <b:column title="#{labels.description}" paginator="#{homeBacker.topics}" key="description">
+                <h:outputText value="#{var.description}" escape="false"/>
+            </b:column>
+            <b:column title="#{labels.last_activity}" paginator="#{homeBacker.topics}" key="last_activity">
+                <h:outputText value="#{var.lastActivity}"/>
+            </b:column>
+        </b:pagitable>
+
         <h:outputText value="#{labels.home_topics}" styleClass="h2"/>
         <h:link id="l-create" value="#{labels.topic_edit_add}" outcome="pretty:topic-edit"
                 rendered="#{userSession.user.administrator}" styleClass="button"/>

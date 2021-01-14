@@ -289,7 +289,7 @@ public class ReportService {
         if (success) {
             Notification notification = new Notification();
             notification.setReportID(report.getId());
-            notification.setTopic(report.getTopic());
+            notification.setTopicID(report.getTopic());
             notification.setPostID(firstPost.getId());
             notification.setActuatorID(report.getAuthorship().getCreator().getId());
             notification.setType(Notification.Type.NEW_REPORT);
@@ -326,7 +326,7 @@ public class ReportService {
             Notification notification = new Notification();
             notification.setType(Notification.Type.MOVED_REPORT);
             notification.setActuatorID(report.getAuthorship().getModifier().getId());
-            notification.setTopic(report.getTopic());
+            notification.setTopicID(report.getTopic());
             notification.setReportID(report.getId());
             notificationService.createNotification(notification);
         }
@@ -357,7 +357,7 @@ public class ReportService {
         Notification notification = new Notification();
         notification.setActuatorID(report.getAuthorship().getModifier().getId());
         notification.setReportID(report.getId());
-        notification.setTopic(report.getTopic());
+        notification.setTopicID(report.getTopic());
         notification.setType(Notification.Type.EDITED_REPORT);
         notificationService.createNotification(notification);
         return true;

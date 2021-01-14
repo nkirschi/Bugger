@@ -93,7 +93,7 @@ public class NotificationDBGateway implements NotificationGateway {
                     .integer(notification.getActuatorID())
                     .integer(notification.getTopicID())
                     .integer(notification.getReportID())
-                    .integer(notification.getPost()).toStatement();
+                    .integer(notification.getPostID()).toStatement();
             statement.executeUpdate();
 
             ResultSet generatedKeys = statement.getGeneratedKeys();
@@ -150,7 +150,8 @@ public class NotificationDBGateway implements NotificationGateway {
                 rs.getBoolean("sent"),
                 rs.getObject("topic", Integer.class),
                 rs.getObject("report", Integer.class),
-                rs.getObject("post", Integer.class));
+                rs.getObject("post", Integer.class),
+                null, null);
         return notification;
     }
 
@@ -173,7 +174,10 @@ public class NotificationDBGateway implements NotificationGateway {
             throw new IllegalArgumentException("Sorted by cannot be blank");
         }
 
-        String sql = "SELECT * FROM notification WHERE recipient = ?"
+        String sql = "SELECT n.*, u.username, r.title FROM notification AS n"
+                + " LEFT OUTER JOIN \"user\" u ON u.id = n.causer"
+                + " LEFT OUTER JOIN report r ON r.id = n.report"
+                + " WHERE n.recipient = ?"
                 + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
                 + " LIMIT ? OFFSET ?;";
         List<Notification> selectedNotifications = new ArrayList<>(Math.min(Pagitable.getItemLimit(selection),
@@ -185,7 +189,10 @@ public class NotificationDBGateway implements NotificationGateway {
                     .integer(Pagitable.getItemOffset(selection)).toStatement();
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                selectedNotifications.add(getNotificationFromResultSet(rs));
+                Notification n = getNotificationFromResultSet(rs);
+                n.setActuatorUsername(rs.getString("username"));
+                n.setReportTitle("title");
+                selectedNotifications.add(n);
             }
         } catch (SQLException e) {
             log.error("Error while selecting notifications for user " + user + " with selection " + selection
@@ -216,7 +223,7 @@ public class NotificationDBGateway implements NotificationGateway {
                     .integer(notification.getActuatorID())
                     .integer(notification.getTopicID())
                     .integer(notification.getReportID())
-                    .integer(notification.getPost())
+                    .integer(notification.getPostID())
                     .integer(notification.getId()).toStatement();
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
@@ -312,7 +319,7 @@ public class NotificationDBGateway implements NotificationGateway {
                         .integer(notification.getActuatorID())
                         .integer(notification.getTopicID())
                         .integer(notification.getReportID())
-                        .integer(notification.getPost())
+                        .integer(notification.getPostID())
                         .toStatement();
                 statement.addBatch();
             }
