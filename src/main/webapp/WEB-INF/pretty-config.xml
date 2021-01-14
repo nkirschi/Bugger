@@ -15,6 +15,10 @@
         <query-param name="token">#{token}</query-param>
         <view-id value="/faces/view/public/password-set.xhtml"/>
     </url-mapping>
+    <url-mapping id="password-forgot">
+        <pattern value="/password-forgot"/>
+        <view-id value="/faces/view/public/password-forgot.xhtml"/>
+    </url-mapping>
     <url-mapping id="login">
         <pattern value="/login"/>
         <query-param name="url">#{loginBacker.redirectURL}</query-param>
@@ -44,19 +48,14 @@
     </url-mapping>
     <url-mapping id="report">
         <pattern value="/report"/>
-        <query-param name="id">#{reportBacker.reportID}</query-param>
-        <query-param name="p">#{reportBacker.postID}</query-param>
-        <view-id value="/faces/view/authorized/report.xhtml"/>
+        <query-param name="id">#{id}</query-param>
+        <query-param name="p">#{p}</query-param>
+        <view-id value="/faces/view/auth/report.xhtml"/>
     </url-mapping>
     <!--<url-mapping id="report-create">
         <pattern value="/report-create"/>
         <view-id value="/faces/view/auth/report-create.xhtml"/>
     </url-mapping>-->
-    <url-mapping id="report">
-        <pattern value="/report"/>
-        <query-param name="r">#{r}</query-param>
-        <view-id value="/faces/view/public/report.xhtml"/>
-    </url-mapping>
     <url-mapping id="report-edit">
         <pattern value="/report-edit"/>
         <query-param name="id">#{id}</query-param>
@@ -71,10 +70,6 @@
         <pattern value="/topic-edit"/>
         <query-param name="id">#{id}</query-param>
         <view-id value="/faces/view/restr/topic-edit.xhtml"/>
-    </url-mapping>
-    <url-mapping id="report">
-        <pattern value="/report"/>
-        <view-id value="/faces/view/public/report.xhtml"/>
     </url-mapping>
     <url-mapping id="statistics">
         <pattern value="/statistics"/>

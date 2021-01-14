@@ -21,11 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
@@ -146,13 +142,6 @@ public class ConnectionPoolTest {
         }
 
         @Test
-        public void testShutdownWhenAlreadyShutDown() {
-            connectionPool.shutdown();
-            assertThrows(IllegalStateException.class,
-                         () -> connectionPool.shutdown());
-        }
-
-        @Test
         public void testShutdownWhenConnectionsCorrupt() throws Exception {
             availableConnections.clear();
             usedConnections.clear();
@@ -164,6 +153,12 @@ public class ConnectionPoolTest {
                     () -> assertEquals(0, availableConnections.size()),
                     () -> assertEquals(0, usedConnections.size())
             );
+        }
+
+        @Test
+        public void testShutdownWhenAlreadyShutDown() {
+            connectionPool.shutdown();
+            assertDoesNotThrow(() -> connectionPool.shutdown());
         }
     }
 
@@ -245,12 +240,7 @@ public class ConnectionPoolTest {
         public void testReleaseConnectionWhenConnectionIsClosed() throws Exception {
             Connection connection = connectionPool.getConnection();
             connection.close();
-            connectionPool.releaseConnection(connection);
-            assertAll(
-                    () -> assertEquals(0, usedConnections.size()),
-                    () -> assertEquals(MIN_CONNS, availableConnections.size()),
-                    () -> assertFalse(availableConnections.contains(connection))
-            );
+            assertThrows(IllegalStateException.class, () -> connectionPool.releaseConnection(connection));
         }
 
         @Test
@@ -258,12 +248,15 @@ public class ConnectionPoolTest {
             Connection connection = mock(Connection.class);
             doThrow(SQLException.class).when(connection).isClosed();
             usedConnections.add(connection);
-            connectionPool.releaseConnection(connection);
-            assertAll(
-                    () -> assertEquals(0, usedConnections.size()),
-                    () -> assertEquals(2, availableConnections.size()),
-                    () -> assertFalse(availableConnections.contains(connection))
-            );
+            assertThrows(IllegalStateException.class, () -> connectionPool.releaseConnection(connection));
+        }
+
+        @Test
+        public void testReleaseConnectionWhenRollbackError() throws Exception {
+            Connection connection = mock(Connection.class);
+            doThrow(SQLException.class).when(connection).rollback();
+            usedConnections.add(connection);
+            assertDoesNotThrow(() -> connectionPool.releaseConnection(connection));
         }
 
         @Test

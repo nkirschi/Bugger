@@ -1,24 +1,22 @@
 package tech.bugger.control.backing;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ResourceBundle;
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Event;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
+import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Event;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.ResourceBundle;
 
 /**
  * Backing bean for the register page.
@@ -109,17 +107,9 @@ public class RegisterBacker {
      * @return The site to redirect to.
      */
     public String register() {
-        ExternalContext ectx = fctx.getExternalContext();
-        URL currentUrl;
-        try {
-            currentUrl = new URL(((HttpServletRequest) ectx.getRequest()).getRequestURL().toString());
-        } catch (MalformedURLException e) {
-            throw new InternalError("URL is invalid.", e);
-        }
+        if (profileService.createUser(user) && authenticationService.register(user,
+                                                                              JFConfig.getApplicationPath(fctx.getExternalContext()))) {
 
-        String path = String.format("%s://%s%s", currentUrl.getProtocol(), currentUrl.getAuthority(),
-                ectx.getApplicationContextPath());
-        if (profileService.createUser(user) && authenticationService.register(user, path)) {
             log.debug("Registration for user " + user + " successful.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("register.success"), Feedback.Type.INFO));
             return "pretty:home";

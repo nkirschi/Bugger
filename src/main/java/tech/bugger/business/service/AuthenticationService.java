@@ -1,10 +1,5 @@
 package tech.bugger.business.service;
 
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Hasher;
 import tech.bugger.business.util.PriorityExecutor;
@@ -21,6 +16,12 @@ import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
+
+import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 /**
  * Service for user authentication. A {@link Feedback} {@link Event} is fired, if unexpected circumstances occur.
@@ -105,7 +106,6 @@ public class AuthenticationService {
         this.configReader = configReader;
     }
 
-
     /**
      * Authenticates a user, e.g. when logging in.
      *
@@ -164,9 +164,9 @@ public class AuthenticationService {
     /**
      * Updates the given user's hashing algorithm to the current one specified in the configuration.
      *
-     * @param user The user.
+     * @param user        The user.
      * @param hashingAlgo The new hashing algorithm.
-     * @param password The user's password.
+     * @param password    The user's password.
      * @return The user.
      */
     private User updateHashingAlgorithm(final User user, final String hashingAlgo, final String password)
@@ -207,7 +207,7 @@ public class AuthenticationService {
     /**
      * Registers a new user by generating a {@link Token} and sending a confirmation email to the new user.
      *
-     * @param user The user to be registered.
+     * @param user   The user to be registered.
      * @param domain The current deployment path of this web application.
      * @return Whether the action was successful or not.
      */
@@ -280,9 +280,9 @@ public class AuthenticationService {
     /**
      * Updates a user's email address by generating a {@link Token} and sending them a confirmation email.
      *
-     * @param user The user whose email address is to be updated.
+     * @param user   The user whose email address is to be updated.
      * @param domain The current domain of this web application.
-     * @param email The user's new email address to be confirmed.
+     * @param email  The user's new email address to be confirmed.
      * @return Whether the action was successful or not.
      */
     public boolean updateEmail(final User user, final String domain, final String email) {
@@ -309,8 +309,8 @@ public class AuthenticationService {
     /**
      * Creates a new {@link Token} of the given {@link Token.Type} for the given {@link User}.
      *
-     * @param user The user for whom the token should be generated.
-     * @param type The token's type.
+     * @param user     The user for whom the token should be generated.
+     * @param type     The token's type.
      * @param metaData The token's meta information.
      * @return The generated {@link Token} or {@code null} upon error.
      */
@@ -358,9 +358,27 @@ public class AuthenticationService {
      * If a user forgot their password and provides their username and email address, an email is sent with instructions
      * to set a new password.
      *
-     * @param user The user who forgot their password.
+     * @param user   The user who forgot their password.
+     * @param domain The current deployment path of this web application.
+     * @return Whether the action was successful or not.
      */
-    public void forgotPassword(final User user) {
+    public boolean forgotPassword(final User user, final String domain) {
+        Token token = createToken(user, Token.Type.FORGOT_PASSWORD, "");
+
+        if (token == null) {
+            return false;
+        }
+
+        String link = domain + "/password-set?token=" + token.getValue();
+        Mail mail = new MailBuilder()
+                .to(user.getEmailAddress())
+                .subject(interactionsBundle.getString("email_password_forgot_subject"))
+                .content(new MessageFormat(interactionsBundle.getString("email_password_forgot_content"))
+                        .format(new String[]{token.getUser().getFirstName(), token.getUser().getLastName(), link}))
+                .envelop();
+        sendMail(mail);
+
+        return true;
     }
 
     /**

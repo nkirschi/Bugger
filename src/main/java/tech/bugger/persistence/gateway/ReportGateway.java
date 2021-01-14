@@ -45,7 +45,25 @@ public interface ReportGateway {
      * @throws NotFoundException The topic could not be found.
      */
     List<Report> getSelectedReports(Topic topic, Selection selection, boolean showOpenReports,
-                                           boolean showClosedReports) throws NotFoundException;
+                                    boolean showClosedReports) throws NotFoundException;
+
+    /**
+     * Looks up the number of duplicates of a given report.
+     *
+     * @param report The report whose duplicates to count.
+     * @return The number of duplicates of the report.
+     * @throws NotFoundException The report could not be found.
+     */
+    int countDuplicates(Report report) throws NotFoundException;
+
+    /**
+     * Retrieves a list of duplicates of a given report that match the given selection criteria.
+     *
+     * @param report    The report whose duplicates to look for.
+     * @param selection The search criteria to apply.
+     * @return The list of duplicates of {@code report}, filtered accordingly.
+     */
+    List<Report> selectDuplicates(Report report, Selection selection);
 
     /**
      * Inserts a report into the report storage.

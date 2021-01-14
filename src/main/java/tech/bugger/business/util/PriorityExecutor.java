@@ -63,7 +63,7 @@ public final class PriorityExecutor {
      * @return {@code true} iff all remaining tasks have been completed without timeout.
      * @throws InterruptedException if interrupted whilst awaiting termination.
      */
-    public boolean shutdown(final int timeoutMillis) throws InterruptedException {
+    public boolean shutdown(final long timeoutMillis) throws InterruptedException {
         executorService.shutdown();
         return executorService.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
     }
@@ -77,7 +77,7 @@ public final class PriorityExecutor {
      * @return {@code true} iff all remaining tasks have been completed without timeout.
      * @throws InterruptedException if interrupted whilst awaiting termination.
      */
-    public boolean kill(final int timeoutMillis) throws InterruptedException {
+    public boolean kill(final long timeoutMillis) throws InterruptedException {
         executorService.shutdownNow();
         return executorService.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
     }

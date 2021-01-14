@@ -7,6 +7,7 @@ import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,12 +64,14 @@ public class StatisticsDBGateway implements StatisticsGateway {
                     .toStatement().executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
+            } else {
+                log.error("Empty result for open reports with criteria " + criteria + ".");
+                throw new InternalError("Empty result for open reports with criteria " + criteria + ".");
             }
         } catch (SQLException e) {
-            log.error("Unable to count open reports.", e);
-            throw new StoreException("Unable to count open reports.", e);
+            log.error("Error while counting open reports with criteria " + criteria + ".", e);
+            throw new StoreException("Error while counting open reports with criteria " + criteria + ".", e);
         }
-        return 0;
     }
 
     /**
@@ -100,34 +103,35 @@ public class StatisticsDBGateway implements StatisticsGateway {
                 } else {
                     return Duration.ofSeconds(seconds);
                 }
+            } else {
+                log.error("Empty result for average time to close with criteria " + criteria + ".");
+                throw new InternalError("Empty result for average time to close with criteria " + criteria + ".");
             }
         } catch (SQLException e) {
             log.error("Unable to determine closing time with criteria " + criteria + ".", e);
             throw new StoreException("Unable to determine closing time with criteria " + criteria + ".", e);
         }
-        return null;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Double getAveragePostsPerReport(final ReportCriteria criteria) {
+    public BigDecimal getAveragePostsPerReport(final ReportCriteria criteria) {
         // @formatter:off
         String query =
-                "SELECT AVG(c) " // duration in seconds
+                "SELECT AVG(c) "
               + "FROM ( "
-              + "    SELECT   COUNT(*) AS c "
-              + "    FROM     report AS r "
-              + "    JOIN     post AS p "
-              + "    ON       p.report = r.id "
-              + "    JOIN     topic AS t "
-              + "    ON       r.topic = t.id "
-              + "    WHERE    NULL IS NULL "
-              + "    AND      t.title = COALESCE(NULLIF(?, ''), t.title) "
-              + "    AND      r.created_at <= COALESCE(?, r.created_at) "
-              + "    AND      (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL)"
-              + "    GROUP BY r.id "
+              + "    SELECT          COUNT(p.id) AS c "
+              + "    FROM            report AS r "
+              + "    LEFT OUTER JOIN post AS p "
+              + "    ON              p.report = r.id "
+              + "    JOIN            topic AS t "
+              + "    ON              r.topic = t.id "
+              + "    WHERE           t.title = COALESCE(NULLIF(?, ''), t.title) "
+              + "    AND             r.created_at <= COALESCE(?, r.created_at) "
+              + "    AND             (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL)"
+              + "    GROUP BY        r.id "
               + ") AS x;";
         // @formatter:on
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -137,18 +141,15 @@ public class StatisticsDBGateway implements StatisticsGateway {
                     .object(criteria.getEarliestClosingDate())
                     .toStatement().executeQuery();
             if (rs.next()) {
-                double avgPosts = rs.getDouble(1);
-                if (rs.wasNull()) {
-                    return null;
-                } else {
-                    return avgPosts;
-                }
+                return rs.getObject(1, BigDecimal.class);
+            } else {
+                log.error("Empty result for average posts per report with criteria " + criteria + ".");
+                throw new InternalError("Empty result for average posts per report with criteria " + criteria + ".");
             }
         } catch (SQLException e) {
             log.error("Unable to determine average posts per report with criteria " + criteria + ".", e);
             throw new StoreException("Unable to determine average posts per report with criteria " + criteria + ".", e);
         }
-        return null;
     }
 
     /**

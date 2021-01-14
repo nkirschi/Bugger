@@ -4,6 +4,7 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.util.MarkdownHandler;
+import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
@@ -15,12 +16,9 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 import java.io.Serial;
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * Backing bean for the profile edit page.
@@ -209,7 +207,7 @@ public class ProfileEditBacker implements Serializable {
     /**
      * Applies and saves the changes made.
      *
-     * @return {@code null} to reload the page.
+     * @return The page to redirect to or {@code null} to reload the current page.
      */
     public String saveChanges() {
         if (!passwordNew.isBlank()) {
@@ -241,31 +239,22 @@ public class ProfileEditBacker implements Serializable {
             }
         }
 
-        return null;
+        return "pretty:profile";
     }
 
     /**
      * Generates a new token with which the user's email address can be updated. An e-mail to finalize the process
      * is sent to the given email address if the provided data checks out.
      *
-     * @param user The user whose email is to be updated.
+     * @param user  The user whose email is to be updated.
      * @param email The user's new email address.
      * @return Whether the operation was successful or not.
      */
     private boolean updateEmail(final User user, final String email) {
-        URL url;
-        try {
-            url = new URL(((HttpServletRequest) fctx.getExternalContext().getRequest()).getRequestURL().toString());
-        } catch (MalformedURLException e) {
-            log.debug("The user with id " + user.getId() + " tried to update their email with an invalid URL.", e);
-            throw new InternalError("URL is invalid.", e);
-        }
-
-        String domain = String.format("%s://%s%s", url.getProtocol(), url.getAuthority(),
-                fctx.getExternalContext().getApplicationContextPath());
         User updateUser = new User(user);
 
-        return authenticationService.updateEmail(updateUser, domain, email);
+        return authenticationService.updateEmail(updateUser,
+                                                 JFConfig.getApplicationPath(fctx.getExternalContext()), email);
     }
 
     /**
