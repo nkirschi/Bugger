@@ -2,6 +2,7 @@ package tech.bugger.control.validation;
 
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.util.Constants;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -20,11 +21,6 @@ import java.util.ResourceBundle;
  */
 @FacesValidator(value = "fileValidator", managed = true)
 public class FileValidator implements Validator<Part> {
-
-    /**
-     * The maximum file size in megabytes allowed for uploaded files.
-     */
-    private static final int MAX_FILE_SIZE = 10;
 
     /**
      * The post service for validating filenames.
@@ -58,9 +54,9 @@ public class FileValidator implements Validator<Part> {
      */
     @Override
     public void validate(final FacesContext fctx, final UIComponent component, final Part part) {
-        if (part.getSize() > MAX_FILE_SIZE * 1000 * 1000) {
+        if (part.getSize() > Constants.MAX_ATTACHMENT_FILESIZE * Constants.MB_TO_BYTES) {
             String message = MessageFormat.format(messagesBundle.getString("image_validator.file_size_too_large"),
-                    MAX_FILE_SIZE);
+                    Constants.MAX_ATTACHMENT_FILESIZE);
             throw new ValidatorException(new FacesMessage(message));
         }
         if (!postService.isAttachmentNameValid(part.getSubmittedFileName())) {

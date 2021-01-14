@@ -1,6 +1,7 @@
 package tech.bugger.control.validation;
 
 import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.util.Constants;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -21,11 +22,6 @@ import java.util.ResourceBundle;
  */
 @FacesValidator(value = "imageValidator", managed = true)
 public class ImageValidator implements Validator<Part> {
-
-    /**
-     * The maximum file size in megabytes allowed for uploaded images.
-     */
-    private static final int MAX_FILE_SIZE = 2;
 
     /**
      * The minimum width images are required to have.
@@ -62,9 +58,9 @@ public class ImageValidator implements Validator<Part> {
      */
     @Override
     public void validate(final FacesContext fctx, final UIComponent component, final Part part) {
-        if (part.getSize() > MAX_FILE_SIZE * 1000 * 1000) {
+        if (part.getSize() > Constants.MAX_AVATAR_FILESIZE * Constants.MB_TO_BYTES) {
             String message = MessageFormat.format(messagesBundle.getString("file_validator.file_size_too_large"),
-                    MAX_FILE_SIZE);
+                    Constants.MAX_AVATAR_FILESIZE);
             throw new ValidatorException(new FacesMessage(message));
         }
 
