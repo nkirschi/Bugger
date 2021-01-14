@@ -1,15 +1,17 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.AuthenticationService;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.service.AuthenticationService;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
 
 /**
  * Backing Bean for the login page.
@@ -82,9 +84,8 @@ public class LoginBacker {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
 
-        String url = fctx.getExternalContext().getRequestParameterMap().get("url");
-
-        redirectURL = (url != null) ? url : "home";
+        redirectURL = fctx.getExternalContext().getRequestParameterMap().get("url");
+        log.debug("Will try to redirect to " + redirectURL);
     }
 
     /**
@@ -99,7 +100,18 @@ public class LoginBacker {
             return null;
         }
         session.setUser(user);
-        return redirectURL;
+
+        if (redirectURL != null) {
+            try {
+                String url = URLDecoder.decode(redirectURL, StandardCharsets.UTF_8);
+                log.debug("Redirecting user to " + url);
+                fctx.getExternalContext().redirect(url);
+                return null;
+            } catch (IOException e) {
+                // Ignore the exception and just go to the home page
+            }
+        }
+        return "pretty:home";
     }
 
     /**
