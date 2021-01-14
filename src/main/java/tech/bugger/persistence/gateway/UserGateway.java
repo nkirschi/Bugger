@@ -18,9 +18,8 @@ public interface UserGateway {
      * @param user  The user whose moderation status to check.
      * @param topic The topic whose moderators to search.
      * @return Whether {@code user} is a moderator of {@code topic}.
-     * @throws NotFoundException The user or the topic could not be found.
      */
-    boolean isModerator(User user, Topic topic) throws NotFoundException;
+    boolean isModerator(User user, Topic topic);
 
     /**
      * Looks up if a user is banned from a given topic.
@@ -28,9 +27,8 @@ public interface UserGateway {
      * @param user  The user for which to check if they are banned from the topic.
      * @param topic The topic whose banned users to search.
      * @return Whether {@code user} is banned from {@code topic}.
-     * @throws NotFoundException The user or the topic could not be found.
      */
-    boolean isBanned(User user, Topic topic) throws NotFoundException;
+    boolean isBanned(User user, Topic topic);
 
     /**
      * Retrieves the number of posts a user has created.
@@ -143,5 +141,13 @@ public interface UserGateway {
      * @throws NotFoundException The user could not be found.
      */
     void deleteUser(User user) throws NotFoundException;
+
+    /**
+     * Retrieves the number of topics where a user has moderator status.
+     *
+     * @param user The user whose moderated topics are to be counted.
+     * @return The number of topics that {@code user} is moderating.
+     */
+    int getNumberOfModeratedTopics(User user);
 
 }

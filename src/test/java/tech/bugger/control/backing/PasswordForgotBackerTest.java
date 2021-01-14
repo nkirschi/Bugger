@@ -23,12 +23,14 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -118,29 +120,29 @@ public class PasswordForgotBackerTest {
 
     @Test
     public void testForgotPasswordWhenError() {
-        try (MockedStatic<AuthenticationService> serviceMock = mockStatic(AuthenticationService.class)) {
-            serviceMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("https://bugger.tech");
-            testUser1.setId(100);
-            backer.setUser(testUser1);
-            doReturn(true).when(authenticationService).forgotPassword(any(), any());
-            doReturn(testUser1).when(profileService).getUserByEmail(any());
-            doReturn(testUser1).when(profileService).getUserByUsername(any());
-            assertNotNull(backer.forgotPassword());
-            verify(feedbackEvent).fire(any());
-        }
+        MockedStatic<JFConfig> config = mockStatic(JFConfig.class);
+        when(JFConfig.getApplicationPath(any())).thenReturn("https://bugger.tech");
+        testUser1.setId(100);
+        backer.setUser(testUser1);
+        doReturn(true).when(authenticationService).forgotPassword(any(), any());
+        doReturn(testUser1).when(profileService).getUserByEmail(any());
+        doReturn(testUser1).when(profileService).getUserByUsername(any());
+        assertNotNull(backer.forgotPassword());
+        verify(feedbackEvent).fire(any());
+        config.close();
     }
 
     @Test
     public void testForgotPasswordSuccess() {
-        try (MockedStatic<AuthenticationService> serviceMock = mockStatic(AuthenticationService.class)) {
-            serviceMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("https://bugger.tech");
-            testUser1.setId(100);
-            backer.setUser(testUser1);
-            doReturn(false).when(authenticationService).forgotPassword(any(), any());
-            doReturn(testUser1).when(profileService).getUserByEmail(any());
-            doReturn(testUser1).when(profileService).getUserByUsername(any());
-            assertNull(backer.forgotPassword());
-        }
+        MockedStatic<JFConfig> config = mockStatic(JFConfig.class);
+        when(JFConfig.getApplicationPath(any())).thenReturn("https://bugger.tech");
+        testUser1.setId(100);
+        backer.setUser(testUser1);
+        doReturn(false).when(authenticationService).forgotPassword(any(), any());
+        doReturn(testUser1).when(profileService).getUserByEmail(any());
+        doReturn(testUser1).when(profileService).getUserByUsername(any());
+        assertNull(backer.forgotPassword());
+        config.close();
     }
 
 }

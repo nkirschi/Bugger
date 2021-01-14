@@ -245,7 +245,12 @@
             <h:panelGroup class="col-sm-12" layout="block" id="p-moderated-pagination">
                 <b:pagitable paginator="#{profileBacker.moderatedTopics}" simple="true">
                     <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
-                    <h:column><h:outputText value="#{var}"/></h:column>
+                    <h:column>
+                        <!-- TODO check if name still fits once implemented in TopicBacker -->
+                        <h:link value="#{var.title}" outcome="pretty:topic">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
+                    </h:column>
                 </b:pagitable>
             </h:panelGroup>
         </h:panelGroup>

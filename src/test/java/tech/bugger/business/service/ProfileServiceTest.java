@@ -288,7 +288,7 @@ public class ProfileServiceTest {
     @Test
     public void testGetVotingWeightNotFound() throws NotFoundException {
         doThrow(NotFoundException.class).when(userGateway).getNumberOfPosts(testUser);
-        assertEquals(0, service.getVotingWeightForUser(testUser));
+        assertEquals(1, service.getVotingWeightForUser(testUser));
         verify(userGateway, times(1)).getNumberOfPosts(testUser);
         verify(feedbackEvent, times(1)).fire(any());
     }
@@ -444,6 +444,20 @@ public class ProfileServiceTest {
     public void testGenerateThumbnailCorruptImageException() {
         assertNull(service.generateThumbnail(new byte[0]));
         verify(feedbackEvent, times(1)).fire(any());
+    }
+
+    @Test
+    public void testGetNumberOfModeratedTopics() {
+        when(userGateway.getNumberOfModeratedTopics(testUser)).thenReturn(THE_ANSWER);
+        assertEquals(THE_ANSWER, service.getNumberOfModeratedTopics(testUser));
+        verify(userGateway).getNumberOfModeratedTopics(testUser);
+    }
+
+    @Test
+    public void testGetNumberOfModeratedTopicsTransactionException() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertEquals(0, service.getNumberOfModeratedTopics(testUser));
+        verify(feedbackEvent).fire(any());
     }
 
 }

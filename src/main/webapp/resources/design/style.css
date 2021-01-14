@@ -165,6 +165,17 @@ body {
     max-height: 200px;
 }
 
+.col-sm-2 {
+    background-color: #f3f3f3;
+    height: 100%;
+}
+
+.col-sm-8 {
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
+    height: 100%;
+    padding: 1%;
+}
+
 .p-avatar {
     width: 50%;
 }
@@ -202,4 +213,14 @@ body {
 .sel-float {
     width: auto !important;
     display: inline-block !important;
+}
+
+.trashcan-small {
+    width: 16px;
+    height: 16px;
+}
+
+.search {
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
+    margin: 1%;
 }
