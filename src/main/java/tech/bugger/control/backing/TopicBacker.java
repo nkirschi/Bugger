@@ -131,7 +131,7 @@ public class TopicBacker implements Serializable {
     private boolean closedReportShown; // default: false
 
     /**
-     * A senitized form of the description, ready for display.
+     * A sanitized form of the description, ready for display.
      */
     private String sanitizedDescription;
 
@@ -154,11 +154,6 @@ public class TopicBacker implements Serializable {
      * Weather or not the delete topic dialog should be shown.
      */
     private boolean displayDeleteDialog;
-
-    /**
-     * A senitized form of the description, ready for display.
-     */
-    private String sanitizedDescription;
 
     /**
      * The current user session.
@@ -185,9 +180,18 @@ public class TopicBacker implements Serializable {
      */
     private final FacesContext fctx;
 
+    /**
+     * Constructs a new topic page backing bean with the necessary dependencies.
+     *
+     * @param topicService  The topic service to use.
+     * @param reportService The report service to use.
+     * @param searchService The search service to use.
+     * @param fctx          The current faces context.
+     * @param session       The current {@link UserSession}.
+     */
     @Inject
-    TopicBacker(final TopicService topicService, final ReportService reportService, final SearchService searchService,
-                final FacesContext fctx, final UserSession session) {
+    public TopicBacker(final TopicService topicService, final ReportService reportService,
+                       final SearchService searchService, final FacesContext fctx, final UserSession session) {
         this.topicService = topicService;
         this.reportService = reportService;
         this.searchService = searchService;
@@ -200,7 +204,7 @@ public class TopicBacker implements Serializable {
      * the page. If not, acts as if the page did not exist.
      */
     @PostConstruct
-    public void init() {
+    void init() {
         ExternalContext ext = fctx.getExternalContext();
         if ((!ext.getRequestParameterMap().containsKey("id"))) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");

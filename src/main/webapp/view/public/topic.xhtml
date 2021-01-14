@@ -3,7 +3,8 @@
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
-                xmlns:b="http://tech.bugger/tags">
+                xmlns:b="http://tech.bugger/tags"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
     <ui:param name="title" value="#{(labels.topic_page).concat(': ').concat(topicBacker.topic.title)}"/>
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
@@ -18,8 +19,10 @@
                             <h:outputLabel value="#{labels.description}"/>
                         </h:panelGroup>
                         <h:panelGroup layout="block" styleClass="col-sm-3 align-right">
-                            <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button" value="#{labels.delete_topic}" rendered="#{userSession.user.administrator}"/>
-                            <h:link id="l-edit" outcome="pretty:topic-edit" value="#{labels.edit_topic}" styleClass="button">
+                            <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button"
+                                             value="#{labels.delete_topic}" rendered="#{userSession.user.administrator}"/>
+                            <h:link id="l-edit" outcome="pretty:topic-edit" value="#{labels.edit_topic}"
+                                    styleClass="button style-button">
                                 <f:param name="id" value="#{topicBacker.topicID}"/>
                             </h:link>
                         </h:panelGroup>
