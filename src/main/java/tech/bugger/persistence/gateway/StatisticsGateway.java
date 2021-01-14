@@ -4,6 +4,7 @@ import tech.bugger.global.transfer.ReportCriteria;
 import tech.bugger.global.transfer.TopReport;
 import tech.bugger.global.transfer.TopUser;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.List;
 
@@ -34,7 +35,7 @@ public interface StatisticsGateway {
      * @param criteria The criteria reports must fulfill to be taken into consideration.
      * @return The average number of posts of the reports in question.
      */
-    Double getAveragePostsPerReport(ReportCriteria criteria);
+    BigDecimal getAveragePostsPerReport(ReportCriteria criteria);
 
     /**
      * Retrieves the list of those ten reports that gained the most relevance in the last 24 hours.

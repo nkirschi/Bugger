@@ -19,6 +19,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.Duration;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -39,9 +41,9 @@ public class StatisticsBacker implements Serializable {
     private static final Log log = Log.forClass(StatisticsBacker.class);
 
     /**
-     * Constant for the number of seconds in a minute. In case someone forgets :)
+     * Constant for the number of minutes in an hour. In case someone forgets :)
      */
-    private static final double SECONDS_IN_A_MINUTE = 60.0;
+    private static final double MINUTES_IN_AN_HOUR = 60.0;
 
     /**
      * Symbol to use when no meaningful value can be displayed.
@@ -84,6 +86,26 @@ public class StatisticsBacker implements Serializable {
     private ReportCriteria reportCriteria;
 
     /**
+     * The top ten reports.
+     */
+    private List<TopReport> topReports;
+
+    /**
+     * The top ten users.
+     */
+    private List<TopUser> topUsers;
+
+    /**
+     * The available topic titles.
+     */
+    private List<String> topicTitles;
+
+    /**
+     * The format to use for printing decimal numbers.
+     */
+    private NumberFormat decimalFormat;
+
+    /**
      * Constructs a new statistics page backing bean with the necessary dependencies.
      *
      * @param statisticsService The statistics service to use.
@@ -110,23 +132,29 @@ public class StatisticsBacker implements Serializable {
     }
 
     /**
-     * Initializes the statistics page. The total number of reports, average number of posts per report and average time
-     * a report remains open are shown system-wide by default. If the user navigated to the statistics page from the
-     * page of a particular topic, those statistics are restricted to reports in that particular topic instead.
-     * Additionally, those statistics are not restricted to a certain time frame by default.
+     * Initializes the statistics page with the data to display.
      *
-     * Furthermore, a list with the ten reports that have gained the most relevance in the last 24 hours is shown.
-     * Another list contains the ten users with the greatest sums of the relevance scores of their reports. By default,
-     * that second list is not restricted to a certain time frame for the creation date of the reports.
+     * If a topic ID is given as request parameter, the criteria are restricted to that topic.
      */
     @PostConstruct
     public void init() {
+        reportCriteria.setTopic(parseTopicParameter());
+        topReports = statisticsService.determineTopTenReports();
+        topUsers = statisticsService.determineTopTenUsers();
+        topicTitles = topicService.discoverTopics();
+        topicTitles.add(0, ""); // empty string for no restriction to topic (JSF doesn't like null)
+        decimalFormat = NumberFormat.getInstance(userSession.getLocale());
+        decimalFormat.setMinimumFractionDigits(0);
+        decimalFormat.setMaximumFractionDigits(2);
+    }
+
+    private String parseTopicParameter() {
         String topicId = ectx.getRequestParameterMap().get("t");
         if (topicId != null) {
             try {
                 Topic topic = topicService.getTopicByID(Integer.parseInt(topicId));
                 if (topic != null) {
-                    reportCriteria.setTopic(topic.getTitle());
+                    return topic.getTitle();
                 } else {
                     log.warning("Request parameter t=" + topicId + " is not the ID of an existing topic.");
                 }
@@ -134,6 +162,7 @@ public class StatisticsBacker implements Serializable {
                 log.warning("Request parameter t=" + topicId + " is not an integer.", e);
             }
         }
+        return "";
     }
 
     /**
@@ -164,7 +193,7 @@ public class StatisticsBacker implements Serializable {
     public String getAverageTimeOpen() {
         Duration duration = statisticsService.averageTimeOpen(reportCriteria);
         if (duration != null) {
-            return String.format(userSession.getLocale(), "%.2f", duration.toMinutes() / SECONDS_IN_A_MINUTE);
+            return decimalFormat.format(duration.toMinutes() / MINUTES_IN_AN_HOUR);
         } else {
             return NO_VALUE_INDICATOR;
         }
@@ -176,12 +205,21 @@ public class StatisticsBacker implements Serializable {
      * @return The average number of posts.
      */
     public String getAveragePostsPerReport() {
-        Double avgPosts = statisticsService.averagePostsPerReport(reportCriteria);
+        BigDecimal avgPosts = statisticsService.averagePostsPerReport(reportCriteria);
         if (avgPosts != null) {
-            return String.format(userSession.getLocale(), "%.2f", avgPosts);
+            return decimalFormat.format(avgPosts);
         } else {
             return NO_VALUE_INDICATOR;
         }
+    }
+
+    /**
+     * Returns the ten reports that have gained the most relevance in the last 24 hours system-wide.
+     *
+     * @return The top ten reports.
+     */
+    public List<TopReport> getTopReports() {
+        return topReports;
     }
 
     /**
@@ -191,16 +229,7 @@ public class StatisticsBacker implements Serializable {
      * @return The top ten users.
      */
     public List<TopUser> getTopUsers() {
-        return statisticsService.topTenUsers();
-    }
-
-    /**
-     * Returns the ten reports that have gained the most relevance in the last 24 hours system-wide.
-     *
-     * @return The top ten reports.
-     */
-    public List<TopReport> getTopReports() {
-        return statisticsService.topTenReports();
+        return topUsers;
     }
 
     /**
@@ -209,8 +238,6 @@ public class StatisticsBacker implements Serializable {
      * @return A list of all topic titles.
      */
     public List<String> getTopicTitles() {
-        List<String> topicTitles = topicService.discoverTopics();
-        topicTitles.add(0, ""); // empty string for no restriction to topic (JSF doesn't like null)
         return topicTitles;
     }
 

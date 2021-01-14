@@ -27,9 +27,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -100,7 +101,6 @@ public class SystemLifetimeListenerTest {
 
         connectionPoolMock = mock(ConnectionPool.class);
         doNothing().when(connectionPoolMock).shutdown();
-        when(connectionPoolMock.isShutDown()).thenReturn(false);
         when(registry.getConnectionPool(anyString())).thenReturn(connectionPoolMock);
 
         priorityExecutorMock = mock(PriorityExecutor.class);
@@ -231,18 +231,10 @@ public class SystemLifetimeListenerTest {
     }
 
     @Test
-    public void testContextDestroyedWhenConnectionPoolAlreadyShutDown() {
-        when(connectionPoolMock.isShutDown()).thenReturn(true);
-        systemLifetimeListenerMock.contextInitialized(sceMock);
-        systemLifetimeListenerMock.contextDestroyed(sceMock);
-        verify(connectionPoolMock, times(0)).shutdown();
-    }
-
-    @Test
     public void testContextDestroyedShutsDownPriorityExecutor()throws Exception {
         systemLifetimeListenerMock.contextInitialized(sceMock);
         systemLifetimeListenerMock.contextDestroyed(sceMock);
-        verify(priorityExecutorMock).shutdown(anyInt());
+        verify(priorityExecutorMock).shutdown(anyLong());
     }
 
     @Test

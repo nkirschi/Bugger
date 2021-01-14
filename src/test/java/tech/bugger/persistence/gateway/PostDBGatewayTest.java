@@ -13,11 +13,15 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
-import tech.bugger.persistence.exception.NotFoundException;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -215,7 +219,7 @@ public class PostDBGatewayTest {
         insertPosts(100);
         testSelection.setCurrentPage(1);
         List<Post> expected = new ArrayList<>(20);
-        for (int i = 120; i < 140; i++) {
+        for (int i = 121; i <= 140; i++) {
             expected.add(makeTestPost(i));
         }
         assertEquals(expected, gateway.selectPostsOfReport(testReport, testSelection));
