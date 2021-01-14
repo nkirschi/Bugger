@@ -67,7 +67,7 @@ public class PasswordSetBacker {
     private String passwordConfirmation;
 
     /**
-     * Constructs a new register page backing bean with the necessary dependencies.
+     * Constructs a new password set page backing bean with the necessary dependencies.
      *
      * @param authenticationService The authentication service to use.
      * @param session               The current {@link UserSession}.

@@ -4,86 +4,99 @@
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
     <ui:param name="title" value="#{labels['profile_edit.title']}"/>
+
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
 
-    <ui:define name="content">
-
+    <ui:define name="dialogs">
         <!-- Renders the popup dialog to delete the profile owner's profile. -->
-        <h:form id="f-del-user" rendered="#{profileEditBacker.dialog == 'DELETE'}">
-            <h:panelGroup id="p-delete" layout="block" styleClass="row">
-                <h:panelGroup layout="block" styleClass="col-sm-2"/>
-                <h:panelGroup layout="block" styleClass="col-sm-8">
-                    <h:panelGroup id="p-delete-text" styleClass="row">
-                        <h:panelGroup layout="block" styleClass="col-sm-12">
-                            <h:outputText id="ot-really-del" value="#{labels['profile_edit.delete']}" styleClass="h2"/>
-                            <h:outputText id="ot-really-del-warn" value="#{labels['profile_edit.delete_warn']}"/>
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{profileEditBacker.dialog == 'DELETE'}">
+            <h:form id="f-del-user">
+                <h:panelGroup id="p-delete" layout="block" styleClass="row">
+                    <h:panelGroup layout="block" styleClass="col-sm-2"/>
+                    <h:panelGroup layout="block" styleClass="col-sm-8">
+                        <h:panelGroup id="p-delete-text" styleClass="row">
+                            <h:panelGroup layout="block" styleClass="col-sm-12">
+                                <h:outputText id="ot-really-del" value="#{labels['profile_edit.delete']}"
+                                              styleClass="h2"/>
+                                <h:outputText id="ot-really-del-warn" value="#{labels['profile_edit.delete_warn']}"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup id="p-delete-password" styleClass="row align-center">
+                            <h:panelGroup layout="block" styleClass="col-sm-3">
+                                <h:outputLabel id="o-password-del" for="i-password-del" value="#{labels.password}"/>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="col-sm-6">
+                                <h:inputSecret id="i-password-del" value="#{profileEditBacker.password}"
+                                               required="true">
+                                    <f:validateLength maximum="#{C.PASSWORD_MAX}"/>
+                                </h:inputSecret>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="col-sm-3">
+                                <h:message id="m-password-del" for="i-password-del"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="row align-center">
+                            <h:panelGroup layout="blok" styleClass="col-sm-12">
+                                <h:commandButton id="cb-really-del" value="#{labels['profile_edit.really_del']}"
+                                                 action="#{profileEditBacker.delete}" styleClass="button"/>
+                                <h:commandButton id="cb-cancel-del" value="#{labels.abort}" styleClass="button"
+                                                 action="#{profileEditBacker.closeDialog}" immediate="true"/>
+                            </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup id="p-delete-password" styleClass="row align-center">
-                        <h:panelGroup layout="block" styleClass="col-sm-3">
-                            <h:outputLabel id="o-password-del" for="i-password-del" value="#{labels.password}"/>
-                        </h:panelGroup>
-                        <h:panelGroup layout="block" styleClass="col-sm-6">
-                            <h:inputSecret id="i-password-del" value="#{profileEditBacker.password}" required="true">
-                                <f:validateLength maximum="#{C.PASSWORD_MAX}"/>
-                            </h:inputSecret>
-                        </h:panelGroup>
-                        <h:panelGroup layout="block" styleClass="col-sm-3">
-                            <h:message id="m-password-del" for="i-password-del"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="row align-center">
-                        <h:panelGroup layout="blok" styleClass="col-sm-12">
-                            <h:commandButton id="cb-really-del" value="#{labels['profile_edit.really_del']}"
-                                             action="#{profileEditBacker.delete}" styleClass="button"/>
-                            <h:commandButton id="cb-cancel-del" value="#{labels.abort}" styleClass="button"
-                                             action="#{profileEditBacker.closeDialog}" immediate="true"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
+                    <h:panelGroup layout="block" styleClass="col-sm-2"/>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="col-sm-2"/>
-            </h:panelGroup>
-        </h:form>
+            </h:form>
+        </h:panelGroup>
 
         <!-- Renders the popup dialog to update the changes made to the profile information. -->
-        <h:form id="f-change-user" rendered="#{profileEditBacker.dialog == 'UPDATE'}">
-            <h:panelGroup id="p-update" layout="block" styleClass="row">
-                <h:panelGroup layout="block" styleClass="col-sm-2"/>
-                <h:panelGroup layout="block" styleClass="col-sm-8">
-                    <h:panelGroup id="p-update-text" styleClass="row">
-                        <h:panelGroup layout="block" styleClass="col-sm-12">
-                            <h:outputText id="ot-really-change" value="#{labels['profile_edit.apply_changes']}"
-                                          styleClass="h2"/>
-                            <h:outputText id="ot-really-change-info" value="#{labels['profile_edit.apply_info']}"/>
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{profileEditBacker.dialog == 'UPDATE'}">
+            <h:form id="f-change-user">
+                <h:panelGroup id="p-update" layout="block" styleClass="row">
+                    <h:panelGroup layout="block" styleClass="col-sm-2"/>
+                    <h:panelGroup layout="block" styleClass="col-sm-8">
+                        <h:panelGroup id="p-update-text" styleClass="row">
+                            <h:panelGroup layout="block" styleClass="col-sm-12">
+                                <h:outputText id="ot-really-change" value="#{labels['profile_edit.apply_changes']}"
+                                              styleClass="h2"/>
+                                <h:outputText id="ot-really-change-info" value="#{labels['profile_edit.apply_info']}"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup id="p-update-password" styleClass="row align-center">
+                            <h:panelGroup layout="block" styleClass="col-sm-3">
+                                <h:outputLabel id="o-password-change" for="i-password-change"
+                                               value="#{labels.password}"/>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="col-sm-6">
+                                <h:inputSecret id="i-password-change" value="#{profileEditBacker.password}"
+                                               required="true">
+                                    <f:validateLength maximum="#{C.PASSWORD_MAX}"/>
+                                </h:inputSecret>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="col-sm-3">
+                                <h:message id="m-password-change" for="i-password-change"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="row align-center">
+                            <h:panelGroup layout="block" styleClass="col-sm-12">
+                                <h:commandButton id="cb-really-change" value="#{labels['profile_edit.really_change']}"
+                                                 action="#{profileEditBacker.saveChanges}" styleClass="button">
+                                    <f:param name="u" value="#{profileEditBacker.user.username}"/>
+                                </h:commandButton>
+                                <h:commandButton id="cb-cancel-change" value="#{labels.abort}" styleClass="button"
+                                                 action="#{profileEditBacker.closeDialog}" immediate="true"/>
+                            </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup id="p-update-password" styleClass="row align-center">
-                        <h:panelGroup layout="block" styleClass="col-sm-3">
-                            <h:outputLabel id="o-password-change" for="i-password-change" value="#{labels.password}"/>
-                        </h:panelGroup>
-                        <h:panelGroup layout="block" styleClass="col-sm-6">
-                            <h:inputSecret id="i-password-change" value="#{profileEditBacker.password}" required="true">
-                                <f:validateLength maximum="#{C.PASSWORD_MAX}"/>
-                            </h:inputSecret>
-                        </h:panelGroup>
-                        <h:panelGroup layout="block" styleClass="col-sm-3">
-                            <h:message id="m-password-change" for="i-password-change"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="row align-center">
-                        <h:panelGroup layout="block" styleClass="col-sm-12">
-                            <h:commandButton id="cb-really-change" value="#{labels['profile_edit.really_change']}"
-                                             action="#{profileEditBacker.saveChanges}" styleClass="button"/>
-                            <h:commandButton id="cb-cancel-change" value="#{labels.abort}" styleClass="button"
-                                             action="#{profileEditBacker.closeDialog}" immediate="true"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
+                    <h:panelGroup layout="block" styleClass="col-sm-2"/>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="col-sm-2"/>
-            </h:panelGroup>
-        </h:form>
+            </h:form>
+        </h:panelGroup>
+    </ui:define>
+
+    <ui:define name="content">
 
         <!-- Renders the profile owner's user information. -->
         <h:form id="f-profile-edit"
@@ -208,7 +221,7 @@
                 <h:message id="m-bio" for="ia-bio"/>
 
                 <h:outputLabel id="ol-biography" value="#{labels.biography}" for="ot-biography"
-                                   styleClass="profile-info" rendered="#{profileEditBacker.dialog == 'PREVIEW'}"/>
+                               styleClass="profile-info" rendered="#{profileEditBacker.dialog == 'PREVIEW'}"/>
                 <h:outputText id="ot-biography" value="#{profileEditBacker.sanitizedBio}" escape="false"
                               styleClass="profile-info" rendered="#{profileEditBacker.dialog == 'PREVIEW'}"/>
 

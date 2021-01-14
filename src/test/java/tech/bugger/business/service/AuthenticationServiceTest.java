@@ -55,7 +55,6 @@ public class AuthenticationServiceTest {
     private Token testToken;
 
     private final String password = "v3rys3cur3";
-    private final String wrongPassword = "password";
     private final String salt = "0123456789abcdef";
     private final String hashingAlgo = "SHA3-512";
     private final String tokenValue = "0123456789abcdef";
@@ -316,6 +315,7 @@ public class AuthenticationServiceTest {
     @Test
     public void testAuthenticateWrongPassword() throws NotFoundException {
         when(userGateway.getUserByUsername(testUser.getUsername())).thenReturn(testUser);
+        String wrongPassword = "password";
         assertNull(service.authenticate(testUser.getUsername(), wrongPassword));
         verify(userGateway, times(1)).getUserByUsername(testUser.getUsername());
         verify(feedbackEvent, times(1)).fire(any());
@@ -373,4 +373,46 @@ public class AuthenticationServiceTest {
         verify(userGateway, times(1)).updateUser(any());
         verify(feedbackEvent, times(1)).fire(any());
     }
+
+    @Test
+    public void testForgotPassword() throws Exception {
+        doReturn(testToken).when(tokenGateway).createToken(any());
+        doReturn(true).when(mailer).send(any());
+        service.forgotPassword(testUser, "http://test.de");
+        verify(tokenGateway).createToken(any());
+        verify(mailer).send(any());
+    }
+
+    @Test
+    public void testForgotPasswordMailNotOnFirstTry() throws Exception {
+        doReturn(testToken).when(tokenGateway).createToken(any());
+        doReturn(false).doReturn(true).when(mailer).send(any());
+        service.forgotPassword(testUser, "http://test.de");
+        verify(tokenGateway).createToken(any());
+        verify(mailer, times(2)).send(any());
+    }
+
+    @Test
+    public void testForgotPasswordMailOnTooManyTries() throws Exception {
+        doReturn(testToken).when(tokenGateway).createToken(any());
+        doReturn(false).when(mailer).send(any());
+        service.forgotPassword(testUser, "http://test.de");
+        verify(tokenGateway).createToken(any());
+        verify(mailer, times(4)).send(any());
+    }
+
+    @Test
+    public void testForgotPasswordWhenNotFound() throws Exception {
+        doThrow(NotFoundException.class).when(tokenGateway).createToken(any());
+        service.forgotPassword(testUser, "http://test.de");
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testForgotPasswordWhenCommitFails() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        service.forgotPassword(testUser, "http://test.de");
+        verify(feedbackEvent, atLeastOnce()).fire(any());
+    }
+
 }

@@ -100,6 +100,11 @@
     justify-content: center;
 }
 
+.align-vcenter {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
 .button {
     margin: 1%;
 }
