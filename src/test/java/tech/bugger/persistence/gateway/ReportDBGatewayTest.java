@@ -1,5 +1,13 @@
 package tech.bugger.persistence.gateway;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,20 +24,9 @@ import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
 
-import java.sql.*;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(DBExtension.class)
 @ExtendWith(LogExtension.class)
@@ -196,7 +193,7 @@ public class ReportDBGatewayTest {
     @Test
     public void testCountPostsWhenReportIDIsNull() {
         report.setId(null);
-        assertThrows(IllegalArgumentException.class, () -> gateway.countPosts(null));
+        assertThrows(IllegalArgumentException.class, () -> gateway.countPosts(report));
     }
 
     @Test
@@ -337,7 +334,7 @@ public class ReportDBGatewayTest {
     public void testOpenReportWhenReportIDIsNull() {
         Report report = new Report();
         report.setId(null);
-        assertThrows(IllegalArgumentException.class, ()  -> gateway.openReport(report));
+        assertThrows(IllegalArgumentException.class, () -> gateway.openReport(report));
     }
 
     @Test
@@ -368,6 +365,39 @@ public class ReportDBGatewayTest {
         report.setClosingDate(ZonedDateTime.now());
         gateway.closeReport(report);
         assertDoesNotThrow(() -> gateway.openReport(report));
+    }
+
+    @Test
+    public void testCountDuplicatesWhenReportIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> gateway.countDuplicates(null));
+    }
+
+    @Test
+    public void testCountDuplicatesWhenReportIDIsNull() {
+        report.setId(null);
+        assertThrows(IllegalArgumentException.class, () -> gateway.countDuplicates(report));
+    }
+
+    @Test
+    public void testCountDuplicatesWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        report.setId(100);
+        assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy, userGateway).countDuplicates(report));
+    }
+
+    @Test
+    public void testCountDuplicatesWhenReportDoesNotExist() throws Exception {
+        report.setId(93);
+        assertEquals(0, gateway.countDuplicates(report));
+    }
+
+    @Test
+    public void testCountDuplicatesWhenThereAreNone() throws Exception {
+        DBExtension.emptyDatabase();
+        insertReport();
+        report.setId(100);
+        assertEquals(0, gateway.countDuplicates(report));
     }
 
 }

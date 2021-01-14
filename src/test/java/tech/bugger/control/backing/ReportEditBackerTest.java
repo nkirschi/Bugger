@@ -115,12 +115,29 @@ public class ReportEditBackerTest {
     @Test
     public void testSaveChanges() {
         doReturn(true).when(reportService).updateReport(any());
+        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopic());
+        assertNotNull(reportEditBacker.saveChanges());
+    }
+
+    @Test
+    public void testSaveChangesMove() {
+        doReturn(true).when(reportService).move(any());
+        doReturn(true).when(reportService).updateReport(any());
+        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopic() + 1);
         assertNotNull(reportEditBacker.saveChanges());
     }
 
     @Test
     public void testSaveChangesWhenError() {
         doReturn(false).when(reportService).updateReport(any());
+        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopic());
+        assertNull(reportEditBacker.saveChanges());
+    }
+
+    @Test
+    public void testSaveChangesWhenMoveError() {
+        doReturn(false).when(reportService).move(any());
+        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopic() + 1);
         assertNull(reportEditBacker.saveChanges());
     }
 

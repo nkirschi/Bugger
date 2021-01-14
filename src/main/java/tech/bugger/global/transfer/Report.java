@@ -111,17 +111,17 @@ public class Report implements Serializable {
     /**
      * Constructs a new report.
      *
-     * @param id The report ID.
-     * @param title The report title.
-     * @param type The report type.
-     * @param severity The report severity.
-     * @param version The version the report is associated with.
-     * @param authorship The report authorship metadata.
-     * @param closingDate The closing date of the report.
-     * @param duplicateOf The report this report is a duplicate of, loaded lazily.
-     * @param relevance The relevance value for the Report.
-     * @param relevanceOverwritten The state of the relevence overwrite.
-     * @param topic The topic the report belongs to, loaded lazily.
+     * @param id                    The report ID.
+     * @param title                 The report title.
+     * @param type                  The report type.
+     * @param severity              The report severity.
+     * @param version               The version the report is associated with.
+     * @param authorship            The report authorship metadata.
+     * @param closingDate           The closing date of the report.
+     * @param duplicateOf           The report this report is a duplicate of, loaded lazily.
+     * @param relevance             The relevance value for the Report.
+     * @param relevanceOverwritten  The state of the relevence overwrite.
+     * @param topic                 The topic the report belongs to, loaded lazily.
      */
     public Report(final Integer id, final String title, final Type type, final Severity severity, final String version,
                   final Authorship authorship, final ZonedDateTime closingDate, final Integer duplicateOf,
@@ -144,6 +144,16 @@ public class Report implements Serializable {
      */
     public Report() {
         this(0, "", Type.BUG, Severity.MINOR, "", new Authorship(null, null, null, null), null, null, null, false, 0);
+    }
+
+    /**
+     * Constructs a new report as deep clone of the given report.
+     *
+     * @param report The report to clone.
+     */
+    public Report(final Report report) {
+        this(report.id, report.title, report.type, report.severity, report.version, report.authorship,
+                report.closingDate, report.duplicateOf, report.relevance, report.relevanceOverwritten, report.topic);
     }
 
     /**
@@ -370,8 +380,7 @@ public class Report implements Serializable {
      */
     @Override
     public int hashCode() {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        return Objects.hash(id);
     }
 
     /**
@@ -381,8 +390,19 @@ public class Report implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "Report{"
+                + "id=" + id
+                + ", title='" + title + '\''
+                + ", type=" + type
+                + ", severity=" + severity
+                + ", version='" + version + '\''
+                + ", authorship=" + authorship
+                + ", closingDate=" + closingDate
+                + ", duplicateOf=" + duplicateOf
+                + ", relevance=" + relevance
+                + ", relevanceOverwritten" + relevanceOverwritten
+                + ", topic=" + topic
+                + '}';
     }
 
 }

@@ -2,22 +2,28 @@
                 xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                xmlns:b="http://tech.bugger/tags"
-                xmlns:f="http://xmlns.jcp.org/jsf/core">
-    <ui:param name="title" value="Home"/>
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:b="http://tech.bugger/tags">
+
+    <ui:param name="title" value="#{labels.home_title}"/>
+
     <ui:define name="content">
-        <h:outputText value="Topics" styleClass="h2" />
+        <h:outputText value="#{labels.home_topics}" styleClass="h2"/>
         <h:link id="l-create" value="#{labels.topic_edit_add}" outcome="pretty:topic-edit"
                 rendered="#{userSession.user.administrator}" styleClass="button"/>
         <b:pagitable paginator="#{homeBacker.topics}">
-            <b:column title="Title" paginator="#{homeBacker.topics}" key="title">
+            <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+            <b:column title="#{labels.title}" paginator="#{homeBacker.topics}" key="title">
                 <h:link value="#{var.title}" outcome="pretty:topic">
                     <f:param name="id" value="#{var.id}"/>
                 </h:link>
             </b:column>
-            <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
-            <b:column title="Description" paginator="#{homeBacker.topics}" key="description"><h:outputText value="#{var.description}" escape="false"/></b:column>
-            <b:column title="Last activity" paginator="#{homeBacker.topics}" key="last_activity"><h:outputText value="#{var.lastActivity}"/></b:column>
+            <b:column title="#{labels.description}" paginator="#{homeBacker.topics}" key="description">
+                <h:outputText value="#{var.description}" escape="false"/>
+            </b:column>
+            <b:column title="#{labels.last_activity}" paginator="#{homeBacker.topics}" key="last_activity">
+                <h:outputText value="#{var.lastActivity}"/>
+            </b:column>
         </b:pagitable>
     </ui:define>
 </ui:composition>
