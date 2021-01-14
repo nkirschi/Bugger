@@ -238,8 +238,25 @@ public class ReportBacker implements Serializable {
                 }
             }
         }
-        hasUpvoted = hasUpvoted();
-        hasDownvoted = hasDownvoted();
+        updateRelevance();
+    }
+
+    private void updateRelevance() {
+        report = reportService.getReportByID(reportID);
+        if (report == null) {
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
+        }
+        if (session.getUser() != null) {
+            hasUpvoted = hasUpvoted();
+            hasDownvoted = hasDownvoted();
+            overwriteRelevance = report.getRelevanceOverwritten();
+            if (overwriteRelevance) {
+                overwriteRelevanceValue = report.getRelevance();
+            } else {
+                overwriteRelevanceValue = null;
+            }
+        }
     }
 
     /**
@@ -266,15 +283,6 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     * Returns the relevance of the report as saved in the data source.
-     *
-     * @return the relevance of the report.
-     */
-    public int getRelevance() {
-        return reportService.getRelevance(report);
-    }
-
-    /**
      * Adds or removes a subscription to the report for the user, whichever is applicable.
      */
     public void toggleReportSubscription() {
@@ -282,26 +290,35 @@ public class ReportBacker implements Serializable {
 
     /**
      * Increases the relevance of the report by the user's voting weight.
+     *
+     * @return {@code null} to reload the page.
      */
     public String upvote() {
         reportService.upvote(report, session.getUser());
-        return "";
+        updateRelevance();
+        return null;
     }
 
     /**
      * Decreases the relevance of the report by the user's voting weight.
+     *
+     * @return {@code null} to reload the page.
      */
     public String downvote() {
         reportService.downvote(report, session.getUser());
-        return "";
+        updateRelevance();
+        return null;
     }
 
     /**
      * Removes a vote from a report.
+     *
+     * @return {@code null} to reload the page.
      */
     public String removeVote() {
         reportService.removeVote(report, session.getUser());
-        return "";
+        updateRelevance();
+        return null;
     }
 
     /**
@@ -359,9 +376,17 @@ public class ReportBacker implements Serializable {
 
     /**
      * Overwrites the relevance of the report with a set value.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void applyOverwriteRelevance() {
-        reportService.overwriteRelevance(report, overwriteRelevanceValue);
+    public String applyOverwriteRelevance() {
+        if (session.getUser().isAdministrator()) {
+            System.out.println(overwriteRelevanceValue);
+            reportService.overwriteRelevance(report, overwriteRelevanceValue);
+            updateRelevance();
+            return null;
+        }
+    return "pretty:error";
     }
 
     /**
@@ -419,14 +444,10 @@ public class ReportBacker implements Serializable {
      * @return Weather the relevance was overwritten.
      */
     public boolean getOverwriteRelevance() {
-        return overwriteRelevance;
-    }
-
-    /**
-     * @param overwriteRelevance Weather the relevance is overwritten.
-     */
-    public void setOverwriteRelevance(boolean overwriteRelevance) {
-        this.overwriteRelevance = overwriteRelevance;
+        if (report != null) {
+            return report.getRelevanceOverwritten();
+        }
+        return false;
     }
 
     /**
@@ -439,7 +460,7 @@ public class ReportBacker implements Serializable {
     /**
      * @param overwriteRelevanceValue The new overwriting relevence.
      */
-    public void setOverwriteRelevanceValue(Integer overwriteRelevanceValue) {
+    public void setOverwriteRelevanceValue(final Integer overwriteRelevanceValue) {
         this.overwriteRelevanceValue = overwriteRelevanceValue;
     }
 

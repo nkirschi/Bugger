@@ -12,16 +12,19 @@
     <ui:define name="content">
         <h:form id="f-report">
             <h:panelGroup rendered="#{userSession.user != null}">
-                <h:commandButton value="UPVOTE" action="#{reportBacker.removeVote}" rendered="#{reportBacker.hasUpvoted}" styleClass="vote-cast"/>
-                <h:commandButton value="UPVOTE" action="#{reportBacker.upvote}" rendered="#{!reportBacker.hasUpvoted}" styleClass="vote-not-cast"/>
-                <h:commandButton value="DOWNVOTE" action="#{reportBacker.removeVote}" rendered="#{reportBacker.hasDownvoted}" styleClass="vote-cast"/>
-                <h:commandButton value="DOWNVOTE" action="#{reportBacker.downvote}" rendered="#{!reportBacker.hasDownvoted}" styleClass="vote-not-cast"/>
-                <h:outputLabel value="THE RELEVANCE IS OVERWRITTEN!" rendered="#{reportBacker.overwriteRelevance}"/>
-                <h:outputLabel value="Current Relevance:"/>
-                <h:outputLabel value="#{reportBacker.relevance}"/>
-                <h:inputText value="#{reportBacker.overwriteRelevanceValue}"/>
-                <h:commandButton value="Overwrite Relevance" action="#{reportBacker.applyOverwriteRelevance}"/>
+                <h:commandButton value="#{labels.upvote_button}" action="#{reportBacker.removeVote}" rendered="#{reportBacker.hasUpvoted}" styleClass="vote-cast"/>
+                <h:commandButton value="#{labels.upvote_button}" action="#{reportBacker.upvote}" rendered="#{!reportBacker.hasUpvoted}" styleClass="vote-not-cast"/>
+                <h:commandButton value="#{labels.downvote_button}" action="#{reportBacker.removeVote}" rendered="#{reportBacker.hasDownvoted}" styleClass="vote-cast"/>
+                <h:commandButton value="#{labels.downvote_button}" action="#{reportBacker.downvote}" rendered="#{!reportBacker.hasDownvoted}" styleClass="vote-not-cast"/>
+                <h:outputLabel value="#{labels.relevance_overwritten}" rendered="#{reportBacker.overwriteRelevance}"/>
+                <h:outputLabel value="#{labels.current_relevance}"/>
+                <h:outputLabel value="#{reportBacker.report.relevance}"/>
+                <h:panelGroup rendered="#{reportBacker.privileged}">
+                    <h:inputText value="#{reportBacker.overwriteRelevanceValue}"/>
+                    <h:commandButton value="#{labels.overwrite_relevance}" action="#{reportBacker.applyOverwriteRelevance}"/>
+                </h:panelGroup>
             </h:panelGroup>
+
             <h:panelGrid columns="5">
                 <h:outputText id="ot-id" value="#{labels.id}: #{reportBacker.report.id}"/>
                 <h:outputText id="ot-status"

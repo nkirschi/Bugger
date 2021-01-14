@@ -248,7 +248,15 @@ public class ReportService {
      * @return {@code true} if they have voted to increase the relevance, {@code false} otherwise.
      */
     public boolean hasUpvoted(final Report report, final User user) {
-        return false;
+        try (Transaction tx = transactionManager.begin()) {
+            boolean upvote = tx.newReportGateway().hasUpvote(user, report);
+            tx.commit();
+            return upvote;
+        } catch (TransactionException e) {
+            log.error("Error while searching for vote for report.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            return false;
+        }
     }
 
     /**
@@ -259,7 +267,15 @@ public class ReportService {
      * @return {@code true} if they have voted to decrease the relevance, {@code false} otherwise.
      */
     public boolean hasDownvoted(final Report report, final User user) {
-        return false;
+        try (Transaction tx = transactionManager.begin()) {
+            boolean upvote = tx.newReportGateway().hasDownvote(user, report);
+            tx.commit();
+            return upvote;
+        } catch (TransactionException e) {
+            log.error("Error while searching for vote for report.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            return false;
+        }
     }
 
     /**
@@ -382,6 +398,16 @@ public class ReportService {
      */
     public void overwriteRelevance(final Report report, final Integer relevance) {
         // if relevance == null, restore original relevance value
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().overwriteRelevance(report, relevance);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Error while overwriting relevance in report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while overwriting relevance in report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
