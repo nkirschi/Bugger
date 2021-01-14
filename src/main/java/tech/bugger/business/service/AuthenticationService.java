@@ -1,14 +1,5 @@
 package tech.bugger.business.service;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Event;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Hasher;
 import tech.bugger.business.util.PriorityExecutor;
@@ -25,6 +16,12 @@ import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
+
+import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 /**
  * Service for user authentication. A {@link Feedback} {@link Event} is fired, if unexpected circumstances occur.
@@ -107,24 +104,6 @@ public class AuthenticationService {
         this.priorityExecutor = priorityExecutor;
         this.mailer = mailer;
         this.configReader = configReader;
-    }
-
-    /**
-     * Retrieves the current application path using the given {@link ExternalContext}.
-     *
-     * @param ectx The {@link ExternalContext} to use.
-     * @return The current application path.
-     */
-    public static String getApplicationPath(final ExternalContext ectx) {
-        URL currentUrl;
-        try {
-            currentUrl = new URL(((HttpServletRequest) ectx.getRequest()).getRequestURL().toString());
-        } catch (MalformedURLException e) {
-            throw new InternalError("URL is invalid.", e);
-        }
-
-        return String.format("%s://%s%s", currentUrl.getProtocol(), currentUrl.getAuthority(),
-                ectx.getApplicationContextPath());
     }
 
     /**
