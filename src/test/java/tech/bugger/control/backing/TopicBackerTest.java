@@ -11,6 +11,7 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
@@ -18,6 +19,7 @@ import tech.bugger.global.util.Lazy;
 
 import javax.faces.context.FacesContext;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
@@ -60,7 +63,7 @@ public class TopicBackerTest {
     private static final String USERNAME = "Helgi";
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic = new Topic(1, "Some title", "Some description");
@@ -152,12 +155,15 @@ public class TopicBackerTest {
     }
 
     @Test
-    public void testMakeModerator() {
+    public void testMakeModerator() throws NoSuchFieldException, IllegalAccessException {
         user.setAdministrator(true);
         topicBacker.setUserMod(USERNAME);
         topicBacker.setTopic(topic);
         when(session.getUser()).thenReturn(user);
         when(topicService.makeModerator(USERNAME, topic)).thenReturn(true);
+        Field moderators = topicBacker.getClass().getDeclaredField("moderators");
+        moderators.setAccessible(true);
+        moderators.set(topicBacker, mock(Paginator.class));
         assertAll(
                 () -> assertEquals("", topicBacker.makeModerator()),
                 () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
@@ -191,12 +197,15 @@ public class TopicBackerTest {
     }
 
     @Test
-    public void testRemoveModerator() {
+    public void testRemoveModerator() throws NoSuchFieldException, IllegalAccessException {
         user.setAdministrator(true);
         topicBacker.setUserMod(USERNAME);
         topicBacker.setTopic(topic);
         when(session.getUser()).thenReturn(user);
         when(topicService.removeModerator(USERNAME, topic)).thenReturn(true);
+        Field moderators = topicBacker.getClass().getDeclaredField("moderators");
+        moderators.setAccessible(true);
+        moderators.set(topicBacker, mock(Paginator.class));
         assertAll(
                 () -> assertEquals("", topicBacker.removeModerator()),
                 () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
@@ -250,12 +259,15 @@ public class TopicBackerTest {
     }
 
     @Test
-    public void testBanUser() {
+    public void testBanUser() throws NoSuchFieldException, IllegalAccessException {
         user.setAdministrator(true);
         topicBacker.setUserBan(USERNAME);
         topicBacker.setTopic(topic);
         when(session.getUser()).thenReturn(user);
         when(topicService.ban(USERNAME, topic)).thenReturn(true);
+        Field banned = topicBacker.getClass().getDeclaredField("bannedUsers");
+        banned.setAccessible(true);
+        banned.set(topicBacker, mock(Paginator.class));
         assertAll(
                 () -> assertEquals("", topicBacker.banUser()),
                 () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
@@ -289,12 +301,15 @@ public class TopicBackerTest {
     }
 
     @Test
-    public void testUnbanUser() {
+    public void testUnbanUser() throws NoSuchFieldException, IllegalAccessException {
         user.setAdministrator(true);
         topicBacker.setUserBan(USERNAME);
         topicBacker.setTopic(topic);
         when(session.getUser()).thenReturn(user);
         when(topicService.unban(USERNAME, topic)).thenReturn(true);
+        Field banned = topicBacker.getClass().getDeclaredField("bannedUsers");
+        banned.setAccessible(true);
+        banned.set(topicBacker, mock(Paginator.class));
         assertAll(
                 () -> assertEquals("", topicBacker.unbanUser()),
                 () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
