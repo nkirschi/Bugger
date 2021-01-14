@@ -14,7 +14,6 @@ import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
-import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
@@ -106,16 +105,6 @@ public class ReportBacker implements Serializable {
     private final PostService postService;
 
     /**
-     * The topic service providing logic.
-     */
-    private final TopicService topicService;
-
-    /**
-     * Weather the relevance is overwritten.
-     */
-    private boolean overwriteRelevance;
-
-    /**
      * The overwriting relevance.
      */
     private Integer overwriteRelevanceValue;
@@ -146,18 +135,16 @@ public class ReportBacker implements Serializable {
      * @param applicationSettings The application settings cache.
      * @param reportService       The report service to use.
      * @param postService         The post service to use.
-     * @param topicService        The topic service to use.
      * @param session             The user session.
      * @param fctx                The current {@link FacesContext} of the application.
      */
     @Inject
     public ReportBacker(final ApplicationSettings applicationSettings, final ReportService reportService,
-                        final PostService postService, final TopicService topicService, final UserSession session,
+                        final PostService postService, final UserSession session,
                         final FacesContext fctx) {
         this.applicationSettings = applicationSettings;
         this.reportService = reportService;
         this.postService = postService;
-        this.topicService = topicService;
         this.session = session;
         this.fctx = fctx;
     }
@@ -260,7 +247,10 @@ public class ReportBacker implements Serializable {
         if (session.getUser() != null) {
             hasUpvoted = hasUpvoted();
             hasDownvoted = hasDownvoted();
-            overwriteRelevance = report.getRelevanceOverwritten();
+            /**
+             * Weather the relevance is overwritten.
+             */
+            boolean overwriteRelevance = report.getRelevanceOverwritten();
             if (overwriteRelevance) {
                 overwriteRelevanceValue = report.getRelevance();
             } else {
@@ -487,7 +477,7 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     * @param overwriteRelevanceValue The new overwriting relevence.
+     * @param overwriteRelevanceValue The new overwriting relevance.
      */
     public void setOverwriteRelevanceValue(final Integer overwriteRelevanceValue) {
         this.overwriteRelevanceValue = overwriteRelevanceValue;
@@ -502,7 +492,6 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     *
      * @return Weather the user has downvoted this report.
      */
     public boolean getHasDownvoted() {
@@ -574,4 +563,5 @@ public class ReportBacker implements Serializable {
     public ReportPageDialog getCurrentDialog() {
         return currentDialog;
     }
+
 }

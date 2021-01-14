@@ -69,7 +69,7 @@ public class ReportBackerTest {
         lenient().doReturn(user).when(session).getUser();
         lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
         lenient().doReturn(ectx).when(fctx).getExternalContext();
-        reportBacker = new ReportBacker(applicationSettings, reportService, postService, topicService,
+        reportBacker = new ReportBacker(applicationSettings, reportService, postService,
                 session, fctx);
 
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),

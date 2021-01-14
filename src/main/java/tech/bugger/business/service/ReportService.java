@@ -152,7 +152,7 @@ public class ReportService {
     public void upvote(final Report report, final User user) {
         removeVote(report, user);
         Integer votingWeight = profileService.getVotingWeightForUser(user);
-        if (votingWeight != null && votingWeight > 0) {
+        if (votingWeight > 0) {
             try (Transaction tx = transactionManager.begin()) {
                 tx.newReportGateway().upvote(report, user, votingWeight);
                 tx.commit();
@@ -181,7 +181,7 @@ public class ReportService {
     public void downvote(final Report report, final User user) {
         removeVote(report, user);
         Integer votingWeight = profileService.getVotingWeightForUser(user);
-        if (votingWeight != null && votingWeight > 0) {
+        if (votingWeight > 0) {
             try (Transaction tx = transactionManager.begin()) {
                 tx.newReportGateway().downvote(report, user, votingWeight);
                 tx.commit();
@@ -192,8 +192,8 @@ public class ReportService {
                 log.error("Error when downvoting report " + report + ".", e);
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
             } catch (DuplicateException e) {
-                e.printStackTrace();
-                //TODO
+                log.error("Error when upvoting report " + report + " because a previous vote was not removed.", e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("duplicate_vote"), Feedback.Type.ERROR));
             }
         } else {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("voting_weight_zero"), Feedback.Type.INFO));
@@ -456,7 +456,6 @@ public class ReportService {
      * @param relevance The new value of the relevance.
      */
     public void overwriteRelevance(final Report report, final Integer relevance) {
-        // if relevance == null, restore original relevance value
         try (Transaction tx = transactionManager.begin()) {
             tx.newReportGateway().overwriteRelevance(report, relevance);
             tx.commit();

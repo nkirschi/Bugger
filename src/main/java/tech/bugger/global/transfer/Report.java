@@ -120,7 +120,7 @@ public class Report implements Serializable {
      * @param closingDate           The closing date of the report.
      * @param duplicateOf           The report this report is a duplicate of, loaded lazily.
      * @param relevance             The relevance value for the Report.
-     * @param relevanceOverwritten  The state of the relevence overwrite.
+     * @param relevanceOverwritten  The state of the relevance overwrite.
      * @param topic                 The topic the report belongs to, loaded lazily.
      */
     public Report(final Integer id, final String title, final Type type, final Severity severity, final String version,
