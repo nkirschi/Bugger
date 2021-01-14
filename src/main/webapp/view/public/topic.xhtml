@@ -22,7 +22,7 @@
                             <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button"
                                              value="#{labels.delete_topic}" rendered="#{userSession.user.administrator}"/>
                             <h:link id="l-edit" outcome="pretty:topic-edit" value="#{labels.edit_topic}"
-                                    styleClass="button style-button">
+                                    styleClass="button style-button" rendered="#{userSession.user.administrator}">
                                 <f:param name="id" value="#{topicBacker.topicID}"/>
                             </h:link>
                         </h:panelGroup>
