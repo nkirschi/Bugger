@@ -1,12 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.util.Locale;
-import javax.enterprise.event.Event;
-import javax.faces.application.Application;
-import javax.faces.application.NavigationHandler;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,10 +12,23 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.User;
 
+import javax.enterprise.event.Event;
+import javax.faces.application.Application;
+import javax.faces.application.NavigationHandler;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Locale;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -113,7 +119,7 @@ public class PasswordForgotBackerTest {
     @Test
     public void testForgotPasswordWhenError() {
         try (MockedStatic<AuthenticationService> serviceMock = mockStatic(AuthenticationService.class)) {
-            serviceMock.when(() -> AuthenticationService.getApplicationPath(any())).thenReturn("https://bugger.tech");
+            serviceMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("https://bugger.tech");
             testUser1.setId(100);
             backer.setUser(testUser1);
             doReturn(true).when(authenticationService).forgotPassword(any(), any());
@@ -127,7 +133,7 @@ public class PasswordForgotBackerTest {
     @Test
     public void testForgotPasswordSuccess() {
         try (MockedStatic<AuthenticationService> serviceMock = mockStatic(AuthenticationService.class)) {
-            serviceMock.when(() -> AuthenticationService.getApplicationPath(any())).thenReturn("https://bugger.tech");
+            serviceMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("https://bugger.tech");
             testUser1.setId(100);
             backer.setUser(testUser1);
             doReturn(false).when(authenticationService).forgotPassword(any(), any());

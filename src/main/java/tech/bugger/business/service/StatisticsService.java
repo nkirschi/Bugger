@@ -13,14 +13,14 @@ import tech.bugger.persistence.util.TransactionManager;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
 /**
- * Service providing methods related to statistics. A {@code Feedback} event is fired, if unexpected circumstances
- * occur.
+ * Service for content statistics. A {@code Feedback} event is fired if unexpected circumstances occur.
  */
 @ApplicationScoped
 public class StatisticsService {
@@ -83,54 +83,55 @@ public class StatisticsService {
      * Returns the average time a report remains open, filtered by the specified {@link ReportCriteria}.
      *
      * @param criteria The criteria reports must fulfill to be taken into consideration.
-     * @return The average time a report matching the {@code criteria} remains open.
+     * @return The average time a report matching the {@code criteria} remains open as {@link Duration} or {@code null}
+     *         iff this time span could not be determined.
      */
     public Duration averageTimeOpen(final ReportCriteria criteria) {
-        Duration d = null;
         try (Transaction tx = transactionManager.begin()) {
-            d = tx.newStatisticsGateway().getAverageTimeToClose(criteria);
+            Duration averageTimeOpen = tx.newStatisticsGateway().getAverageTimeToClose(criteria);
             tx.commit();
+            return averageTimeOpen;
         } catch (TransactionException e) {
             log.error("Error when determining average activity duration of reports.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
-        return d;
+        return null;
     }
 
     /**
      * Returns the average number of posts per report, filtered by the specified {@link ReportCriteria}.
      *
      * @param criteria The criteria reports must fulfill to be taken into consideration.
-     * @return The average number of posts per report of those matching the {@code criteria}.
+     * @return The average number of posts per report of those matching the {@code criteria} or {@code null} if this
+     *         average could not be determined.
      */
-    public Double averagePostsPerReport(final ReportCriteria criteria) {
-        Double avgPostsPerReport = null;
+    public BigDecimal averagePostsPerReport(final ReportCriteria criteria) {
         try (Transaction tx = transactionManager.begin()) {
-            avgPostsPerReport = tx.newStatisticsGateway().getAveragePostsPerReport(criteria);
+            BigDecimal avgPostsPerReport = tx.newStatisticsGateway().getAveragePostsPerReport(criteria);
             tx.commit();
+            return avgPostsPerReport;
         } catch (TransactionException e) {
             log.error("Error when determining average posts per report.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
-        return avgPostsPerReport;
+        return null;
     }
 
     /**
-     * Returns the ten users with the most relevance summed up over their created reports, either all-time or for a
-     * specific time frame regarding the creation date of the reports.
+     * Returns the ten users with the most relevance summed up over their created reports.
      *
      * @return The top ten users.
      */
-    public List<TopUser> topTenUsers() {
-        List<TopUser> topTenUsers = Collections.emptyList();
+    public List<TopUser> determineTopTenUsers() {
         try (Transaction tx = transactionManager.begin()) {
-            topTenUsers = tx.newStatisticsGateway().getTopTenUsers();
+            List<TopUser> topTenUsers = tx.newStatisticsGateway().getTopTenUsers();
             tx.commit();
+            return topTenUsers;
         } catch (TransactionException e) {
             log.error("Error when fetching top ten users.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
-        return topTenUsers;
+        return Collections.emptyList();
     }
 
     /**
@@ -138,16 +139,16 @@ public class StatisticsService {
      *
      * @return The top ten reports.
      */
-    public List<TopReport> topTenReports() {
-        List<TopReport> topTenReports = Collections.emptyList();
+    public List<TopReport> determineTopTenReports() {
         try (Transaction tx = transactionManager.begin()) {
-            topTenReports = tx.newStatisticsGateway().getTopTenReports();
+            List<TopReport> topTenReports = tx.newStatisticsGateway().getTopTenReports();
             tx.commit();
+            return topTenReports;
         } catch (TransactionException e) {
             log.error("Error when fetching top ten reports.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
-        return topTenReports;
+        return Collections.emptyList();
     }
 
 }
