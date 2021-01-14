@@ -161,9 +161,10 @@ public class HeaderBacker implements Serializable {
      * @return The URL to redirect to after login.
      */
     public String getRedirectUrl() {
+        String base = fctx.getExternalContext().getApplicationContextPath();
         String uri = PrettyContext.getCurrentInstance().getCurrentMapping().getPattern();
         String queryString = ((HttpServletRequest) fctx.getExternalContext().getRequest()).getQueryString();
-        return URLEncoder.encode(uri + (queryString == null ? "" : '?' + queryString), StandardCharsets.UTF_8);
+        return URLEncoder.encode(base + uri + (queryString == null ? "" : '?' + queryString), StandardCharsets.UTF_8);
     }
 
     /**

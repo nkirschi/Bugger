@@ -23,11 +23,12 @@
                             <h:inputText id="it-username" value="#{registerBacker.user.username}" required="true"
                                          a:maxlength="#{Constants.USERNAME_MAX}"
                                          a:placeholder="#{labels['register.username']}"
-                                         styleClass="form-control #{component.valid ? 'is-valid' : 'is-invalid'}">
+                                         styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                                : component.valid ? 'is-valid' : 'is-invalid'}">
                                 <f:validator validatorId="usernameRegexValidator"/>
                                 <f:validator validatorId="usernameAssignedValidator"/>
                             </h:inputText>
-                            <h:panelGroup layout="block" styleClass="invalid-tooltip">
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                 <h:message for="it-username"/>
                             </h:panelGroup>
                         </h:panelGroup>
@@ -42,11 +43,12 @@
                             <h:inputText id="it-email" value="#{registerBacker.user.emailAddress}" required="true"
                                          a:maxlength="#{Constants.SMALL_FIELD}"
                                          a:placeholder="#{labels['register.email']}"
-                                         styleClass="form-control #{component.valid ? 'is-valid' : 'is-invalid'}">
+                                         styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                                : component.valid ? 'is-valid' : 'is-invalid'}">
                                 <f:validator validatorId="emailRegexValidator"/>
                                 <f:validator validatorId="emailAssignedValidator"/>
                             </h:inputText>
-                            <h:panelGroup layout="block" styleClass="invalid-tooltip text-end">
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                 <h:message for="it-email"/>
                             </h:panelGroup>
                         </h:panelGroup>
@@ -61,8 +63,9 @@
                             <h:inputText id="it-first-name" value="#{registerBacker.user.firstName}" required="true"
                                          a:maxlength="#{Constants.SMALL_FIELD}"
                                          a:placeholder="#{labels['register.first_name']}"
-                                         styleClass="form-control #{component.valid ? 'is-valid' : 'is-invalid'}"/>
-                            <h:panelGroup layout="block" styleClass="invalid-tooltip text-end">
+                                         styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                                : component.valid ? 'is-valid' : 'is-invalid'}"/>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                 <h:message for="it-first-name"/>
                             </h:panelGroup>
                         </h:panelGroup>
@@ -75,8 +78,9 @@
                             <h:inputText id="it-last-name" value="#{registerBacker.user.lastName}" required="true"
                                          a:maxlength="#{Constants.SMALL_FIELD}"
                                          a:placeholder="#{labels['register.last_name']}"
-                                         styleClass="form-control #{component.valid ? 'is-valid' : 'is-invalid'}"/>
-                            <h:panelGroup layout="block" styleClass="invalid-tooltip text-end">
+                                         styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                                : component.valid ? 'is-valid' : 'is-invalid'}"/>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                 <h:message for="it-last-name"/>
                             </h:panelGroup>
                         </h:panelGroup>

@@ -1,8 +1,12 @@
-.h1, .h2, .h3, .h4, .h5, .h6 {
-    display: block;
+/**
+ * Template
+ */
+
+body {
+    background: #fafafa;
 }
 
-#header {
+#p-header {
     position: fixed;
     height: 80px;
     top: 0;
@@ -13,7 +17,7 @@
     background: #fff;
 }
 
-#footer {
+#p-footer {
     position: fixed;
     height: 50px;
     bottom: 0;
@@ -25,20 +29,52 @@
     background: #fff;
 }
 
-#content {
+#p-content {
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
     overflow: auto;
     padding: 40px;
     margin: 100px auto 70px auto;
     max-width: 1200px;
+    background: #fff;
 }
 
-#messages {
+#p-messages {
     position: fixed;
     top: 120px;
     left: 50%;
     transform: translateX(-50%);
     max-width: 400px;
+}
+
+#l-logo {
+    text-decoration: none;
+    border:none;
+    color: #000;
+    transition: opacity .15s ease-in-out;
+}
+
+#l-logo:hover {
+    opacity: 0.3
+}
+
+#l-logo:hover {
+    opacity: 0.5;
+}
+
+#p-search-bar {
+    flex: 9999;
+    max-width: 1200px;
+}
+
+#p-profile-menu {
+    position: absolute;
+    padding: 10px;
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
+    right: 20px;
+    top: 65px;
+    z-index: 9999;
+    background: #fff;
+    width: 200px;
 }
 
 .alert {
@@ -58,28 +94,29 @@
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
 }
 
-.dialog + #content {
-    filter: blur(10px);
+.dialog + #p-content {
+    filter: blur(4px);
     opacity: 0.5;
     pointer-events: none;
+    box-shadow: none;
 }
 
-.headerMenu {
-    display: inline-block;
-    margin-right: 50px;
-    margin-top: 30px;
-    float: right;
+
+/**
+ * Content
+ */
+
+.flex-basis-0 {
+    flex-basis: 0;
 }
 
-#p-profile-menu {
-    position: absolute;
-    padding: 10px;
-    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
-    right: 20px;
-    top: 65px;
-    z-index: 9999;
-    background: #fff;
-    width: 200px;
+
+/**
+ * Content
+ */
+
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    display: block;
 }
 
 .title {
@@ -103,10 +140,6 @@
 .align-vcenter {
     margin-top: auto;
     margin-bottom: auto;
-}
-
-.button {
-    margin: 1%;
 }
 
 .style-button {

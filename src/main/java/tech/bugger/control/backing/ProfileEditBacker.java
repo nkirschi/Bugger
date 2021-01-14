@@ -1,7 +1,15 @@
 package tech.bugger.control.backing;
 
-import java.io.Serial;
-import java.io.Serializable;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.service.AuthenticationService;
+import tech.bugger.business.service.ProfileService;
+import tech.bugger.business.util.MarkdownHandler;
+import tech.bugger.control.util.JFConfig;
+import tech.bugger.global.transfer.Token;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Lazy;
+import tech.bugger.global.util.Log;
+
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -9,14 +17,8 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.AuthenticationService;
-import tech.bugger.business.service.ProfileService;
-import tech.bugger.business.util.MarkdownHandler;
-import tech.bugger.global.transfer.Token;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
-import tech.bugger.global.util.Log;
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * Backing bean for the profile edit page.
@@ -259,7 +261,7 @@ public class ProfileEditBacker implements Serializable {
         User updateUser = new User(user);
 
         return authenticationService.updateEmail(updateUser,
-                AuthenticationService.getApplicationPath(fctx.getExternalContext()), email);
+                                                 JFConfig.getApplicationPath(fctx.getExternalContext()), email);
     }
 
     /**
