@@ -156,3 +156,11 @@
     width: auto !important;
     display: inline-block !important;
 }
+
+.vote-cast {
+    background-color: #0a58ca;
+}
+
+.vote-not-cast {
+    background-color: #157347;
+}

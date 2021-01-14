@@ -94,14 +94,14 @@ public class Report implements Serializable {
     private Integer duplicateOf;
 
     /**
-     * The forced relevance value of the report.
+     * The relevance value of the report.
      */
-    private Integer forcedRelevance;
+    private Integer relevance;
 
     /**
-     * The relevance of the report, based on votes.
+     * {@code true} if the relevance is overwritten.
      */
-    private Integer calculatedRelevance;
+    private boolean relevanceOverwritten;
 
     /**
      * The ID of the topic this report is in.
@@ -119,12 +119,13 @@ public class Report implements Serializable {
      * @param authorship The report authorship metadata.
      * @param closingDate The closing date of the report.
      * @param duplicateOf The report this report is a duplicate of, loaded lazily.
-     * @param forcedRelevance The relevance value to override the calculated relevance.
+     * @param relevance The relevance value for the Report.
+     * @param relevanceOverwritten The state of the relevence overwrite.
      * @param topic The topic the report belongs to, loaded lazily.
      */
     public Report(final Integer id, final String title, final Type type, final Severity severity, final String version,
                   final Authorship authorship, final ZonedDateTime closingDate, final Integer duplicateOf,
-                  final Integer forcedRelevance, final Integer topic) {
+                  final Integer relevance, final boolean relevanceOverwritten, final Integer topic) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -133,7 +134,8 @@ public class Report implements Serializable {
         this.authorship = authorship;
         this.closingDate = closingDate;
         this.duplicateOf = duplicateOf;
-        this.forcedRelevance = forcedRelevance;
+        this.relevance = relevance;
+        this.relevanceOverwritten = relevanceOverwritten;
         this.topic = topic;
     }
 
@@ -141,7 +143,7 @@ public class Report implements Serializable {
      * Constructs an empty report.
      */
     public Report() {
-        this(0, "", Type.BUG, Severity.MINOR, "", new Authorship(null, null, null, null), null, null, null, 0);
+        this(0, "", Type.BUG, Severity.MINOR, "", new Authorship(null, null, null, null), null, null, null, false, 0);
     }
 
     /**
@@ -289,21 +291,21 @@ public class Report implements Serializable {
     }
 
     /**
-     * Returns the relevance value to override the calculated relevance.
+     * Returns the relevance value.
      *
-     * @return The forced relevance or {@code null} if it is not overridden.
+     * @return The relevance or the report.
      */
-    public Integer getForcedRelevance() {
-        return forcedRelevance;
+    public Integer getRelevance() {
+        return relevance;
     }
 
     /**
-     * Sets the relevance value to override the calculated relevance.
+     * Sets the relevance value.
      *
-     * @param forcedRelevance The forced relevance to be set.
+     * @param relevance The relevance to be set.
      */
-    public void setForcedRelevance(final Integer forcedRelevance) {
-        this.forcedRelevance = forcedRelevance;
+    public void setRelevance(final Integer relevance) {
+        this.relevance = relevance;
     }
 
     /**
@@ -325,21 +327,21 @@ public class Report implements Serializable {
     }
 
     /**
-     * Returns the relevance if this report.
+     * Returns weather the relevance of this report is overwritten.
      *
-     * @return The relevance of this topic.
+     * @return {@code true} iff relevance of this topic is overwritten.
      */
-    public Integer getCalculatedRelevance() {
-        return calculatedRelevance;
+    public boolean getRelevanceOverwritten() {
+        return relevanceOverwritten;
     }
 
     /**
-     * Sets the relevance of this report at a specified value.
+     * Sets weather the relevance of this topic should be overwritten.
      *
-     * @param relevance The new relevance of this topic.
+     * @param relevanceOverwritten {@code true} iff relevance of this topic should be overwritten.
      */
-    public void setCalculatedRelevance(final Integer relevance) {
-        this.calculatedRelevance = relevance;
+    public void setRelevanceOverwritten(final boolean relevanceOverwritten) {
+        this.relevanceOverwritten = relevanceOverwritten;
     }
 
     /**

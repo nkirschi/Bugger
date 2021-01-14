@@ -88,7 +88,9 @@ public class ReportDBGateway implements ReportGateway {
     @Override
     public Report find(final int id) throws NotFoundException {
         try (PreparedStatement stmt = conn.prepareStatement(
-                "SELECT * FROM report WHERE id = ?;"
+                "SELECT * FROM report AS r"
+                        + " LEFT OUTER JOIN report_relevance AS v ON r.id = v.report"
+                        + " WHERE id = ?;"
         )) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(id)
@@ -103,12 +105,16 @@ public class ReportDBGateway implements ReportGateway {
                 ZonedDateTime modifiedAt = rs.getTimestamp("last_modified_at").toLocalDateTime()
                         .atZone(ZoneId.systemDefault());
                 Authorship authorship = new Authorship(creator, createdAt, modifier, modifiedAt);
-
-                Integer forcedRelevance = rs.getObject("forced_relevance", Integer.class);
+                Integer relevance = rs.getInt("relevance");
+                boolean relevanceOverwritten = false;
+                if (rs.getObject("forced_relevance", Integer.class) != null) {
+                    relevance = rs.getInt("forced_relevance");
+                    relevanceOverwritten = true;
+                }
                 Integer duplicateOf = rs.getObject("duplicate_of", Integer.class);
                 Timestamp closingDate = rs.getTimestamp("closed_at");
 
-                return new Report(
+                return new Report (
                         id,
                         rs.getString("title"),
                         Report.Type.valueOf(rs.getString("type")),
@@ -117,7 +123,8 @@ public class ReportDBGateway implements ReportGateway {
                         authorship,
                         closingDate != null ? closingDate.toLocalDateTime().atZone(ZoneId.systemDefault()) : null,
                         duplicateOf,
-                        forcedRelevance,
+                        relevance,
+                        relevanceOverwritten,
                         rs.getInt("topic")
                 );
             } else {
@@ -143,12 +150,17 @@ public class ReportDBGateway implements ReportGateway {
         } else if (!showOpenReports) {
             filter = "AND closed_at IS NOT NULL";
         }
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM report WHERE topic = ? " + filter
-                + " AS r LEFT OUTER JOIN report_relevance AS v ON r.id = v.report"
+        String sql = "SELECT * FROM report AS r"
+                + " LEFT OUTER JOIN report_relevance AS v ON r.id = v.report"
+                + " WHERE topic = ? " + filter
                 + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
-                + " LIMIT " + Pagitable.getItemLimit(selection)
-                + " OFFSET " + Pagitable.getItemOffset(selection) + ";")) {
-            ResultSet rs = new StatementParametrizer(stmt).integer(topic.getId()).toStatement().executeQuery();
+                + " LIMIT ? OFFSET ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(topic.getId())
+                    .integer(Pagitable.getItemLimit(selection))
+                    .integer(Pagitable.getItemOffset(selection)).toStatement();
+            ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 selectedReports.add(getReportFromResultSet(rs));
             }
@@ -160,17 +172,21 @@ public class ReportDBGateway implements ReportGateway {
     }
 
     private Report getReportFromResultSet(final ResultSet rs) throws SQLException, NotFoundException {
-        System.out.println(rs.getInt("relevance"));
         Report report = new Report();
         report.setId(rs.getInt("id"));
         report.setTitle(rs.getString("title"));
         report.setType(Report.Type.valueOf(rs.getString("type")));
         report.setSeverity(Report.Severity.valueOf(rs.getString("severity")));
         report.setVersion(rs.getString("version"));
-        report.setForcedRelevance(rs.getInt("forced_relevance"));
+        report.setRelevance((rs.getInt("relevance")));
+        report.setRelevanceOverwritten(false);
+        if (rs.getObject("forced_relevance", Integer.class) != null) {
+            report.setRelevance((rs.getInt("forced_relevance")));
+            report.setRelevanceOverwritten(true);
+        }
         report.setTopic(rs.getInt("topic"));
         report.setDuplicateOf(rs.getInt("duplicate_of"));
-        report.setCalculatedRelevance((rs.getInt("relevance")));
+
         ZonedDateTime created = null;
         ZonedDateTime modified = null;
         ZonedDateTime closed = null;
@@ -379,8 +395,8 @@ public class ReportDBGateway implements ReportGateway {
      */
     @Override
     public Integer getRelevance(Report report) throws NotFoundException {
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT relevance FROM report_votes WHERE report = ? "
-                + " AS r LEFT OUTER JOIN report_relevance AS v ON r.id = v.report")) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT relevance FROM report"
+                + " AS r LEFT OUTER JOIN report_relevance AS v ON r.id = v.report WHERE report = ? ")) {
             ResultSet rs = new StatementParametrizer(stmt).integer(report.getId()).toStatement().executeQuery();
             if (rs.next()) {
                 return rs.getInt("relevance");
@@ -429,7 +445,7 @@ public class ReportDBGateway implements ReportGateway {
     @Override
     public void upvote(final Report report, final User user, Integer votingWeight) {
         try (PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO report_vote (voter, report, weight)"
+                "INSERT INTO relevance_vote (voter, report, weight)"
                         + "VALUES (?, ?, ?);"
         )) {
             PreparedStatement statement = new StatementParametrizer(stmt)
@@ -450,7 +466,7 @@ public class ReportDBGateway implements ReportGateway {
     @Override
     public void downvote(final Report report, final User user, final Integer votingWeight) {
         try (PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO report_vote (voter, report, weight)"
+                "INSERT INTO relevance_vote (voter, report, weight)"
                         + "VALUES (?, ?, ?);"
         )) {
             PreparedStatement statement = new StatementParametrizer(stmt)
@@ -470,6 +486,7 @@ public class ReportDBGateway implements ReportGateway {
      */
     @Override
     public void removeVote(final Report report, final User user) {
+        boolean voteExists = false;
         if (report == null) {
             log.error("Cannot delete report null.");
             throw new IllegalArgumentException("Report cannot be null.");
@@ -477,15 +494,29 @@ public class ReportDBGateway implements ReportGateway {
             log.error("Cannot delete report with ID null");
             throw new IllegalArgumentException("Report ID cannot be null.");
         }
-
-        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM report_vote WHERE voter = ? report = ? RETURNING *;")) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM relevance_vote WHERE voter = ? AND report = ?;")) {
             PreparedStatement statement = new StatementParametrizer(stmt)
                     .integer(user.getId())
                     .integer(report.getId()).toStatement();
             ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                voteExists = true;
+            } else {
+                voteExists = false;
+            }
         } catch (SQLException e) {
-            log.error("Error when deleting report " + report + ".", e);
-            throw new StoreException("Error when deleting report " + report + ".", e);
+            throw new StoreException("Error when deleting vote on report " + report + ".", e);
+        }
+        if (voteExists) {
+            try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM relevance_vote WHERE voter = ? AND report = ? RETURNING *;")) {
+                PreparedStatement statement = new StatementParametrizer(stmt)
+                        .integer(user.getId())
+                        .integer(report.getId()).toStatement();
+                ResultSet rs = statement.executeQuery();
+            } catch (SQLException e) {
+                log.error("Error when deleting vote on report " + report + ".", e);
+                throw new StoreException("Error when deleting vote on report " + report + ".", e);
+            }
         }
     }
 

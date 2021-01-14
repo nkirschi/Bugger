@@ -87,11 +87,6 @@ public class ReportBacker implements Serializable {
     private int duplicateOfID;
 
     /**
-     * The overwriting relevance.
-     */
-    private Integer overwritingRelevance;
-
-    /**
      * The post to be deleted.
      */
     private Post postToBeDeleted;
@@ -120,6 +115,26 @@ public class ReportBacker implements Serializable {
      * The topic service providing logic.
      */
     private final TopicService topicService;
+
+    /**
+     * Weather the relevance is overwritten.
+     */
+    private boolean overwriteRelevance;
+
+    /**
+     * The overwriting relevance.
+     */
+    private Integer overwriteRelevanceValue;
+
+    /**
+     * Weather the user has upvoted the report.
+     */
+    private boolean hasUpvoted;
+
+    /**
+     * Weather the user has downvoted the report.
+     */
+    private boolean hasDownvoted;
 
     /**
      * The user session.
@@ -223,6 +238,8 @@ public class ReportBacker implements Serializable {
                 }
             }
         }
+        hasUpvoted = hasUpvoted();
+        hasDownvoted = hasDownvoted();
     }
 
     /**
@@ -268,7 +285,7 @@ public class ReportBacker implements Serializable {
      */
     public String upvote() {
         reportService.upvote(report, session.getUser());
-        return null;
+        return "";
     }
 
     /**
@@ -276,7 +293,7 @@ public class ReportBacker implements Serializable {
      */
     public String downvote() {
         reportService.downvote(report, session.getUser());
-        return null;
+        return "";
     }
 
     /**
@@ -284,7 +301,7 @@ public class ReportBacker implements Serializable {
      */
     public String removeVote() {
         reportService.removeVote(report, session.getUser());
-        return null;
+        return "";
     }
 
     /**
@@ -343,8 +360,8 @@ public class ReportBacker implements Serializable {
     /**
      * Overwrites the relevance of the report with a set value.
      */
-    public void overwriteRelevance() {
-
+    public void applyOverwriteRelevance() {
+        reportService.overwriteRelevance(report, overwriteRelevanceValue);
     }
 
     /**
@@ -399,6 +416,50 @@ public class ReportBacker implements Serializable {
     }
 
     /**
+     * @return Weather the relevance was overwritten.
+     */
+    public boolean getOverwriteRelevance() {
+        return overwriteRelevance;
+    }
+
+    /**
+     * @param overwriteRelevance Weather the relevance is overwritten.
+     */
+    public void setOverwriteRelevance(boolean overwriteRelevance) {
+        this.overwriteRelevance = overwriteRelevance;
+    }
+
+    /**
+     * @return The relevance overwriting value.
+     */
+    public Integer getOverwriteRelevanceValue() {
+        return overwriteRelevanceValue;
+    }
+
+    /**
+     * @param overwriteRelevanceValue The new overwriting relevence.
+     */
+    public void setOverwriteRelevanceValue(Integer overwriteRelevanceValue) {
+        this.overwriteRelevanceValue = overwriteRelevanceValue;
+    }
+
+    /**
+     *
+     * @return Weather the user has upvoted this report.
+     */
+    public boolean getHasUpvoted() {
+        return hasUpvoted;
+    }
+
+    /**
+     *
+     * @return Weather the user has downvoted this report.
+     */
+    public boolean getHasDownvoted() {
+        return hasDownvoted;
+    }
+
+    /**
      * @param report The report to set.
      */
     public void setReport(final Report report) {
@@ -447,20 +508,6 @@ public class ReportBacker implements Serializable {
      */
     public ReportPageDialog getCurrentDialog() {
         return currentDialog;
-    }
-
-    /**
-     * @param overwritingRelevance The overwritingRelevance to set.
-     */
-    public void setOverwritingRelevance(final Integer overwritingRelevance) {
-        this.overwritingRelevance = overwritingRelevance;
-    }
-
-    /**
-     * @return The overwritingRelevance.
-     */
-    public Integer getOverwritingRelevance() {
-        return overwritingRelevance;
     }
 
     /**
