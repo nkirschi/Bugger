@@ -41,7 +41,8 @@
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block">
                         <h:panelGroup layout="block" styleClass="col-sm-12">
-                            <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}" styleClass="button" value="#{labels.apply_filter}"/>
+                            <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}"
+                                             styleClass="button" value="#{labels.apply_filter}"/>
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -58,6 +59,13 @@
                         <h:link value="#{var.username}" outcome="pretty:profile">
                             <f:param name="u" value="#{var.username}"/>
                         </h:link>
+                    </h:column>
+                    <h:column>
+                        <h:commandLink id="l-demote-user" action="#{topicBacker.unmodSingleUser(var.username)}"
+                                       styleClass="button" rendered="#{topicBacker.moderator}">
+                            <h:graphicImage id="g-demote-user" value="/resources/images/trash.png"
+                                            styleClass="trashcan-small"/>
+                        </h:commandLink>
                     </h:column>
                 </b:pagitable>
             </h:panelGroup>
@@ -85,6 +93,13 @@
                         <h:link value="#{var.username}" outcome="pretty:profile">
                             <f:param name="u" value="#{var.username}"/>
                         </h:link>
+                    </h:column>
+                    <h:column>
+                        <h:commandLink id="l-unban-user" action="#{topicBacker.unbanSingleUser(var.username)}"
+                                       styleClass="button" rendered="#{topicBacker.moderator}">
+                            <h:graphicImage id="g-unban-user" value="/resources/images/trash.png"
+                                            styleClass="trashcan-small"/>
+                        </h:commandLink>
                     </h:column>
                 </b:pagitable>
             </h:panelGroup>
@@ -179,7 +194,7 @@
                     <h:panelGroup id="p-mod-suggestions" layout="block">
                         <ui:repeat value="#{empty topicBacker.userModSuggestions ? labels.no_suggestions
                             : topicBacker.userModSuggestions}" var="user">
-                            <h:panelGrid columns="1">
+                            <h:panelGrid columns="1" styleClass="search">
                                 #{user}
                             </h:panelGrid>
                         </ui:repeat>
@@ -221,7 +236,7 @@
                         <h:panelGroup id="p-unmod-suggestions" layout="block">
                             <ui:repeat value="#{empty topicBacker.userModSuggestions ? labels.no_suggestions
                                 : topicBacker.userModSuggestions}" var="user">
-                                <h:panelGrid columns="1">
+                                <h:panelGrid columns="1" styleClass="search">
                                     #{user}
                                 </h:panelGrid>
                             </ui:repeat>
@@ -264,7 +279,7 @@
                         <h:panelGroup id="p-ban-suggestions" layout="block">
                             <ui:repeat value="#{empty topicBacker.userBanSuggestions ? labels.no_suggestions
                                 : topicBacker.userBanSuggestions}" var="user">
-                                <h:panelGrid columns="1">
+                                <h:panelGrid columns="1" styleClass="search">
                                     #{user}
                                 </h:panelGrid>
                             </ui:repeat>
@@ -309,7 +324,7 @@
                         <h:panelGroup id="p-unban-suggestions" layout="block">
                             <ui:repeat value="#{empty topicBacker.userBanSuggestions ? labels.no_suggestions
                                 : topicBacker.userBanSuggestions}" var="user">
-                                <h:panelGrid columns="1">
+                                <h:panelGrid columns="1" styleClass="search">
                                     #{user}
                                 </h:panelGrid>
                             </ui:repeat>

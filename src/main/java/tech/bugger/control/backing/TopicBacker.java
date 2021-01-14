@@ -72,7 +72,12 @@ public class TopicBacker implements Serializable {
         /**
          * The dialog to unban a user is to be rendered.
          */
-        UNBAN
+        UNBAN,
+
+        /**
+         * A dialog to confirm the current user action is to be rendered.
+         */
+        SIMPLE
     }
 
     /**
@@ -378,6 +383,26 @@ public class TopicBacker implements Serializable {
     public String closeDialog() {
         displayDialog = DialogType.NONE;
         return null;
+    }
+
+    /**
+     * Opens the unban dialog and fills the input field with the given username.
+     *
+     * @param username The username of the user to be demoted.
+     */
+    public void unbanSingleUser(String username) {
+        userBan = username;
+        openUnbanDialog();
+    }
+
+    /**
+     * Opens the dialog for demoting a moderator of the topic and fills the input field with the given username.
+     *
+     * @param username The username of the user to be demoted.
+     */
+    public void unmodSingleUser(String username) {
+        userMod = username;
+        openUnmodDialog();
     }
 
     /**

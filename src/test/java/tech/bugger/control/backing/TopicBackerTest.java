@@ -64,6 +64,12 @@ public class TopicBackerTest {
     }
 
     @Test
+    public void testOpenDeleteDialog() {
+        topicBacker.openDeleteDialog();
+        assertEquals(TopicBacker.DialogType.DELETE, topicBacker.getDisplayDialog());
+    }
+
+    @Test
     public void testOpenModDialog() {
         topicBacker.openModDialog();
         assertEquals(TopicBacker.DialogType.MOD, topicBacker.getDisplayDialog());
@@ -88,16 +94,28 @@ public class TopicBackerTest {
     }
 
     @Test
-    public void testOpenDeleteDialog() {
-        topicBacker.openDeleteDialog();
-        assertEquals(TopicBacker.DialogType.DELETE, topicBacker.getDisplayDialog());
-    }
-
-    @Test
     public void testCloseDialog() {
         topicBacker.setDisplayDialog(TopicBacker.DialogType.BAN);
         topicBacker.closeDialog();
         assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog());
+    }
+
+    @Test
+    public void testUnbanSingleUser() {
+        topicBacker.unbanSingleUser(USERNAME);
+        assertAll(
+                () -> assertEquals(USERNAME, topicBacker.getUserBan()),
+                () -> assertEquals(TopicBacker.DialogType.UNBAN, topicBacker.getDisplayDialog())
+        );
+    }
+
+    @Test
+    public void testUnmodSingleUser() {
+        topicBacker.unmodSingleUser(USERNAME);
+        assertAll(
+                () -> assertEquals(USERNAME, topicBacker.getUserMod()),
+                () -> assertEquals(TopicBacker.DialogType.UNMOD, topicBacker.getDisplayDialog())
+        );
     }
 
     @Test

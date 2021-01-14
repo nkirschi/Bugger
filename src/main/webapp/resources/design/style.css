@@ -166,3 +166,13 @@
     width: auto !important;
     display: inline-block !important;
 }
+
+.trashcan-small {
+    width: 16px;
+    height: 16px;
+}
+
+.search {
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
+    margin: 1%;
+}
