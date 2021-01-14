@@ -86,6 +86,27 @@ public class SearchServiceTest {
     }
 
     @Test
+    public void testGetUserUnbanSuggestions() {
+        List<String> users = new ArrayList<>();
+        users.add(user.getUsername());
+        when(searchGateway.getUserUnbanSuggestions(any(), anyInt(), any())).thenReturn(users);
+        assertEquals(users, service.getUserUnbanSuggestions(query, topic));
+    }
+
+    @Test
+    public void testGetUserUnbanSuggestionsNoUsers() {
+        when(searchGateway.getUserUnbanSuggestions(any(), anyInt(), any())).thenReturn(new ArrayList<>());
+        assertTrue(service.getUserUnbanSuggestions(query, topic).isEmpty());
+    }
+
+    @Test
+    public void testGetUserUnbanSuggestionsTransactionException() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertTrue(service.getUserUnbanSuggestions(query, topic).isEmpty());
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
     public void testGetUserModSuggestions() {
         List<String> users = new ArrayList<>();
         users.add(user.getUsername());
@@ -103,6 +124,27 @@ public class SearchServiceTest {
     public void testGetUserModSuggestionsTransactionException() throws TransactionException {
         doThrow(TransactionException.class).when(tx).commit();
         assertTrue(service.getUserModSuggestions(query, topic).isEmpty());
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetUserUnmodSuggestions() {
+        List<String> users = new ArrayList<>();
+        users.add(user.getUsername());
+        when(searchGateway.getUserUnmodSuggestions(any(), anyInt(), any())).thenReturn(users);
+        assertEquals(users, service.getUserUnmodSuggestions(query, topic));
+    }
+
+    @Test
+    public void testGetUserUnmodSuggestionsNoUsers() {
+        when(searchGateway.getUserUnmodSuggestions(any(), anyInt(), any())).thenReturn(new ArrayList<>());
+        assertTrue(service.getUserUnmodSuggestions(query, topic).isEmpty());
+    }
+
+    @Test
+    public void testGetUserUnmodSuggestionsTransactionException() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertTrue(service.getUserUnmodSuggestions(query, topic).isEmpty());
         verify(feedbackEvent).fire(any());
     }
 

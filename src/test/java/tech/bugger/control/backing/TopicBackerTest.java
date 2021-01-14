@@ -22,9 +22,11 @@ import javax.faces.context.FacesContext;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -133,64 +135,78 @@ public class TopicBackerTest {
     @Test
     public void testMakeModerator() {
         user.setAdministrator(true);
-        topicBacker.setUserToBeModded(USERNAME);
+        topicBacker.setUserMod(USERNAME);
         topicBacker.setTopic(topic);
         when(session.getUser()).thenReturn(user);
         when(topicService.makeModerator(USERNAME, topic)).thenReturn(true);
-        topicBacker.makeModerator();
-        assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog());
+        assertAll(
+                () -> assertEquals("", topicBacker.makeModerator()),
+                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+        );
         verify(topicService).makeModerator(USERNAME, topic);
     }
 
     @Test
     public void testMakeModeratorNotPrivileged() {
-        topicBacker.setUserToBeModded(USERNAME);
+        topicBacker.setUserMod(USERNAME);
         topicBacker.setTopic(topic);
-        topicBacker.makeModerator();
+        assertAll(
+                () -> assertNull(topicBacker.makeModerator()),
+                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+        );
         verify(topicService, times(0)).makeModerator(USERNAME, topic);
     }
 
     @Test
     public void testMakeModeratorUnsuccessful() {
         user.setAdministrator(true);
-        topicBacker.setUserToBeModded(USERNAME);
+        topicBacker.setUserMod(USERNAME);
         topicBacker.setTopic(topic);
         topicBacker.setDisplayDialog(TopicBacker.DialogType.MOD);
         when(session.getUser()).thenReturn(user);
-        topicBacker.makeModerator();
-        assertEquals(TopicBacker.DialogType.MOD, topicBacker.getDisplayDialog());
+        assertAll(
+                () -> assertNull(topicBacker.makeModerator()),
+                () -> assertEquals(TopicBacker.DialogType.MOD, topicBacker.getDisplayDialog())
+        );
         verify(topicService).makeModerator(USERNAME, topic);
     }
 
     @Test
     public void testRemoveModerator() {
         user.setAdministrator(true);
-        topicBacker.setUserToBeModded(USERNAME);
+        topicBacker.setUserMod(USERNAME);
         topicBacker.setTopic(topic);
         when(session.getUser()).thenReturn(user);
         when(topicService.removeModerator(USERNAME, topic)).thenReturn(true);
-        topicBacker.removeModerator();
-        assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog());
+        assertAll(
+                () -> assertEquals("", topicBacker.removeModerator()),
+                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+        );
         verify(topicService).removeModerator(USERNAME, topic);
     }
 
     @Test
     public void testRemoveModeratorNotPrivileged() {
-        topicBacker.setUserToBeModded(USERNAME);
+        topicBacker.setUserMod(USERNAME);
         topicBacker.setTopic(topic);
-        topicBacker.removeModerator();
+        assertAll(
+                () -> assertNull(topicBacker.removeModerator()),
+                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+        );
         verify(topicService, times(0)).removeModerator(USERNAME, topic);
     }
 
     @Test
     public void testRemoveModeratorUnsuccessful() {
         user.setAdministrator(true);
-        topicBacker.setUserToBeModded(USERNAME);
+        topicBacker.setUserMod(USERNAME);
         topicBacker.setTopic(topic);
         topicBacker.setDisplayDialog(TopicBacker.DialogType.UNMOD);
         when(session.getUser()).thenReturn(user);
-        topicBacker.removeModerator();
-        assertEquals(TopicBacker.DialogType.UNMOD, topicBacker.getDisplayDialog());
+        assertAll(
+                () -> assertNull(topicBacker.removeModerator()),
+                () -> assertEquals(TopicBacker.DialogType.UNMOD, topicBacker.getDisplayDialog())
+        );
         verify(topicService).removeModerator(USERNAME, topic);
     }
 
@@ -217,64 +233,78 @@ public class TopicBackerTest {
     @Test
     public void testBanUser() {
         user.setAdministrator(true);
-        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.setUserBan(USERNAME);
         topicBacker.setTopic(topic);
         when(session.getUser()).thenReturn(user);
         when(topicService.ban(USERNAME, topic)).thenReturn(true);
-        topicBacker.banUser();
-        assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog());
+        assertAll(
+                () -> assertEquals("", topicBacker.banUser()),
+                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+        );
         verify(topicService).ban(USERNAME, topic);
     }
 
     @Test
     public void testBanUserNotPrivileged() {
-        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.setUserBan(USERNAME);
         topicBacker.setTopic(topic);
-        topicBacker.banUser();
+        assertAll(
+                () -> assertNull(topicBacker.banUser()),
+                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+        );
         verify(topicService, times(0)).ban(USERNAME, topic);
     }
 
     @Test
     public void testBanUserUnsuccessful() {
         user.setAdministrator(true);
-        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.setUserBan(USERNAME);
         topicBacker.setTopic(topic);
         topicBacker.setDisplayDialog(TopicBacker.DialogType.BAN);
         when(session.getUser()).thenReturn(user);
-        topicBacker.banUser();
-        assertEquals(TopicBacker.DialogType.BAN, topicBacker.getDisplayDialog());
+        assertAll(
+                () -> assertNull(topicBacker.banUser()),
+                () -> assertEquals(TopicBacker.DialogType.BAN, topicBacker.getDisplayDialog())
+        );
         verify(topicService).ban(USERNAME, topic);
     }
 
     @Test
     public void testUnbanUser() {
         user.setAdministrator(true);
-        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.setUserBan(USERNAME);
         topicBacker.setTopic(topic);
         when(session.getUser()).thenReturn(user);
         when(topicService.unban(USERNAME, topic)).thenReturn(true);
-        topicBacker.unbanUser();
-        assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog());
+        assertAll(
+                () -> assertEquals("", topicBacker.unbanUser()),
+                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+        );
         verify(topicService).unban(USERNAME, topic);
     }
 
     @Test
     public void testUnbanUserNotPrivileged() {
-        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.setUserBan(USERNAME);
         topicBacker.setTopic(topic);
-        topicBacker.unbanUser();
+        assertAll(
+                () -> assertNull(topicBacker.unbanUser()),
+                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+        );
         verify(topicService, times(0)).unban(USERNAME, topic);
     }
 
     @Test
     public void testUnbanUserUnsuccessful() {
         user.setAdministrator(true);
-        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.setUserBan(USERNAME);
         topicBacker.setTopic(topic);
         topicBacker.setDisplayDialog(TopicBacker.DialogType.UNBAN);
         when(session.getUser()).thenReturn(user);
-        topicBacker.unbanUser();
-        assertEquals(TopicBacker.DialogType.UNBAN, topicBacker.getDisplayDialog());
+        assertAll(
+                () -> assertNull(topicBacker.unbanUser()),
+                () -> assertEquals(TopicBacker.DialogType.UNBAN, topicBacker.getDisplayDialog())
+        );
         verify(topicService).unban(USERNAME, topic);
     }
 
@@ -283,7 +313,7 @@ public class TopicBackerTest {
         List<String> users = new ArrayList<>();
         users.add(user.getUsername());
         when(searchService.getUserBanSuggestions(any(), any())).thenReturn(users);
-        topicBacker.setUserToBeBanned(USERNAME);
+        topicBacker.setUserBan(USERNAME);
         topicBacker.searchBanUsers();
         assertEquals(users, topicBacker.getUserBanSuggestions());
         verify(searchService).getUserBanSuggestions(any(), any());
@@ -297,9 +327,33 @@ public class TopicBackerTest {
 
     @Test
     public void testSearchBanUsersStringBlank() {
-        topicBacker.setUserToBeBanned("");
+        topicBacker.setUserBan("");
         topicBacker.searchBanUsers();
         verify(searchService, times(0)).getUserBanSuggestions(any(), any());
+    }
+
+    @Test
+    public void testSearchUnbanUsers() {
+        List<String> users = new ArrayList<>();
+        users.add(user.getUsername());
+        when(searchService.getUserUnbanSuggestions(any(), any())).thenReturn(users);
+        topicBacker.setUserBan(USERNAME);
+        topicBacker.searchUnbanUsers();
+        assertEquals(users, topicBacker.getUserBanSuggestions());
+        verify(searchService).getUserUnbanSuggestions(any(), any());
+    }
+
+    @Test
+    public void testSearchUnbanUsersStringNull() {
+        topicBacker.searchUnbanUsers();
+        verify(searchService, times(0)).getUserUnbanSuggestions(any(), any());
+    }
+
+    @Test
+    public void testSearchUnbanUsersStringBlank() {
+        topicBacker.setUserBan("");
+        topicBacker.searchUnbanUsers();
+        verify(searchService, times(0)).getUserUnbanSuggestions(any(), any());
     }
 
     @Test
@@ -307,7 +361,7 @@ public class TopicBackerTest {
         List<String> users = new ArrayList<>();
         users.add(user.getUsername());
         when(searchService.getUserModSuggestions(any(), any())).thenReturn(users);
-        topicBacker.setUserToBeModded(USERNAME);
+        topicBacker.setUserMod(USERNAME);
         topicBacker.searchModUsers();
         assertEquals(users, topicBacker.getUserModSuggestions());
         verify(searchService).getUserModSuggestions(any(), any());
@@ -321,9 +375,33 @@ public class TopicBackerTest {
 
     @Test
     public void testSearchModUsersStringBlank() {
-        topicBacker.setUserToBeModded("");
+        topicBacker.setUserMod("");
         topicBacker.searchModUsers();
         verify(searchService, times(0)).getUserModSuggestions(any(), any());
+    }
+
+    @Test
+    public void testSearchUnmodUsers() {
+        List<String> users = new ArrayList<>();
+        users.add(user.getUsername());
+        when(searchService.getUserUnmodSuggestions(any(), any())).thenReturn(users);
+        topicBacker.setUserMod(USERNAME);
+        topicBacker.searchUnmodUsers();
+        assertEquals(users, topicBacker.getUserModSuggestions());
+        verify(searchService).getUserUnmodSuggestions(any(), any());
+    }
+
+    @Test
+    public void testSearchUnmodUsersStringNull() {
+        topicBacker.searchUnmodUsers();
+        verify(searchService, times(0)).getUserUnmodSuggestions(any(), any());
+    }
+
+    @Test
+    public void testSearchUnmodUsersStringBlank() {
+        topicBacker.setUserMod("");
+        topicBacker.searchUnmodUsers();
+        verify(searchService, times(0)).getUserUnmodSuggestions(any(), any());
     }
 
 }

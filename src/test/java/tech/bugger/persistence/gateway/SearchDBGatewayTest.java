@@ -121,6 +121,39 @@ public class SearchDBGatewayTest {
     }
 
     @Test
+    public void testGetUserUnbanSuggestions() throws NotFoundException {
+        userGateway.createUser(user1);
+        userGateway.createUser(user2);
+        userGateway.createUser(admin);
+        topicGateway.createTopic(topic);
+        topicGateway.banUser(topic, user1);
+        List<String> suggestions = searchGateway.getUserUnbanSuggestions(query, limit, topic);
+        assertAll(
+                () -> assertTrue(suggestions.contains(user1.getUsername())),
+                () -> assertFalse(suggestions.contains(user2.getUsername())),
+                () -> assertFalse(suggestions.contains(admin.getUsername()))
+        );
+    }
+
+    @Test
+    public void testGetUserUnbanSuggestionsNone() throws NotFoundException {
+        userGateway.createUser(user1);
+        topicGateway.createTopic(topic);
+        List<String> suggestions = searchGateway.getUserUnbanSuggestions(query, limit, topic);
+        assertEquals(0, suggestions.size());
+    }
+
+    @Test
+    public void testGetUserUnbanSuggestionsSQLException() throws SQLException {
+        topic.setId(1);
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new SearchDBGateway(connectionSpy).getUserUnbanSuggestions(query, limit, topic)
+        );
+    }
+
+    @Test
     public void testGetUserModSuggestions() throws NotFoundException {
         userGateway.createUser(user1);
         userGateway.createUser(user2);
@@ -150,6 +183,39 @@ public class SearchDBGatewayTest {
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
                 () -> new SearchDBGateway(connectionSpy).getUserModSuggestions(query, limit, topic)
+        );
+    }
+
+    @Test
+    public void testGetUserUnmodSuggestions() throws NotFoundException {
+        userGateway.createUser(user1);
+        userGateway.createUser(user2);
+        userGateway.createUser(admin);
+        topicGateway.createTopic(topic);
+        topicGateway.promoteModerator(topic, user1);
+        List<String> suggestions = searchGateway.getUserUnmodSuggestions(query, limit, topic);
+        assertAll(
+                () -> assertTrue(suggestions.contains(user1.getUsername())),
+                () -> assertFalse(suggestions.contains(user2.getUsername())),
+                () -> assertFalse(suggestions.contains(admin.getUsername()))
+        );
+    }
+
+    @Test
+    public void testGetUserUnmodSuggestionsNone() throws NotFoundException {
+        userGateway.createUser(admin);
+        topicGateway.createTopic(topic);
+        List<String> suggestions = searchGateway.getUserUnmodSuggestions(query, limit, topic);
+        assertEquals(0, suggestions.size());
+    }
+
+    @Test
+    public void testGetUserUnmodSuggestionsSQLException() throws SQLException {
+        topic.setId(1);
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new SearchDBGateway(connectionSpy).getUserUnmodSuggestions(query, limit, topic)
         );
     }
 

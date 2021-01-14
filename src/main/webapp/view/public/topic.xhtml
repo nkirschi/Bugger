@@ -165,9 +165,10 @@
                     <h:outputLabel id="ol-username" value="#{labels.username}" for="it-username"
                                    styleClass="form-label"/>
                     <h:panelGroup id="p-username-input" layout="block" styleClass="input-group has-validation">
-                        <h:inputText id="it-username" value="#{topicBacker.userToBeModded}" required="true"
+                        <h:inputText id="it-username" value="#{topicBacker.userMod}" required="true"
                                      a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
-                                     #{component.valid ? 'is-valid' : 'is-invalid'}">
+                                     #{component.valid ? 'is-valid' : 'is-invalid'}"
+                                     a:placeholder="#{labels.search}">
                             <f:validateLength maximum="#{C.USERNAME_MAX}"/>
                             <f:ajax listener="#{topicBacker.searchModUsers}" event="keyup"
                                     render="p-mod-suggestions"/>
@@ -177,7 +178,8 @@
                         </h:panelGroup>
                     </h:panelGroup>
                     <h:panelGroup id="p-mod-suggestions" layout="block">
-                        <ui:repeat value="#{topicBacker.userModSuggestions}" var="user">
+                        <ui:repeat value="#{empty topicBacker.userModSuggestions ? labels.no_suggestions
+                            : topicBacker.userModSuggestions}" var="user">
                             <h:panelGrid columns="1">
                                 #{user}
                             </h:panelGrid>
@@ -205,14 +207,25 @@
                         <h:outputLabel id="ol-username-mod" value="#{labels.username}" for="it-username-mod"
                                        styleClass="form-label"/>
                         <h:panelGroup id="p-username-mod-input" layout="block" styleClass="input-group has-validation">
-                            <h:inputText id="it-username-mod" value="#{topicBacker.userToBeModded}" required="true"
+                            <h:inputText id="it-username-mod" value="#{topicBacker.userMod}" required="true"
                                          a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
-                                         #{component.valid ? 'is-valid' : 'is-invalid'}">
+                                         #{component.valid ? 'is-valid' : 'is-invalid'}"
+                                         a:placeholder="#{labels.search}">
                                 <f:validateLength maximum="#{C.USERNAME_MAX}"/>
+                                <f:ajax listener="#{topicBacker.searchUnmodUsers}" event="keyup"
+                                        render="p-unmod-suggestions"/>
                             </h:inputText>
                             <h:panelGroup id="p-username-mod-message" layout="block" styleClass="invalid-tooltip right">
                                 <h:message for="it-username-mod"/>
                             </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup id="p-unmod-suggestions" layout="block">
+                            <ui:repeat value="#{empty topicBacker.userModSuggestions ? labels.no_suggestions
+                                : topicBacker.userModSuggestions}" var="user">
+                                <h:panelGrid columns="1">
+                                    #{user}
+                                </h:panelGrid>
+                            </ui:repeat>
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -237,9 +250,10 @@
                         <h:outputLabel id="ol-username-ban" value="#{labels.username}" for="it-username-ban"
                                        styleClass="form-label"/>
                         <h:panelGroup id="p-username-ban-input" layout="block" styleClass="input-group has-validation">
-                            <h:inputText id="it-username-ban" value="#{topicBacker.userToBeBanned}" required="true"
+                            <h:inputText id="it-username-ban" value="#{topicBacker.userBan}" required="true"
                                          a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
-                                         #{component.valid ? 'is-valid' : 'is-invalid'}">
+                                         #{component.valid ? 'is-valid' : 'is-invalid'}"
+                                         a:placeholder="#{labels.search}">
                                 <f:validateLength maximum="#{C.USERNAME_MAX}"/>
                                 <f:ajax listener="#{topicBacker.searchBanUsers}" event="keyup"
                                         render="p-ban-suggestions"/>
@@ -249,7 +263,8 @@
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:panelGroup id="p-ban-suggestions" layout="block">
-                            <ui:repeat value="#{topicBacker.userBanSuggestions}" var="user">
+                            <ui:repeat value="#{empty topicBacker.userBanSuggestions ? labels.no_suggestions
+                                : topicBacker.userBanSuggestions}" var="user">
                                 <h:panelGrid columns="1">
                                     #{user}
                                 </h:panelGrid>
@@ -279,15 +294,26 @@
                                        styleClass="form-label"/>
                         <h:panelGroup id="p-username-unban-input" layout="block"
                                       styleClass="input-group has-validation">
-                            <h:inputText id="it-username-unban" value="#{topicBacker.userToBeBanned}" required="true"
+                            <h:inputText id="it-username-unban" value="#{topicBacker.userBan}" required="true"
                                          a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
-                                         #{component.valid ? 'is-valid' : 'is-invalid'}">
+                                         #{component.valid ? 'is-valid' : 'is-invalid'}"
+                                         a:placeholder="#{labels.search}">
                                 <f:validateLength maximum="#{C.USERNAME_MAX}"/>
+                                <f:ajax listener="#{topicBacker.searchUnbanUsers}" event="keyup"
+                                        render="p-unban-suggestions"/>
                             </h:inputText>
                             <h:panelGroup id="p-username-unban-message" layout="block"
                                           styleClass="invalid-tooltip right">
                                 <h:message for="it-username-unban"/>
                             </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup id="p-unban-suggestions" layout="block">
+                            <ui:repeat value="#{empty topicBacker.userBanSuggestions ? labels.no_suggestions
+                                : topicBacker.userBanSuggestions}" var="user">
+                                <h:panelGrid columns="1">
+                                    #{user}
+                                </h:panelGrid>
+                            </ui:repeat>
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>

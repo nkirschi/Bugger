@@ -15,6 +15,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -85,9 +86,29 @@ public class SearchService {
      * @return A list containing the first few results.
      */
     public List<String> getUserBanSuggestions(final String query, final Topic topic) {
-        List<String> users = null;
+        List<String> users = new ArrayList<>();
         try (Transaction tx = transactionManager.begin()) {
             users = tx.newSearchGateway().getUserBanSuggestions(query, MAX_SUGGESTIONS, topic);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while loading the user search suggestions.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return users;
+    }
+
+    /**
+     * Returns at most the first five results when searching the data source for users which could be unbanned from a
+     * certain topic.
+     *
+     * @param query The search query for usernames.
+     * @param topic The topic in question.
+     * @return A list containing the first few results.
+     */
+    public List<String> getUserUnbanSuggestions(final String query, final Topic topic) {
+        List<String> users = null;
+        try (Transaction tx = transactionManager.begin()) {
+            users = tx.newSearchGateway().getUserUnbanSuggestions(query, MAX_SUGGESTIONS, topic);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error while loading the user search suggestions.", e);
@@ -105,9 +126,29 @@ public class SearchService {
      * @return A list containing the first few results.
      */
     public List<String> getUserModSuggestions(final String query, final Topic topic) {
-        List<String> users = null;
+        List<String> users = new ArrayList<>();
         try (Transaction tx = transactionManager.begin()) {
             users = tx.newSearchGateway().getUserModSuggestions(query, MAX_SUGGESTIONS, topic);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while loading the user search suggestions.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return users;
+    }
+
+    /**
+     * Returns at most the first five results when searching the data source for users which could be demoted as
+     * moderators of a certain topic.
+     *
+     * @param query The search query for usernames.
+     * @param topic The topic in question.
+     * @return A list containing the first few results.
+     */
+    public List<String> getUserUnmodSuggestions(final String query, final Topic topic) {
+        List<String> users = null;
+        try (Transaction tx = transactionManager.begin()) {
+            users = tx.newSearchGateway().getUserUnmodSuggestions(query, MAX_SUGGESTIONS, topic);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error while loading the user search suggestions.", e);

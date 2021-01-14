@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -87,20 +88,20 @@ public class TopicBacker implements Serializable {
     /**
      * The username of the User to be banned.
      */
-    private String userToBeBanned;
+    private String userBan;
 
     /**
      * The Username of the User to be made a moderator.
      */
-    private String userToBeModded;
+    private String userMod;
 
     /**
-     * List of users similar to the entered name, for modding porpoise.
+     * List of users similar to the entered name, for modding purpose.
      */
     private List<String> userBanSuggestions;
 
     /**
-     * List of users similar to the entered name, for banning porpoise.
+     * List of users similar to the entered name, for banning purpose.
      */
     private List<String> userModSuggestions;
 
@@ -211,6 +212,8 @@ public class TopicBacker implements Serializable {
             }
         }
         displayDialog = DialogType.NONE;
+        userBanSuggestions = new ArrayList<>();
+        userModSuggestions = new ArrayList<>();
         openReportShown = true;
         closedReportShown = false;
         sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
@@ -267,8 +270,17 @@ public class TopicBacker implements Serializable {
      * Enables suggestions for users to be banned.
      */
     public void searchBanUsers() {
-        if ((userToBeBanned != null) && (!userToBeBanned.isBlank())) {
-            userBanSuggestions = searchService.getUserBanSuggestions(userToBeBanned, topic);
+        if ((userBan != null) && (!userBan.isBlank())) {
+            userBanSuggestions = searchService.getUserBanSuggestions(userBan, topic);
+        }
+    }
+
+    /**
+     * Enables suggestions for users to be unbanned.
+     */
+    public void searchUnbanUsers() {
+        if ((userBan != null) && (!userBan.isBlank())) {
+            userBanSuggestions = searchService.getUserUnbanSuggestions(userBan, topic);
         }
     }
 
@@ -276,8 +288,17 @@ public class TopicBacker implements Serializable {
      * Enables suggestions for users to be made moderators.
      */
     public void searchModUsers() {
-        if ((userToBeModded != null) && (!userToBeModded.isBlank())) {
-            userModSuggestions = searchService.getUserModSuggestions(userToBeModded, topic);
+        if ((userMod != null) && (!userMod.isBlank())) {
+            userModSuggestions = searchService.getUserModSuggestions(userMod, topic);
+        }
+    }
+
+    /**
+     * Enables suggestions for moderators to be demoted.
+     */
+    public void searchUnmodUsers() {
+        if ((userMod != null) && (!userMod.isBlank())) {
+            userModSuggestions = searchService.getUserUnmodSuggestions(userMod, topic);
         }
     }
 
@@ -376,7 +397,6 @@ public class TopicBacker implements Serializable {
 
     /**
      * Irreversibly deletes the topic.
-     *
      */
     public void delete() {
         topicService.deleteTopic(topic);
@@ -389,62 +409,90 @@ public class TopicBacker implements Serializable {
     }
 
     /**
-     * Bans the user whose username is specified in the attribute {@code userToBeBanned}. Note that administrators and
+     * Bans the user whose username is specified in the attribute {@code userBan}. Note that administrators and
      * moderators cannot be banned.
+     *
+     * @return {@code null} to reload the page if no user was banned or an empty string to call init() again and update
+     * the ban results.
      */
-    public void banUser() {
+    public String banUser() {
         if (!isModerator()) {
             log.error("A user was able to use the ban user functionality even though they were no moderator!");
-            return;
+            displayDialog = DialogType.NONE;
+            return null;
         }
 
-        if (topicService.ban(userToBeBanned, topic)) {
+        if (topicService.ban(userBan, topic)) {
             displayDialog = DialogType.NONE;
+            return "";
         }
+
+        return null;
     }
 
     /**
      * Unbans the user specified whose username is specified in the attribute {@code userToBeBanned}.
+     *
+     * @return {@code null} to reload the page if no user was unbanned or an empty string to call init() again and
+     * update the ban results.
      */
-    public void unbanUser() {
+    public String unbanUser() {
         if (!isModerator()) {
             log.error("A user was able to use the unban user functionality even though they were no moderator!");
-            return;
+            displayDialog = DialogType.NONE;
+            return null;
         }
 
-        if (topicService.unban(userToBeBanned, topic)) {
+        if (topicService.unban(userBan, topic)) {
             displayDialog = DialogType.NONE;
+            return "";
         }
+
+        return null;
     }
 
     /**
      * Makes the user whose username is specified in {@code userToBeModded} a moderator of the topic. This is not
      * possible if they already are a moderator.
+     *
+     * @return {@code null} to reload the page if no user was promoted or an empty string to call init() again and
+     * update the moderation results.
      */
-    public void makeModerator() {
+    public String makeModerator() {
         if (!isModerator()) {
             log.error("A user was able to use the promote functionality even though they were no moderator!");
-            return;
+            displayDialog = DialogType.NONE;
+            return null;
         }
 
-        if (topicService.makeModerator(userToBeModded, topic)) {
+        if (topicService.makeModerator(userMod, topic)) {
             displayDialog = DialogType.NONE;
+            return "";
         }
+
+        return null;
     }
 
     /**
      * Removes the moderator status of the user specified in {@code unmodUser}. This is not possible if they are an
      * administrator.
+     *
+     * @return {@code null} to reload the page if no user was promoted or an empty string to call init() again and
+     * update the moderation results.
      */
-    public void removeModerator() {
+    public String removeModerator() {
         if (!isModerator()) {
             log.error("A user was able to use the demote functionality even though they were no moderator!");
-            return;
+            displayDialog = DialogType.NONE;
+            return null;
         }
 
-        if (topicService.removeModerator(userToBeModded, topic)) {
+        if (topicService.removeModerator(userMod, topic)) {
             displayDialog = DialogType.NONE;
+            return "";
         }
+
+        return null;
     }
 
     /**
@@ -481,29 +529,29 @@ public class TopicBacker implements Serializable {
     /**
      * @return The userToBeBanned.
      */
-    public String getUserToBeBanned() {
-        return userToBeBanned;
+    public String getUserBan() {
+        return userBan;
     }
 
     /**
-     * @param userToBeBanned The userToBeBanned to set.
+     * @param userBan The userToBeBanned to set.
      */
-    public void setUserToBeBanned(final String userToBeBanned) {
-        this.userToBeBanned = userToBeBanned;
+    public void setUserBan(final String userBan) {
+        this.userBan = userBan;
     }
 
     /**
      * @return The userToBeModded.
      */
-    public String getUserToBeModded() {
-        return userToBeModded;
+    public String getUserMod() {
+        return userMod;
     }
 
     /**
-     * @param userToBeModded The userToBeModded to set.
+     * @param userMod The userToBeModded to set.
      */
-    public void setUserToBeModded(final String userToBeModded) {
-        this.userToBeModded = userToBeModded;
+    public void setUserMod(final String userMod) {
+        this.userMod = userMod;
     }
 
     /**

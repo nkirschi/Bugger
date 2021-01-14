@@ -114,10 +114,47 @@ public class SearchDBGateway implements SearchGateway {
      * {@inheritDoc}
      */
     @Override
+    public List<String> getUserUnbanSuggestions(final String query, final int limit, final Topic topic) {
+        validateSuggestionParams(query, limit, topic);
+        List<String> userResults = new ArrayList<>(limit);
+        String newQuery = query
+                .replace("!", "!!")
+                .replace("%", "!%")
+                .replace("_", "!_")
+                .replace("[", "![");
+
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u INNER JOIN "
+                + "topic_ban as t ON t.outcast = u.id WHERE u.username LIKE ? AND t.topic = ? LIMIT ?;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .string("%" + newQuery + "%")
+                    .integer(topic.getId())
+                    .integer(limit)
+                    .toStatement().executeQuery();
+
+            while (rs.next()) {
+                userResults.add(rs.getString("username"));
+            }
+        } catch (SQLException e) {
+            log.error("Error while loading the user search suggestions for the query " + query, e);
+            throw new StoreException("Error while loading the user search suggestions for the query " + query, e);
+        }
+
+        return userResults;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<String> getUserModSuggestions(final String query, final int limit, final Topic topic) {
         validateSuggestionParams(query, limit, topic);
-
         List<String> modResults = new ArrayList<>(limit);
+        String newQuery = query
+                .replace("!", "!!")
+                .replace("%", "!%")
+                .replace("_", "!_")
+                .replace("[", "![");
+
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u WHERE u.username "
                 + "LIKE ? AND u.is_admin = false AND u.id NOT IN (SELECT t.moderator FROM topic_moderation AS t WHERE "
                 + "t.topic = ?) LIMIT ?;")) {
@@ -135,6 +172,38 @@ public class SearchDBGateway implements SearchGateway {
             throw new StoreException("Error while loading the user search suggestions for the query " + query, e);
         }
         return modResults;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<String> getUserUnmodSuggestions(final String query, final int limit, final Topic topic) {
+        validateSuggestionParams(query, limit, topic);
+        List<String> unmodResults = new ArrayList<>(limit);
+        String newQuery = query
+                .replace("!", "!!")
+                .replace("%", "!%")
+                .replace("_", "!_")
+                .replace("[", "![");
+
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u INNER JOIN "
+                + "topic_moderation as t ON t.moderator = u.id WHERE u.username LIKE ? AND t.topic = ? LIMIT ?;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .string("%" + newQuery + "%")
+                    .integer(topic.getId())
+                    .integer(limit)
+                    .toStatement().executeQuery();
+
+            while (rs.next()) {
+                unmodResults.add(rs.getString("username"));
+            }
+        } catch (SQLException e) {
+            log.error("Error while loading the user search suggestions for the query " + query, e);
+            throw new StoreException("Error while loading the user search suggestions for the query " + query, e);
+        }
+
+        return unmodResults;
     }
 
     /**
