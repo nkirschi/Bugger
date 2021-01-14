@@ -7,6 +7,7 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
@@ -107,6 +108,33 @@ public class TopicService {
      * @param topic The topic receiving the subscription.
      */
     public void subscribeToTopic(final User user, final Topic topic) {
+        if (user == null) {
+            log.error("Anonymous users cannot subscribe to anything.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot subscribe when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (topic == null) {
+            log.error("Cannot subscribe to topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot subscribe to topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
+
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().subscribe(topic, user);
+            tx.commit();
+        } catch (DuplicateException e) {
+            log.error("User " + user + " is already subscribed to topic " + topic + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("already_subscribed"), Feedback.Type.ERROR));
+        } catch (NotFoundException e) {
+            log.error("User " + user + " or topic " + topic + " not found.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when user " + user + " is subscribing to topic " + topic + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -116,7 +144,30 @@ public class TopicService {
      * @param topic The topic the user is subscribed to.
      */
     public void unsubscribeFromTopic(final User user, final Topic topic) {
+        if (user == null) {
+            log.error("Anonymous users cannot unsubscribe from anything.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot unsubscribe when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (topic == null) {
+            log.error("Cannot unsubscribe from topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot unsubscribe from topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
 
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().unsubscribe(topic, user);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("User " + user + " or topic " + topic + " not found.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when user " + user + " is unsubscribing from topic " + topic + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -323,7 +374,26 @@ public class TopicService {
      * @return The number of subscribers.
      */
     public int getNumberOfSubscribers(final Topic topic) {
-        return 0;
+        if (topic == null) {
+            log.error("Cannot count subscribers of topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot count subscribers of topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
+
+        int count = 0;
+        try (Transaction tx = transactionManager.begin()) {
+            count = tx.newTopicGateway().countSubscribers(topic);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Cannot find topic " + topic + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when counting subscribers of topic " + topic + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return count;
     }
 
     /**
@@ -383,7 +453,33 @@ public class TopicService {
      * @return {@code true} if the user is subscribed, {@code false} otherwise.
      */
     public boolean isSubscribed(final User user, final Topic topic) {
-        return false;
+        if (user == null) {
+            return false;
+        } else if (user.getId() == null) {
+            log.error("Cannot determine subscription status of user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (topic == null) {
+            log.error("Cannot determine subscription status to topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot determine subscription status to topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
+
+        boolean status;
+        try (Transaction tx = transactionManager.begin()) {
+            status = tx.newSubscriptionGateway().isSubscribed(user, topic);
+            tx.commit();
+        } catch (NotFoundException e) {
+            status = false;
+            log.error("Could not find user " + user + " or topic " + topic + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            status = false;
+            log.error("Error when determining subscription status of user " + user + " to topic " + topic + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return status;
     }
 
     /**
