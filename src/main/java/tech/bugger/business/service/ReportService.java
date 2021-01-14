@@ -299,6 +299,14 @@ public class ReportService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
         }
 
+        if (success) {
+            Notification notification = new Notification();
+            notification.setType(Notification.Type.MOVED_REPORT);
+            notification.setActuatorID(report.getAuthorship().getModifier().getId());
+            notification.setTopic(report.getTopic());
+            notification.setReportID(report.getId());
+            notificationService.createNotification(notification);
+        }
         return success;
     }
 
