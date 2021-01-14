@@ -247,9 +247,6 @@ public class ReportBacker implements Serializable {
         if (session.getUser() != null) {
             hasUpvoted = hasUpvoted();
             hasDownvoted = hasDownvoted();
-            /**
-             * Whether the relevance is overwritten.
-             */
             boolean overwriteRelevance = report.getRelevanceOverwritten();
             if (overwriteRelevance) {
                 overwriteRelevanceValue = report.getRelevance();
