@@ -99,27 +99,24 @@ public interface UserGateway {
      *
      * @param user The user whose subscribers to list.
      * @return The list of subscribers to {@code user}.
-     * @throws NotFoundException The user could not be found.
      */
-    List<User> getSubscribersOf(User user) throws NotFoundException;
+    List<User> getSubscribersOf(User user);
 
     /**
      * Retrieves the list of subscribers to a report.
      *
      * @param report The report whose subscribers to list.
      * @return The list of subscribers to {@code report}.
-     * @throws NotFoundException The report could not be found.
      */
-    List<User> getSubscribersOf(Report report) throws NotFoundException;
+    List<User> getSubscribersOf(Report report);
 
     /**
      * Retrieves the list of subscribers to a topic.
      *
      * @param topic The topic whose subscribers to list.
      * @return The list of subscribers to {@code topic}.
-     * @throws NotFoundException The topic could not be found.
      */
-    List<User> getSubscribersOf(Topic topic) throws NotFoundException;
+    List<User> getSubscribersOf(Topic topic);
 
     /**
      * Inserts a user into the user storage and sets its internal id, i.e. changes the given {@code user}.

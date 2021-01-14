@@ -4,11 +4,14 @@ import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Notification;
+import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
@@ -17,8 +20,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Service providing methods related to notifications. A {@code Feedback} event is fired, if unexpected circumstances
@@ -66,8 +72,8 @@ public class NotificationService implements Serializable {
      * Constructs a new notification service with the given dependencies.
      *
      * @param transactionManager The transaction manager to use for creating transactions.
-     * @param feedbackEvent The feedback event to use for user feedback.
-     * @param messagesBundle The resource bundle for feedback messages.
+     * @param feedbackEvent      The feedback event to use for user feedback.
+     * @param messagesBundle     The resource bundle for feedback messages.
      * @param interactionsBundle The resource bundle for interaction messages.
      * @param priorityExecutor   The priority executor to use when sending e-mails.
      * @param mailer             The mailer to use.
@@ -96,8 +102,8 @@ public class NotificationService implements Serializable {
             tx.newNotificationGateway().delete(notification);
             tx.commit();
         } catch (NotFoundException e) {
-           log.error("Could not find notification to delete " + notification + ".", e);
-           feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            log.error("Could not find notification to delete " + notification + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error when deleting notification " + notification + ".", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
@@ -168,13 +174,51 @@ public class NotificationService implements Serializable {
      * @param notification The notification based on which new notifications are to be created.
      */
     public void createNotification(final Notification notification) {
+        if (notification == null) {
+            log.error("Cannot create notification null.");
+            throw new IllegalArgumentException("Notification cannot be null.");
+        } else if (notification.getActuatorID() == null) {
+            log.error("Cannot create notification without causer.");
+            throw new IllegalArgumentException("Actuator ID cannot be null.");
+        } else if (notification.getReportID() == null) {
+            log.error("Cannot create notification without report.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        } else if (notification.getTopicID() == null) {
+            log.error("Cannot create notification without topic.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
+
+        List<Notification> notifications;
         try (Transaction tx = transactionManager.begin()) {
-            tx.newNotificationGateway().create(notification);
+            UserGateway gateway = tx.newUserGateway();
+            User causer = new User();
+            causer.setId(notification.getActuatorID());
+            Set<User> affectedUsers = new HashSet<>(gateway.getSubscribersOf(causer));
+            Report report = new Report();
+            report.setId(notification.getReportID());
+            affectedUsers.addAll(gateway.getSubscribersOf(report));
+            Topic topic = new Topic();
+            topic.setId(notification.getTopicID());
+            affectedUsers.addAll(gateway.getSubscribersOf(topic));
+            notifications = new ArrayList<>(affectedUsers.size());
+            for (User user : affectedUsers) {
+                Notification n = new Notification(notification);
+                n.setRecipientID(user.getId());
+                notifications.add(n);
+            }
+            tx.newNotificationGateway().createNotificationBulk(notifications);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error when creating notification " + notification + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            return;
+            // feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+        sendMails(notifications);
+    }
+
+    private void sendMails(final List<Notification> notifications) {
+        // TODO implement
+        return;
     }
 
     /**
@@ -196,6 +240,7 @@ public class NotificationService implements Serializable {
                 continue;
             }
             String email = recipient.getEmailAddress();
+            // TODO finish
         }
     }
 
