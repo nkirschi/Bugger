@@ -1,6 +1,7 @@
 package tech.bugger.control.backing;
 
 import com.ocpsoft.pretty.PrettyContext;
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
@@ -40,14 +41,19 @@ public class HeaderBacker implements Serializable {
     private User user;
 
     /**
-     * The current user session.
-     */
-    private final UserSession session;
-
-    /**
      * {@code true} if the Menu should be displayed, {@code false} otherwise.
      */
     private boolean displayMenu;
+
+    /**
+     * The current application settings.
+     */
+    private final ApplicationSettings applicationSettings;
+
+    /**
+     * The current user session.
+     */
+    private final UserSession session;
 
     /**
      * The current {@link FacesContext} of the application.
@@ -57,11 +63,14 @@ public class HeaderBacker implements Serializable {
     /**
      * Constructs a new header backing bean.
      *
-     * @param session The currently active {@link UserSession}.
-     * @param fctx    The current {@link FacesContext} of the application.
+     * @param applicationSettings The current application settings.
+     * @param session             The currently active {@link UserSession}.
+     * @param fctx                The current {@link FacesContext} of the application.
      */
     @Inject
-    public HeaderBacker(final UserSession session, final FacesContext fctx) {
+    public HeaderBacker(final ApplicationSettings applicationSettings, final UserSession session,
+                        final FacesContext fctx) {
+        this.applicationSettings = applicationSettings;
         this.session = session;
         this.fctx = fctx;
     }
@@ -181,5 +190,6 @@ public class HeaderBacker implements Serializable {
     private void openMenu() {
         displayMenu = true;
     }
+
 
 }

@@ -49,14 +49,14 @@
                     <h:message for="it-name" styleClass="text-danger"/>
                 </h:panelGroup>
 
-                <!-- organization logo (later) -->
-                <h:outputLabel id="o-logo" for="g-logo" value="#{labels.logo}"/>
+                <!-- organization logo -->
+                <h:outputLabel id="o-logo" for="i-logo" value="#{labels.logo}"/>
                 <h:panelGrid columns="1">
-                    <!-- TODO upgrade to real image from DB -->
-                    <h:graphicImage id="g-logo"
-                                    library="images"
-                                    name="bugger.png"
-                                    width="100" height="100"/>
+                    <h:graphicImage id="g-logo-preview" value="logo" styleClass="logo-preview"
+                                    rendered="#{applicationSettings.organization.existsLogo}"/>
+                    <h:graphicImage id="g-logo-preview-fallback" library="images" name="bugger.png"
+                                    styleClass="logo-preview"
+                                    rendered="#{not applicationSettings.organization.existsLogo}"/>
                     <h:inputFile id="i-logo"
                                  validator="imageValidator"
                                  valueChangeListener="#{adminBacker.uploadLogo}"
