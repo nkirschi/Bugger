@@ -31,7 +31,7 @@ public class SearchDBGateway implements SearchGateway {
     /**
      * The database connection used by this gateway.
      */
-    private Connection conn;
+    private final Connection conn;
 
     /**
      * Constructs a new search gateway with the given database connection.
@@ -83,13 +83,13 @@ public class SearchDBGateway implements SearchGateway {
     @Override
     public List<String> getUserBanSuggestions(final String query, final int limit, final Topic topic) {
         validateSuggestionParams(query, limit, topic);
-
         List<String> userResults = new ArrayList<>(limit);
         String newQuery = query
                 .replace("!", "!!")
                 .replace("%", "!%")
                 .replace("_", "!_")
                 .replace("[", "![");
+
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u WHERE u.username "
                 + "LIKE ? AND u.is_admin = false AND u.id NOT IN (SELECT t.outcast FROM topic_ban AS t WHERE t.topic "
                 + "= ?) LIMIT ?;")) {
@@ -159,7 +159,7 @@ public class SearchDBGateway implements SearchGateway {
                 + "LIKE ? AND u.is_admin = false AND u.id NOT IN (SELECT t.moderator FROM topic_moderation AS t WHERE "
                 + "t.topic = ?) LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + query + "%")
+                    .string("%" + newQuery + "%")
                     .integer(topic.getId())
                     .integer(limit)
                     .toStatement().executeQuery();
