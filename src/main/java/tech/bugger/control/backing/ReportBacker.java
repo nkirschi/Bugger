@@ -21,6 +21,7 @@ import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
@@ -155,6 +156,11 @@ public class ReportBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        if (!applicationSettings.getConfiguration().isGuestReading()) {
+            if (session.getUser() == null || isBanned()) {
+                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            }
+        }
         ExternalContext ext = fctx.getExternalContext();
         int reportID;
         Integer postID = null;
@@ -384,7 +390,13 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user is privileged and {@code false} otherwise.
      */
     public boolean isPrivileged() {
-        return reportService.isPrivileged(session.getUser(), report);
+        User user = session.getUser();
+        if (user == null || report == null || topicService.isBanned(user, new Topic(report.getTopic(), "", ""))) {
+            return false;
+        }
+        Topic topic = new Topic(report.getTopic(), "", "");
+        return user.isAdministrator() || topicService.isModerator(user, topic)
+                || user.equals(report.getAuthorship().getCreator());
     }
 
     /**
@@ -398,21 +410,17 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     * Checks if the user is a moderator of the topic the report is located in.
-     *
-     * @return {@code true} if the user is a moderator and {@code false} otherwise.
-     */
-    public boolean isModerator() {
-        return false;
-    }
-
-    /**
      * Checks if the user is banned from the topic the report is located in.
      *
      * @return {@code true} if the user is banned and {@code false} otherwise.
      */
     public boolean isBanned() {
-        return false;
+        User user = session.getUser();
+        if (user == null || report == null) {
+            return false;
+        }
+        Topic topic = new Topic(report.getTopic(), "", "");
+        return topicService.isBanned(user, topic);
     }
 
     /**
