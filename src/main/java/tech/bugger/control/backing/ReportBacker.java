@@ -110,12 +110,12 @@ public class ReportBacker implements Serializable {
     private Integer overwriteRelevanceValue;
 
     /**
-     * Weather the user has upvoted the report.
+     * Whether the user has upvoted the report.
      */
     private boolean hasUpvoted;
 
     /**
-     * Weather the user has downvoted the report.
+     * Whether the user has downvoted the report.
      */
     private boolean hasDownvoted;
 
@@ -248,7 +248,7 @@ public class ReportBacker implements Serializable {
             hasUpvoted = hasUpvoted();
             hasDownvoted = hasDownvoted();
             /**
-             * Weather the relevance is overwritten.
+             * Whether the relevance is overwritten.
              */
             boolean overwriteRelevance = report.getRelevanceOverwritten();
             if (overwriteRelevance) {
@@ -460,7 +460,7 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     * @return Weather the relevance was overwritten.
+     * @return Whether the relevance was overwritten.
      */
     public boolean getOverwriteRelevance() {
         if (report != null) {
@@ -485,14 +485,14 @@ public class ReportBacker implements Serializable {
 
     /**
      *
-     * @return Weather the user has upvoted this report.
+     * @return Whether the user has upvoted this report.
      */
     public boolean getHasUpvoted() {
         return hasUpvoted;
     }
 
     /**
-     * @return Weather the user has downvoted this report.
+     * @return Whether the user has downvoted this report.
      */
     public boolean getHasDownvoted() {
         return hasDownvoted;
