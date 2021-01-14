@@ -125,9 +125,9 @@ public class PostService {
      * @param name The attachment name to check the validity of.
      * @return Whether the attachment name is valid.
      */
-    private boolean isAttachmentNameValid(final String name) {
+    public boolean isAttachmentNameValid(final String name) {
         return Arrays.stream(applicationSettings.getConfiguration().getAllowedFileExtensions().split(","))
-                .anyMatch(name::endsWith);
+                .anyMatch(suffix -> name.endsWith(suffix.trim()));
     }
 
     /**
@@ -308,6 +308,55 @@ public class PostService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
             return null;
         }
+    }
+
+    /**
+     * Returns the attachment with the specified ID.
+     *
+     * @param id The ID of the attachment to be returned.
+     * @return The attachment with the specified ID if it exists, {@code null} if no attachment with that ID exists.
+     */
+    public Attachment getAttachmentByID(final int id) {
+        try (Transaction tx = transactionManager.begin()) {
+            Attachment attachment = tx.newAttachmentGateway().find(id);
+            tx.commit();
+            return attachment;
+        } catch (NotFoundException e) {
+            log.debug("Attachment not found.", e);
+            return null;
+        } catch (TransactionException e) {
+            log.error("Error while retrieving attachment.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            return null;
+        }
+    }
+
+    /**
+     * Returns the attachments of one particular post.
+     *
+     * @param post The post in question.
+     * @return A list of attachments that may be empty.
+     */
+    public List<Attachment> getAttachmentsForPost(final Post post) {
+        return null;
+    }
+
+    /**
+     * Creates a new attachment in the data storage.
+     *
+     * @param attachment The attachment to be created.
+     */
+    public void createAttachment(final Attachment attachment) {
+
+    }
+
+    /**
+     * Create several new attachments at once.
+     *
+     * @param attachments The list of attachments to be created.
+     */
+    public void createMultipleAttachments(final List<Attachment> attachments) {
+
     }
 
     /**

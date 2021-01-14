@@ -93,7 +93,12 @@ public class ProfileEditBacker implements Serializable {
     /**
      * The new avatar to be set.
      */
-    private Part tempAvatar;
+    private Part uploadedAvatar;
+
+    /**
+     * Whether to delete the existing avatar.
+     */
+    private boolean deleteAvatar;
 
     /**
      * The user's sanitized biography.
@@ -171,6 +176,8 @@ public class ProfileEditBacker implements Serializable {
             passwordNew = "";
             passwordNewConfirm = "";
         }
+
+        deleteAvatar = false;
     }
 
     /**
@@ -281,29 +288,24 @@ public class ProfileEditBacker implements Serializable {
     }
 
     /**
-     * Irreversibly deletes the user's avatar.
+     * Converts the uploaded avatar in {@code uploadedAvatar} to a {@code byte[]}, creates a thumbnail,
+     * and puts it into the user.
+     *
+     * @return {@code true} iff the avatar was successfully processed.
      */
-    public void deleteAvatar() {
-        //TODO needs to be changed to default pictures in Milestone 2
-        user.setAvatar(new Lazy<>(new byte[0]));
-        user.setAvatarThumbnail(new byte[0]);
-    }
-
-    /**
-     * Converts the uploaded avatar in {@code tempAvatar} to a {@code byte[]} and puts it into the user.
-     */
-    public void uploadAvatar() {
-        Lazy<byte[]> image = (profileService.uploadAvatar(tempAvatar));
+    boolean uploadAvatar() {
+        Lazy<byte[]> image = deleteAvatar ? new Lazy<>(new byte[0]) : profileService.uploadAvatar(uploadedAvatar);
         if (image != null) {
-            user.setAvatar(image);
-            byte[] thumbnail = (profileService.generateThumbnail(image.get()));
-            //TODO needs to be changed to default thumbnail in Milestone 2
-            user.setAvatarThumbnail(thumbnail == null ? new byte[0] : thumbnail);
-        } else {
-            //TODO needs to be changed to default pictures in Milestone 2
-            user.setAvatar(new Lazy<>(new byte[0]));
-            user.setAvatarThumbnail(new byte[0]);
+            byte[] thumbnail = deleteAvatar ? new byte[0] : profileService.generateThumbnail(image.get());
+            if (thumbnail != null) {
+                user.setAvatar(image);
+                user.setAvatarThumbnail(thumbnail);
+                return true;
+            }
         }
+        uploadedAvatar = null;
+        deleteAvatar = false;
+        return false;
     }
 
     /**
@@ -317,6 +319,11 @@ public class ProfileEditBacker implements Serializable {
      * Opens the dialog that is displayed if the user wants to save the changes made to the given profile.
      */
     public void openChangeDialog() {
+        if (uploadedAvatar != null || deleteAvatar) {
+            if (!uploadAvatar()) {
+                return;
+            }
+        }
         dialog = DialogType.UPDATE;
     }
 
@@ -324,6 +331,11 @@ public class ProfileEditBacker implements Serializable {
      * Opens the dialog that is displayed if the user wants a preview of the biography.
      */
     public void openPreviewDialog() {
+        if (uploadedAvatar != null || deleteAvatar) {
+            if (!uploadAvatar()) {
+                return;
+            }
+        }
         if (user.getBiography() != null) {
             sanitizedBio = MarkdownHandler.toHtml(user.getBiography());
         }
@@ -436,17 +448,35 @@ public class ProfileEditBacker implements Serializable {
     }
 
     /**
-     * @return The tempAvatar.
+     * @return The uploaded avatar.
      */
-    public Part getTempAvatar() {
-        return tempAvatar;
+    public Part getUploadedAvatar() {
+        return uploadedAvatar;
     }
 
     /**
-     * @param tempAvatar The tempAvatar to set.
+     * @param uploadedAvatar The uploaded avatar to set.
      */
-    public void setTempAvatar(final Part tempAvatar) {
-        this.tempAvatar = tempAvatar;
+    public void setUploadedAvatar(final Part uploadedAvatar) {
+        this.uploadedAvatar = uploadedAvatar;
+    }
+
+    /**
+     * Returns whether to delete the existing avatar.
+     *
+     * @return Whether to delete the existing avatar.
+     */
+    public boolean isDeleteAvatar() {
+        return this.deleteAvatar;
+    }
+
+    /**
+     * Sets whether to delete the existing avatar.
+     *
+     * @param deleteAvatar Whether to delete the existing avatar.
+     */
+    public void setDeleteAvatar(final boolean deleteAvatar) {
+        this.deleteAvatar = deleteAvatar;
     }
 
     /**
@@ -468,6 +498,15 @@ public class ProfileEditBacker implements Serializable {
      */
     public boolean isCreate() {
         return create;
+    }
+
+    /**
+     * Sets whether the user is being created by an administrator.
+     *
+     * @param create Whether the user is being created by an administrator.
+     */
+    public void setCreate(final boolean create) {
+        this.create = create;
     }
 
 }

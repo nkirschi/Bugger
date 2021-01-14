@@ -140,8 +140,16 @@
 
             <!-- The profile owner's user information -->
             <h:panelGroup class="row" layout="block" id="p-avatar" styleClass="p-avatar">
-                <!-- TODO add user avatar once servlet has been implemented -->
-                <h:graphicImage id="g-avatar" value="" styleClass="g-avatar" alt="The user's avatar"/>
+                <h:graphicImage id="g-avatar"
+                                value="avatar?id=#{profileBacker.user.id}"
+                                styleClass="g-avatar"
+                                alt="The user's avatar"
+                                rendered="#{profileBacker.user.existsAvatar}"/>
+                <h:graphicImage id="g-avatar-fallback"
+                                library="images" name="bugger.png"
+                                styleClass="g-avatar"
+                                alt="The user's avatar"
+                                rendered="#{not profileBacker.user.existsAvatar}"/>
             </h:panelGroup>
             <h:panelGroup class="row" layout="block" id="p-username">
                 <h:panelGroup class="col-sm-3" id="p-username-label">

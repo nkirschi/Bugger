@@ -70,7 +70,7 @@ public final class Constants {
     /**
      * The maximum filesize for profile avatars in megabytes.
      */
-    public static final int MAX_AVATAR_FILESIZE = 10;
+    public static final int MAX_AVATAR_FILESIZE = 2;
 
     /**
      * The number of bytes in a megabyte.

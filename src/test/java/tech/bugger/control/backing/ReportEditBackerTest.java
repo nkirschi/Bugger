@@ -70,7 +70,7 @@ public class ReportEditBackerTest {
         reportEditBacker = new ReportEditBacker(topicService, reportService, session, fctx, registry);
 
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(ZonedDateTime.class), null, null, 1);
+                mock(ZonedDateTime.class), null, null, false, 1);
         reportEditBacker.setReport(testReport);
         reportEditBacker.setReportID(testReport.getId());
         testTopic = new Topic(1, "Some title", "Some description");

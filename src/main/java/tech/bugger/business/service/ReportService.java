@@ -15,6 +15,7 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.TransactionException;
@@ -43,6 +44,11 @@ public class ReportService {
     private final PostService postService;
 
     /**
+     * Profile service used for getting voting weight.
+     */
+    private final ProfileService profileService;
+
+    /**
      * Transaction manager used for creating transactions.
      */
     private final TransactionManager transactionManager;
@@ -62,16 +68,19 @@ public class ReportService {
      *
      * @param notificationService The notification service to use.
      * @param postService         The post service to use.
+     * @param profileService      The profile service to use.
      * @param transactionManager  The transaction manager to use for creating transactions.
      * @param feedbackEvent       The feedback event to use for user feedback.
      * @param messagesBundle      The resource bundle for feedback messages.
      */
     @Inject
     public ReportService(final NotificationService notificationService, final PostService postService,
-                         final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
+                         final ProfileService profileService, final TransactionManager transactionManager,
+                         final Event<Feedback> feedbackEvent,
                          final @RegistryKey("messages") ResourceBundle messagesBundle) {
         this.notificationService = notificationService;
         this.postService = postService;
+        this.profileService = profileService;
         this.transactionManager = transactionManager;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;
@@ -141,6 +150,25 @@ public class ReportService {
      * @param user   The user voting on the report.
      */
     public void upvote(final Report report, final User user) {
+        removeVote(report, user);
+        Integer votingWeight = profileService.getVotingWeightForUser(user);
+        if (votingWeight > 0) {
+            try (Transaction tx = transactionManager.begin()) {
+                tx.newReportGateway().upvote(report, user, votingWeight);
+                tx.commit();
+            } catch (NotFoundException e) {
+                log.error("Could not find report " + report + ".", e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            } catch (TransactionException e) {
+                log.error("Error when upvoting report " + report + ".", e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            } catch (DuplicateException e) {
+                log.error("Error when upvoting report " + report + " because a previous vote was not removed.", e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("duplicate_vote"), Feedback.Type.ERROR));
+            }
+        } else {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("voting_weight_zero"), Feedback.Type.INFO));
+        }
 
     }
 
@@ -151,7 +179,25 @@ public class ReportService {
      * @param user   The user voting on the report.
      */
     public void downvote(final Report report, final User user) {
-
+        removeVote(report, user);
+        Integer votingWeight = profileService.getVotingWeightForUser(user);
+        if (votingWeight > 0) {
+            try (Transaction tx = transactionManager.begin()) {
+                tx.newReportGateway().downvote(report, user, votingWeight);
+                tx.commit();
+            } catch (NotFoundException e) {
+                log.error("Could not find report " + report + ".", e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            } catch (TransactionException e) {
+                log.error("Error when downvoting report " + report + ".", e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            } catch (DuplicateException e) {
+                log.error("Error when upvoting report " + report + " because a previous vote was not removed.", e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("duplicate_vote"), Feedback.Type.ERROR));
+            }
+        } else {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("voting_weight_zero"), Feedback.Type.INFO));
+        }
     }
 
     /**
@@ -161,7 +207,16 @@ public class ReportService {
      * @param user   The user whose vote is to be removed.
      */
     public void removeVote(final Report report, final User user) {
-
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().removeVote(report, user);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Error while removing vote in report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while removing vote in report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -172,7 +227,15 @@ public class ReportService {
      * @return {@code true} if they have voted to increase the relevance, {@code false} otherwise.
      */
     public boolean hasUpvoted(final Report report, final User user) {
-        return false;
+        try (Transaction tx = transactionManager.begin()) {
+            boolean upvote = tx.newReportGateway().hasUpvoted(user, report);
+            tx.commit();
+            return upvote;
+        } catch (TransactionException e) {
+            log.error("Error while searching for vote for report.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            return false;
+        }
     }
 
     /**
@@ -183,7 +246,15 @@ public class ReportService {
      * @return {@code true} if they have voted to decrease the relevance, {@code false} otherwise.
      */
     public boolean hasDownvoted(final Report report, final User user) {
-        return false;
+        try (Transaction tx = transactionManager.begin()) {
+            boolean upvote = tx.newReportGateway().hasDownvoted(user, report);
+            tx.commit();
+            return upvote;
+        } catch (TransactionException e) {
+            log.error("Error while searching for vote for report.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            return false;
+        }
     }
 
     /**
@@ -385,7 +456,16 @@ public class ReportService {
      * @param relevance The new value of the relevance.
      */
     public void overwriteRelevance(final Report report, final Integer relevance) {
-        // if relevance == null, restore original relevance value
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newReportGateway().overwriteRelevance(report, relevance);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Error while overwriting relevance in report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while overwriting relevance in report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**

@@ -48,7 +48,7 @@ public class AttachmentDBGateway implements AttachmentGateway {
      * @return The parsed {@link Attachment}.
      * @throws SQLException Some parsing error occurred.
      */
-    private Attachment getUserFromResultSet(final ResultSet rs) throws SQLException {
+    private Attachment getAttachmentFromResultSet(final ResultSet rs) throws SQLException {
         int postID = rs.getInt("id");
         Attachment attachment = new Attachment(
                 postID,
@@ -162,7 +162,7 @@ public class AttachmentDBGateway implements AttachmentGateway {
                     .integer(id)
                     .toStatement().executeQuery();
             if (rs.next()) {
-                return getUserFromResultSet(rs);
+                return getAttachmentFromResultSet(rs);
             } else {
                 throw new NotFoundException("Attachment could not be found.");
             }
@@ -205,7 +205,7 @@ public class AttachmentDBGateway implements AttachmentGateway {
                     .toStatement().executeQuery();
             List<Attachment> attachments = new ArrayList<>();
             while (rs.next()) {
-                Attachment attachment = getUserFromResultSet(rs);
+                Attachment attachment = getAttachmentFromResultSet(rs);
                 attachment.setPost(new Lazy<>(post));
                 attachments.add(attachment);
             }

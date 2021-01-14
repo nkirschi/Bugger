@@ -1,7 +1,6 @@
 package tech.bugger.persistence.gateway;
 
 import java.util.List;
-import java.util.Optional;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
@@ -126,35 +125,54 @@ public interface ReportGateway {
     void unmarkDuplicate(Report report) throws NotFoundException;
 
     /**
+     * Finds out weather a specified user has cast an upvote on a specified report.
+     *
+     * @param user   The user who cast the vote.
+     * @param report The report under inspection.
+     * @return {@code true} iff the user has cast an upvote on the specified report.
+     */
+    boolean hasUpvoted(User user, Report report);
+
+    /**
+     * Finds out weather a specified user has cast an downvote on a specified report.
+     *
+     * @param user   The user who cast the vote.
+     * @param report The report under inspection.
+     * @return {@code true} iff the user has cast an downvote on the specified report.
+     */
+    boolean hasDownvoted(User user, Report report);
+
+    /**
      * Overwrites the calculated relevance of a report by a fixed relevance value or removes the override, restoring the
      * calculated relevance.
      *
      * @param report    The report whose relevance to overwrite.
-     * @param relevance An {@link Optional} that indicates, the new overwriting relevance if present and the removal of
-     *                  the override if empty.
+     * @param relevance An Integer representing the new overriding relevance.
      * @throws NotFoundException The report could not be found.
      */
-    void overwriteRelevance(Report report, Optional<Integer> relevance) throws NotFoundException;
+    void overwriteRelevance(Report report, Integer relevance) throws NotFoundException;
 
     /**
      * Stores an upvote, i.e. a positive vote for the relevance, of a report by a user.
      *
-     * @param report The report to upvote.
-     * @param user   The upvoting user.
+     * @param report       The report to upvote.
+     * @param user         The upvoting user.
+     * @param votingWeight The users voting weight.
      * @throws DuplicateException A vote on the report by the user already existed.
      * @throws NotFoundException  The report or the user could not be found.
      */
-    void upvote(Report report, User user) throws DuplicateException, NotFoundException;
+    void upvote(Report report, User user, Integer votingWeight) throws DuplicateException, NotFoundException;
 
     /**
      * Stores an downvote, i.e. a negative vote for the relevance, of a report by a user.
      *
-     * @param report The report to downvote.
-     * @param user   The downvoting user.
+     * @param report       The report to downvote.
+     * @param user         The downvoting user.
+     * @param votingWeight The users voting weight.
      * @throws DuplicateException A vote on the report by the user already existed.
      * @throws NotFoundException  The report or the user could not be found.
      */
-    void downvote(Report report, User user) throws DuplicateException, NotFoundException;
+    void downvote(Report report, User user, Integer votingWeight) throws DuplicateException, NotFoundException;
 
     /**
      * Removes a user's vote on a report.

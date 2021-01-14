@@ -167,7 +167,7 @@ public class ReportCreateBacker implements Serializable {
 
         banned = false;
         Authorship authorship = new Authorship(session.getUser(), null, session.getUser(), null);
-        report = new Report(0, "", Report.Type.BUG, Report.Severity.MINOR, "", authorship, null, null, null, 0);
+        report = new Report(0, "", Report.Type.BUG, Report.Severity.MINOR, "", authorship, null, null, null, false, 0);
         report.setTopic(topicID);
         attachments = new ArrayList<>();
         firstPost = new Post(0, "", new Lazy<>(report), authorship, attachments);
@@ -175,10 +175,8 @@ public class ReportCreateBacker implements Serializable {
 
     /**
      * Saves the new report and its first post to the database.
-     * <p>
-     * On success, the user is redirected to the report page of the newly created report.
      *
-     * @return The site to redirect to.
+     * On success, the user is redirected to the report page of the newly created report.
      */
     public void create() {
         if (reportService.createReport(report, firstPost)) {
