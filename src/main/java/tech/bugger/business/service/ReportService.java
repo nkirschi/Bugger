@@ -123,7 +123,30 @@ public class ReportService {
      * @param report The report the user is subscribed to.
      */
     public void unsubscribeFromReport(final User user, final Report report) {
+        if (user == null) {
+            log.error("Anonymous users cannot unsubscribe.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot unsubscribe when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (report == null) {
+            log.error("Cannot unsubscribe from report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot unsubscribe from report with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
 
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().unsubscribe(report, user);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("User " + user + " or report " + report + " not found.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when user " + user + " is unsubscribing from report " + report + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
