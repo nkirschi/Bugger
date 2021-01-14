@@ -43,6 +43,9 @@ public class ReportEditBackerTest {
     private FacesContext fctx;
 
     @Mock
+    private ExternalContext ectx;
+
+    @Mock
     private Registry registry;
 
     private Topic testTopic;
@@ -61,14 +64,14 @@ public class ReportEditBackerTest {
         testTopic = new Topic(1, "Some title", "Some description");
         reportEditBacker.setCurrentTopic(testTopic);
         lenient().doReturn(testTopic).when(topicService).getTopicByID(1);
-        lenient().doReturn(mock(ExternalContext.class)).when(fctx).getExternalContext();
+        lenient().doReturn(ectx).when(fctx).getExternalContext();
     }
 
     @Test
     public void testSaveChangesWithConfirm() {
         reportEditBacker.setDestinationID(testReport.getTopic());
         doReturn(true).when(reportService).updateReport(any());
-        assertNotNull(reportEditBacker.saveChangesWithConfirm());
+        reportEditBacker.saveChangesWithConfirm();
         assertFalse(reportEditBacker.isDisplayConfirmDialog());
     }
 
@@ -78,7 +81,7 @@ public class ReportEditBackerTest {
         doReturn(mock(User.class)).when(session).getUser();
         doReturn(testTopic).when(topicService).getTopicByID(anyInt());
         doReturn(false).when(topicService).isBanned(any(), any());
-        assertNull(reportEditBacker.saveChangesWithConfirm());
+        reportEditBacker.saveChangesWithConfirm();
         assertTrue(reportEditBacker.isDisplayConfirmDialog());
     }
 
@@ -87,8 +90,8 @@ public class ReportEditBackerTest {
         reportEditBacker.setDestinationID(42);
         doReturn(mock(User.class)).when(session).getUser();
         doReturn(null).when(topicService).getTopicByID(42);
-        assertNull(reportEditBacker.saveChangesWithConfirm());
         assertFalse(reportEditBacker.isDisplayConfirmDialog());
+        reportEditBacker.saveChangesWithConfirm();
         verify(fctx).addMessage(any(), any());
     }
 
@@ -97,8 +100,8 @@ public class ReportEditBackerTest {
         reportEditBacker.setDestinationID(42);
         doReturn(testTopic).when(topicService).getTopicByID(anyInt());
         doReturn(null).when(session).getUser();
-        assertNull(reportEditBacker.saveChangesWithConfirm());
         assertFalse(reportEditBacker.isDisplayConfirmDialog());
+        reportEditBacker.saveChangesWithConfirm();
         verify(fctx).addMessage(any(), any());
     }
 
@@ -108,20 +111,41 @@ public class ReportEditBackerTest {
         doReturn(mock(User.class)).when(session).getUser();
         doReturn(testTopic).when(topicService).getTopicByID(anyInt());
         doReturn(true).when(topicService).isBanned(any(), any());
-        assertNull(reportEditBacker.saveChangesWithConfirm());
+        reportEditBacker.saveChangesWithConfirm();
         assertFalse(reportEditBacker.isDisplayConfirmDialog());
     }
 
     @Test
-    public void testSaveChanges() {
+    public void testSaveChanges() throws Exception {
         doReturn(true).when(reportService).updateReport(any());
-        assertNotNull(reportEditBacker.saveChanges());
+        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopic());
+        reportEditBacker.saveChanges();
+        verify(ectx).redirect(any());
     }
 
     @Test
-    public void testSaveChangesWhenError() {
+    public void testSaveChangesMove() throws Exception {
+        doReturn(true).when(reportService).move(any());
+        doReturn(true).when(reportService).updateReport(any());
+        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopic() + 1);
+        reportEditBacker.saveChanges();
+        verify(ectx).redirect(any());
+    }
+
+    @Test
+    public void testSaveChangesWhenError() throws Exception {
         doReturn(false).when(reportService).updateReport(any());
-        assertNull(reportEditBacker.saveChanges());
+        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopic());
+        reportEditBacker.saveChanges();
+        verify(ectx, times(0)).redirect(any());
+    }
+
+    @Test
+    public void testSaveChangesWhenMoveError() throws Exception {
+        doReturn(false).when(reportService).move(any());
+        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopic() + 1);
+        reportEditBacker.saveChanges();
+        verify(ectx, times(0)).redirect(any());
     }
 
     @Test

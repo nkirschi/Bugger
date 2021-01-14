@@ -16,8 +16,14 @@
                     <h:outputLabel value="#{labels.description}"/>
                     <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
                     <h:panelGroup class="row" layout="block" rendered="#{userSession.user.administrator}">
-                        <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button" value="#{labels.delete_topic}"/>
-                        <h:link id="l-edit" outcome="pretty:topic-edit" value="#{labels.edit_topic}" styleClass="button">
+                        <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button"
+                                         value="#{labels.delete_topic}"/>
+                        <h:link id="l-edit" outcome="pretty:topic-edit" value="#{labels.edit_topic}"
+                                styleClass="button">
+                            <f:param name="id" value="#{topicBacker.topicID}"/>
+                        </h:link>
+                        <h:link id="l-create-report" outcome="pretty:report-create" value="#{labels.create_report}"
+                                styleClass="button">
                             <f:param name="id" value="#{topicBacker.topicID}"/>
                         </h:link>
                     </h:panelGroup>
@@ -31,7 +37,8 @@
                         <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"/>
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block">
-                        <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}" styleClass="button" value="#{labels.apply_filter}"/>
+                        <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}" styleClass="button"
+                                         value="#{labels.apply_filter}"/>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup class="col-sm-2" layout="block"/>
@@ -47,13 +54,15 @@
                         </h:link>
                     </b:column>
                     <b:column title="#{labels.col_title}" paginator="#{topicBacker.reports}" key="title">
-                        <h:outputText value="#{var.title}"/>
+                        <h:link outcome="pretty:report" value="#{var.title}">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
                     </b:column>
                     <b:column title="#{labels.col_type}" paginator="#{topicBacker.reports}" key="type">
-                        <h:outputText value="#{var.type}"/>
+                        <h:outputText value="#{labels['report_type.' += var.type]}"/>
                     </b:column>
                     <b:column title="#{labels.col_severity}" paginator="#{topicBacker.reports}" key="severity">
-                        <h:outputText value="#{var.severity}"/>
+                        <h:outputText value="#{labels['report_severity.' += var.severity]}"/>
                     </b:column>
                     <b:column title="#{labels.col_version}" paginator="#{topicBacker.reports}" key="version">
                         <h:outputText value="#{var.version}"/>
@@ -61,7 +70,7 @@
                     <b:column title="#{labels.col_duplicate}" paginator="#{topicBacker.reports}" key="duplicate_of">
                         <h:outputText value="#{var.duplicateOf}"/>
                     </b:column>
-                    <b:column title="#{labels.col_relevance}" paginator="#{topicBacker.reports}" key="forced_relevance" >
+                    <b:column title="#{labels.col_relevance}" paginator="#{topicBacker.reports}" key="forced_relevance">
                         <h:outputText value="#{var.forcedRelevance}"/>
                     </b:column>
                     <b:column title="#{labels.col_change}" paginator="#{topicBacker.reports}" key="last_modified_at">
@@ -78,11 +87,13 @@
                         <h:outputText value="#{labels.delete_affirm}"/>
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block">
-                        <h:commandButton id="cb-delTopic" action="#{topicBacker.delete}" styleClass="button" value="#{labels.delete}" immediate="true"/>
-                        <h:commandButton id="cb-abortDelTopic" action="#{topicBacker.closeDeleteDialog}" styleClass="button" value="#{labels.cancel}" immediate="true"/>
+                        <h:commandButton id="cb-delTopic" action="#{topicBacker.delete}" styleClass="button"
+                                         value="#{labels.delete}" immediate="true"/>
+                        <h:commandButton id="cb-abortDelTopic" action="#{topicBacker.closeDeleteDialog}"
+                                         styleClass="button" value="#{labels.cancel}" immediate="true"/>
                     </h:panelGroup>
                 </h:panelGroup>
-            <h:panelGroup class="col-sm-4" layout="block"/>
+                <h:panelGroup class="col-sm-4" layout="block"/>
             </h:panelGroup>
         </h:form>
     </ui:define>

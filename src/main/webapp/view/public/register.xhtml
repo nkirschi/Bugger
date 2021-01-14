@@ -1,13 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+<ui:composition template="/WEB-INF/template/main.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
 
-<ui:composition template="/WEB-INF/template/main.xhtml">
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="Constants"/>
     </f:metadata>
@@ -18,90 +15,81 @@
         <h:panelGroup layout="block" styleClass="d-flex p-2 justify-content-center align-items-center container">
             <h:panelGroup layout="block" styleClass="row vw-50">
                 <h:form id="f-register">
-                    <h:panelGroup styleClass="card">
-                        <h:panelGroup styleClass="card-body">
-                            <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
-                                <h:outputLabel id="o-username" for="it-username" styleClass="form-label"
-                                               value="#{labels['register.username']}:"/>
-                                <h:panelGroup layout="block" styleClass="input-group has-validation">
-                                    <h:outputLabel styleClass="input-group-text" id="ol-username-icon">@</h:outputLabel>
-                                    <h:inputText id="it-username" value="#{registerBacker.user.username}"
-                                                 required="true" a:maxlength="#{Constants.USERNAME_MAX}"
-                                                 styleClass="form-control
-                                                 #{component.valid ? 'is-valid' : 'is-invalid'}"
-                                                 a:placeholder="#{labels['register.username']}">
-                                        <f:validator validatorId="usernameRegexValidator"/>
-                                        <f:validator validatorId="usernameAssignedValidator"/>
-                                    </h:inputText>
-                                    <h:panelGroup layout="block" styleClass="invalid-tooltip right">
-                                        <h:message for="it-username"/>
-                                    </h:panelGroup>
-                                </h:panelGroup>
-                                <h:outputLabel id="ol-username-hint" value="#{labels['register.username_hint']}"
-                                               styleClass="form-text"/>
-                            </h:panelGroup>
-
-                            <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
-                                <h:outputLabel id="o-email" for="it-email" styleClass="form-label"
-                                               value="#{labels['register.email']}:"/>
-                                <h:panelGroup layout="block" styleClass="input-group has-validation">
-                                    <h:inputText id="it-email" value="#{registerBacker.user.emailAddress}"
-                                                 required="true" a:maxlength="#{Constants.SMALL_FIELD}"
-                                                 styleClass="form-control
-                                                 #{component.valid ? 'is-valid' : 'is-invalid'}"
-                                                 a:placeholder="#{labels['register.email']}">
-                                        <f:validator validatorId="emailRegexValidator"/>
-                                        <f:validator validatorId="emailAssignedValidator"/>
-                                    </h:inputText>
-                                    <h:panelGroup layout="block" styleClass="invalid-tooltip right">
-                                        <h:message for="it-email"/>
-                                    </h:panelGroup>
-                                </h:panelGroup>
-                                <h:outputLabel id="ol-email-hint" value="#{labels['register.email_hint']}"
-                                               styleClass="form-text"/>
-                            </h:panelGroup>
-
-                            <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
-                                <h:outputLabel id="o-first-name" for="it-first-name" styleClass="form-label"
-                                               value="#{labels['register.first_name']}:"/>
-                                <h:panelGroup layout="block" styleClass="input-group has-validation">
-                                    <h:inputText id="it-first-name" value="#{registerBacker.user.firstName}"
-                                                 required="true" a:maxlength="#{Constants.SMALL_FIELD}"
-                                                 styleClass="form-control
-                                                 #{component.valid ? 'is-valid' : 'is-invalid'}"
-                                                 a:placeholder="#{labels['register.first_name']}"/>
-                                    <h:panelGroup layout="block" styleClass="invalid-tooltip right">
-                                        <h:message for="it-first-name"/>
-                                    </h:panelGroup>
-                                </h:panelGroup>
-                            </h:panelGroup>
-
-                            <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
-                                <h:outputLabel id="o-last-name" for="it-last-name" styleClass="form-label"
-                                               value="#{labels['register.last_name']}:"/>
-                                <h:panelGroup layout="block" styleClass="input-group has-validation">
-                                    <h:inputText id="it-last-name" value="#{registerBacker.user.lastName}"
-                                                 required="true" a:maxlength="#{Constants.SMALL_FIELD}"
-                                                 styleClass="form-control
-                                                 #{component.valid ? 'is-valid' : 'is-invalid'}"
-                                                 a:placeholder="#{labels['register.last_name']}"/>
-                                    <h:panelGroup layout="block" styleClass="invalid-tooltip right">
-                                        <h:message for="it-last-name"/>
-                                    </h:panelGroup>
-                                </h:panelGroup>
-                            </h:panelGroup>
-
-                            <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
-                                <h:commandButton value="#{labels['register.submit']}" styleClass="btn btn-primary"
-                                                 action="#{registerBacker.register}" type="submit"/>
-                                <h:link value="#{labels['login.title']}" outcome="pretty:login"
-                                        styleClass="btn btn-secondary"/>
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:outputLabel id="o-username" for="it-username" styleClass="form-label"
+                                       value="#{labels['register.username']}:"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:outputLabel styleClass="input-group-text" id="ol-username-icon">@</h:outputLabel>
+                            <h:inputText id="it-username" value="#{registerBacker.user.username}" required="true"
+                                         a:maxlength="#{Constants.USERNAME_MAX}"
+                                         a:placeholder="#{labels['register.username']}"
+                                         styleClass="form-control #{component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:validator validatorId="usernameRegexValidator"/>
+                                <f:validator validatorId="usernameAssignedValidator"/>
+                            </h:inputText>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip">
+                                <h:message for="it-username"/>
                             </h:panelGroup>
                         </h:panelGroup>
+                        <h:outputLabel id="ol-username-hint" value="#{labels['register.username_hint']}"
+                                       styleClass="form-text"/>
+                    </h:panelGroup>
+
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:outputLabel id="o-email" for="it-email" styleClass="form-label"
+                                       value="#{labels['register.email']}:"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:inputText id="it-email" value="#{registerBacker.user.emailAddress}" required="true"
+                                         a:maxlength="#{Constants.SMALL_FIELD}"
+                                         a:placeholder="#{labels['register.email']}"
+                                         styleClass="form-control #{component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:validator validatorId="emailRegexValidator"/>
+                                <f:validator validatorId="emailAssignedValidator"/>
+                            </h:inputText>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip text-end">
+                                <h:message for="it-email"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:outputLabel id="ol-email-hint" value="#{labels['register.email_hint']}"
+                                       styleClass="form-text"/>
+                    </h:panelGroup>
+
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:outputLabel id="o-first-name" for="it-first-name" styleClass="form-label"
+                                       value="#{labels['register.first_name']}:"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:inputText id="it-first-name" value="#{registerBacker.user.firstName}" required="true"
+                                         a:maxlength="#{Constants.SMALL_FIELD}"
+                                         a:placeholder="#{labels['register.first_name']}"
+                                         styleClass="form-control #{component.valid ? 'is-valid' : 'is-invalid'}"/>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip text-end">
+                                <h:message for="it-first-name"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:outputLabel id="o-last-name" for="it-last-name" styleClass="form-label"
+                                       value="#{labels['register.last_name']}:"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:inputText id="it-last-name" value="#{registerBacker.user.lastName}" required="true"
+                                         a:maxlength="#{Constants.SMALL_FIELD}"
+                                         a:placeholder="#{labels['register.last_name']}"
+                                         styleClass="form-control #{component.valid ? 'is-valid' : 'is-invalid'}"/>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip text-end">
+                                <h:message for="it-last-name"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
+                        <h:commandButton id="cb-register" value="#{labels['register.submit']}" type="submit"
+                                         styleClass="btn btn-primary" action="#{registerBacker.register}"/>
+                        <h:link id="l-login" value="#{labels['login.title']}" outcome="pretty:login"
+                                styleClass="btn btn-secondary"/>
                     </h:panelGroup>
                 </h:form>
             </h:panelGroup>
         </h:panelGroup>
     </ui:define>
 </ui:composition>
-</html>

@@ -180,11 +180,14 @@ public class ReportCreateBacker implements Serializable {
      *
      * @return The site to redirect to.
      */
-    public String create() {
+    public void create() {
         if (reportService.createReport(report, firstPost)) {
-            return "report.xhtml?id=" + report.getId();
-        } else {
-            return null;
+            try {
+                ectx.redirect(ectx.getRequestContextPath()
+                        + "/faces/view/auth/report.xhtml?id=" + report.getId());
+            } catch (IOException e) {
+                redirectTo404Page();
+            }
         }
     }
 

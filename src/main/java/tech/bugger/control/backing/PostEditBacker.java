@@ -136,13 +136,11 @@ public class PostEditBacker implements Serializable {
         if (create) {
             reportID = parseRequestParameter("r");
             if (reportID == null) {
-                log.debug("ID of report to create post in is null.");
                 redirectToErrorPage();
                 return;
             }
             report = reportService.getReportByID(reportID);
             if (report == null || !reportService.canPostInReport(user, report)) {
-                log.debug("Report to create post in is null or forbidden.");
                 redirectToErrorPage();
                 return;
             }
@@ -151,27 +149,22 @@ public class PostEditBacker implements Serializable {
         } else {
             postID = parseRequestParameter("p");
             if (postID == null) {
-                log.debug("ID of post to edit is null.");
                 redirectToErrorPage();
                 return;
             }
             post = postService.getPostByID(postID);
             if (post == null || !postService.canModify(user, post)) {
-                log.debug("Post to edit is null or forbidden: post=" + post);
                 redirectToErrorPage();
                 return;
             }
             report = reportService.getReportByID(post.getReport().get().getId());
             if (report == null) {
-                log.debug("Report to edit post in is null or forbidden.");
                 redirectToErrorPage();
                 return;
             }
             attachments = post.getAttachments();
             post.getAuthorship().setModifier(user);
         }
-
-        log.debug("Init done, create=" + create + ", postID=" + postID + "reportID=" + reportID);
     }
 
     /**
@@ -184,8 +177,7 @@ public class PostEditBacker implements Serializable {
             ExternalContext ectx = fctx.getExternalContext();
             try {
                 ectx.redirect(ectx.getRequestContextPath()
-                        + "/faces/view/authorized/report.xhtml?id=" + report.getId() + "&p=" + post.getId());
-
+                        + "/faces/view/auth/report.xhtml?id=" + report.getId() + "&p=" + post.getId());
             } catch (IOException e) {
                 redirectToErrorPage();
             }

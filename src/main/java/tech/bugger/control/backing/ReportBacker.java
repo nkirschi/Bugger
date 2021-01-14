@@ -1,5 +1,15 @@
 package tech.bugger.control.backing;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.stream.StreamSupport;
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
@@ -11,17 +21,6 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.List;
 
 /**
  * Backing bean for the report page.
@@ -62,16 +61,6 @@ public class ReportBacker implements Serializable {
     private static final long serialVersionUID = 7260516443406682026L;
 
     /**
-     * The report ID.
-     */
-    private int reportID;
-
-    /**
-     * The post ID.
-     */
-    private int postID;
-
-    /**
      * The report.
      */
     private Report report;
@@ -82,9 +71,14 @@ public class ReportBacker implements Serializable {
     private Paginator<Post> posts;
 
     /**
+     * The paginated list of all duplicates.
+     */
+    private Paginator<Report> duplicates;
+
+    /**
      * The ID of the report the current report is potentially a duplicate of.
      */
-    private int duplicateOfID;
+    private Integer duplicateOfID;
 
     /**
      * The overwriting relevance.
@@ -160,7 +154,8 @@ public class ReportBacker implements Serializable {
     @PostConstruct
     void init() {
         ExternalContext ext = fctx.getExternalContext();
-        postID = -1;
+        int reportID;
+        Integer postID = null;
         if (ext.getRequestParameterMap().containsKey("p")) {
             try {
                 postID = Integer.parseInt(ext.getRequestParameterMap().get("p"));
@@ -186,6 +181,7 @@ public class ReportBacker implements Serializable {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
             return;
         }
+        duplicateOfID = report.getDuplicateOf();
         User user = session.getUser();
         boolean maySee = false;
         if (applicationSettings.getConfiguration().isGuestReading()) {
@@ -209,11 +205,22 @@ public class ReportBacker implements Serializable {
                 return reportService.getNumberOfPosts(report);
             }
         };
+        duplicates = new Paginator<>("ID", Selection.PageSize.TINY) {
+            @Override
+            protected Iterable<Report> fetch() {
+                return reportService.getDuplicatesFor(report, getSelection());
+            }
+
+            @Override
+            protected int totalSize() {
+                return reportService.getNumberOfDuplicates(report);
+            }
+        };
         log.debug("Paginator initialized with Selection " + posts.getSelection() + " and items "
                 + posts.getWrappedData());
-        if (postID > -1) {
+        if (postID != null) {
             Post post = new Post(postID, null, null, null, null);
-            while (!((List<Post>) posts.getWrappedData()).contains(post)) {
+            while (StreamSupport.stream(posts.spliterator(), false).noneMatch(post::equals)) {
                 try {
                     posts.nextPage();
                 } catch (IllegalStateException e) {
@@ -296,15 +303,29 @@ public class ReportBacker implements Serializable {
     }
 
     /**
+     * Opens the current report.
+     */
+    private void open() {
+        report.setClosingDate(null);
+        reportService.open(report);
+    }
+
+    /**
+     * Closes the current report.
+     */
+    private void close() {
+        report.setClosingDate(ZonedDateTime.now());
+        reportService.close(report);
+    }
+
+    /**
      * Opens a closed report and closes an open one.
      */
     public void toggleOpenClosed() {
         if (report.getClosingDate() == null) {
-            report.setClosingDate(ZonedDateTime.now());
-            reportService.close(report);
+            close();
         } else {
-            report.setClosingDate(null);
-            reportService.open(report);
+            open();
         }
         displayDialog(null);
     }
@@ -320,21 +341,26 @@ public class ReportBacker implements Serializable {
      * Marks the report as a duplicate of another report. This automatically closes the report.
      */
     public void markDuplicate() {
-
+        if (duplicateOfID != null && isPrivileged() && reportService.markDuplicate(report, duplicateOfID)) {
+            close();
+            displayDialog(null);
+            duplicates.update();
+        }
     }
 
     /**
      * Removes the marking signifying that the report is a duplicate of another one.
      */
     public void unmarkDuplicate() {
-
+        if (isPrivileged() && reportService.unmarkDuplicate(report)) {
+            duplicateOfID = null;
+        }
     }
 
     /**
      * Overwrites the relevance of the report with a set value.
      */
     public void overwriteRelevance() {
-
     }
 
     /**
@@ -350,7 +376,7 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user is privileged and {@code false} otherwise.
      */
     public boolean isPrivileged() {
-        return reportService.canModify(session.getUser(), report);
+        return reportService.isPrivileged(session.getUser(), report);
     }
 
     /**
@@ -396,16 +422,20 @@ public class ReportBacker implements Serializable {
     }
 
     /**
+     * Returns the ID of the report this report is a duplicate of.
+     *
      * @return The duplicateOfID.
      */
-    public int getDuplicateOfID() {
+    public Integer getDuplicateOfID() {
         return duplicateOfID;
     }
 
     /**
+     * Sets the ID of the report this report is a duplicate of.
+     *
      * @param duplicateOfID The duplicateOfID to set.
      */
-    public void setDuplicateOfID(final int duplicateOfID) {
+    public void setDuplicateOfID(final Integer duplicateOfID) {
         this.duplicateOfID = duplicateOfID;
     }
 
@@ -424,10 +454,21 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     * @return The posts.
+     * Returns the paginator managing all posts of the currently shown report.
+     *
+     * @return The paginator managing the posts.
      */
     public Paginator<Post> getPosts() {
         return posts;
+    }
+
+    /**
+     * Returns the paginator managing all duplicates of the currently shown report.
+     *
+     * @return The paginator managing the duplicates.
+     */
+    public Paginator<Report> getDuplicates() {
+        return duplicates;
     }
 
     /**
@@ -451,38 +492,6 @@ public class ReportBacker implements Serializable {
      */
     public Integer getOverwritingRelevance() {
         return overwritingRelevance;
-    }
-
-    /**
-     * @return The reportID.
-     */
-    public int getReportID() {
-        return reportID;
-    }
-
-    /**
-     * @param reportID The reportID to set.
-     */
-    public void setReportID(final int reportID) {
-        this.reportID = reportID;
-    }
-
-    /**
-     * Returns the post ID.
-     *
-     * @return The post ID.
-     */
-    public int getPostID() {
-        return postID;
-    }
-
-    /**
-     * Sets the post ID.
-     *
-     * @param postID The post ID to set.
-     */
-    public void setPostID(final int postID) {
-        this.postID = postID;
     }
 
 }

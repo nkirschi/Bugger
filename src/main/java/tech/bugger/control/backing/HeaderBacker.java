@@ -1,18 +1,21 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-
+import com.ocpsoft.pretty.PrettyContext;
+import java.io.Serial;
+import java.io.Serializable;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDate;
+import javax.servlet.http.HttpServletRequest;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
 
 
 /**
@@ -128,7 +131,7 @@ public class HeaderBacker implements Serializable {
     public String determineAlertClass() {
         if (!fctx.getMessageList(null).isEmpty()) {
             FacesMessage.Severity maxSeverity = fctx.getMessageList().stream().map(FacesMessage::getSeverity)
-                                                    .max(FacesMessage.Severity::compareTo).orElseThrow();
+                    .max(FacesMessage.Severity::compareTo).orElseThrow();
             if (maxSeverity.equals(FacesMessage.SEVERITY_ERROR)) {
                 return " alert-danger";
             } else if (maxSeverity.equals(FacesMessage.SEVERITY_WARN)) {
@@ -140,6 +143,17 @@ public class HeaderBacker implements Serializable {
             }
         }
         return "";
+    }
+
+    /**
+     * Retrieves and returns the URL to redirect to after login.
+     *
+     * @return The URL to redirect to after login.
+     */
+    public String getRedirectUrl() {
+        String uri = PrettyContext.getCurrentInstance().getCurrentMapping().getPattern();
+        String queryString = ((HttpServletRequest) fctx.getExternalContext().getRequest()).getQueryString();
+        return URLEncoder.encode(uri + (queryString == null ? "" : '?' + queryString), StandardCharsets.UTF_8);
     }
 
     /**

@@ -129,11 +129,13 @@ public class ReportEditBacker implements Serializable {
                     && (user.equals(report.getAuthorship().getCreator())
                     || user.isAdministrator()
                     || topicService.isModerator(user, currentTopic));
-        }
+        };
 
         if (!privileged) {
             redirectTo404Page();
         }
+
+        report.getAuthorship().setModifier(session.getUser());
     }
 
     /**
@@ -161,29 +163,36 @@ public class ReportEditBacker implements Serializable {
      *
      * @return The page to navigate to.
      */
-    public String saveChangesWithConfirm() {
+    public void saveChangesWithConfirm() {
         if (report.getTopic() == destinationID) {
-            return saveChanges();
+            saveChanges();
+            return;
         }
 
         if (canMoveToTopic()) {
             openConfirmDialog();
         }
-        return null;
     }
 
     /**
      * Saves the changes made into the database.
-     *
-     * @return The page to navigate to.
      */
-    public String saveChanges() {
-        report.setTopic(destinationID);
+    public void saveChanges() {
+        boolean success = true;
 
-        if (reportService.updateReport(report)) {
-            return "pretty:report?r=" + report.getId();
-        } else {
-            return null;
+        if (destinationID != report.getTopic()) {
+            report.setTopic(destinationID);
+            success = reportService.move(report);
+        }
+
+        if (success && reportService.updateReport(report)) {
+            ExternalContext ectx = fctx.getExternalContext();
+            try {
+                ectx.redirect(ectx.getRequestContextPath()
+                        + "/faces/view/auth/report.xhtml?id=" + report.getId());
+            } catch (IOException e) {
+                redirectTo404Page();
+            }
         }
     }
 
