@@ -291,7 +291,9 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String upvote() {
-        reportService.upvote(report, session.getUser());
+        if (session.getUser() == null) {
+            reportService.upvote(report, session.getUser());
+        }
         updateRelevance();
         return null;
     }
@@ -302,7 +304,9 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String downvote() {
-        reportService.downvote(report, session.getUser());
+        if (session.getUser() == null) {
+            reportService.downvote(report, session.getUser());
+        }
         updateRelevance();
         return null;
     }
@@ -313,7 +317,9 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String removeVote() {
-        reportService.removeVote(report, session.getUser());
+        if (session.getUser() == null) {
+            reportService.removeVote(report, session.getUser());
+        }
         updateRelevance();
         return null;
     }
@@ -324,7 +330,10 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user has voted up and {@code false} otherwise.
      */
     public boolean hasUpvoted() {
-        return reportService.hasUpvoted(report, session.getUser());
+        if(session.getUser() == null) {
+            return reportService.hasUpvoted(report, session.getUser());
+        }
+        return false;
     }
 
     /**
@@ -333,7 +342,10 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user has voted down and {@code false} otherwise.
      */
     public boolean hasDownvoted() {
-        return reportService.hasDownvoted(report, session.getUser());
+        if(session.getUser() == null) {
+            return reportService.hasDownvoted(report, session.getUser());
+        }
+        return false;
     }
 
     /**
@@ -397,12 +409,12 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String applyOverwriteRelevance() {
-        if (session.getUser().isAdministrator()) {
+        if (session.getUser() != null && session.getUser().isAdministrator()) {
             reportService.overwriteRelevance(report, overwriteRelevanceValue);
             updateRelevance();
             return null;
         }
-    return "pretty:error";
+        return "pretty:error";
     }
 
     /**
@@ -418,7 +430,10 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user is privileged and {@code false} otherwise.
      */
     public boolean isPrivileged() {
-        return reportService.isPrivileged(session.getUser(), report);
+        if (session.getUser() != null) {
+            return reportService.isPrivileged(session.getUser(), report);
+        }
+        return false;
     }
 
     /**
@@ -428,7 +443,10 @@ public class ReportBacker implements Serializable {
      * @return {@code true} iff the user is privileged.
      */
     public boolean privilegedForPost(final Post post) {
-        return postService.isPrivileged(session.getUser(), post);
+        if(session.getUser() != null) {
+            return postService.isPrivileged(session.getUser(), post);
+        }
+        return false;
     }
 
     /**
