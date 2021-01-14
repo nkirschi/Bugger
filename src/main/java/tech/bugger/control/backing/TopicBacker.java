@@ -1,5 +1,6 @@
 package tech.bugger.control.backing;
 
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.SearchService;
@@ -111,27 +112,27 @@ public class TopicBacker implements Serializable {
     private List<String> userModSuggestions;
 
     /**
-     * Paginator for reports in the Topic.
+     * Paginator for reports in the topic.
      */
     private Paginator<Report> reports;
 
     /**
-     * Paginator for moderators in this Topic.
+     * Paginator for moderators in this topic.
      */
     private Paginator<User> moderators;
 
     /**
-     * Paginator for banned users in this Topic.
+     * Paginator for banned users in this topic.
      */
     private Paginator<User> bannedUsers;
 
     /**
-     * Weather or not open reports should be shown in the Pagination.
+     * Whether or not open reports should be shown in the Pagination.
      */
     private boolean openReportShown; // default: true
 
     /**
-     * Weather or not closed reports should be shown in the Pagination.
+     * Whether or not closed reports should be shown in the Pagination.
      */
     private boolean closedReportShown; // default: false
 
@@ -146,17 +147,17 @@ public class TopicBacker implements Serializable {
     private DialogType displayDialog;
 
     /**
-     * Weather or not the make mod dialog should be shown.
+     * Whether or not the make mod dialog should be shown.
      */
     private boolean displayModDialog;
 
     /**
-     * Weather or not the un-make mod dialog should be shown.
+     * Whether or not the un-make mod dialog should be shown.
      */
     private boolean displayUnmodDialog;
 
     /**
-     * Weather or not the delete topic dialog should be shown.
+     * Whether or not the delete topic dialog should be shown.
      */
     private boolean displayDeleteDialog;
 
@@ -186,6 +187,11 @@ public class TopicBacker implements Serializable {
     private final FacesContext fctx;
 
     /**
+     * The application settings cache.
+     */
+    private final ApplicationSettings settings;
+
+    /**
      * Constructs a new topic page backing bean with the necessary dependencies.
      *
      * @param topicService  The topic service to use.
@@ -193,15 +199,18 @@ public class TopicBacker implements Serializable {
      * @param searchService The search service to use.
      * @param fctx          The current faces context.
      * @param session       The current {@link UserSession}.
+     * @param settings      The current application settings.
      */
     @Inject
     public TopicBacker(final TopicService topicService, final ReportService reportService,
-                       final SearchService searchService, final FacesContext fctx, final UserSession session) {
+                       final SearchService searchService, final FacesContext fctx, final UserSession session,
+                       final ApplicationSettings settings) {
         this.topicService = topicService;
         this.reportService = reportService;
         this.searchService = searchService;
         this.fctx = fctx;
         this.session = session;
+        this.settings = settings;
     }
 
     /**
@@ -210,6 +219,12 @@ public class TopicBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        if (!settings.getConfiguration().isGuestReading()) {
+            if (session.getUser() == null || isBanned()) {
+                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            }
+        }
+
         ExternalContext ext = fctx.getExternalContext();
         if ((!ext.getRequestParameterMap().containsKey("id"))) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
@@ -390,7 +405,7 @@ public class TopicBacker implements Serializable {
      *
      * @param username The username of the user to be demoted.
      */
-    public void unbanSingleUser(String username) {
+    public void unbanSingleUser(final String username) {
         userBan = username;
         openUnbanDialog();
     }
@@ -400,7 +415,7 @@ public class TopicBacker implements Serializable {
      *
      * @param username The username of the user to be demoted.
      */
-    public void unmodSingleUser(String username) {
+    public void unmodSingleUser(final String username) {
         userMod = username;
         openUnmodDialog();
     }

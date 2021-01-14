@@ -154,6 +154,11 @@ public class ReportBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        if (!applicationSettings.getConfiguration().isGuestReading()) {
+            if (session.getUser() == null || isBanned()) {
+                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            }
+        }
         ExternalContext ext = fctx.getExternalContext();
         int reportID;
         Integer postID = null;

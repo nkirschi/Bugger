@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.SearchService;
@@ -51,6 +52,9 @@ public class TopicBackerTest {
     @Mock
     private FacesContext fctx;
 
+    @Mock
+    private ApplicationSettings settings;
+
     private User user;
     private Topic topic;
     private static final String USERNAME = "Helgi";
@@ -60,7 +64,7 @@ public class TopicBackerTest {
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic = new Topic(1, "Some title", "Some description");
-        topicBacker = new TopicBacker(topicService, reportService, searchService, fctx, session);
+        topicBacker = new TopicBacker(topicService, reportService, searchService, fctx, session, settings);
     }
 
     @Test
