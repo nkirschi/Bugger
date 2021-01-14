@@ -32,6 +32,15 @@
                 </ui:repeat>
             </ul>
 
+            <h:panelGroup>
+                <h:outputFormat id="post-attachments-info"
+                                value="#{labels.post_attachments_info}"
+                                styleClass="small form-text text-muted">
+                    <f:param value="#{applicationSettings.configuration.maxAttachmentsPerPost}"/>
+                    <f:param value="#{C.MAX_ATTACHMENT_FILESIZE}"/>
+                </h:outputFormat>
+            </h:panelGroup>
+
             <h:panelGroup styleClass="row"
                           layout="block"
                           rendered="#{postEditBacker.attachments.size()

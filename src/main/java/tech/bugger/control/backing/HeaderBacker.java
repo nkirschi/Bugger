@@ -1,22 +1,23 @@
 package tech.bugger.control.backing;
 
 import com.ocpsoft.pretty.PrettyContext;
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
+import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import java.io.Serial;
 import java.io.Serializable;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
 
 
 /**
@@ -152,9 +153,14 @@ public class HeaderBacker implements Serializable {
      * @return The URL to redirect to after login.
      */
     public String getRedirectUrl() {
-        String base = fctx.getExternalContext().getApplicationContextPath();
-        String uri = PrettyContext.getCurrentInstance().getCurrentMapping().getPattern();
-        String queryString = ((HttpServletRequest) fctx.getExternalContext().getRequest()).getQueryString();
+        ExternalContext ectx = fctx.getExternalContext();
+
+        String base = ectx.getApplicationContextPath();
+        HttpServletRequest request = (HttpServletRequest) ectx.getRequest();
+        UrlMapping mapping = PrettyContext.getCurrentInstance().getCurrentMapping();
+        String uri = mapping != null ? mapping.getPattern() : request.getRequestURI();
+        String queryString = request.getQueryString();
+
         return URLEncoder.encode(base + uri + (queryString == null ? "" : '?' + queryString), StandardCharsets.UTF_8);
     }
 

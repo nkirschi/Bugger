@@ -18,7 +18,6 @@ import javax.servlet.http.Part;
 public class FileValidator implements Validator<Part> {
 
     private static final Log log = Log.forClass(FileValidator.class);
-    private static final int MAX_FILESIZE = 2; // in MB
 
     @Inject
     private ApplicationSettings applicationSettings;

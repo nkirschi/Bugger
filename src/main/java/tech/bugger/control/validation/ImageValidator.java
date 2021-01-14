@@ -16,7 +16,6 @@ import javax.servlet.http.Part;
 public class ImageValidator implements Validator<Part> {
 
     private static Log log = Log.forClass(ImageValidator.class);
-    private static final int MAX_SIZE = 2 * 1024 * 1024;
 
     /**
      * Validates the given {@code part}.

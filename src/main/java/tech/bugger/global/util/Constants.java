@@ -62,4 +62,19 @@ public final class Constants {
      */
     public static final String EXTENSION_LIST_REGEX = "^\\.[^,]+(,\\s?\\.[^,\\s\\.]+)*$";
 
+    /**
+     * The maximum filesize for attachments in megabytes.
+     */
+    public static final int MAX_ATTACHMENT_FILESIZE = 10;
+
+    /**
+     * The maximum filesize for profile avatars in megabytes.
+     */
+    public static final int MAX_AVATAR_FILESIZE = 10;
+
+    /**
+     * The number of bytes in a megabyte.
+     */
+    public static final int MB_TO_BYTES = 1_000_000;
+
 }

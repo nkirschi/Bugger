@@ -123,6 +123,14 @@
             </h:panelGroup>
         -->
 
+            <h:panelGroup>
+                <h:outputFormat id="first-post-attachments-info"
+                                value="#{labels['profile_edit.avatar_info']}"
+                                styleClass="small form-text text-muted">
+                    <f:param value="#{C.MAX_AVATAR_FILESIZE}"/>
+                </h:outputFormat>
+            </h:panelGroup>
+
             <h:panelGrid id="p-profile-info" columns="2">
                 <h:outputLabel id="o-visibility" for="s-visibility" value="#{labels['profile_edit.visibility']}"/>
                 <h:selectOneMenu id="s-visibility" value="#{profileEditBacker.user.profileVisibility}"
