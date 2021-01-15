@@ -13,10 +13,10 @@
 
         <!-- useful links for managing the users in the system -->
         <h:outputText value="#{labels.user_management}" styleClass="h2"/>
-        <h:panelGroup>
+        <h:panelGroup layout="block" styleClass="mb-3">
             <h:link value="#{labels.browse}"
                     outcome="pretty:search"
-                    styleClass="btn btn-secondary">
+                    styleClass="btn btn-secondary me-3">
                 <f:param name="t" value="USER"/><!-- user results tab on the search page -->
                 <f:param name="q" value=""/><!-- empty query string => all results displayed -->
             </h:link>
@@ -28,204 +28,307 @@
         </h:panelGroup>
 
         <!-- organization settings form -->
-        <h:outputText value="#{labels.organization_settings}" styleClass="h2"/>
-        <h:form id="f-organisation" enctype="multipart/form-data">
-            <h:panelGrid columns="2">
-
-                <!-- organization name -->
-                <h:outputLabel id="o-name" for="it-name" value="#{labels.name}"/>
-                <h:inputText id="it-name"
-                             value="#{adminBacker.organization.name}"
-                             a:maxlength="#{Constants.SMALL_FIELD}"
-                             a:placeholder="#{labels.organization_name_placeholder}"
-                             styleClass="form-control#{component.valid ? '' : ' border-danger'}">
-                    <f:validateLength maximum="#{Constants.SMALL_FIELD}"/>
-                </h:inputText>
-                <h:panelGroup/>
-                <h:panelGroup>
-                    <h:outputLabel id="ot-name-hint"
-                                  value="#{labels.organization_name_hint}"
-                                  styleClass="small form-text text-muted"/>
-                    <h:message for="it-name" styleClass="text-danger"/>
-                </h:panelGroup>
-
-                <!-- organization logo -->
-                <h:outputLabel id="o-logo" for="i-logo" value="#{labels.logo}"/>
-                <h:panelGrid columns="1">
-                    <h:graphicImage id="g-logo-preview" value="logo" styleClass="logo-preview"
-                                    rendered="#{applicationSettings.organization.existsLogo}"/>
-                    <h:graphicImage id="g-logo-preview-fallback" library="images" name="bugger.png"
-                                    styleClass="logo-preview"
-                                    rendered="#{not applicationSettings.organization.existsLogo}"/>
-                    <h:inputFile id="i-logo"
-                                 validator="imageValidator"
-                                 valueChangeListener="#{adminBacker.uploadLogo}"
-                                 styleClass="form-control-file"/>
-                    <h:panelGroup>
-                        <h:selectBooleanCheckbox id="s-remove-logo" valueChangeListener="#{adminBacker.removeLogo}"/>
-                        <h:outputLabel id="o-remove-logo" for="s-remove-logo" value="#{labels.remove}"/>
+        <h:panelGroup layout="block" styleClass="row">
+            <h:panelGroup layout="block" styleClass="col-6">
+                <h:outputText value="#{labels.organization_settings}" styleClass="h2"/>
+                <h:form id="f-organisation" enctype="multipart/form-data">
+                    <!-- organization name -->
+                    <h:panelGroup layout="block" styleClass="mb-3">
+                        <h:outputLabel id="o-name"
+                                       for="it-name"
+                                       value="#{labels.name}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="form-group position-relative">
+                            <h:inputText id="it-name"
+                                         value="#{adminBacker.organization.name}"
+                                         a:maxlength="#{Constants.SMALL_FIELD}"
+                                         a:placeholder="#{labels.organization_name_placeholder}"
+                                         styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:validateLength maximum="#{Constants.SMALL_FIELD}"/>
+                            </h:inputText>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message for="it-name"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:outputLabel id="ot-name-hint"
+                                       value="#{labels.organization_name_hint}"
+                                       styleClass="small form-text text-muted"/>
                     </h:panelGroup>
-                </h:panelGrid>
-                <h:panelGroup/>
-                <h:message for="i-logo" styleClass="text-danger"/>
 
-                <!-- organization theme -->
-                <h:outputLabel id="o-theme" for="s-theme" value="#{labels.theme}"/>
-                <h:selectOneMenu id="s-theme"
-                                 styleClass="form-control#{component.valid ? '' : ' border-danger'}"
-                                 value="#{adminBacker.organization.theme}">
-                    <f:selectItems value="#{adminBacker.availableThemes}"/>
-                </h:selectOneMenu>
-                <h:panelGroup/>
-                <h:panelGroup>
-                    <h:message for="s-theme" styleClass="text-danger"/>
-                    <h:outputLabel id="ot-theme-hint"
-                                  value="#{labels.organization_theme_hint}"
-                                  styleClass="small form-text text-muted"/>
-                </h:panelGroup>
+                    <!-- organization logo -->
+                    <h:panelGroup layout="block" styleClass="mb-3">
+                        <h:outputLabel id="o-logo"
+                                       for="i-logo"
+                                       value="#{labels.logo}"
+                                       styleClass="form-label"/>
+                        <h:panelGrid columns="1">
+                            <h:graphicImage id="g-logo-preview"
+                                            value="logo"
+                                            styleClass="img-thumbnail img-size-small"
+                                            rendered="#{applicationSettings.organization.existsLogo}"/>
+                            <h:graphicImage id="g-logo-preview-fallback"
+                                            library="images"
+                                            name="bugger.png"
+                                            styleClass="img-thumbnail img-size-small"
+                                            rendered="#{not applicationSettings.organization.existsLogo}"/>
+                            <h:panelGroup layout="block" styleClass="form-group position-relative">
+                                <h:inputFile id="i-logo"
+                                             validator="imageValidator"
+                                             valueChangeListener="#{adminBacker.uploadLogo}"
+                                             styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}"/>
+                                <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                    <h:message for="i-logo"/>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                            <h:panelGroup styleClass="form-check">
+                                <h:selectBooleanCheckbox id="s-remove-logo"
+                                                         valueChangeListener="#{adminBacker.removeLogo}"
+                                                         styleClass="form-check-input"/>
+                                <h:outputLabel id="o-remove-logo"
+                                               for="s-remove-logo" value="#{labels.remove}"
+                                               styleClass="form-check-label"/>
+                            </h:panelGroup>
+                        </h:panelGrid>
+                    </h:panelGroup>
 
-                <!-- organization imprint (Markdown) -->
-                <h:outputLabel id="o-imprint" for="it-imprint" value="#{labels.imprint}"/>
-                <h:inputTextarea id="it-imprint"
-                                 value="#{adminBacker.organization.imprint}"
-                                 a:maxlength="#{Constants.LARGE_AREA}"
-                                 styleClass="form-control#{component.valid ? '' : ' border-danger'}">
-                    <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
-                </h:inputTextarea>
-                <h:panelGroup/>
-                <h:message for="it-imprint" styleClass="text-danger"/>
+                    <!-- organization theme -->
+                    <h:panelGroup layout="block" styleClass="mb-3">
+                        <h:outputLabel id="o-theme"
+                                       for="s-theme"
+                                       value="#{labels.theme}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="form-group position-relative">
+                            <h:selectOneMenu id="s-theme"
+                                             styleClass="form-select"
+                                             value="#{adminBacker.organization.theme}">
+                                <f:selectItems value="#{adminBacker.availableThemes}"/>
+                            </h:selectOneMenu>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message for="s-theme"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
 
-                <!-- organization privacy policy (Markdown) -->
-                <h:outputLabel id="o-privacy-policy" for="it-privacy-policy" value="#{labels.privacy_policy}"/>
-                <h:inputTextarea id="it-privacy-policy"
-                                 value="#{adminBacker.organization.privacyPolicy}"
-                                 a:maxlength="#{Constants.LARGE_AREA}"
-                                 styleClass="form-control#{component.valid ? '' : ' border-danger'}">
-                    <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
-                </h:inputTextarea>
-                <h:panelGroup/>
-                <h:message for="it-privacy-policy" styleClass="text-danger"/>
+                        <h:outputLabel id="ot-theme-hint"
+                                       value="#{labels.organization_theme_hint}"
+                                       styleClass="small form-text text-muted"/>
+                    </h:panelGroup>
 
-                <!-- organization support information (Markdown) -->
-                <h:outputLabel id="o-support-info" for="it-support-info" value="#{labels.support_info}"/>
-                <h:inputTextarea id="it-support-info"
-                                 value="#{adminBacker.organization.supportInfo}"
-                                 a:maxlength="#{Constants.LARGE_AREA}"
-                                 styleClass="form-control#{component.valid ? '' : ' border-danger'}">
-                    <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
-                </h:inputTextarea>
-                <h:panelGroup/>
-                <h:message for="it-support-info" styleClass="text-danger"/>
-            </h:panelGrid>
-            <h:commandButton value="#{labels.save}"
-                             action="#{adminBacker.saveOrganization}"
-                             styleClass="btn btn-primary"/>
-        </h:form>
+                    <!-- organization imprint (Markdown) -->
+                    <h:panelGroup layout="block" styleClass="mb-3">
+                        <h:outputLabel id="o-imprint"
+                                       for="it-imprint"
+                                       value="#{labels.imprint}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="form-group position-relative">
+                            <h:inputTextarea id="it-imprint"
+                                             value="#{adminBacker.organization.imprint}"
+                                             a:maxlength="#{Constants.LARGE_AREA}"
+                                             styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
+                            </h:inputTextarea>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message for="it-imprint"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
 
-        <!-- application configuration form -->
-        <h:outputText value="#{labels.configuration_settings}" styleClass="h2"/>
-        <h:form id="f-configuration">
-            <h:panelGrid columns="2">
-                <!-- guest reading policy -->
-                <h:outputText value="#{labels.guest_reading}"/>
-                <h:panelGroup>
-                    <h:selectBooleanCheckbox id="s-guest-reading"
-                                             value="#{adminBacker.configuration.guestReading}"
-                                             styleClass="form-check-input"/>
-                    <h:outputLabel id="o-guest-reading"
-                                   for="s-guest-reading"
-                                   value="#{labels.guest_reading_detail}"/>
-                </h:panelGroup>
-                <h:panelGroup/>
-                <h:message for="s-guest-reading" styleClass="text-danger"/>
-
-                <!-- closed report policy -->
-                <h:outputText value="#{labels.closed_report_posting}"/>
-                <h:panelGroup>
-                    <h:selectBooleanCheckbox id="s-closed-report-posting"
-                                             value="#{adminBacker.configuration.closedReportPosting}"
-                                             styleClass="form-check-input"/>
-                    <h:outputLabel id="o-closed-report-posting" for="s-closed-report-posting"
-                                   value="#{labels.closed_report_posting_detail}"/>
-                </h:panelGroup>
-                <h:panelGroup/>
-                <h:message for="s-closed-report-posting" styleClass="text-danger"/>
-
-                <!-- user e-mail address format -->
-                <h:outputLabel id="o-user-email-format"
-                               for="s-user-email-format"
-                               value="#{labels.user_email_format}"/>
-                <h:inputText id="s-user-email-format"
-                             value="#{adminBacker.configuration.userEmailFormat}"
-                             validator="regexValidator"
-                             a:maxlength="#{Constants.LARGE_FIELD}"
-                             styleClass="form-control#{component.valid ? '' : ' border-danger'}">
-                    <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>
-                </h:inputText>
-                <h:panelGroup/>
-                <h:panelGroup>
-                    <h:message for="s-user-email-format" styleClass="text-danger"/>
-                    <h:outputLabel id="ot-user-email-format-hint"
-                                  value="#{labels.user_email_format_hint}"
-                                  styleClass="small form-text text-muted"/>
-                </h:panelGroup>
+                    </h:panelGroup>
 
 
-                <!-- definition of a user's voting weight -->
-                <h:outputLabel id="o-voting-weight-definition"
-                               for="it-voting-weight-definition"
-                               value="#{labels.voting_weight_definition}"/>
-                <h:inputText id="it-voting-weight-definition"
-                             value="#{adminBacker.configuration.votingWeightDefinition}"
-                             a:maxlength="#{Constants.LARGE_FIELD}"
-                             styleClass="form-control#{component.valid ? '' : ' border-danger'}">
-                    <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>
-                    <f:validateRegex pattern="#{Constants.INTEGER_LIST_REGEX}"/>
-                </h:inputText>
-                <h:panelGrid/>
-                <h:panelGrid>
-                    <h:message for="it-voting-weight-definition" styleClass="text-danger"/>
-                    <h:outputLabel id="ot-voting-weight-definition-hint"
-                                  value="#{labels.voting_weight_definition_hint}"
-                                  styleClass="small form-text text-muted"/>
-                </h:panelGrid>
+                    <!-- organization privacy policy (Markdown) -->
+                    <h:panelGroup layout="block" styleClass="mb-3">
+                        <h:outputLabel id="o-privacy-policy"
+                                       for="it-privacy-policy"
+                                       value="#{labels.privacy_policy}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="form-group position-relative">
+                            <h:inputTextarea id="it-privacy-policy"
+                                             value="#{adminBacker.organization.privacyPolicy}"
+                                             a:maxlength="#{Constants.LARGE_AREA}"
+                                             styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
+                            </h:inputTextarea>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message for="it-privacy-policy"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
 
-                <!-- allowed file extensions for uploads -->
-                <h:outputLabel id="o-allowed-file-extensions"
-                               for="it-allowed-file-extensions"
-                               value="#{labels.allowed_file_extensions}"/>
-                <h:inputTextarea id="it-allowed-file-extensions"
-                                 value="#{adminBacker.configuration.allowedFileExtensions}"
-                                 a:maxlength="#{Constants.SMALL_AREA}"
-                                 styleClass="form-control#{component.valid ? '' : ' border-danger'}">
-                    <f:validateLength maximum="#{Constants.SMALL_AREA}"/>
-                    <f:validateRegex pattern="#{Constants.EXTENSION_LIST_REGEX}"/>
-                </h:inputTextarea>
-                <h:panelGroup/>
-                <h:panelGroup>
-                    <h:message for="it-allowed-file-extensions" styleClass="text-danger"/>
-                    <h:outputLabel id="ot-allowed-file-extensions-hint"
-                                  value="#{labels.allowed_file_extensions_hint}"
-                                  styleClass="small form-text text-muted"/>
-                </h:panelGroup>
+                    <!-- organization support information (Markdown) -->
+                    <h:panelGroup layout="block" styleClass="mb-3">
+                        <h:outputLabel id="o-support-info"
+                                       for="it-support-info"
+                                       value="#{labels.support_info}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="form-group position-relative">
+                            <h:inputTextarea id="it-support-info"
+                                             value="#{adminBacker.organization.supportInfo}"
+                                             a:maxlength="#{Constants.LARGE_AREA}"
+                                             styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
+                            </h:inputTextarea>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message for="it-support-info"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
 
-                <!-- maximum number of attachments per post -->
-                <h:outputLabel id="o-max-attachments-per-post"
-                               for="it-max-attachments-per-post"
-                               value="#{labels.max_attachments_per_post}"/>
-                <h:inputText id="it-max-attachments-per-post"
-                             value="#{adminBacker.configuration.maxAttachmentsPerPost}"
-                             styleClass="form-control#{component.valid ? '' : ' border-danger'}"
-                             a:maxlength="#{Constants.SMALL_FIELD}"
-                             validatorMessage="#{messages.validate_nonnegative_number}">
-                    <f:validateLongRange minimum="0" maximum="#{Constants.SMALL_FIELD}"/>
-                </h:inputText>
-                <h:panelGroup/>
-                <h:message for="it-max-attachments-per-post" styleClass="text-danger"/>
-            </h:panelGrid>
-            <h:commandButton value="#{labels.save}"
-                             action="#{adminBacker.saveConfiguration}"
-                             styleClass="btn btn-primary"/>
-        </h:form>
+                    <!-- submit button -->
+                    <h:commandButton value="#{labels.save}"
+                                     action="#{adminBacker.saveOrganization}"
+                                     styleClass="btn btn-primary"/>
+                </h:form>
+            </h:panelGroup>
+
+            <!-- application configuration form -->
+            <h:panelGroup layout="block" styleClass="col-6">
+                <h:outputText value="#{labels.configuration_settings}" styleClass="h2"/>
+                <h:form id="f-configuration">
+                    <h:outputLabel value="Permissions" styleClass="form-label"/>
+                    <!-- guest reading policy -->
+                    <h:panelGroup layout="block" styleClass="form-check mb-3">
+                        <h:panelGroup layout="block" styleClass="form-group position-relative">
+                            <h:selectBooleanCheckbox id="s-guest-reading"
+                                                     value="#{adminBacker.configuration.guestReading}"
+                                                     styleClass="form-check-input"/>
+                            <h:outputLabel id="o-guest-reading"
+                                           for="s-guest-reading"
+                                           value="#{labels.guest_reading}"
+                                           styleClass="form-check-label"/>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message for="s-guest-reading"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="form-text">
+                            <h:outputLabel value="#{labels.guest_reading_detail}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+
+                    <!-- closed report policy -->
+                    <h:panelGroup layout="block" styleClass="form-check mb-3">
+                        <h:panelGroup layout="block" styleClass="form-group position-relative">
+                            <h:selectBooleanCheckbox id="s-closed-report-posting"
+                                                     value="#{adminBacker.configuration.closedReportPosting}"
+                                                     styleClass="form-check-input"/>
+                            <h:outputLabel id="o-closed-report-posting"
+                                           for="s-closed-report-posting"
+                                           value="#{labels.closed_report_posting}"
+                                           styleClass="form-check-label"/>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message for="s-closed-report-posting"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block"
+                                      styleClass="form-text">
+                            <h:outputLabel value="#{labels.closed_report_posting_detail}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+
+                    <!-- user e-mail address format -->
+                    <h:panelGroup layout="block" styleClass="mb-3">
+                        <h:outputLabel id="o-user-email-format"
+                                       for="s-user-email-format"
+                                       value="#{labels.user_email_format}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="form-group position-relative">
+                            <h:inputText id="s-user-email-format"
+                                         value="#{adminBacker.configuration.userEmailFormat}"
+                                         validator="regexValidator"
+                                         a:maxlength="#{Constants.LARGE_FIELD}"
+                                         styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>
+                            </h:inputText>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message for="s-user-email-format"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:outputLabel id="ot-user-email-format-hint"
+                                       value="#{labels.user_email_format_hint}"
+                                       styleClass="small form-text text-muted"/>
+                    </h:panelGroup>
+
+                    <!-- definition of a user's voting weight -->
+                    <h:panelGroup layout="block" styleClass="mb-3 position-relative">
+                        <h:outputLabel id="o-voting-weight-definition"
+                                       for="it-voting-weight-definition"
+                                       value="#{labels.voting_weight_definition}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="form-group position-relative">
+                            <h:inputText id="it-voting-weight-definition"
+                                         value="#{adminBacker.configuration.votingWeightDefinition}"
+                                         a:maxlength="#{Constants.LARGE_FIELD}"
+                                         styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>
+                                <f:validateRegex pattern="#{Constants.INTEGER_LIST_REGEX}"/>
+                            </h:inputText>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message for="it-voting-weight-definition"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:outputLabel id="ot-voting-weight-definition-hint"
+                                       value="#{labels.voting_weight_definition_hint}"
+                                       styleClass="small form-text text-muted"/>
+                    </h:panelGroup>
+
+                    <!-- allowed file extensions for uploads -->
+                    <h:panelGroup layout="block" styleClass="mb-3 position-relative">
+                        <h:outputLabel id="o-allowed-file-extensions"
+                                       for="it-allowed-file-extensions"
+                                       value="#{labels.allowed_file_extensions}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="form-group position-relative">
+                            <h:inputTextarea id="it-allowed-file-extensions"
+                                             value="#{adminBacker.configuration.allowedFileExtensions}"
+                                             a:maxlength="#{Constants.SMALL_AREA}"
+                                             styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:validateLength maximum="#{Constants.SMALL_AREA}"/>
+                                <f:validateRegex pattern="#{Constants.EXTENSION_LIST_REGEX}"/>
+                            </h:inputTextarea>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message for="it-allowed-file-extensions"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:outputLabel id="ot-allowed-file-extensions-hint"
+                                       value="#{labels.allowed_file_extensions_hint}"
+                                       styleClass="small form-text text-muted"/>
+                    </h:panelGroup>
+
+                    <!-- maximum number of attachments per post -->
+                    <h:panelGroup layout="block" styleClass="mb-3 position-relative">
+                        <h:outputLabel id="o-max-attachments-per-post"
+                                       for="it-max-attachments-per-post"
+                                       value="#{labels.max_attachments_per_post}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="form-group position-relative">
+                            <h:inputText id="it-max-attachments-per-post"
+                                         value="#{adminBacker.configuration.maxAttachmentsPerPost}"
+                                         styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}"
+                                         a:maxlength="#{Constants.SMALL_FIELD}"
+                                         validatorMessage="#{messages.validate_nonnegative_number}">
+                                <f:validateLongRange minimum="0" maximum="#{Constants.SMALL_FIELD}"/>
+                            </h:inputText>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message for="it-max-attachments-per-post"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <!-- submit button -->
+                    <h:commandButton value="#{labels.save}"
+                                     action="#{adminBacker.saveConfiguration}"
+                                     styleClass="btn btn-primary"/>
+                </h:form>
+            </h:panelGroup>
+        </h:panelGroup>
     </ui:define>
 </ui:composition>
