@@ -20,6 +20,9 @@ import javax.servlet.annotation.WebListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Listener observing application startup and shutdown in order to initialize and clean up critical resources.
@@ -55,7 +58,12 @@ public class SystemLifetimeListener implements ServletContextListener {
     /**
      * Maximum time in ms to wait for remaining mailing task execution completion.
      */
-    public static final long TASK_TERMINATION_TIMEOUT_MILLIS = Long.MAX_VALUE;
+    private static final long TASK_TERMINATION_TIMEOUT_MILLIS = Long.MAX_VALUE;
+
+    /**
+     * Rate in minutes at which maintenance tasks are periodically run.
+     */
+    private static final long MAINTENANCE_PERIODICITY_MINUTES = 60;
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.
@@ -73,6 +81,11 @@ public class SystemLifetimeListener implements ServletContextListener {
     private TransactionManager transactionManager;
 
     /**
+     * Periodic executor for maintenance tasks.
+     */
+    private ScheduledExecutorService maintenanceExecutor;
+
+    /**
      * Shutdown hook for cleaning up database connections.
      */
     private Thread databaseShutdownHook;
@@ -81,6 +94,11 @@ public class SystemLifetimeListener implements ServletContextListener {
      * Shutdown hook for clearing mailing queues.
      */
     private Thread mailQueueShutdownHook;
+
+    /**
+     * Shutdown hook for clearing maintenance tasks.
+     */
+    private Thread maintenanceShutdownHook;
 
     /**
      * Initializes necessary resources for the application to run.
@@ -96,6 +114,7 @@ public class SystemLifetimeListener implements ServletContextListener {
         initializeMailing(sctx);
         registerPriorityExecutors();
         registerShutdownHooks();
+        scheduleMaintenanceTasks();
 
         log.info("Application startup completed.");
     }
@@ -105,9 +124,10 @@ public class SystemLifetimeListener implements ServletContextListener {
      */
     @Override
     public void contextDestroyed(final ServletContextEvent sce) {
-        deregisterShutdownHooks(); // not needed due to regular shutdown
+        deregisterShutdownHooks(); // hooks not needed due to regular shutdown
 
         cleanUpDatabaseConnections();
+        terminateMaintenanceTasks(false);
         terminateMailingTasks(false);
 
         log.info("Application shutdown completed.");
@@ -205,15 +225,36 @@ public class SystemLifetimeListener implements ServletContextListener {
 
         mailQueueShutdownHook = new Thread(() -> terminateMailingTasks(true));
         Runtime.getRuntime().addShutdownHook(mailQueueShutdownHook);
+
+        maintenanceShutdownHook = new Thread(() -> terminateMaintenanceTasks(true));
+        Runtime.getRuntime().addShutdownHook(maintenanceShutdownHook);
     }
 
     private void deregisterShutdownHooks() {
         Runtime.getRuntime().removeShutdownHook(databaseShutdownHook);
         Runtime.getRuntime().removeShutdownHook(mailQueueShutdownHook);
+        Runtime.getRuntime().removeShutdownHook(maintenanceShutdownHook);
     }
 
     private void cleanUpDatabaseConnections() {
         registry.getConnectionPool("db").shutdown();
+    }
+
+    private void terminateMaintenanceTasks(final boolean immediately) {
+        if (immediately) {
+            maintenanceExecutor.shutdownNow();
+        } else {
+            maintenanceExecutor.shutdown();
+        }
+        try {
+            if (maintenanceExecutor.awaitTermination(TASK_TERMINATION_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) {
+                log.info("Successfully terminated all running and scheduled maintenance tasks.");
+            } else {
+                log.warning("Timeout while terminating maintenance tasks.");
+            }
+        } catch (InterruptedException e) {
+            log.error("Interrupted while waiting for maintenance tasks to finish.", e);
+        }
     }
 
     private void terminateMailingTasks(final boolean immediately) {
@@ -231,6 +272,12 @@ public class SystemLifetimeListener implements ServletContextListener {
         } catch (InterruptedException e) {
             log.error("Interrupted while waiting for mailing tasks to finish.", e);
         }
+    }
+
+    private void scheduleMaintenanceTasks() {
+        maintenanceExecutor = new ScheduledThreadPoolExecutor(1);
+        maintenanceExecutor.scheduleAtFixedRate(new PeriodicCleaner(transactionManager), 0,
+                                                MAINTENANCE_PERIODICITY_MINUTES, TimeUnit.HOURS);
     }
 
     /**
