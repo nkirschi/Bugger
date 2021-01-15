@@ -7,6 +7,8 @@
 
     <ui:param name="title" value="#{labels.home_title}"/>
 
+    <ui:param name="helpKey" value="home"/>
+
     <ui:define name="content">
         <h:outputText value="#{labels.home_topics}" styleClass="h2"/>
         <h:link id="l-create" value="#{labels.topic_edit_add}" outcome="pretty:topic-edit"

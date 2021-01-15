@@ -3,12 +3,13 @@
         xmlns:h="http://xmlns.jcp.org/jsf/html"
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
         xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <!--@elvariable id="helpKey" type="java.lang.String"-->
     <h:panelGroup layout="block"
                   id="p-footer"
                   styleClass="d-flex align-items-center p-3">
         <h:panelGroup layout="block"
                       id="p-copyright"
-                        styleClass="d-flex justify-content-start flex-grow-1 flex-basis-0 text-center">
+                      styleClass="d-flex justify-content-start flex-grow-1 flex-basis-0 text-center">
             <h:outputText value="©#{headerBacker.currentYear} #{labels.app_name}"/>
         </h:panelGroup>
         <h:panelGroup layout="block"
@@ -35,7 +36,7 @@
                     <f:selectItems value="#{footerBacker.availableLanguages}"
                                    var="language"
                                    itemValue="#{language}"
-                    itemLabel="#{labels['lang.' += language]}"/>
+                                   itemLabel="#{labels['lang.' += language]}"/>
                 </h:selectOneMenu>
                 <h:commandButton value="#{labels.ok}"
                                  id="cb-language"
