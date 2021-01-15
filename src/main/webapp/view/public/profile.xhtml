@@ -134,7 +134,7 @@
                 </h:commandLink>
                 <h:link id="l-edit" value="#{labels.edit}" outcome="/view/restr/profile-edit.xhtml"
                         rendered="#{profileBacker.privileged}" styleClass="button">
-                    <f:param name="e" value="#{profileBacker.user.id}"/>
+                    <f:param name="e" value="#{profileBacker.user.username}"/>
                 </h:link>
             </h:panelGroup>
 

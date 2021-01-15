@@ -151,6 +151,10 @@ body {
     max-height: 1em;
 }
 
+.button {
+    margin: 1%;
+}
+
 .style-button {
     text-decoration: none;
     background-color: white;

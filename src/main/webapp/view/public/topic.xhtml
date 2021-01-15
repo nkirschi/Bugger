@@ -26,7 +26,8 @@
                                 <f:param name="id" value="#{topicBacker.topicID}"/>
                             </h:link>
                             <h:link id="l-create-report" outcome="pretty:report-create" value="#{labels.create_report}"
-                                    styleClass="button style-button" rendered="#{not topicBacker.banned}">
+                                    styleClass="button style-button" rendered="#{userSession.user != null and
+                                    not topicBacker.banned}">
                                 <f:param name="id" value="#{topicBacker.topicID}"/>
                             </h:link>
                         </h:panelGroup>

@@ -38,7 +38,7 @@ public class ProfileEditBacker implements Serializable {
     /**
      * The type of popup dialog to be rendered on the profile page.
      */
-    enum DialogType {
+    public enum ProfileEditDialog {
         /**
          * No dialogs are to be rendered.
          */
@@ -108,7 +108,7 @@ public class ProfileEditBacker implements Serializable {
     /**
      * The type of popup dialog to be rendered.
      */
-    private DialogType dialog;
+    private ProfileEditDialog dialog;
 
     /**
      * Whether the user is being created by an administrator or not.
@@ -154,14 +154,14 @@ public class ProfileEditBacker implements Serializable {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
             return;
         }
-        dialog = DialogType.NONE;
+        dialog = ProfileEditDialog.NONE;
 
         if (ext.getRequestParameterMap().containsKey("c") && session.getUser().isAdministrator()) {
             create = true;
             user = new User();
             log.debug("Creating new user.");
-        } else if (ext.getRequestParameterMap().containsKey("e")) {
-            user = findUser(ext.getRequestParameterMap().get("e"));
+        } else if (ext.getRequestParameterMap().containsKey("e") && session.getUser().isAdministrator()) {
+            user = profileService.getUserByUsername(ext.getRequestParameterMap().get("e"));
             log.debug("Using the edit key to find the user in the database.");
         } else {
             user = profileService.getUser(session.getUser().getId());
@@ -178,21 +178,6 @@ public class ProfileEditBacker implements Serializable {
         }
 
         deleteAvatar = false;
-    }
-
-    /**
-     * Finds the {@link User} based on the given {@code id}.
-     *
-     * @param id The id passed in the RequestParameterMap.
-     * @return The {@link User} if they exist and the {@code id} could be parsed, or {@code null} if not.
-     */
-    private User findUser(final String id) {
-        try {
-            int userID = Integer.parseInt(id);
-            return profileService.getUser(userID);
-        } catch (NumberFormatException e) {
-            return null;
-        }
     }
 
     /**
@@ -278,6 +263,7 @@ public class ProfileEditBacker implements Serializable {
 
         if (profileService.deleteUser(user)) {
             if (user.equals(session.getUser())) {
+                session.setUser(null);
                 session.invalidateSession();
             }
 
@@ -310,43 +296,55 @@ public class ProfileEditBacker implements Serializable {
 
     /**
      * Opens the delete profile dialog.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void openDeleteDialog() {
-        dialog = DialogType.DELETE;
+    public String openDeleteDialog() {
+        dialog = ProfileEditDialog.DELETE;
+        return null;
     }
 
     /**
      * Opens the dialog that is displayed if the user wants to save the changes made to the given profile.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void openChangeDialog() {
+    public String openChangeDialog() {
         if (uploadedAvatar != null || deleteAvatar) {
             if (!uploadAvatar()) {
-                return;
+                return null;
             }
         }
-        dialog = DialogType.UPDATE;
+        dialog = ProfileEditDialog.UPDATE;
+        return null;
     }
 
     /**
      * Opens the dialog that is displayed if the user wants a preview of the biography.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void openPreviewDialog() {
+    public String openPreviewDialog() {
         if (uploadedAvatar != null || deleteAvatar) {
             if (!uploadAvatar()) {
-                return;
+                return null;
             }
         }
         if (user.getBiography() != null) {
             sanitizedBio = MarkdownHandler.toHtml(user.getBiography());
         }
-        dialog = DialogType.PREVIEW;
+        dialog = ProfileEditDialog.PREVIEW;
+        return null;
     }
 
     /**
      * Closes all open dialogs.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void closeDialog() {
-        dialog = DialogType.NONE;
+    public String closeDialog() {
+        dialog = ProfileEditDialog.NONE;
+        return null;
     }
 
     /**
@@ -482,14 +480,14 @@ public class ProfileEditBacker implements Serializable {
     /**
      * @return The dialog.
      */
-    public DialogType getDialog() {
+    public ProfileEditDialog getDialog() {
         return dialog;
     }
 
     /**
      * @param dialog The DialogType to set.
      */
-    public void setDialog(final DialogType dialog) {
+    public void setDialog(final ProfileEditDialog dialog) {
         this.dialog = dialog;
     }
 

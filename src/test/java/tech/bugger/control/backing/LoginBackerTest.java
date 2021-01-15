@@ -136,4 +136,11 @@ public class LoginBackerTest {
         );
         verify(authenticationService, times(1)).authenticate(any(), anyString());
     }
+
+    @Test
+    public void testSetUserForCoverage() {
+        loginBacker.setUser(user);
+        assertEquals(user, loginBacker.getUser());
+    }
+
 }
