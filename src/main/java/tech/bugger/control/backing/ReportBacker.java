@@ -312,7 +312,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String upvote() {
-        if (session.getUser() == null) {
+        if (session.getUser() != null) {
             reportService.upvote(report, session.getUser());
         }
         updateRelevance();
@@ -325,7 +325,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String downvote() {
-        if (session.getUser() == null) {
+        if (session.getUser() != null) {
             reportService.downvote(report, session.getUser());
         }
         updateRelevance();
@@ -338,7 +338,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String removeVote() {
-        if (session.getUser() == null) {
+        if (session.getUser() != null) {
             reportService.removeVote(report, session.getUser());
         }
         updateRelevance();
@@ -351,7 +351,7 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user has voted up and {@code false} otherwise.
      */
     public boolean hasUpvoted() {
-        if (session.getUser() == null) {
+        if (session.getUser() != null) {
             return reportService.hasUpvoted(report, session.getUser());
         }
         return false;
@@ -363,7 +363,7 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user has voted down and {@code false} otherwise.
      */
     public boolean hasDownvoted() {
-        if (session.getUser() == null) {
+        if (session.getUser() != null) {
             return reportService.hasDownvoted(report, session.getUser());
         }
         return false;
