@@ -271,11 +271,21 @@
         <!-- A paginated list of the profile owner's subscribed topics. -->
         <h:panelGroup class="row" layout="block" id="p-sub-topics" rendered="#{profileBacker.privileged}">
             <h:panelGroup class="col-sm-12" layout="block" id="p-sub-topics-pagination">
+                <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                 <b:pagitable paginator="#{profileBacker.topicSubscriptions}">
-                    <b:column title="ID" paginator="#{profileBacker.topicSubscriptions}" key="id">
-                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
-                        <h:outputText value="#{var}"/>
+                    <b:column title="#{labels.id}" paginator="#{profileBacker.topicSubscriptions}" key="id">
+                        <h:link value="#{var.id}" outcome="pretty:topic">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
                     </b:column>
+                    <b:column title="#{labels.title}" paginator="#{profileBacker.topicSubscriptions}" key="title">
+                        <h:link value="#{var.title}" outcome="pretty:topic">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
+                    </b:column>
+                    <h:column>
+                        <h:commandButton id="cb-delete-topic-subscription" value="#{labels.unsubscribe}" action="#{profileBacker.deleteTopicSubscription(var)}"/>
+                    </h:column>
                 </b:pagitable>
             </h:panelGroup>
         </h:panelGroup>
@@ -295,11 +305,27 @@
         <!-- A paginated list of the profile owner's subscribed reports. -->
         <h:panelGroup class="row" layout="block" id="p-sub-reports" rendered="#{profileBacker.privileged}">
             <h:panelGroup class="col-sm-12" layout="block" id="p-sub-reports-pagination">
+                <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
                 <b:pagitable paginator="#{profileBacker.reportSubscriptions}">
-                    <b:column title="ID" paginator="#{profileBacker.reportSubscriptions}" key="id">
-                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
-                        <h:outputText value="#{var}"/>
+                    <b:column title="#{labels.id}" paginator="#{profileBacker.reportSubscriptions}" key="id">
+                        <h:link value="#{var.id}" outcome="pretty:report">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
                     </b:column>
+                    <b:column title="#{labels.title}" paginator="#{profileBacker.reportSubscriptions}" key="title">
+                        <h:link value="#{var.title}" outcome="pretty:report">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
+                    </b:column>
+                    <b:column title="#{labels.col_type}" paginator="#{profileBacker.reportSubscriptions}" key="type">
+                        <h:outputText value="#{labels['report_type.' += var.type]}"/>
+                    </b:column>
+                    <b:column title="#{labels.col_severity}" paginator="#{profileBacker.reportSubscriptions}" key="severity">
+                        <h:outputText value="#{labels['report_severity.' += var.severity]}"/>
+                    </b:column>
+                    <h:column>
+                        <h:commandButton id="cb-delete-report-subscription" value="#{labels.unsubscribe}" action="#{profileBacker.deleteReportSubscription(var)}"/>
+                    </h:column>
                 </b:pagitable>
             </h:panelGroup>
         </h:panelGroup>
@@ -318,11 +344,16 @@
         <!-- A paginated list of the profile owner's subscribed users. -->
         <h:panelGroup class="row" layout="block" id="p-sub-users" rendered="#{profileBacker.privileged}">
             <h:panelGroup class="col-sm-12" layout="block" id="p-sub-users-pagination">
+                <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
                 <b:pagitable paginator="#{profileBacker.userSubscriptions}">
-                    <b:column title="ID" paginator="#{profileBacker.userSubscriptions}" key="id">
-                        <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
-                        <h:outputText value="#{var}"/>
+                    <b:column title="#{labels.username}" paginator="#{profileBacker.userSubscriptions}" key="username">
+                        <h:link value="#{var.username}" outcome="pretty:profile">
+                            <f:param name="u" value="#{var.username}"/>
+                        </h:link>
                     </b:column>
+                    <h:column>
+                        <h:commandButton id="cb-delete-user-subscription" value="#{labels.unsubscribe}" action="#{profileBacker.deleteUserSubscription(var)}"/>
+                    </h:column>
                 </b:pagitable>
             </h:panelGroup>
         </h:panelGroup>

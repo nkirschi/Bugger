@@ -301,6 +301,7 @@ public class ProfileBacker implements Serializable {
      */
     public void deleteTopicSubscription(final Topic topic) {
         profileService.deleteTopicSubscription(user, topic);
+        topicSubscriptions.update();
     }
 
     /**
@@ -310,6 +311,7 @@ public class ProfileBacker implements Serializable {
      */
     public void deleteReportSubscription(final Report report) {
         profileService.deleteReportSubscription(user, report);
+        reportSubscriptions.update();
     }
 
     /**
@@ -319,6 +321,7 @@ public class ProfileBacker implements Serializable {
      */
     public void deleteUserSubscription(final User subscribee) {
         profileService.deleteUserSubscription(user, subscribee);
+        userSubscriptions.update();
     }
 
     /**
