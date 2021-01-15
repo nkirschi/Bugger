@@ -203,7 +203,7 @@ public class ProfileBacker implements Serializable {
                 }
             };
 
-            reportSubscriptions = new Paginator<Report>("title", Selection.PageSize.NORMAL) {
+            reportSubscriptions = new Paginator<>("title", Selection.PageSize.NORMAL) {
                 @Override
                 protected Iterable<Report> fetch() {
                     return profileService.selectSubscribedReports(user, getSelection());
