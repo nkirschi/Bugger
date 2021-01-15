@@ -114,7 +114,8 @@ public class SettingsService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newSettingsGateway().setConfiguration(configuration);
             tx.commit();
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("changes_successfully_saved"), Feedback.Type.INFO));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("changes_successfully_saved"),
+                    Feedback.Type.INFO));
             return true;
         } catch (TransactionException e) {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
@@ -132,7 +133,8 @@ public class SettingsService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newSettingsGateway().setOrganization(organization);
             tx.commit();
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("changes_successfully_saved"), Feedback.Type.INFO));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("changes_successfully_saved"),
+                    Feedback.Type.INFO));
             return true;
         } catch (TransactionException e) {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
