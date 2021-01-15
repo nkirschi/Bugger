@@ -7,12 +7,14 @@
 
     <display-name>Bugger</display-name>
 
+
+    <!-- servlets -->
+
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>Faces Servlet</servlet-name>
         <url-pattern>/faces/*</url-pattern>
@@ -27,7 +29,6 @@
         <servlet-name>Attachment Servlet</servlet-name>
         <servlet-class>tech.bugger.control.servlet.AttachmentServlet</servlet-class>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>Attachment Servlet</servlet-name>
         <url-pattern>/attachment</url-pattern>
@@ -37,7 +38,6 @@
         <servlet-name>Avatar Servlet</servlet-name>
         <servlet-class>tech.bugger.control.servlet.AvatarServlet</servlet-class>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>Avatar Servlet</servlet-name>
         <url-pattern>/avatar</url-pattern>
@@ -47,12 +47,13 @@
         <servlet-name>Logo Servlet</servlet-name>
         <servlet-class>tech.bugger.control.servlet.LogoServlet</servlet-class>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>Logo Servlet</servlet-name>
         <url-pattern>/logo</url-pattern>
->>>>>>> master
     </servlet-mapping>
+
+
+    <!-- context params -->
 
     <context-param>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
@@ -73,6 +74,9 @@
         <param-name>javax.faces.FACELETS_SKIP_COMMENTS</param-name>
         <param-value>true</param-value>
     </context-param>
+
+
+    <!-- miscellaneous settings -->
 
     <welcome-file-list>
         <welcome-file>faces/view/public/home.xhtml</welcome-file>

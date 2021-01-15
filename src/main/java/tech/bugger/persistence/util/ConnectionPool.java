@@ -229,7 +229,7 @@ public final class ConnectionPool {
      *
      * @throws IllegalStateException if the connection pool has already been shut down.
      */
-    public void shutdown() {
+    public synchronized void shutdown() {
         if (!shutDown) {
             log.debug("Shutting down connection pool.");
             availableConnections.addAll(usedConnections);

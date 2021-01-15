@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Authorship;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class PostDBGatewayTest {
 
     private PostDBGateway gateway;

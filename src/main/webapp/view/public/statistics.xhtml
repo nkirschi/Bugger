@@ -61,6 +61,7 @@
                         <h:selectOneMenu id="s-topic-filter"
                                          value="#{statisticsBacker.reportCriteria.topic}"
                                          styleClass="form-select">
+                            <f:selectItem itemLabel="#{labels.none}" itemValue="" />
                             <f:selectItems value="#{statisticsBacker.topicTitles}"/>
                         </h:selectOneMenu>
                     </h:panelGroup>
@@ -68,25 +69,35 @@
                         <h:outputLabel id="ol-latest-opening-date"
                                        for="it-latest-opening-date"
                                        value="#{labels.latest_opening_date}"/>
-                        <h:inputText id="it-latest-opening-date"
-                                     value="#{statisticsBacker.reportCriteria.latestOpeningDate}"
-                                     a:placeholder="#{labels.date_time_pattern}"
-                                     styleClass="form-control">
-                            <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
-                        </h:inputText>
-                        <h:message for="it-latest-opening-date" styleClass="text-danger"/>
+                        <h:panelGroup layout="block" styleClass="form-group position-relative">
+                            <h:inputText id="it-latest-opening-date"
+                                         value="#{statisticsBacker.reportCriteria.latestOpeningDate}"
+                                         a:placeholder="#{labels.date_time_pattern}"
+                                         styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                            </h:inputText>
+                            <h:panelGroup layout="block" styleClass="invalid-feedback">
+                                <h:message for="it-latest-opening-date"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
                     </h:panelGroup>
                     <h:panelGroup id="p-earliest-closing-date" layout="block" styleClass="mb-2">
                         <h:outputLabel id="ol-earliest-closing-date"
                                        for="it-earliest-closing-date"
                                        value="#{labels.earliest_closing_date}"/>
-                        <h:inputText id="it-earliest-closing-date"
-                                     value="#{statisticsBacker.reportCriteria.earliestClosingDate}"
-                                     a:placeholder="#{labels.date_time_pattern}"
-                                     styleClass="form-control">
-                            <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
-                        </h:inputText>
-                        <h:message for="it-earliest-closing-date" styleClass="text-danger"/>
+                        <h:panelGroup layout="block" styleClass="form-group position-relative">
+                            <h:inputText id="it-earliest-closing-date"
+                                         value="#{statisticsBacker.reportCriteria.earliestClosingDate}"
+                                         a:placeholder="#{labels.date_time_pattern}"
+                                         styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                            </h:inputText>
+                            <h:panelGroup layout="block" styleClass="invalid-feedback">
+                                <h:message for="it-earliest-closing-date"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
                     </h:panelGroup>
                     <h:commandButton value="#{labels.apply_filter}"
                                      action="#{statisticsBacker.applyFilters}"
