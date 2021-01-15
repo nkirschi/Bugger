@@ -177,6 +177,20 @@ public class ProfileBacker implements Serializable {
                 return profileService.getNumberOfModeratedTopics(user);
             }
         };
+
+        if (session.getUser().isAdministrator() || user.equals(session.getUser())) {
+            topicSubscriptions = new Paginator<>("title", Selection.PageSize.NORMAL) {
+                @Override
+                protected Iterable<Topic> fetch() {
+                    return topicService.selectSubscribedTopics(user, getSelection());
+                }
+
+                @Override
+                protected int totalSize() {
+                    return topicService.countSubscribedTopics(user);
+                }
+            };
+        }
     }
 
     /**
@@ -187,30 +201,24 @@ public class ProfileBacker implements Serializable {
     }
 
     /**
-     * Opens the dialog for deleting all topic subscriptions of a particular type.
-     *
-     * @return {@code null} to reload the page.
+     * Opens the dialog for deleting all topic subscriptions.
      */
-    public String openDeleteAllTopicSubscriptionsDialog() {
-        return null;
+    public void openDeleteAllTopicSubscriptionsDialog() {
+        displayDialog = DialogType.TOPIC;
     }
 
     /**
-     * Opens the dialog for deleting all report subscriptions of a particular type.
-     *
-     * @return {@code null} to reload the page.
+     * Opens the dialog for deleting all report subscriptions.
      */
-    public String openDeleteAllReportSubscriptionsDialog() {
-        return null;
+    public void openDeleteAllReportSubscriptionsDialog() {
+        displayDialog = DialogType.REPORT;
     }
 
     /**
-     * Opens the dialog for deleting all user subscriptions of a particular type.
-     *
-     * @return {@code null} to reload the page.
+     * Opens the dialog for deleting all user subscriptions.
      */
-    public String openDeleteAllUserSubscriptionsDialog() {
-        return null;
+    public void openDeleteAllUserSubscriptionsDialog() {
+        displayDialog = DialogType.USER;
     }
 
     /**
