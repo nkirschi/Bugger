@@ -354,6 +354,15 @@ public class User implements Serializable {
     }
 
     /**
+     * Returns whether the avatar is non-empty.
+     *
+     * @return Whether the avatar is non-empty.
+     */
+    public boolean isExistsAvatar() {
+        return avatarThumbnail != null && avatarThumbnail.length > 0;
+    }
+
+    /**
      * Returns the biography of this user.
      *
      * @return The user's biography.
@@ -527,8 +536,9 @@ public class User implements Serializable {
                 + ", firstName='" + firstName + '\''
                 + ", lastName='" + lastName + '\''
                 + ", avatar=" + (avatar == null ? "null"
-                : avatar.toString(a -> String.format("%.100s", Arrays.toString(a))))
-                + ", avatarThumbnail=" + Arrays.toString(avatarThumbnail)
+                : avatar.toString(a -> String.format("%.20s", Arrays.toString(a))))
+                + ", avatarThumbnail=" + (avatar == null ? "null"
+                : String.format("%.20s", Arrays.toString(avatarThumbnail)))
                 + ", biography='" + biography + '\''
                 + ", preferredLanguage=" + preferredLanguage
                 + ", profileVisibility=" + profileVisibility

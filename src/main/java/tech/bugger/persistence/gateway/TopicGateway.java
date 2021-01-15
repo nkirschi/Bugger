@@ -161,4 +161,13 @@ public interface TopicGateway {
      */
     List<String> discoverTopics();
 
+    /**
+     * Retrieves the the topics where a user has moderator status.
+     *
+     * @param user      The user whose moderated topics are to be found.
+     * @param selection The search criteria to apply.
+     * @return The topics that {@code user} is moderating.
+     */
+    List<Topic> getModeratedTopics(User user, Selection selection);
+
 }

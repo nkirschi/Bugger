@@ -1,6 +1,8 @@
 package tech.bugger.control.backing;
 
 import com.ocpsoft.pretty.PrettyContext;
+import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
@@ -8,6 +10,7 @@ import tech.bugger.global.util.Log;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -40,14 +43,19 @@ public class HeaderBacker implements Serializable {
     private User user;
 
     /**
-     * The current user session.
-     */
-    private final UserSession session;
-
-    /**
      * {@code true} if the Menu should be displayed, {@code false} otherwise.
      */
     private boolean displayMenu;
+
+    /**
+     * The current application settings.
+     */
+    private final ApplicationSettings applicationSettings;
+
+    /**
+     * The current user session.
+     */
+    private final UserSession session;
 
     /**
      * The current {@link FacesContext} of the application.
@@ -57,11 +65,14 @@ public class HeaderBacker implements Serializable {
     /**
      * Constructs a new header backing bean.
      *
-     * @param session The currently active {@link UserSession}.
-     * @param fctx    The current {@link FacesContext} of the application.
+     * @param applicationSettings The current application settings.
+     * @param session             The currently active {@link UserSession}.
+     * @param fctx                The current {@link FacesContext} of the application.
      */
     @Inject
-    public HeaderBacker(final UserSession session, final FacesContext fctx) {
+    public HeaderBacker(final ApplicationSettings applicationSettings, final UserSession session,
+                        final FacesContext fctx) {
+        this.applicationSettings = applicationSettings;
         this.session = session;
         this.fctx = fctx;
     }
@@ -152,9 +163,14 @@ public class HeaderBacker implements Serializable {
      * @return The URL to redirect to after login.
      */
     public String getRedirectUrl() {
-        String base = fctx.getExternalContext().getApplicationContextPath();
-        String uri = PrettyContext.getCurrentInstance().getCurrentMapping().getPattern();
-        String queryString = ((HttpServletRequest) fctx.getExternalContext().getRequest()).getQueryString();
+        ExternalContext ectx = fctx.getExternalContext();
+
+        String base = ectx.getApplicationContextPath();
+        HttpServletRequest request = (HttpServletRequest) ectx.getRequest();
+        UrlMapping mapping = PrettyContext.getCurrentInstance().getCurrentMapping();
+        String uri = mapping != null ? mapping.getPattern() : request.getRequestURI();
+        String queryString = request.getQueryString();
+
         return URLEncoder.encode(base + uri + (queryString == null ? "" : '?' + queryString), StandardCharsets.UTF_8);
     }
 
@@ -181,5 +197,6 @@ public class HeaderBacker implements Serializable {
     private void openMenu() {
         displayMenu = true;
     }
+
 
 }

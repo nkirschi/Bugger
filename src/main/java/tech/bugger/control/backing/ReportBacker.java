@@ -3,6 +3,7 @@ package tech.bugger.control.backing;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.stream.StreamSupport;
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
@@ -15,9 +16,11 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
@@ -81,11 +84,6 @@ public class ReportBacker implements Serializable {
     private Integer duplicateOfID;
 
     /**
-     * The overwriting relevance.
-     */
-    private Integer overwritingRelevance;
-
-    /**
      * The post to be deleted.
      */
     private Post postToBeDeleted;
@@ -116,6 +114,21 @@ public class ReportBacker implements Serializable {
     private final TopicService topicService;
 
     /**
+     * The overwriting relevance.
+     */
+    private Integer overwriteRelevanceValue;
+
+    /**
+     * Whether the user has upvoted the report.
+     */
+    private boolean hasUpvoted;
+
+    /**
+     * Whether the user has downvoted the report.
+     */
+    private boolean hasDownvoted;
+
+    /**
      * The user session.
      */
     private final UserSession session;
@@ -131,7 +144,6 @@ public class ReportBacker implements Serializable {
      * @param applicationSettings The application settings cache.
      * @param reportService       The report service to use.
      * @param postService         The post service to use.
-     * @param topicService        The topic service to use.
      * @param session             The user session.
      * @param fctx                The current {@link FacesContext} of the application.
      */
@@ -153,6 +165,11 @@ public class ReportBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        if (!applicationSettings.getConfiguration().isGuestReading()) {
+            if (session.getUser() == null || isBanned()) {
+                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            }
+        }
         ExternalContext ext = fctx.getExternalContext();
         int reportID;
         Integer postID = null;
@@ -176,14 +193,17 @@ public class ReportBacker implements Serializable {
                 return;
             }
         }
+
         report = reportService.getReportByID(reportID);
         if (report == null) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
             return;
         }
+
         duplicateOfID = report.getDuplicateOf();
         User user = session.getUser();
         boolean maySee = false;
+
         if (applicationSettings.getConfiguration().isGuestReading()) {
             maySee = true;
         } else if (user != null && !isBanned()) {
@@ -194,10 +214,13 @@ public class ReportBacker implements Serializable {
             return;
         }
         currentDialog = null;
+
         posts = new Paginator<>("created_at", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Post> fetch() {
-                return reportService.getPostsFor(report, getSelection());
+                List<Post> posts = reportService.getPostsFor(report, getSelection());
+                posts.forEach(p -> p.setContent(MarkdownHandler.toHtml(p.getContent())));
+                return posts;
             }
 
             @Override
@@ -205,6 +228,7 @@ public class ReportBacker implements Serializable {
                 return reportService.getNumberOfPosts(report);
             }
         };
+
         duplicates = new Paginator<>("ID", Selection.PageSize.TINY) {
             @Override
             protected Iterable<Report> fetch() {
@@ -216,8 +240,7 @@ public class ReportBacker implements Serializable {
                 return reportService.getNumberOfDuplicates(report);
             }
         };
-        log.debug("Paginator initialized with Selection " + posts.getSelection() + " and items "
-                + posts.getWrappedData());
+
         if (postID != null) {
             Post post = new Post(postID, null, null, null, null);
             while (StreamSupport.stream(posts.spliterator(), false).noneMatch(post::equals)) {
@@ -228,6 +251,28 @@ public class ReportBacker implements Serializable {
                     fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
                     return;
                 }
+            }
+        }
+        updateRelevance();
+    }
+
+    /**
+     * Updates the values for the relevance interface.
+     */
+    private void updateRelevance() {
+        report = reportService.getReportByID(report.getId());
+        if (report == null) {
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
+        }
+        if (session.getUser() != null) {
+            hasUpvoted = hasUpvoted();
+            hasDownvoted = hasDownvoted();
+            boolean overwriteRelevance = report.getRelevanceOverwritten();
+            if (overwriteRelevance) {
+                overwriteRelevanceValue = report.getRelevance();
+            } else {
+                overwriteRelevanceValue = null;
             }
         }
     }
@@ -256,15 +301,6 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     * Returns the relevance of the report as saved in the data source.
-     *
-     * @return the relevance of the report.
-     */
-    public int getRelevance() {
-        return 0;
-    }
-
-    /**
      * Adds or removes a subscription to the report for the user, whichever is applicable.
      */
     public void toggleReportSubscription() {
@@ -272,16 +308,41 @@ public class ReportBacker implements Serializable {
 
     /**
      * Increases the relevance of the report by the user's voting weight.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void upvote() {
-
+    public String upvote() {
+        if (session.getUser() != null) {
+            reportService.upvote(report, session.getUser());
+        }
+        updateRelevance();
+        return null;
     }
 
     /**
      * Decreases the relevance of the report by the user's voting weight.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void downvote() {
+    public String downvote() {
+        if (session.getUser() != null) {
+            reportService.downvote(report, session.getUser());
+        }
+        updateRelevance();
+        return null;
+    }
 
+    /**
+     * Removes a vote from a report.
+     *
+     * @return {@code null} to reload the page.
+     */
+    public String removeVote() {
+        if (session.getUser() != null) {
+            reportService.removeVote(report, session.getUser());
+        }
+        updateRelevance();
+        return null;
     }
 
     /**
@@ -290,6 +351,9 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user has voted up and {@code false} otherwise.
      */
     public boolean hasUpvoted() {
+        if (session.getUser() != null) {
+            return reportService.hasUpvoted(report, session.getUser());
+        }
         return false;
     }
 
@@ -299,6 +363,9 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user has voted down and {@code false} otherwise.
      */
     public boolean hasDownvoted() {
+        if (session.getUser() != null) {
+            return reportService.hasDownvoted(report, session.getUser());
+        }
         return false;
     }
 
@@ -359,8 +426,16 @@ public class ReportBacker implements Serializable {
 
     /**
      * Overwrites the relevance of the report with a set value.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void overwriteRelevance() {
+    public String applyOverwriteRelevance() {
+        if (session.getUser() != null && session.getUser().isAdministrator()) {
+            reportService.overwriteRelevance(report, overwriteRelevanceValue);
+            updateRelevance();
+            return null;
+        }
+        return "pretty:error";
     }
 
     /**
@@ -376,7 +451,13 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user is privileged and {@code false} otherwise.
      */
     public boolean isPrivileged() {
-        return reportService.isPrivileged(session.getUser(), report);
+        User user = session.getUser();
+        if (user == null || report == null || topicService.isBanned(user, new Topic(report.getTopic(), "", ""))) {
+            return false;
+        }
+        Topic topic = new Topic(report.getTopic(), "", "");
+        return user.isAdministrator() || topicService.isModerator(user, topic)
+                || user.equals(report.getAuthorship().getCreator());
     }
 
     /**
@@ -386,15 +467,9 @@ public class ReportBacker implements Serializable {
      * @return {@code true} iff the user is privileged.
      */
     public boolean privilegedForPost(final Post post) {
-        return postService.isPrivileged(session.getUser(), post);
-    }
-
-    /**
-     * Checks if the user is a moderator of the topic the report is located in.
-     *
-     * @return {@code true} if the user is a moderator and {@code false} otherwise.
-     */
-    public boolean isModerator() {
+        if (session.getUser() != null) {
+            return postService.canModify(session.getUser(), post);
+        }
         return false;
     }
 
@@ -404,7 +479,21 @@ public class ReportBacker implements Serializable {
      * @return {@code true} if the user is banned and {@code false} otherwise.
      */
     public boolean isBanned() {
-        return false;
+        User user = session.getUser();
+        if (user == null || report == null) {
+            return false;
+        }
+        Topic topic = new Topic(report.getTopic(), "", "");
+        return topicService.isBanned(user, topic);
+    }
+
+    /**
+     * Checks whether the user is currently logged in.
+     *
+     * @return {@code true} if the user is currently logged in and {@code false} otherwise.
+     */
+    public boolean isLoggedIn() {
+        return session.getUser() != null;
     }
 
     /**
@@ -412,6 +501,45 @@ public class ReportBacker implements Serializable {
      */
     public Report getReport() {
         return report;
+    }
+
+    /**
+     * @return Whether the relevance was overwritten.
+     */
+    public boolean getOverwriteRelevance() {
+        if (report != null) {
+            return report.getRelevanceOverwritten();
+        }
+        return false;
+    }
+
+    /**
+     * @return The relevance overwriting value.
+     */
+    public Integer getOverwriteRelevanceValue() {
+        return overwriteRelevanceValue;
+    }
+
+    /**
+     * @param overwriteRelevanceValue The new overwriting relevance.
+     */
+    public void setOverwriteRelevanceValue(final Integer overwriteRelevanceValue) {
+        this.overwriteRelevanceValue = overwriteRelevanceValue;
+    }
+
+    /**
+     *
+     * @return Whether the user has upvoted this report.
+     */
+    public boolean getHasUpvoted() {
+        return hasUpvoted;
+    }
+
+    /**
+     * @return Whether the user has downvoted this report.
+     */
+    public boolean getHasDownvoted() {
+        return hasDownvoted;
     }
 
     /**
@@ -478,20 +606,6 @@ public class ReportBacker implements Serializable {
      */
     public ReportPageDialog getCurrentDialog() {
         return currentDialog;
-    }
-
-    /**
-     * @param overwritingRelevance The overwritingRelevance to set.
-     */
-    public void setOverwritingRelevance(final Integer overwritingRelevance) {
-        this.overwritingRelevance = overwritingRelevance;
-    }
-
-    /**
-     * @return The overwritingRelevance.
-     */
-    public Integer getOverwritingRelevance() {
-        return overwritingRelevance;
     }
 
 }

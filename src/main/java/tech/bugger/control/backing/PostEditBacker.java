@@ -4,21 +4,25 @@ import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
-import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Attachment;
+import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,57 +32,156 @@ import java.util.List;
 @Named
 public class PostEditBacker implements Serializable {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(PostEditBacker.class);
+
     @Serial
     private static final long serialVersionUID = -973315118868047411L;
 
+    /**
+     * Whether to create a new post or edit an existing one.
+     */
+    private boolean create;
+
+    /**
+     * The ID of the post to edit.
+     */
     private Integer postID;
-    private int reportID;
+
+    /**
+     * The ID of the report to create a new post in.
+     */
+    private Integer reportID;
+
+    /**
+     * The post to edit.
+     */
     private Post post;
+
+    /**
+     * The report of the post.
+     */
+    private Report report;
+
+    /**
+     * The attachment that was last uploaded.
+     */
     private Part lastAttachmentUploaded;
+
+    /**
+     * The list of attachments of the post to edit.
+     */
     private List<Attachment> attachments;
 
-    @Inject
-    private transient PostService postService;
+    /**
+     * The current application settings.
+     */
+    private final ApplicationSettings applicationSettings;
 
-    @Inject
-    private transient ReportService reportService;
+    /**
+     * The report service creating reports.
+     */
+    private final ReportService reportService;
 
-    @Inject
-    private transient TopicService topicService;
+    /**
+     * The post service validating posts and attachments.
+     */
+    private final PostService postService;
 
-    @Inject
-    private transient UserSession session;
+    /**
+     * The current user session.
+     */
+    private final UserSession session;
 
-    @Inject
-    private transient ApplicationSettings applicationSettings;
+    /**
+     * The current {@link FacesContext}.
+     */
+    private final FacesContext fctx;
 
+    /**
+     * Constructs a new post editing backing bean with the necessary dependencies.
+     *
+     * @param applicationSettings The current application settings.
+     * @param reportService       The report service to use.
+     * @param postService         The post service to use.
+     * @param session             The current user session.
+     * @param fctx                The current {@link FacesContext} of the application.
+     */
     @Inject
-    private transient FacesContext fctx;
-
+    public PostEditBacker(final ApplicationSettings applicationSettings, final ReportService reportService,
+                          final PostService postService, final UserSession session, final FacesContext fctx) {
+        this.applicationSettings = applicationSettings;
+        this.reportService = reportService;
+        this.postService = postService;
+        this.session = session;
+        this.fctx = fctx;
+        attachments = new ArrayList<>();
+    }
 
     /**
      * Initializes the page for creating and editing posts. Checks if the user is allowed to view the page in the first
      * place. If not, acts as if the page did not exist.
      */
-    public void init() {
+    @PostConstruct
+    void init() {
+        User user = session.getUser();
+        if (user == null) {
+            redirectToErrorPage();
+            return;
+        }
 
+        create = fctx.getExternalContext().getRequestParameterMap().containsKey("c");
+        if (create) {
+            reportID = parseRequestParameter("r");
+            if (reportID == null) {
+                redirectToErrorPage();
+                return;
+            }
+            report = reportService.getReportByID(reportID);
+            if (report == null || !reportService.canPostInReport(user, report)) {
+                redirectToErrorPage();
+                return;
+            }
+            Authorship authorship = new Authorship(user, null, user, null);
+            post = new Post(0, "", new Lazy<>(report), authorship, attachments);
+        } else {
+            postID = parseRequestParameter("p");
+            if (postID == null) {
+                redirectToErrorPage();
+                return;
+            }
+            post = postService.getPostByID(postID);
+            if (post == null || !postService.canModify(user, post)) {
+                redirectToErrorPage();
+                return;
+            }
+            report = reportService.getReportByID(post.getReport().get().getId());
+            if (report == null) {
+                redirectToErrorPage();
+                return;
+            }
+            attachments = post.getAttachments();
+            post.getAuthorship().setModifier(user);
+        }
     }
 
     /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
-     *
-     * @param feedback The feedback with details on what to display.
-     */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
-
-    }
-
-    /**
-     * Creates a new post or saves the changes made to an existing post.
+     * Creates a new post or saves the changes made to an existing post. On success, the user is redirected to the post
+     * in its report page.
      */
     public void saveChanges() {
-
+        boolean success = create ? postService.createPost(post) : postService.updatePost(post);
+        if (success) {
+            ExternalContext ectx = fctx.getExternalContext();
+            try {
+                ectx.redirect(ectx.getRequestContextPath()
+                        + "/faces/view/auth/report.xhtml?id=" + report.getId() + "&p=" + post.getId());
+            } catch (IOException e) {
+                redirectToErrorPage();
+            }
+        }
     }
 
     /**
@@ -86,55 +189,89 @@ public class PostEditBacker implements Serializable {
      * attachments has already been reached, displays an error message instead.
      */
     public void uploadAttachment() {
-
+        postService.addAttachment(post, lastAttachmentUploaded);
     }
 
     /**
-     * Clears the list of uploaded attachments.
+     * Clears the list of attachments of the post.
      */
     public void deleteAllAttachments() {
-
+        post.getAttachments().clear();
     }
 
     /**
-     * @return The postID.
+     * Tries to parse a request parameter to an integer.
+     *
+     * @param param The name of the parameter to parse.
+     * @return The integer value of the request parameter, {@code null} if the parameter could not be parsed.
+     */
+    private Integer parseRequestParameter(final String param) {
+        ExternalContext ectx = fctx.getExternalContext();
+        try {
+            return Integer.parseInt(ectx.getRequestParameterMap().get(param));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Redirects the user to the error page.
+     */
+    private void redirectToErrorPage() {
+        fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+    }
+
+    /**
+     * Returns the ID of the post to edit.
+     *
+     * @return The post ID to set.
      */
     public Integer getPostID() {
         return postID;
     }
 
     /**
-     * @param postID The postID to set.
+     * Sets the ID of the post to edit.
+     *
+     * @param postID The post ID to set.
      */
-    public void setPostID(Integer postID) {
+    public void setPostID(final Integer postID) {
         this.postID = postID;
     }
 
     /**
-     * @return The reportID.
+     * Returns the ID of the report to create the new post in.
+     *
+     * @return The ID of the report to create the new post in.
      */
-    public int getReportID() {
+    public Integer getReportID() {
         return reportID;
     }
 
     /**
-     * @param reportID The reportID to set.
+     * Sets the ID of the report to create the new post in.
+     *
+     * @param reportID The report ID to set.
      */
-    public void setReportID(int reportID) {
+    public void setReportID(final Integer reportID) {
         this.reportID = reportID;
     }
 
     /**
-     * @return The post.
+     * The post to edit.
+     *
+     * @return The post to edit.
      */
     public Post getPost() {
         return post;
     }
 
     /**
-     * @param post The post to set.
+     * Sets the post to edit.
+     *
+     * @param post The post ID to set.
      */
-    public void setPost(Post post) {
+    public void setPost(final Post post) {
         this.post = post;
     }
 
@@ -148,22 +285,44 @@ public class PostEditBacker implements Serializable {
     /**
      * @param lastAttachmentUploaded The lastAttachmentUploaded to set.
      */
-    public void setLastAttachmentUploaded(Part lastAttachmentUploaded) {
+    public void setLastAttachmentUploaded(final Part lastAttachmentUploaded) {
         this.lastAttachmentUploaded = lastAttachmentUploaded;
     }
 
     /**
-     * @return The attachments.
+     * Returns the list of attachments of the post.
+     *
+     * @return The list of attachments of the post.
      */
     public List<Attachment> getAttachments() {
         return attachments;
     }
 
     /**
-     * @param attachments The attachments to set.
+     * Sets the list of attachments of the post.
+     *
+     * @param attachments The list of attachments to set.
      */
-    public void setAttachments(List<Attachment> attachments) {
+    public void setAttachments(final List<Attachment> attachments) {
         this.attachments = attachments;
+    }
+
+    /**
+     * Returns whether to create a new post or edit an existing one.
+     *
+     * @return Whether to create or edit a post.
+     */
+    public boolean isCreate() {
+        return create;
+    }
+
+    /**
+     * Sets whether to create a new post or edit an existing one.
+     *
+     * @param create Whether to create or edit a post.
+     */
+    public void setCreate(final boolean create) {
+        this.create = create;
     }
 
 }

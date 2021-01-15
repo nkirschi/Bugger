@@ -17,6 +17,11 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     private static final Log log = Log.forClass(Paginator.class);
 
     /**
+     * All valid {@link Selection.PageSize}s for the paginator.
+     */
+    public static final Selection.PageSize[] PAGE_SIZES = Selection.PageSize.values();
+
+    /**
      * The current {@link Selection}, representing the state of this paginator.
      */
     private final Selection selection;
@@ -195,7 +200,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      * @return The possible page size values.
      */
     public Selection.PageSize[] pageSizeValues() {
-        return Selection.PageSize.values();
+        return PAGE_SIZES;
     }
 
     /**

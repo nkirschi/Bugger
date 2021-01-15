@@ -74,7 +74,7 @@ public class PostServiceTest {
     private Post testPost1;
 
     private User testUser = new User();
-    private Report testReport = new Report(100, "Hi", Report.Type.BUG, Report.Severity.MINOR, "1", null, null, null, null, null);
+    private Report testReport = new Report(100, "Hi", Report.Type.BUG, Report.Severity.MINOR, "1", null, null, null, null, false, null);
     private Post testPost = new Post(300, "Hi", new Lazy<>(testReport), null, null);
 
 
@@ -206,13 +206,13 @@ public class PostServiceTest {
         verify(feedbackEvent).fire(any());
     }
     public void testIsPrivilegedWhenUserIsAnon() {
-        assertFalse(postService.isPrivileged(null, testPost));
+        assertFalse(postService.canModify(null, testPost));
     }
 
     @Test
     public void testIsPrivilegedWhenUserIsAdmin() {
         testUser.setAdministrator(true);
-        assertTrue(postService.isPrivileged(testUser, testPost));
+        assertTrue(postService.canModify(testUser, testPost));
     }
 
     @Test
@@ -220,13 +220,14 @@ public class PostServiceTest {
         testUser.setAdministrator(false);
         Authorship authorship = new Authorship(testUser, null, null, null);
         testPost.setAuthorship(authorship);
-        assertTrue(postService.isPrivileged(testUser, testPost));
+        assertTrue(postService.canModify(testUser, testPost));
     }
 
     @Test
     public void testIsPrivilegedWhenUserIsNotAuthor() {
         testUser.setAdministrator(false);
         testPost.setAuthorship(new Authorship(null, null, null, null));
-        assertFalse(postService.isPrivileged(testUser, testPost));
+        assertFalse(postService.canModify(testUser, testPost));
     }
+
 }

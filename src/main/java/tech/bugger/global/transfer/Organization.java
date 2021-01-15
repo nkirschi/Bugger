@@ -110,6 +110,15 @@ public class Organization implements Serializable {
     }
 
     /**
+     * Returns whether the organization logo is non-empty.
+     *
+     * @return Whether the organization logo is non-empty.
+     */
+    public boolean isExistsLogo() {
+        return logo != null && logo.length > 0;
+    }
+
+    /**
      * Returns the theme of this organization.
      *
      * @return The organization theme.

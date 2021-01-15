@@ -4,6 +4,7 @@ import tech.bugger.global.util.Lazy;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -187,7 +188,7 @@ public class Post implements Serializable {
         String reportId = report.isPresent() ? String.valueOf(report.get().getId()) : "<absent>";
         return "Post{"
                 + "id='" + id + '\''
-                + ", content='" + content + '\''
+                + ", content='" + String.format("%.20s", content) + '\''
                 + ", report='#" + reportId + '\''
                 + ", authorship='" + authorship + '\''
                 + ", attachments='" + attachments + '\''
