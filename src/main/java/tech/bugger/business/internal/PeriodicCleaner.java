@@ -18,10 +18,21 @@ public class PeriodicCleaner implements Runnable {
      */
     private static final Log log = Log.forClass(PeriodicCleaner.class);
 
+    /**
+     * The time after which data in the data source is considered expired.
+     */
     private static final Duration EXPIRATION_AGE = Duration.ofHours(1);
 
+    /**
+     * The transaction manager used for creating transactions.
+     */
     private final TransactionManager transactionManager;
 
+    /**
+     * Creates a new periodic data source cleaner with the given dependencies.
+     *
+     * @param transactionManager The transaction manager to be used for creating transactions.
+     */
     @Inject
     public PeriodicCleaner(final TransactionManager transactionManager) {
         this.transactionManager = transactionManager;

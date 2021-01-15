@@ -63,7 +63,7 @@ public class SystemLifetimeListener implements ServletContextListener {
     /**
      * Rate in minutes at which maintenance tasks are periodically run.
      */
-    private static final long MAINTENANCE_PERIODICITY_MINUTES = 60;
+    private static final long MAINTENANCE_PERIODICITY_MINUTES = 15;
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.
@@ -126,8 +126,8 @@ public class SystemLifetimeListener implements ServletContextListener {
     public void contextDestroyed(final ServletContextEvent sce) {
         deregisterShutdownHooks(); // hooks not needed due to regular shutdown
 
-        cleanUpDatabaseConnections();
         terminateMaintenanceTasks(false);
+        cleanUpDatabaseConnections();
         terminateMailingTasks(false);
 
         log.info("Application shutdown completed.");
@@ -209,6 +209,12 @@ public class SystemLifetimeListener implements ServletContextListener {
         }
     }
 
+    private void scheduleMaintenanceTasks() {
+        maintenanceExecutor = new ScheduledThreadPoolExecutor(1);
+        maintenanceExecutor.scheduleAtFixedRate(new PeriodicCleaner(transactionManager), 0,
+                                                MAINTENANCE_PERIODICITY_MINUTES, TimeUnit.HOURS);
+    }
+
     private void registerPriorityExecutors() {
         PropertiesReader configReader = registry.getPropertiesReader("config");
         registry.registerPriorityExecutor("mails", new PriorityExecutor(
@@ -272,12 +278,6 @@ public class SystemLifetimeListener implements ServletContextListener {
         } catch (InterruptedException e) {
             log.error("Interrupted while waiting for mailing tasks to finish.", e);
         }
-    }
-
-    private void scheduleMaintenanceTasks() {
-        maintenanceExecutor = new ScheduledThreadPoolExecutor(1);
-        maintenanceExecutor.scheduleAtFixedRate(new PeriodicCleaner(transactionManager), 0,
-                                                MAINTENANCE_PERIODICITY_MINUTES, TimeUnit.HOURS);
     }
 
     /**
