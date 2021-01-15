@@ -101,6 +101,16 @@ public class SystemLifetimeListener implements ServletContextListener {
     private Thread maintenanceShutdownHook;
 
     /**
+     * Main connection pool to remember. This is necessary because of a CDI bug.
+     */
+    private ConnectionPool mainConnectionPool;
+
+    /**
+     * Mail priority executor to remember. This is necessary because of a CDI bug.
+     */
+    private PriorityExecutor mailPriorityExecutor;
+
+    /**
      * Initializes necessary resources for the application to run.
      */
     @Override
@@ -167,6 +177,7 @@ public class SystemLifetimeListener implements ServletContextListener {
                 configReader.getInt("DB_MAX_CONNS"),
                 configReader.getInt("DB_TIMEOUT")
         ));
+        mainConnectionPool = registry.getConnectionPool("db");
     }
 
     private void initializeDatabaseSchema(final ServletContext sctx) {
@@ -223,6 +234,7 @@ public class SystemLifetimeListener implements ServletContextListener {
                 configReader.getInt("MAIL_MAX_THREADS"),
                 configReader.getInt("MAIL_IDLE_TIMEOUT")
         ));
+        mailPriorityExecutor = registry.getPriorityExecutor("mails");
     }
 
     private void registerShutdownHooks() {
@@ -243,7 +255,7 @@ public class SystemLifetimeListener implements ServletContextListener {
     }
 
     private void cleanUpDatabaseConnections() {
-        registry.getConnectionPool("db").shutdown();
+        mainConnectionPool.shutdown();
     }
 
     private void terminateMaintenanceTasks(final boolean immediately) {
@@ -264,7 +276,7 @@ public class SystemLifetimeListener implements ServletContextListener {
     }
 
     private void terminateMailingTasks(final boolean immediately) {
-        PriorityExecutor mailingExecutor = registry.getPriorityExecutor("mails");
+        PriorityExecutor mailingExecutor = mailPriorityExecutor;
         try {
             boolean completed = immediately
                     ? mailingExecutor.kill(TASK_TERMINATION_TIMEOUT_MILLIS)
