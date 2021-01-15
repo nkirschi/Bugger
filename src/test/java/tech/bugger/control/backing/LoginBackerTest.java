@@ -22,8 +22,14 @@ import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(LogExtension.class)
 public class LoginBackerTest {
@@ -82,7 +88,7 @@ public class LoginBackerTest {
         when(fctx.getApplication()).thenReturn(application);
         when(application.getNavigationHandler()).thenReturn(navHandler);
         loginBacker.init();
-        verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
+        verify(navHandler).handleNavigation(any(), any(), anyString());
     }
 
     @Test
@@ -96,11 +102,8 @@ public class LoginBackerTest {
     public void testLoginRedirectURL() throws Exception {
         loginBacker.setRedirectURL(profileEncoded);
         when(authenticationService.authenticate(loginBacker.getUsername(), loginBacker.getPassword())).thenReturn(user);
-        assertAll(
-                () -> assertEquals(null, loginBacker.login()),
-                () -> assertEquals(user, loginBacker.getUser())
-        );
-        verify(authenticationService, times(1)).authenticate(any(), anyString());
+        assertNull(loginBacker.login());
+        verify(authenticationService).authenticate(any(), anyString());
         verify(context).redirect(profile);
     }
 
@@ -109,38 +112,23 @@ public class LoginBackerTest {
         loginBacker.setRedirectURL(profile);
         doThrow(IOException.class).when(context).redirect(any());
         when(authenticationService.authenticate(loginBacker.getUsername(), loginBacker.getPassword())).thenReturn(user);
-        assertAll(
-                () -> assertEquals("pretty:home", loginBacker.login()),
-                () -> assertEquals(user, loginBacker.getUser())
-        );
-        verify(authenticationService, times(1)).authenticate(any(), anyString());
+        assertEquals("pretty:home", loginBacker.login());
+        verify(authenticationService).authenticate(any(), anyString());
     }
 
     @Test
     public void testLoginNoRedirectURL() throws Exception {
         loginBacker.setRedirectURL(null);
         when(authenticationService.authenticate(loginBacker.getUsername(), loginBacker.getPassword())).thenReturn(user);
-        assertAll(
-                () -> assertEquals("pretty:home", loginBacker.login()),
-                () -> assertEquals(user, loginBacker.getUser())
-        );
-        verify(authenticationService, times(1)).authenticate(any(), anyString());
+        assertEquals("pretty:home", loginBacker.login());
+        verify(authenticationService).authenticate(any(), anyString());
         verify(context, never()).redirect(profile);
     }
 
     @Test
     public void testLoginUserNull() {
-        when(authenticationService.authenticate(any(), anyString())).thenReturn(null);
-        assertAll(
-                () -> assertNull(loginBacker.login())
-        );
-        verify(authenticationService, times(1)).authenticate(any(), anyString());
-    }
-
-    @Test
-    public void testSetUserForCoverage() {
-        loginBacker.setUser(user);
-        assertEquals(user, loginBacker.getUser());
+        assertNull(loginBacker.login());
+        verify(authenticationService).authenticate(any(), anyString());
     }
 
 }

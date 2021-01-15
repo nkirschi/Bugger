@@ -215,9 +215,18 @@ public class SearchDBGateway implements SearchGateway {
      * @throws IllegalArgumentException if the given parameters are invalid.
      */
     private void validateSuggestionParams(final String query, final int limit, final Topic topic) {
-        if (query == null || query.isBlank() || topic.getId() == null || limit < 0) {
-            log.error("The topic cannot be null and the query cannot be null or blank!");
-            throw new IllegalArgumentException("The topic cannot be null and the query cannot be null or blank!");
+        if (query == null) {
+            log.error("The search query cannot be null!");
+            throw new IllegalArgumentException("The search query cannot be null!");
+        } else if (query.isBlank()) {
+            log.error("The search query cannot be blank!");
+            throw new IllegalArgumentException("The search query cannot be blank!");
+        } else if (limit < 0) {
+            log.error("The limit of search suggestions to return cannot be negative!");
+            throw new IllegalArgumentException("The limit of search suggestions to return cannot be negative!");
+        } else if (topic.getId() == null) {
+            log.error("The topic cannot be null!");
+            throw new IllegalArgumentException("The topic cannot be null!");
         }
     }
 

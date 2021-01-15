@@ -33,7 +33,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(LogExtension.class)
 public class ProfileEditBackerTest {
@@ -215,20 +222,20 @@ public class ProfileEditBackerTest {
                 () -> assertNull(profileEditBacker.getUser()),
                 () -> assertEquals(ProfileEditBacker.ProfileEditDialog.NONE, profileEditBacker.getDialog())
         );
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
+        verify(navHandler).handleNavigation(any(), any(), any());
     }
 
     @Test
     public void testInitSessionUserNull() {
         profileEditBacker.init();
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
+        verify(navHandler).handleNavigation(any(), any(), any());
     }
 
     @Test
     public void testInitGetUserNull() {
         when(session.getUser()).thenReturn(user);
         profileEditBacker.init();
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
+        verify(navHandler).handleNavigation(any(), any(), any());
     }
 
     @Test
@@ -238,8 +245,8 @@ public class ProfileEditBackerTest {
         when(profileService.createUser(any())).thenReturn(true);
         profileEditBacker.setUser(user);
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(profileService, times(1)).createUser(any());
+        verify(profileService).matchingPassword(any(), any());
+        verify(profileService).createUser(any());
     }
 
     @Test
@@ -248,8 +255,8 @@ public class ProfileEditBackerTest {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         profileEditBacker.setUser(user);
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(profileService, times(1)).createUser(any());
+        verify(profileService).matchingPassword(any(), any());
+        verify(profileService).createUser(any());
     }
 
     @Test
@@ -257,8 +264,8 @@ public class ProfileEditBackerTest {
         createUser.setBoolean(profileEditBacker, true);
         when(profileService.matchingPassword(any(), any())).thenReturn(false);
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(profileService, times(0)).createUser(any());
+        verify(profileService).matchingPassword(any(), any());
+        verify(profileService, never()).createUser(any());
     }
 
     @Test
@@ -268,7 +275,7 @@ public class ProfileEditBackerTest {
         profileEditBacker.setUser(user);
         profileEditBacker.setEmailNew(user.getEmailAddress());
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
+        verify(profileService).matchingPassword(any(), any());
     }
 
     @Test
@@ -277,7 +284,7 @@ public class ProfileEditBackerTest {
         profileEditBacker.setUser(user);
         profileEditBacker.setEmailNew(user.getEmailAddress());
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
+        verify(profileService).matchingPassword(any(), any());
     }
 
     @Test
@@ -290,9 +297,9 @@ public class ProfileEditBackerTest {
         profileEditBacker.setUser(user);
         profileEditBacker.setEmailNew(EMAIL);
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(authenticationService, times(1)).updateEmail(any(), any(), any());
-        verify(profileService, times(1)).updateUser(user);
+        verify(profileService).matchingPassword(any(), any());
+        verify(authenticationService).updateEmail(any(), any(), any());
+        verify(profileService).updateUser(user);
     }
 
     @Test
@@ -303,8 +310,8 @@ public class ProfileEditBackerTest {
         profileEditBacker.setUser(user);
         profileEditBacker.setEmailNew(EMAIL);
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(authenticationService, times(1)).updateEmail(any(), any(), any());
+        verify(profileService).matchingPassword(any(), any());
+        verify(authenticationService).updateEmail(any(), any(), any());
     }
 
     @Test
@@ -325,7 +332,7 @@ public class ProfileEditBackerTest {
         profileEditBacker.setPasswordNewConfirm(PASSWORD);
         profileEditBacker.setUser(user);
         profileEditBacker.saveChanges();
-        verify(authenticationService, times(1)).hashPassword(user, PASSWORD);
+        verify(authenticationService).hashPassword(user, PASSWORD);
     }
 
     @Test
@@ -333,8 +340,8 @@ public class ProfileEditBackerTest {
         profileEditBacker.setPasswordNew(PASSWORD);
         profileEditBacker.setUser(user);
         profileEditBacker.saveChanges();
-        verify(authenticationService, times(0)).hashPassword(user, PASSWORD);
-        verify(profileService, times(0)).matchingPassword(any(), any());
+        verify(authenticationService, never()).hashPassword(user, PASSWORD);
+        verify(profileService, never()).matchingPassword(any(), any());
     }
 
     @Test
@@ -343,8 +350,8 @@ public class ProfileEditBackerTest {
         when(profileService.deleteUser(user)).thenReturn(true);
         profileEditBacker.setUser(user);
         assertEquals("pretty:home", profileEditBacker.delete());
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(profileService, times(1)).deleteUser(user);
+        verify(profileService).matchingPassword(any(), any());
+        verify(profileService).deleteUser(user);
     }
 
     @Test
@@ -352,15 +359,15 @@ public class ProfileEditBackerTest {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         profileEditBacker.setUser(user);
         profileEditBacker.delete();
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(profileService, times(1)).deleteUser(user);
+        verify(profileService).matchingPassword(any(), any());
+        verify(profileService).deleteUser(user);
     }
 
     @Test
     public void testDeleteWrongPassword() {
         profileEditBacker.setUser(user);
         profileEditBacker.delete();
-        verify(profileService, times(1)).matchingPassword(any(), any());
+        verify(profileService).matchingPassword(any(), any());
     }
 
     @Test
@@ -371,9 +378,9 @@ public class ProfileEditBackerTest {
         when(session.getUser()).thenReturn(user);
         profileEditBacker.setUser(user);
         assertEquals("pretty:home", profileEditBacker.delete());
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(profileService, times(1)).deleteUser(user);
-        verify(session, times(1)).invalidateSession();
+        verify(profileService).matchingPassword(any(), any());
+        verify(profileService).deleteUser(user);
+        verify(session).invalidateSession();
     }
 
     @Test
@@ -388,8 +395,8 @@ public class ProfileEditBackerTest {
                 () -> assertEquals(avatar.get(), user.getAvatar().get()),
                 () -> assertEquals(thumbnail, user.getAvatarThumbnail())
         );
-        verify(profileService, times(1)).uploadAvatar(any());
-        verify(profileService, times(1)).generateThumbnail(any());
+        verify(profileService).uploadAvatar(any());
+        verify(profileService).generateThumbnail(any());
     }
 
     @Test
@@ -401,7 +408,7 @@ public class ProfileEditBackerTest {
                 () -> assertArrayEquals(new byte[0], user.getAvatar().get()),
                 () -> assertArrayEquals(new byte[0], user.getAvatarThumbnail())
         );
-        verify(profileService, times(0)).generateThumbnail(any());
+        verify(profileService, never()).generateThumbnail(any());
     }
 
     @Test
@@ -416,8 +423,8 @@ public class ProfileEditBackerTest {
                 () -> assertEquals(oldAvatar, user.getAvatar()),
                 () -> assertEquals(oldThumbnail, user.getAvatarThumbnail())
         );
-        verify(profileService, times(1)).uploadAvatar(any());
-        verify(profileService, times(1)).generateThumbnail(any());
+        verify(profileService).uploadAvatar(any());
+        verify(profileService).generateThumbnail(any());
     }
 
     @Test
@@ -430,7 +437,7 @@ public class ProfileEditBackerTest {
                 () -> assertEquals(oldAvatar, user.getAvatar()),
                 () -> assertEquals(oldThumbnail, user.getAvatarThumbnail())
         );
-        verify(profileService, times(1)).uploadAvatar(any());
+        verify(profileService).uploadAvatar(any());
     }
 
     @Test
