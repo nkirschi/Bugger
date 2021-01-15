@@ -200,6 +200,7 @@ public class NotificationService implements Serializable {
             Topic topic = new Topic();
             topic.setId(notification.getTopicID());
             affectedUsers.addAll(gateway.getSubscribersOf(topic));
+            affectedUsers.remove(causer);
             notifications = new ArrayList<>(affectedUsers.size());
             for (User user : affectedUsers) {
                 Notification n = new Notification(notification);
