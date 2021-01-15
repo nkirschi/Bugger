@@ -619,7 +619,7 @@ public class TopicDBGateway implements TopicGateway {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             PreparedStatement statement = new StatementParametrizer(stmt)
                     .integer(user.getId()).toStatement();
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 return rs.getInt("count");
             } else {

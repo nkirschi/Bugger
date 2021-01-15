@@ -780,7 +780,7 @@ public class TopicService {
             selectedTopics = tx.newTopicGateway().selectSubscribedTopics(user, selection);
             tx.commit();
         } catch (TransactionException e) {
-            log.error("Error when selecting subscribed topics for user " + user + "with selection " + selection + ".",
+            log.error("Error when selecting subscribed topics for user " + user + " with selection " + selection + ".",
                     e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
             selectedTopics = null;

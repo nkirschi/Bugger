@@ -7,6 +7,7 @@ import tech.bugger.business.util.Hasher;
 import tech.bugger.business.util.Images;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
@@ -24,6 +25,7 @@ import javax.inject.Inject;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -679,6 +681,64 @@ public class ProfileService {
             feedback.fire(new Feedback(messages.getString("generate_thumbnail"), Feedback.Type.ERROR));
         }
         return null;
+    }
+
+    /**
+     * Returns all users the user is subscribed to for a given selection.
+     *
+     * @param user      The user in question.
+     * @param selection The given selection.
+     * @return A list of users the user is subscribed to.
+     */
+    public List<User> selectSubscribedUsers(final User user, final Selection selection) {
+        if (selection == null) {
+            log.error("Cannot select subscribed users when selection is null.");
+            throw new IllegalArgumentException("Selection cannot be null.");
+        } else if (user == null) {
+            log.error("Cannot select subscribed users when user is null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot select subscribed users when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        List<User> selectedUsers;
+        try (Transaction tx = transactionManager.begin()) {
+            selectedUsers = tx.newUserGateway().selectSubscribedUsers(user, selection);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when selecting subscribed users for user " + user + " with selection " + selection + ".",
+                    e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            selectedUsers = null;
+        }
+        return selectedUsers;
+    }
+
+    /**
+     * Counts the number of users the user is subscribed to.
+     *
+     * @param user The user in question.
+     * @return The number of users the user is subscribed to.
+     */
+    public int countSubscribedUsers(final User user) {
+        if (user == null) {
+            return 0;
+        } else if (user.getId() == null) {
+            log.error("Cannot count subscribed users when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        int count;
+        try (Transaction tx = transactionManager.begin()) {
+            count = tx.newUserGateway().countSubscribedUsers(user);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when counting subscribed users for user " + user + ".", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            count = 0;
+        }
+        return count;
     }
 
 }

@@ -147,4 +147,21 @@ public interface UserGateway {
      */
     int getNumberOfModeratedTopics(User user);
 
+    /**
+     * Retrieves all users the user is subscribed to for a given selection.
+     *
+     * @param user      The user in question.
+     * @param selection The given selection.
+     * @return A list of users the user is subscribed to.
+     */
+    List<User> selectSubscribedUsers(User user, Selection selection);
+
+    /**
+     * Counts the number of users the user is subscribed to.
+     *
+     * @param user The user in question.
+     * @return The number of users the user is subscribed to.
+     */
+    int countSubscribedUsers(User user);
+
 }
