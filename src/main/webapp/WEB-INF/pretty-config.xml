@@ -84,4 +84,12 @@
         <pattern value="/statistics"/>
         <view-id value="/faces/view/public/statistics.xhtml"/>
     </url-mapping>
+    <url-mapping id="imprint">
+        <pattern value="/imprint"/>
+        <view-id value="/faces/view/public/imprint.xhtml"/>
+    </url-mapping>
+    <url-mapping id="privacy">
+        <pattern value="/privacy"/>
+        <view-id value="/faces/view/public/privacy.xhtml"/>
+    </url-mapping>
 </pretty-config>
