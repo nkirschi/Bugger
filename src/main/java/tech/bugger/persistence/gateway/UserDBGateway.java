@@ -560,10 +560,10 @@ public class UserDBGateway implements UserGateway {
     @Override
     public List<User> selectSubscribedUsers(final User user, final Selection selection) {
         if (selection == null) {
-            log.error("Cannot select subscribers when selection is null.");
+            log.error("Cannot select subscribed users when selection is null.");
             throw new IllegalArgumentException("Selection cannot be null.");
         } else if (StringUtils.isBlank(selection.getSortedBy())) {
-            log.error("Cannot select subscribers when sorted by is blank.");
+            log.error("Cannot select subscribed users when sorted by is blank.");
             throw new IllegalArgumentException("Cannot sort by nothing.");
         } else if (user == null) {
             log.error("Cannot select subscribed users when user is null.");
@@ -621,8 +621,8 @@ public class UserDBGateway implements UserGateway {
                 throw new InternalError("Could not count the number of subscribed users.");
             }
         } catch (SQLException e) {
-            log.error("Error while retrieving number of topics.", e);
-            throw new StoreException("Error while retrieving number of topics.", e);
+            log.error("Error while retrieving number of users user " + user + " is subscribed to.", e);
+            throw new StoreException("Error while retrieving number of users user " + user + " is subscribed to.", e);
         }
     }
 

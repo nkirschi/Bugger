@@ -741,4 +741,62 @@ public class ProfileService {
         return count;
     }
 
+    /**
+     * Returns all reports the user is subscribed to for a given selection.
+     *
+     * @param user      The user in question.
+     * @param selection The given selection.
+     * @return A list of reports the user is subscribed to.
+     */
+    public List<Report> selectSubscribedReports(final User user, final Selection selection) {
+        if (selection == null) {
+            log.error("Cannot select subscribed reports when selection is null.");
+            throw new IllegalArgumentException("Selection cannot be null.");
+        } else if (user == null) {
+            log.error("Cannot select subscribed reports when user is null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot select subscribed reports when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        List<Report> selectedReports;
+        try (Transaction tx = transactionManager.begin()) {
+            selectedReports = tx.newReportGateway().selectSubscribedReports(user, selection);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when selecting subscribed reports for user " + user + " with selection " + selection + ".",
+                    e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            selectedReports = null;
+        }
+        return selectedReports;
+    }
+
+    /**
+     * Counts the number of users the user is subscribed to.
+     *
+     * @param user The user in question.
+     * @return The number of users the user is subscribed to.
+     */
+    public int countSubscribedReports(final User user) {
+        if (user == null) {
+            return 0;
+        } else if (user.getId() == null) {
+            log.error("Cannot count subscribed reports when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        int count;
+        try (Transaction tx = transactionManager.begin()) {
+            count = tx.newReportGateway().countSubscribedReports(user);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when counting subscribed reports for user " + user + ".", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            count = 0;
+        }
+        return count;
+    }
+
 }
