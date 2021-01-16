@@ -69,12 +69,12 @@ public class ProfileBackerTest {
     private static final String LONG_USERNAME = "This username is much too long";
 
     @BeforeEach
-    public void setup()
-    {
+    public void setup() {
         user = new User(12345, "Helgi", "v3ry_s3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen", null,
                 new byte[]{1}, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         MockitoAnnotations.openMocks(this);
+        profileBacker = new ProfileBacker(topicService, profileService, session, fctx);
         when(fctx.getExternalContext()).thenReturn(context);
         when(context.getRequestParameterMap()).thenReturn(map);
         when(fctx.getApplication()).thenReturn(application);

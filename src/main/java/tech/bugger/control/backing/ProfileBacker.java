@@ -115,26 +115,39 @@ public class ProfileBacker implements Serializable {
     /**
      * The current user session.
      */
-    @Inject
-    private UserSession session;
+    private final UserSession session;
 
     /**
      * The current external context.
      */
-    @Inject
-    private FacesContext fctx;
+    private final FacesContext fctx;
 
     /**
      * The profile service providing the business logic for user functionality.
      */
-    @Inject
-    private transient ProfileService profileService;
+    private final transient ProfileService profileService;
 
     /**
      * The topic service providing the business logic for topic functionality.
      */
+    private final transient TopicService topicService;
+
+    /**
+     * Constructs a new profile page backing bean with the necessary dependencies.
+     *
+     * @param topicService      The topic service to use.
+     * @param profileService    The profile service to use.
+     * @param session           The current {@link UserSession}.
+     * @param fctx              The current faces context.
+     */
     @Inject
-    private transient TopicService topicService;
+    public ProfileBacker(final TopicService topicService, final ProfileService profileService,
+                         final UserSession session, final FacesContext fctx) {
+        this.topicService = topicService;
+        this.profileService = profileService;
+        this.session = session;
+        this.fctx = fctx;
+    }
 
     /**
      * Initializes the profile page. Checks whether this is the user's own profile page.

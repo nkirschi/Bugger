@@ -16,7 +16,7 @@ import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.servlet.http.Part;
@@ -28,7 +28,7 @@ import java.util.ResourceBundle;
  * Service providing methods related to users and user profiles. A {@code Feedback} event is fired, if unexpected
  * circumstances occur.
  */
-@Dependent
+@ApplicationScoped
 public class ProfileService {
 
     /**

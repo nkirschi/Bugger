@@ -91,6 +91,7 @@ public class ProfileEditBackerTest {
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         emailToken = new Token(TOKEN, Token.Type.CHANGE_EMAIL, ZonedDateTime.now(), EMAIL, user);
         MockitoAnnotations.openMocks(this);
+        profileEditBacker = new ProfileEditBacker(authenticationService, profileService, session, fctx);
         createUser = profileEditBacker.getClass().getDeclaredField("create");
         createUser.setAccessible(true);
         profileEditBacker.setPasswordNew("");

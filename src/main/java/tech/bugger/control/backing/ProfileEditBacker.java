@@ -118,26 +118,39 @@ public class ProfileEditBacker implements Serializable {
     /**
      * The current user session.
      */
-    @Inject
-    private UserSession session;
+    private final UserSession session;
 
     /**
      * The current external context.
      */
-    @Inject
-    private FacesContext fctx;
+    private final FacesContext fctx;
 
     /**
      * The profile service providing the business logic.
      */
-    @Inject
-    private transient ProfileService profileService;
+    private final transient ProfileService profileService;
 
     /**
      * The authentication service providing the business logic for authentication.
      */
+    private final transient AuthenticationService authenticationService;
+
+    /**
+     * Constructs a new profile edit page backing bean with the necessary dependencies.
+     *
+     * @param authenticationService The authentication service to use.
+     * @param profileService        The profile service to use.
+     * @param session               The current {@link UserSession}.
+     * @param fctx                  The current faces context.
+     */
     @Inject
-    private transient AuthenticationService authenticationService;
+    public ProfileEditBacker(final AuthenticationService authenticationService, final ProfileService profileService,
+                             final UserSession session, final FacesContext fctx) {
+        this.authenticationService = authenticationService;
+        this.profileService = profileService;
+        this.session = session;
+        this.fctx = fctx;
+    }
 
     /**
      * Initializes the profile edit page. Also checks if the user is allowed to modify this profile.
