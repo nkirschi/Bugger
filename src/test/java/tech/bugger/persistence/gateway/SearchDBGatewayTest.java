@@ -75,6 +75,18 @@ public class SearchDBGatewayTest {
     }
 
     @Test
+    public void testGetUserBanSuggestionsWithModeratorsAndBanned() throws NotFoundException {
+        userGateway.createUser(user1);
+        userGateway.createUser(user2);
+        userGateway.createUser(admin);
+        topicGateway.createTopic(topic);
+        topicGateway.promoteModerator(topic, user1);
+        topicGateway.banUser(topic, user2);
+        List<String> suggestions = searchGateway.getUserBanSuggestions(query, limit, topic);
+        assertTrue(suggestions.isEmpty());
+    }
+
+    @Test
     public void testGetUserBanSuggestionsNone() throws NotFoundException {
         userGateway.createUser(admin);
         topicGateway.createTopic(topic);

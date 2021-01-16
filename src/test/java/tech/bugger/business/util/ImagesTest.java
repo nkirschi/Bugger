@@ -1,13 +1,21 @@
 package tech.bugger.business.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
+import tech.bugger.LogExtension;
 import tech.bugger.business.exception.CorruptImageException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import javax.imageio.ImageIO;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(LogExtension.class)
 public class ImagesTest {
 
     @Test
@@ -30,10 +38,20 @@ public class ImagesTest {
     }
 
     @Test
-    public void testGenerateThumbnailCorruptImage() throws CorruptImageException {
+    public void testGenerateThumbnailCorruptImage() {
         assertThrows(CorruptImageException.class,
                 () -> Images.generateThumbnail(new byte[10])
         );
+    }
+
+    @Test
+    public void testGenerateThumbnailIOException() throws IOException {
+        MockedStatic<ImageIO> imageIO = mockStatic(ImageIO.class);
+        when(ImageIO.read(any(ByteArrayInputStream.class))).thenThrow(IOException.class);
+        assertThrows(CorruptImageException.class,
+                () -> Images.generateThumbnail(new byte[0])
+        );
+        imageIO.close();
     }
 
 }

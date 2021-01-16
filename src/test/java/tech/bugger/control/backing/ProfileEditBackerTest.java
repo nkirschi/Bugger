@@ -22,6 +22,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
 
@@ -33,14 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class ProfileEditBackerTest {
@@ -343,6 +337,16 @@ public class ProfileEditBackerTest {
         profileEditBacker.saveChanges();
         verify(authenticationService, never()).hashPassword(user, PASSWORD);
         verify(profileService, never()).matchingPassword(any(), any());
+    }
+
+    @Test
+    public void testSaveChangesIOException() throws IOException {
+        when(profileService.matchingPassword(any(), any())).thenReturn(true);
+        when(profileService.updateUser(user)).thenReturn(true);
+        doThrow(IOException.class).when(ext).redirect(any());
+        profileEditBacker.setUser(user);
+        profileEditBacker.setEmailNew(user.getEmailAddress());
+        assertNull(profileEditBacker.saveChanges());
     }
 
     @Test

@@ -17,6 +17,7 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -244,7 +245,16 @@ public class ProfileEditBacker implements Serializable {
             }
         }
 
-        return "pretty:profile";
+        ExternalContext ext = fctx.getExternalContext();
+
+        String base = ext.getApplicationContextPath();
+        String redirect = base + "/profile?u=" + user.getUsername();
+        try {
+            fctx.getExternalContext().redirect(redirect);
+        } catch (IOException e) {
+            // Ignore the exception and just stay on the page
+        }
+        return null;
     }
 
     /**

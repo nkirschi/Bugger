@@ -66,7 +66,6 @@ public class ProfileBackerTest {
     private User user;
     private static final int THE_ANSWER = 42;
     private static final String PARAMETER = "u";
-    private static final String LONG_USERNAME = "This username is much too long";
 
     @BeforeEach
     public void setup() {
@@ -134,11 +133,14 @@ public class ProfileBackerTest {
     }
 
     @Test
-    public void testInitUsernameTooLong() {
-        when(map.containsKey(PARAMETER)).thenReturn(true);
-        when(map.get(PARAMETER)).thenReturn(LONG_USERNAME);
+    public void testInitUserSessionNotNull() {
+        when(session.getUser()).thenReturn(user);
+        when(profileService.getUserByUsername(user.getUsername())).thenReturn(user);
         profileBacker.init();
-        verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
+        assertAll(
+                () -> assertEquals(user, profileBacker.getUser()),
+                () -> assertEquals(session.getUser(), profileBacker.getUser())
+        );
     }
 
     @Test
@@ -167,6 +169,7 @@ public class ProfileBackerTest {
 
     @Test
     public void testClosePromoteDemoteAdminDialog() {
+        profileBacker.setDisplayDialog(ProfileBacker.DialogType.ADMIN);
         profileBacker.closeDialog();
         assertEquals(ProfileBacker.DialogType.NONE, profileBacker.getDisplayDialog());
     }

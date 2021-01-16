@@ -92,9 +92,10 @@ public class SearchDBGateway implements SearchGateway {
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u WHERE u.username "
                 + "LIKE ? AND u.is_admin = false AND u.id NOT IN (SELECT t.outcast FROM topic_ban AS t WHERE t.topic "
-                + "= ?) LIMIT ?;")) {
+                + "= ?) AND u.id NOT IN (SELECT m.moderator FROM topic_moderation AS m WHERE m.topic = ?) LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string("%" + newQuery + "%")
+                    .integer(topic.getId())
                     .integer(topic.getId())
                     .integer(limit)
                     .toStatement().executeQuery();

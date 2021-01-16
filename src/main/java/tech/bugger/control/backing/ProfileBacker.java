@@ -9,7 +9,6 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Constants;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
@@ -156,13 +155,18 @@ public class ProfileBacker implements Serializable {
     void init() {
         ExternalContext ext = fctx.getExternalContext();
         // The initialization of the subscriptions will be implemented in the subscriptions feature.
-        if ((!ext.getRequestParameterMap().containsKey("u")) || (ext.getRequestParameterMap().get("u").length()
-                > Constants.USERNAME_MAX)) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
-            return;
+        if (!ext.getRequestParameterMap().containsKey("u")) {
+            if (session.getUser() != null) {
+                username = session.getUser().getUsername();
+            } else {
+                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+                return;
+            }
         }
 
-        username = ext.getRequestParameterMap().get("u");
+        if (username == null) {
+            username = ext.getRequestParameterMap().get("u");
+        }
         user = profileService.getUserByUsername(username);
 
         if (user == null) {
