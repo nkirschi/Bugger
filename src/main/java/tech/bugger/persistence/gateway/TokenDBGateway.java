@@ -1,16 +1,19 @@
 package tech.bugger.persistence.gateway;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.time.ZoneId;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 
 /**
  * Token gateway that gives access to verification tokens stored in a database.
@@ -113,7 +116,15 @@ public class TokenDBGateway implements TokenGateway {
     /**
      * {@inheritDoc}
      */
-    public void cleanUp(final int expirationAge) {
+    public void cleanExpiredTokens(final Duration expirationAge) {
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM token WHERE \"timestamp\" < ?;")) {
+            new StatementParametrizer(stmt)
+                    .object(OffsetDateTime.now().minus(expirationAge))
+                    .toStatement().executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error when cleaning expired verification tokens.", e);
+            throw new StoreException("Error when cleaning expired verification tokens.", e);
+        }
     }
 
 }
