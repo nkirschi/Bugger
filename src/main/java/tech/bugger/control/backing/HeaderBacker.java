@@ -48,6 +48,11 @@ public class HeaderBacker implements Serializable {
     private boolean displayMenu;
 
     /**
+     * The current search query
+     */
+    private String search;
+
+    /**
      * The current application settings.
      */
     private final ApplicationSettings applicationSettings;
@@ -196,6 +201,20 @@ public class HeaderBacker implements Serializable {
 
     private void openMenu() {
         displayMenu = true;
+    }
+
+    /**
+     * @param search The new search query.
+     */
+    public void setSearch(String search) {
+        this.search = search;
+    }
+
+    /**
+     * @return The current search query
+     */
+    public String getSearch() {
+        return search;
     }
 
 

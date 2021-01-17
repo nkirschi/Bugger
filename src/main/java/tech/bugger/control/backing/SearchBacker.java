@@ -10,6 +10,7 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
@@ -203,11 +204,14 @@ public class SearchBacker implements Serializable {
      */
     @PostConstruct
     public void init() {
-        if (tab == null) {
-            tab = Tab.REPORT;
+        tab = Tab.REPORT;
+        query = "";
+        ExternalContext ext = fctx.getExternalContext();
+        if (ext.getRequestParameterMap().containsKey("q")) {
+            query = ext.getRequestParameterMap().get("q");
         }
-        if (query == null) {
-            query = "";
+        if (ext.getRequestParameterMap().containsKey("t")) {
+            tab = Tab.valueOf(ext.getRequestParameterMap().get("t"));
         }
         openReportShown = true;
         closedReportShown = false;
@@ -224,58 +228,76 @@ public class SearchBacker implements Serializable {
         userResults = new Paginator<>("username", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<User> fetch() {
-                return searchService.getUserResults(query, getSelection(), adminShown, nonAdminShown);
+                if (tab == Tab.USER) {
+                    return searchService.getUserResults(query, getSelection(), adminShown, nonAdminShown);
+                }
+                return null;
             }
 
             @Override
             protected int totalSize() {
-                return searchService.getNumberOfUserResults(query, adminShown, nonAdminShown);
+                if (tab == Tab.REPORT) {
+                    return searchService.getNumberOfUserResults(query, adminShown, nonAdminShown);
+                }
+                return 0;
             }
         };
         reportResults = new Paginator<>("title", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Report> fetch() {
-                HashMap<Report.Type, Boolean> typeHashMap = new HashMap<Report.Type, Boolean>();
-                typeHashMap.put(Report.Type.BUG, showBug);
-                typeHashMap.put(Report.Type.FEATURE, showFeature);
-                typeHashMap.put(Report.Type.HINT, showHint);
-                HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<Report.Severity, Boolean>();
-                severityHashMap.put(Report.Severity.MINOR, showMinor);
-                severityHashMap.put(Report.Severity.RELEVANT, showRelevant);
-                severityHashMap.put(Report.Severity.SEVERE, showSevere);
-                if (topic != null && topic.isBlank()) {
-                    topic = null;
+                if (tab == Tab.REPORT) {
+                    HashMap<Report.Type, Boolean> typeHashMap = new HashMap<Report.Type, Boolean>();
+                    typeHashMap.put(Report.Type.BUG, showBug);
+                    typeHashMap.put(Report.Type.FEATURE, showFeature);
+                    typeHashMap.put(Report.Type.HINT, showHint);
+                    HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<Report.Severity, Boolean>();
+                    severityHashMap.put(Report.Severity.MINOR, showMinor);
+                    severityHashMap.put(Report.Severity.RELEVANT, showRelevant);
+                    severityHashMap.put(Report.Severity.SEVERE, showSevere);
+                    if (topic != null && topic.isBlank()) {
+                        topic = null;
+                    }
+                    return searchService.getReportResults(query, getSelection(), latestCreationDateTime, earliestClosingDateTime,
+                            openReportShown, closedReportShown, duplicatesShown, topic, typeHashMap, severityHashMap );
                 }
-                return searchService.getReportResults(query, getSelection(), latestCreationDateTime, earliestClosingDateTime,
-                        openReportShown, closedReportShown, duplicatesShown, topic, typeHashMap, severityHashMap );
+                return null;
             }
 
             @Override
             protected int totalSize() {
-                HashMap<Report.Type, Boolean> typeHashMap = new HashMap<Report.Type, Boolean>();
-                typeHashMap.put(Report.Type.BUG, showBug);
-                typeHashMap.put(Report.Type.FEATURE, showFeature);
-                typeHashMap.put(Report.Type.HINT, showHint);
-                HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<Report.Severity, Boolean>();
-                severityHashMap.put(Report.Severity.MINOR, showMinor);
-                severityHashMap.put(Report.Severity.RELEVANT, showRelevant);
-                severityHashMap.put(Report.Severity.SEVERE, showSevere);
-                if (topic != null && topic.isBlank()) {
-                    topic = null;
+                if (tab == Tab.REPORT) {
+                    HashMap<Report.Type, Boolean> typeHashMap = new HashMap<Report.Type, Boolean>();
+                    typeHashMap.put(Report.Type.BUG, showBug);
+                    typeHashMap.put(Report.Type.FEATURE, showFeature);
+                    typeHashMap.put(Report.Type.HINT, showHint);
+                    HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<Report.Severity, Boolean>();
+                    severityHashMap.put(Report.Severity.MINOR, showMinor);
+                    severityHashMap.put(Report.Severity.RELEVANT, showRelevant);
+                    severityHashMap.put(Report.Severity.SEVERE, showSevere);
+                    if (topic != null && topic.isBlank()) {
+                        topic = null;
+                    }
+                    return searchService.getNumberOfReportResults(query, latestCreationDateTime, earliestClosingDateTime, openReportShown,
+                            closedReportShown, duplicatesShown, topic, typeHashMap, severityHashMap);
                 }
-                return searchService.getNumberOfReportResults(query, latestCreationDateTime, earliestClosingDateTime, openReportShown,
-                        closedReportShown, duplicatesShown, topic, typeHashMap, severityHashMap);
+                return 0;
             }
         };
         topicResults = new Paginator<>("title", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Topic> fetch() {
-                return searchService.getTopicResults(query, getSelection());
+                if (tab == Tab.TOPIC) {
+                    return searchService.getTopicResults(query, getSelection());
+                }
+                return null;
             }
 
             @Override
             protected int totalSize() {
-                return searchService.getNumberOfTopicResults(query);
+                if (tab == Tab.TOPIC) {
+                    return searchService.getNumberOfTopicResults(query);
+                }
+                return 0;
             }
         };
         topicTitles = topicService.discoverTopics();

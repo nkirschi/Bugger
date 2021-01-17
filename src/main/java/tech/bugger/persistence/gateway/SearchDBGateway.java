@@ -79,7 +79,8 @@ public class SearchDBGateway implements SearchGateway {
         }
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE username LIKE ? "
                 + adminFilter
-                + "ORDER BY username LIMIT ? OFFSET ?;")) {
+                + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
+                + "LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string(query + "%")
                     .integer(selection.getPageSize().getSize())
@@ -360,7 +361,8 @@ public class SearchDBGateway implements SearchGateway {
 
         List<Topic> topicResults = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"topic\" WHERE title LIKE ?"
-                + " ORDER BY title LIMIT ? OFFSET ?;")) {
+                + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
+                + "LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string(query + "%")
                     .integer(selection.getPageSize().getSize())
@@ -469,9 +471,10 @@ public class SearchDBGateway implements SearchGateway {
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) "
                 + filterClosedAt + filterDuplicate + filterType + filterSeverity
                 + "AND t.title = COALESCE(?, t.title) "
-                + "ORDER BY r.title LIMIT ? OFFSET ?;")) {
+                + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
+                + "LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + query)
+                    .string(query + "%")
                     .object(latestOpeningDateTime)
                     .object(earliestClosingDateTime)
                     .string(topic)
