@@ -191,7 +191,7 @@ public class NotificationDBGateway implements NotificationGateway {
             while (rs.next()) {
                 Notification n = getNotificationFromResultSet(rs);
                 n.setActuatorUsername(rs.getString("username"));
-                n.setReportTitle("title");
+                n.setReportTitle(rs.getString("title"));
                 selectedNotifications.add(n);
             }
         } catch (SQLException e) {
