@@ -330,6 +330,7 @@ public class ProfileBacker implements Serializable {
     public void deleteAllTopicSubscriptions() {
         profileService.deleteAllTopicSubscriptions(user);
         topicSubscriptions.updateReset();
+        closeDialog();
     }
 
     /**
@@ -338,6 +339,7 @@ public class ProfileBacker implements Serializable {
     public void deleteAllReportSubscriptions() {
         profileService.deleteAllReportSubscriptions(user);
         reportSubscriptions.updateReset();
+        closeDialog();
     }
 
     /**
@@ -346,6 +348,7 @@ public class ProfileBacker implements Serializable {
     public void deleteAllUserSubscriptions() {
         profileService.deleteAllUserSubscriptions(user);
         userSubscriptions.updateReset();
+        closeDialog();
     }
 
     /**
