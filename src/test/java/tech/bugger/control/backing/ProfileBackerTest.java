@@ -89,7 +89,7 @@ public class ProfileBackerTest {
         profileBacker.init();
         assertAll(
                 () -> assertEquals(user, profileBacker.getUser()),
-                () -> assertEquals(profileBacker.getDisplayDialog(), ProfileBacker.DialogType.NONE),
+                () -> assertEquals(profileBacker.getProfileDialog(), ProfileBacker.ProfileDialog.NONE),
                 () -> assertEquals(Selection.PageSize.SMALL,
                         profileBacker.getModeratedTopics().getSelection().getPageSize()),
                 () -> assertEquals("title", profileBacker.getModeratedTopics().getSelection().getSortedBy())
@@ -164,14 +164,14 @@ public class ProfileBackerTest {
     @Test
     public void testOpenPromoteDemoteAdminDialog() {
         profileBacker.openPromoteDemoteAdminDialog();
-        assertEquals(ProfileBacker.DialogType.ADMIN, profileBacker.getDisplayDialog());
+        assertEquals(ProfileBacker.ProfileDialog.ADMIN, profileBacker.getProfileDialog());
     }
 
     @Test
     public void testClosePromoteDemoteAdminDialog() {
-        profileBacker.setDisplayDialog(ProfileBacker.DialogType.ADMIN);
+        profileBacker.setProfileDialog(ProfileBacker.ProfileDialog.ADMIN);
         profileBacker.closeDialog();
-        assertEquals(ProfileBacker.DialogType.NONE, profileBacker.getDisplayDialog());
+        assertEquals(ProfileBacker.ProfileDialog.NONE, profileBacker.getProfileDialog());
     }
 
     @Test

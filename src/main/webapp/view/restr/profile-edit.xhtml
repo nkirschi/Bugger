@@ -8,13 +8,13 @@
 
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
-        <f:importConstants type="tech.bugger.control.backing.ProfileEditBacker.ProfileEditDialog" var="D"/>
+        <f:importConstants type="tech.bugger.control.backing.ProfileEditBacker.ProfileEditDialog" var="E"/>
     </f:metadata>
 
     <ui:define name="content">
 
         <h:panelGroup id="p-profile-info" styleClass="d-flex p-2 justify-content-center align-items-center container">
-            <h:panelGroup layout="block" styleClass="row vw-50">
+            <h:panelGroup layout="block" styleClass="row vw-90">
             <!-- Renders the profile owner's user information. -->
                 <h:form id="f-profile-edit" rendered="#{userSession.user != null and userSession.user.administrator
                         or userSession.user.id == profileEditBacker.user.id}" enctype="multipart/form-data">
@@ -50,17 +50,38 @@
                     </h:panelGroup>
 
                     <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
-                        <h:outputLabel id="o-visibility" for="s-visibility" value="#{labels['profile_edit.visibility']}"
-                                       styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group has-validation">
-                            <h:selectOneMenu id="s-visibility" value="#{profileEditBacker.user.profileVisibility}"
-                                             required="true">
-                                <f:selectItems id="s-visibility-values" value="#{profileEditBacker.user.profileVisibilities}"
-                                               var="visibility" itemValue="#{visibility}"
-                                               itemLabel="#{labels['visibility.'.concat(visibility)]}"/>
-                            </h:selectOneMenu>
-                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message id="m-visibility" for="s-visibility"/>
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:panelGroup layout="block" styleClass="col-sm-6">
+                                <h:outputLabel id="o-visibility" for="s-visibility" value="#{labels['profile_edit.visibility']}"
+                                               styleClass="form-label"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:selectOneMenu id="s-visibility" value="#{profileEditBacker.user.profileVisibility}"
+                                                     required="true">
+                                        <f:selectItems id="s-visibility-values"
+                                                       value="#{profileEditBacker.user.profileVisibilities}"
+                                                       var="visibility" itemValue="#{visibility}"
+                                                       itemLabel="#{labels['visibility.'.concat(visibility)]}"/>
+                                    </h:selectOneMenu>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-visibility" for="s-visibility"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="col-sm-6">
+                                <h:outputLabel id="o-language" for="s-language" value="#{labels.language}"
+                                               styleClass="form-label"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:selectOneMenu id="s-language" value="#{profileEditBacker.user.preferredLanguage}"
+                                                     required="true">
+                                        <f:selectItems id="s-language-values"
+                                                       value="#{profileEditBacker.user.preferredLanguages}"
+                                                       var="lang" itemValue="#{lang}"
+                                                       itemLabel="#{labels['lang.'.concat(lang)]}"/>
+                                    </h:selectOneMenu>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-language" for="s-language"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
                             </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
@@ -172,7 +193,7 @@
                     </h:panelGroup>
 
                     <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative"
-                                  rendered="#{profileEditBacker.dialog != D.PREVIEW}">
+                                  rendered="#{profileEditBacker.dialog != E.PREVIEW}">
                         <h:outputLabel id="o-bio" for="ia-bio" value="#{labels.biography}" styleClass="form-label"/>
                         <h:panelGroup layout="block" styleClass="input-group has-validation">
                             <h:inputTextarea id="ia-bio" value="#{profileEditBacker.user.biography}"
@@ -190,7 +211,7 @@
                     </h:panelGroup>
 
                     <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative"
-                                  rendered="#{profileEditBacker.dialog == D.PREVIEW}">
+                                  rendered="#{profileEditBacker.dialog == E.PREVIEW}">
                         <h:outputLabel id="ol-biography" value="#{labels.biography}" for="ot-biography"
                                        styleClass="form-label"/>
                         <h:outputText id="ot-biography" value="#{profileEditBacker.sanitizedBio}" escape="false"
@@ -200,25 +221,10 @@
                     <h:panelGroup layout="block" styleClass="d-flex justify-content-center">
                         <h:commandButton id="cb-preview" value="#{labels['profile_edit.preview']}"
                                          action="#{profileEditBacker.openPreviewDialog}" styleClass="button"
-                                         rendered="#{profileEditBacker.dialog != D.PREVIEW}"/>
+                                         rendered="#{profileEditBacker.dialog != E.PREVIEW}"/>
                         <h:commandButton id="cb-stop-preview" value="#{labels['profile_edit.stop_preview']}"
                                          action="#{profileEditBacker.closeDialog}" styleClass="button"
-                                         rendered="#{profileEditBacker.dialog == D.PREVIEW}"/>
-                    </h:panelGroup>
-
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
-                        <h:outputLabel id="o-language" for="s-language" value="#{labels.language}"
-                                       styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group has-validation">
-                            <h:selectOneMenu id="s-language" value="#{profileEditBacker.user.preferredLanguage}"
-                                             required="true">
-                                <f:selectItems id="s-language-values" value="#{profileEditBacker.user.preferredLanguages}"
-                                               var="lang" itemValue="#{lang}" itemLabel="#{labels['lang.'.concat(lang)]}"/>
-                            </h:selectOneMenu>
-                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message id="m-language" for="s-language"/>
-                            </h:panelGroup>
-                        </h:panelGroup>
+                                         rendered="#{profileEditBacker.dialog == E.PREVIEW}"/>
                     </h:panelGroup>
 
                     <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative"
@@ -252,7 +258,7 @@
 
     <ui:define name="dialogs">
         <!-- Renders the popup dialog to delete the profile owner's profile. -->
-        <h:panelGroup layout="block" styleClass="dialog" rendered="#{profileEditBacker.dialog == D.DELETE}">
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{profileEditBacker.dialog == E.DELETE}">
             <h:form id="f-del-user">
                 <h:outputText id="ot-really-del" styleClass="h2" value="#{labels['profile_edit.delete']}"/>
                 <h:panelGroup layout="block" styleClass="mb-3">
@@ -287,7 +293,7 @@
         </h:panelGroup>
 
         <!-- Renders the popup dialog to update the changes made to the profile information. -->
-        <h:panelGroup layout="block" styleClass="dialog" rendered="#{profileEditBacker.dialog == D.UPDATE}">
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{profileEditBacker.dialog == E.UPDATE}">
             <h:form id="f-change-user">
                 <h:outputText id="ot-really-change" value="#{labels['profile_edit.apply_changes']}" styleClass="h2"/>
                 <h:panelGroup layout="block" styleClass="mb-3">

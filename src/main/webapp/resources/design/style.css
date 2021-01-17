@@ -211,12 +211,20 @@ body {
     font-size: 1.3em;
 }
 
+.profile-h2 {
+    margin: 1em 0;
+}
+
 .hide {
     display: none !important;
 }
 
 .vw-50 {
     width: 50vw;
+}
+
+.vw-90 {
+    width: 90vw;
 }
 
 .no-ul {

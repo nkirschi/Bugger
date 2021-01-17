@@ -39,7 +39,7 @@ public class ProfileBacker implements Serializable {
     /**
      * The type of popup dialog to be rendered on the profile page.
      */
-    enum DialogType {
+    public enum ProfileDialog {
         /**
          * No dialogs are to be rendered.
          */
@@ -109,7 +109,7 @@ public class ProfileBacker implements Serializable {
     /**
      * The type of popup dialog to be rendered.
      */
-    private DialogType displayDialog;
+    private ProfileDialog displayDialog;
 
     /**
      * The current user session.
@@ -181,7 +181,7 @@ public class ProfileBacker implements Serializable {
         if ((session.getUser() != null) && (session.getUser().equals(user))) {
             session.setUser(new User(user));
         }
-        displayDialog = DialogType.NONE;
+        displayDialog = ProfileDialog.NONE;
 
         moderatedTopics = new Paginator<>("title", Selection.PageSize.SMALL) {
             @Override
@@ -198,9 +198,12 @@ public class ProfileBacker implements Serializable {
 
     /**
      * Opens the administrator promotion/demotion dialog.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void openPromoteDemoteAdminDialog() {
-        displayDialog = DialogType.ADMIN;
+    public String openPromoteDemoteAdminDialog() {
+        displayDialog = ProfileDialog.ADMIN;
+        return null;
     }
 
     /**
@@ -232,9 +235,12 @@ public class ProfileBacker implements Serializable {
 
     /**
      * Closes any open dialog.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void closeDialog() {
-        displayDialog = DialogType.NONE;
+    public String closeDialog() {
+        displayDialog = ProfileDialog.NONE;
+        return null;
     }
 
     /**
@@ -444,14 +450,14 @@ public class ProfileBacker implements Serializable {
     /**
      * @return The DialogType.
      */
-    public DialogType getDisplayDialog() {
+    public ProfileDialog getProfileDialog() {
         return displayDialog;
     }
 
     /**
      * @param displayDialog The DialogType to set.
      */
-    public void setDisplayDialog(final DialogType displayDialog) {
+    public void setProfileDialog(final ProfileDialog displayDialog) {
         this.displayDialog = displayDialog;
     }
 
