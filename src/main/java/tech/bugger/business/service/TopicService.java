@@ -150,15 +150,17 @@ public class TopicService {
      * @return {@code true} if the user has successfully been promoted to a moderator or {@code false} if not.
      */
     public boolean makeModerator(final String username, final Topic topic) {
+        User user;
         try (Transaction tx = transactionManager.begin()) {
             UserGateway gateway = tx.newUserGateway();
-            User user = gateway.getUserByUsername(username);
+            user = gateway.getUserByUsername(username);
 
             if (gateway.isModerator(user, topic) || user.isAdministrator()) {
                 log.debug("The user with id " + user.getId() + " is already a moderator of the topic with id "
                         + topic.getId());
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("is_moderator"), Feedback.Type.INFO));
                 tx.commit();
+                return false;
             } else {
                 TopicGateway topicGateway = tx.newTopicGateway();
 
@@ -170,20 +172,20 @@ public class TopicService {
                 tx.commit();
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("operation_successful"),
                         Feedback.Type.INFO));
-                return true;
             }
-
         } catch (NotFoundException e) {
             log.error("The user with the username " + username + " or the topic with id " + topic.getId()
                     + " could not be found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            return false;
         } catch (TransactionException e) {
             log.error("Error while promoting the user with the username " + username + " to a moderator for the "
                     + "topic with id " + topic.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            return false;
         }
-
-        return false;
+        subscribeToTopic(user, topic);
+        return true;
     }
 
     /**
@@ -277,7 +279,7 @@ public class TopicService {
             tx.commit();
         } catch (DuplicateException e) {
             log.error("User " + user + " is already subscribed to topic " + topic + ".");
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("already_subscribed"), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("already_subscribed"), Feedback.Type.WARNING));
         } catch (NotFoundException e) {
             log.error("User " + user + " or topic " + topic + " not found.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
