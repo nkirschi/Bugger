@@ -239,7 +239,7 @@ public class NotificationService implements Serializable {
                     .subject(interactionsBundle.getString("email_notification_subject." + n.getType()))
                     .content(new MessageFormat(interactionsBundle.getString("email_notification_content."
                             + n.getType()))
-                            .format(new String[]{link}))
+                            .format(new String[]{n.getReportTitle(), link}))
                     .envelop();
             priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.LOW, () -> {
                 int tries = 1;
