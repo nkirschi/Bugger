@@ -52,10 +52,11 @@
                     <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
                         <h:panelGroup layout="block" styleClass="row">
                             <h:panelGroup layout="block" styleClass="col-sm-6">
-                                <h:outputLabel id="o-visibility" for="s-visibility" value="#{labels['profile_edit.visibility']}"
-                                               styleClass="form-label"/>
+                                <h:outputLabel id="o-visibility" for="s-visibility"
+                                               value="#{labels['profile_edit.visibility']}" styleClass="form-label"/>
                                 <h:panelGroup layout="block" styleClass="input-group has-validation">
-                                    <h:selectOneMenu id="s-visibility" value="#{profileEditBacker.user.profileVisibility}"
+                                    <h:selectOneMenu id="s-visibility"
+                                                     value="#{profileEditBacker.user.profileVisibility}"
                                                      required="true">
                                         <f:selectItems id="s-visibility-values"
                                                        value="#{profileEditBacker.user.profileVisibilities}"

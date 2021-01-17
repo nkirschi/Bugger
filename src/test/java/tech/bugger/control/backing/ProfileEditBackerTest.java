@@ -34,7 +34,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(LogExtension.class)
 public class ProfileEditBackerTest {
@@ -239,6 +247,7 @@ public class ProfileEditBackerTest {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         when(profileService.createUser(any())).thenReturn(true);
         profileEditBacker.setUser(user);
+        profileEditBacker.setEmailNew(user.getEmailAddress());
         profileEditBacker.saveChanges();
         verify(profileService).matchingPassword(any(), any());
         verify(profileService).createUser(any());
@@ -249,6 +258,7 @@ public class ProfileEditBackerTest {
         createUser.setBoolean(profileEditBacker, true);
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         profileEditBacker.setUser(user);
+        profileEditBacker.setEmailNew(user.getEmailAddress());
         profileEditBacker.saveChanges();
         verify(profileService).matchingPassword(any(), any());
         verify(profileService).createUser(any());

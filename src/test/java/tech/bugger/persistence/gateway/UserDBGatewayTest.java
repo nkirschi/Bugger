@@ -369,12 +369,13 @@ public class UserDBGatewayTest {
         topicGateway.createTopic(topic);
         userGateway.createUser(user);
         userGateway.createUser(admin);
-        List<User> users = new ArrayList<>();
-        users.add(user);
-        users.add(admin);
         topicGateway.promoteModerator(topic, user);
         topicGateway.promoteModerator(topic, admin);
-        assertEquals(users, userGateway.getSelectedModerators(topic, selection));
+        List<User> users = userGateway.getSelectedModerators(topic, selection);
+        assertAll(
+                () -> assertTrue(users.contains(user)),
+                () -> assertTrue(users.contains(admin))
+        );
     }
 
     @Test
@@ -467,12 +468,13 @@ public class UserDBGatewayTest {
         topicGateway.createTopic(topic);
         userGateway.createUser(user);
         userGateway.createUser(admin);
-        List<User> users = new ArrayList<>();
-        users.add(user);
-        users.add(admin);
         topicGateway.banUser(topic, user);
         topicGateway.banUser(topic, admin);
-        assertEquals(users, userGateway.getSelectedBannedUsers(topic, selection));
+        List<User> users = userGateway.getSelectedBannedUsers(topic, selection);
+        assertAll(
+                () -> assertTrue(users.contains(user)),
+                () -> assertTrue(users.contains(admin))
+        );
     }
 
     @Test

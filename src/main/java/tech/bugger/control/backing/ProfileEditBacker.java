@@ -232,10 +232,10 @@ public class ProfileEditBacker implements Serializable {
 
         user.setUsername(usernameNew);
         if (create) {
-            user.setEmailAddress(emailNew);
+            user.setEmailAddress(emailNew.toLowerCase());
             profileService.createUser(user);
         } else {
-            if (!emailNew.equals(user.getEmailAddress()) && !updateEmail(user, emailNew)) {
+            if (!emailNew.equalsIgnoreCase(user.getEmailAddress()) && !updateEmail(user, emailNew.toLowerCase())) {
                 closeDialog();
                 return null;
             }

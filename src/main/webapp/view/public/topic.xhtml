@@ -8,6 +8,7 @@
     <ui:param name="title" value="#{(labels.topic_page).concat(': ').concat(topicBacker.topic.title)}"/>
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
+        <f:importConstants type="tech.bugger.control.backing.TopicBacker.TopicDialog" var="T"/>
     </f:metadata>
 
     <ui:define name="content">
@@ -157,7 +158,7 @@
                 </b:pagitable>
             </h:panelGroup>
         </h:panelGroup>
-        <h:form id="f-delTopic" rendered="#{topicBacker.displayDialog == 'DELETE'}">
+        <h:form id="f-delTopic" rendered="#{topicBacker.topicDialog == T.DELETE}">
             <h:panelGroup class="row" layout="block" styleClass="align-center">
                 <h:panelGroup class="col-sm-4" layout="block"/>
                 <h:panelGroup class="col-sm-4" layout="block">
@@ -176,7 +177,7 @@
 
     <ui:define name="dialogs">
         <!-- Renders the popup dialog to promote a user to a moderator. -->
-        <h:panelGroup layout="block" styleClass="dialog" rendered="#{topicBacker.displayDialog == 'MOD'}">
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{topicBacker.topicDialog == T.MOD}">
             <h:form id="f-promote-mod">
                 <h:outputText id="ot-promote-mod" styleClass="h2" value="#{labels.topic_promote_mod}"/>
                 <h:panelGroup layout="block" styleClass="mb-3">
@@ -194,16 +195,15 @@
                             <f:ajax listener="#{topicBacker.searchModUsers}" event="keyup"
                                     render="p-mod-suggestions"/>
                         </h:inputText>
-                        <h:panelGroup id="p-username-message" layout="block" styleClass="invalid-tooltip right">
+                        <h:panelGroup id="p-username-message" layout="block" styleClass="invalid-tooltip end-0">
                             <h:message for="it-username"/>
                         </h:panelGroup>
                     </h:panelGroup>
                     <h:panelGroup id="p-mod-suggestions" layout="block">
                         <ui:repeat value="#{empty topicBacker.userModSuggestions ? labels.no_suggestions
                             : topicBacker.userModSuggestions}" var="user">
-                            <h:panelGrid columns="1" styleClass="search">
-                                #{user}
-                            </h:panelGrid>
+                            <h:commandLink action="#{topicBacker.setUserMod(user)}" value="#{user}"
+                                           styleClass="row search"/>
                         </ui:repeat>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -217,7 +217,7 @@
         </h:panelGroup>
 
         <!-- Renders the popup dialog to demote a moderator. -->
-        <h:panelGroup layout="block" styleClass="dialog" rendered="#{topicBacker.displayDialog == 'UNMOD'}">
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{topicBacker.topicDialog == T.UNMOD}">
             <h:form id="f-demote-mod">
                 <h:outputText id="ot-deomote-mod" styleClass="h2" value="#{labels.topic_demote_mod}"/>
                 <h:panelGroup layout="block" styleClass="mb-3">
@@ -236,16 +236,15 @@
                                 <f:ajax listener="#{topicBacker.searchUnmodUsers}" event="keyup"
                                         render="p-unmod-suggestions"/>
                             </h:inputText>
-                            <h:panelGroup id="p-username-mod-message" layout="block" styleClass="invalid-tooltip right">
+                            <h:panelGroup id="p-username-mod-message" layout="block" styleClass="invalid-tooltip end-0">
                                 <h:message for="it-username-mod"/>
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:panelGroup id="p-unmod-suggestions" layout="block">
                             <ui:repeat value="#{empty topicBacker.userModSuggestions ? labels.no_suggestions
                                 : topicBacker.userModSuggestions}" var="user">
-                                <h:panelGrid columns="1" styleClass="search">
-                                    #{user}
-                                </h:panelGrid>
+                                <h:commandLink action="#{topicBacker.setUserMod(user)}" value="#{user}"
+                                               styleClass="row search"/>
                             </ui:repeat>
                         </h:panelGroup>
                     </h:panelGroup>
@@ -260,7 +259,7 @@
         </h:panelGroup>
 
         <!-- Renders the popup dialog to ban a user. -->
-        <h:panelGroup layout="block" styleClass="dialog" rendered="#{topicBacker.displayDialog == 'BAN'}">
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{topicBacker.topicDialog == T.BAN}">
             <h:form id="f-ban">
                 <h:outputText id="ot-ban" styleClass="h2" value="#{labels.topic_ban}"/>
                 <h:panelGroup layout="block" styleClass="mb-3">
@@ -279,16 +278,15 @@
                                 <f:ajax listener="#{topicBacker.searchBanUsers}" event="keyup"
                                         render="p-ban-suggestions"/>
                             </h:inputText>
-                            <h:panelGroup id="p-username-ban-message" layout="block" styleClass="invalid-tooltip right">
+                            <h:panelGroup id="p-username-ban-message" layout="block" styleClass="invalid-tooltip end-0">
                                 <h:message for="it-username-ban"/>
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:panelGroup id="p-ban-suggestions" layout="block">
                             <ui:repeat value="#{empty topicBacker.userBanSuggestions ? labels.no_suggestions
                                 : topicBacker.userBanSuggestions}" var="user">
-                                <h:panelGrid columns="1" styleClass="search">
-                                    #{user}
-                                </h:panelGrid>
+                                <h:commandLink action="#{topicBacker.setUserBan(user)}" value="#{user}"
+                                               styleClass="row search"/>
                             </ui:repeat>
                         </h:panelGroup>
                     </h:panelGroup>
@@ -303,7 +301,7 @@
         </h:panelGroup>
 
         <!-- Renders the popup dialog to unban a user. -->
-        <h:panelGroup layout="block" styleClass="dialog" rendered="#{topicBacker.displayDialog == 'UNBAN'}">
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{topicBacker.topicDialog == T.UNBAN}">
             <h:form id="f-unban">
                 <h:outputText id="ot-unban" styleClass="h2" value="#{labels.topic_unban}"/>
                 <h:panelGroup layout="block" styleClass="mb-3">
@@ -324,16 +322,15 @@
                                         render="p-unban-suggestions"/>
                             </h:inputText>
                             <h:panelGroup id="p-username-unban-message" layout="block"
-                                          styleClass="invalid-tooltip right">
+                                          styleClass="invalid-tooltip end-0">
                                 <h:message for="it-username-unban"/>
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:panelGroup id="p-unban-suggestions" layout="block">
                             <ui:repeat value="#{empty topicBacker.userBanSuggestions ? labels.no_suggestions
                                 : topicBacker.userBanSuggestions}" var="user">
-                                <h:panelGrid columns="1" styleClass="search">
-                                    #{user}
-                                </h:panelGrid>
+                                <h:commandLink action="#{topicBacker.setUserBan(user)}" value="#{user}"
+                                               styleClass="row search"/>
                             </ui:repeat>
                         </h:panelGroup>
                     </h:panelGroup>

@@ -510,7 +510,7 @@ public class TopicDBGateway implements TopicGateway {
 
         List<Topic> moderatedTopics = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         try (PreparedStatement stmt = conn.prepareStatement("SELECT t.* FROM topic AS t, topic_moderation AS m "
-                + "WHERE t.id = m.topic AND m.moderator = ? LIMIT ? OFFSET ?;")) {
+                + "WHERE t.id = m.topic AND m.moderator = ? ORDER BY t.title ASC LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(user.getId())
                     .integer(selection.getPageSize().getSize())

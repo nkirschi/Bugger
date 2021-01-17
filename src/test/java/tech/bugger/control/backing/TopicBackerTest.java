@@ -73,38 +73,38 @@ public class TopicBackerTest {
     @Test
     public void testOpenDeleteDialog() {
         topicBacker.openDeleteDialog();
-        assertEquals(TopicBacker.DialogType.DELETE, topicBacker.getDisplayDialog());
+        assertEquals(TopicBacker.TopicDialog.DELETE, topicBacker.getTopicDialog());
     }
 
     @Test
     public void testOpenModDialog() {
         topicBacker.openModDialog();
-        assertEquals(TopicBacker.DialogType.MOD, topicBacker.getDisplayDialog());
+        assertEquals(TopicBacker.TopicDialog.MOD, topicBacker.getTopicDialog());
     }
 
     @Test
     public void testOpenUnmodDialog() {
         topicBacker.openUnmodDialog();
-        assertEquals(TopicBacker.DialogType.UNMOD, topicBacker.getDisplayDialog());
+        assertEquals(TopicBacker.TopicDialog.UNMOD, topicBacker.getTopicDialog());
     }
 
     @Test
     public void testOpenBanDialog() {
         topicBacker.openBanDialog();
-        assertEquals(TopicBacker.DialogType.BAN, topicBacker.getDisplayDialog());
+        assertEquals(TopicBacker.TopicDialog.BAN, topicBacker.getTopicDialog());
     }
 
     @Test
     public void testOpenUnbanDialog() {
         topicBacker.openUnbanDialog();
-        assertEquals(TopicBacker.DialogType.UNBAN, topicBacker.getDisplayDialog());
+        assertEquals(TopicBacker.TopicDialog.UNBAN, topicBacker.getTopicDialog());
     }
 
     @Test
     public void testCloseDialog() {
-        topicBacker.setDisplayDialog(TopicBacker.DialogType.BAN);
+        topicBacker.setTopicDialog(TopicBacker.TopicDialog.BAN);
         topicBacker.closeDialog();
-        assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog());
+        assertEquals(TopicBacker.TopicDialog.NONE, topicBacker.getTopicDialog());
     }
 
     @Test
@@ -112,7 +112,7 @@ public class TopicBackerTest {
         topicBacker.unbanSingleUser(USERNAME);
         assertAll(
                 () -> assertEquals(USERNAME, topicBacker.getUserBan()),
-                () -> assertEquals(TopicBacker.DialogType.UNBAN, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.UNBAN, topicBacker.getTopicDialog())
         );
     }
 
@@ -121,7 +121,7 @@ public class TopicBackerTest {
         topicBacker.unmodSingleUser(USERNAME);
         assertAll(
                 () -> assertEquals(USERNAME, topicBacker.getUserMod()),
-                () -> assertEquals(TopicBacker.DialogType.UNMOD, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.UNMOD, topicBacker.getTopicDialog())
         );
     }
 
@@ -166,7 +166,7 @@ public class TopicBackerTest {
         moderators.set(topicBacker, mock(Paginator.class));
         assertAll(
                 () -> assertEquals("", topicBacker.makeModerator()),
-                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.NONE, topicBacker.getTopicDialog())
         );
         verify(topicService).makeModerator(USERNAME, topic);
     }
@@ -177,7 +177,7 @@ public class TopicBackerTest {
         topicBacker.setTopic(topic);
         assertAll(
                 () -> assertNull(topicBacker.makeModerator()),
-                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.NONE, topicBacker.getTopicDialog())
         );
         verify(topicService, times(0)).makeModerator(USERNAME, topic);
     }
@@ -187,11 +187,11 @@ public class TopicBackerTest {
         user.setAdministrator(true);
         topicBacker.setUserMod(USERNAME);
         topicBacker.setTopic(topic);
-        topicBacker.setDisplayDialog(TopicBacker.DialogType.MOD);
+        topicBacker.setTopicDialog(TopicBacker.TopicDialog.MOD);
         when(session.getUser()).thenReturn(user);
         assertAll(
                 () -> assertNull(topicBacker.makeModerator()),
-                () -> assertEquals(TopicBacker.DialogType.MOD, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.MOD, topicBacker.getTopicDialog())
         );
         verify(topicService).makeModerator(USERNAME, topic);
     }
@@ -208,7 +208,7 @@ public class TopicBackerTest {
         moderators.set(topicBacker, mock(Paginator.class));
         assertAll(
                 () -> assertEquals("", topicBacker.removeModerator()),
-                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.NONE, topicBacker.getTopicDialog())
         );
         verify(topicService).removeModerator(USERNAME, topic);
     }
@@ -219,7 +219,7 @@ public class TopicBackerTest {
         topicBacker.setTopic(topic);
         assertAll(
                 () -> assertNull(topicBacker.removeModerator()),
-                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.NONE, topicBacker.getTopicDialog())
         );
         verify(topicService, times(0)).removeModerator(USERNAME, topic);
     }
@@ -229,11 +229,11 @@ public class TopicBackerTest {
         user.setAdministrator(true);
         topicBacker.setUserMod(USERNAME);
         topicBacker.setTopic(topic);
-        topicBacker.setDisplayDialog(TopicBacker.DialogType.UNMOD);
+        topicBacker.setTopicDialog(TopicBacker.TopicDialog.UNMOD);
         when(session.getUser()).thenReturn(user);
         assertAll(
                 () -> assertNull(topicBacker.removeModerator()),
-                () -> assertEquals(TopicBacker.DialogType.UNMOD, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.UNMOD, topicBacker.getTopicDialog())
         );
         verify(topicService).removeModerator(USERNAME, topic);
     }
@@ -270,7 +270,7 @@ public class TopicBackerTest {
         banned.set(topicBacker, mock(Paginator.class));
         assertAll(
                 () -> assertEquals("", topicBacker.banUser()),
-                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.NONE, topicBacker.getTopicDialog())
         );
         verify(topicService).ban(USERNAME, topic);
     }
@@ -281,7 +281,7 @@ public class TopicBackerTest {
         topicBacker.setTopic(topic);
         assertAll(
                 () -> assertNull(topicBacker.banUser()),
-                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.NONE, topicBacker.getTopicDialog())
         );
         verify(topicService, times(0)).ban(USERNAME, topic);
     }
@@ -291,11 +291,11 @@ public class TopicBackerTest {
         user.setAdministrator(true);
         topicBacker.setUserBan(USERNAME);
         topicBacker.setTopic(topic);
-        topicBacker.setDisplayDialog(TopicBacker.DialogType.BAN);
+        topicBacker.setTopicDialog(TopicBacker.TopicDialog.BAN);
         when(session.getUser()).thenReturn(user);
         assertAll(
                 () -> assertNull(topicBacker.banUser()),
-                () -> assertEquals(TopicBacker.DialogType.BAN, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.BAN, topicBacker.getTopicDialog())
         );
         verify(topicService).ban(USERNAME, topic);
     }
@@ -312,7 +312,7 @@ public class TopicBackerTest {
         banned.set(topicBacker, mock(Paginator.class));
         assertAll(
                 () -> assertEquals("", topicBacker.unbanUser()),
-                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.NONE, topicBacker.getTopicDialog())
         );
         verify(topicService).unban(USERNAME, topic);
     }
@@ -323,7 +323,7 @@ public class TopicBackerTest {
         topicBacker.setTopic(topic);
         assertAll(
                 () -> assertNull(topicBacker.unbanUser()),
-                () -> assertEquals(TopicBacker.DialogType.NONE, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.NONE, topicBacker.getTopicDialog())
         );
         verify(topicService, times(0)).unban(USERNAME, topic);
     }
@@ -333,11 +333,11 @@ public class TopicBackerTest {
         user.setAdministrator(true);
         topicBacker.setUserBan(USERNAME);
         topicBacker.setTopic(topic);
-        topicBacker.setDisplayDialog(TopicBacker.DialogType.UNBAN);
+        topicBacker.setTopicDialog(TopicBacker.TopicDialog.UNBAN);
         when(session.getUser()).thenReturn(user);
         assertAll(
                 () -> assertNull(topicBacker.unbanUser()),
-                () -> assertEquals(TopicBacker.DialogType.UNBAN, topicBacker.getDisplayDialog())
+                () -> assertEquals(TopicBacker.TopicDialog.UNBAN, topicBacker.getTopicDialog())
         );
         verify(topicService).unban(USERNAME, topic);
     }

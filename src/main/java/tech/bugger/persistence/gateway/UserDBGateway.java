@@ -229,7 +229,7 @@ public class UserDBGateway implements UserGateway {
 
         List<User> moderators = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.* FROM \"user\" AS u, topic_moderation AS t "
-                + "WHERE t.topic = ? AND u.id = t.moderator LIMIT ? OFFSET ?;")) {
+                + "WHERE t.topic = ? AND u.id = t.moderator ORDER BY u.username ASC LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(topic.getId())
                     .integer(selection.getPageSize().getSize())
@@ -260,7 +260,7 @@ public class UserDBGateway implements UserGateway {
 
         List<User> banned = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.* FROM \"user\" AS u, topic_ban AS t "
-                + "WHERE t.topic = ? AND u.id = t.outcast LIMIT ? OFFSET ?;")) {
+                + "WHERE t.topic = ? AND u.id = t.outcast ORDER BY u.username ASC LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(topic.getId())
                     .integer(selection.getPageSize().getSize())

@@ -23,12 +23,14 @@
                     <h:panelGroup id="p-profile-buttons" layout="block" styleClass="row">
                         <h:panelGroup styleClass="col-sm-12 align-right">
                             <h:commandButton id="cb-subscribe" action="#{profileBacker.toggleUserSubscription()}"
-                                             value="#{labels.subscribe}" styleClass="button" rendered="#{userSession.user
-                                         != null and userSession.user.id != profileBacker.user.id}"/>
+                                             value="#{labels.subscribe}" styleClass="button"
+                                             rendered="#{userSession.user != null and userSession.user.id
+                                             != profileBacker.user.id}"/>
                             <h:commandLink id="l-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
                                            styleClass="command-link" rendered="#{userSession.user.administrator
-                               and not profileBacker.user.administrator}">
-                                <h:graphicImage id="g-admin" value="/resources/images/add.png" alt="Button to add admin"/>
+                                           and not profileBacker.user.administrator}">
+                                <h:graphicImage id="g-admin" value="/resources/images/add.png"
+                                                alt="Button to add admin"/>
                             </h:commandLink>
                             <h:commandLink id="l-rem-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
                                            immediate="true" styleClass="command-link"

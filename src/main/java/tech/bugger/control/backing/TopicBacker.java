@@ -44,7 +44,7 @@ public class TopicBacker implements Serializable {
     /**
      * The type of popup dialog to be rendered on the topic page.
      */
-    enum DialogType {
+    public enum TopicDialog {
         /**
          * No dialogs are to be rendered.
          */
@@ -144,7 +144,7 @@ public class TopicBacker implements Serializable {
     /**
      * The type of popup dialog to be rendered.
      */
-    private DialogType displayDialog;
+    private TopicDialog displayDialog;
 
     /**
      * Whether or not the make mod dialog should be shown.
@@ -242,7 +242,7 @@ public class TopicBacker implements Serializable {
                 throw new InternalError("Error while redirecting.", e);
             }
         }
-        displayDialog = DialogType.NONE;
+        displayDialog = TopicDialog.NONE;
         userBanSuggestions = new ArrayList<>();
         userModSuggestions = new ArrayList<>();
         openReportShown = true;
@@ -346,7 +346,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openBanDialog() {
-        displayDialog = DialogType.BAN;
+        displayDialog = TopicDialog.BAN;
         return null;
     }
 
@@ -356,7 +356,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openUnbanDialog() {
-        displayDialog = DialogType.UNBAN;
+        displayDialog = TopicDialog.UNBAN;
         return null;
     }
 
@@ -366,7 +366,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openModDialog() {
-        displayDialog = DialogType.MOD;
+        displayDialog = TopicDialog.MOD;
         return null;
     }
 
@@ -376,7 +376,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openUnmodDialog() {
-        displayDialog = DialogType.UNMOD;
+        displayDialog = TopicDialog.UNMOD;
         return null;
     }
 
@@ -386,7 +386,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String openDeleteDialog() {
-        displayDialog = DialogType.DELETE;
+        displayDialog = TopicDialog.DELETE;
         return null;
     }
 
@@ -396,7 +396,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String closeDialog() {
-        displayDialog = DialogType.NONE;
+        displayDialog = TopicDialog.NONE;
         return null;
     }
 
@@ -472,12 +472,12 @@ public class TopicBacker implements Serializable {
     public String banUser() {
         if (!isModerator()) {
             log.error("A user was able to use the ban user functionality even though they were no moderator!");
-            displayDialog = DialogType.NONE;
+            displayDialog = TopicDialog.NONE;
             return null;
         }
 
         if (topicService.ban(userBan, topic)) {
-            displayDialog = DialogType.NONE;
+            displayDialog = TopicDialog.NONE;
             bannedUsers.update();
             return "";
         }
@@ -494,12 +494,12 @@ public class TopicBacker implements Serializable {
     public String unbanUser() {
         if (!isModerator()) {
             log.error("A user was able to use the unban user functionality even though they were no moderator!");
-            displayDialog = DialogType.NONE;
+            displayDialog = TopicDialog.NONE;
             return null;
         }
 
         if (topicService.unban(userBan, topic)) {
-            displayDialog = DialogType.NONE;
+            displayDialog = TopicDialog.NONE;
             bannedUsers.update();
             return "";
         }
@@ -517,12 +517,12 @@ public class TopicBacker implements Serializable {
     public String makeModerator() {
         if (!isModerator()) {
             log.error("A user was able to use the promote functionality even though they were no moderator!");
-            displayDialog = DialogType.NONE;
+            displayDialog = TopicDialog.NONE;
             return null;
         }
 
         if (topicService.makeModerator(userMod, topic)) {
-            displayDialog = DialogType.NONE;
+            displayDialog = TopicDialog.NONE;
             moderators.update();
             return "";
         }
@@ -540,12 +540,12 @@ public class TopicBacker implements Serializable {
     public String removeModerator() {
         if (!isModerator()) {
             log.error("A user was able to use the demote functionality even though they were no moderator!");
-            displayDialog = DialogType.NONE;
+            displayDialog = TopicDialog.NONE;
             return null;
         }
 
         if (topicService.removeModerator(userMod, topic)) {
-            displayDialog = DialogType.NONE;
+            displayDialog = TopicDialog.NONE;
             moderators.update();
             return "";
         }
@@ -713,14 +713,14 @@ public class TopicBacker implements Serializable {
     /**
      * @return The DialogType.
      */
-    public DialogType getDisplayDialog() {
+    public TopicDialog getTopicDialog() {
         return displayDialog;
     }
 
     /**
      * @param displayDialog The DialogType to set.
      */
-    public void setDisplayDialog(final DialogType displayDialog) {
+    public void setTopicDialog(final TopicDialog displayDialog) {
         this.displayDialog = displayDialog;
     }
 
