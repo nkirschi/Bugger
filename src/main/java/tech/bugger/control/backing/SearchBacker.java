@@ -1,10 +1,10 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
@@ -18,6 +18,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Backing bean for the search page.
@@ -65,6 +66,11 @@ public class SearchBacker implements Serializable {
     private Tab tab;
 
     /**
+     * The available topic titles.
+     */
+    private List<String> topicTitles;
+
+    /**
      * The paginator for topic results.
      */
     private Paginator<Topic> topicResults;
@@ -110,9 +116,34 @@ public class SearchBacker implements Serializable {
     private boolean searchInFullText;
 
     /**
-     * The topic to search for.
+     * Whether to search for reports of th BUG type.
      */
-    private Topic searchTopic;
+    private boolean showBug;
+
+    /**
+     * Whether to search for reports of th REPORT type.
+     */
+    private boolean showFeature;
+
+    /**
+     * Whether to search for reports of th HINT type.
+     */
+    private boolean showHint;
+
+    /**
+     * Whether to search for reports with the MINOR severity
+     */
+    private boolean showMinor;
+
+    /**
+     * Whether to search for reports with the RELEVANT severity
+     */
+    private boolean showRelevant;
+
+    /**
+     * Whether to search for reports with the SEVERE severity
+     */
+    private boolean showSevere;
 
     /**
      * A hash map containing information for which report type to filter.
@@ -125,6 +156,11 @@ public class SearchBacker implements Serializable {
     private HashMap<Report.Severity, Boolean> severityFilter;
 
     /**
+     * The title of a filtered topic.
+     */
+    private String topic;
+
+    /**
      * Whether to show administrators in the user search results.
      */
     private boolean adminShown;
@@ -135,46 +171,129 @@ public class SearchBacker implements Serializable {
     private boolean nonAdminShown;
 
     /**
-     * A transient search service.
+     * A search service.
      */
-    @Inject
-    private transient SearchService searchService;
+    private final SearchService searchService;
 
     /**
-     * A transient topic service.
+     * A topic service.
      */
-    @Inject
-    private transient TopicService topicService;
-
-    /**
-     * A transient profile service.
-     */
-    @Inject
-    private transient ProfileService profileService;
+    private final TopicService topicService;
 
     /**
      * The current faces context.
      */
-    @Inject
     private FacesContext fctx;
+
+    /**
+     * Constructs a new search page backing bean with the necessary dependencies.
+     *
+     * @param searchService         The search service to use.
+     * @param fctx                The current {@link FacesContext} of the application.
+     */
+    @Inject
+    public SearchBacker(final SearchService searchService, final TopicService topicService, final FacesContext fctx) {
+        this.searchService = searchService;
+        this.topicService = topicService;
+        this.fctx = fctx;
+    }
 
     /**
      * Initializes the search page. The default tab is {@code Tab.REPORT}.
      */
     @PostConstruct
     public void init() {
+        if (tab == null) {
+            tab = Tab.REPORT;
+        }
+        if (query == null) {
+            query = "";
+        }
+        openReportShown = true;
+        closedReportShown = false;
+        duplicatesShown = true;
+        nonAdminShown = true;
+        adminShown = true;
+        showBug = true;
+        showFeature = true;
+        showHint = true;
+        showMinor = true;
+        showSevere = true;
+        showRelevant = true;
+        topic = null;
+        userResults = new Paginator<>("username", Selection.PageSize.NORMAL) {
+            @Override
+            protected Iterable<User> fetch() {
+                return searchService.getUserResults(query, getSelection(), adminShown, nonAdminShown);
+            }
+
+            @Override
+            protected int totalSize() {
+                return searchService.getNumberOfUserResults(query, adminShown, nonAdminShown);
+            }
+        };
+        reportResults = new Paginator<>("title", Selection.PageSize.NORMAL) {
+            @Override
+            protected Iterable<Report> fetch() {
+                HashMap<Report.Type, Boolean> typeHashMap = new HashMap<Report.Type, Boolean>();
+                typeHashMap.put(Report.Type.BUG, showBug);
+                typeHashMap.put(Report.Type.FEATURE, showFeature);
+                typeHashMap.put(Report.Type.HINT, showHint);
+                HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<Report.Severity, Boolean>();
+                severityHashMap.put(Report.Severity.MINOR, showMinor);
+                severityHashMap.put(Report.Severity.RELEVANT, showRelevant);
+                severityHashMap.put(Report.Severity.SEVERE, showSevere);
+                if (topic != null && topic.isBlank()) {
+                    topic = null;
+                }
+                return searchService.getReportResults(query, getSelection(), latestCreationDateTime, earliestClosingDateTime,
+                        openReportShown, closedReportShown, duplicatesShown, topic, typeHashMap, severityHashMap );
+            }
+
+            @Override
+            protected int totalSize() {
+                HashMap<Report.Type, Boolean> typeHashMap = new HashMap<Report.Type, Boolean>();
+                typeHashMap.put(Report.Type.BUG, showBug);
+                typeHashMap.put(Report.Type.FEATURE, showFeature);
+                typeHashMap.put(Report.Type.HINT, showHint);
+                HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<Report.Severity, Boolean>();
+                severityHashMap.put(Report.Severity.MINOR, showMinor);
+                severityHashMap.put(Report.Severity.RELEVANT, showRelevant);
+                severityHashMap.put(Report.Severity.SEVERE, showSevere);
+                if (topic != null && topic.isBlank()) {
+                    topic = null;
+                }
+                return searchService.getNumberOfReportResults(query, latestCreationDateTime, earliestClosingDateTime, openReportShown,
+                        closedReportShown, duplicatesShown, topic, typeHashMap, severityHashMap);
+            }
+        };
+        topicResults = new Paginator<>("title", Selection.PageSize.NORMAL) {
+            @Override
+            protected Iterable<Topic> fetch() {
+                return searchService.getTopicResults(query, getSelection());
+            }
+
+            @Override
+            protected int totalSize() {
+                return searchService.getNumberOfTopicResults(query);
+            }
+        };
+        topicTitles = topicService.discoverTopics();
     }
 
     /**
      * Changes the tab (and with it, the type of search results).
      */
-    public void changeTab() {
+    public String changeTab() {
+        search();
+        return null;
     }
 
     /**
      * Executes the search with the specified query and filters.
      */
-    public void search() {
+    public String search() {
+        return null;
     }
 
     /**
@@ -270,14 +389,14 @@ public class SearchBacker implements Serializable {
     /**
      * @return The latestOpeningDate.
      */
-    public ZonedDateTime getLatestCreationDateTime() {
+    public ZonedDateTime getLatestOpeningDateTime() {
         return latestCreationDateTime;
     }
 
     /**
      * @param latestOpeningDate The latestOpeningDate to set.
      */
-    public void setLatestOpeningDate(final ZonedDateTime latestOpeningDate) {
+    public void setLatestOpeningDateTime(final ZonedDateTime latestOpeningDate) {
         this.latestCreationDateTime = latestOpeningDate;
     }
 
@@ -291,7 +410,7 @@ public class SearchBacker implements Serializable {
     /**
      * @param earliestClosingDate The earliestClosingDate to set.
      */
-    public void setEarliestClosingDate(final ZonedDateTime earliestClosingDate) {
+    public void setEarliestClosingDateTime(final ZonedDateTime earliestClosingDate) {
         this.earliestClosingDateTime = earliestClosingDate;
     }
 
@@ -352,20 +471,6 @@ public class SearchBacker implements Serializable {
     }
 
     /**
-     * @return The searchTopic.
-     */
-    public Topic getSearchTopic() {
-        return searchTopic;
-    }
-
-    /**
-     * @param searchTopic The searchTopic to set.
-     */
-    public void setSearchTopic(final Topic searchTopic) {
-        this.searchTopic = searchTopic;
-    }
-
-    /**
      * @return The reportTypeFilter.
      */
     public HashMap<Report.Type, Boolean> getReportTypeFilter() {
@@ -422,6 +527,90 @@ public class SearchBacker implements Serializable {
     }
 
     /**
+     * @return {@code true} if Bug-type reports are shown, {@code false} otherwise.
+     */
+    public boolean isShowBug() {
+        return showSevere;
+    }
+
+    /**
+     * @param {@code true} if Bug-type reports are shown, {@code false} otherwise.
+     */
+    public void setShowBug(final boolean showBug) {
+        this.showBug = showBug;
+    }
+
+    /**
+     * @return {@code true} if Hint-type reports are shown, {@code false} otherwise.
+     */
+    public boolean isShowHint() {
+        return showHint;
+    }
+
+    /**
+     * @param {@code true} if Hint-type reports are shown, {@code false} otherwise.
+     */
+    public void setShowHint(final boolean showHint) {
+        this.showHint = showHint;
+    }
+
+    /**
+     * @return {@code true} if Feature-type reports are shown, {@code false} otherwise.
+     */
+    public boolean isShowFeature() {
+        return showFeature;
+    }
+
+    /**
+     * @param {@code true} if Feature-type reports are shown, {@code false} otherwise.
+     */
+    public void setShowFeature(final boolean showFeature) {
+        this.showFeature = showFeature;
+    }
+
+    /**
+     * @return {@code true} if Minor-Severity reports are shown, {@code false} otherwise.
+     */
+    public boolean isShowMinor() {
+        return showSevere;
+    }
+
+    /**
+     * @param {@code true} if Minor-Severity reports are shown, {@code false} otherwise.
+     */
+    public void setShowMinor(final boolean showMinor) {
+        this.showMinor = showMinor;
+    }
+
+    /**
+     * @return {@code true} if Relevant-Severity reports are shown, {@code false} otherwise.
+     */
+    public boolean isShowRelevant() {
+        return showRelevant;
+    }
+
+    /**
+     * @param {@code true} if Relevant-Severity reports are shown, {@code false} otherwise.
+     */
+    public void setShowRelevant(final boolean showRelevant) {
+        this.showRelevant = showRelevant;
+    }
+
+    /**
+     * @return {@code true} if Severe-Severity reports are shown, {@code false} otherwise.
+     */
+    public boolean isShowSevere() {
+        return showSevere;
+    }
+
+    /**
+     * @param {@code true} if Severe-Severity reports are shown, {@code false} otherwise.
+     */
+    public void setShowSevere(final boolean showSevere) {
+        this.showSevere = showSevere;
+    }
+
+    /**
      * @return The topicResults.
      */
     public Paginator<Topic> getTopicResults() {
@@ -442,4 +631,26 @@ public class SearchBacker implements Serializable {
         return userResults;
     }
 
+    /**
+     * Retrieves the titles of all topics in the system.
+     *
+     * @return A list of all topic titles.
+     */
+    public List<String> getTopicTitles() {
+        return topicTitles;
+    }
+
+    /**
+     * @return The topic
+     */
+    public String getTopic() {
+        return topic;
+    }
+
+    /**
+     * @param topic The topic to set.
+     */
+    public void setTopic(final String topic) {
+        this.topic = topic;
+    }
 }

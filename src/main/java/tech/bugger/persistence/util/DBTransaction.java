@@ -158,7 +158,7 @@ public class DBTransaction implements Transaction {
     @Override
     public SearchGateway newSearchGateway() {
         checkState();
-        return new SearchDBGateway(connection);
+        return new SearchDBGateway(connection, newUserGateway());
     }
 
     /**

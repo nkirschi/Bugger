@@ -104,7 +104,7 @@ public class HeaderBacker implements Serializable {
      * @return The location to redirect to.
      */
     public String search() {
-        return null;
+        return "pretty:search";
     }
 
     /**

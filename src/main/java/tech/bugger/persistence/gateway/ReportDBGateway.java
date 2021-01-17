@@ -54,7 +54,7 @@ public class ReportDBGateway implements ReportGateway {
         this.userGateway = userGateway;
     }
 
-    private Report getReportFromResultSet(final ResultSet rs) throws SQLException, NotFoundException {
+     static Report getReportFromResultSet(final ResultSet rs, final UserGateway userGateway) throws SQLException, NotFoundException {
         Report report = new Report();
         report.setId(rs.getInt("id"));
         report.setTitle(rs.getString("title"));
@@ -206,7 +206,7 @@ public class ReportDBGateway implements ReportGateway {
                     .integer(Pagitable.getItemOffset(selection)).toStatement();
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                selectedReports.add(extractRelevanceFromResultSet(getReportFromResultSet(rs), rs));
+                selectedReports.add(extractRelevanceFromResultSet(getReportFromResultSet(rs, userGateway), rs));
             }
             log.debug("Found " + selectedReports.size() + " reports!");
         } catch (SQLException | NotFoundException e) {
@@ -269,7 +269,7 @@ public class ReportDBGateway implements ReportGateway {
                     .toStatement().executeQuery();
 
             while (rs.next()) {
-                selectedDuplicates.add(getReportFromResultSet(rs));
+                selectedDuplicates.add(getReportFromResultSet(rs, userGateway));
             }
             log.debug("Found " + selectedDuplicates.size() + " duplicates!");
         } catch (SQLException | NotFoundException e) {
