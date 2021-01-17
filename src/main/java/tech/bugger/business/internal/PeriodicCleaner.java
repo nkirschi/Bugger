@@ -5,7 +5,6 @@ import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.inject.Inject;
 import java.time.Duration;
 
 /**
@@ -33,7 +32,6 @@ public class PeriodicCleaner implements Runnable {
      *
      * @param transactionManager The transaction manager to be used for creating transactions.
      */
-    @Inject
     public PeriodicCleaner(final TransactionManager transactionManager) {
         this.transactionManager = transactionManager;
     }

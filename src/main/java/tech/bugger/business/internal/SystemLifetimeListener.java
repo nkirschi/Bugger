@@ -223,7 +223,7 @@ public class SystemLifetimeListener implements ServletContextListener {
     private void scheduleMaintenanceTasks() {
         maintenanceExecutor = new ScheduledThreadPoolExecutor(1);
         maintenanceExecutor.scheduleAtFixedRate(new PeriodicCleaner(transactionManager), 0,
-                                                MAINTENANCE_PERIODICITY_MINUTES, TimeUnit.HOURS);
+                                                MAINTENANCE_PERIODICITY_MINUTES, TimeUnit.MINUTES);
     }
 
     private void registerPriorityExecutors() {
