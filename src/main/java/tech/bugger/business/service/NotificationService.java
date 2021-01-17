@@ -2,7 +2,9 @@ package tech.bugger.business.service;
 
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.PriorityExecutor;
+import tech.bugger.business.util.PriorityTask;
 import tech.bugger.business.util.RegistryKey;
+import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
@@ -12,14 +14,18 @@ import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.UserGateway;
+import tech.bugger.persistence.util.Mail;
+import tech.bugger.persistence.util.MailBuilder;
 import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +43,11 @@ public class NotificationService implements Serializable {
      * The {@link Log} instance associated with this class for logging purposes.
      */
     private static final Log log = Log.forClass(NotificationService.class);
+
+    /**
+     * The maximum number of tries before sending an e-mail is aborted.
+     */
+    private static final int MAX_EMAIL_TRIES = 3;
 
     /**
      * Transaction manager used for creating transactions.
@@ -219,8 +230,28 @@ public class NotificationService implements Serializable {
     }
 
     private void sendMails(final List<Notification> notifications) {
-        // TODO implement
-        return;
+        String domain = JFConfig.getApplicationPath(FacesContext.getCurrentInstance().getExternalContext());
+        for (Notification n : notifications) {
+            String link = domain + "/report?id=" + n.getReportID()
+                    + (n.getPostID() != null ? "&p=" + n.getPostID() : "");
+            Mail mail = new MailBuilder()
+                    .to(n.getRecipientMail())
+                    .subject(interactionsBundle.getString("email_notification_subject." + n.getType()))
+                    .content(new MessageFormat(interactionsBundle.getString("email_notification_content."
+                            + n.getType()))
+                            .format(new String[]{link}))
+                    .envelop();
+            priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.LOW, () -> {
+                int tries = 1;
+                log.debug("Sending e-mail " + mail + ".");
+                while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
+                    log.warning("Trying to send e-mail again. Try #" + tries + '.');
+                }
+                if (tries > MAX_EMAIL_TRIES) {
+                    log.error("Couldn't send e-mail for more than " + MAX_EMAIL_TRIES + " times! Please investigate!");
+                }
+            }));
+        }
     }
 
     /**
@@ -234,16 +265,7 @@ public class NotificationService implements Serializable {
         } catch (TransactionException e) {
             return;
         }
-        for (Notification notification : unsentNotifications) {
-            User recipient;
-            try (Transaction tx = transactionManager.begin()) {
-                recipient = tx.newUserGateway().getUserByID(notification.getRecipientID());
-            } catch (NotFoundException e) {
-                continue;
-            }
-            String email = recipient.getEmailAddress();
-            // TODO finish
-        }
+        sendMails(unsentNotifications);
     }
 
 }
