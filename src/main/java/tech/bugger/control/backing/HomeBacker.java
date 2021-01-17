@@ -112,6 +112,7 @@ public class HomeBacker implements Serializable {
      */
     public String deleteNotification(final Notification notification) {
         notificationService.deleteNotification(notification);
+        inbox.updateReset();
         return null;
     }
 
