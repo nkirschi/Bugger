@@ -6,7 +6,6 @@ import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
-import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
@@ -28,7 +27,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 
 /**
  * Backing Bean for the report create page.
@@ -111,11 +109,6 @@ public class ReportCreateBacker implements Serializable {
     private final Event<Feedback> feedbackEvent;
 
     /**
-     * Resource bundle for feedback message.
-     */
-    private final ResourceBundle messagesBundle;
-
-    /**
      * Constructs a new report creation page backing bean with the necessary dependencies.
      *
      * @param applicationSettings The current application settings.
@@ -125,13 +118,12 @@ public class ReportCreateBacker implements Serializable {
      * @param session             The current user session.
      * @param ectx                The current {@link ExternalContext} of the application.
      * @param feedbackEvent       The feedback event to use for user feedback.
-     * @param registry            The dependency registry to use.
      */
     @Inject
     public ReportCreateBacker(final ApplicationSettings applicationSettings, final TopicService topicService,
                               final ReportService reportService, final PostService postService,
                               final UserSession session, final ExternalContext ectx,
-                              final Event<Feedback> feedbackEvent, final Registry registry) {
+                              final Event<Feedback> feedbackEvent) {
         this.applicationSettings = applicationSettings;
         this.topicService = topicService;
         this.reportService = reportService;
@@ -139,7 +131,6 @@ public class ReportCreateBacker implements Serializable {
         this.session = session;
         this.ectx = ectx;
         this.feedbackEvent = feedbackEvent;
-        this.messagesBundle = registry.getBundle("messages", session);
         this.banned = true;
     }
 
@@ -160,15 +151,15 @@ public class ReportCreateBacker implements Serializable {
 
         User user = session.getUser();
         Topic topic = topicService.getTopicByID(topicID);
-        if (user == null || topic == null || topicService.isBanned(user, topic)) {
+        if (user == null || topic == null || !topicService.canCreateReportIn(user, topic)) {
             redirectTo404Page();
             return;
         }
 
         banned = false;
-        Authorship authorship = new Authorship(session.getUser(), null, session.getUser(), null);
+        Authorship authorship = new Authorship(user, null, user, null);
         report = new Report(0, "", Report.Type.BUG, Report.Severity.MINOR, "", authorship, null, null, null, false, 0);
-        report.setTopic(topicID);
+        report.setTopicID(topicID);
         attachments = new ArrayList<>();
         firstPost = new Post(0, "", new Lazy<>(report), authorship, attachments);
     }
@@ -181,8 +172,7 @@ public class ReportCreateBacker implements Serializable {
     public void create() {
         if (reportService.createReport(report, firstPost)) {
             try {
-                ectx.redirect(ectx.getRequestContextPath()
-                        + "/faces/view/auth/report.xhtml?id=" + report.getId());
+                ectx.redirect(ectx.getRequestContextPath() + "/report?id=" + report.getId());
             } catch (IOException e) {
                 redirectTo404Page();
             }
@@ -194,7 +184,9 @@ public class ReportCreateBacker implements Serializable {
      * the post.
      */
     public void saveAttachment() {
-        postService.addAttachment(firstPost, uploadedAttachment);
+        if (uploadedAttachment != null) {
+            postService.addAttachment(firstPost, uploadedAttachment);
+        }
     }
 
     /**
@@ -210,7 +202,7 @@ public class ReportCreateBacker implements Serializable {
     private void redirectTo404Page() {
         // This will be subject to change when the error page is implemented.
         try {
-            ectx.redirect(ectx.getRequestContextPath() + "/faces/view/public/error.xhtml");
+            ectx.redirect(ectx.getRequestContextPath() + "/error");
         } catch (IOException e) {
             throw new InternalError("Redirection to error page failed.");
         }
