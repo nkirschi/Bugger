@@ -223,7 +223,7 @@ public class NotificationDBGateway implements NotificationGateway {
                     .integer(notification.getActuatorID())
                     .integer(notification.getTopicID())
                     .integer(notification.getReportID())
-                    .integer(notification.getPostID())
+                    .object(notification.getPostID())
                     .integer(notification.getId()).toStatement();
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
