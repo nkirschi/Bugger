@@ -319,7 +319,7 @@ public class NotificationDBGateway implements NotificationGateway {
                         .integer(notification.getActuatorID())
                         .integer(notification.getTopicID())
                         .integer(notification.getReportID())
-                        .integer(notification.getPostID())
+                        .object(notification.getPostID())
                         .toStatement();
                 statement.addBatch();
             }
