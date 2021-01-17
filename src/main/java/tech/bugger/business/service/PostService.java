@@ -13,7 +13,6 @@ import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentGateway;
-import tech.bugger.persistence.gateway.UserDBGateway;
 import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;

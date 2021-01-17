@@ -13,7 +13,6 @@ import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.DuplicateException;
