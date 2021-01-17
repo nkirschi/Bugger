@@ -444,6 +444,17 @@ public class TopicService {
     }
 
     /**
+     * Returns whether {@code user} is allowed to create a report in {@code topic}.
+     *
+     * @param user  The user whose rights to check.
+     * @param topic The topic in question.
+     * @return Whether {@code user} is allowed to create a report in {@code topic}.
+     */
+    public boolean canCreateReportIn(final User user, final Topic topic) {
+        return user != null && topic != null && (user.isAdministrator() || !isBanned(user, topic));
+    }
+
+    /**
      * Gets the number of reports in a certain topic.
      *
      * @param topic             The topic which the reports belong to.
