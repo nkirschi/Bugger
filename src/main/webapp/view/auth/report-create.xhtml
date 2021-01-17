@@ -48,13 +48,16 @@
                 <h:inputText id="it-version" value="#{reportCreateBacker.report.version}" maxlength="#{C.SMALL_FIELD}"/>
                 <h:panelGroup/>
                 <h:message for="it-version"/>
+            </h:panelGrid>
 
+            <h:panelGroup>
                 <h:outputLabel id="o-post-content" for="it-post-content" value="#{labels.first_post_content}"/>
                 <h:inputTextarea id="it-post-content" value="#{reportCreateBacker.firstPost.content}"
-                                 required="true" a:maxlength="#{C.SMALL_AREA}"/>
-                <h:panelGroup/>
+                                 required="true" styleClass="form-control" rows="10">
+                    <f:validateLength maximum="#{C.SMALL_AREA}"/>
+                </h:inputTextarea>
                 <h:message for="it-post-content"/>
-            </h:panelGrid>
+            </h:panelGroup>
 
             <!-- TODO Adding attachment when post content is empty will trigger a "value is required" message and will
                  not add attachment. -->
@@ -85,13 +88,15 @@
                 <h:message for="it-attachment"/>
                 <h:commandButton id="cb-add-attachment"
                                  value="#{labels.add_attachment}"
-                                 action="#{reportCreateBacker.saveAttachment}"/>
+                                 action="#{reportCreateBacker.saveAttachment}"
+                                 styleClass="button style-button"/>
             </h:panelGroup>
 
             <h:panelGroup styleClass="row" layout="block">
                 <h:commandButton id="cb-remove-attachments"
                                  value="#{labels.remove_all_attachments}"
-                                 action="#{reportCreateBacker.deleteAllAttachments}"/>
+                                 action="#{reportCreateBacker.deleteAllAttachments}"
+                                 styleClass="button style-button"/>
             </h:panelGroup>
 
             <h:commandButton value="#{labels.create}" action="#{reportCreateBacker.create}"/>

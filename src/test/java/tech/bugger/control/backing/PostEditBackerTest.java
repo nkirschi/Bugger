@@ -1,35 +1,28 @@
 package tech.bugger.control.backing;
 
-import com.sun.faces.context.RequestParameterMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
-import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
-import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
-import tech.bugger.global.transfer.Configuration;
+import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 
-import javax.enterprise.event.Event;
+import javax.faces.application.Application;
+import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.servlet.http.Part;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,30 +31,23 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
-public class ReportCreateBackerTest {
+public class PostEditBackerTest {
 
-    private ReportCreateBacker reportCreateBacker;
+    private PostEditBacker postEditBacker;
 
     @Mock
     private ApplicationSettings applicationSettings;
-
-    @Mock
-    private TopicService topicService;
 
     @Mock
     private ReportService reportService;
@@ -73,132 +59,208 @@ public class ReportCreateBackerTest {
     private UserSession session;
 
     @Mock
+    private FacesContext fctx;
+
+    @Mock
     private ExternalContext ectx;
-
-    @Mock
-    private Event<Feedback> feedbackEvent;
-
-    @Mock
-    private Part uploadedAttachment;
 
     @Mock
     private Map<String, String> requestParameterMap;
 
-    private Report testReport;
+    @Mock
+    private Application app;
 
-    private Post testFirstPost;
+    @Mock
+    private NavigationHandler navigationHandler;
 
-    private InputStream inputStream;
+    private Post post;
 
-    private Configuration configuration;
+    private Report report;
+
+    private User user;
 
     @BeforeEach
     public void setUp() throws Exception {
-        reportCreateBacker = new ReportCreateBacker(applicationSettings, topicService, reportService, postService,
-                session, ectx, feedbackEvent);
+        postEditBacker = new PostEditBacker(applicationSettings, reportService, postService, session, fctx);
 
         List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
-        testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
-        testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(ZonedDateTime.class), null, null, false, 1);
-        reportCreateBacker.setReport(testReport);
-        reportCreateBacker.setFirstPost(testFirstPost);
+        report = new Report(1234, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
+                new Authorship(null, null, null, null), mock(ZonedDateTime.class),
+                null, null, false, 1);
+        post = new Post(5678, "Some content", new Lazy<>(report), new Authorship(null, null, null, null), attachments);
+        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
+                Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+
+        lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
+        lenient().doReturn(app).when(fctx).getApplication();
+        lenient().doReturn(navigationHandler).when(app).getNavigationHandler();
+    }
 
-        uploadedAttachment = mock(Part.class);
-        inputStream = mock(InputStream.class);
-        lenient().doReturn(inputStream).when(uploadedAttachment).getInputStream();
-        reportCreateBacker.setUploadedAttachment(uploadedAttachment);
-
-        configuration = mock(Configuration.class);
-        lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
-        lenient().doReturn(5).when(configuration).getMaxAttachmentsPerPost();
+    private void verify404Redirect() {
+        verify(navigationHandler).handleNavigation(any(), any(), eq("pretty:error"));
     }
 
     @Test
-    public void testInit() {
-        doReturn("1234").when(requestParameterMap).get("id");
-        doReturn(mock(User.class)).when(session).getUser();
-        doReturn(mock(Topic.class)).when(topicService).getTopicByID(anyInt());
-        doReturn(false).when(topicService).isBanned(any(), any());
-        reportCreateBacker.init();
-        assertEquals(1234, reportCreateBacker.getReport().getTopic());
-        assertEquals(reportCreateBacker.getReport(), reportCreateBacker.getFirstPost().getReport().get());
-    }
-
-    @Test
-    public void testInitWhenNoParam() throws Exception {
-        doReturn(null).when(requestParameterMap).get("id");
-        reportCreateBacker.init();
-        verify(ectx).redirect(any());
-        assertTrue(reportCreateBacker.isBanned());
-    }
-
-    @Test
-    public void testInitWhenNoUser() throws Exception {
-        doReturn("1").when(requestParameterMap).get("id");
+    public void testInitNoUser()  {
         doReturn(null).when(session).getUser();
-        reportCreateBacker.init();
-        verify(ectx).redirect(any());
-        assertTrue(reportCreateBacker.isBanned());
+        postEditBacker.init();
+        verify404Redirect();
     }
 
     @Test
-    public void testInitWhenNoTopic() throws Exception {
-        doReturn("1").when(requestParameterMap).get("id");
-        doReturn(mock(User.class)).when(session).getUser();
-        doReturn(null).when(topicService).getTopicByID(anyInt());
-        reportCreateBacker.init();
-        verify(ectx).redirect(any());
-        assertTrue(reportCreateBacker.isBanned());
+    public void testInitCreate() {
+        doReturn("1234").when(requestParameterMap).get("r");
+        doReturn(true).when(requestParameterMap).containsKey("c");
+        doReturn(user).when(session).getUser();
+        doReturn(report).when(reportService).getReportByID(1234);
+        doReturn(true).when(reportService).canPostInReport(user, report);
+        postEditBacker.init();
+        assertTrue(postEditBacker.isCreate());
+        assertEquals(report, postEditBacker.getPost().getReport().get());
+        assertEquals(user, postEditBacker.getPost().getAuthorship().getCreator());
     }
 
     @Test
-    public void testInitWhenBanned() throws Exception {
-        doReturn("1").when(requestParameterMap).get("id");
-        doReturn(mock(User.class)).when(session).getUser();
-        doReturn(mock(Topic.class)).when(topicService).getTopicByID(anyInt());
-        doReturn(true).when(topicService).isBanned(any(), any());
-        reportCreateBacker.init();
-        verify(ectx).redirect(any());
-        assertTrue(reportCreateBacker.isBanned());
+    public void testInitCreateNoParam() {
+        doReturn(null).when(requestParameterMap).get("r");
+        doReturn(true).when(requestParameterMap).containsKey("c");
+        doReturn(user).when(session).getUser();
+        postEditBacker.init();
+        verify404Redirect();
     }
 
     @Test
-    public void testCreateWhenFine() throws Exception {
-        doReturn(true).when(reportService).createReport(any(), any());
-        reportCreateBacker.create();
+    public void testInitCreateReportNull() {
+        doReturn("1234").when(requestParameterMap).get("r");
+        doReturn(true).when(requestParameterMap).containsKey("c");
+        doReturn(user).when(session).getUser();
+        doReturn(null).when(reportService).getReportByID(1234);
+        postEditBacker.init();
+        verify404Redirect();
+    }
+
+    @Test
+    public void testInitCreateBanned() {
+        doReturn("1234").when(requestParameterMap).get("r");
+        doReturn(true).when(requestParameterMap).containsKey("c");
+        doReturn(user).when(session).getUser();
+        doReturn(report).when(reportService).getReportByID(1234);
+        doReturn(false).when(reportService).canPostInReport(user, report);
+        postEditBacker.init();
+        verify404Redirect();
+    }
+
+    @Test
+    public void testInitEdit() {
+        doReturn("5678").when(requestParameterMap).get("p");
+        doReturn(false).when(requestParameterMap).containsKey("c");
+        doReturn(user).when(session).getUser();
+        doReturn(post).when(postService).getPostByID(5678);
+        doReturn(true).when(postService).isPrivileged(user, post);
+        postEditBacker.init();
+        assertFalse(postEditBacker.isCreate());
+        assertEquals(post.getAttachments(), postEditBacker.getAttachments());
+        assertEquals(user, postEditBacker.getPost().getAuthorship().getModifier());
+    }
+
+    @Test
+    public void testInitEditNoParam() {
+        doReturn(null).when(requestParameterMap).get("p");
+        doReturn(false).when(requestParameterMap).containsKey("c");
+        doReturn(user).when(session).getUser();
+        postEditBacker.init();
+        verify404Redirect();
+    }
+
+    @Test
+    public void testInitEditPostNull() {
+        doReturn("5678").when(requestParameterMap).get("p");
+        doReturn(false).when(requestParameterMap).containsKey("c");
+        doReturn(user).when(session).getUser();
+        doReturn(null).when(postService).getPostByID(5678);
+        postEditBacker.init();
+        verify404Redirect();
+    }
+
+    @Test
+    public void testInitEditBanned() {
+        doReturn("5678").when(requestParameterMap).get("p");
+        doReturn(false).when(requestParameterMap).containsKey("c");
+        doReturn(user).when(session).getUser();
+        doReturn(post).when(postService).getPostByID(5678);
+        doReturn(false).when(postService).isPrivileged(user, post);
+        postEditBacker.init();
+        verify404Redirect();
+    }
+
+    @Test
+    public void testInitEditReportNull() {
+        doReturn("5678").when(requestParameterMap).get("p");
+        doReturn(false).when(requestParameterMap).containsKey("c");
+        doReturn(user).when(session).getUser();
+        doReturn(post).when(postService).getPostByID(5678);
+        doReturn(true).when(postService).isPrivileged(user, post);
+        post.setReport(null);
+        postEditBacker.init();
+        verify404Redirect();
+    }
+
+    @Test
+    public void testSaveChangesCreate() throws Exception {
+        postEditBacker.setPost(post);
+        postEditBacker.setReport(report);
+        postEditBacker.setCreate(true);
+        doReturn(true).when(postService).createPost(post);
+        postEditBacker.saveChanges();
+        verify(postService).createPost(post);
         verify(ectx).redirect(anyString());
     }
 
     @Test
-    public void testCreateWhenCreationFails() throws Exception {
-        doReturn(false).when(reportService).createReport(any(), any());
-        reportCreateBacker.create();
-        verify(ectx, times(0)).redirect(any());
+    public void testSaveChangesEdit() throws Exception {
+        postEditBacker.setPost(post);
+        postEditBacker.setReport(report);
+        postEditBacker.setCreate(false);
+        doReturn(true).when(postService).updatePost(post);
+        postEditBacker.saveChanges();
+        verify(postService).updatePost(post);
+        verify(ectx).redirect(anyString());
     }
 
     @Test
-    public void testSaveAttachments() {
-        reportCreateBacker.saveAttachment();
-        verify(postService).addAttachment(testFirstPost, uploadedAttachment);
+    public void testSaveChangesNoSuccess() {
+        postEditBacker.setPost(post);
+        postEditBacker.setReport(report);
+        postEditBacker.setCreate(false);
+        doReturn(false).when(postService).updatePost(post);
+        postEditBacker.saveChanges();
+        verify(fctx, times(0)).getApplication();
+    }
+
+    @Test
+    public void testUploadAttachments() {
+        Part uploadedAttachment = mock(Part.class);
+        postEditBacker.setLastAttachmentUploaded(uploadedAttachment);
+        postEditBacker.setPost(post);
+        postEditBacker.uploadAttachment();
+        verify(postService).addAttachment(post, uploadedAttachment);
+    }
+
+    @Test
+    public void testUploadAttachmentsWhenUploadNull() {
+        Part uploadedAttachment = mock(Part.class);
+        postEditBacker.setLastAttachmentUploaded(null);
+        postEditBacker.setPost(post);
+        postEditBacker.uploadAttachment();
+        verify(postService, times(0)).addAttachment(post, uploadedAttachment);
     }
 
     @Test
     public void testDeleteAllAttachments() {
-        reportCreateBacker.setAttachments(new LinkedList<>(Arrays.asList(new Attachment(), new Attachment())));
-        reportCreateBacker.deleteAllAttachments();
-        assertEquals(0, reportCreateBacker.getAttachments().size());
-    }
-
-    @Test
-    public void testGetReportTypes() {
-        assertArrayEquals(Report.Type.values(), reportCreateBacker.getReportTypes());
-    }
-
-    @Test
-    public void testGetReportSeverities() {
-        assertArrayEquals(Report.Severity.values(), reportCreateBacker.getReportSeverities());
+        postEditBacker.setAttachments(new LinkedList<>(Arrays.asList(new Attachment(), new Attachment())));
+        postEditBacker.deleteAllAttachments();
+        assertEquals(0, postEditBacker.getAttachments().size());
     }
 
 }
