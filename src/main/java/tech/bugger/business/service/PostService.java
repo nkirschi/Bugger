@@ -119,8 +119,9 @@ public class PostService {
         Notification notification = new Notification();
         notification.setType(Notification.Type.EDITED_POST);
         notification.setActuatorID(post.getAuthorship().getModifier().getId());
-        notification.setReportID(post.getReport().get().getId());
         notification.setTopicID(post.getReport().get().getTopic());
+        notification.setReportID(post.getReport().get().getId());
+        notification.setPostID(post.getId());
         notificationService.createNotification(notification);
         return true;
     }
@@ -210,10 +211,11 @@ public class PostService {
         }
         if (success) {
             Notification notification = new Notification();
-            notification.setActuatorID(post.getAuthorship().getCreator().getId());
-            notification.setReportID(post.getReport().get().getId());
-            notification.setTopicID(post.getReport().get().getTopic());
             notification.setType(Notification.Type.NEW_POST);
+            notification.setActuatorID(post.getAuthorship().getCreator().getId());
+            notification.setTopicID(post.getReport().get().getTopic());
+            notification.setReportID(post.getReport().get().getId());
+            notification.setPostID(post.getId());
             notificationService.createNotification(notification);
         }
         return success;

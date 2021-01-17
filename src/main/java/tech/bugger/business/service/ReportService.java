@@ -375,7 +375,6 @@ public class ReportService {
      * @return {@code true} iff creating the report succeeded.
      */
     public boolean createReport(final Report report, final Post firstPost) {
-        // Notifications will be dealt with when implementing the subscriptions feature.
         boolean success = false;
         try (Transaction tx = transactionManager.begin()) {
             tx.newReportGateway().create(report);
@@ -395,11 +394,11 @@ public class ReportService {
         }
         if (success) {
             Notification notification = new Notification();
-            notification.setReportID(report.getId());
-            notification.setTopicID(report.getTopic());
-            notification.setPostID(firstPost.getId());
-            notification.setActuatorID(report.getAuthorship().getCreator().getId());
             notification.setType(Notification.Type.NEW_REPORT);
+            notification.setActuatorID(report.getAuthorship().getCreator().getId());
+            notification.setTopicID(report.getTopic());
+            notification.setReportID(report.getId());
+            notification.setPostID(firstPost.getId());
             notificationService.createNotification(notification);
         }
         return success;
@@ -462,10 +461,10 @@ public class ReportService {
             return false;
         }
         Notification notification = new Notification();
-        notification.setActuatorID(report.getAuthorship().getModifier().getId());
-        notification.setReportID(report.getId());
-        notification.setTopicID(report.getTopic());
         notification.setType(Notification.Type.EDITED_REPORT);
+        notification.setActuatorID(report.getAuthorship().getModifier().getId());
+        notification.setTopicID(report.getTopic());
+        notification.setReportID(report.getId());
         notificationService.createNotification(notification);
         return true;
     }
