@@ -103,8 +103,7 @@ public class UserDBGateway implements UserGateway {
                         Language.valueOf(rs.getString(prefix + "preferred_language").toUpperCase()),
                         User.ProfileVisibility.valueOf(rs.getString(prefix + "profile_visibility").toUpperCase()),
                         rs.getTimestamp(prefix + "registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
-                        rs.getObject(prefix + "forced_voting_weight", Integer.class), rs.getBoolean(prefix +
-                                                                                                            "is_admin"
+                        rs.getObject(prefix + "forced_voting_weight", Integer.class), rs.getBoolean(prefix + "is_admin"
         ));
     }
 
