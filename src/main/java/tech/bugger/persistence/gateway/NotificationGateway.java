@@ -69,22 +69,6 @@ public interface NotificationGateway {
     void delete(Notification notification) throws NotFoundException;
 
     /**
-     * Marks a notification as read in the notification storage.
-     *
-     * @param notification The notification to mark as read.
-     * @throws NotFoundException The notification could not be found.
-     */
-    void markAsRead(Notification notification) throws NotFoundException;
-
-    /**
-     * Marks a notification as sent in the notification storage.
-     *
-     * @param notification The notification to mark as sent.
-     * @throws NotFoundException The notification could not be found.
-     */
-    void markAsSent(Notification notification) throws NotFoundException;
-
-    /**
      * Returns all unsent notifications.
      *
      * @return The unsent notifications

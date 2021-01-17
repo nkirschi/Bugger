@@ -271,36 +271,6 @@ public class NotificationDBGateway implements NotificationGateway {
      * {@inheritDoc}
      */
     @Override
-    public void markAsRead(final Notification notification) {
-        // TODO either finish or remove
-        if (notification == null) {
-            log.error("Cannot mark notification null as read.");
-            throw new IllegalArgumentException("Notification cannot be null.");
-        } else if (notification.getId() == null) {
-            log.error("Cannot mark notification with ID null as read.");
-        }
-
-        try (PreparedStatement stmt = conn.prepareStatement("UPDATE notification SET read = true WHERE id = ?;")) {
-            PreparedStatement statement = new StatementParametrizer(stmt)
-                    .integer(notification.getId()).toStatement();
-        } catch (SQLException e) {
-            log.error("");
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void markAsSent(final Notification notification) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void createNotificationBulk(final List<Notification> notifications) {
         if (notifications == null) {
             log.error("Cannot create list of notifications null.");
