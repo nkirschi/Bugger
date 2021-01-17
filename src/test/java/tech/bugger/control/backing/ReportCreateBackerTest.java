@@ -5,31 +5,30 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
-import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 
 import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.servlet.http.Part;
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,9 +36,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doReturn;
@@ -72,10 +73,10 @@ public class ReportCreateBackerTest {
     private Event<Feedback> feedbackEvent;
 
     @Mock
-    private Registry registry;
+    private Part uploadedAttachment;
 
     @Mock
-    private Part uploadedAttachment;
+    private Map<String, String> requestParameterMap;
 
     private Report testReport;
 
@@ -87,9 +88,8 @@ public class ReportCreateBackerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(anyString(), any());
         reportCreateBacker = new ReportCreateBacker(applicationSettings, topicService, reportService, postService,
-                session, ectx, feedbackEvent, registry);
+                session, ectx, feedbackEvent);
 
         List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
         testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
@@ -97,6 +97,7 @@ public class ReportCreateBackerTest {
                 mock(ZonedDateTime.class), null, null, false, 1);
         reportCreateBacker.setReport(testReport);
         reportCreateBacker.setFirstPost(testFirstPost);
+        lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
 
         uploadedAttachment = mock(Part.class);
         inputStream = mock(InputStream.class);
@@ -110,14 +111,27 @@ public class ReportCreateBackerTest {
 
     @Test
     public void testInit() {
-        reportCreateBacker.setTopicID(1);
+        doReturn("1234").when(requestParameterMap).get("id");
+        doReturn(mock(User.class)).when(session).getUser();
+        doReturn(mock(Topic.class)).when(topicService).getTopicByID(anyInt());
+        doReturn(true).when(topicService).canCreateReportIn(any(), any());
         reportCreateBacker.init();
-        assertEquals(1, reportCreateBacker.getReport().getTopic());
+        assertEquals(1234, reportCreateBacker.getReport().getTopicID());
+        assertEquals(reportCreateBacker.getReport(), reportCreateBacker.getFirstPost().getReport().get());
+    }
+
+    @Test
+    public void testInitWhenNoParam() throws Exception {
+        doReturn(null).when(requestParameterMap).get("id");
+        reportCreateBacker.init();
+        verify(ectx).redirect(any());
+        assertTrue(reportCreateBacker.isBanned());
     }
 
     @Test
     public void testInitWhenNoUser() throws Exception {
-        reportCreateBacker.setTopicID(1);
+        doReturn("1").when(requestParameterMap).get("id");
+        doReturn(null).when(session).getUser();
         reportCreateBacker.init();
         verify(ectx).redirect(any());
         assertTrue(reportCreateBacker.isBanned());
@@ -125,15 +139,20 @@ public class ReportCreateBackerTest {
 
     @Test
     public void testInitWhenNoTopic() throws Exception {
-        reportCreateBacker.setTopicID(1);
+        doReturn("1").when(requestParameterMap).get("id");
+        doReturn(mock(User.class)).when(session).getUser();
+        doReturn(null).when(topicService).getTopicByID(anyInt());
         reportCreateBacker.init();
         verify(ectx).redirect(any());
         assertTrue(reportCreateBacker.isBanned());
     }
 
     @Test
-    public void testInitWhenBanned() throws Exception {
-        reportCreateBacker.setTopicID(1);
+    public void testInitWhenNotAllowed() throws Exception {
+        doReturn("1").when(requestParameterMap).get("id");
+        doReturn(mock(User.class)).when(session).getUser();
+        doReturn(mock(Topic.class)).when(topicService).getTopicByID(anyInt());
+        doReturn(false).when(topicService).canCreateReportIn(any(), any());
         reportCreateBacker.init();
         verify(ectx).redirect(any());
         assertTrue(reportCreateBacker.isBanned());
@@ -151,6 +170,20 @@ public class ReportCreateBackerTest {
         doReturn(false).when(reportService).createReport(any(), any());
         reportCreateBacker.create();
         verify(ectx, times(0)).redirect(any());
+    }
+
+    @Test
+    public void testSaveAttachments() {
+        reportCreateBacker.setUploadedAttachment(uploadedAttachment);
+        reportCreateBacker.saveAttachment();
+        verify(postService).addAttachment(testFirstPost, uploadedAttachment);
+    }
+
+    @Test
+    public void testSaveAttachmentsWhenUploadNull() {
+        reportCreateBacker.setUploadedAttachment(null);
+        reportCreateBacker.saveAttachment();
+        verify(postService, times(0)).addAttachment(testFirstPost, uploadedAttachment);
     }
 
     @Test
