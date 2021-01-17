@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tech.bugger.LogExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
@@ -13,6 +14,7 @@ import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
@@ -20,6 +22,8 @@ import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentGateway;
 import tech.bugger.persistence.gateway.PostGateway;
 import tech.bugger.persistence.gateway.ReportGateway;
+import tech.bugger.persistence.gateway.TopicGateway;
+import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
@@ -27,17 +31,21 @@ import javax.enterprise.event.Event;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doReturn;
 
+@ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
 
@@ -69,13 +77,20 @@ public class PostServiceTest {
     private ReportGateway reportGateway;
 
     @Mock
+    private TopicGateway topicGateway;
+
+    @Mock
+    private UserGateway userGateway;
+
+    @Mock
     private Event<Feedback> feedbackEvent;
 
     private Post testPost1;
 
     private User testUser = new User();
-    private Report testReport = new Report(100, "Hi", Report.Type.BUG, Report.Severity.MINOR, "1", null, null, null, null, false, null);
+    private Report testReport = new Report(100, "Hi", Report.Type.BUG, Report.Severity.MINOR, "1", null, null, null, null, false, 100);
     private Post testPost = new Post(300, "Hi", new Lazy<>(testReport), null, null);
+    private Topic testTopic = new Topic(100, "Hi", "I am a topic");
 
 
     @BeforeEach
@@ -95,6 +110,8 @@ public class PostServiceTest {
         lenient().doReturn(postGateway).when(tx).newPostGateway();
         lenient().doReturn(reportGateway).when(tx).newReportGateway();
         lenient().doReturn(attachmentGateway).when(tx).newAttachmentGateway();
+        lenient().doReturn(topicGateway).when(tx).newTopicGateway();
+        lenient().doReturn(userGateway).when(tx).newUserGateway();
         configuration = new Configuration(false, false, "", ".txt,.mp3", 5, "");
         lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
     }
@@ -205,8 +222,15 @@ public class PostServiceTest {
         assertDoesNotThrow(() -> postService.deletePost(testPost));
         verify(feedbackEvent).fire(any());
     }
+
+    @Test
     public void testIsPrivilegedWhenUserIsAnon() {
         assertFalse(postService.canModify(null, testPost));
+    }
+
+    @Test
+    public void testIsPrivilegedPostNull() {
+        assertFalse(postService.canModify(testUser, null));
     }
 
     @Test
@@ -216,18 +240,53 @@ public class PostServiceTest {
     }
 
     @Test
-    public void testIsPrivilegedWhenUserIsAuthor() {
+    public void testIsPrivilegedWhenUserIsBanned() throws NotFoundException {
         testUser.setAdministrator(false);
-        Authorship authorship = new Authorship(testUser, null, null, null);
-        testPost.setAuthorship(authorship);
+        doReturn(testTopic).when(topicGateway).findTopic(anyInt());
+        doReturn(true).when(userGateway).isBanned(any(), any());
+        assertFalse(postService.canModify(testUser, testPost));
+    }
+
+    @Test
+    public void testIsPrivilegedWhenUserIsMod() throws NotFoundException {
+        testUser.setAdministrator(false);
+        doReturn(testTopic).when(topicGateway).findTopic(anyInt());
+        doReturn(true).when(userGateway).isModerator(testUser, testTopic);
         assertTrue(postService.canModify(testUser, testPost));
     }
 
     @Test
-    public void testIsPrivilegedWhenUserIsNotAuthor() {
+    public void testIsPrivilegedWhenUserIsAuthor() throws NotFoundException {
         testUser.setAdministrator(false);
-        testPost.setAuthorship(new Authorship(null, null, null, null));
+        Authorship authorship = new Authorship(testUser, null, null, null);
+        testPost.setAuthorship(authorship);
+        doReturn(testTopic).when(topicGateway).findTopic(anyInt());
+        assertTrue(postService.canModify(testUser, testPost));
+    }
+
+    @Test
+    public void testIsPrivilegedNotPrivileged() throws NotFoundException {
+        doReturn(testTopic).when(topicGateway).findTopic(anyInt());
+        Authorship authorship = new Authorship(null, null, null, null);
+        testPost.setAuthorship(authorship);
         assertFalse(postService.canModify(testUser, testPost));
+    }
+
+    @Test
+    public void testIsPrivilegedNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(topicGateway).findTopic(anyInt());
+        assertFalse(postService.canModify(testUser, testPost));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testIsPrivilegedTransactionException() throws TransactionException, NotFoundException {
+        doReturn(testTopic).when(topicGateway).findTopic(anyInt());
+        doThrow(TransactionException.class).when(tx).commit();
+        Authorship authorship = new Authorship(null, null, null, null);
+        testPost.setAuthorship(authorship);
+        assertFalse(postService.canModify(testUser, testPost));
+        verify(feedbackEvent).fire(any());
     }
 
 }

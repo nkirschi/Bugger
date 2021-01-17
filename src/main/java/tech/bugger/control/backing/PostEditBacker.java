@@ -140,7 +140,7 @@ public class PostEditBacker implements Serializable {
                 return;
             }
             report = reportService.getReportByID(reportID);
-            if (report == null || !reportService.canPostInReport(user, report)) {
+            if (report == null) {
                 redirectToErrorPage();
                 return;
             }

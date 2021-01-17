@@ -6,12 +6,15 @@ import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentGateway;
+import tech.bugger.persistence.gateway.UserDBGateway;
+import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
@@ -370,13 +373,33 @@ public class PostService {
      * @return {@code true} iff the user is allowed to modify the post.
      */
     public boolean canModify(final User user, final Post post) {
-        // TODO add checks for mods, banned users
-        if (user == null) {
+        if (user == null || post == null) {
             return false;
         } else if (user.isAdministrator()) {
             return true;
         } else {
-            return user.equals(post.getAuthorship().getCreator());
+            try (Transaction tx = transactionManager.begin()) {
+                Report report = post.getReport().get();
+                Topic topic = tx.newTopicGateway().findTopic(report.getTopic());
+                UserGateway userGateway = tx.newUserGateway();
+                if (userGateway.isBanned(user, topic)) {
+                    tx.commit();
+                    return false;
+                } else if (userGateway.isModerator(user, topic) || user.equals(post.getAuthorship().getCreator())) {
+                    tx.commit();
+                    return true;
+                }
+                tx.commit();
+            } catch (NotFoundException e) {
+                log.error("Unable to find an answer, if the user with id " + user.getId()
+                        + " is privileged for the post with id " + post.getId(), e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            } catch (TransactionException e) {
+                log.error("Error while trying to determine if the user with id " + user.getId()
+                        + " is privileged for the post with id " + post.getId(), e);
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            }
+            return false;
         }
     }
 

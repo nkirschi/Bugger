@@ -13,6 +13,7 @@ import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.DuplicateException;
@@ -564,36 +565,6 @@ public class ReportService {
      */
     public ZonedDateTime lastChange(final Report report) {
         return null;
-    }
-
-    /**
-     * Returns whether the user is allowed to modify (edit or delete) a given report.
-     *
-     * @param user   The user in question.
-     * @param report The report in question.
-     * @return {@code true} iff the user is allowed to modify the report.
-     */
-    public boolean isPrivileged(final User user, final Report report) {
-        // TODO add checks for mods, banned users
-        if (user == null) {
-            return false;
-        } else if (user.isAdministrator()) {
-            return true;
-        } else {
-            return user.equals(report.getAuthorship().getCreator());
-        }
-    }
-
-    /**
-     * Returns whether the user is allowed to post in a given report.
-     *
-     * @param user The user in question.
-     * @param report The report in question.
-     * @return {@code true} iff the user is allowed to post in the report.
-     */
-    public boolean canPostInReport(final User user, final Report report) {
-        // TODO add checks for banned users
-        return true;
     }
 
     /**
