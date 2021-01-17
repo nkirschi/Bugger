@@ -70,8 +70,7 @@ CREATE TABLE "user" (
     is_admin BOOLEAN,
 
     CONSTRAINT user_first_name_non_empty CHECK (length(first_name) >= 1),
-    CONSTRAINT user_last_name_non_empty CHECK (length(last_name) >= 1),
-    CONSTRAINT user_email_address_lower_case CHECK (LOWER(email_address) = email_address)
+    CONSTRAINT user_last_name_non_empty CHECK (length(last_name) >= 1)
 );
 
 -- Insert the first admin with the password 'BuggerFahrenMachtSpass42'
