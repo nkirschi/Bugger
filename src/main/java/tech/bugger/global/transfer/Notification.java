@@ -104,6 +104,11 @@ public class Notification implements Serializable {
     private String reportTitle;
 
     /**
+     * The recipient's e-mail address.
+     */
+    private String recipientMail;
+
+    /**
      * Constructs a new notification from the specified parameters.
      *
      * @param id               The notification ID.
@@ -370,6 +375,24 @@ public class Notification implements Serializable {
      */
     public void setReportTitle(final String reportTitle) {
         this.reportTitle = reportTitle;
+    }
+
+    /**
+     * Returns the recipient's e-mail address.
+     *
+     * @return The recipient's e-mail address.
+     */
+    public String getRecipientMail() {
+        return recipientMail;
+    }
+
+    /**
+     * Sets the recipient's e-mail address.
+     *
+     * @param recipientMail The e-mail address to set.
+     */
+    public void setRecipientMail(final String recipientMail) {
+        this.recipientMail = recipientMail;
     }
 
     /**

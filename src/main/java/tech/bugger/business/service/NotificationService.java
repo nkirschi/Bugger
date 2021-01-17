@@ -205,6 +205,7 @@ public class NotificationService implements Serializable {
             for (User user : affectedUsers) {
                 Notification n = new Notification(notification);
                 n.setRecipientID(user.getId());
+                n.setRecipientMail(user.getEmailAddress());
                 notifications.add(n);
             }
             tx.newNotificationGateway().createNotificationBulk(notifications);
