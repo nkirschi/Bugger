@@ -705,7 +705,7 @@ public class ReportDBGateway implements ReportGateway {
             while (rs.next()) {
                 Report r;
                 try {
-                    r = getReportFromResultSet(rs);
+                    r = getReportFromResultSet(rs, userGateway);
                 } catch (NotFoundException e) {
                     throw new InternalError("User not found! Who thought it was a good idea to let the helper methods"
                             + " throw a NotFoundException?!", e);

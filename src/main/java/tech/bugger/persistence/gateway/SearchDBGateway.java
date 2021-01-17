@@ -465,7 +465,7 @@ public class SearchDBGateway implements SearchGateway {
         }
         filterSeverityBuilder.append(") ");
         String filterSeverity = filterSeverityBuilder.toString();
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"report\" AS r JOIN topic AS t "
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT r.*, t.title AS t_title FROM \"report\" AS r JOIN topic AS t "
                 + "ON r.topic = t.id WHERE r.title LIKE ?"
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) "
@@ -665,7 +665,7 @@ public class SearchDBGateway implements SearchGateway {
                 + filterClosedAt + filterDuplicate + filterType + filterSeverity
                 + "AND t.title = COALESCE(?, t.title);")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + query)
+                    .string(query + "%")
                     .object(latestOpeningDateTime)
                     .object(earliestClosingDateTime)
                     .string(topic)

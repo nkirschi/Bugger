@@ -205,7 +205,7 @@ public class SearchBacker implements Serializable {
     @PostConstruct
     public void init() {
         tab = Tab.REPORT;
-        query = "";
+        query = null;
         ExternalContext ext = fctx.getExternalContext();
         if (ext.getRequestParameterMap().containsKey("q")) {
             query = ext.getRequestParameterMap().get("q");
@@ -301,14 +301,6 @@ public class SearchBacker implements Serializable {
             }
         };
         topicTitles = topicService.discoverTopics();
-    }
-
-    /**
-     * Changes the tab (and with it, the type of search results).
-     */
-    public String changeTab() {
-        search();
-        return null;
     }
 
     /**
@@ -621,6 +613,7 @@ public class SearchBacker implements Serializable {
     /**
      * @return {@code true} if Severe-Severity reports are shown, {@code false} otherwise.
      */
+
     public boolean isShowSevere() {
         return showSevere;
     }
