@@ -151,7 +151,7 @@ public class NotificationDBGateway implements NotificationGateway {
                 rs.getObject("topic", Integer.class),
                 rs.getObject("report", Integer.class),
                 rs.getObject("post", Integer.class),
-                null, null);
+                null, null, null);
         return notification;
     }
 

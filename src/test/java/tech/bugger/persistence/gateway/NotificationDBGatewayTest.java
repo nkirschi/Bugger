@@ -55,7 +55,7 @@ class NotificationDBGatewayTest {
         DBExtension.insertMinimalTestData();
         List<Notification> notifications = new ArrayList<>(20);
         for (int i = 0; i < 20; i++) {
-            notifications.add(new Notification(null, 2, 1, Notification.Type.NEW_POST, null, false, false, 1, 100, 100, null, null));
+            notifications.add(new Notification(null, 2, 1, Notification.Type.NEW_POST, null, false, false, 1, 100, 100, null, null, null));
         }
         assertDoesNotThrow(() -> gateway.createNotificationBulk(notifications));
         assertDoesNotThrow(() -> gateway.find(1));

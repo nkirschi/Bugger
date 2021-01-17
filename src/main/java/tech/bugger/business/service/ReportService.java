@@ -238,7 +238,7 @@ public class ReportService {
      */
     public void upvote(final Report report, final User user) {
         removeVote(report, user);
-        Integer votingWeight = profileService.getVotingWeightForUser(user);
+        int votingWeight = profileService.getVotingWeightForUser(user);
         if (votingWeight > 0) {
             try (Transaction tx = transactionManager.begin()) {
                 tx.newReportGateway().upvote(report, user, votingWeight);
@@ -267,7 +267,7 @@ public class ReportService {
      */
     public void downvote(final Report report, final User user) {
         removeVote(report, user);
-        Integer votingWeight = profileService.getVotingWeightForUser(user);
+        int votingWeight = profileService.getVotingWeightForUser(user);
         if (votingWeight > 0) {
             try (Transaction tx = transactionManager.begin()) {
                 tx.newReportGateway().downvote(report, user, votingWeight);

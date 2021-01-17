@@ -49,7 +49,6 @@ public interface NotificationGateway {
      * @param user      The user whose notifications to look for.
      * @param selection The search criteria to apply.
      * @return The list of the user's notifications that match {@code selection}.
-     * @throws NotFoundException The user could not be found.
      */
     List<Notification> selectNotifications(User user, Selection selection);
 

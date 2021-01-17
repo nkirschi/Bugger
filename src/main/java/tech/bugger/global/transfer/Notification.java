@@ -123,11 +123,12 @@ public class Notification implements Serializable {
      * @param postID           The associated post.
      * @param actuatorUsername The actuator's username.
      * @param reportTitle      The title of the associated report.
+     * @param recipientMail    The recipient's e-mail address.
      */
     public Notification(final Integer id, final Integer actuatorID, final Integer recipientID, final Type type,
                         final ZonedDateTime date, final boolean read, final boolean sent, final Integer topicID,
                         final Integer reportID, final Integer postID, final String actuatorUsername,
-                        final String reportTitle) {
+                        final String reportTitle, final String recipientMail) {
         this.id = id;
         this.actuatorID = actuatorID;
         this.recipientID = recipientID;
@@ -140,13 +141,14 @@ public class Notification implements Serializable {
         this.postID = postID;
         this.actuatorUsername = actuatorUsername;
         this.reportTitle = reportTitle;
+        this.recipientMail = recipientMail;
     }
 
     /**
      * Constructs an empty notification.
      */
     public Notification() {
-        this(null, null, null, null, null, false, false, null, null, null, null, null);
+        this(null, null, null, null, null, false, false, null, null, null, null, null, null);
     }
 
     /**
@@ -157,7 +159,7 @@ public class Notification implements Serializable {
     public Notification(final Notification notification) {
         this(notification.id, notification.actuatorID, notification.recipientID, notification.type, notification.date,
                 notification.read, notification.sent, notification.topicID, notification.reportID, notification.postID,
-                notification.actuatorUsername, notification.reportTitle);
+                notification.actuatorUsername, notification.reportTitle, notification.recipientMail);
     }
 
     /**
