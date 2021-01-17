@@ -29,6 +29,7 @@ import javax.enterprise.event.Event;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -94,7 +95,9 @@ public class PostServiceTest {
                 new Attachment(3, "test3.txt", new Lazy<>(new byte[0]), "", new Lazy<>(testPost))
         );
         testPost.setAttachments(new ArrayList<>(attachments));
-
+        testUser.setId(1);
+        Authorship authorship = new Authorship(testUser, ZonedDateTime.now(), testUser, ZonedDateTime.now());
+        testPost.setAuthorship(authorship);
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(postGateway).when(tx).newPostGateway();
         lenient().doReturn(reportGateway).when(tx).newReportGateway();
