@@ -178,7 +178,7 @@ public class ProfileBacker implements Serializable {
             }
         };
 
-        if (session.getUser().isAdministrator() || user.equals(session.getUser())) {
+        if (isPrivileged()) {
             topicSubscriptions = new Paginator<>("title", Selection.PageSize.NORMAL) {
                 @Override
                 protected Iterable<Topic> fetch() {
