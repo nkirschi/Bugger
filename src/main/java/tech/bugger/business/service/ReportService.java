@@ -412,7 +412,6 @@ public class ReportService {
      * @return {@code true} iff moving the report succeeded.
      */
     public boolean move(final Report report) {
-        // Notifications will be dealt with when implementing the subscriptions feature.
         log.debug("Moving report " + report + ".");
         boolean success = false;
 
@@ -447,7 +446,6 @@ public class ReportService {
      * @return {@code true} iff updating the report succeeded.
      */
     public boolean updateReport(final Report report) {
-        // Notifications will be dealt with when implementing the subscriptions feature.
         try (Transaction tx = transactionManager.begin()) {
             tx.newReportGateway().update(report);
             tx.commit();
