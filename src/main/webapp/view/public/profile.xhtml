@@ -284,7 +284,11 @@
                         </h:link>
                     </b:column>
                     <h:column>
-                        <h:commandButton id="cb-delete-topic-subscription" value="#{labels.unsubscribe}" action="#{profileBacker.deleteTopicSubscription(var)}"/>
+                        <h:commandLink id="l-unsub-topic" action="#{profileBacker.deleteTopicSubscription(var)}"
+                                       styleClass="button">
+                            <h:graphicImage id="g-unsub-topic" value="/resources/images/trash.png"
+                                            styleClass="trashcan-small"/>
+                        </h:commandLink>
                     </h:column>
                 </b:pagitable>
             </h:panelGroup>
@@ -324,7 +328,11 @@
                         <h:outputText value="#{labels['report_severity.' += var.severity]}"/>
                     </b:column>
                     <h:column>
-                        <h:commandButton id="cb-delete-report-subscription" value="#{labels.unsubscribe}" action="#{profileBacker.deleteReportSubscription(var)}"/>
+                        <h:commandLink id="l-unsub-report" action="#{profileBacker.deleteReportSubscription(var)}"
+                                       styleClass="button">
+                            <h:graphicImage id="g-unsub-report" value="/resources/images/trash.png"
+                                            styleClass="trashcan-small"/>
+                        </h:commandLink>
                     </h:column>
                 </b:pagitable>
             </h:panelGroup>
@@ -352,7 +360,11 @@
                         </h:link>
                     </b:column>
                     <h:column>
-                        <h:commandButton id="cb-delete-user-subscription" value="#{labels.unsubscribe}" action="#{profileBacker.deleteUserSubscription(var)}"/>
+                        <h:commandLink id="l-unsub-user" action="#{profileBacker.deleteUserSubscription(var)}"
+                                       styleClass="button">
+                            <h:graphicImage id="g-unsub-user" value="/resources/images/trash.png"
+                                            styleClass="trashcan-small"/>
+                        </h:commandLink>
                     </h:column>
                 </b:pagitable>
             </h:panelGroup>
