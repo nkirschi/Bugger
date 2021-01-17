@@ -122,6 +122,7 @@ public class PostService {
         notification.setTopicID(post.getReport().get().getTopic());
         notification.setReportID(post.getReport().get().getId());
         notification.setPostID(post.getId());
+        notification.setReportTitle(post.getReport().get().getTitle());
         notificationService.createNotification(notification);
         return true;
     }
@@ -216,6 +217,7 @@ public class PostService {
             notification.setTopicID(post.getReport().get().getTopic());
             notification.setReportID(post.getReport().get().getId());
             notification.setPostID(post.getId());
+            notification.setReportTitle(post.getReport().get().getTitle());
             notificationService.createNotification(notification);
         }
         return success;

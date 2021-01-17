@@ -402,6 +402,7 @@ public class ReportService {
             notification.setTopicID(report.getTopic());
             notification.setReportID(report.getId());
             notification.setPostID(firstPost.getId());
+            notification.setReportTitle(report.getTitle());
             notificationService.createNotification(notification);
         }
         return success;
@@ -436,6 +437,7 @@ public class ReportService {
             notification.setActuatorID(report.getAuthorship().getModifier().getId());
             notification.setTopicID(report.getTopic());
             notification.setReportID(report.getId());
+            notification.setReportTitle(report.getTitle());
             notificationService.createNotification(notification);
         }
         return success;
@@ -466,6 +468,7 @@ public class ReportService {
         notification.setActuatorID(report.getAuthorship().getModifier().getId());
         notification.setTopicID(report.getTopic());
         notification.setReportID(report.getId());
+        notification.setReportTitle(report.getTitle());
         notificationService.createNotification(notification);
         return true;
     }
