@@ -10,9 +10,12 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -124,7 +127,15 @@ public class HomeBacker implements Serializable {
      */
     public String openNotification(final Notification notification) {
         notificationService.markAsRead(notification);
-        return "pretty:report";
+        ExternalContext ext = FacesContext.getCurrentInstance().getExternalContext();
+        String query = "/report?id=" + notification.getReportID()
+                + (notification.getPostID() != null ? "&p=" + notification.getPostID() : "");
+        try {
+            ext.redirect(ext.getApplicationContextPath() + query);
+        } catch (IOException e) {
+            return "pretty:error";
+        }
+        return null;
     }
 
     /**

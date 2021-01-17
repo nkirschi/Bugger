@@ -15,9 +15,7 @@
                 <h:outputText value="#{var.read ? '&#x2713;' : ' '}"/>
             </b:column>
             <b:column title="#{labels.type}" paginator="#{homeBacker.inbox}" key="type">
-                <h:commandButton value="#{labels['notification_type.'.concat(var.type)]}" action="#{homeBacker.openNotification(var)}" styleClass="btn-link">
-                    <f:param name="#{var.postID == null ? 'id' : 'p'}" value="#{var.postID == null ? var.reportID : var.postID}"/>
-                </h:commandButton>
+                <h:commandButton value="#{labels['notification_type.'.concat(var.type)]}" action="#{homeBacker.openNotification(var)}" styleClass="btn-link"/>
             </b:column>
             <b:column title="#{labels.report}" paginator="#{homeBacker.inbox}" key="report">
                 <h:outputText value="##{var.reportID}: #{var.reportTitle}"/>
