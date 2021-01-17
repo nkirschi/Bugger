@@ -14,6 +14,7 @@ import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.DuplicateException;
@@ -38,6 +39,11 @@ public class ReportService {
      * Notification service used for sending notifications.
      */
     private final NotificationService notificationService;
+
+    /**
+     * Topic service for checking bans.
+     */
+    private final TopicService topicService;
 
     /**
      * Post service used for creating posts.
@@ -68,6 +74,7 @@ public class ReportService {
      * Constructs a new report service with the given dependencies.
      *
      * @param notificationService The notification service to use.
+     * @param topicService        The topic service to use.
      * @param postService         The post service to use.
      * @param profileService      The profile service to use.
      * @param transactionManager  The transaction manager to use for creating transactions.
@@ -75,11 +82,12 @@ public class ReportService {
      * @param messagesBundle      The resource bundle for feedback messages.
      */
     @Inject
-    public ReportService(final NotificationService notificationService, final PostService postService,
-                         final ProfileService profileService, final TransactionManager transactionManager,
-                         final Event<Feedback> feedbackEvent,
+    public ReportService(final NotificationService notificationService, final TopicService topicService,
+                         final PostService postService, final ProfileService profileService,
+                         final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
                          final @RegistryKey("messages") ResourceBundle messagesBundle) {
         this.notificationService = notificationService;
+        this.topicService = topicService;
         this.postService = postService;
         this.profileService = profileService;
         this.transactionManager = transactionManager;
@@ -452,6 +460,7 @@ public class ReportService {
      */
     public boolean updateReport(final Report report) {
         try (Transaction tx = transactionManager.begin()) {
+            report.getAuthorship().setModifiedDate(ZonedDateTime.now());
             tx.newReportGateway().update(report);
             tx.commit();
         } catch (NotFoundException e) {
@@ -682,24 +691,6 @@ public class ReportService {
     }
 
     /**
-     * Returns whether the user is allowed to modify (edit or delete) a given report.
-     *
-     * @param user   The user in question.
-     * @param report The report in question.
-     * @return {@code true} iff the user is allowed to modify the report.
-     */
-    public boolean isPrivileged(final User user, final Report report) {
-        // TODO add checks for mods, banned users
-        if (user == null) {
-            return false;
-        } else if (user.isAdministrator()) {
-            return true;
-        } else {
-            return user.equals(report.getAuthorship().getCreator());
-        }
-    }
-
-    /**
      * Returns whether the user is allowed to post in a given report.
      *
      * @param user The user in question.
@@ -707,8 +698,16 @@ public class ReportService {
      * @return {@code true} iff the user is allowed to post in the report.
      */
     public boolean canPostInReport(final User user, final Report report) {
-        // TODO add checks for banned users
-        return true;
+        if (user == null || report == null) {
+            return false;
+        }
+
+        if (user.isAdministrator()) {
+            return true;
+        } else {
+            Topic topic = topicService.getTopicByID(report.getTopicID());
+            return topic != null && !topicService.isBanned(user, topic);
+        }
     }
 
     /**

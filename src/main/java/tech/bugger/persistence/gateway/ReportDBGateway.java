@@ -63,7 +63,7 @@ public class ReportDBGateway implements ReportGateway {
         report.setType(Report.Type.valueOf(rs.getString("type")));
         report.setSeverity(Report.Severity.valueOf(rs.getString("severity")));
         report.setVersion(rs.getString("version"));
-        report.setTopic(rs.getInt("topic"));
+        report.setTopicID(rs.getInt("topic"));
         report.setDuplicateOf(rs.getInt("duplicate_of"));
         ZonedDateTime closed = null;
         if (rs.getTimestamp("closed_at") != null) {
@@ -301,7 +301,7 @@ public class ReportDBGateway implements ReportGateway {
                     .string(report.getVersion())
                     .object(creator == null ? null : creator.getId(), Types.INTEGER)
                     .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
-                    .integer(report.getTopic())
+                    .integer(report.getTopicID())
                     .toStatement();
             statement.executeUpdate();
 
@@ -336,7 +336,7 @@ public class ReportDBGateway implements ReportGateway {
                     .string(report.getSeverity().name())
                     .string(report.getVersion())
                     .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
-                    .object(report.getTopic(), Types.INTEGER)
+                    .object(report.getTopicID(), Types.INTEGER)
                     .integer(report.getId())
                     .toStatement().executeUpdate();
             if (rowsAffected == 0) {

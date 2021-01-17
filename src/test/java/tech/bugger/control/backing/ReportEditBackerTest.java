@@ -1,6 +1,7 @@
 package tech.bugger.control.backing;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
@@ -21,6 +22,7 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -58,6 +60,9 @@ public class ReportEditBackerTest {
     private ExternalContext ectx;
 
     @Mock
+    private Map<String, String> requestParameterMap;
+
+    @Mock
     private Registry registry;
 
     private Topic testTopic;
@@ -69,8 +74,9 @@ public class ReportEditBackerTest {
         doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(anyString(), any());
         reportEditBacker = new ReportEditBacker(topicService, reportService, session, fctx, registry);
 
-        testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(ZonedDateTime.class), null, null, false, 1);
+        testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
+                new Authorship(null, null, null, null), mock(ZonedDateTime.class),
+                null, null, false, 1);
         reportEditBacker.setReport(testReport);
         reportEditBacker.setReportID(testReport.getId());
         testTopic = new Topic(1, "Some title", "Some description");
@@ -79,11 +85,60 @@ public class ReportEditBackerTest {
         reportEditBacker.setCurrentTopic(testTopic);
         lenient().doReturn(testTopic).when(topicService).getTopicByID(1);
         lenient().doReturn(ectx).when(fctx).getExternalContext();
+        lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
+    }
+
+    @Test
+    public void testInit() {
+        doReturn("1234").when(requestParameterMap).get("id");
+        doReturn(testReport).when(reportService).getReportByID(1234);
+        doReturn(user).when(session).getUser();
+        testReport.getAuthorship().setCreator(user);
+        doReturn(false).when(topicService).isBanned(any(), any());
+        reportEditBacker.init();
+        assertEquals(testReport, reportEditBacker.getReport());
+        assertEquals(testTopic, reportEditBacker.getCurrentTopic());
+        assertEquals(testTopic.getId(), reportEditBacker.getDestinationID());
+        assertEquals(user, reportEditBacker.getReport().getAuthorship().getModifier());
+    }
+
+    @Test
+    public void testInitWhenNoParam() throws Exception {
+        doReturn(null).when(requestParameterMap).get("id");
+        reportEditBacker.init();
+        verify(ectx).redirect(any());
+    }
+
+    @Test
+    public void testInitWhenNoReport() throws Exception {
+        doReturn("1234").when(requestParameterMap).get("id");
+        doReturn(null).when(reportService).getReportByID(1234);
+        reportEditBacker.init();
+        verify(ectx).redirect(any());
+    }
+
+    @Test
+    public void testInitWhenNoUser() throws Exception {
+        doReturn("1234").when(requestParameterMap).get("id");
+        doReturn(testReport).when(reportService).getReportByID(1234);
+        doReturn(user).when(session).getUser();
+        reportEditBacker.init();
+        verify(ectx).redirect(any());
+    }
+
+    @Test
+    public void testInitWhenNotPrivileged() throws Exception {
+        doReturn("1234").when(requestParameterMap).get("id");
+        doReturn(testReport).when(reportService).getReportByID(1234);
+        doReturn(user).when(session).getUser();
+        testReport.getAuthorship().setCreator(mock(User.class));
+        reportEditBacker.init();
+        verify(ectx).redirect(any());
     }
 
     @Test
     public void testSaveChangesWithConfirm() {
-        reportEditBacker.setDestinationID(testReport.getTopic());
+        reportEditBacker.setDestinationID(testReport.getTopicID());
         doReturn(true).when(reportService).updateReport(any());
         reportEditBacker.saveChangesWithConfirm();
         assertFalse(reportEditBacker.isDisplayConfirmDialog());
@@ -132,7 +187,7 @@ public class ReportEditBackerTest {
     @Test
     public void testSaveChanges() throws Exception {
         doReturn(true).when(reportService).updateReport(any());
-        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopic());
+        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopicID());
         reportEditBacker.saveChanges();
         verify(ectx).redirect(any());
     }
@@ -141,7 +196,7 @@ public class ReportEditBackerTest {
     public void testSaveChangesMove() throws Exception {
         doReturn(true).when(reportService).move(any());
         doReturn(true).when(reportService).updateReport(any());
-        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopic() + 1);
+        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopicID() + 1);
         reportEditBacker.saveChanges();
         verify(ectx).redirect(any());
     }
@@ -149,7 +204,7 @@ public class ReportEditBackerTest {
     @Test
     public void testSaveChangesWhenError() throws Exception {
         doReturn(false).when(reportService).updateReport(any());
-        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopic());
+        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopicID());
         reportEditBacker.saveChanges();
         verify(ectx, times(0)).redirect(any());
     }
@@ -157,7 +212,7 @@ public class ReportEditBackerTest {
     @Test
     public void testSaveChangesWhenMoveError() throws Exception {
         doReturn(false).when(reportService).move(any());
-        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopic() + 1);
+        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopicID() + 1);
         reportEditBacker.saveChanges();
         verify(ectx, times(0)).redirect(any());
     }
@@ -277,38 +332,42 @@ public class ReportEditBackerTest {
     }
 
     @Test
-    public void testIsPrivilegedUserBanned() {
+    public void testIsPrivilegedAdmin() {
         reportEditBacker.setCurrentTopic(testTopic);
         when(session.getUser()).thenReturn(user);
+        user.setAdministrator(true);
+        assertTrue(reportEditBacker.isPrivileged());
+    }
+
+    @Test
+    public void testIsPrivilegedModerator() {
+        reportEditBacker.setCurrentTopic(testTopic);
+        when(session.getUser()).thenReturn(user);
+        user.setAdministrator(false);
+        when(topicService.isModerator(user, testTopic)).thenReturn(true);
+        assertTrue(reportEditBacker.isPrivileged());
+    }
+
+    @Test
+    public void testIsPrivilegedCreator() {
+        reportEditBacker.setCurrentTopic(testTopic);
+        when(session.getUser()).thenReturn(user);
+        user.setAdministrator(false);
+        when(topicService.isModerator(user, testTopic)).thenReturn(false);
+        testReport.getAuthorship().setCreator(user);
+        when(topicService.isBanned(user, testTopic)).thenReturn(false);
+        assertTrue(reportEditBacker.isPrivileged());
+    }
+
+    @Test
+    public void testIsPrivilegedBanned() {
+        reportEditBacker.setCurrentTopic(testTopic);
+        when(session.getUser()).thenReturn(user);
+        user.setAdministrator(false);
+        when(topicService.isModerator(user, testTopic)).thenReturn(false);
+        testReport.getAuthorship().setCreator(user);
         when(topicService.isBanned(user, testTopic)).thenReturn(true);
         assertFalse(reportEditBacker.isPrivileged());
-    }
-
-    @Test
-    public void testIsBanned() {
-        reportEditBacker.setCurrentTopic(testTopic);
-        when(session.getUser()).thenReturn(user);
-        when(topicService.isBanned(user, testTopic)).thenReturn(true);
-        assertTrue(reportEditBacker.isBanned());
-    }
-
-    @Test
-    public void testIsBannedFalse() {
-        reportEditBacker.setCurrentTopic(testTopic);
-        when(session.getUser()).thenReturn(user);
-        assertFalse(reportEditBacker.isBanned());
-    }
-
-    @Test
-    public void testIsBannedUserNull() {
-        reportEditBacker.setCurrentTopic(testTopic);
-        assertFalse(reportEditBacker.isBanned());
-    }
-
-    @Test
-    public void testIsBannedTopicNull() {
-        when(session.getUser()).thenReturn(user);
-        assertFalse(reportEditBacker.isBanned());
     }
 
 }
