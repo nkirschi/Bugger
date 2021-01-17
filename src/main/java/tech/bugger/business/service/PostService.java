@@ -135,7 +135,7 @@ public class PostService {
         Notification notification = new Notification();
         notification.setType(Notification.Type.EDITED_POST);
         notification.setActuatorID(post.getAuthorship().getModifier().getId());
-        notification.setTopicID(post.getReport().get().getTopic());
+        notification.setTopicID(post.getReport().get().getTopicID());
         notification.setReportID(post.getReport().get().getId());
         notification.setPostID(post.getId());
         notification.setReportTitle(post.getReport().get().getTitle());
@@ -230,7 +230,7 @@ public class PostService {
             Notification notification = new Notification();
             notification.setType(Notification.Type.NEW_POST);
             notification.setActuatorID(post.getAuthorship().getCreator().getId());
-            notification.setTopicID(post.getReport().get().getTopic());
+            notification.setTopicID(post.getReport().get().getTopicID());
             notification.setReportID(post.getReport().get().getId());
             notification.setPostID(post.getId());
             notification.setReportTitle(post.getReport().get().getTitle());

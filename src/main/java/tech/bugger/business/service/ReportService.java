@@ -407,7 +407,7 @@ public class ReportService {
             Notification notification = new Notification();
             notification.setType(Notification.Type.NEW_REPORT);
             notification.setActuatorID(report.getAuthorship().getCreator().getId());
-            notification.setTopicID(report.getTopic());
+            notification.setTopicID(report.getTopicID());
             notification.setReportID(report.getId());
             notification.setPostID(firstPost.getId());
             notification.setReportTitle(report.getTitle());
@@ -443,7 +443,7 @@ public class ReportService {
             Notification notification = new Notification();
             notification.setType(Notification.Type.MOVED_REPORT);
             notification.setActuatorID(report.getAuthorship().getModifier().getId());
-            notification.setTopicID(report.getTopic());
+            notification.setTopicID(report.getTopicID());
             notification.setReportID(report.getId());
             notification.setReportTitle(report.getTitle());
             notificationService.createNotification(notification);
@@ -475,7 +475,7 @@ public class ReportService {
         Notification notification = new Notification();
         notification.setType(Notification.Type.EDITED_REPORT);
         notification.setActuatorID(report.getAuthorship().getModifier().getId());
-        notification.setTopicID(report.getTopic());
+        notification.setTopicID(report.getTopicID());
         notification.setReportID(report.getId());
         notification.setReportTitle(report.getTitle());
         notificationService.createNotification(notification);
