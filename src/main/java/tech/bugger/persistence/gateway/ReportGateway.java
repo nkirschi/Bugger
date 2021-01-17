@@ -192,4 +192,21 @@ public interface ReportGateway {
      */
     int findReportOfPost(int postID) throws NotFoundException;
 
+    /**
+     * Retrieves all reports the user is subscribed to for a given selection.
+     *
+     * @param user      The user in question.
+     * @param selection The given selection.
+     * @return A list of reports the user is subscribed to.
+     */
+    List<Report> selectSubscribedReports(User user, Selection selection);
+
+    /**
+     * Counts the number of reports the user is subscribed to.
+     *
+     * @param user The user in question.
+     * @return The number of reports the user is subscribed to.
+     */
+    int countSubscribedReports(User user);
+
 }

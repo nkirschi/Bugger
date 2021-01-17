@@ -11,6 +11,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
@@ -145,6 +146,7 @@ public class ReportBacker implements Serializable {
      * @param topicService        The topic service to use.
      * @param reportService       The report service to use.
      * @param postService         The post service to use.
+     * @param topicService        The topic service to use.
      * @param session             The user session.
      * @param fctx                The current {@link FacesContext} of the application.
      */
@@ -303,8 +305,28 @@ public class ReportBacker implements Serializable {
 
     /**
      * Adds or removes a subscription to the report for the user, whichever is applicable.
+     *
+     * @return {@code null}
      */
-    public void toggleReportSubscription() {
+    public String toggleReportSubscription() {
+        if (session.getUser() == null) {
+            return null;
+        }
+        if (reportService.isSubscribed(session.getUser(), report)) {
+            reportService.unsubscribeFromReport(session.getUser(), report);
+        } else {
+            reportService.subscribeToReport(session.getUser(), report);
+        }
+        return null;
+    }
+
+    /**
+     * Returns whether the user is subscribed to the report.
+     *
+     * @return {@code true} iff the user is subscribed to the report.
+     */
+    public boolean isSubscribed() {
+        return reportService.isSubscribed(session.getUser(), report);
     }
 
     /**
@@ -529,7 +551,6 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     *
      * @return Whether the user has upvoted this report.
      */
     public boolean getHasUpvoted() {

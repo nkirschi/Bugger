@@ -10,6 +10,7 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
@@ -102,7 +103,33 @@ public class ReportService {
      * @param report The report receiving the subscription.
      */
     public void subscribeToReport(final User user, final Report report) {
+        if (user == null) {
+            log.error("Anonymous users cannot subscribe to anything.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot subscribe when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (report == null) {
+            log.error("Cannot subscribe to report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot subscribe to report with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
 
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().subscribe(report, user);
+            tx.commit();
+        } catch (DuplicateException e) {
+            log.error("User " + user + " is already subscribed to report " + report + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("already_subscribed"), Feedback.Type.ERROR));
+        } catch (NotFoundException e) {
+            log.error("User " + user + " or report " + report + " not found.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when user " + user + " is subscribing to report " + report + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -112,7 +139,67 @@ public class ReportService {
      * @param report The report the user is subscribed to.
      */
     public void unsubscribeFromReport(final User user, final Report report) {
+        if (user == null) {
+            log.error("Anonymous users cannot unsubscribe.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot unsubscribe when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (report == null) {
+            log.error("Cannot unsubscribe from report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot unsubscribe from report with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
 
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().unsubscribe(report, user);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("User " + user + " or report " + report + " not found.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when user " + user + " is unsubscribing from report " + report + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+    }
+
+    /**
+     * Determines the subscription status of the user to the report.
+     *
+     * @param user The user in question.
+     * @param report The report in question.
+     * @return {@code true} iff the user is subscribed to the report.
+     */
+    public boolean isSubscribed(final User user, final Report report) {
+        if (user == null) {
+            return false;
+        } else if (user.getId() == null) {
+            log.error("Cannot determine subscription status of user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (report == null) {
+            log.error("Cannot determine subscription status to report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot determine subscription status to report with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
+
+        boolean status;
+        try (Transaction tx = transactionManager.begin()) {
+            status = tx.newSubscriptionGateway().isSubscribed(user, report);
+            tx.commit();
+        } catch (NotFoundException e) {
+            status = false;
+            log.error("Could not find user " + user + " or report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            status = false;
+            log.error("Error when determining subscription status of user " + user + " to report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return status;
     }
 
     /**
@@ -159,7 +246,7 @@ public class ReportService {
      */
     public void upvote(final Report report, final User user) {
         removeVote(report, user);
-        Integer votingWeight = profileService.getVotingWeightForUser(user);
+        int votingWeight = profileService.getVotingWeightForUser(user);
         if (votingWeight > 0) {
             try (Transaction tx = transactionManager.begin()) {
                 tx.newReportGateway().upvote(report, user, votingWeight);
@@ -188,7 +275,7 @@ public class ReportService {
      */
     public void downvote(final Report report, final User user) {
         removeVote(report, user);
-        Integer votingWeight = profileService.getVotingWeightForUser(user);
+        int votingWeight = profileService.getVotingWeightForUser(user);
         if (votingWeight > 0) {
             try (Transaction tx = transactionManager.begin()) {
                 tx.newReportGateway().downvote(report, user, votingWeight);
@@ -296,23 +383,37 @@ public class ReportService {
      * @return {@code true} iff creating the report succeeded.
      */
     public boolean createReport(final Report report, final Post firstPost) {
-        // Notifications will be dealt with when implementing the subscriptions feature.
+        boolean success = false;
         try (Transaction tx = transactionManager.begin()) {
             tx.newReportGateway().create(report);
             boolean postCreated = postService.createPostWithTransaction(firstPost, tx);
             if (postCreated) {
                 tx.commit();
+                success = true;
                 log.info("Report created successfully.");
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("report_created"), Feedback.Type.INFO));
             } else {
                 tx.abort();
             }
-            return postCreated;
         } catch (TransactionException e) {
             log.error("Error while creating a new report", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
             return false;
         }
+        if (success) {
+            User creator = new User();
+            creator.setId(report.getAuthorship().getCreator().getId());
+            subscribeToReport(creator, report);
+            Notification notification = new Notification();
+            notification.setType(Notification.Type.NEW_REPORT);
+            notification.setActuatorID(report.getAuthorship().getCreator().getId());
+            notification.setTopicID(report.getTopicID());
+            notification.setReportID(report.getId());
+            notification.setPostID(firstPost.getId());
+            notification.setReportTitle(report.getTitle());
+            notificationService.createNotification(notification);
+        }
+        return success;
     }
 
     /**
@@ -323,7 +424,6 @@ public class ReportService {
      * @return {@code true} iff moving the report succeeded.
      */
     public boolean move(final Report report) {
-        // Notifications will be dealt with when implementing the subscriptions feature.
         log.debug("Moving report " + report + ".");
         boolean success = false;
 
@@ -339,6 +439,15 @@ public class ReportService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
         }
 
+        if (success) {
+            Notification notification = new Notification();
+            notification.setType(Notification.Type.MOVED_REPORT);
+            notification.setActuatorID(report.getAuthorship().getModifier().getId());
+            notification.setTopicID(report.getTopicID());
+            notification.setReportID(report.getId());
+            notification.setReportTitle(report.getTitle());
+            notificationService.createNotification(notification);
+        }
         return success;
     }
 
@@ -350,12 +459,10 @@ public class ReportService {
      * @return {@code true} iff updating the report succeeded.
      */
     public boolean updateReport(final Report report) {
-        // Notifications will be dealt with when implementing the subscriptions feature.
         try (Transaction tx = transactionManager.begin()) {
             report.getAuthorship().setModifiedDate(ZonedDateTime.now());
             tx.newReportGateway().update(report);
             tx.commit();
-            return true;
         } catch (NotFoundException e) {
             log.error("Report to be updated could not be found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
@@ -365,6 +472,14 @@ public class ReportService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
             return false;
         }
+        Notification notification = new Notification();
+        notification.setType(Notification.Type.EDITED_REPORT);
+        notification.setActuatorID(report.getAuthorship().getModifier().getId());
+        notification.setTopicID(report.getTopicID());
+        notification.setReportID(report.getId());
+        notification.setReportTitle(report.getTitle());
+        notificationService.createNotification(notification);
+        return true;
     }
 
     /**

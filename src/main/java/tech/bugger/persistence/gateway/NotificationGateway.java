@@ -17,16 +17,15 @@ public interface NotificationGateway {
      *
      * @param user The user whose notifications to count.
      * @return The number of notifications the user has received.
-     * @throws NotFoundException The user could not be found.
      */
-    int getNumberOfNotificationsForUser(User user) throws NotFoundException;
+    int countNotifications(User user);
 
     /**
      * Inserts a given notification into the notification storage.
      *
      * @param notification The notification to insert.
      */
-    void createNotification(Notification notification);
+    void create(Notification notification);
 
     /**
      * Inserts a whole list of notifications into the notification storage all at once.
@@ -42,7 +41,7 @@ public interface NotificationGateway {
      * @return The notification identified by the ID.
      * @throws NotFoundException The notification could not be found.
      */
-    Notification getNotificationByID(int id) throws NotFoundException;
+    Notification find(int id) throws NotFoundException;
 
     /**
      * Retrieves the list of a user's notifications that match the given selection criteria.
@@ -50,9 +49,8 @@ public interface NotificationGateway {
      * @param user      The user whose notifications to look for.
      * @param selection The search criteria to apply.
      * @return The list of the user's notifications that match {@code selection}.
-     * @throws NotFoundException The user could not be found.
      */
-    List<Notification> getNotificationsForUser(User user, Selection selection) throws NotFoundException;
+    List<Notification> selectNotifications(User user, Selection selection);
 
     /**
      * Updates a notification's attributes in the notification storage.
@@ -60,7 +58,7 @@ public interface NotificationGateway {
      * @param notification The notification to update.
      * @throws NotFoundException The notification could not be found.
      */
-    void updateNotification(Notification notification) throws NotFoundException;
+    void update(Notification notification) throws NotFoundException;
 
     /**
      * Deletes a notification from the notification storage.
@@ -68,22 +66,13 @@ public interface NotificationGateway {
      * @param notification The notification to delete.
      * @throws NotFoundException The notification could not be found.
      */
-    void deleteNotification(Notification notification) throws NotFoundException;
+    void delete(Notification notification) throws NotFoundException;
 
     /**
-     * Marks a notification as read in the notification storage.
+     * Returns all unsent notifications.
      *
-     * @param notification The notification to mark as read.
-     * @throws NotFoundException The notification could not be found.
+     * @return The unsent notifications
      */
-    void markAsRead(Notification notification) throws NotFoundException;
-
-    /**
-     * Marks a notification as sent in the notification storage.
-     *
-     * @param notification The notification to mark as sent.
-     * @throws NotFoundException The notification could not be found.
-     */
-    void markAsSent(Notification notification) throws NotFoundException;
+    List<Notification> getUnsentNotifications();
 
 }

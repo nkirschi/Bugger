@@ -7,11 +7,14 @@ import tech.bugger.business.util.Hasher;
 import tech.bugger.business.util.Images;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.business.exception.NotFoundException;
+import tech.bugger.persistence.exception.DuplicateException;
+import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
@@ -22,6 +25,7 @@ import javax.inject.Inject;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -59,10 +63,10 @@ public class ProfileService {
     /**
      * Constructs a new profile service with the given dependencies.
      *
-     * @param feedback The feedback event to be used for user feedback.
-     * @param transactionManager The transaction manager to be used for creating transactions.
+     * @param feedback            The feedback event to be used for user feedback.
+     * @param transactionManager  The transaction manager to be used for creating transactions.
      * @param applicationSettings The current application settings.
-     * @param messages The resource bundle to look up feedback messages.
+     * @param messages            The resource bundle to look up feedback messages.
      */
     @Inject
     public ProfileService(final Event<Feedback> feedback, final TransactionManager transactionManager,
@@ -105,6 +109,7 @@ public class ProfileService {
      */
     public boolean createUser(final User user) {
         try (Transaction tx = transactionManager.begin()) {
+            user.setEmailAddress(user.getEmailAddress().toLowerCase());
             tx.newUserGateway().createUser(user);
             tx.commit();
             return true;
@@ -168,6 +173,30 @@ public class ProfileService {
      * @param topic      The topic of which the subscription to is to be removed.
      */
     public void deleteTopicSubscription(final User subscriber, final Topic topic) {
+        if (subscriber == null) {
+            log.error("Anonymous users cannot unsubscribe from anything.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (subscriber.getId() == null) {
+            log.error("Cannot unsubscribe when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (topic == null) {
+            log.error("Cannot unsubscribe from topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot unsubscribe from topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
+
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().unsubscribe(topic, subscriber);
+            tx.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("User " + subscriber + " or topic " + topic + " not found.");
+            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when user " + subscriber + " is unsubscribing from topic " + topic + ".");
+            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -177,6 +206,30 @@ public class ProfileService {
      * @param report     The report of which the subscription to is to be removed.
      */
     public void deleteReportSubscription(final User subscriber, final Report report) {
+        if (subscriber == null) {
+            log.error("Anonymous users cannot unsubscribe.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (subscriber.getId() == null) {
+            log.error("Cannot unsubscribe when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (report == null) {
+            log.error("Cannot unsubscribe from report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot unsubscribe from report with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
+
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().unsubscribe(report, subscriber);
+            tx.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("User " + subscriber + " or report " + report + " not found.");
+            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when user " + subscriber + " is unsubscribing from report " + report + ".");
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -186,6 +239,30 @@ public class ProfileService {
      * @param user       The user of which the subscription to is to be removed.
      */
     public void deleteUserSubscription(final User subscriber, final User user) {
+        if (subscriber == null) {
+            log.error("Anonymous users cannot unsubscribe.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (subscriber.getId() == null) {
+            log.error("Cannot unsubscribe when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (user == null) {
+            log.error("Cannot unsubscribe from user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot unsubscribe from user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().unsubscribe(user, subscriber);
+            tx.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("User " + subscriber + " or user " + user + " not found.");
+            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when user " + subscriber + " is unsubscribing from user " + user + ".");
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -194,6 +271,24 @@ public class ProfileService {
      * @param user The user whose topic subscriptions are to be deleted.
      */
     public void deleteAllTopicSubscriptions(final User user) {
+        if (user == null) {
+            log.error("Cannot delete subscriptions for user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot delete subscriptions for user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().unsubscribeAllTopics(user);
+            tx.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("Could not find user " + user + ".", e);
+            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when removing all topic subscriptions for user " + user + ".", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -202,6 +297,24 @@ public class ProfileService {
      * @param user The user whose report subscriptions are to be deleted.
      */
     public void deleteAllReportSubscriptions(final User user) {
+        if (user == null) {
+            log.error("Cannot delete subscriptions for user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot delete subscriptions for user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().unsubscribeAllReports(user);
+            tx.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("Could not find user " + user + ".", e);
+            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when removing all report subscriptions for user " + user + ".", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -210,6 +323,24 @@ public class ProfileService {
      * @param user The user whose user subscriptions are to be deleted.
      */
     public void deleteAllUserSubscriptions(final User user) {
+        if (user == null) {
+            log.error("Cannot delete subscriptions for user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot delete subscriptions for user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().unsubscribeAllUsers(user);
+            tx.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("Could not find user " + user + ".", e);
+            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when removing all user subscriptions for user " + user + ".", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -219,6 +350,74 @@ public class ProfileService {
      * @param subscribedTo The user who will receive a subscription.
      */
     public void subscribeToUser(final User subscriber, final User subscribedTo) {
+        if (subscriber == null) {
+            log.error("Anonymous users cannot subscribe to anything.");
+            throw new IllegalArgumentException("Subscriber cannot be null.");
+        } else if (subscriber.getId() == null) {
+            log.error("Cannot subscribe when user ID is null.");
+            throw new IllegalArgumentException("Subscriber ID cannot be null.");
+        } else if (subscribedTo == null) {
+            log.error("Cannot subscribe to user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (subscribedTo.getId() == null) {
+            log.error("Cannot subscribe to user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().subscribe(subscribedTo, subscriber);
+            tx.commit();
+        } catch (DuplicateException e) {
+            log.error("User " + subscriber + " is already subscribed to user " + subscribedTo + ".");
+            feedback.fire(new Feedback(messages.getString("already_subscribed"), Feedback.Type.ERROR));
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.error("User " + subscriber + " or user " + subscribedTo + " not found.");
+            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when user " + subscriber + " is subscribing to user " + subscribedTo + ".");
+            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (SelfReferenceException e) {
+            log.error("User cannot self-subscribe.");
+            feedback.fire(new Feedback(messages.getString("no_self_subscribe"), Feedback.Type.ERROR));
+        }
+    }
+
+    /**
+     * Checks whether a user is subscribed to another user.
+     *
+     * @param subscriber   The user whose subscription to check.
+     * @param subscribedTo he user to which subscriber might be subscribed.
+     * @return Whether subscriber is subscribed to subscribedTo.
+     */
+    public boolean isSubscribed(final User subscriber, final User subscribedTo) {
+        if (subscriber == null) {
+            return false;
+        } else if (subscriber.getId() == null) {
+            log.error("Cannot determine subscription status of user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (subscribedTo == null) {
+            log.error("Cannot determine subscription status to user null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (subscribedTo.getId() == null) {
+            log.error("Cannot determine subscription status to user with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
+
+        boolean status;
+        try (Transaction tx = transactionManager.begin()) {
+            status = tx.newSubscriptionGateway().isSubscribed(subscriber, subscribedTo);
+            tx.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            status = false;
+            log.error("Could not find user " + subscriber + " or user " + subscribedTo + ".", e);
+            feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            status = false;
+            log.error("Error when determining subscription status of user " + subscriber + " to user " + subscribedTo
+                    + ".", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return status;
     }
 
     /**
@@ -268,7 +467,7 @@ public class ProfileService {
     /**
      * Calculates the voting weight from the given number of posts and the voting weight definition.
      *
-     * @param numPosts The number of posts.
+     * @param numPosts        The number of posts.
      * @param votingWeightDef The voting weight definition.
      * @return The calculated voting weight.
      */
@@ -353,7 +552,7 @@ public class ProfileService {
     /**
      * Changes the given user's administrator status based on the given boolean.
      *
-     * @param user The user to be promoted.
+     * @param user  The user to be promoted.
      * @param admin The administration status to change to.
      */
     private void changeAdminStatus(final User user, final boolean admin) {
@@ -376,7 +575,7 @@ public class ProfileService {
     /**
      * Checks whether the input password is the same as the given user's password.
      *
-     * @param user The user whose password is to be checked.
+     * @param user     The user whose password is to be checked.
      * @param password The password given as input.
      * @return {@code true} iff the input matched the user's hashed password.
      */
@@ -483,6 +682,122 @@ public class ProfileService {
             feedback.fire(new Feedback(messages.getString("generate_thumbnail"), Feedback.Type.ERROR));
         }
         return null;
+    }
+
+    /**
+     * Returns all users the user is subscribed to for a given selection.
+     *
+     * @param user      The user in question.
+     * @param selection The given selection.
+     * @return A list of users the user is subscribed to.
+     */
+    public List<User> selectSubscribedUsers(final User user, final Selection selection) {
+        if (selection == null) {
+            log.error("Cannot select subscribed users when selection is null.");
+            throw new IllegalArgumentException("Selection cannot be null.");
+        } else if (user == null) {
+            log.error("Cannot select subscribed users when user is null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot select subscribed users when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        List<User> selectedUsers;
+        try (Transaction tx = transactionManager.begin()) {
+            selectedUsers = tx.newUserGateway().selectSubscribedUsers(user, selection);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when selecting subscribed users for user " + user + " with selection " + selection + ".",
+                    e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            selectedUsers = null;
+        }
+        return selectedUsers;
+    }
+
+    /**
+     * Counts the number of users the user is subscribed to.
+     *
+     * @param user The user in question.
+     * @return The number of users the user is subscribed to.
+     */
+    public int countSubscribedUsers(final User user) {
+        if (user == null) {
+            return 0;
+        } else if (user.getId() == null) {
+            log.error("Cannot count subscribed users when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        int count;
+        try (Transaction tx = transactionManager.begin()) {
+            count = tx.newUserGateway().countSubscribedUsers(user);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when counting subscribed users for user " + user + ".", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            count = 0;
+        }
+        return count;
+    }
+
+    /**
+     * Returns all reports the user is subscribed to for a given selection.
+     *
+     * @param user      The user in question.
+     * @param selection The given selection.
+     * @return A list of reports the user is subscribed to.
+     */
+    public List<Report> selectSubscribedReports(final User user, final Selection selection) {
+        if (selection == null) {
+            log.error("Cannot select subscribed reports when selection is null.");
+            throw new IllegalArgumentException("Selection cannot be null.");
+        } else if (user == null) {
+            log.error("Cannot select subscribed reports when user is null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot select subscribed reports when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        List<Report> selectedReports;
+        try (Transaction tx = transactionManager.begin()) {
+            selectedReports = tx.newReportGateway().selectSubscribedReports(user, selection);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when selecting subscribed reports for user " + user + " with selection " + selection + ".",
+                    e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            selectedReports = null;
+        }
+        return selectedReports;
+    }
+
+    /**
+     * Counts the number of users the user is subscribed to.
+     *
+     * @param user The user in question.
+     * @return The number of users the user is subscribed to.
+     */
+    public int countSubscribedReports(final User user) {
+        if (user == null) {
+            return 0;
+        } else if (user.getId() == null) {
+            log.error("Cannot count subscribed reports when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        int count;
+        try (Transaction tx = transactionManager.begin()) {
+            count = tx.newReportGateway().countSubscribedReports(user);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when counting subscribed reports for user " + user + ".", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            count = 0;
+        }
+        return count;
     }
 
 }

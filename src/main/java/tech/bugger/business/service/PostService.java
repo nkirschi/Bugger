@@ -4,6 +4,7 @@ import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Attachment;
+import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
@@ -100,7 +101,6 @@ public class PostService {
      * @return {@code true} iff updating the post succeeded.
      */
     public boolean updatePost(final Post post) {
-        // Notifications will be dealt with when implementing the subscriptions feature.
         try (Transaction tx = transactionManager.begin()) {
             post.getAuthorship().setModifiedDate(ZonedDateTime.now());
             tx.newPostGateway().update(post);
@@ -123,7 +123,6 @@ public class PostService {
             }
 
             tx.commit();
-            return true;
         } catch (NotFoundException e) {
             log.error("Post to be updated could not be found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
@@ -133,6 +132,15 @@ public class PostService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
             return false;
         }
+        Notification notification = new Notification();
+        notification.setType(Notification.Type.EDITED_POST);
+        notification.setActuatorID(post.getAuthorship().getModifier().getId());
+        notification.setTopicID(post.getReport().get().getTopicID());
+        notification.setReportID(post.getReport().get().getId());
+        notification.setPostID(post.getId());
+        notification.setReportTitle(post.getReport().get().getTitle());
+        notificationService.createNotification(notification);
+        return true;
     }
 
     /**
@@ -205,20 +213,30 @@ public class PostService {
      * @return {@code true} iff creating the post succeeded.
      */
     public boolean createPost(final Post post) {
-        // Notifications will be dealt with when implementing the subscriptions feature.
+        boolean success;
         try (Transaction tx = transactionManager.begin()) {
-            boolean success = createPostWithTransaction(post, tx);
+            success = createPostWithTransaction(post, tx);
             if (success) {
                 tx.commit();
                 log.info("Post created successfully.");
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("post_created"), Feedback.Type.INFO));
             }
-            return success;
         } catch (TransactionException e) {
             log.error("Error while creating a new post.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
             return false;
         }
+        if (success) {
+            Notification notification = new Notification();
+            notification.setType(Notification.Type.NEW_POST);
+            notification.setActuatorID(post.getAuthorship().getCreator().getId());
+            notification.setTopicID(post.getReport().get().getTopicID());
+            notification.setReportID(post.getReport().get().getId());
+            notification.setPostID(post.getId());
+            notification.setReportTitle(post.getReport().get().getTitle());
+            notificationService.createNotification(notification);
+        }
+        return success;
     }
 
     /**

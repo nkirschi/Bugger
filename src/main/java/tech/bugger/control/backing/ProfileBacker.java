@@ -177,6 +177,44 @@ public class ProfileBacker implements Serializable {
                 return profileService.getNumberOfModeratedTopics(user);
             }
         };
+
+        if (isPrivileged()) {
+            topicSubscriptions = new Paginator<>("title", Selection.PageSize.NORMAL) {
+                @Override
+                protected Iterable<Topic> fetch() {
+                    return topicService.selectSubscribedTopics(user, getSelection());
+                }
+
+                @Override
+                protected int totalSize() {
+                    return topicService.countSubscribedTopics(user);
+                }
+            };
+
+            userSubscriptions = new Paginator<>("username", Selection.PageSize.NORMAL) {
+                @Override
+                protected Iterable<User> fetch() {
+                    return profileService.selectSubscribedUsers(user, getSelection());
+                }
+
+                @Override
+                protected int totalSize() {
+                    return profileService.countSubscribedUsers(user);
+                }
+            };
+
+            reportSubscriptions = new Paginator<>("title", Selection.PageSize.NORMAL) {
+                @Override
+                protected Iterable<Report> fetch() {
+                    return profileService.selectSubscribedReports(user, getSelection());
+                }
+
+                @Override
+                protected int totalSize() {
+                    return profileService.countSubscribedReports(user);
+                }
+            };
+        }
     }
 
     /**
@@ -187,30 +225,24 @@ public class ProfileBacker implements Serializable {
     }
 
     /**
-     * Opens the dialog for deleting all topic subscriptions of a particular type.
-     *
-     * @return {@code null} to reload the page.
+     * Opens the dialog for deleting all topic subscriptions.
      */
-    public String openDeleteAllTopicSubscriptionsDialog() {
-        return null;
+    public void openDeleteAllTopicSubscriptionsDialog() {
+        displayDialog = DialogType.TOPIC;
     }
 
     /**
-     * Opens the dialog for deleting all report subscriptions of a particular type.
-     *
-     * @return {@code null} to reload the page.
+     * Opens the dialog for deleting all report subscriptions.
      */
-    public String openDeleteAllReportSubscriptionsDialog() {
-        return null;
+    public void openDeleteAllReportSubscriptionsDialog() {
+        displayDialog = DialogType.REPORT;
     }
 
     /**
-     * Opens the dialog for deleting all user subscriptions of a particular type.
-     *
-     * @return {@code null} to reload the page.
+     * Opens the dialog for deleting all user subscriptions.
      */
-    public String openDeleteAllUserSubscriptionsDialog() {
-        return null;
+    public void openDeleteAllUserSubscriptionsDialog() {
+        displayDialog = DialogType.USER;
     }
 
     /**
@@ -268,7 +300,8 @@ public class ProfileBacker implements Serializable {
      * @param topic The topic of which the subscription to should be removed.
      */
     public void deleteTopicSubscription(final Topic topic) {
-
+        profileService.deleteTopicSubscription(user, topic);
+        topicSubscriptions.updateReset();
     }
 
     /**
@@ -277,7 +310,8 @@ public class ProfileBacker implements Serializable {
      * @param report The report of which the subscription to should be removed.
      */
     public void deleteReportSubscription(final Report report) {
-
+        profileService.deleteReportSubscription(user, report);
+        reportSubscriptions.updateReset();
     }
 
     /**
@@ -286,35 +320,64 @@ public class ProfileBacker implements Serializable {
      * @param subscribee The user of which the subscription to should be removed.
      */
     public void deleteUserSubscription(final User subscribee) {
-
+        profileService.deleteUserSubscription(user, subscribee);
+        userSubscriptions.updateReset();
     }
 
     /**
      * Removes all subscriptions to topics for the user.
      */
     public void deleteAllTopicSubscriptions() {
-
+        profileService.deleteAllTopicSubscriptions(user);
+        topicSubscriptions.updateReset();
+        closeDialog();
     }
 
     /**
      * Removes all subscriptions to reports for the user.
      */
     public void deleteAllReportSubscriptions() {
-
+        profileService.deleteAllReportSubscriptions(user);
+        reportSubscriptions.updateReset();
+        closeDialog();
     }
 
     /**
      * Removes all subscriptions to other users for the user.
      */
     public void deleteAllUserSubscriptions() {
-
+        profileService.deleteAllUserSubscriptions(user);
+        userSubscriptions.updateReset();
+        closeDialog();
     }
 
     /**
      * Subscribes the user to the user whose profile is being viewed.
+     *
+     * @return {@code null}
      */
-    public void toggleUserSubscription() {
+    public String toggleUserSubscription() {
+        if (session.getUser() == null) {
+            return null;
+        } else if (session.getUser().equals(user)) {
+            return null;
+        }
 
+        if (isSubscribed()) {
+            profileService.deleteUserSubscription(session.getUser(), user);
+        } else {
+            profileService.subscribeToUser(session.getUser(), user);
+        }
+        return null;
+    }
+
+    /**
+     * Checks if the current user is subscribed to the user whose profile is being viewed.
+     *
+     * @return {@code true} iff the current user is a subscriber of the user whose profile is being viewed.
+     */
+    public boolean isSubscribed() {
+        return profileService.isSubscribed(session.getUser(), user);
     }
 
     /**

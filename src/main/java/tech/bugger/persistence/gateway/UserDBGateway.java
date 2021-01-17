@@ -8,6 +8,7 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
+import tech.bugger.global.util.Pagitable;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
@@ -397,8 +398,31 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public List<User> getSubscribersOf(final User user) {
-        // TODO Auto-generated method stub
-        return null;
+        if (user == null) {
+            log.error("Cannot get subscribers of user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot get subscribers of user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        String sql = "SELECT * FROM user_subscription AS s"
+                + " JOIN \"user\" u on u.id = s.subscriber"
+                + " WHERE s.subscribee = ?;";
+        List<User> subscribers;
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            subscribers = new ArrayList<>();
+            while (rs.next()) {
+                subscribers.add(getUserFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            log.error("Error while retrieving subscribers of user " + user + ".", e);
+            throw new StoreException("Error while retrieving subscribers of user " + user + ".", e);
+        }
+        return subscribers;
     }
 
     /**
@@ -406,8 +430,31 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public List<User> getSubscribersOf(final Report report) {
-        // TODO Auto-generated method stub
-        return null;
+        if (report == null) {
+            log.error("Cannot get subscribers of report null.");
+            throw new IllegalArgumentException("Report cannot be null.");
+        } else if (report.getId() == null) {
+            log.error("Cannot get subscribers of report with ID null.");
+            throw new IllegalArgumentException("Report ID cannot be null.");
+        }
+
+        String sql = "SELECT * FROM report_subscription AS s"
+                + " JOIN \"user\" u on u.id = s.subscriber"
+                + " WHERE s.report = ?;";
+        List<User> subscribers;
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(report.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            subscribers = new ArrayList<>();
+            while (rs.next()) {
+                subscribers.add(getUserFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            log.error("Error while retrieving subscribers of report " + report + ".", e);
+            throw new StoreException("Error while retrieving subscribers of report " + report + ".", e);
+        }
+        return subscribers;
     }
 
     /**
@@ -415,8 +462,31 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public List<User> getSubscribersOf(final Topic topic) {
-        // TODO Auto-generated method stub
-        return null;
+        if (topic == null) {
+            log.error("Cannot get subscribers of topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot get subscribers of topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
+
+        String sql = "SELECT * FROM topic_subscription AS s"
+                + " JOIN \"user\" u on u.id = s.subscriber"
+                + " WHERE s.topic = ?;";
+        List<User> subscribers;
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(topic.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            subscribers = new ArrayList<>();
+            while (rs.next()) {
+                subscribers.add(getUserFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            log.error("Error while retrieving subscribers of topic " + topic + ".", e);
+            throw new StoreException("Error while retrieving subscribers of topic " + topic + ".", e);
+        }
+        return subscribers;
     }
 
     /**
@@ -515,6 +585,78 @@ public class UserDBGateway implements UserGateway {
         } catch (SQLException e) {
             log.error("Error when cleaning expired user registrations.", e);
             throw new StoreException("Error when cleaning expired user registrations.", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<User> selectSubscribedUsers(final User user, final Selection selection) {
+        if (selection == null) {
+            log.error("Cannot select subscribed users when selection is null.");
+            throw new IllegalArgumentException("Selection cannot be null.");
+        } else if (StringUtils.isBlank(selection.getSortedBy())) {
+            log.error("Cannot select subscribed users when sorted by is blank.");
+            throw new IllegalArgumentException("Cannot sort by nothing.");
+        } else if (user == null) {
+            log.error("Cannot select subscribed users when user is null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot select subscribed users when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        String sql = " SELECT * FROM user_subscription AS s"
+                + " LEFT OUTER JOIN \"user\" u ON s.subscribee = u.id"
+                + " WHERE s.subscriber = ?"
+                + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
+                + " LIMIT ? OFFSET ?;";
+        List<User> selectedUsers =
+                new ArrayList<>(Math.min(Pagitable.getItemLimit(selection), Math.max(0, selection.getTotalSize())));
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(Pagitable.getItemLimit(selection))
+                    .integer(Pagitable.getItemOffset(selection)).toStatement();
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                selectedUsers.add(getUserFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            log.error("Error while selecting subscribed users for user " + user + " with " + selection + ".", e);
+            throw new StoreException("Error while selecting subscribed users for user " + user + " with " + selection
+                    + ".", e);
+        }
+        return selectedUsers;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int countSubscribedUsers(final User user) {
+        if (user == null) {
+            log.error("Cannot count subscribed users when user is null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot count subscribed users when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        String sql = "SELECT COUNT(*) AS count FROM user_subscription WHERE subscriber = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            } else {
+                throw new InternalError("Could not count the number of subscribed users.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while retrieving number of users user " + user + " is subscribed to.", e);
+            throw new StoreException("Error while retrieving number of users user " + user + " is subscribed to.", e);
         }
     }
 
