@@ -10,6 +10,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.ocpsoft.pretty.faces.util.StringUtils;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
@@ -61,7 +63,7 @@ public class ReportDBGateway implements ReportGateway {
         report.setType(Report.Type.valueOf(rs.getString("type")));
         report.setSeverity(Report.Severity.valueOf(rs.getString("severity")));
         report.setVersion(rs.getString("version"));
-        report.setTopic(rs.getInt("topic"));
+        report.setTopicID(rs.getInt("topic"));
         report.setDuplicateOf(rs.getInt("duplicate_of"));
         ZonedDateTime closed = null;
         if (rs.getTimestamp("closed_at") != null) {
@@ -299,7 +301,7 @@ public class ReportDBGateway implements ReportGateway {
                     .string(report.getVersion())
                     .object(creator == null ? null : creator.getId(), Types.INTEGER)
                     .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
-                    .integer(report.getTopic())
+                    .integer(report.getTopicID())
                     .toStatement();
             statement.executeUpdate();
 
@@ -334,7 +336,7 @@ public class ReportDBGateway implements ReportGateway {
                     .string(report.getSeverity().name())
                     .string(report.getVersion())
                     .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
-                    .object(report.getTopic(), Types.INTEGER)
+                    .object(report.getTopicID(), Types.INTEGER)
                     .integer(report.getId())
                     .toStatement().executeUpdate();
             if (rowsAffected == 0) {
@@ -665,6 +667,85 @@ public class ReportDBGateway implements ReportGateway {
             }
         } catch (SQLException e) {
             throw new StoreException("Error when finding report containing post with ID " + postID + ".");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Report> selectSubscribedReports(final User user, final Selection selection) {
+        if (selection == null) {
+            log.error("Cannot select subscribed reports when selection is null.");
+            throw new IllegalArgumentException("Selection cannot be null.");
+        } else if (StringUtils.isBlank(selection.getSortedBy())) {
+            log.error("Cannot select subscribed reports when sorted by is blank.");
+            throw new IllegalArgumentException("Cannot sort by nothing.");
+        } else if (user == null) {
+            log.error("Cannot select subscribed reports when user is null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot select subscribed reports when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        String sql = "SELECT * FROM report_subscription AS s"
+                + " LEFT OUTER JOIN report r ON s.report = r.id"
+                + " WHERE s.subscriber = ?"
+                + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
+                + " LIMIT ? OFFSET ?;";
+        List<Report> selectedReports =
+                new ArrayList<>(Math.min(Pagitable.getItemLimit(selection), Math.max(0, selection.getTotalSize())));
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(Pagitable.getItemLimit(selection))
+                    .integer(Pagitable.getItemOffset(selection)).toStatement();
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                Report r;
+                try {
+                    r = getReportFromResultSet(rs);
+                } catch (NotFoundException e) {
+                    throw new InternalError("User not found! Who thought it was a good idea to let the helper methods"
+                            + " throw a NotFoundException?!", e);
+                }
+                selectedReports.add(r);
+            }
+        } catch (SQLException e) {
+            log.error("Error while selecting subscribed reports for user " + user + " with " + selection + ".", e);
+            throw new StoreException("Error while selecting subscribed reports for user " + user + " with " + selection
+                    + ".", e);
+        }
+        return selectedReports;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int countSubscribedReports(final User user) {
+        if (user == null) {
+            log.error("Cannot count subscribed reports when user is null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot count subscribed reports when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        String sql = "SELECT COUNT(*) AS count FROM report_subscription WHERE subscriber = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            } else {
+                throw new InternalError("Could not count the number of subscribed reports.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while retrieving number of subscribed reports for user " + user + ".", e);
+            throw new StoreException("Error while retrieving number of subscribed reports for user " + user + ".", e);
         }
     }
 

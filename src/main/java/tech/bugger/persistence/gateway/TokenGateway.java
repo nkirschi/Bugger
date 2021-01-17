@@ -3,6 +3,8 @@ package tech.bugger.persistence.gateway;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.persistence.exception.NotFoundException;
 
+import java.time.Duration;
+
 /**
  * A token gateway allows to query and modify a persistent storage of verification tokens.
  */
@@ -31,6 +33,6 @@ public interface TokenGateway {
      *
      * @param expirationAge The maximum number of seconds a verification token is to be considered valid.
      */
-    void cleanUp(int expirationAge);
+    void cleanExpiredTokens(Duration expirationAge);
 
 }

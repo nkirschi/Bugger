@@ -26,13 +26,17 @@
                                 <f:param name="id" value="#{topicBacker.topicID}"/>
                             </h:link>
                             <h:link id="l-create-report" outcome="pretty:report-create" value="#{labels.create_report}"
-                                    styleClass="button style-button" rendered="#{not topicBacker.banned}">
+                                    styleClass="button style-button" rendered="#{userSession.user != null and not topicBacker.banned}">
                                 <f:param name="id" value="#{topicBacker.topicID}"/>
                             </h:link>
                         </h:panelGroup>
                     </h:panelGroup>
                     <h:panelGroup layout="block" styleClass="row">
                         <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block" rendered="#{userSession.user != null}">
+                        <h:commandButton id="cb-subscribe" action="#{topicBacker.toggleTopicSubscription}" styleClass="button"
+                                         value="#{topicBacker.subscribed ? labels.unsubscribe : labels.subscribe}"/>
                     </h:panelGroup>
                     <!-- statistik link -->
                     <h:panelGroup class="row" layout="block">

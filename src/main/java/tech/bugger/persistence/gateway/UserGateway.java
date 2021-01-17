@@ -1,11 +1,12 @@
 package tech.bugger.persistence.gateway;
 
-import java.util.List;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
+
+import java.util.List;
 
 /**
  * A user gateway allows to query and modify a persistent storage of users.
@@ -41,6 +42,7 @@ public interface UserGateway {
 
     /**
      * Retrieves the current number of administrators.
+     *
      * @return The number of administrators.
      */
     int getNumberOfAdmins();
@@ -97,27 +99,24 @@ public interface UserGateway {
      *
      * @param user The user whose subscribers to list.
      * @return The list of subscribers to {@code user}.
-     * @throws NotFoundException The user could not be found.
      */
-    List<User> getSubscribersOf(User user) throws NotFoundException;
+    List<User> getSubscribersOf(User user);
 
     /**
      * Retrieves the list of subscribers to a report.
      *
      * @param report The report whose subscribers to list.
      * @return The list of subscribers to {@code report}.
-     * @throws NotFoundException The report could not be found.
      */
-    List<User> getSubscribersOf(Report report) throws NotFoundException;
+    List<User> getSubscribersOf(Report report);
 
     /**
      * Retrieves the list of subscribers to a topic.
      *
      * @param topic The topic whose subscribers to list.
      * @return The list of subscribers to {@code topic}.
-     * @throws NotFoundException The topic could not be found.
      */
-    List<User> getSubscribersOf(Topic topic) throws NotFoundException;
+    List<User> getSubscribersOf(Topic topic);
 
     /**
      * Inserts a user into the user storage and sets its internal id, i.e. changes the given {@code user}.
@@ -149,5 +148,27 @@ public interface UserGateway {
      * @return The number of topics that {@code user} is moderating.
      */
     int getNumberOfModeratedTopics(User user);
+
+    /**
+     * Cleans up user corpses due to expired registration.
+     */
+    void cleanExpiredRegistrations();
+
+    /**
+     * Retrieves all users the user is subscribed to for a given selection.
+     *
+     * @param user      The user in question.
+     * @param selection The given selection.
+     * @return A list of users the user is subscribed to.
+     */
+    List<User> selectSubscribedUsers(User user, Selection selection);
+
+    /**
+     * Counts the number of users the user is subscribed to.
+     *
+     * @param user The user in question.
+     * @return The number of users the user is subscribed to.
+     */
+    int countSubscribedUsers(User user);
 
 }

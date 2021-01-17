@@ -66,8 +66,8 @@
     <url-mapping id="post-edit">
         <pattern value="/post-edit"/>
         <query-param name="c">#{c}</query-param>
-        <query-param name="p">#{postEditBacker.postID}</query-param>
-        <query-param name="r">#{postEditBacker.reportID}</query-param>
+        <query-param name="p">#{postID}</query-param>
+        <query-param name="r">#{reportID}</query-param>
         <view-id value="/faces/view/restr/post-edit.xhtml"/>
     </url-mapping>
     <url-mapping id="topic">

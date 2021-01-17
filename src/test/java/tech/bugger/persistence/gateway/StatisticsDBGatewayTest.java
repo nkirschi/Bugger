@@ -93,7 +93,9 @@ public class StatisticsDBGatewayTest {
         public void testGetTopTenUsers() {
             List<TopUser> expected = List.of(
                     new TopUser("admin", 10),
-                    new TopUser("testuser", 5)
+                    new TopUser("testuser", 5),
+                    new TopUser("pending", 0),
+                    new TopUser("corpse", 0)
             );
             assertEquals(expected, gateway.getTopTenUsers());
         }

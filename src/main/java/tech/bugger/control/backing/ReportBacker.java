@@ -11,6 +11,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
@@ -142,19 +143,21 @@ public class ReportBacker implements Serializable {
      * Constructs a new report page backing bean with the necessary dependencies.
      *
      * @param applicationSettings The application settings cache.
+     * @param topicService        The topic service to use.
      * @param reportService       The report service to use.
      * @param postService         The post service to use.
+     * @param topicService        The topic service to use.
      * @param session             The user session.
      * @param fctx                The current {@link FacesContext} of the application.
      */
     @Inject
-    public ReportBacker(final ApplicationSettings applicationSettings, final ReportService reportService,
-                        final PostService postService, final TopicService topicService, final UserSession session,
+    public ReportBacker(final ApplicationSettings applicationSettings, final TopicService topicService,
+                        final ReportService reportService, final PostService postService, final UserSession session,
                         final FacesContext fctx) {
         this.applicationSettings = applicationSettings;
+        this.topicService = topicService;
         this.reportService = reportService;
         this.postService = postService;
-        this.topicService = topicService;
         this.session = session;
         this.fctx = fctx;
     }
@@ -302,8 +305,28 @@ public class ReportBacker implements Serializable {
 
     /**
      * Adds or removes a subscription to the report for the user, whichever is applicable.
+     *
+     * @return {@code null}
      */
-    public void toggleReportSubscription() {
+    public String toggleReportSubscription() {
+        if (session.getUser() == null) {
+            return null;
+        }
+        if (reportService.isSubscribed(session.getUser(), report)) {
+            reportService.unsubscribeFromReport(session.getUser(), report);
+        } else {
+            reportService.subscribeToReport(session.getUser(), report);
+        }
+        return null;
+    }
+
+    /**
+     * Returns whether the user is subscribed to the report.
+     *
+     * @return {@code true} iff the user is subscribed to the report.
+     */
+    public boolean isSubscribed() {
+        return reportService.isSubscribed(session.getUser(), report);
     }
 
     /**
@@ -452,10 +475,10 @@ public class ReportBacker implements Serializable {
      */
     public boolean isPrivileged() {
         User user = session.getUser();
-        if (user == null || report == null || topicService.isBanned(user, new Topic(report.getTopic(), "", ""))) {
+        if (user == null || report == null || topicService.isBanned(user, new Topic(report.getTopicID(), "", ""))) {
             return false;
         }
-        Topic topic = new Topic(report.getTopic(), "", "");
+        Topic topic = new Topic(report.getTopicID(), "", "");
         return user.isAdministrator() || topicService.isModerator(user, topic)
                 || user.equals(report.getAuthorship().getCreator());
     }
@@ -468,7 +491,7 @@ public class ReportBacker implements Serializable {
      */
     public boolean privilegedForPost(final Post post) {
         if (session.getUser() != null) {
-            return postService.canModify(session.getUser(), post);
+            return postService.isPrivileged(session.getUser(), post);
         }
         return false;
     }
@@ -483,7 +506,7 @@ public class ReportBacker implements Serializable {
         if (user == null || report == null) {
             return false;
         }
-        Topic topic = new Topic(report.getTopic(), "", "");
+        Topic topic = new Topic(report.getTopicID(), "", "");
         return topicService.isBanned(user, topic);
     }
 
@@ -528,7 +551,6 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     *
      * @return Whether the user has upvoted this report.
      */
     public boolean getHasUpvoted() {
