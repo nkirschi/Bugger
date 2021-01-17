@@ -96,15 +96,16 @@ public class UserDBGateway implements UserGateway {
      */
     static User getUserFromResultSet(final String prefix, final ResultSet rs) throws SQLException {
         return new User(rs.getInt(prefix + "id"), rs.getString(prefix + "username"),
-                rs.getString(prefix + "password_hash"), rs.getString(prefix + "password_salt"),
-                rs.getString(prefix + "hashing_algorithm"), rs.getString(prefix + "email_address"),
-                rs.getString(prefix + "first_name"), rs.getString(prefix + "last_name"),
-                new Lazy<>(rs.getBytes(prefix + "avatar")), rs.getBytes(prefix + "avatar_thumbnail"),
-                rs.getString(prefix + "biography"),
-                Language.valueOf(rs.getString(prefix + "preferred_language").toUpperCase()),
-                User.ProfileVisibility.valueOf(rs.getString(prefix + "profile_visibility").toUpperCase()),
-                rs.getTimestamp(prefix + "registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
-                rs.getObject(prefix + "forced_voting_weight", Integer.class), rs.getBoolean(prefix + "is_admin"));
+                        rs.getString(prefix + "password_hash"), rs.getString(prefix + "password_salt"),
+                        rs.getString(prefix + "hashing_algorithm"), rs.getString(prefix + "email_address"),
+                        rs.getString(prefix + "first_name"), rs.getString(prefix + "last_name"),
+                        new Lazy<>(rs.getBytes(prefix + "avatar")), rs.getBytes(prefix + "avatar_thumbnail"),
+                        rs.getString(prefix + "biography"),
+                        Language.valueOf(rs.getString(prefix + "preferred_language").toUpperCase()),
+                        User.ProfileVisibility.valueOf(rs.getString(prefix + "profile_visibility").toUpperCase()),
+                        rs.getTimestamp(prefix + "registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
+                        rs.getObject(prefix + "forced_voting_weight", Integer.class), rs.getBoolean(prefix + "is_admin"
+        ));
     }
 
     /**
@@ -117,7 +118,7 @@ public class UserDBGateway implements UserGateway {
         }
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM topic_moderation WHERE moderator = ? "
-                + "AND topic = ?;")) {
+                                                                    + "AND topic = ?;")) {
             ResultSet resultSet = new StatementParametrizer(stmt)
                     .integer(user.getId())
                     .integer(topic.getId())
@@ -125,9 +126,9 @@ public class UserDBGateway implements UserGateway {
             return resultSet.next();
         } catch (SQLException e) {
             log.error("Error while checking if the user with id " + user.getId() + " is a moderator of the topic "
-                    + "with id " + topic.getId(), e);
+                              + "with id " + topic.getId(), e);
             throw new StoreException("Error while checking if the user with id " + user.getId() + " is a moderator of "
-                    + "the topic with id " + topic.getId(), e);
+                                             + "the topic with id " + topic.getId(), e);
         }
     }
 
@@ -137,7 +138,7 @@ public class UserDBGateway implements UserGateway {
     @Override
     public int getNumberOfAdmins() {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(u.id) AS num_admins FROM \"user\" AS u "
-                + "WHERE u.is_admin = true;")) {
+                                                                    + "WHERE u.is_admin = true;")) {
             ResultSet resultSet = stmt.executeQuery();
             int numAdmins = 0;
             if (resultSet.next()) {
@@ -230,7 +231,8 @@ public class UserDBGateway implements UserGateway {
 
         List<User> moderators = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.* FROM \"user\" AS u, topic_moderation AS t "
-                + "WHERE t.topic = ? AND u.id = t.moderator LIMIT ? OFFSET ?;")) {
+                                                                    + "WHERE t.topic = ? AND u.id = t.moderator LIMIT"
+                                                                    + " ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(topic.getId())
                     .integer(selection.getPageSize().getSize())
@@ -261,7 +263,8 @@ public class UserDBGateway implements UserGateway {
 
         List<User> banned = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.* FROM \"user\" AS u, topic_ban AS t "
-                + "WHERE t.topic = ? AND u.id = t.outcast LIMIT ? OFFSET ?;")) {
+                                                                    + "WHERE t.topic = ? AND u.id = t.outcast LIMIT ?"
+                                                                    + " OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(topic.getId())
                     .integer(selection.getPageSize().getSize())
@@ -309,10 +312,14 @@ public class UserDBGateway implements UserGateway {
         }
 
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO \"user\" "
-                        + "(username, password_hash, password_salt, hashing_algorithm, email_address, first_name, "
-                        + "last_name, avatar, avatar_thumbnail, biography, preferred_language, profile_visibility, "
-                        + "forced_voting_weight, is_admin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                Statement.RETURN_GENERATED_KEYS)) {
+                                                                    + "(username, password_hash, password_salt, "
+                                                                    + "hashing_algorithm, email_address, first_name, "
+                                                                    + "last_name, avatar, avatar_thumbnail, "
+                                                                    + "biography, preferred_language, "
+                                                                    + "profile_visibility, "
+                                                                    + "forced_voting_weight, is_admin) VALUES (?, ?, "
+                                                                    + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                                            Statement.RETURN_GENERATED_KEYS)) {
 
             storeUserInStatement(new StatementParametrizer(stmt), user)
                     .toStatement().executeUpdate();
@@ -321,7 +328,7 @@ public class UserDBGateway implements UserGateway {
             if (rs.next()) {
                 user.setId(rs.getInt("id"));
                 user.setRegistrationDate(rs.getTimestamp("registered_at").toLocalDateTime()
-                        .atZone(ZoneId.systemDefault()));
+                                           .atZone(ZoneId.systemDefault()));
             } else {
                 log.error("Couldn't read new user data.");
                 throw new StoreException("Couldn't read new user data.");
@@ -344,12 +351,15 @@ public class UserDBGateway implements UserGateway {
         }
 
         try (PreparedStatement stmt = conn.prepareStatement("UPDATE \"user\" SET "
-                        + "username = ?, password_hash = ?, password_salt = ?, hashing_algorithm = ?, "
-                        + "email_address = ?, first_name = ?, last_name = ?, avatar = ?, avatar_thumbnail = ?, "
-                        + "biography = ?, preferred_language = ?, profile_visibility = ?, "
-                        + "forced_voting_weight = ?, is_admin = ? "
-                        + "WHERE id = ?",
-                Statement.RETURN_GENERATED_KEYS)) {
+                                                                    + "username = ?, password_hash = ?, password_salt"
+                                                                    + " = ?, hashing_algorithm = ?, "
+                                                                    + "email_address = ?, first_name = ?, last_name ="
+                                                                    + " ?, avatar = ?, avatar_thumbnail = ?, "
+                                                                    + "biography = ?, preferred_language = ?, "
+                                                                    + "profile_visibility = ?, "
+                                                                    + "forced_voting_weight = ?, is_admin = ? "
+                                                                    + "WHERE id = ?",
+                                                            Statement.RETURN_GENERATED_KEYS)) {
 
             StatementParametrizer parametrizer = storeUserInStatement(new StatementParametrizer(stmt), user);
             int changedRows = parametrizer
@@ -485,7 +495,7 @@ public class UserDBGateway implements UserGateway {
     @Override
     public int getNumberOfPosts(final User user) throws NotFoundException {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT num_posts FROM user_num_posts WHERE "
-                + "author = ?;")) {
+                                                                    + "author = ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(user.getId())
                     .toStatement().executeQuery();
@@ -498,7 +508,7 @@ public class UserDBGateway implements UserGateway {
         } catch (SQLException e) {
             log.error("Error while searching for number of posts of the user with id " + user.getId(), e);
             throw new StoreException("Error while searching for number of posts of the user with id "
-                    + user.getId(), e);
+                                             + user.getId(), e);
         }
     }
 
@@ -513,7 +523,7 @@ public class UserDBGateway implements UserGateway {
 
         int moderatedTopics = 0;
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(t.topic) AS num_topics FROM "
-                + "topic_moderation AS t WHERE t.moderator = ?;")) {
+                                                                    + "topic_moderation AS t WHERE t.moderator = ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(user.getId())
                     .toStatement().executeQuery();
@@ -524,7 +534,7 @@ public class UserDBGateway implements UserGateway {
         } catch (SQLException e) {
             log.error("Error while counting the moderated topics for the user with id " + user.getId(), e);
             throw new StoreException("Error while counting the moderated topics for the user with id " + user.getId(),
-                    e);
+                                     e);
         }
 
         return moderatedTopics;
@@ -540,7 +550,7 @@ public class UserDBGateway implements UserGateway {
         }
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM topic_ban WHERE outcast = ? "
-                + "AND topic = ?;")) {
+                                                                    + "AND topic = ?;")) {
             ResultSet resultSet = new StatementParametrizer(stmt)
                     .integer(user.getId())
                     .integer(topic.getId())
@@ -548,9 +558,33 @@ public class UserDBGateway implements UserGateway {
             return resultSet.next();
         } catch (SQLException e) {
             log.error("Error while checking if the user with id " + user.getId() + " is banned from the topic "
-                    + "with id " + topic.getId(), e);
+                              + "with id " + topic.getId(), e);
             throw new StoreException("Error while checking if the user with id " + user.getId() + " is banned from "
-                    + "the topic with id " + topic.getId(), e);
+                                             + "the topic with id " + topic.getId(), e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void cleanExpiredRegistrations() {
+        // @formatter:off
+        String query =
+                "DELETE FROM \"user\""
+              + "WHERE password_hash IS NULL "
+              + "AND NOT EXISTS("
+              + "    SELECT * "
+              + "    FROM   token "
+              + "    WHERE  type = 'REGISTER' "
+              + "    AND    verifies = id"
+              + ");";
+        // @formatter:on
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error when cleaning expired user registrations.", e);
+            throw new StoreException("Error when cleaning expired user registrations.", e);
         }
     }
 

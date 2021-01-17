@@ -53,9 +53,9 @@ CREATE TABLE "user" (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
     username VARCHAR UNIQUE NOT NULL,
-    password_hash VARCHAR NOT NULL,
-    password_salt VARCHAR NOT NULL,
-    hashing_algorithm VARCHAR NOT NULL,
+    password_hash VARCHAR,
+    password_salt VARCHAR,
+    hashing_algorithm VARCHAR,
 
     email_address VARCHAR UNIQUE NOT NULL,
     first_name VARCHAR NOT NULL,
