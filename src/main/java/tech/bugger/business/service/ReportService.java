@@ -393,6 +393,9 @@ public class ReportService {
             return false;
         }
         if (success) {
+            User creator = new User();
+            creator.setId(report.getAuthorship().getCreator().getId());
+            subscribeToReport(creator, report);
             Notification notification = new Notification();
             notification.setType(Notification.Type.NEW_REPORT);
             notification.setActuatorID(report.getAuthorship().getCreator().getId());
