@@ -91,7 +91,6 @@ public class PostService {
      * @return {@code true} iff updating the post succeeded.
      */
     public boolean updatePost(final Post post) {
-        // Notifications will be dealt with when implementing the subscriptions feature.
         try (Transaction tx = transactionManager.begin()) {
             tx.newPostGateway().update(post);
             AttachmentGateway attachmentGateway = tx.newAttachmentGateway();
@@ -108,7 +107,6 @@ public class PostService {
                 }
             }
             tx.commit();
-            return true;
         } catch (NotFoundException e) {
             log.error("Post to be updated could not be found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
@@ -118,6 +116,13 @@ public class PostService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
             return false;
         }
+        Notification notification = new Notification();
+        notification.setType(Notification.Type.EDITED_POST);
+        notification.setActuatorID(post.getAuthorship().getModifier().getId());
+        notification.setReportID(post.getReport().get().getId());
+        notification.setTopicID(post.getReport().get().getTopic());
+        notificationService.createNotification(notification);
+        return true;
     }
 
     /**
@@ -190,7 +195,6 @@ public class PostService {
      * @return {@code true} iff creating the post succeeded.
      */
     public boolean createPost(final Post post) {
-        // Notifications will be dealt with when implementing the subscriptions feature.
         boolean success;
         try (Transaction tx = transactionManager.begin()) {
             success = createPostWithTransaction(post, tx);
