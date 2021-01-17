@@ -109,6 +109,7 @@ public class ProfileService {
      */
     public boolean createUser(final User user) {
         try (Transaction tx = transactionManager.begin()) {
+            user.setEmailAddress(user.getEmailAddress().toLowerCase());
             tx.newUserGateway().createUser(user);
             tx.commit();
             return true;
