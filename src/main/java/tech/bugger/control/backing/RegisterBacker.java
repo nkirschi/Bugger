@@ -1,5 +1,12 @@
 package tech.bugger.control.backing;
 
+import java.util.ResourceBundle;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Event;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
@@ -9,14 +16,6 @@ import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Event;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.ResourceBundle;
 
 /**
  * Backing bean for the register page.
@@ -108,7 +107,7 @@ public class RegisterBacker {
      */
     public String register() {
         if (profileService.createUser(user) && authenticationService.register(user,
-                                                                              JFConfig.getApplicationPath(fctx.getExternalContext()))) {
+                JFConfig.getApplicationPath(fctx.getExternalContext()))) {
 
             log.debug("Registration for user " + user + " successful.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("register.success"), Feedback.Type.INFO));

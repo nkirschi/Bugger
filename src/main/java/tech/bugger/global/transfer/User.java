@@ -1,11 +1,12 @@
 package tech.bugger.global.transfer;
 
+import tech.bugger.global.util.Lazy;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Objects;
-import tech.bugger.global.util.Lazy;
 
 /**
  * DTO representing a user.
@@ -114,7 +115,7 @@ public class User implements Serializable {
      * Constructs an empty user.
      */
     public User() {
-        this(null, "", "", "", "", "", "", "", new Lazy<>(new byte[0]), new byte[0],
+        this(null, "", null, null, null, "", "", "", new Lazy<>(new byte[0]), new byte[0],
                 "", Language.ENGLISH, User.ProfileVisibility.FULL, null, null, false);
     }
 

@@ -144,6 +144,7 @@ public class ReportBacker implements Serializable {
      * @param applicationSettings The application settings cache.
      * @param reportService       The report service to use.
      * @param postService         The post service to use.
+     * @param topicService        The topic service to use.
      * @param session             The user session.
      * @param fctx                The current {@link FacesContext} of the application.
      */
