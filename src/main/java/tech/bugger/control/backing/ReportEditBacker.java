@@ -149,8 +149,6 @@ public class ReportEditBacker implements Serializable {
 
     /**
      * Saves the changes made into the database or opens the confirmation dialog if the report's topic changed.
-     *
-     * @return The page to navigate to.
      */
     public void saveChangesWithConfirm() {
         if (report.getTopic() == destinationID) {

@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.MarkdownHandler;
-import tech.bugger.global.util.Log;
 
 /**
  * Backing Bean for the imprint page.
