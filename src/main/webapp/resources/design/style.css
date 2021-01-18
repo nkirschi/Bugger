@@ -44,7 +44,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     max-width: 400px;
-    z-index: 9999;
+    z-index: 99999;
 }
 
 #l-logo {

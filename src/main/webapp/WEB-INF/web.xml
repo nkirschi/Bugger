@@ -79,7 +79,7 @@
     <!-- miscellaneous settings -->
 
     <welcome-file-list>
-        <welcome-file>faces/view/public/home.xhtml</welcome-file>
+        <welcome-file>faces/view/auth/home.xhtml</welcome-file>
     </welcome-file-list>
 
     <security-constraint>

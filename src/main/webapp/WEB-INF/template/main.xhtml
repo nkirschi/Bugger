@@ -23,6 +23,9 @@
             <h:panelGroup layout="block"
                           id="p-messages"
                           rendered="#{not empty facesContext.messageList}">
+                <h:panelGroup layout="block"
+                              styleClass="btn btn-close btn-danger float-end ms-1"
+                              onclick="document.getElementById('p-messages').hidden = true;"/>
                 <h:messages id="m-global"
                             globalOnly="true"
                             layout="table"

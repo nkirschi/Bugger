@@ -4,7 +4,7 @@
                       http://ocpsoft.org/xml/ns/prettyfaces/rewrite-config-prettyfaces.xsd">
     <url-mapping id="home">
         <pattern value="/"/>
-        <view-id value="/faces/view/public/home.xhtml"/>
+        <view-id value="/faces/view/auth/home.xhtml"/>
     </url-mapping>
     <url-mapping id="register">
         <pattern value="/register"/>
@@ -34,13 +34,13 @@
     <url-mapping id="profile">
         <pattern value="/profile"/>
         <query-param name="u">#{profileBacker.username}</query-param>
-        <view-id value="/faces/view/public/profile.xhtml"/>
+        <view-id value="/faces/view/auth/profile.xhtml"/>
     </url-mapping>
     <url-mapping id="search">
         <pattern value="/search"/>
         <query-param name="q">#{searchBacker.query}</query-param>
         <query-param name="t">#{searchBacker.tab}</query-param>
-        <view-id value="/faces/view/public/search.xhtml"/>
+        <view-id value="/faces/view/auth/search.xhtml"/>
     </url-mapping>
     <url-mapping id="admin">
         <pattern value="/admin"/>
@@ -56,7 +56,7 @@
     <url-mapping id="report-create">
         <pattern value="/report-create"/>
         <query-param name="id">#{reportCreateBacker.topicID}</query-param>
-        <view-id value="/faces/view/auth/report-create.xhtml"/>
+        <view-id value="/faces/view/restr/report-create.xhtml"/>
     </url-mapping>
     <url-mapping id="report-edit">
         <pattern value="/report-edit"/>
@@ -73,7 +73,7 @@
     <url-mapping id="topic">
         <pattern value="/topic"/>
         <query-param name="id">#{id}</query-param>
-        <view-id value="/faces/view/public/topic.xhtml"/>
+        <view-id value="/faces/view/auth/topic.xhtml"/>
     </url-mapping>
     <url-mapping id="topic-edit">
         <pattern value="/topic-edit"/>
@@ -82,6 +82,6 @@
     </url-mapping>
     <url-mapping id="statistics">
         <pattern value="/statistics"/>
-        <view-id value="/faces/view/public/statistics.xhtml"/>
+        <view-id value="/faces/view/auth/statistics.xhtml"/>
     </url-mapping>
 </pretty-config>
