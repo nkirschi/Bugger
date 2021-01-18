@@ -8,6 +8,26 @@
     <ui:param name="title" value="#{labels.home_title}"/>
 
     <ui:define name="content">
+        <h:outputText value="#{labels.home_notifications}" styleClass="h2" rendered="#{userSession.user != null}"/>
+        <b:pagitable paginator="#{homeBacker.inbox}" rendered="#{userSession.user != null}">
+            <!--@elvariable id="var" type="tech.bugger.global.transfer.Notification"-->
+            <b:column title="#{labels.home_seen}" paginator="#{homeBacker.inbox}" key="read">
+                <h:outputText value="#{var.read ? '&#x2713;' : ' '}"/>
+            </b:column>
+            <b:column title="#{labels.type}" paginator="#{homeBacker.inbox}" key="type">
+                <h:commandButton value="#{labels['notification_type.'.concat(var.type)]}" action="#{homeBacker.openNotification(var)}" styleClass="btn-link"/>
+            </b:column>
+            <b:column title="#{labels.report}" paginator="#{homeBacker.inbox}" key="report">
+                <h:outputText value="##{var.reportID}: #{var.reportTitle}"/>
+            </b:column>
+            <b:column title="#{labels.user}" paginator="#{homeBacker.inbox}" key="causer">
+                <h:outputText value="#{var.actuatorUsername}"/>
+            </b:column>
+            <h:column>
+                <h:commandButton value="#{labels.delete}" action="#{homeBacker.deleteNotification(var)}"/>
+            </h:column>
+        </b:pagitable>
+
         <h:outputText value="#{labels.home_topics}" styleClass="h2"/>
         <h:link id="l-create" value="#{labels.topic_edit_add}" outcome="pretty:topic-edit"
                 rendered="#{userSession.user.administrator}" styleClass="button"/>

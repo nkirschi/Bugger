@@ -7,6 +7,7 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
@@ -74,8 +75,16 @@ public class SearchService {
      * @param query The search query for usernames.
      * @return A list containing the first few results.
      */
-    public List<User> getUserSuggestions(final String query) {
-        return null;
+    public List<String> getUserSuggestions(final String query) {
+        List<String> users = new ArrayList<>();
+        try (Transaction tx = transactionManager.begin()) {
+            users = tx.newSearchGateway().getUserSuggestions(query, MAX_SUGGESTIONS);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while loading the user search suggestions.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return users;
     }
 
     /**
@@ -164,8 +173,16 @@ public class SearchService {
      * @param query The search query for topic titles.
      * @return A list containing the first few results.
      */
-    public List<Topic> getTopicSuggestions(final String query) {
-        return null;
+    public List<String> getTopicSuggestions(final String query) {
+        List<String> topics = new ArrayList<>();
+        try (Transaction tx = transactionManager.begin()) {
+            topics = tx.newSearchGateway().getTopicSuggestions(query, MAX_SUGGESTIONS);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while loading the topic search suggestions.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return topics;
     }
 
     /**
@@ -174,8 +191,16 @@ public class SearchService {
      * @param query The search query for report titles.
      * @return A list containing the first few results.
      */
-    public List<Report> getReportSuggestions(final String query) {
-        return null;
+    public List<String> getReportSuggestions(final String query) {
+        List<String> reports = new ArrayList<>();
+        try (Transaction tx = transactionManager.begin()) {
+            reports = tx.newSearchGateway().getReportSuggestions(query, MAX_SUGGESTIONS);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while loading the user search suggestions.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return reports;
     }
 
     /**
@@ -189,7 +214,15 @@ public class SearchService {
      */
     public List<User> getUserResults(final String query, final Selection selection, final boolean showAdmins,
                                      final boolean showNonAdmins) {
-        return null;
+        List<User> users = new ArrayList<>();
+        try (Transaction tx = transactionManager.begin()) {
+            users = tx.newSearchGateway().getUserResults(query, selection, showAdmins, showNonAdmins);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while loading the user search results.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return users;
     }
 
     /**
@@ -200,7 +233,15 @@ public class SearchService {
      * @return A list of topics containing the selected search results.
      */
     public List<Topic> getTopicResults(final String query, final Selection selection) {
-        return null;
+        List<Topic> topics = new ArrayList<>();
+        try (Transaction tx = transactionManager.begin()) {
+            topics = tx.newSearchGateway().getTopicResults(query, selection);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while loading the topic search results.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return topics;
     }
 
     /**
@@ -226,10 +267,22 @@ public class SearchService {
                                          final ZonedDateTime latestCreationDateTime,
                                          final ZonedDateTime earliestClosingDateTime,
                                          final boolean showOpenReports, final boolean showClosedReports,
-                                         final boolean showDuplicates, final Topic topic,
+                                         final boolean showDuplicates, final String topic,
                                          final HashMap<Report.Type, Boolean> reportTypeFilter,
                                          final HashMap<Report.Severity, Boolean> severityFilter) {
-        return null;
+        List<Report> reports = new ArrayList<>();
+        try (Transaction tx = transactionManager.begin()) {
+            reports = tx.newSearchGateway().getReportResults(query, selection, latestCreationDateTime,
+                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic, reportTypeFilter, severityFilter);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Filter Topic " + topic + " not found while searching for reports", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while loading the report search results.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return reports;
     }
 
     /**
@@ -258,7 +311,19 @@ public class SearchService {
                                            final boolean showClosedReports, final boolean showDuplicates,
                                            final Topic topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                            final HashMap<Report.Severity, Boolean> severityFilter) {
-        return null;
+            List<Report> reports = new ArrayList<>();
+            try (Transaction tx = transactionManager.begin()) {
+                reports = tx.newSearchGateway().getFulltextResults(query, selection, latestCreationDateTime,
+                        earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic, reportTypeFilter, severityFilter);
+                tx.commit();
+            } catch (NotFoundException e) {
+                log.error("Filter Topic with id " + topic.getId() + " not found while searching for reports", e);
+                feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            } catch (TransactionException e) {
+                log.error("Error while loading the report search results.", e);
+                feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+            }
+            return reports;
     }
 
     /**
@@ -270,7 +335,15 @@ public class SearchService {
      * @return The number of results as an {@code int}.
      */
     public int getNumberOfUserResults(final String query, final boolean showAdmins, final boolean showNonAdmins) {
-        return 0;
+        int results = 0;
+        try (Transaction tx = transactionManager.begin()) {
+            results = tx.newSearchGateway().getNumberOfUserResults(query, showAdmins, showNonAdmins);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while loading the user search results.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return results;
     }
 
     /**
@@ -280,7 +353,15 @@ public class SearchService {
      * @return The number of results as an {@code int}.
      */
     public int getNumberOfTopicResults(final String query) {
-        return 0;
+        int results = 0;
+        try (Transaction tx = transactionManager.begin()) {
+            results = tx.newSearchGateway().getNumberOfTopicResults(query);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while loading the topic search results.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return results;
     }
 
     /**
@@ -304,9 +385,21 @@ public class SearchService {
     public int getNumberOfReportResults(final String query, final ZonedDateTime latestCreationDateTime,
                                         final ZonedDateTime earliestClosingDateTime, final boolean showOpenReports,
                                         final boolean showClosedReports, final boolean showDuplicates,
-                                        final Topic topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
+                                        final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                         final HashMap<Report.Severity, Boolean> severityFilter) {
-        return 0;
+        int results = 0;
+        try (Transaction tx = transactionManager.begin()) {
+            results = tx.newSearchGateway().getNumberOfReportResults(query, latestCreationDateTime,
+                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic, reportTypeFilter, severityFilter);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Filter Topic " + topic + " not found while searching for reports", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while loading the report search results.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return results;
     }
 
     /**
@@ -332,7 +425,19 @@ public class SearchService {
                                           final boolean showClosedReports, final boolean showDuplicates,
                                           final Topic topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                           final HashMap<Report.Severity, Boolean> severityFilter) {
-        return 0;
+        int results = 0;
+        try (Transaction tx = transactionManager.begin()) {
+            results = tx.newSearchGateway().getNumberOfFulltextResults(query, latestCreationDateTime,
+                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic, reportTypeFilter, severityFilter);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Filter Topic with id " + topic.getId() + " not found while searching for reports", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while loading the report search results.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return results;
     }
 
 }
