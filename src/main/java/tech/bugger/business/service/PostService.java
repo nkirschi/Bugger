@@ -4,8 +4,10 @@ import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Attachment;
+import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
@@ -21,6 +23,7 @@ import javax.inject.Inject;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -41,6 +44,11 @@ public class PostService {
      * Notification service used for sending notifications.
      */
     private final NotificationService notificationService;
+
+    /**
+     * Topic service used for checking editing rights.
+     */
+    private final TopicService topicService;
 
     /**
      * The current application settings.
@@ -66,16 +74,19 @@ public class PostService {
      * Constructs a new post service with the given dependencies.
      *
      * @param notificationService The notification service to use for sending notifications.
+     * @param topicService        The topic service used for checking editing rights.
      * @param applicationSettings The application settings to use.
      * @param transactionManager  The transaction manager to use for creating transactions.
      * @param feedbackEvent       The feedback event to use for user feedback.
      * @param messagesBundle      The resource bundle for feedback messages.
      */
     @Inject
-    public PostService(final NotificationService notificationService, final ApplicationSettings applicationSettings,
-                       final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
+    public PostService(final NotificationService notificationService, final TopicService topicService,
+                       final ApplicationSettings applicationSettings, final TransactionManager transactionManager,
+                       final Event<Feedback> feedbackEvent,
                        final @RegistryKey("messages") ResourceBundle messagesBundle) {
         this.notificationService = notificationService;
+        this.topicService = topicService;
         this.applicationSettings = applicationSettings;
         this.transactionManager = transactionManager;
         this.feedbackEvent = feedbackEvent;
@@ -90,24 +101,28 @@ public class PostService {
      * @return {@code true} iff updating the post succeeded.
      */
     public boolean updatePost(final Post post) {
-        // Notifications will be dealt with when implementing the subscriptions feature.
         try (Transaction tx = transactionManager.begin()) {
+            post.getAuthorship().setModifiedDate(ZonedDateTime.now());
             tx.newPostGateway().update(post);
             AttachmentGateway attachmentGateway = tx.newAttachmentGateway();
             List<Attachment> newAttachments = post.getAttachments();
             List<Attachment> oldAttachments = attachmentGateway.getAttachmentsForPost(post);
+
+            // Delete all existing attachments that do not occur in the edited post.
             for (Attachment oldAttachment : oldAttachments) {
                 if (!newAttachments.contains(oldAttachment)) {
                     attachmentGateway.delete(oldAttachment);
                 }
             }
+
+            // Create all new attachments that do not yet exist in the post.
             for (Attachment newAttachment : newAttachments) {
                 if (!oldAttachments.contains(newAttachment)) {
                     attachmentGateway.create(newAttachment);
                 }
             }
+
             tx.commit();
-            return true;
         } catch (NotFoundException e) {
             log.error("Post to be updated could not be found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
@@ -117,6 +132,15 @@ public class PostService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
             return false;
         }
+        Notification notification = new Notification();
+        notification.setType(Notification.Type.EDITED_POST);
+        notification.setActuatorID(post.getAuthorship().getModifier().getId());
+        notification.setTopicID(post.getReport().get().getTopicID());
+        notification.setReportID(post.getReport().get().getId());
+        notification.setPostID(post.getId());
+        notification.setReportTitle(post.getReport().get().getTitle());
+        notificationService.createNotification(notification);
+        return true;
     }
 
     /**
@@ -189,20 +213,30 @@ public class PostService {
      * @return {@code true} iff creating the post succeeded.
      */
     public boolean createPost(final Post post) {
-        // Notifications will be dealt with when implementing the subscriptions feature.
+        boolean success;
         try (Transaction tx = transactionManager.begin()) {
-            boolean success = createPostWithTransaction(post, tx);
+            success = createPostWithTransaction(post, tx);
             if (success) {
                 tx.commit();
                 log.info("Post created successfully.");
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("post_created"), Feedback.Type.INFO));
             }
-            return success;
         } catch (TransactionException e) {
             log.error("Error while creating a new post.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
             return false;
         }
+        if (success) {
+            Notification notification = new Notification();
+            notification.setType(Notification.Type.NEW_POST);
+            notification.setActuatorID(post.getAuthorship().getCreator().getId());
+            notification.setTopicID(post.getReport().get().getTopicID());
+            notification.setReportID(post.getReport().get().getId());
+            notification.setPostID(post.getId());
+            notification.setReportTitle(post.getReport().get().getTitle());
+            notificationService.createNotification(notification);
+        }
+        return success;
     }
 
     /**
@@ -230,11 +264,14 @@ public class PostService {
      * Checks whether an uploaded attachment can be added to a given post and, if so, adds it to the post.
      *
      * @param post The post to add the attachment to.
-     * @param part The attachment to add.
+     * @param part The uploaded file to add as an attachment.
      */
     public void addAttachment(final Post post, final Part part) {
+        if (post == null) {
+            throw new IllegalArgumentException("Post must not be null.");
+        }
         if (part == null) {
-            return;
+            throw new IllegalArgumentException("Part must not be null.");
         }
 
         byte[] content;
@@ -369,14 +406,27 @@ public class PostService {
      * @param post The post in question.
      * @return {@code true} iff the user is allowed to modify the post.
      */
-    public boolean canModify(final User user, final Post post) {
-        // TODO add checks for mods, banned users
+    public boolean isPrivileged(final User user, final Post post) {
         if (user == null) {
             return false;
         } else if (user.isAdministrator()) {
             return true;
+        }
+
+        Report report = post.getReport() != null ? post.getReport().get() : null;
+        if (report == null || report.getTopicID() == null) {
+            return false;
+        }
+
+        Topic topic = topicService.getTopicByID(report.getTopicID());
+        if (topic == null) {
+            return false;
+        }
+
+        if (topicService.isModerator(user, topic)) {
+            return true;
         } else {
-            return user.equals(post.getAuthorship().getCreator());
+            return user.equals(post.getAuthorship().getCreator()) && !topicService.isBanned(user, topic);
         }
     }
 

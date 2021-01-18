@@ -4,6 +4,7 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import javax.enterprise.event.Event;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,16 +13,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.util.Feedback;
-import tech.bugger.global.transfer.Attachment;
-import tech.bugger.global.transfer.Authorship;
-import tech.bugger.global.transfer.Post;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.*;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.PostGateway;
 import tech.bugger.persistence.gateway.ReportGateway;
+import tech.bugger.persistence.gateway.SubscriptionGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
@@ -36,7 +34,8 @@ public class ReportServiceTest {
 
     private ReportService service;
 
-    private ReportService reportService;
+    @Mock
+    private TopicService topicService;
 
     @Mock
     private ProfileService profileService;
@@ -60,6 +59,9 @@ public class ReportServiceTest {
     private PostGateway postGateway;
 
     @Mock
+    private SubscriptionGateway subscriptionGateway;
+
+    @Mock
     private Event<Feedback> feedbackEvent;
 
     private Report testReport;
@@ -68,16 +70,20 @@ public class ReportServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new ReportService(notificationService, postService, profileService, transactionManager, feedbackEvent,
-                ResourceBundleMocker.mock(""));
+        service = new ReportService(notificationService, topicService, postService, profileService, transactionManager,
+                feedbackEvent, ResourceBundleMocker.mock(""));
         List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
         testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
-        testReport = new Report(200, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
+        User testUser = new User();
+        testUser.setId(1);
+        Authorship authorship = new Authorship(testUser, ZonedDateTime.now(), testUser, ZonedDateTime.now());
+        testReport = new Report(200, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", authorship,
                 mock(ZonedDateTime.class), null, null, false, 1);
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(reportGateway).when(tx).newReportGateway();
         lenient().doReturn(postGateway).when(tx).newPostGateway();
+        lenient().doReturn(subscriptionGateway).when(tx).newSubscriptionGateway();
     }
 
     @Test
@@ -124,12 +130,11 @@ public class ReportServiceTest {
         doReturn(true).when(postService).createPostWithTransaction(any(), any());
         assertTrue(service.createReport(testReport, testFirstPost));
         verify(reportGateway).create(any());
-        verify(tx).commit();
+        verify(tx, times(2)).commit();
     }
 
     @Test
-    public void testCreateReportWhenPostCreationFails() throws Exception {
-        doReturn(false).when(postService).createPostWithTransaction(any(), any());
+    public void testCreateReportWhenPostCreationFails() {
         assertFalse(service.createReport(testReport, testFirstPost));
         verify(tx).abort();
     }

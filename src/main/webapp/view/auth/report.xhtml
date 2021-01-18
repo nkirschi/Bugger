@@ -157,7 +157,7 @@
                           value="#{labels.report_at} #{reportBacker.report.authorship.creationDate}"/>
             <h:panelGroup>
                 <h:graphicImage id="g-creator-thumbnail-r#{reportBacker.report.id}"
-                                value="avatar?id=#{reportBacker.report.authorship.creator == null ? 0 : reportBacker.report.authorship.creator.id}&amp;type=thumbnail"
+                                value="/avatar?id=#{reportBacker.report.authorship.creator == null ? 0 : reportBacker.report.authorship.creator.id}&amp;type=thumbnail"
                                 styleClass="g-avatar-thumbnail"
                                 alt="#{reportBacker.report.authorship.creator == null ? labels.deleted_user : reportBacker.report.authorship.creator.username}'s avatar"
                                 rendered="#{reportBacker.report.authorship.creator != null and reportBacker.report.authorship.creator.existsAvatar}"/>
@@ -176,7 +176,7 @@
                           rendered="#{reportBacker.report.authorship.modifiedDate != null}"/>
             <h:panelGroup>
                 <h:graphicImage id="g-modifier-thumbnail-r#{reportBacker.report.id}"
-                                value="avatar?id=#{reportBacker.report.authorship.modifier == null ? 0 : reportBacker.report.authorship.modifier.id}&amp;type=thumbnail"
+                                value="/avatar?id=#{reportBacker.report.authorship.modifier == null ? 0 : reportBacker.report.authorship.modifier.id}&amp;type=thumbnail"
                                 styleClass="g-avatar-thumbnail"
                                 alt="#{reportBacker.report.authorship.modifier == null ? labels.deleted_user : reportBacker.report.authorship.modifier.username}'s avatar"
                                 rendered="#{reportBacker.report.authorship.modifier != null and reportBacker.report.authorship.modifier.existsAvatar}"/>
@@ -204,6 +204,10 @@
                                  value="#{labels.report_unmark_duplicate}" styleClass="btn btn-secondary"
                                  rendered="#{reportBacker.report.duplicateOf != null}"/>
             </h:panelGrid>
+            <h:panelGrid rendered="#{userSession.user != null}">
+                <h:commandButton id="cb-subscribe" action="#{reportBacker.toggleReportSubscription}"
+                                 value="#{reportBacker.subscribed ? labels.unsubscribe : labels.subscribe}" styleClass="btn btn-secondary"/>
+            </h:panelGrid>
         </h:form>
 
         <h:link id="cb-add-post"
@@ -230,7 +234,7 @@
                                 <h:outputText id="ot-post-created-at" styleClass="row"
                                               value="#{labels.report_at} #{var.authorship.creationDate}"/>
                                 <h:graphicImage id="g-creator-thumbnail-p#{var.id}"
-                                                value="avatar?id=#{var.authorship.creator == null ? 0 : var.authorship.creator.id}&amp;type=thumbnail"
+                                                value="/avatar?id=#{var.authorship.creator == null ? 0 : var.authorship.creator.id}&amp;type=thumbnail"
                                                 styleClass="g-avatar-thumbnail"
                                                 alt="#{var.authorship.creator == null ? labels.deleted_user : var.authorship.creator.username}'s avatar"
                                                 rendered="#{var.authorship.creator != null and var.authorship.creator.existsAvatar}"/>
@@ -305,10 +309,9 @@
                     <ul>
                         <ui:repeat var="attachment" value="#{var.attachments}">
                             <li>
-                                <!-- TODO: Correct path to attachment servlet -->
-                                <h:link outcome="attachment" value="#{attachment.name}">
-                                    <f:param name="id" value="#{attachment.id}"/>
-                                </h:link>
+                                <h:outputLink value="#{request.contextPath}/attachment?id=#{attachment.id}">
+                                    <h:outputText value="#{attachment.name}"/>
+                                </h:outputLink>
                             </li>
                         </ui:repeat>
                     </ul>

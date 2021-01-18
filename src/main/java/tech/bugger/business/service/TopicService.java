@@ -7,6 +7,7 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.TopicGateway;
@@ -108,8 +109,8 @@ public class TopicService {
     /**
      * Unbans a user from a topic.
      *
-     * @param username  The user to be unbanned.
-     * @param topic The topic which the user is to be unbanned from.
+     * @param username The user to be unbanned.
+     * @param topic    The topic which the user is to be unbanned from.
      * @return {@code true} iff the user with given username has successfully been unbanned from the topic.
      */
     public boolean unban(final String username, final Topic topic) {
@@ -149,15 +150,17 @@ public class TopicService {
      * @return {@code true} if the user has successfully been promoted to a moderator or {@code false} if not.
      */
     public boolean makeModerator(final String username, final Topic topic) {
+        User user;
         try (Transaction tx = transactionManager.begin()) {
             UserGateway gateway = tx.newUserGateway();
-            User user = gateway.getUserByUsername(username);
+            user = gateway.getUserByUsername(username);
 
             if (gateway.isModerator(user, topic) || user.isAdministrator()) {
                 log.debug("The user with id " + user.getId() + " is already a moderator of the topic with id "
                         + topic.getId());
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("is_moderator"), Feedback.Type.INFO));
                 tx.commit();
+                return false;
             } else {
                 TopicGateway topicGateway = tx.newTopicGateway();
 
@@ -169,27 +172,27 @@ public class TopicService {
                 tx.commit();
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("operation_successful"),
                         Feedback.Type.INFO));
-                return true;
             }
-
         } catch (NotFoundException e) {
             log.error("The user with the username " + username + " or the topic with id " + topic.getId()
                     + " could not be found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            return false;
         } catch (TransactionException e) {
             log.error("Error while promoting the user with the username " + username + " to a moderator for the "
                     + "topic with id " + topic.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            return false;
         }
-
-        return false;
+        subscribeToTopic(user, topic);
+        return true;
     }
 
     /**
      * Removes the moderator status of a moderator of a topic. Cannot be applied to administrators.
      *
-     * @param username  The username of the user who is about to lose moderator privileges.
-     * @param topic The topic which the user is a moderator of.
+     * @param username The username of the user who is about to lose moderator privileges.
+     * @param topic    The topic which the user is a moderator of.
      * @return {@code true} if the user has successfully been demoted as a moderator or {@code false} if not.
      */
     public boolean removeModerator(final String username, final Topic topic) {
@@ -234,7 +237,7 @@ public class TopicService {
      * Retrieves the user with the given username from the database.
      *
      * @param username The username to search for.
-     * @param tx The current transaction.
+     * @param tx       The current transaction.
      * @return The user if the username could be found in the database or {@code null} if not.
      */
     private User getUser(final String username, final Transaction tx) {
@@ -257,6 +260,33 @@ public class TopicService {
      * @param topic The topic receiving the subscription.
      */
     public void subscribeToTopic(final User user, final Topic topic) {
+        if (user == null) {
+            log.error("Anonymous users cannot subscribe to anything.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot subscribe when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (topic == null) {
+            log.error("Cannot subscribe to topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot subscribe to topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
+
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().subscribe(topic, user);
+            tx.commit();
+        } catch (DuplicateException e) {
+            log.error("User " + user + " is already subscribed to topic " + topic + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("already_subscribed"), Feedback.Type.WARNING));
+        } catch (NotFoundException e) {
+            log.error("User " + user + " or topic " + topic + " not found.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when user " + user + " is subscribing to topic " + topic + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -266,7 +296,30 @@ public class TopicService {
      * @param topic The topic the user is subscribed to.
      */
     public void unsubscribeFromTopic(final User user, final Topic topic) {
+        if (user == null) {
+            log.error("Anonymous users cannot unsubscribe from anything.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot unsubscribe when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (topic == null) {
+            log.error("Cannot unsubscribe from topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot unsubscribe from topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
 
+        try (Transaction tx = transactionManager.begin()) {
+            tx.newSubscriptionGateway().unsubscribe(topic, user);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("User " + user + " or topic " + topic + " not found.");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when user " + user + " is unsubscribing from topic " + topic + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -389,7 +442,7 @@ public class TopicService {
         List<Report> reports = null;
         try (Transaction transaction = transactionManager.begin()) {
             reports = transaction.newReportGateway()
-                                 .getSelectedReports(topic, selection, showOpenReports, showClosedReports);
+                    .getSelectedReports(topic, selection, showOpenReports, showClosedReports);
             transaction.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The topic could not be found.", e);
@@ -441,6 +494,17 @@ public class TopicService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return users;
+    }
+
+    /**
+     * Returns whether {@code user} is allowed to create a report in {@code topic}.
+     *
+     * @param user  The user whose rights to check.
+     * @param topic The topic in question.
+     * @return Whether {@code user} is allowed to create a report in {@code topic}.
+     */
+    public boolean canCreateReportIn(final User user, final Topic topic) {
+        return user != null && topic != null && (user.isAdministrator() || !isBanned(user, topic));
     }
 
     /**
@@ -513,7 +577,26 @@ public class TopicService {
      * @return The number of subscribers.
      */
     public int getNumberOfSubscribers(final Topic topic) {
-        return 0;
+        if (topic == null) {
+            log.error("Cannot count subscribers of topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot count subscribers of topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
+
+        int count = 0;
+        try (Transaction tx = transactionManager.begin()) {
+            count = tx.newTopicGateway().countSubscribers(topic);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Cannot find topic " + topic + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error when counting subscribers of topic " + topic + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return count;
     }
 
     /**
@@ -591,7 +674,33 @@ public class TopicService {
      * @return {@code true} if the user is subscribed, {@code false} otherwise.
      */
     public boolean isSubscribed(final User user, final Topic topic) {
-        return false;
+        if (user == null) {
+            return false;
+        } else if (user.getId() == null) {
+            log.error("Cannot determine subscription status of user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (topic == null) {
+            log.error("Cannot determine subscription status to topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot determine subscription status to topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
+
+        boolean status;
+        try (Transaction tx = transactionManager.begin()) {
+            status = tx.newSubscriptionGateway().isSubscribed(user, topic);
+            tx.commit();
+        } catch (NotFoundException e) {
+            status = false;
+            log.error("Could not find user " + user + " or topic " + topic + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            status = false;
+            log.error("Error when determining subscription status of user " + user + " to topic " + topic + ".");
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return status;
     }
 
     /**
@@ -644,7 +753,7 @@ public class TopicService {
     /**
      * Returns all topics moderated by the given user for a given selection.
      *
-     * @param user The user in question.
+     * @param user      The user in question.
      * @param selection The given selection.
      * @return A list of topics moderated by the user.
      */
@@ -658,6 +767,64 @@ public class TopicService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return moderatedTopics;
+    }
+
+    /**
+     * Returns all topics the user is subscribed to for a given selection.
+     *
+     * @param user      The user in question.
+     * @param selection The given selection.
+     * @return A list of topics the user is subscribed to.
+     */
+    public List<Topic> selectSubscribedTopics(final User user, final Selection selection) {
+        if (selection == null) {
+            log.error("Cannot select subscribed topics when selection is null.");
+            throw new IllegalArgumentException("Selection cannot be null.");
+        } else if (user == null) {
+            log.error("Cannot select subscribed topics when user is null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot select subscribed topics when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        List<Topic> selectedTopics;
+        try (Transaction tx = transactionManager.begin()) {
+            selectedTopics = tx.newTopicGateway().selectSubscribedTopics(user, selection);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when selecting subscribed topics for user " + user + " with selection " + selection + ".",
+                    e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            selectedTopics = null;
+        }
+        return selectedTopics;
+    }
+
+    /**
+     * Counts the number of topics the user is subscribed to.
+     *
+     * @param user The user in question.
+     * @return The number of topics the user is subscribed to.
+     */
+    public int countSubscribedTopics(final User user) {
+        if (user == null) {
+            return 0;
+        } else if (user.getId() == null) {
+            log.error("Cannot count subscribed topics when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        int count;
+        try (Transaction tx = transactionManager.begin()) {
+            count = tx.newTopicGateway().countSubscribedTopics(user);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error when counting subscribed topics for user " + user + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            count = 0;
+        }
+        return count;
     }
 
 }
