@@ -56,7 +56,7 @@ public abstract class MediaServlet extends HttpServlet {
      */
     protected void redirectToNotFoundPage(final HttpServletResponse response) {
         try {
-            // TODO: Redirect to our own error page.
+            // TODO Redirect to our own error page.
             response.sendError(HttpServletResponse.SC_NOT_FOUND); // 404.
         } catch (IOException e) {
             throw new InternalError("Could not redirect to 404 page.");
