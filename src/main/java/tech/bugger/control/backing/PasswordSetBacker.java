@@ -12,6 +12,7 @@ import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Token;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 /**
@@ -106,13 +107,15 @@ public class PasswordSetBacker {
     }
 
     /**
-     * Sets the user's password to the new value in {@code password}.
+     * Sets the user's password to the new value in {@code password} and logs in the user.
      *
      * @return The site to redirect to or {@code null}.
      */
     public String setUserPassword() {
-        if (authenticationService.setPassword(token.getUser(), password, token.getValue())) {
+        User user = token.getUser();
+        if (authenticationService.setPassword(user, password, token.getValue())) {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("password_set.success"), Feedback.Type.INFO));
+            session.setUser(user);
             return "pretty:home";
         }
         return null;
