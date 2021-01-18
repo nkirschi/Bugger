@@ -1,0 +1,377 @@
+<ui:composition template="/WEB-INF/template/main.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:b="http://tech.bugger/tags">
+    <f:metadata>
+        <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
+    </f:metadata>
+
+    <ui:param name="helpKey" value="profile"/>
+
+    <ui:param name="title" value="#{(labels.profile_page).concat(' ').concat(profileBacker.user.username)}"/>
+
+    <ui:define name="content">
+
+        <!-- Renders the popup dialog for changing the profile owner's administrator status. -->
+        <h:form id="f-change-status" rendered="#{profileBacker.displayDialog == 'ADMIN'}">
+            <h:panelGroup class="row" layout="block">
+                <h:panelGroup class="col-sm-2" layout="block"/>
+                <h:panelGroup class="col-sm-8" layout="block">
+                    <h:panelGroup class="row" layout="block" id="p-change-status">
+                        <h:panelGroup class="col-sm-12" layout="block">
+                            <h:outputText id="ot-change-status" styleClass="h2" value="#{labels.change_admin_status}"/>
+                            <h:outputText id="ot-change-status-info" value="#{labels.really_change_admin_status}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block" id="p-user-password" styleClass="align-center">
+                        <h:panelGroup class="col-sm-3" id="p-user-password-label">
+                            <h:outputLabel id="ol-user-password" value="#{labels.password}" for="i-user-password"/>
+                        </h:panelGroup>
+                        <h:panelGroup class="col-sm-6" id="p-user-password-input">
+                            <h:inputSecret id="i-user-password" value="#{profileBacker.password}" required="true">
+                                <f:validateLength maximum="#{C.PASSWORD_MAX}"/>
+                            </h:inputSecret>
+                        </h:panelGroup>
+                        <h:panelGroup class="col-sm-3" id="p-user-password-message">
+                            <h:message for="i-user-password"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block" styleClass="align-center">
+                        <h:commandButton id="cb-change-status" value="#{labels.change_status}"
+                                         action="#{profileBacker.toggleAdmin}" styleClass="button"/>
+                        <h:commandButton id="cb-abort-change" value="#{labels.abort}" styleClass="button"
+                                         action="#{profileBacker.closeDialog}" immediate="true"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-2" layout="block"/>
+            </h:panelGroup>
+        </h:form>
+
+        <!-- Renders the popup dialog to unsubscribe all of the profile owner's subscribed topics. -->
+        <h:form id="f-really-unsub-topics" rendered="#{profileBacker.displayDialog == 'TOPIC'}">
+            <h:panelGroup class="row" layout="block">
+                <h:panelGroup class="col-sm-2" layout="block"/>
+                <h:panelGroup class="col-sm-8" layout="block">
+                    <h:panelGroup class="row" layout="block" id="p-really-unsub-topics">
+                        <h:panelGroup class="col-sm-12" layout="block">
+                            <h:outputText id="ot-really-unsub-topics" styleClass="h2"
+                                          value="#{labels.unsub_all_topics}"/>
+                            <h:outputText id="ot-really-unsub-topics-warn" value="#{labels.really_unsub_all_topics}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block" styleClass="align-center">
+                        <h:commandButton id="cb-really-unsub-topics" value="#{labels.really_unsub}"
+                                         action="#{profileBacker.deleteAllTopicSubscriptions}" styleClass="button"/>
+                        <h:commandButton id="cb-abort-unsub-topics" value="#{labels.abort}" styleClass="button"
+                                         action="#{profileBacker.closeDialog}"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-2" layout="block"/>
+            </h:panelGroup>
+        </h:form>
+
+        <!-- Renders the popup dialog to unsubscribe all of the profile owner's subscribed reports. -->
+        <h:form id="f-really-unsub-reports" rendered="#{profileBacker.displayDialog == 'REPORT'}">
+            <h:panelGroup class="row" layout="block">
+                <h:panelGroup class="col-sm-2" layout="block"/>
+                <h:panelGroup class="col-sm-8" layout="block">
+                    <h:panelGroup class="row" layout="block" id="p-really-unsub-reports">
+                        <h:panelGroup class="col-sm-12" layout="block">
+                            <h:outputText id="ot-really-unsub-reports" styleClass="h2"
+                                          value="#{labels.unsub_all_reports}"/>
+                            <h:outputText id="ot-really-unsub-reports-warn" value="#{labels.really_unsub_all_reports}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block" styleClass="align-center">
+                        <h:commandButton id="cb-really-unsub-reports" value="#{labels.really_unsub}"
+                                         action="#{profileBacker.deleteAllReportSubscriptions}" styleClass="button"/>
+                        <h:commandButton id="cb-abort-unsub-reports" value="#{labels.abort}" styleClass="button"
+                                         action="#{profileBacker.closeDialog}"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-2" layout="block"/>
+            </h:panelGroup>
+        </h:form>
+
+        <!-- Renders the popup dialog to unsubscribe all of the profile owner's subscribed users. -->
+        <h:form id="f-really-unsub-users" rendered="#{profileBacker.displayDialog == 'USER'}">
+            <h:panelGroup class="row" layout="block">
+                <h:panelGroup class="col-sm-2" layout="block"/>
+                <h:panelGroup class="col-sm-8" layout="block">
+                    <h:panelGroup class="row" layout="block" id="p-really-unsub-users">
+                        <h:panelGroup class="col-sm-12" layout="block">
+                            <h:outputText id="ot-really-unsub-users" styleClass="h2" value="#{labels.unsub_all_users}"/>
+                            <h:outputText id="ot-really-unsub-users-warn" value="#{labels.really_unsub_all_users}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block" styleClass="align-center">
+                        <h:commandButton id="cb-really-unsub-users" value="#{labels.really_unsub}"
+                                         action="#{profileBacker.deleteAllUserSubscriptions}" styleClass="button"/>
+                        <h:commandButton id="cb-abort-unsub-users" value="#{labels.abort}" styleClass="button"
+                                         action="#{profileBacker.closeDialog}"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-2" layout="block"/>
+            </h:panelGroup>
+        </h:form>
+
+        <!-- Renders the profile owner's user information and subscriptions. -->
+        <h:form id="f-profile">
+
+            <!-- Contains the buttons for changing administration status, profile editing and subscribing -->
+            <h:panelGroup class="row" layout="block" styleClass="align-right">
+                <h:commandButton id="cb-subscribe" action="#{profileBacker.toggleUserSubscription()}"
+                                 value="#{profileBacker.subscribed ? labels.unsubscribe : labels.subscribe}" styleClass="button" rendered="#{userSession.user != null
+                                 and userSession.user.id != profileBacker.user.id}"/>
+                <h:commandLink id="l-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
+                               styleClass="command-link" rendered="#{userSession.user.administrator
+                               and not profileBacker.user.administrator}">
+                    <h:graphicImage id="g-admin" value="/resources/images/add.png" alt="Button to add admin"/>
+                </h:commandLink>
+                <h:commandLink id="l-rem-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
+                               immediate="true" styleClass="command-link" rendered="#{userSession.user.administrator
+                               and profileBacker.user.administrator}">
+                    <h:graphicImage id="g-rem-admin" value="/resources/images/delete.png" alt="Button to remove admin"/>
+                </h:commandLink>
+                <h:link id="l-edit" value="#{labels.edit}" outcome="/view/restr/profile-edit.xhtml"
+                        rendered="#{profileBacker.privileged}" styleClass="button">
+                    <f:param name="e" value="#{profileBacker.user.id}"/>
+                </h:link>
+            </h:panelGroup>
+
+            <!-- The profile owner's user information -->
+            <h:panelGroup class="row" layout="block" id="p-avatar" styleClass="p-avatar">
+                <h:graphicImage id="g-avatar"
+                                value="/avatar?id=#{profileBacker.user.id}"
+                                styleClass="g-avatar"
+                                alt="The user's avatar"
+                                rendered="#{profileBacker.user.existsAvatar}"/>
+                <h:graphicImage id="g-avatar-fallback"
+                                library="images" name="bugger.png"
+                                styleClass="g-avatar"
+                                alt="The user's avatar"
+                                rendered="#{not profileBacker.user.existsAvatar}"/>
+            </h:panelGroup>
+            <h:panelGroup class="row" layout="block" id="p-username">
+                <h:panelGroup class="col-sm-3" id="p-username-label">
+                    <h:outputLabel id="ol-username" value="#{labels.username}" for="ot-username"
+                                   styleClass="profile-info"/>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-9" id="p-username-output">
+                    <h:outputText id="ot-username" value="#{profileBacker.user.username}" styleClass="profile-info"/>
+                </h:panelGroup>
+            </h:panelGroup>
+            <h:panelGroup id="p-first-name" class="row" layout="block" rendered="#{profileBacker.user.profileVisibility
+                            == 'FULL' or profileBacker.privileged}">
+                <h:panelGroup class="col-sm-3" id="p-first-name-label">
+                    <h:outputLabel id="ol-first-name" value="#{labels.first_name}" for="ot-first-name"
+                                   styleClass="profile-info"/>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-9" id="p-first-name-output">
+                    <h:outputText id="ot-first-name" value="#{profileBacker.user.firstName}" styleClass="profile-info"/>
+                </h:panelGroup>
+            </h:panelGroup>
+            <h:panelGroup class="row" layout="block" id="p-last-name" rendered="#{profileBacker.user.profileVisibility
+                            == 'FULL' or profileBacker.privileged}">
+                <h:panelGroup class="col-sm-3" id="p-last-name-label">
+                    <h:outputLabel id="ol-last-name" value="#{labels.last_name}" for="ot-last-name"
+                                   styleClass="profile-info"/>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-9" id="p-last-name-output">
+                    <h:outputText id="ot-last-name" value="#{profileBacker.user.lastName}" styleClass="profile-info"/>
+                </h:panelGroup>
+            </h:panelGroup>
+            <h:panelGroup class="row" layout="block" id="p-email" rendered="#{profileBacker.user.profileVisibility
+                            == 'FULL' or profileBacker.privileged}">
+                <h:panelGroup class="col-sm-3" id="p-email-label">
+                    <h:outputLabel id="ol-email" value="#{labels.email}" for="ot-email" styleClass="profile-info"/>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-9" id="p-email-output">
+                    <h:outputText id="ot-email" value="#{profileBacker.user.emailAddress}" styleClass="profile-info"/>
+                </h:panelGroup>
+            </h:panelGroup>
+            <h:panelGroup class="row" layout="block" id="p-biography" rendered="#{profileBacker.user.profileVisibility
+                            == 'FULL' or profileBacker.privileged}">
+                <h:panelGroup class="col-sm-3" id="p-biography-label">
+                    <h:outputLabel id="ol-biography" value="#{labels.biography}" for="ot-biography"
+                                   styleClass="profile-info"/>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-9" id="p-biography-output">
+                    <h:outputText id="ot-biography" value="#{profileBacker.sanitizedBiography}" escape="false"
+                                  styleClass="profile-info"/>
+                </h:panelGroup>
+            </h:panelGroup>
+            <h:panelGroup class="row" layout="block" id="p-weight">
+                <h:panelGroup class="col-sm-3" id="p-weight-label">
+                    <h:outputLabel id="ol-weight" value="#{labels.voting_weight}" for="ot-weight"
+                                   styleClass="profile-info"/>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-9" id="p-weight-output">
+                    <h:outputText id="ot-weight" value="#{profileBacker.votingWeight}" styleClass="profile-info"/>
+                </h:panelGroup>
+            </h:panelGroup>
+            <h:panelGroup class="row" layout="block" id="p-post-count">
+                <h:panelGroup class="col-sm-3" id="p-post-count-label">
+                    <h:outputLabel id="ol-post-count" value="#{labels.num_posts}" for="ot-post-count"
+                                   styleClass="profile-info"/>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-9" id="p-post-count-output">
+                    <h:outputText id="ot-post-count" value="#{profileBacker.numberOfPosts}" styleClass="profile-info"/>
+                </h:panelGroup>
+            </h:panelGroup>
+            <h:panelGroup class="row" layout="block" id="p-is-admin" rendered="#{profileBacker.user.administrator}">
+                <h:panelGroup class="col-sm-3" id="p-is-admin-label">
+                    <h:outputLabel id="ol-is-admin" value="#{labels.status}" for="ot-is-admin"
+                                   styleClass="profile-info"/>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-9" id="p-is-admin-output">
+                    <h:outputText id="ot-is-admin" value="#{labels.administrator}" styleClass="profile-info"/>
+                </h:panelGroup>
+            </h:panelGroup>
+            <h:panelGroup class="row" layout="block" id="p-register-date">
+                <h:panelGroup class="col-sm-3" id="p-register-date-label">
+                    <h:outputLabel id="ol-register-date" value="#{labels.registration_date}" for="ot-register-date"
+                                   styleClass="profile-info"/>
+                </h:panelGroup>
+                <h:panelGroup class="col-sm-9" id="p-register-date-output">
+                    <h:outputText id="ot-register-date" value="#{profileBacker.user.registrationDate}"
+                                  styleClass="profile-info"/>
+                </h:panelGroup>
+            </h:panelGroup>
+        </h:form>
+
+        <!-- A paginated list of topics moderated by the profile owner. -->
+        <h:outputText id="ot-moderated" styleClass="h2" value="#{labels.mod_topics}"/>
+        <h:panelGroup class="row" layout="block" id="p-moderated">
+            <h:panelGroup class="col-sm-12" layout="block" id="p-moderated-pagination">
+                <b:pagitable paginator="#{profileBacker.moderatedTopics}" simple="true">
+                    <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+                    <h:column>
+                        <!-- TODO check if name still fits once implemented in TopicBacker -->
+                        <h:link value="#{var.title}" outcome="pretty:topic">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
+                    </h:column>
+                </b:pagitable>
+            </h:panelGroup>
+        </h:panelGroup>
+
+        <!-- Renders the title and command button of the profile owner's subscribed topics. This form is necessary
+        since the pagitable contains an additional form. -->
+        <h:form id="f-sub-topics">
+            <h:outputText id="ot-sub-topics" styleClass="h2" value="#{labels.topic_subs}"
+                          rendered="#{profileBacker.privileged}"/>
+            <h:panelGroup class="row" layout="block" styleClass="align-right" id="p-unsub-all-topics">
+                <h:commandButton id="cb-unsub-all-topics"
+                                 action="#{profileBacker.openDeleteAllTopicSubscriptionsDialog}"
+                                 rendered="#{not profileBacker.topicSubscriptions.isEmpty() and
+                                 profileBacker.privileged}" value="#{labels.unsub_all}" styleClass="button"/>
+            </h:panelGroup>
+        </h:form>
+
+        <!-- A paginated list of the profile owner's subscribed topics. -->
+        <h:panelGroup class="row" layout="block" id="p-sub-topics" rendered="#{profileBacker.privileged}">
+            <h:panelGroup class="col-sm-12" layout="block" id="p-sub-topics-pagination">
+                <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+                <b:pagitable paginator="#{profileBacker.topicSubscriptions}">
+                    <b:column title="#{labels.id}" paginator="#{profileBacker.topicSubscriptions}" key="id">
+                        <h:link value="#{var.id}" outcome="pretty:topic">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
+                    </b:column>
+                    <b:column title="#{labels.title}" paginator="#{profileBacker.topicSubscriptions}" key="title">
+                        <h:link value="#{var.title}" outcome="pretty:topic">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
+                    </b:column>
+                    <h:column>
+                        <h:commandLink id="l-unsub-topic" action="#{profileBacker.deleteTopicSubscription(var)}"
+                                       styleClass="button">
+                            <h:graphicImage id="g-unsub-topic" value="/resources/images/trash.png"
+                                            styleClass="trashcan-small"/>
+                        </h:commandLink>
+                    </h:column>
+                </b:pagitable>
+            </h:panelGroup>
+        </h:panelGroup>
+
+        <!-- Same as previous form for reports -->
+        <h:form id="f-sub-reports">
+            <h:outputText id="ot-sub-reports" styleClass="h2" value="#{labels.report_subs}"
+                          rendered="#{profileBacker.privileged}"/>
+            <h:panelGroup class="row" layout="block" styleClass="align-right" id="p-unsub-all-reports">
+                <h:commandButton id="cb-unsub-all-reports"
+                                 action="#{profileBacker.openDeleteAllReportSubscriptionsDialog}"
+                                 rendered="#{not profileBacker.reportSubscriptions.isEmpty() and
+                                 profileBacker.privileged}" value="#{labels.unsub_all}" styleClass="button"/>
+            </h:panelGroup>
+        </h:form>
+
+        <!-- A paginated list of the profile owner's subscribed reports. -->
+        <h:panelGroup class="row" layout="block" id="p-sub-reports" rendered="#{profileBacker.privileged}">
+            <h:panelGroup class="col-sm-12" layout="block" id="p-sub-reports-pagination">
+                <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
+                <b:pagitable paginator="#{profileBacker.reportSubscriptions}">
+                    <b:column title="#{labels.id}" paginator="#{profileBacker.reportSubscriptions}" key="id">
+                        <h:link value="#{var.id}" outcome="pretty:report">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
+                    </b:column>
+                    <b:column title="#{labels.title}" paginator="#{profileBacker.reportSubscriptions}" key="title">
+                        <h:link value="#{var.title}" outcome="pretty:report">
+                            <f:param name="id" value="#{var.id}"/>
+                        </h:link>
+                    </b:column>
+                    <b:column title="#{labels.col_type}" paginator="#{profileBacker.reportSubscriptions}" key="type">
+                        <h:outputText value="#{labels['report_type.' += var.type]}"/>
+                    </b:column>
+                    <b:column title="#{labels.col_severity}" paginator="#{profileBacker.reportSubscriptions}" key="severity">
+                        <h:outputText value="#{labels['report_severity.' += var.severity]}"/>
+                    </b:column>
+                    <h:column>
+                        <h:commandLink id="l-unsub-report" action="#{profileBacker.deleteReportSubscription(var)}"
+                                       styleClass="button">
+                            <h:graphicImage id="g-unsub-report" value="/resources/images/trash.png"
+                                            styleClass="trashcan-small"/>
+                        </h:commandLink>
+                    </h:column>
+                </b:pagitable>
+            </h:panelGroup>
+        </h:panelGroup>
+
+        <!-- Same as previous form for users -->
+        <h:form id="f-sub-users">
+            <h:outputText id="ot-sub-users" styleClass="h2" value="#{labels.user_subs}"
+                          rendered="#{profileBacker.privileged}"/>
+            <h:panelGroup class="row" layout="block" styleClass="align-right" id="p-unsub-all-users">
+                <h:commandButton id="cb-unsub-all-users" action="#{profileBacker.openDeleteAllUserSubscriptionsDialog}"
+                                 rendered="#{not profileBacker.userSubscriptions.isEmpty() and
+                                 profileBacker.privileged}" value="#{labels.unsub_all}" styleClass="button"/>
+            </h:panelGroup>
+        </h:form>
+
+        <!-- A paginated list of the profile owner's subscribed users. -->
+        <h:panelGroup class="row" layout="block" id="p-sub-users" rendered="#{profileBacker.privileged}">
+            <h:panelGroup class="col-sm-12" layout="block" id="p-sub-users-pagination">
+                <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
+                <b:pagitable paginator="#{profileBacker.userSubscriptions}">
+                    <b:column title="#{labels.username}" paginator="#{profileBacker.userSubscriptions}" key="username">
+                        <h:link value="#{var.username}" outcome="pretty:profile">
+                            <f:param name="u" value="#{var.username}"/>
+                        </h:link>
+                    </b:column>
+                    <h:column>
+                        <h:commandLink id="l-unsub-user" action="#{profileBacker.deleteUserSubscription(var)}"
+                                       styleClass="button">
+                            <h:graphicImage id="g-unsub-user" value="/resources/images/trash.png"
+                                            styleClass="trashcan-small"/>
+                        </h:commandLink>
+                    </h:column>
+                </b:pagitable>
+            </h:panelGroup>
+        </h:panelGroup>
+
+    </ui:define>
+</ui:composition>

@@ -9,6 +9,7 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:f="http://xmlns.jcp.org/jsf/core">
 <!--@elvariable id="title" type="java.lang.String"-->
+<!--@elvariable id="helpKey" type="java.lang.String"-->
 <f:view locale="#{userSession.locale}">
     <h:head>
         <title> Bugger: #{title} </title>
@@ -23,6 +24,9 @@
             <h:panelGroup layout="block"
                           id="p-messages"
                           rendered="#{not empty facesContext.messageList}">
+                <h:panelGroup layout="block"
+                              styleClass="btn btn-close btn-danger float-end ms-1"
+                              onclick="document.getElementById('p-messages').hidden = true;"/>
                 <h:messages id="m-global"
                             globalOnly="true"
                             layout="table"
@@ -33,7 +37,11 @@
             </h:panelGroup>
             <ui:insert name="dialogs"/>
             <h:panelGroup layout="block" id="p-help" styleClass="dialog" rendered="#{footerBacker.helpDisplayed}">
-                <ui:insert name="help"/>
+                <h:outputText id="ot-help" value="#{footerBacker.getHelp(helpKey)}" escape="false"/>
+                <h:form id="f-toggle-help" styleClass="mb-3">
+                    <h:commandButton id="cb-toggle-help" styleClass="btn btn-primary form-control"
+                                     value="#{labels.close_help}" action="#{footerBacker.toggleHelp}"/>
+                </h:form>
             </h:panelGroup>
             <h:panelGroup layout="block" id="p-content">
                 <h:outputText value="#{title}" styleClass="h1" id="title"/>

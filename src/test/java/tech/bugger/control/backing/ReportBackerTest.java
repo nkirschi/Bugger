@@ -1,5 +1,13 @@
 package tech.bugger.control.backing;
 
+import java.lang.reflect.Field;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,29 +27,10 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import java.lang.reflect.Field;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
@@ -192,6 +181,17 @@ public class ReportBackerTest {
     }
 
     @Test
+    public void testMarkDuplicateErrorInService() {
+        user.setAdministrator(true);
+        when(session.getUser()).thenReturn(user);
+        reportBacker.setReport(report);
+        reportBacker.setDuplicateOfID(100);
+        reportBacker.markDuplicate();
+        verify(reportService).markDuplicate(any(), anyInt());
+        verify(reportService, never()).close(any());
+    }
+
+    @Test
     public void testMarkDuplicateValidIsSelectedAndPrivileged() throws Exception {
         reportBacker.setReport(report);
         reportBacker.setDuplicateOfID(100);
@@ -218,10 +218,12 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testUnmarkDuplicateError() {
-        reportBacker.setDuplicateOfID(100);
+    public void testUnmarkDuplicateErrorInService() {
+        user.setAdministrator(true);
+        when(session.getUser()).thenReturn(user);
+        reportBacker.setReport(report);
         reportBacker.unmarkDuplicate();
-        assertNotNull(reportBacker.getDuplicateOfID());
+        verify(reportService).unmarkDuplicate(any());
     }
 
     @Test

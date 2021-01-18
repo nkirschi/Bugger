@@ -8,19 +8,23 @@ import java.sql.Statement;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
 
@@ -33,9 +37,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class ReportDBGatewayTest {
 
-    @Mock
-    private UserDBGateway userGateway;
-
     private ReportDBGateway gateway;
 
     private Connection connection;
@@ -43,6 +44,11 @@ public class ReportDBGatewayTest {
     private Report report;
 
     private Topic topic;
+
+    private Selection selection;
+
+    @Mock
+    private UserDBGateway userGateway;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -57,6 +63,7 @@ public class ReportDBGatewayTest {
         report = new Report(0, "App crashes", Report.Type.HINT, Report.Severity.SEVERE, "1.4.1",
                 new Authorship(null, ZonedDateTime.now(), null, ZonedDateTime.now()), null,
                 null, null, false, 1);
+        selection = new Selection(0, 0, Selection.PageSize.LARGE, "ID", true);
     }
 
     @AfterEach
@@ -64,10 +71,11 @@ public class ReportDBGatewayTest {
         connection.close();
     }
 
-    public void insertReport() throws Exception {
+    public void insertReports() throws Exception {
         try (Statement stmt = connection.createStatement()) {
             stmt.execute("INSERT INTO topic (title, description) VALUES ('topic1', 'description1');");
             stmt.execute("INSERT INTO report (title, type, severity, topic) VALUES ('HI', 'BUG', 'MINOR', 1);");
+            stmt.execute("INSERT INTO report (title, type, severity, topic, duplicate_of) VALUES ('HI', 'BUG', 'MINOR', 1, 100);");
         }
     }
 
@@ -213,7 +221,7 @@ public class ReportDBGatewayTest {
     @Test
     public void testCountPostsWhenThereAreNone() throws Exception {
         DBExtension.emptyDatabase();
-        insertReport();
+        insertReports();
         report.setId(100);
         assertEquals(0, gateway.countPosts(report));
     }
@@ -221,7 +229,7 @@ public class ReportDBGatewayTest {
     @Test
     public void testCountPostsWhenThereAreSome() throws Exception {
         DBExtension.emptyDatabase();
-        insertReport();
+        insertReports();
         insertPosts(100, 34);
         report.setId(100);
         assertEquals(34, gateway.countPosts(report));
@@ -254,7 +262,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testDeleteReport() throws Exception {
-        insertReport();
+        insertReports();
         report.setId(100);
         gateway.delete(report);
         assertTrue(isGone(100));
@@ -262,7 +270,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testDeleteReportTwice() throws Exception {
-        insertReport();
+        insertReports();
         report.setId(100);
         gateway.delete(report);
         assertThrows(NotFoundException.class, () -> gateway.delete(report));
@@ -303,7 +311,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testCloseReport() throws Exception {
-        insertReport();
+        insertReports();
         report.setId(100);
         report.setClosingDate(ZonedDateTime.now());
         assertDoesNotThrow(() -> gateway.closeReport(report));
@@ -311,7 +319,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testCloseReportVerifyClosingDate() throws Exception {
-        insertReport();
+        insertReports();
         report.setId(100);
         report.setClosingDate(ZonedDateTime.now());
         gateway.closeReport(report);
@@ -353,14 +361,14 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testOpenReportWhenReportIsOpen() throws Exception {
-        insertReport();
+        insertReports();
         report.setId(100);
         assertDoesNotThrow(() -> gateway.openReport(report));
     }
 
     @Test
     public void testOpenReportWhenReportIsClosed() throws Exception {
-        insertReport();
+        insertReports();
         report.setId(100);
         report.setClosingDate(ZonedDateTime.now());
         gateway.closeReport(report);
@@ -395,9 +403,157 @@ public class ReportDBGatewayTest {
     @Test
     public void testCountDuplicatesWhenThereAreNone() throws Exception {
         DBExtension.emptyDatabase();
-        insertReport();
-        report.setId(100);
+        insertReports();
+        report.setId(101);
         assertEquals(0, gateway.countDuplicates(report));
+    }
+
+    @Test
+    public void testCountDuplicatesWhenCountNotFound() throws Exception {
+        ResultSet resultSetMock = mock(ResultSet.class);
+        PreparedStatement stmtMock = mock(PreparedStatement.class);
+        Connection connectionSpy = spy(connection);
+        doReturn(false).when(resultSetMock).next();
+        doReturn(resultSetMock).when(stmtMock).executeQuery();
+        doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
+        report.setId(93);
+        assertThrows(NotFoundException.class,
+                () -> new ReportDBGateway(connectionSpy, userGateway).countDuplicates(report));
+        reset(connectionSpy, stmtMock);
+    }
+
+    @Test
+    public void testSelectDuplicatesWhenThereAreNone() {
+        report.setId(93);
+        assertEquals(List.of(), gateway.selectDuplicates(report, selection));
+    }
+
+    @Test
+    public void testSelectDuplicatesWhenThereAreSome() throws Exception {
+        DBExtension.emptyDatabase();
+        insertReports();
+        Report original = new Report();
+        original.setId(100);
+        report.setId(101);
+        selection.setAscending(false);
+        assertEquals(List.of(report), gateway.selectDuplicates(original, selection));
+    }
+
+    @Test
+    public void testSelectDuplicatesWhenCountNotFound() throws Exception {
+        try (MockedStatic<ReportDBGateway> gatewayMock = mockStatic(ReportDBGateway.class)) {
+            gatewayMock.when(() -> ReportDBGateway.getReportFromResultSet(any(), any()))
+                    .thenThrow(NotFoundException.class);
+
+            ResultSet resultSetMock = mock(ResultSet.class);
+            PreparedStatement stmtMock = mock(PreparedStatement.class);
+            Connection connectionSpy = spy(connection);
+            doReturn(true).when(resultSetMock).next();
+            doReturn(resultSetMock).when(stmtMock).executeQuery();
+            doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
+
+            report.setId(93);
+
+            assertThrows(StoreException.class,
+                    () -> new ReportDBGateway(connectionSpy, userGateway).selectDuplicates(report, selection));
+            reset(connectionSpy, stmtMock);
+        }
+    }
+
+    @Test
+    public void testUnmarkDuplicateNullReport() {
+        assertThrows(IllegalArgumentException.class, () -> gateway.unmarkDuplicate(null));
+    }
+
+    @Test
+    public void testUnmarkDuplicateNullReportID() {
+        report.setId(null);
+        assertThrows(IllegalArgumentException.class, () -> gateway.unmarkDuplicate(report));
+    }
+
+    @Test
+    public void testUnmarkDuplicateNoRowsAffected() throws Exception {
+        PreparedStatement stmtMock = mock(PreparedStatement.class);
+        Connection connectionSpy = spy(connection);
+        doReturn(0).when(stmtMock).executeUpdate();
+        doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
+
+        report.setId(100);
+        assertThrows(NotFoundException.class,
+                () -> new ReportDBGateway(connectionSpy, userGateway).unmarkDuplicate(report));
+    }
+
+    @Test
+    public void testUnmarkDuplicateWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        report.setId(100);
+        assertThrows(StoreException.class,
+                () -> new ReportDBGateway(connectionSpy, userGateway).unmarkDuplicate(report));
+    }
+
+    @Test
+    public void testUnmarkDuplicateSuccess() throws Exception {
+        DBExtension.emptyDatabase();
+        insertReports();
+        report.setId(101);
+        assertDoesNotThrow(() -> gateway.unmarkDuplicate(report));
+        assertNull(report.getDuplicateOf());
+    }
+
+    @Test
+    public void testMarkDuplicateNullReport() {
+        assertThrows(IllegalArgumentException.class, () -> gateway.markDuplicate(null, 100));
+    }
+
+    @Test
+    public void testMarkDuplicateNullReportID() {
+        report.setId(null);
+        assertThrows(IllegalArgumentException.class, () -> gateway.markDuplicate(report, 100));
+    }
+
+    @Test
+    public void testMarkDuplicateSelfReference() {
+        report.setId(100);
+        assertThrows(SelfReferenceException.class, () -> gateway.markDuplicate(report, 100));
+    }
+
+    @Test
+    public void testMarkDuplicateNoRowsAffected() throws Exception {
+        PreparedStatement stmtMock = mock(PreparedStatement.class);
+        Connection connectionSpy = spy(connection);
+        doReturn(0).when(stmtMock).executeUpdate();
+        doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
+
+        report.setId(101);
+        assertThrows(NotFoundException.class,
+                () -> new ReportDBGateway(connectionSpy, userGateway).markDuplicate(report, 100));
+    }
+
+    @Test
+    public void testMarkDuplicateWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        report.setId(101);
+        assertThrows(StoreException.class,
+                () -> new ReportDBGateway(connectionSpy, userGateway).markDuplicate(report, 100));
+    }
+
+    @Test
+    public void testMarkDuplicateNotFound() throws Exception {
+        DBExtension.emptyDatabase();
+        insertReports();
+        report.setId(101);
+        assertThrows(NotFoundException.class, () -> gateway.markDuplicate(report, 93));
+    }
+
+    @Test
+    public void testMarkDuplicateSuccess() throws Exception {
+        DBExtension.emptyDatabase();
+        insertReports();
+        report.setId(101);
+        assertDoesNotThrow(() -> gateway.markDuplicate(report, 100));
+        assertEquals(100, report.getDuplicateOf());
     }
 
 }

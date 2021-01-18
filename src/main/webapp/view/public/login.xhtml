@@ -5,10 +5,13 @@
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
 
-    <ui:param name="title" value="#{labels.login}"/>
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
+
+    <ui:param name="helpKey" value="login"/>
+
+    <ui:param name="title" value="#{labels['login.title']}"/>
 
     <ui:define name="content">
         <h:panelGroup layout="block" styleClass="d-flex p-2 justify-content-center align-items-center container">

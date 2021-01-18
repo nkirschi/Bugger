@@ -4,11 +4,15 @@
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="Constants"/>
     </f:metadata>
 
+    <ui:param name="helpKey" value="statistics"/>
+
     <ui:param name="title" value="#{labels.statistics}"/>
+
     <ui:define name="content">
         <!-- insight figures -->
         <h:outputText value="#{labels.insight_figures}" styleClass="h2"/>

@@ -32,8 +32,6 @@ public class UserSessionTest {
     @BeforeEach
     public void setup() {
         fctxStatic = mockStatic(FacesContext.class);
-        when(FacesContext.getCurrentInstance()).thenReturn(fctx);
-        doReturn(ectx).when(fctx).getExternalContext();
         session = new UserSession();
     }
 
@@ -44,6 +42,8 @@ public class UserSessionTest {
 
     @Test
     public void testInitGerman() {
+        when(FacesContext.getCurrentInstance()).thenReturn(fctx);
+        doReturn(ectx).when(fctx).getExternalContext();
         doReturn(Locale.GERMAN).when(ectx).getRequestLocale();
         session.init();
         assertEquals(Locale.GERMAN, session.getLocale());
@@ -51,7 +51,16 @@ public class UserSessionTest {
 
     @Test
     public void testInitEnglish() {
+        when(FacesContext.getCurrentInstance()).thenReturn(fctx);
+        doReturn(ectx).when(fctx).getExternalContext();
         doReturn(Locale.ENGLISH).when(ectx).getRequestLocale();
+        session.init();
+        assertEquals(Locale.ENGLISH, session.getLocale());
+    }
+
+    @Test
+    public void testInitFallback() {
+        when(FacesContext.getCurrentInstance()).thenReturn(null);
         session.init();
         assertEquals(Locale.ENGLISH, session.getLocale());
     }

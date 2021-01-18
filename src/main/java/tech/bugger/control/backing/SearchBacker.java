@@ -1,5 +1,16 @@
 package tech.bugger.control.backing;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
@@ -8,18 +19,6 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Backing bean for the search page.
@@ -184,7 +183,7 @@ public class SearchBacker implements Serializable {
     /**
      * The current faces context.
      */
-    private FacesContext fctx;
+    private final FacesContext fctx;
 
     /**
      * Constructs a new search page backing bean with the necessary dependencies.
@@ -247,11 +246,11 @@ public class SearchBacker implements Serializable {
             @Override
             protected Iterable<Report> fetch() {
                 if (tab == Tab.REPORT) {
-                    HashMap<Report.Type, Boolean> typeHashMap = new HashMap<Report.Type, Boolean>();
+                    HashMap<Report.Type, Boolean> typeHashMap = new HashMap<>();
                     typeHashMap.put(Report.Type.BUG, showBug);
                     typeHashMap.put(Report.Type.FEATURE, showFeature);
                     typeHashMap.put(Report.Type.HINT, showHint);
-                    HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<Report.Severity, Boolean>();
+                    HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<>();
                     severityHashMap.put(Report.Severity.MINOR, showMinor);
                     severityHashMap.put(Report.Severity.RELEVANT, showRelevant);
                     severityHashMap.put(Report.Severity.SEVERE, showSevere);
@@ -268,11 +267,11 @@ public class SearchBacker implements Serializable {
             @Override
             protected int totalSize() {
                 if (tab == Tab.REPORT) {
-                    HashMap<Report.Type, Boolean> typeHashMap = new HashMap<Report.Type, Boolean>();
+                    HashMap<Report.Type, Boolean> typeHashMap = new HashMap<>();
                     typeHashMap.put(Report.Type.BUG, showBug);
                     typeHashMap.put(Report.Type.FEATURE, showFeature);
                     typeHashMap.put(Report.Type.HINT, showHint);
-                    HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<Report.Severity, Boolean>();
+                    HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<>();
                     severityHashMap.put(Report.Severity.MINOR, showMinor);
                     severityHashMap.put(Report.Severity.RELEVANT, showRelevant);
                     severityHashMap.put(Report.Severity.SEVERE, showSevere);
@@ -309,7 +308,7 @@ public class SearchBacker implements Serializable {
     /**
      * Executes the search with the specified query and filters.
      *
-     * @return {@code null} to reload the page.
+     * @return The site to redirect to or {@code null} to reload the page.
      */
     public String search() {
         return null;

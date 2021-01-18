@@ -5,11 +5,14 @@
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:b="http://tech.bugger/tags"
                 xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
-    <ui:param name="title" value="#{(labels.topic_page).concat(': ').concat(topicBacker.topic.title)}"/>
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
         <f:importConstants type="tech.bugger.control.backing.TopicBacker.TopicDialog" var="T"/>
     </f:metadata>
+
+    <ui:param name="helpKey" value="topic"/>
+
+    <ui:param name="title" value="#{(labels.topic_page).concat(': ').concat(topicBacker.topic.title)}"/>
 
     <ui:define name="content">
         <h:form id="f-topic">

@@ -37,7 +37,6 @@ public class ConfigException extends RuntimeException {
      */
     public ConfigException() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -48,7 +47,6 @@ public class ConfigException extends RuntimeException {
      */
     public ConfigException(final Throwable cause) {
         super(cause);
-        // TODO Auto-generated constructor stub
     }
 
 }

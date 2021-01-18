@@ -7,6 +7,8 @@
 
     <ui:param name="title" value="#{labels.home_title}"/>
 
+    <ui:param name="helpKey" value="home"/>
+
     <ui:define name="content">
         <h:outputText value="#{labels.home_notifications}" styleClass="h2" rendered="#{userSession.user != null}"/>
         <b:pagitable paginator="#{homeBacker.inbox}" rendered="#{userSession.user != null}">

@@ -160,7 +160,7 @@ public class PostEditBacker implements Serializable {
         if (success) {
             ExternalContext ectx = fctx.getExternalContext();
             try {
-                ectx.redirect(ectx.getRequestContextPath() + "/report?id=" + report.getId() + "&p=" + post.getId());
+                ectx.redirect(ectx.getRequestContextPath() + "/report?p=" + post.getId() + "#post-" + post.getId());
             } catch (IOException e) {
                 redirectToErrorPage();
             }

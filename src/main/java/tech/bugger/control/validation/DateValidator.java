@@ -1,14 +1,13 @@
 package tech.bugger.control.validation;
 
-import tech.bugger.global.util.Log;
-
+import java.time.LocalDate;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.validator.FacesValidator;
 import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
-import java.time.LocalDate;
+import tech.bugger.global.util.Log;
 
 /**
  * Validator for time inputs.
@@ -31,7 +30,7 @@ public class DateValidator implements Validator<LocalDate> {
      */
     @Override
     public void validate(final FacesContext fctx, final UIComponent component, final LocalDate date) {
-        throw new ValidatorException(new FacesMessage("Missing implementation"));
+        throw new ValidatorException(new FacesMessage("Implement me! I am only here for CheckStyle purposes"));
     }
 
 }

@@ -1,15 +1,6 @@
 package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.NotFoundException;
-import tech.bugger.persistence.exception.StoreException;
-import tech.bugger.persistence.util.StatementParametrizer;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,6 +9,14 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
 
 /**
  * Search gateway that retrieves search results from data stored in a database.
@@ -42,8 +41,8 @@ public class SearchDBGateway implements SearchGateway {
     /**
      * Constructs a new search gateway with the given database connection.
      *
-     * @param conn         The database connection to use for the gateway.
-     * @param userGateway  The user gateway to use.
+     * @param conn        The database connection to use for the gateway.
+     * @param userGateway The user gateway to use.
      */
     public SearchDBGateway(final Connection conn, final UserGateway userGateway) {
         this.conn = conn;
@@ -498,7 +497,6 @@ public class SearchDBGateway implements SearchGateway {
                                            final boolean showClosedReports, final boolean showDuplicates,
                                            final Topic topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                            final HashMap<Report.Severity, Boolean> severityFilter) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -528,9 +526,8 @@ public class SearchDBGateway implements SearchGateway {
                 adminFilter = "AND is_admin = false";
             }
         }
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) AS num_users FROM \"user\" WHERE "
-                + "username LIKE ? "
-                + adminFilter)) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) AS num_users FROM \"user\" "
+                + "WHERE username LIKE ? " + adminFilter)) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string(query + "%")
                     .toStatement().executeQuery();
@@ -558,8 +555,8 @@ public class SearchDBGateway implements SearchGateway {
 
         int topics = 0;
 
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) AS num_topics FROM \"topic\" WHERE "
-                + "title LIKE ?;")) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) AS num_topics FROM \"topic\" "
+                + "WHERE title LIKE ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string(query + "%")
                     .toStatement().executeQuery();
@@ -689,7 +686,6 @@ public class SearchDBGateway implements SearchGateway {
                                           final boolean showClosedReports, final boolean showDuplicates,
                                           final Topic topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                           final HashMap<Report.Severity, Boolean> severityFilter) {
-        // TODO Auto-generated method stub
         return 0;
     }
 

@@ -1,13 +1,12 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.global.util.Log;
-
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.global.util.Log;
 
 /**
  * Backing Bean for the error page.
@@ -22,22 +21,22 @@ public class ErrorBacker {
     private static final Log log = Log.forClass(ErrorBacker.class);
 
     /**
-     * The email address to contact administration.
+     * The current admin email.
      */
     private String adminMail;
 
     /**
-     * The title of the error page.
+     * The current title.
      */
     private String title;
 
     /**
-     * The error description.
+     * The current description.
      */
     private String description;
 
     /**
-     * The stack trace of the error.
+     * The current stack trace.
      */
     private String stackTrace;
 
@@ -58,7 +57,6 @@ public class ErrorBacker {
      */
     @PostConstruct
     public void init() {
-
     }
 
     /**
