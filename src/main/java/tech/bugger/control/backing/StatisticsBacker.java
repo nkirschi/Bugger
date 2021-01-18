@@ -20,7 +20,6 @@ import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.time.Duration;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -41,14 +40,9 @@ public class StatisticsBacker implements Serializable {
     private static final Log log = Log.forClass(StatisticsBacker.class);
 
     /**
-     * Constant for the number of minutes in an hour. In case someone forgets :)
+     * The maximum number of entries to be displayed in a leaderboard.
      */
-    private static final double MINUTES_IN_AN_HOUR = 60.0;
-
-    /**
-     * Symbol to use when no meaningful value can be displayed.
-     */
-    private static final String NO_VALUE_INDICATOR = "-";
+    private static final int LEADERBOARDS_LIMIT = 10;
 
     /**
      * The statistics service providing logic.
@@ -86,6 +80,21 @@ public class StatisticsBacker implements Serializable {
     private ReportCriteria reportCriteria;
 
     /**
+     * The number of open reports matching the {@link ReportCriteria}.
+     */
+    private int openReportCount;
+
+    /**
+     * The average time a report matching the {@link ReportCriteria} is open.
+     */
+    private Duration averageTimeOpen;
+
+    /**
+     * The average number of posts per report of those matching the {@link ReportCriteria}.
+     */
+    private BigDecimal averagePostsPerReport;
+
+    /**
      * The top ten reports.
      */
     private List<TopReport> topReports;
@@ -99,11 +108,6 @@ public class StatisticsBacker implements Serializable {
      * The available topic titles.
      */
     private List<String> topicTitles;
-
-    /**
-     * The format to use for printing decimal numbers.
-     */
-    private NumberFormat decimalFormat;
 
     /**
      * Constructs a new statistics page backing bean with the necessary dependencies.
@@ -122,12 +126,14 @@ public class StatisticsBacker implements Serializable {
                             final Event<Feedback> feedbackEvent,
                             final Registry registry,
                             final ExternalContext ectx) {
+
         this.statisticsService = statisticsService;
         this.topicService = topicService;
         this.userSession = userSession;
         this.feedbackEvent = feedbackEvent;
         this.registry = registry;
         this.ectx = ectx;
+
         this.reportCriteria = new ReportCriteria("", null, null);
     }
 
@@ -139,12 +145,17 @@ public class StatisticsBacker implements Serializable {
     @PostConstruct
     public void init() {
         reportCriteria.setTopic(parseTopicParameter());
-        topReports = statisticsService.determineTopTenReports();
-        topUsers = statisticsService.determineTopTenUsers();
         topicTitles = topicService.discoverTopics();
-        decimalFormat = NumberFormat.getInstance(userSession.getLocale());
-        decimalFormat.setMinimumFractionDigits(0);
-        decimalFormat.setMaximumFractionDigits(2);
+        loadStatistics();
+    }
+
+    private void loadStatistics() {
+        openReportCount = statisticsService.countOpenReports(reportCriteria);
+        averageTimeOpen = statisticsService.averageTimeOpen(reportCriteria);
+        averagePostsPerReport = statisticsService.averagePostsPerReport(reportCriteria);
+
+        topReports = statisticsService.determineTopReports(LEADERBOARDS_LIMIT);
+        topUsers = statisticsService.determineTopUsers(LEADERBOARDS_LIMIT);
     }
 
     private String parseTopicParameter() {
@@ -172,6 +183,7 @@ public class StatisticsBacker implements Serializable {
     public String applyFilters() {
         ResourceBundle messagesBundle = registry.getBundle("messages", userSession);
         feedbackEvent.fire(new Feedback(messagesBundle.getString("filters_applied"), Feedback.Type.INFO));
+        loadStatistics();
         return null;
     }
 
@@ -181,7 +193,7 @@ public class StatisticsBacker implements Serializable {
      * @return The total number of reports.
      */
     public int getOpenReportCount() {
-        return statisticsService.countOpenReports(reportCriteria);
+        return openReportCount;
     }
 
     /**
@@ -189,13 +201,8 @@ public class StatisticsBacker implements Serializable {
      *
      * @return The average time a report remains open.
      */
-    public String getAverageTimeOpen() {
-        Duration duration = statisticsService.averageTimeOpen(reportCriteria);
-        if (duration != null) {
-            return decimalFormat.format(duration.toMinutes() / MINUTES_IN_AN_HOUR);
-        } else {
-            return NO_VALUE_INDICATOR;
-        }
+    public Duration getAverageTimeOpen() {
+        return averageTimeOpen;
     }
 
     /**
@@ -203,13 +210,8 @@ public class StatisticsBacker implements Serializable {
      *
      * @return The average number of posts.
      */
-    public String getAveragePostsPerReport() {
-        BigDecimal avgPosts = statisticsService.averagePostsPerReport(reportCriteria);
-        if (avgPosts != null) {
-            return decimalFormat.format(avgPosts);
-        } else {
-            return NO_VALUE_INDICATOR;
-        }
+    public BigDecimal getAveragePostsPerReport() {
+        return averagePostsPerReport;
     }
 
     /**

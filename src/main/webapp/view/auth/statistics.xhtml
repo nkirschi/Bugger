@@ -14,6 +14,7 @@
     <ui:param name="title" value="#{labels.statistics}"/>
 
     <ui:define name="content">
+
         <!-- insight figures -->
         <h:outputText value="#{labels.insight_figures}" styleClass="h2"/>
         <h:panelGroup layout="block" styleClass="mb-3">
@@ -24,8 +25,10 @@
                       id="p-insight-figures">
             <h:panelGroup layout="block" styleClass="col-9 align-self-center">
                 <h:panelGroup layout="block" styleClass="row">
+
+                    <!-- open report count -->
                     <h:panelGroup layout="block"
-                                  styleClass="col-4 p-4 text-center">
+                                  styleClass="col p-4 text-center">
                         <h:panelGroup layout="block" styleClass="row">
                             <h:outputLabel styleClass="display-1" value="#{statisticsBacker.openReportCount}"/>
                         </h:panelGroup>
@@ -33,21 +36,35 @@
                             <h:outputLabel value="#{labels.open_reports}"/>
                         </h:panelGroup>
                     </h:panelGroup>
+
+                    <!-- average time to close -->
                     <h:panelGroup layout="block"
-                                  styleClass="col-4 p-4 text-center">
+                                  styleClass="col p-4 text-center">
                         <h:panelGroup layout="block" styleClass="row">
-                            <h:outputLabel styleClass="display-1" value="#{statisticsBacker.averageTimeOpen}">
-                                <f:convertNumber maxFractionDigits="2"/>
+                            <h:outputLabel styleClass="display-1">
+                                <h:outputText rendered="#{not empty statisticsBacker.averageTimeOpen}"
+                                              value="#{statisticsBacker.averageTimeOpen}">
+                                    <f:converter converterId="durationConverter"/>
+                                </h:outputText>
+                                <h:outputText rendered="#{empty statisticsBacker.averageTimeOpen}"
+                                              value="#{Constants.NO_VALUE_INDICATOR}"/>
                             </h:outputLabel>
                         </h:panelGroup>
                         <h:panelGroup layout="block" styleClass="row">
                             <h:outputLabel value="#{labels.avg_time_open}"/>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="col-4 p-4 text-center">
+
+                    <!-- average #posts per report -->
+                    <h:panelGroup layout="block" styleClass="col p-4 text-center">
                         <h:panelGroup layout="block" styleClass="row">
-                            <h:outputLabel styleClass="display-1" value="#{statisticsBacker.averagePostsPerReport}">
-                                <f:convertNumber maxFractionDigits="2"/>
+                            <h:outputLabel styleClass="display-1">
+                                <h:outputText rendered="#{not empty statisticsBacker.averagePostsPerReport}"
+                                              value="#{statisticsBacker.averagePostsPerReport}">
+                                    <f:convertNumber maxFractionDigits="#{Constants.MAX_FRACTION_DIGITS}"/>
+                                </h:outputText>
+                                <h:outputText rendered="#{empty statisticsBacker.averagePostsPerReport}"
+                                              value="#{Constants.NO_VALUE_INDICATOR}"/>
                             </h:outputLabel>
                         </h:panelGroup>
                         <h:panelGroup layout="block" styleClass="row">
@@ -56,6 +73,8 @@
                     </h:panelGroup>
                 </h:panelGroup>
             </h:panelGroup>
+
+            <!-- filters for insight figures -->
             <h:panelGroup layout="block" styleClass="col-3 ps-5">
                 <h:form id="f-insight-figures-filter">
                     <h:panelGroup id="p-topic-filter" layout="block" styleClass="mb-2">
@@ -65,7 +84,7 @@
                         <h:selectOneMenu id="s-topic-filter"
                                          value="#{statisticsBacker.reportCriteria.topic}"
                                          styleClass="form-select">
-                            <f:selectItem itemLabel="#{labels.none}" itemValue="" />
+                            <f:selectItem itemLabel="#{labels.none}" itemValue=""/>
                             <f:selectItems value="#{statisticsBacker.topicTitles}"/>
                         </h:selectOneMenu>
                     </h:panelGroup>
@@ -80,6 +99,7 @@
                                          styleClass="form-control #{!facesContext.validationFailed ? ''
                                                  : component.valid ? 'is-valid' : 'is-invalid'}">
                                 <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                                <f:validateLength maximum="#{Constants.SMALL_FIELD}"/>
                             </h:inputText>
                             <h:panelGroup layout="block" styleClass="invalid-feedback">
                                 <h:message for="it-latest-opening-date"/>
@@ -97,6 +117,7 @@
                                          styleClass="form-control #{!facesContext.validationFailed ? ''
                                                  : component.valid ? 'is-valid' : 'is-invalid'}">
                                 <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                                <f:validateLength maximum="#{Constants.SMALL_FIELD}"/>
                             </h:inputText>
                             <h:panelGroup layout="block" styleClass="invalid-feedback">
                                 <h:message for="it-earliest-closing-date"/>
@@ -109,8 +130,10 @@
                 </h:form>
             </h:panelGroup>
         </h:panelGroup>
+
         <!-- leaderboards -->
         <h:panelGroup layout="block" styleClass="row">
+
             <!-- top 10 reports -->
             <h:panelGroup layout="block" styleClass="col-6 p-4">
                 <h:outputLabel value="#{labels.top_ten_reports}" styleClass="h2"/>
@@ -140,6 +163,7 @@
                     </h:column>
                 </h:dataTable>
             </h:panelGroup>
+
             <!-- top 10 users -->
             <h:panelGroup layout="block" styleClass="col-6 p-4">
                 <h:outputLabel value="#{labels.top_ten_users}" styleClass="h2"/>
