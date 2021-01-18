@@ -419,37 +419,27 @@ public class PostService {
             return false;
         }
 
-        Topic topic = topicService.getTopicByID(report.getTopicID());
-        if (topic == null) {
-            return false;
-        }
-
-        if (topicService.isModerator(user, topic)) {
-            return true;
-        } else {
-            try (Transaction tx = transactionManager.begin()) {
-                Report report = post.getReport().get();
-                Topic topic = tx.newTopicGateway().findTopic(report.getTopic());
-                UserGateway userGateway = tx.newUserGateway();
-                if (userGateway.isBanned(user, topic)) {
-                    tx.commit();
-                    return false;
-                } else if (userGateway.isModerator(user, topic) || user.equals(post.getAuthorship().getCreator())) {
-                    tx.commit();
-                    return true;
-                }
+        try (Transaction tx = transactionManager.begin()) {
+            Topic topic = tx.newTopicGateway().findTopic(report.getTopicID());
+            UserGateway userGateway = tx.newUserGateway();
+            if (userGateway.isBanned(user, topic)) {
                 tx.commit();
-            } catch (NotFoundException e) {
-                log.error("Unable to find an answer, if the user with id " + user.getId()
-                        + " is privileged for the post with id " + post.getId(), e);
-                feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
-            } catch (TransactionException e) {
-                log.error("Error while trying to determine if the user with id " + user.getId()
-                        + " is privileged for the post with id " + post.getId(), e);
-                feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+                return false;
+            } else if (userGateway.isModerator(user, topic) || user.equals(post.getAuthorship().getCreator())) {
+                tx.commit();
+                return true;
             }
-            return false;
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Unable to find an answer, if the user with id " + user.getId() + " is privileged for the "
+                    + "post with id " + post.getId(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while trying to determine if the user with id " + user.getId() + " is privileged for "
+                    + "the post with id " + post.getId(), e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
         }
+        return false;
     }
 
 }

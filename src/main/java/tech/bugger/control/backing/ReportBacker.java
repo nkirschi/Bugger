@@ -491,7 +491,7 @@ public class ReportBacker implements Serializable {
      */
     public boolean privilegedForPost(final Post post) {
         if (session.getUser() != null) {
-            return postService.isPrivileged(session.getUser(), post);
+            return postService.canModify(session.getUser(), post);
         }
         return false;
     }

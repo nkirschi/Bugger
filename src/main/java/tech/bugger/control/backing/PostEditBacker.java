@@ -124,7 +124,7 @@ public class PostEditBacker implements Serializable {
                 return;
             }
             report = reportService.getReportByID(reportID);
-            if (report == null) {
+            if (report == null || !reportService.canPostInReport(user, report)) {
                 redirectToErrorPage();
                 return;
             }
@@ -137,7 +137,7 @@ public class PostEditBacker implements Serializable {
                 return;
             }
             post = postService.getPostByID(postID);
-            if (post == null || !postService.isPrivileged(user, post)) {
+            if (post == null || !postService.canModify(user, post)) {
                 redirectToErrorPage();
                 return;
             }

@@ -16,12 +16,13 @@
             <h:panelGroup class="row" layout="block">
                 <h:panelGroup class="col-sm-12" layout="block">
                     <h:panelGroup layout="block" styleClass="row">
-                        <h:panelGroup layout="block" styleClass="col-sm-9">
-                            <h:outputLabel value="#{labels.description}"/>
-                        </h:panelGroup>
-                        <h:panelGroup layout="block" styleClass="col-sm-3 align-right">
+                        <h:panelGroup layout="block" styleClass="col-sm-12 align-right">
+                            <h:commandButton id="cb-subscribe" action="#{topicBacker.toggleTopicSubscription}"
+                                             styleClass="button" value="#{topicBacker.subscribed ? labels.unsubscribe
+                                             : labels.subscribe}" rendered="#{userSession != null}"/>
                             <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}" styleClass="button"
-                                             value="#{labels.delete_topic}" rendered="#{userSession.user.administrator}"/>
+                                             value="#{labels.delete_topic}"
+                                             rendered="#{userSession.user.administrator}"/>
                             <h:link id="l-edit" outcome="pretty:topic-edit" value="#{labels.edit_topic}"
                                     styleClass="button style-button" rendered="#{userSession.user.administrator}">
                                 <f:param name="id" value="#{topicBacker.topicID}"/>
@@ -34,11 +35,12 @@
                         </h:panelGroup>
                     </h:panelGroup>
                     <h:panelGroup layout="block" styleClass="row">
-                        <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
+                        <h:panelGroup layout="block" styleClass="col-sm-12">
+                            <h:outputLabel value="#{labels.description}"/>
+                        </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup class="row" layout="block" rendered="#{userSession.user != null}">
-                        <h:commandButton id="cb-subscribe" action="#{topicBacker.toggleTopicSubscription}" styleClass="button"
-                                         value="#{topicBacker.subscribed ? labels.unsubscribe : labels.subscribe}"/>
+                    <h:panelGroup layout="block" styleClass="row">
+                        <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
                     </h:panelGroup>
                     <!-- statistik link -->
                     <h:panelGroup class="row" layout="block">

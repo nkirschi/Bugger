@@ -37,6 +37,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -328,18 +330,18 @@ public class PostServiceTest {
 
     @Test
     public void testIsPrivilegedWhenUserIsAnon() {
-        assertFalse(service.isPrivileged(null, testPost));
+        assertFalse(service.canModify(null, testPost));
     }
 
     @Test
     public void testIsPrivilegedPostNull() {
-        assertFalse(postService.canModify(testUser, null));
+        assertFalse(service.canModify(testUser, null));
     }
 
     @Test
     public void testIsPrivilegedWhenUserIsAdmin() {
         testUser.setAdministrator(true);
-        assertTrue(service.isPrivileged(testUser, testPost));
+        assertTrue(service.canModify(testUser, testPost));
     }
 
     @Test
@@ -347,7 +349,7 @@ public class PostServiceTest {
         testUser.setAdministrator(false);
         doReturn(testTopic).when(topicGateway).findTopic(anyInt());
         doReturn(true).when(userGateway).isBanned(any(), any());
-        assertFalse(postService.canModify(testUser, testPost));
+        assertFalse(service.canModify(testUser, testPost));
     }
 
     @Test
@@ -355,7 +357,7 @@ public class PostServiceTest {
         testUser.setAdministrator(false);
         doReturn(testTopic).when(topicGateway).findTopic(anyInt());
         doReturn(true).when(userGateway).isModerator(testUser, testTopic);
-        assertTrue(postService.canModify(testUser, testPost));
+        assertTrue(service.canModify(testUser, testPost));
     }
 
     @Test
@@ -364,7 +366,7 @@ public class PostServiceTest {
         Authorship authorship = new Authorship(testUser, null, null, null);
         testPost.setAuthorship(authorship);
         doReturn(testTopic).when(topicGateway).findTopic(anyInt());
-        assertTrue(postService.canModify(testUser, testPost));
+        assertTrue(service.canModify(testUser, testPost));
     }
 
     @Test
@@ -372,13 +374,13 @@ public class PostServiceTest {
         doReturn(testTopic).when(topicGateway).findTopic(anyInt());
         Authorship authorship = new Authorship(null, null, null, null);
         testPost.setAuthorship(authorship);
-        assertFalse(postService.canModify(testUser, testPost));
+        assertFalse(service.canModify(testUser, testPost));
     }
 
     @Test
     public void testIsPrivilegedNotFound() throws NotFoundException {
         doThrow(NotFoundException.class).when(topicGateway).findTopic(anyInt());
-        assertFalse(postService.canModify(testUser, testPost));
+        assertFalse(service.canModify(testUser, testPost));
         verify(feedbackEvent).fire(any());
     }
 
@@ -388,7 +390,7 @@ public class PostServiceTest {
         doThrow(TransactionException.class).when(tx).commit();
         Authorship authorship = new Authorship(null, null, null, null);
         testPost.setAuthorship(authorship);
-        assertFalse(postService.canModify(testUser, testPost));
+        assertFalse(service.canModify(testUser, testPost));
         verify(feedbackEvent).fire(any());
     }
 

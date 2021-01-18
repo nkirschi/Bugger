@@ -248,21 +248,21 @@ public class ProfileBacker implements Serializable {
      * Opens the dialog for deleting all topic subscriptions.
      */
     public void openDeleteAllTopicSubscriptionsDialog() {
-        displayDialog = DialogType.TOPIC;
+        displayDialog = ProfileDialog.TOPIC;
     }
 
     /**
      * Opens the dialog for deleting all report subscriptions.
      */
     public void openDeleteAllReportSubscriptionsDialog() {
-        displayDialog = DialogType.REPORT;
+        displayDialog = ProfileDialog.REPORT;
     }
 
     /**
      * Opens the dialog for deleting all user subscriptions.
      */
     public void openDeleteAllUserSubscriptionsDialog() {
-        displayDialog = DialogType.USER;
+        displayDialog = ProfileDialog.USER;
     }
 
     /**
