@@ -31,7 +31,6 @@ Validate:
 
 Checkstyle:
   stage: validate
-  allow_failure: true
   script:
     - "mvn $MAVEN_ARGS checkstyle:check"
 
@@ -48,7 +47,6 @@ Compile:
 
 Unit-Tests:
   stage: test
-  allow_failure: true
   script:
     - "wget http://femtopedia.de/cover2cover.py"
     - "mvn $MAVEN_ARGS test"
