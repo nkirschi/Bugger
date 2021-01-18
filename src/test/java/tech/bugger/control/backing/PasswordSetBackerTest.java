@@ -112,7 +112,8 @@ public class PasswordSetBackerTest {
         doReturn(true).when(authenticationService).setPassword(any(), any(), any());
         passwordSetBacker.setToken(testToken);
         String redirect = passwordSetBacker.setUserPassword();
-        assertEquals("pretty:home", redirect);
+        assertAll(() -> assertEquals("pretty:home", redirect),
+                () -> verify(userSession).setUser(any()));
     }
 
     @Test
@@ -120,7 +121,8 @@ public class PasswordSetBackerTest {
         doReturn(false).when(authenticationService).setPassword(any(), any(), any());
         passwordSetBacker.setToken(testToken);
         String redirect = passwordSetBacker.setUserPassword();
-        assertNull(redirect);
+        assertAll(() -> assertNull(redirect),
+                () -> verify(userSession, never()).setUser(any()));
     }
 
     @Test

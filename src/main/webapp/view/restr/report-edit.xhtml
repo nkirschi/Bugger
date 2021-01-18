@@ -4,11 +4,13 @@
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
-    <ui:param name="title" value="#{labels.report_edit_title}"/>
-
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
+
+    <ui:param name="helpKey" value="report_edit"/>
+
+    <ui:param name="title" value="#{labels.report_edit_title}"/>
 
     <ui:define name="dialogs">
         <h:panelGroup id="p-confirm" layout="block" styleClass="dialog"

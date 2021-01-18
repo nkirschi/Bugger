@@ -46,7 +46,6 @@
         <pattern value="/admin"/>
         <view-id value="/faces/view/restr/admin.xhtml"/>
     </url-mapping>
-
     <url-mapping id="report">
         <pattern value="/report"/>
         <query-param name="id">#{id}</query-param>
@@ -83,5 +82,13 @@
     <url-mapping id="statistics">
         <pattern value="/statistics"/>
         <view-id value="/faces/view/auth/statistics.xhtml"/>
+    </url-mapping>
+    <url-mapping id="imprint">
+        <pattern value="/imprint"/>
+        <view-id value="/faces/view/public/imprint.xhtml"/>
+    </url-mapping>
+    <url-mapping id="privacy">
+        <pattern value="/privacy"/>
+        <view-id value="/faces/view/public/privacy.xhtml"/>
     </url-mapping>
 </pretty-config>

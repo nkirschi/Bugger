@@ -1,16 +1,12 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.util.Feedback;
-import tech.bugger.global.util.Log;
-
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.global.util.Log;
 
 /**
  * Backing Bean for the error page.
@@ -19,16 +15,40 @@ import javax.inject.Named;
 @Named
 public class ErrorBacker {
 
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
     private static final Log log = Log.forClass(ErrorBacker.class);
 
+    /**
+     * The current admin email.
+     */
     private String adminMail;
+
+    /**
+     * The current title.
+     */
     private String title;
+
+    /**
+     * The current description.
+     */
     private String description;
+
+    /**
+     * The current stack trace.
+     */
     private String stackTrace;
 
+    /**
+     * The current user session.
+     */
     @Inject
     private UserSession session;
 
+    /**
+     * The current faces context.
+     */
     @Inject
     private FacesContext fctx;
 
@@ -37,15 +57,6 @@ public class ErrorBacker {
      */
     @PostConstruct
     public void init() {
-
-    }
-
-    /**
-     * Creates a FacesMessage to display if an event is fired in one of the injected services.
-     *
-     * @param feedback The feedback with details on what to display.
-     */
-    public void displayFeedback(@Observes @Any Feedback feedback) {
     }
 
     /**
@@ -58,7 +69,7 @@ public class ErrorBacker {
     /**
      * @param adminMail The adminMail to set.
      */
-    public void setAdminMail(String adminMail) {
+    public void setAdminMail(final String adminMail) {
         this.adminMail = adminMail;
     }
 
@@ -72,7 +83,7 @@ public class ErrorBacker {
     /**
      * @param title The title to set.
      */
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -86,7 +97,7 @@ public class ErrorBacker {
     /**
      * @param description The description to set.
      */
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
@@ -100,7 +111,7 @@ public class ErrorBacker {
     /**
      * @param stackTrace The stackTrace to set.
      */
-    public void setStackTrace(String stackTrace) {
+    public void setStackTrace(final String stackTrace) {
         this.stackTrace = stackTrace;
     }
 

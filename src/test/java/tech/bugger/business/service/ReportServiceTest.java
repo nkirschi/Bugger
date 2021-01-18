@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import javax.enterprise.event.Event;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,9 +12,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.util.Feedback;
-import tech.bugger.global.transfer.*;
+import tech.bugger.global.transfer.Attachment;
+import tech.bugger.global.transfer.Authorship;
+import tech.bugger.global.transfer.Post;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.PostGateway;
 import tech.bugger.persistence.gateway.ReportGateway;
@@ -107,6 +112,25 @@ public class ReportServiceTest {
     }
 
     @Test
+    public void testMoveReportWhenFine() throws Exception {
+        assertTrue(service.move(testReport));
+        verify(reportGateway).update(testReport);
+    }
+
+    @Test
+    public void testMoveReportWhenNotExists() throws Exception {
+        doThrow(NotFoundException.class).when(reportGateway).update(any());
+        assertFalse(service.move(testReport));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testMoveReportWhenCommitFails() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertFalse(service.move(testReport));
+    }
+
+    @Test
     public void testUpdateReportWhenFine() throws Exception {
         assertTrue(service.updateReport(testReport));
         verify(reportGateway).update(testReport);
@@ -148,10 +172,75 @@ public class ReportServiceTest {
     }
 
     @Test
-    public void testMarkDuplicateWhenCommitFails() throws Exception {
+    public void testMarkDuplicateWhenSelfReference() {
+        assertFalse(service.markDuplicate(testReport, testReport.getId()));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testMarkDuplicateWhenOriginalNotFound() {
+        ReportService service = spy(this.service);
+        doReturn(null).when(service).getReportByID(anyInt());
+        assertFalse(service.markDuplicate(testReport, testReport.getId() - 1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testMarkDuplicateWhenOriginalOfItself() {
+        Report original = new Report();
+        original.setDuplicateOf(testReport.getId());
+        ReportService service = spy(this.service);
+        doReturn(original).when(service).getReportByID(anyInt());
+        assertFalse(service.markDuplicate(testReport, testReport.getId() - 1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testMarkDuplicateWhenGatewaySelfReference() throws Exception {
+        Report original = new Report();
+        ReportService service = spy(this.service);
+        doReturn(original).when(service).getReportByID(anyInt());
+        doThrow(SelfReferenceException.class).when(reportGateway).markDuplicate(any(), anyInt());
+        assertFalse(service.markDuplicate(testReport, testReport.getId() - 1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testMarkDuplicateWhenGatewayCouldNotFindOriginalReport() throws Exception {
+        Report original = new Report();
+        ReportService service = spy(this.service);
+        doReturn(original).when(service).getReportByID(anyInt());
+        doThrow(NotFoundException.class).when(reportGateway).markDuplicate(any(), anyInt());
+        assertFalse(service.markDuplicate(testReport, testReport.getId() - 1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testMarkDuplicateWhenTransactionError() throws Exception {
+        Report original = new Report();
+        ReportService service = spy(this.service);
+        doReturn(original).when(service).getReportByID(anyInt());
         doThrow(TransactionException.class).when(tx).commit();
-        assertFalse(service.markDuplicate(testReport, 100));
-        verify(feedbackEvent, atLeastOnce()).fire(any());
+        assertFalse(service.markDuplicate(testReport, testReport.getId() - 1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testMarkDuplicateWhenSuccess() {
+        Report original = new Report();
+        ReportService service = spy(this.service);
+        doReturn(original).when(service).getReportByID(anyInt());
+        assertTrue(service.markDuplicate(testReport, testReport.getId() - 1));
+    }
+
+    @Test
+    public void testMarkDuplicateWhenOriginalIDPropagate() throws Exception {
+        Report original = new Report();
+        original.setDuplicateOf(testReport.getId() - 1);
+        ReportService service = spy(this.service);
+        doReturn(original).when(service).getReportByID(anyInt());
+        assertTrue(service.markDuplicate(testReport, testReport.getId() - 1));
+        verify(reportGateway).markDuplicate(any(), eq(original.getDuplicateOf()));
     }
 
     @Test

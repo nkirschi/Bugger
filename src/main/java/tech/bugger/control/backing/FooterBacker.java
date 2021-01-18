@@ -1,14 +1,16 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.global.transfer.Language;
-
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Locale;
+import java.util.ResourceBundle;
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.util.MarkdownHandler;
+import tech.bugger.business.util.Registry;
+import tech.bugger.global.transfer.Language;
 
 /**
  * Backing Bean for the footer.
@@ -26,6 +28,11 @@ public class FooterBacker implements Serializable {
     private final UserSession session;
 
     /**
+     * The current help bundle containing all the texts for help.
+     */
+    private final ResourceBundle helpBundle;
+
+    /**
      * The currently selected language.
      */
     private Language language;
@@ -38,11 +45,13 @@ public class FooterBacker implements Serializable {
     /**
      * Constructs a new footer backing bean with the necessary dependencies.
      *
-     * @param session The current user session.
+     * @param session  The current user session.
+     * @param registry The current registry.
      */
     @Inject
-    public FooterBacker(final UserSession session) {
+    public FooterBacker(final UserSession session, final Registry registry) {
         this.session = session;
+        this.helpBundle = registry.getBundle("help", session);
         language = Language.of(session.getLocale());
     }
 
@@ -60,9 +69,23 @@ public class FooterBacker implements Serializable {
 
     /**
      * Toggles the help popup.
+     *
+     * @return The site to redirect to or {@code null} to stay on the same page.
      */
-    public void toggleHelp() {
+    public String toggleHelp() {
         helpDisplayed = !helpDisplayed;
+        return null;
+    }
+
+    /**
+     * Returns the current help key for loading the help from the properties.
+     *
+     * @param helpKey The help key of the currently loaded page.
+     * @return The current help key.
+     */
+    public String getHelp(final String helpKey) {
+        String mainHelp = helpBundle.getString("main");
+        return MarkdownHandler.toHtml(mainHelp + "\n\n" + helpBundle.getString(helpKey));
     }
 
     /**
