@@ -195,7 +195,7 @@ public class ProfileBacker implements Serializable {
         };
 
         if (isPrivileged()) {
-            topicSubscriptions = new Paginator<>("title", Selection.PageSize.NORMAL) {
+            topicSubscriptions = new Paginator<>("title", Selection.PageSize.SMALL) {
                 @Override
                 protected Iterable<Topic> fetch() {
                     return topicService.selectSubscribedTopics(user, getSelection());
@@ -207,7 +207,7 @@ public class ProfileBacker implements Serializable {
                 }
             };
 
-            userSubscriptions = new Paginator<>("username", Selection.PageSize.NORMAL) {
+            userSubscriptions = new Paginator<>("username", Selection.PageSize.SMALL) {
                 @Override
                 protected Iterable<User> fetch() {
                     return profileService.selectSubscribedUsers(user, getSelection());
@@ -219,7 +219,7 @@ public class ProfileBacker implements Serializable {
                 }
             };
 
-            reportSubscriptions = new Paginator<>("title", Selection.PageSize.NORMAL) {
+            reportSubscriptions = new Paginator<>("title", Selection.PageSize.SMALL) {
                 @Override
                 protected Iterable<Report> fetch() {
                     return profileService.selectSubscribedReports(user, getSelection());
