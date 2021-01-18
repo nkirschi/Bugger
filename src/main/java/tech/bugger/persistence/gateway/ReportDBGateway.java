@@ -246,8 +246,8 @@ public class ReportDBGateway implements ReportGateway {
                 throw new NotFoundException("Report could not be found when counting its duplicates!");
             }
         } catch (SQLException e) {
-            log.error("Error when counting posts of report " + report + ".", e);
-            throw new StoreException("Error when counting posts of report " + report + ".", e);
+            log.error("Error when counting posts of report " + report + '.', e);
+            throw new StoreException("Error when counting posts of report " + report + '.', e);
         }
 
         return count;

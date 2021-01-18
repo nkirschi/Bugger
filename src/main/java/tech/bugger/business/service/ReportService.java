@@ -432,10 +432,10 @@ public class ReportService {
             tx.commit();
             success = true;
         } catch (NotFoundException e) {
-            log.error("Report to be updated could not be found.", e);
+            log.error("Report to be moved could not be found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
-            log.error("Error while updating a report.", e);
+            log.error("Error while moving a report.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
         }
 
@@ -538,7 +538,7 @@ public class ReportService {
             log.error("Cannot mark report " + duplicate + " as original report of itself.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("self_reference_error"), Feedback.Type.ERROR));
         } catch (NotFoundException e) {
-            log.error("Could not find report " + duplicate + ".", e);
+            log.error("Could not find report " + duplicate + '.', e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error when marking report " + duplicate + " as duplicate.", e);
@@ -562,7 +562,7 @@ public class ReportService {
             tx.commit();
             valid = true;
         } catch (NotFoundException e) {
-            log.error("Could not find report " + report + ".", e);
+            log.error("Could not find report " + report + '.', e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error when marking report " + report + " as duplicate.", e);
