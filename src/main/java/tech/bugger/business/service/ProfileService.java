@@ -173,13 +173,9 @@ public class ProfileService {
      * @param topic      The topic of which the subscription to is to be removed.
      */
     public void deleteTopicSubscription(final User subscriber, final Topic topic) {
-        if (subscriber == null) {
-            log.error("Anonymous users cannot unsubscribe from anything.");
-            throw new IllegalArgumentException("User cannot be null.");
-        } else if (subscriber.getId() == null) {
-            log.error("Cannot unsubscribe when user ID is null.");
-            throw new IllegalArgumentException("User ID cannot be null.");
-        } else if (topic == null) {
+        validateSubscriberDelete(subscriber);
+
+        if (topic == null) {
             log.error("Cannot unsubscribe from topic null.");
             throw new IllegalArgumentException("Topic cannot be null.");
         } else if (topic.getId() == null) {
@@ -191,10 +187,10 @@ public class ProfileService {
             tx.newSubscriptionGateway().unsubscribe(topic, subscriber);
             tx.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
-            log.error("User " + subscriber + " or topic " + topic + " not found.");
+            log.error("User " + subscriber + " or topic " + topic + " not found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
-            log.error("Error when user " + subscriber + " is unsubscribing from topic " + topic + ".");
+            log.error("Error when user " + subscriber + " is unsubscribing from topic " + topic + ".", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         }
     }
@@ -206,13 +202,9 @@ public class ProfileService {
      * @param report     The report of which the subscription to is to be removed.
      */
     public void deleteReportSubscription(final User subscriber, final Report report) {
-        if (subscriber == null) {
-            log.error("Anonymous users cannot unsubscribe.");
-            throw new IllegalArgumentException("User cannot be null.");
-        } else if (subscriber.getId() == null) {
-            log.error("Cannot unsubscribe when user ID is null.");
-            throw new IllegalArgumentException("User ID cannot be null.");
-        } else if (report == null) {
+        validateSubscriberDelete(subscriber);
+
+        if (report == null) {
             log.error("Cannot unsubscribe from report null.");
             throw new IllegalArgumentException("Report cannot be null.");
         } else if (report.getId() == null) {
@@ -224,10 +216,10 @@ public class ProfileService {
             tx.newSubscriptionGateway().unsubscribe(report, subscriber);
             tx.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
-            log.error("User " + subscriber + " or report " + report + " not found.");
+            log.error("User " + subscriber + " or report " + report + " not found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
-            log.error("Error when user " + subscriber + " is unsubscribing from report " + report + ".");
+            log.error("Error when user " + subscriber + " is unsubscribing from report " + report + ".", e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
     }
@@ -239,13 +231,9 @@ public class ProfileService {
      * @param user       The user of which the subscription to is to be removed.
      */
     public void deleteUserSubscription(final User subscriber, final User user) {
-        if (subscriber == null) {
-            log.error("Anonymous users cannot unsubscribe.");
-            throw new IllegalArgumentException("User cannot be null.");
-        } else if (subscriber.getId() == null) {
-            log.error("Cannot unsubscribe when user ID is null.");
-            throw new IllegalArgumentException("User ID cannot be null.");
-        } else if (user == null) {
+        validateSubscriberDelete(subscriber);
+
+        if (user == null) {
             log.error("Cannot unsubscribe from user null.");
             throw new IllegalArgumentException("User cannot be null.");
         } else if (user.getId() == null) {
@@ -257,11 +245,26 @@ public class ProfileService {
             tx.newSubscriptionGateway().unsubscribe(user, subscriber);
             tx.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
-            log.error("User " + subscriber + " or user " + user + " not found.");
+            log.error("User " + subscriber + " or user " + user + " not found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
-            log.error("Error when user " + subscriber + " is unsubscribing from user " + user + ".");
+            log.error("Error when user " + subscriber + " is unsubscribing from user " + user + ".", e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+    }
+
+    /**
+     * Checks whether the given user is valid when trying to delete a subscription.
+     *
+     * @param subscriber The user to check.
+     */
+    private void validateSubscriberDelete(final User subscriber) {
+        if (subscriber == null) {
+            log.error("Anonymous users cannot unsubscribe.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (subscriber.getId() == null) {
+            log.error("Cannot unsubscribe when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
         }
     }
 
@@ -271,13 +274,7 @@ public class ProfileService {
      * @param user The user whose topic subscriptions are to be deleted.
      */
     public void deleteAllTopicSubscriptions(final User user) {
-        if (user == null) {
-            log.error("Cannot delete subscriptions for user null.");
-            throw new IllegalArgumentException("User cannot be null.");
-        } else if (user.getId() == null) {
-            log.error("Cannot delete subscriptions for user with ID null.");
-            throw new IllegalArgumentException("User ID cannot be null.");
-        }
+        validateSubscriberDeleteAll(user);
 
         try (Transaction tx = transactionManager.begin()) {
             tx.newSubscriptionGateway().unsubscribeAllTopics(user);
@@ -297,13 +294,7 @@ public class ProfileService {
      * @param user The user whose report subscriptions are to be deleted.
      */
     public void deleteAllReportSubscriptions(final User user) {
-        if (user == null) {
-            log.error("Cannot delete subscriptions for user null.");
-            throw new IllegalArgumentException("User cannot be null.");
-        } else if (user.getId() == null) {
-            log.error("Cannot delete subscriptions for user with ID null.");
-            throw new IllegalArgumentException("User ID cannot be null.");
-        }
+        validateSubscriberDeleteAll(user);
 
         try (Transaction tx = transactionManager.begin()) {
             tx.newSubscriptionGateway().unsubscribeAllReports(user);
@@ -323,13 +314,7 @@ public class ProfileService {
      * @param user The user whose user subscriptions are to be deleted.
      */
     public void deleteAllUserSubscriptions(final User user) {
-        if (user == null) {
-            log.error("Cannot delete subscriptions for user null.");
-            throw new IllegalArgumentException("User cannot be null.");
-        } else if (user.getId() == null) {
-            log.error("Cannot delete subscriptions for user with ID null.");
-            throw new IllegalArgumentException("User ID cannot be null.");
-        }
+        validateSubscriberDeleteAll(user);
 
         try (Transaction tx = transactionManager.begin()) {
             tx.newSubscriptionGateway().unsubscribeAllUsers(user);
@@ -340,6 +325,21 @@ public class ProfileService {
         } catch (TransactionException e) {
             log.error("Error when removing all user subscriptions for user " + user + ".", e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+    }
+
+    /**
+     * Checks whether the given user is valid when trying to delete all subscriptions.
+     *
+     * @param subscriber The user to check.
+     */
+    private void validateSubscriberDeleteAll(final User subscriber) {
+        if (subscriber == null) {
+            log.error("Cannot delete subscriptions for user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (subscriber.getId() == null) {
+            log.error("Cannot delete subscriptions for user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
         }
     }
 
@@ -418,14 +418,6 @@ public class ProfileService {
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return status;
-    }
-
-    /**
-     * Updates the avatar of a user and generates a new thumbnail.
-     *
-     * @param user The user with a new avatar.
-     */
-    public void updateAvatar(final User user) {
     }
 
     /**
