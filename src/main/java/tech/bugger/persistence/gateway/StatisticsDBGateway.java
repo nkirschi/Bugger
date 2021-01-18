@@ -85,7 +85,7 @@ public class StatisticsDBGateway implements StatisticsGateway {
               + "FROM   report AS r "
               + "JOIN   topic AS t "
               + "ON     r.topic = t.id "
-              + "AND    t.title = COALESCE(NULLIF(?, ''), t.title) "
+              + "WHERE  t.title = COALESCE(NULLIF(?, ''), t.title) "
               + "AND    r.created_at <= COALESCE(?, r.created_at) "
               + "AND    (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL);";
         // @formatter:on
