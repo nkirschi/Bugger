@@ -30,19 +30,14 @@
                                              value="#{profileBacker.subscribed ? labels.unsubscribe : labels.subscribe}"
                                              styleClass="button" rendered="#{userSession.user != null
                                              and userSession.user.id != profileBacker.user.id}"/>
-                            <h:commandLink id="l-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
-                                           styleClass="command-link" rendered="#{userSession.user.administrator
-                                           and not profileBacker.user.administrator}">
-                                <h:graphicImage id="g-admin" value="/resources/images/add.png"
-                                                alt="Button to add admin"/>
-                            </h:commandLink>
-                            <h:commandLink id="l-rem-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
-                                           immediate="true" styleClass="command-link"
-                                           rendered="#{userSession.user.administrator
-                                       and profileBacker.user.administrator}">
-                                <h:graphicImage id="g-rem-admin" value="/resources/images/delete.png"
-                                                alt="Button to remove admin"/>
-                            </h:commandLink>
+                            <h:commandButton id="cb-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
+                                             styleClass="button" value="#{labels.promote}"
+                                             rendered="#{userSession.user.administrator
+                                             and not profileBacker.user.administrator}"/>
+                            <h:commandButton id="cb-rem-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
+                                             styleClass="button" value="#{labels.demote}"
+                                             rendered="#{userSession.user.administrator
+                                             and profileBacker.user.administrator}"/>
                             <h:link id="l-edit" value="#{labels.edit}" outcome="/view/restr/profile-edit.xhtml"
                                     rendered="#{profileBacker.privileged}" styleClass="button style-button">
                                 <f:param name="e" value="#{profileBacker.user.username}"/>
@@ -51,107 +46,121 @@
                     </h:panelGroup>
 
                     <!-- The profile owner's user information -->
-                    <h:panelGroup id="p-avatar" layout="block" styleClass="row p-avatar">
-                        <h:graphicImage id="g-avatar" value="avatar?id=#{profileBacker.user.id}" styleClass="g-avatar"
-                                        alt="The user's avatar" rendered="#{profileBacker.user.existsAvatar}"/>
-                        <h:graphicImage id="g-avatar-fallback" library="images" name="bugger.png" styleClass="g-avatar"
-                                        alt="The user's avatar" rendered="#{not profileBacker.user.existsAvatar}"/>
-                    </h:panelGroup>
-                    <h:panelGroup id="p-username" layout="block" styleClass="row">
-                        <h:panelGroup id="p-username-label" styleClass="col-sm-3">
-                            <h:outputLabel id="ol-username" value="#{labels.username}" for="ot-username"
-                                           styleClass="form-label"/>
+                    <h:panelGroup layout="block" styleClass="row">
+                        <h:panelGroup id="p-avatar" layout="block" styleClass="col-sm-4">
+                            <h:graphicImage id="g-avatar" value="avatar?id=#{profileBacker.user.id}"
+                                            styleClass="g-avatar" alt="The user's avatar"
+                                            rendered="#{profileBacker.user.existsAvatar}"/>
+                            <h:graphicImage id="g-avatar-fallback" library="images" name="bugger.png"
+                                            styleClass="g-avatar" alt="The user's avatar"
+                                            rendered="#{not profileBacker.user.existsAvatar}"/>
                         </h:panelGroup>
-                        <h:panelGroup id="p-username-output" styleClass="col-sm-9">
-                            <h:outputText id="ot-username" value="#{profileBacker.user.username}"
-                                          styleClass="profile-info"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup id="p-first-name" layout="block" styleClass="row"
-                                  rendered="#{profileBacker.user.profileVisibility == V.FULL
+
+                        <h:panelGroup layout="block" styleClass="col-sm-8">
+                            <h:panelGroup id="p-username" layout="block" styleClass="row">
+                                <h:panelGroup id="p-username-label" styleClass="col-sm-3">
+                                    <h:outputLabel id="ol-username" value="#{labels.username}" for="ot-username"
+                                                   styleClass="form-label"/>
+                                </h:panelGroup>
+                                <h:panelGroup id="p-username-output" styleClass="col-sm-9">
+                                    <h:outputText id="ot-username" value="#{profileBacker.user.username}"
+                                                  styleClass="profile-info"/>
+                                </h:panelGroup>
+                            </h:panelGroup>
+
+                            <h:panelGroup id="p-first-name" layout="block" styleClass="row"
+                                          rendered="#{profileBacker.user.profileVisibility == V.FULL
                                   or profileBacker.privileged}">
-                        <h:panelGroup id="p-first-name-label" styleClass="col-sm-3">
-                            <h:outputLabel id="ol-first-name" value="#{labels.first_name}" for="ot-first-name"
-                                           styleClass="form-label"/>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-first-name-output" styleClass="col-sm-9">
-                            <h:outputText id="ot-first-name" value="#{profileBacker.user.firstName}"
-                                          styleClass="profile-info"/>
+                                <h:panelGroup id="p-first-name-label" styleClass="col-sm-3">
+                                    <h:outputLabel id="ol-first-name" value="#{labels.first_name}" for="ot-first-name"
+                                                   styleClass="form-label"/>
+                                </h:panelGroup>
+                                <h:panelGroup id="p-first-name-output" styleClass="col-sm-9">
+                                    <h:outputText id="ot-first-name" value="#{profileBacker.user.firstName}"
+                                                  styleClass="profile-info"/>
+                                </h:panelGroup>
+                            </h:panelGroup>
+
+                            <h:panelGroup id="p-last-name" layout="block" styleClass="row"
+                                          rendered="#{profileBacker.user.profileVisibility == V.FULL
+                                  or profileBacker.privileged}">
+                                <h:panelGroup id="p-last-name-label" styleClass="col-sm-3">
+                                    <h:outputLabel id="ol-last-name" value="#{labels.last_name}" for="ot-last-name"
+                                                   styleClass="form-label"/>
+                                </h:panelGroup>
+                                <h:panelGroup id="p-last-name-output" styleClass="col-sm-9">
+                                    <h:outputText id="ot-last-name" value="#{profileBacker.user.lastName}"
+                                                  styleClass="profile-info"/>
+                                </h:panelGroup>
+                            </h:panelGroup>
+
+                            <h:panelGroup id="p-email" layout="block" styleClass="row"
+                                          rendered="#{profileBacker.user.profileVisibility == V.FULL
+                                  or profileBacker.privileged}">
+                                <h:panelGroup id="p-email-label" styleClass="col-sm-3">
+                                    <h:outputLabel id="ol-email" value="#{labels.email}" for="ot-email"
+                                                   styleClass="form-label"/>
+                                </h:panelGroup>
+                                <h:panelGroup id="p-email-output" styleClass="col-sm-9">
+                                    <h:outputText id="ot-email" value="#{profileBacker.user.emailAddress}"
+                                                  styleClass="profile-info"/>
+                                </h:panelGroup>
+                            </h:panelGroup>
+
+                            <h:panelGroup id="p-weight" layout="block" styleClass="row">
+                                <h:panelGroup id="p-weight-label" styleClass="col-sm-3">
+                                    <h:outputLabel id="ol-weight" value="#{labels.voting_weight}" for="ot-weight"
+                                                   styleClass="form-label"/>
+                                </h:panelGroup>
+                                <h:panelGroup id="p-weight-output" styleClass="col-sm-9">
+                                    <h:outputText id="ot-weight" value="#{profileBacker.votingWeight}"
+                                                  styleClass="profile-info"/>
+                                </h:panelGroup>
+                            </h:panelGroup>
+
+                            <h:panelGroup id="p-post-count" layout="block" styleClass="row">
+                                <h:panelGroup id="p-post-count-label" styleClass="col-sm-3">
+                                    <h:outputLabel id="ol-post-count" value="#{labels.num_posts}" for="ot-post-count"
+                                                   styleClass="form-label"/>
+                                </h:panelGroup>
+                                <h:panelGroup id="p-post-count-output" styleClass="col-sm-9">
+                                    <h:outputText id="ot-post-count" value="#{profileBacker.numberOfPosts}"
+                                                  styleClass="profile-info"/>
+                                </h:panelGroup>
+                            </h:panelGroup>
+
+                            <h:panelGroup id="p-is-admin" layout="block" styleClass="row"
+                                          rendered="#{profileBacker.user.administrator}">
+                                <h:panelGroup id="p-is-admin-label" styleClass="col-sm-3">
+                                    <h:outputLabel id="ol-is-admin" value="#{labels.status}" for="ot-is-admin"
+                                                   styleClass="form-label"/>
+                                </h:panelGroup>
+                                <h:panelGroup id="p-is-admin-output" styleClass="col-sm-9">
+                                    <h:outputText id="ot-is-admin" value="#{labels.administrator}"
+                                                  styleClass="profile-info"/>
+                                </h:panelGroup>
+                            </h:panelGroup>
+
+                            <h:panelGroup id="p-register-date" layout="block" styleClass="row">
+                                <h:panelGroup id="p-register-date-label" styleClass="col-sm-3">
+                                    <h:outputLabel id="ol-register-date" value="#{labels.registration_date}"
+                                                   for="ot-register-date" styleClass="form-label"/>
+                                </h:panelGroup>
+                                <h:panelGroup id="p-register-date-output" styleClass="col-sm-9">
+                                    <h:outputText id="ot-register-date" value="#{profileBacker.user.registrationDate}"
+                                                  styleClass="profile-info"/>
+                                </h:panelGroup>
+                            </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup id="p-last-name" layout="block" styleClass="row"
-                                  rendered="#{profileBacker.user.profileVisibility == V.FULL
-                                  or profileBacker.privileged}">
-                        <h:panelGroup id="p-last-name-label" styleClass="col-sm-3">
-                            <h:outputLabel id="ol-last-name" value="#{labels.last_name}" for="ot-last-name"
-                                           styleClass="form-label"/>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-last-name-output" styleClass="col-sm-9">
-                            <h:outputText id="ot-last-name" value="#{profileBacker.user.lastName}"
-                                          styleClass="profile-info"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup id="p-email" layout="block" styleClass="row"
-                                  rendered="#{profileBacker.user.profileVisibility == V.FULL
-                                  or profileBacker.privileged}">
-                        <h:panelGroup id="p-email-label" styleClass="col-sm-3">
-                            <h:outputLabel id="ol-email" value="#{labels.email}" for="ot-email"
-                                           styleClass="form-label"/>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-email-output" styleClass="col-sm-9">
-                            <h:outputText id="ot-email" value="#{profileBacker.user.emailAddress}"
-                                          styleClass="profile-info"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup id="p-biography" layout="block" styleClass="row"
-                                  rendered="#{profileBacker.user.profileVisibility == V.FULL
-                                  or profileBacker.privileged}">
-                        <h:panelGroup id="p-biography-label" styleClass="col-sm-3">
+
+                    <h:panelGroup layout="block" styleClass="mb3">
+                        <h:panelGroup id="p-biography" layout="block" styleClass="row"
+                                      rendered="#{profileBacker.user.profileVisibility == V.FULL
+                                      or profileBacker.privileged}">
                             <h:outputLabel id="ol-biography" value="#{labels.biography}" for="ot-biography"
                                            styleClass="form-label"/>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-biography-output" styleClass="col-sm-9">
                             <h:outputText id="ot-biography" value="#{profileBacker.sanitizedBiography}" escape="false"
-                                          styleClass="profile-info"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup id="p-weight" layout="block" styleClass="row">
-                        <h:panelGroup id="p-weight-label" styleClass="col-sm-3">
-                            <h:outputLabel id="ol-weight" value="#{labels.voting_weight}" for="ot-weight"
-                                           styleClass="form-label"/>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-weight-output" styleClass="col-sm-9">
-                            <h:outputText id="ot-weight" value="#{profileBacker.votingWeight}"
-                                          styleClass="profile-info"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup id="p-post-count" layout="block" styleClass="row">
-                        <h:panelGroup id="p-post-count-label" styleClass="col-sm-3">
-                            <h:outputLabel id="ol-post-count" value="#{labels.num_posts}" for="ot-post-count"
-                                           styleClass="form-label"/>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-post-count-output" styleClass="col-sm-9">
-                            <h:outputText id="ot-post-count" value="#{profileBacker.numberOfPosts}"
-                                          styleClass="profile-info"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup id="p-is-admin" layout="block" styleClass="row"
-                                  rendered="#{profileBacker.user.administrator}">
-                        <h:panelGroup id="p-is-admin-label" styleClass="col-sm-3">
-                            <h:outputLabel id="ol-is-admin" value="#{labels.status}" for="ot-is-admin"
-                                           styleClass="form-label"/>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-is-admin-output" styleClass="col-sm-9">
-                            <h:outputText id="ot-is-admin" value="#{labels.administrator}" styleClass="profile-info"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup id="p-register-date" layout="block" styleClass="row">
-                        <h:panelGroup id="p-register-date-label" styleClass="col-sm-3">
-                            <h:outputLabel id="ol-register-date" value="#{labels.registration_date}"
-                                           for="ot-register-date" styleClass="form-label"/>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-register-date-output" styleClass="col-sm-9">
-                            <h:outputText id="ot-register-date" value="#{profileBacker.user.registrationDate}"
                                           styleClass="profile-info"/>
                         </h:panelGroup>
                     </h:panelGroup>
