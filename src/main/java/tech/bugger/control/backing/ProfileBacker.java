@@ -19,7 +19,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 
 /**
  * Backing bean for the profile page.
@@ -281,28 +280,6 @@ public class ProfileBacker implements Serializable {
      */
     public String closeDialog() {
         displayDialog = ProfileDialog.NONE;
-        return null;
-    }
-
-    /**
-     * Returns the timestamp of the last action in one particular topic. Creating, editing and moving a report as well
-     * as creating and editing posts count as actions. Moving a report is an action in the destination topic only.
-     *
-     * @param topic The topic in question.
-     * @return The timestamp of the last action as a {@code ZonedDateTime}.
-     */
-    public ZonedDateTime lastChanged(final Topic topic) {
-        return null;
-    }
-
-    /**
-     * Returns the timestamp of the last action in one particular report. Creating, editing and moving a report as well
-     * as creating and editing posts count as actions.
-     *
-     * @param report The report in question.
-     * @return The timestamp of the last action as a {@code ZonedDateTime}.
-     */
-    public ZonedDateTime lastChanged(final Report report) {
         return null;
     }
 

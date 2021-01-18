@@ -273,7 +273,8 @@ public class SearchService {
         List<Report> reports = new ArrayList<>();
         try (Transaction tx = transactionManager.begin()) {
             reports = tx.newSearchGateway().getReportResults(query, selection, latestCreationDateTime,
-                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic, reportTypeFilter, severityFilter);
+                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic,
+                    reportTypeFilter, severityFilter);
             tx.commit();
         } catch (NotFoundException e) {
             log.error("Filter Topic " + topic + " not found while searching for reports", e);
@@ -314,7 +315,8 @@ public class SearchService {
             List<Report> reports = new ArrayList<>();
             try (Transaction tx = transactionManager.begin()) {
                 reports = tx.newSearchGateway().getFulltextResults(query, selection, latestCreationDateTime,
-                        earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic, reportTypeFilter, severityFilter);
+                        earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic,
+                        reportTypeFilter, severityFilter);
                 tx.commit();
             } catch (NotFoundException e) {
                 log.error("Filter Topic with id " + topic.getId() + " not found while searching for reports", e);
@@ -390,7 +392,8 @@ public class SearchService {
         int results = 0;
         try (Transaction tx = transactionManager.begin()) {
             results = tx.newSearchGateway().getNumberOfReportResults(query, latestCreationDateTime,
-                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic, reportTypeFilter, severityFilter);
+                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic,
+                    reportTypeFilter, severityFilter);
             tx.commit();
         } catch (NotFoundException e) {
             log.error("Filter Topic " + topic + " not found while searching for reports", e);
@@ -428,7 +431,8 @@ public class SearchService {
         int results = 0;
         try (Transaction tx = transactionManager.begin()) {
             results = tx.newSearchGateway().getNumberOfFulltextResults(query, latestCreationDateTime,
-                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic, reportTypeFilter, severityFilter);
+                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic,
+                    reportTypeFilter, severityFilter);
             tx.commit();
         } catch (NotFoundException e) {
             log.error("Filter Topic with id " + topic.getId() + " not found while searching for reports", e);

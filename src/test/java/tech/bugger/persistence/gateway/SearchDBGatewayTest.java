@@ -40,8 +40,8 @@ public class SearchDBGatewayTest {
     private User user2;
     private User admin;
     private Topic topic;
-    private final String query = "test";
-    private final int limit = 5;
+    private static final String QUERY = "test";
+    private static final int LIMIT = 5;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -66,7 +66,7 @@ public class SearchDBGatewayTest {
         userGateway.createUser(user2);
         userGateway.createUser(admin);
         topicGateway.createTopic(topic);
-        List<String> suggestions = searchGateway.getUserBanSuggestions(query, limit, topic);
+        List<String> suggestions = searchGateway.getUserBanSuggestions(QUERY, LIMIT, topic);
         assertAll(
                 () -> assertTrue(suggestions.contains(user1.getUsername())),
                 () -> assertTrue(suggestions.contains(user2.getUsername())),
@@ -82,7 +82,7 @@ public class SearchDBGatewayTest {
         topicGateway.createTopic(topic);
         topicGateway.promoteModerator(topic, user1);
         topicGateway.banUser(topic, user2);
-        List<String> suggestions = searchGateway.getUserBanSuggestions(query, limit, topic);
+        List<String> suggestions = searchGateway.getUserBanSuggestions(QUERY, LIMIT, topic);
         assertTrue(suggestions.isEmpty());
     }
 
@@ -90,35 +90,35 @@ public class SearchDBGatewayTest {
     public void testGetUserBanSuggestionsNone() throws NotFoundException {
         userGateway.createUser(admin);
         topicGateway.createTopic(topic);
-        List<String> suggestions = searchGateway.getUserBanSuggestions(query, limit, topic);
+        List<String> suggestions = searchGateway.getUserBanSuggestions(QUERY, LIMIT, topic);
         assertEquals(0, suggestions.size());
     }
 
     @Test
     public void testGetUserBanSuggestionsQueryNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> searchGateway.getUserBanSuggestions(null, limit, topic)
+                () -> searchGateway.getUserBanSuggestions(null, LIMIT, topic)
         );
     }
 
     @Test
     public void testGetUserBanSuggestionsQueryBlank() {
         assertThrows(IllegalArgumentException.class,
-                () -> searchGateway.getUserBanSuggestions("", limit, topic)
+                () -> searchGateway.getUserBanSuggestions("", LIMIT, topic)
         );
     }
 
     @Test
     public void testGetUserBanSuggestionsTopicIdNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> searchGateway.getUserBanSuggestions(query, limit, topic)
+                () -> searchGateway.getUserBanSuggestions(QUERY, LIMIT, topic)
         );
     }
 
     @Test
     public void testGetUserBanSuggestionsLimitNegative() {
         assertThrows(IllegalArgumentException.class,
-                () -> searchGateway.getUserBanSuggestions(query, -1, topic)
+                () -> searchGateway.getUserBanSuggestions(QUERY, -1, topic)
         );
     }
 
@@ -128,7 +128,7 @@ public class SearchDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new SearchDBGateway(connectionSpy, userGateway).getUserBanSuggestions(query, limit, topic)
+                () -> new SearchDBGateway(connectionSpy, userGateway).getUserBanSuggestions(QUERY, LIMIT, topic)
         );
     }
 
@@ -139,7 +139,7 @@ public class SearchDBGatewayTest {
         userGateway.createUser(admin);
         topicGateway.createTopic(topic);
         topicGateway.banUser(topic, user1);
-        List<String> suggestions = searchGateway.getUserUnbanSuggestions(query, limit, topic);
+        List<String> suggestions = searchGateway.getUserUnbanSuggestions(QUERY, LIMIT, topic);
         assertAll(
                 () -> assertTrue(suggestions.contains(user1.getUsername())),
                 () -> assertFalse(suggestions.contains(user2.getUsername())),
@@ -151,7 +151,7 @@ public class SearchDBGatewayTest {
     public void testGetUserUnbanSuggestionsNone() throws NotFoundException {
         userGateway.createUser(user1);
         topicGateway.createTopic(topic);
-        List<String> suggestions = searchGateway.getUserUnbanSuggestions(query, limit, topic);
+        List<String> suggestions = searchGateway.getUserUnbanSuggestions(QUERY, LIMIT, topic);
         assertEquals(0, suggestions.size());
     }
 
@@ -161,7 +161,7 @@ public class SearchDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new SearchDBGateway(connectionSpy, userGateway).getUserUnbanSuggestions(query, limit, topic)
+                () -> new SearchDBGateway(connectionSpy, userGateway).getUserUnbanSuggestions(QUERY, LIMIT, topic)
         );
     }
 
@@ -172,7 +172,7 @@ public class SearchDBGatewayTest {
         userGateway.createUser(admin);
         topicGateway.createTopic(topic);
         topicGateway.promoteModerator(topic, user2);
-        List<String> suggestions = searchGateway.getUserModSuggestions(query, limit, topic);
+        List<String> suggestions = searchGateway.getUserModSuggestions(QUERY, LIMIT, topic);
         assertAll(
                 () -> assertTrue(suggestions.contains(user1.getUsername())),
                 () -> assertFalse(suggestions.contains(user2.getUsername())),
@@ -184,7 +184,7 @@ public class SearchDBGatewayTest {
     public void testGetUserModSuggestionsNone() throws NotFoundException {
         userGateway.createUser(admin);
         topicGateway.createTopic(topic);
-        List<String> suggestions = searchGateway.getUserModSuggestions(query, limit, topic);
+        List<String> suggestions = searchGateway.getUserModSuggestions(QUERY, LIMIT, topic);
         assertEquals(0, suggestions.size());
     }
 
@@ -194,7 +194,7 @@ public class SearchDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new SearchDBGateway(connectionSpy, userGateway).getUserModSuggestions(query, limit, topic)
+                () -> new SearchDBGateway(connectionSpy, userGateway).getUserModSuggestions(QUERY, LIMIT, topic)
         );
     }
 
@@ -205,7 +205,7 @@ public class SearchDBGatewayTest {
         userGateway.createUser(admin);
         topicGateway.createTopic(topic);
         topicGateway.promoteModerator(topic, user1);
-        List<String> suggestions = searchGateway.getUserUnmodSuggestions(query, limit, topic);
+        List<String> suggestions = searchGateway.getUserUnmodSuggestions(QUERY, LIMIT, topic);
         assertAll(
                 () -> assertTrue(suggestions.contains(user1.getUsername())),
                 () -> assertFalse(suggestions.contains(user2.getUsername())),
@@ -217,7 +217,7 @@ public class SearchDBGatewayTest {
     public void testGetUserUnmodSuggestionsNone() throws NotFoundException {
         userGateway.createUser(admin);
         topicGateway.createTopic(topic);
-        List<String> suggestions = searchGateway.getUserUnmodSuggestions(query, limit, topic);
+        List<String> suggestions = searchGateway.getUserUnmodSuggestions(QUERY, LIMIT, topic);
         assertEquals(0, suggestions.size());
     }
 
@@ -227,7 +227,7 @@ public class SearchDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new SearchDBGateway(connectionSpy, userGateway).getUserUnmodSuggestions(query, limit, topic)
+                () -> new SearchDBGateway(connectionSpy, userGateway).getUserUnmodSuggestions(QUERY, LIMIT, topic)
         );
     }
 

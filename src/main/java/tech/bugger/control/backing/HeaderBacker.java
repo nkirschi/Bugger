@@ -48,7 +48,7 @@ public class HeaderBacker implements Serializable {
     private boolean displayMenu;
 
     /**
-     * The current search query
+     * The current search query.
      */
     private String search;
 
@@ -206,7 +206,7 @@ public class HeaderBacker implements Serializable {
     /**
      * @param search The new search query.
      */
-    public void setSearch(String search) {
+    public void setSearch(final String search) {
         this.search = search;
     }
 

@@ -704,6 +704,20 @@ public class UserDBGatewayTest {
     }
 
     @Test
+    public void testSelectSubscribedUsersDesc() throws DuplicateException, NotFoundException, SelfReferenceException {
+        userGateway.createUser(user);
+        userGateway.createUser(admin);
+        subscriptionGateway.subscribe(admin, user);
+        selection.setTotalSize(1);
+        selection.setAscending(false);
+        List<User> subscribers = userGateway.selectSubscribedUsers(user, selection);
+        assertAll(
+                () -> assertEquals(1, subscribers.size()),
+                () -> assertTrue(subscribers.contains(admin))
+        );
+    }
+
+    @Test
     public void testSelectSubscribedUsersSelectionNull() {
         assertThrows(IllegalArgumentException.class,
                 () -> userGateway.selectSubscribedUsers(user, null)

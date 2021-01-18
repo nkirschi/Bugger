@@ -108,7 +108,7 @@ public class RegisterBacker {
      */
     public String register() {
         if (profileService.createUser(user) && authenticationService.register(user,
-                                                                              JFConfig.getApplicationPath(fctx.getExternalContext()))) {
+                JFConfig.getApplicationPath(fctx.getExternalContext()))) {
 
             log.debug("Registration for user " + user + " successful.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("register.success"), Feedback.Type.INFO));

@@ -42,7 +42,8 @@ public class SearchDBGateway implements SearchGateway {
     /**
      * Constructs a new search gateway with the given database connection.
      *
-     * @param conn The database connection to use for the gateway.
+     * @param conn         The database connection to use for the gateway.
+     * @param userGateway  The user gateway to use.
      */
     public SearchDBGateway(final Connection conn, final UserGateway userGateway) {
         this.conn = conn;
@@ -105,17 +106,13 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getUserBanSuggestions(final String query, final int limit, final Topic topic) {
         validateSuggestionParams(query, limit, topic);
         List<String> userResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u WHERE u.username "
-                + "LIKE ? AND u.is_admin = false AND u.id NOT IN (SELECT t.outcast FROM topic_ban AS t WHERE t.topic "
-                + "= ?) AND u.id NOT IN (SELECT m.moderator FROM topic_moderation AS m WHERE m.topic = ?) LIMIT ?;")) {
+                + "LIKE CONCAT('%', ?, '%') AND u.is_admin = false AND u.id NOT IN (SELECT t.outcast FROM topic_ban "
+                + "AS t WHERE t.topic = ?) AND u.id NOT IN (SELECT m.moderator FROM topic_moderation AS m "
+                + "WHERE m.topic = ?) LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + newQuery + "%")
+                    .string(query)
                     .integer(topic.getId())
                     .integer(topic.getId())
                     .integer(limit)
@@ -139,16 +136,12 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getUserUnbanSuggestions(final String query, final int limit, final Topic topic) {
         validateSuggestionParams(query, limit, topic);
         List<String> userResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u INNER JOIN "
-                + "topic_ban as t ON t.outcast = u.id WHERE u.username LIKE ? AND t.topic = ? LIMIT ?;")) {
+                + "topic_ban as t ON t.outcast = u.id WHERE u.username LIKE CONCAT('%', ?, '%') AND t.topic = ? "
+                + "LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + newQuery + "%")
+                    .string(query)
                     .integer(topic.getId())
                     .integer(limit)
                     .toStatement().executeQuery();
@@ -171,17 +164,12 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getUserModSuggestions(final String query, final int limit, final Topic topic) {
         validateSuggestionParams(query, limit, topic);
         List<String> modResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u WHERE u.username "
-                + "LIKE ? AND u.is_admin = false AND u.id NOT IN (SELECT t.moderator FROM topic_moderation AS t WHERE "
-                + "t.topic = ?) LIMIT ?;")) {
+                + "LIKE CONCAT('%', ?, '%') AND u.is_admin = false AND u.id NOT IN (SELECT t.moderator FROM "
+                + "topic_moderation AS t WHERE t.topic = ?) LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + newQuery + "%")
+                    .string(query)
                     .integer(topic.getId())
                     .integer(limit)
                     .toStatement().executeQuery();
@@ -203,16 +191,12 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getUserUnmodSuggestions(final String query, final int limit, final Topic topic) {
         validateSuggestionParams(query, limit, topic);
         List<String> unmodResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u INNER JOIN "
-                + "topic_moderation as t ON t.moderator = u.id WHERE u.username LIKE ? AND t.topic = ? LIMIT ?;")) {
+                + "topic_moderation as t ON t.moderator = u.id WHERE u.username LIKE CONCAT('%', ?, '%') AND "
+                + "t.topic = ? LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + newQuery + "%")
+                    .string(query)
                     .integer(topic.getId())
                     .integer(limit)
                     .toStatement().executeQuery();
@@ -398,7 +382,8 @@ public class SearchDBGateway implements SearchGateway {
                                          final ZonedDateTime earliestClosingDateTime, final boolean showOpenReports,
                                          final boolean showClosedReports, final boolean showDuplicates,
                                          final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
-                                         final HashMap<Report.Severity, Boolean> severityFilter) throws NotFoundException {
+                                         final HashMap<Report.Severity, Boolean> severityFilter)
+            throws NotFoundException {
         if (selection == null || query == null || severityFilter == null || reportTypeFilter == null) {
             log.error("The selection or query cannot be null!");
             throw new IllegalArgumentException("The selection or query cannot be null!");
@@ -475,7 +460,8 @@ public class SearchDBGateway implements SearchGateway {
         }
         filterSeverityBuilder.append(") ");
         String filterSeverity = filterSeverityBuilder.toString();
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT r.*, t.title AS t_title FROM \"report\" AS r JOIN topic AS t "
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT r.*, t.title AS t_title FROM \"report\" AS r "
+                + "JOIN topic AS t "
                 + "ON r.topic = t.id WHERE r.title LIKE ?"
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) "
@@ -542,7 +528,8 @@ public class SearchDBGateway implements SearchGateway {
                 adminFilter = "AND is_admin = false";
             }
         }
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) AS num_users FROM \"user\" WHERE username LIKE ? "
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) AS num_users FROM \"user\" WHERE "
+                + "username LIKE ? "
                 + adminFilter)) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string(query + "%")
@@ -571,7 +558,8 @@ public class SearchDBGateway implements SearchGateway {
 
         int topics = 0;
 
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) AS num_topics FROM \"topic\" WHERE title LIKE ?;")) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) AS num_topics FROM \"topic\" WHERE "
+                + "title LIKE ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string(query + "%")
                     .toStatement().executeQuery();
@@ -668,7 +656,8 @@ public class SearchDBGateway implements SearchGateway {
         }
         filterSeverityBuilder.append(") ");
         String filterSeverity = filterSeverityBuilder.toString();
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT Count(*) AS num_reports FROM \"report\" AS r JOIN topic AS t "
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT Count(*) AS num_reports FROM \"report\" AS r "
+                + "JOIN topic AS t "
                 + "ON r.topic = t.id WHERE r.title LIKE ? "
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL)"
