@@ -33,7 +33,7 @@
             </h:panelGroup>
             <ui:insert name="dialogs"/>
             <h:panelGroup layout="block" id="p-help" styleClass="dialog" rendered="#{footerBacker.helpDisplayed}">
-                <ui:insert name="help"/>
+                <h:outputText value="#{footerBacker.getHelp(helpKey)}" escape="false"/>
             </h:panelGroup>
             <h:panelGroup layout="block" id="p-content">
                 <h:outputText value="#{title}" styleClass="h1" id="title"/>
