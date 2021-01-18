@@ -1,21 +1,220 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:h="http://xmlns.jcp.org/jsf/html">
-<ui:composition template="/WEB-INF/template/main.xhtml">
+<ui:composition template="/WEB-INF/template/main.xhtml" xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:b="http://tech.bugger/tags">
     <f:metadata>
         <f:viewParam name="q" value="#{searchBacker.query}"/>
         <f:viewParam name="t" value="#{searchBacker.tab}"/>
+        <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
-    <ui:param name="title" value="Home"/>
+    <ui:param name="title" value="#{labels.search}"/>
     <ui:define name="content">
-        <h2>Welcome to the search page.</h2>
-        <p>You searched for: "<h:outputLabel value="#{searchBacker.query}"/>"</p>
-        <p>The current tab is: "<h:outputLabel value="#{searchBacker.tab}"/>"</p>
+        <h:form id="f-search">
+            <h:panelGroup class="row" layout="block">
+                <h:panelGroup class="row" layout="block" id="p-search-head">
+                    <h:panelGroup class ="row" layout="block"  id="p-search-bar-large"
+                                  styleClass="d-flex justify-content-center align-items-center mx-5 px-5 col">
+                        <h:inputText styleClass="form-control form-text mt-0 me-3" id="it-search-large"/>
+                        <h:commandButton value="#{labels.search}" action="#{searchBacker.search}"
+                                             styleClass="btn btn-outline-primary" id="cb-search-large">
+                            <f:param name="q" value="#{searchBacker.query}"/>
+                        </h:commandButton>
+
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block" id="p-switch-tabs">
+                        <h:link value="#{labels.topic}" outcome="pretty:search">
+                            <f:param name="t" value="TOPIC"/>
+                            <f:param name="q" value="#{searchBacker.query}"/>
+                        </h:link>
+                        <h:link value="#{labels.report}" outcome="pretty:search">
+                            <f:param name="t" value="REPORT"/>
+                            <f:param name="q" value="#{searchBacker.query}"/>
+                        </h:link>
+                        <h:link value="#{labels.user}" outcome="pretty:search">
+                            <f:param name="t" value="USER"/>
+                            <f:param name="q" value="#{searchBacker.query}"/>
+                        </h:link>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup class="row" layout="block" id="p-search-tabs">
+                    <h:panelGroup class="row" layout="block" id="p-tab-topic" rendered="#{searchBacker.tab == 'TOPIC'}">
+                        <h:panelGroup class="row" layout="block" id="p-tab-topic-filter">
+
+                        </h:panelGroup>
+                        <h:panelGroup class="row" layout="block" id="p-tab-topic-results">
+                            <h:panelGroup class="col-sm-12" layout="block">
+                                <b:pagitable paginator="#{searchBacker.topicResults}">
+                                    <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+                                    <b:column title="#{labels.col_id}" paginator="#{searchBacker.topicResults}" key="id">
+                                        <h:link outcome="pretty:topic" value="##{var.id}">
+                                            <f:param name="id" value="#{var.id}"/>
+                                        </h:link>
+                                    </b:column>
+                                    <b:column title="#{labels.col_title}" paginator="#{searchBacker.topicResults}" key="title">
+                                        <h:link outcome="pretty:topic" value="#{var.title}">
+                                            <f:param name="id" value="#{var.id}"/>
+                                        </h:link>
+                                    </b:column>
+                                </b:pagitable>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block" id="p-tab-user" rendered="#{searchBacker.tab == 'USER'}">
+                        <h:panelGroup class="row" layout="block" id="p-tab-user-filter">
+                            <h:panelGroup layout="block" styleClass="mb-2">
+                                <h:outputLabel for="s-show-admin-user"
+                                               value="#{labels.show_admin_user}"/>
+                                <h:selectBooleanCheckbox id="s-show-admin-user" value="#{searchBacker.adminShown}"/>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="mb-2">
+                                <h:outputLabel for="s-show-non-admin-user"
+                                               value="#{labels.show_non_admin_user}"/>
+                                <h:selectBooleanCheckbox id="s-show-non-admin-user" value="#{searchBacker.nonAdminShown}"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup class="row" layout="block" id="p-tab-user-results">
+                            <h:panelGroup class="col-sm-12" layout="block">
+                                <b:pagitable paginator="#{searchBacker.userResults}">
+                                    <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
+                                    <b:column title="#{labels.username}" paginator="#{searchBacker.userResults}" key="id">
+                                        <h:link outcome="pretty:profile" value="##{var.username}">
+                                            <f:param name="u" value="#{var.username}"/>
+                                        </h:link>
+                                    </b:column>
+                                </b:pagitable>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup class="row" layout="block" id="p-tab-report" rendered="#{searchBacker.tab == 'REPORT'}">
+                        <h:panelGroup class="row" layout="block" id="p-tab-report-filter">
+                            <h:panelGroup id="p-latest-opening-date" layout="block" styleClass="mb-2">
+                                <h:outputLabel id="ol-latest-opening-date"
+                                               for="it-latest-opening-date"
+                                               value="#{labels.latest_opening_date}"/>
+                                <h:panelGroup layout="block" styleClass="form-group position-relative">
+                                    <h:inputText id="it-latest-opening-date"
+                                                 value="#{searchBacker.latestOpeningDateTime}"
+                                                 a:placeholder="#{labels.date_time_pattern}"
+                                                 styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}">
+                                        <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                                    </h:inputText>
+                                    <h:panelGroup layout="block" styleClass="invalid-feedback">
+                                        <h:message for="it-latest-opening-date"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                            <h:panelGroup id="p-earliest-closing-date" layout="block" styleClass="mb-2">
+                                <h:outputLabel id="ol-earliest-closing-date"
+                                               for="it-earliest-closing-date"
+                                               value="#{labels.earliest_closing_date}"/>
+                                <h:panelGroup layout="block" styleClass="form-group position-relative">
+                                    <h:inputText id="it-earliest-closing-date"
+                                                 value="#{searchBacker.earliestClosingDateTime}"
+                                                 a:placeholder="#{labels.date_time_pattern}"
+                                                 styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}">
+                                        <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                                    </h:inputText>
+                                    <h:panelGroup layout="block" styleClass="invalid-feedback">
+                                        <h:message for="it-earliest-closing-date"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="mb-2">
+                                <h:outputLabel for="s-show-open-reports"
+                                               value="#{labels.topic_show_open_reports}"/>
+                                <h:selectBooleanCheckbox id="s-show-open-reports" value="#{searchBacker.openReportShown}"/>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="mb-2">
+                                <h:outputLabel for="s-show-closed-reports"
+                                               value="#{labels.topic_show_closed_reports}"/>
+                                <h:selectBooleanCheckbox id="s-show-closed-reports" value="#{searchBacker.closedReportShown}"/>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="mb-2">
+                                <h:outputLabel for="s-show-duplicate-reports"
+                                               value="#{labels.show_duplicate}"/>
+                                <h:selectBooleanCheckbox id="s-show-duplicate-reports" value="#{searchBacker.duplicatesShown}"/>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="mb-2">
+                                <h:outputLabel for="s-show-bug-reports"
+                                               value="#{labels.show_bug_reports}"/>
+                                <h:selectBooleanCheckbox id="s-show-bug-reports" value="#{searchBacker.showBug}"/>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="mb-2">
+                                <h:outputLabel for="s-show-hint-reports"
+                                               value="#{labels.show_hint_reports}"/>
+                                <h:selectBooleanCheckbox id="s-show-hint-reports" value="#{searchBacker.showHint}"/>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="mb-2">
+                                <h:outputLabel for="s-show-feature-reports"
+                                               value="#{labels.show_feature_reports}"/>
+                                <h:selectBooleanCheckbox id="s-show-feature-reports" value="#{searchBacker.showFeature}"/>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="mb-2">
+                                <h:outputLabel for="s-show-minor-reports"
+                                               value="#{labels.show_minor_reports}"/>
+                                <h:selectBooleanCheckbox id="s-show-minor-reports" value="#{searchBacker.showMinor}"/>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="mb-2">
+                                <h:outputLabel for="s-show-relevante-reports"
+                                               value="#{labels.show_relevant_reports}"/>
+                                <h:selectBooleanCheckbox id="s-show-relevante-reports" value="#{searchBacker.showRelevant}"/>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="mb-2">
+                                <h:outputLabel for="s-show-severe-reports"
+                                               value="#{labels.show_severe_reports}"/>
+                                <h:selectBooleanCheckbox id="s-show-severe-reports" value="#{searchBacker.showSevere}"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup id="p-topic-filter" layout="block" styleClass="mb-2">
+                            <h:outputLabel id="ol-topic-filter"
+                                           for="s-topic-filter"
+                                           value="#{labels.topic}"/>
+                            <h:selectOneMenu id="s-topic-filter"
+                                             value="#{searchBacker.topic}"
+                                             styleClass="form-select">
+                                <f:selectItem itemLabel="#{labels.none}" itemValue="" />
+                                <f:selectItems value="#{searchBacker.topicTitles}"/>
+                            </h:selectOneMenu>
+                        </h:panelGroup>
+                        <h:panelGroup class="row" layout="block" id="p-tab-report-results">
+                            <h:panelGroup class="col-sm-12" layout="block">
+                                <b:pagitable paginator="#{searchBacker.reportResults}">
+                                    <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
+                                    <b:column title="#{labels.col_id}" paginator="#{searchBacker.reportResults}" key="id">
+                                        <h:link outcome="pretty:report" value="##{var.id}">
+                                            <f:param name="id" value="#{var.id}"/>
+                                        </h:link>
+                                    </b:column>
+                                    <b:column title="#{labels.col_title}" paginator="#{searchBacker.reportResults}" key="title">
+                                        <h:link outcome="pretty:report" value="#{var.title}">
+                                            <f:param name="id" value="#{var.id}"/>
+                                        </h:link>
+                                    </b:column>
+                                    <b:column title="#{labels.col_type}" paginator="#{searchBacker.reportResults}" key="type">
+                                        <h:outputText value="#{labels['report_type.' += var.type]}"/>
+                                    </b:column>
+                                    <b:column title="#{labels.col_severity}" paginator="#{searchBacker.reportResults}" key="severity">
+                                        <h:outputText value="#{labels['report_severity.' += var.severity]}"/>
+                                    </b:column>
+                                    <b:column title="#{labels.col_version}" paginator="#{searchBacker.reportResults}" key="version">
+                                        <h:outputText value="#{var.version}"/>
+                                    </b:column>
+                                    <b:column title="#{labels.col_duplicate}" paginator="#{searchBacker.reportResults}" key="duplicate_of">
+                                        <h:outputText value="#{var.duplicateOf}"/>
+                                    </b:column>
+                                    <b:column title="#{labels.col_change}" paginator="#{searchBacker.reportResults}" key="last_modified_at">
+                                        <h:outputText value="#{var.authorship.creationDate}"/>
+                                    </b:column>
+                                </b:pagitable>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </h:panelGroup>
+            </h:panelGroup>
+        </h:form>
     </ui:define>
 </ui:composition>
-</html>

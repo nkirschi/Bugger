@@ -170,4 +170,21 @@ public interface TopicGateway {
      */
     List<Topic> getModeratedTopics(User user, Selection selection);
 
+    /**
+     * Retrieves all topics the user is subscribed to for a given selection.
+     *
+     * @param user      The user in question.
+     * @param selection The given selection.
+     * @return A list of topics the user is subscribed to.
+     */
+    List<Topic> selectSubscribedTopics(User user, Selection selection);
+
+    /**
+     * Counts the number of topics the user is subscribed to.
+     *
+     * @param user The user in question.
+     * @return The number of topics the user is subscribed to.
+     */
+    int countSubscribedTopics(User user);
+
 }

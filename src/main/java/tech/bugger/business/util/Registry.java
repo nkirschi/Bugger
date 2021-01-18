@@ -8,10 +8,10 @@ import tech.bugger.persistence.util.PropertiesReader;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Registry for application-wide access to shared dependencies.
@@ -22,31 +22,31 @@ public class Registry {
     /**
      * The registered {@link ConnectionPool} instances.
      */
-    private final Map<String, ConnectionPool> connectionPools;
+    private final ConcurrentMap<String, ConnectionPool> connectionPools;
 
     /**
      * The registered {@link Mailer} instances.
      */
-    private final Map<String, Mailer> mailers;
+    private final ConcurrentMap<String, Mailer> mailers;
 
     /**
      * The registered {@link PriorityExecutor} instances.
      */
-    private final Map<String, PriorityExecutor> priorityExecutors;
+    private final ConcurrentMap<String, PriorityExecutor> priorityExecutors;
 
     /**
      * The registered {@link PropertiesReader} instances.
      */
-    private final Map<String, PropertiesReader> propertiesReaders;
+    private final ConcurrentMap<String, PropertiesReader> propertiesReaders;
 
     /**
      * Constructs an empty registry.
      */
     public Registry() {
-        connectionPools = new HashMap<>();
-        mailers = new HashMap<>();
-        priorityExecutors = new HashMap<>();
-        propertiesReaders = new HashMap<>();
+        connectionPools = new ConcurrentHashMap<>();
+        mailers = new ConcurrentHashMap<>();
+        priorityExecutors = new ConcurrentHashMap<>();
+        propertiesReaders = new ConcurrentHashMap<>();
     }
 
     /**

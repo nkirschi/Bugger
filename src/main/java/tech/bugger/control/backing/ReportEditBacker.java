@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.text.MessageFormat;
+import java.time.ZonedDateTime;
 import java.util.ResourceBundle;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -114,17 +115,21 @@ public class ReportEditBacker implements Serializable {
         }
 
         report = reportService.getReportByID(reportID);
-        if (report != null) {
-            destinationID = report.getTopic();
+        User user = session.getUser();
+        if (report != null && user != null) {
+            destinationID = report.getTopicID();
             currentTopic = topicService.getTopicByID(destinationID);
-            User user = session.getUser();
+        } else {
+            redirectTo404Page();
+            return;
         }
 
         if (!isPrivileged()) {
             redirectTo404Page();
+            return;
         }
 
-        report.getAuthorship().setModifier(session.getUser());
+        report.getAuthorship().setModifier(user);
     }
 
     /**
@@ -149,11 +154,9 @@ public class ReportEditBacker implements Serializable {
 
     /**
      * Saves the changes made into the database or opens the confirmation dialog if the report's topic changed.
-     *
-     * @return The page to navigate to.
      */
     public void saveChangesWithConfirm() {
-        if (report.getTopic() == destinationID) {
+        if (report.getTopicID() == destinationID) {
             saveChanges();
             return;
         }
@@ -169,16 +172,17 @@ public class ReportEditBacker implements Serializable {
     public void saveChanges() {
         boolean success = true;
 
-        if (destinationID != report.getTopic()) {
-            report.setTopic(destinationID);
+        report.getAuthorship().setModifiedDate(ZonedDateTime.now());
+        report.getAuthorship().setModifier(session.getUser());
+        if (destinationID != report.getTopicID()) {
+            report.setTopicID(destinationID);
             success = reportService.move(report);
         }
 
         if (success && reportService.updateReport(report)) {
             ExternalContext ectx = fctx.getExternalContext();
             try {
-                ectx.redirect(ectx.getRequestContextPath()
-                        + "/faces/view/auth/report.xhtml?id=" + report.getId());
+                ectx.redirect(ectx.getRequestContextPath() + "/report?id=" + report.getId());
             } catch (IOException e) {
                 redirectTo404Page();
             }
@@ -229,7 +233,7 @@ public class ReportEditBacker implements Serializable {
         // This will be subject to change when the error page is implemented.
         try {
             ExternalContext ectx = fctx.getExternalContext();
-            ectx.redirect(ectx.getRequestContextPath() + "/faces/view/public/error.xhtml");
+            ectx.redirect(ectx.getRequestContextPath() + "/error");
         } catch (IOException e) {
             throw new InternalError("Redirection to error page failed.");
         }
@@ -243,25 +247,13 @@ public class ReportEditBacker implements Serializable {
      */
     public boolean isPrivileged() {
         User user = session.getUser();
-        if (user == null || currentTopic == null || topicService.isBanned(user, currentTopic)) {
-            return false;
-        }
-        return user.isAdministrator() || topicService.isModerator(user, currentTopic)
-                || user.equals(report.getAuthorship().getCreator());
-    }
-
-    /**
-     * Checks if the user is banned from the topic the report is located in.
-     *
-     * @return {@code true} if the user is banned and {@code false} otherwise.
-     */
-    public boolean isBanned() {
-        User user = session.getUser();
         if (user == null || currentTopic == null) {
             return false;
         }
-        Topic topic = new Topic(report.getTopic(), "", "");
-        return topicService.isBanned(user, topic);
+        if (user.isAdministrator() || topicService.isModerator(user, currentTopic)) {
+            return true;
+        }
+        return user.equals(report.getAuthorship().getCreator()) && !topicService.isBanned(user, currentTopic);
     }
 
     /**

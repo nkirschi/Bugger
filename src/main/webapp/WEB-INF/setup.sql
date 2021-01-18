@@ -53,9 +53,9 @@ CREATE TABLE "user" (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
     username VARCHAR UNIQUE NOT NULL,
-    password_hash VARCHAR NOT NULL,
-    password_salt VARCHAR NOT NULL,
-    hashing_algorithm VARCHAR NOT NULL,
+    password_hash VARCHAR,
+    password_salt VARCHAR,
+    hashing_algorithm VARCHAR,
 
     email_address VARCHAR UNIQUE NOT NULL,
     first_name VARCHAR NOT NULL,
@@ -70,8 +70,7 @@ CREATE TABLE "user" (
     is_admin BOOLEAN,
 
     CONSTRAINT user_first_name_non_empty CHECK (length(first_name) >= 1),
-    CONSTRAINT user_last_name_non_empty CHECK (length(last_name) >= 1),
-    CONSTRAINT user_email_address_lower_case CHECK (LOWER(email_address) = email_address)
+    CONSTRAINT user_last_name_non_empty CHECK (length(last_name) >= 1)
 );
 
 -- Insert the first admin with the password 'BuggerFahrenMachtSpass42'

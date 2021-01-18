@@ -66,6 +66,33 @@ public interface SearchGateway {
     List<String> getUserUnmodSuggestions(String query, int limit, Topic topic);
 
     /**
+     * Searches for users by their username and filters the results according to given selection criteria.
+     *
+     * @param query The search string to use.
+     * @param limit The maximum amount of usernames to return.
+     * @return The list of usernames that match the search criteria.
+     */
+    List<String> getUserSuggestions(String query, int limit);
+
+    /**
+     * Searches for topics by their title and filters the results according to given selection criteria.
+     *
+     * @param query The search string to use.
+     * @param limit The maximum amount of topic titles to return.
+     * @return The list of titles that match the search criteria.
+     */
+    List<String> getTopicSuggestions(String query, int limit);
+
+    /**
+     * Searches for reports by their title and filters the results according to given selection criteria.
+     *
+     * @param query The search string to use.
+     * @param limit The maximum amount of report titles to return.
+     * @return The list of titles that match the search criteria.
+     */
+    List<String> getReportSuggestions(String query, int limit);
+
+    /**
      * Searches for topics by their title and returns the requested result page.
      *
      * @param query     The search string to use.
@@ -95,7 +122,7 @@ public interface SearchGateway {
      */
     List<Report> getReportResults(String query, Selection selection, ZonedDateTime latestOpeningDateTime,
                                   ZonedDateTime earliestClosingDateTime, boolean showOpenReports,
-                                  boolean showClosedReports, boolean showDuplicates, Topic topic,
+                                  boolean showClosedReports, boolean showDuplicates, String topic,
                                   HashMap<Report.Type, Boolean> reportTypeFilter,
                                   HashMap<Report.Severity, Boolean> severityFilter) throws NotFoundException;
 
@@ -166,7 +193,7 @@ public interface SearchGateway {
     int getNumberOfReportResults(String query, ZonedDateTime latestOpeningDateTime,
                                  ZonedDateTime earliestClosingDateTime, boolean showOpenReports,
                                  boolean showClosedReports,
-                                 boolean showDuplicates, Topic topic,
+                                 boolean showDuplicates, String topic,
                                  HashMap<Report.Type, Boolean> reportTypeFilter,
                                  HashMap<Report.Severity, Boolean> severityFilter) throws NotFoundException;
 

@@ -10,7 +10,6 @@ import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
-import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
@@ -32,11 +31,6 @@ import java.util.List;
 @Named
 public class PostEditBacker implements Serializable {
 
-    /**
-     * The {@link Log} instance associated with this class for logging purposes.
-     */
-    private static final Log log = Log.forClass(PostEditBacker.class);
-
     @Serial
     private static final long serialVersionUID = -973315118868047411L;
 
@@ -44,16 +38,6 @@ public class PostEditBacker implements Serializable {
      * Whether to create a new post or edit an existing one.
      */
     private boolean create;
-
-    /**
-     * The ID of the post to edit.
-     */
-    private Integer postID;
-
-    /**
-     * The ID of the report to create a new post in.
-     */
-    private Integer reportID;
 
     /**
      * The post to edit.
@@ -134,7 +118,7 @@ public class PostEditBacker implements Serializable {
 
         create = fctx.getExternalContext().getRequestParameterMap().containsKey("c");
         if (create) {
-            reportID = parseRequestParameter("r");
+            Integer reportID = parseRequestParameter("r");
             if (reportID == null) {
                 redirectToErrorPage();
                 return;
@@ -147,17 +131,17 @@ public class PostEditBacker implements Serializable {
             Authorship authorship = new Authorship(user, null, user, null);
             post = new Post(0, "", new Lazy<>(report), authorship, attachments);
         } else {
-            postID = parseRequestParameter("p");
+            Integer postID = parseRequestParameter("p");
             if (postID == null) {
                 redirectToErrorPage();
                 return;
             }
             post = postService.getPostByID(postID);
-            if (post == null || !postService.canModify(user, post)) {
+            if (post == null || !postService.isPrivileged(user, post)) {
                 redirectToErrorPage();
                 return;
             }
-            report = reportService.getReportByID(post.getReport().get().getId());
+            report = post.getReport() != null ? post.getReport().get() : null;
             if (report == null) {
                 redirectToErrorPage();
                 return;
@@ -176,8 +160,7 @@ public class PostEditBacker implements Serializable {
         if (success) {
             ExternalContext ectx = fctx.getExternalContext();
             try {
-                ectx.redirect(ectx.getRequestContextPath()
-                        + "/faces/view/auth/report.xhtml?id=" + report.getId() + "&p=" + post.getId());
+                ectx.redirect(ectx.getRequestContextPath() + "/report?id=" + report.getId() + "&p=" + post.getId());
             } catch (IOException e) {
                 redirectToErrorPage();
             }
@@ -189,14 +172,16 @@ public class PostEditBacker implements Serializable {
      * attachments has already been reached, displays an error message instead.
      */
     public void uploadAttachment() {
-        postService.addAttachment(post, lastAttachmentUploaded);
+        if (lastAttachmentUploaded != null) {
+            postService.addAttachment(post, lastAttachmentUploaded);
+        }
     }
 
     /**
      * Clears the list of attachments of the post.
      */
     public void deleteAllAttachments() {
-        post.getAttachments().clear();
+        attachments.clear();
     }
 
     /**
@@ -222,39 +207,21 @@ public class PostEditBacker implements Serializable {
     }
 
     /**
-     * Returns the ID of the post to edit.
+     * Returns the report to create the new post in.
      *
-     * @return The post ID to set.
+     * @return The report to create the new post in.
      */
-    public Integer getPostID() {
-        return postID;
+    public Report getReport() {
+        return report;
     }
 
     /**
-     * Sets the ID of the post to edit.
+     * Sets the report to create the new post in.
      *
-     * @param postID The post ID to set.
+     * @param report The report to set.
      */
-    public void setPostID(final Integer postID) {
-        this.postID = postID;
-    }
-
-    /**
-     * Returns the ID of the report to create the new post in.
-     *
-     * @return The ID of the report to create the new post in.
-     */
-    public Integer getReportID() {
-        return reportID;
-    }
-
-    /**
-     * Sets the ID of the report to create the new post in.
-     *
-     * @param reportID The report ID to set.
-     */
-    public void setReportID(final Integer reportID) {
-        this.reportID = reportID;
+    public void setReport(final Report report) {
+        this.report = report;
     }
 
     /**

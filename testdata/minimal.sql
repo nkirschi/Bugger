@@ -3,7 +3,9 @@ DELETE FROM topic;
 
 INSERT INTO "user" (username, email_address, first_name, last_name,
     password_hash, password_salt, hashing_algorithm, is_admin) VALUES
-    ('testuser', 'testuser@example.org', 'Test', 'User', 'cb64f9739595a2eb5d58cb7a291aed0b0627f4efcbbf1a6b1c5e5864df3f6c941a0495fad7939cdd810bc74852a670ca14a9ae5033843c8d233d2a4f33b11393', 'aa35afbed60537ff39a5be70dc1d183fbf6614ea5ce7d36c2e5f154d2d3e1706d9429f8597fb12fd4d0601391aaa5684d15d8d0078645b4946acf5512766fc25', 'SHA3-512', false);
+    ('testuser', 'testuser@example.org', 'Test', 'User', 'cb64f9739595a2eb5d58cb7a291aed0b0627f4efcbbf1a6b1c5e5864df3f6c941a0495fad7939cdd810bc74852a670ca14a9ae5033843c8d233d2a4f33b11393', 'aa35afbed60537ff39a5be70dc1d183fbf6614ea5ce7d36c2e5f154d2d3e1706d9429f8597fb12fd4d0601391aaa5684d15d8d0078645b4946acf5512766fc25', 'SHA3-512', false),
+    ('pending', 'pending@example.org', 'Pen', 'Ding', null, null, null, false),
+    ('corpse', 'corpse@example.org', 'Cor', 'Pse', null, null, null, false);
 
 INSERT INTO topic (title, description) VALUES
     ('testtopic', 'Description of testtopic');
@@ -24,3 +26,8 @@ INSERT INTO relevance_vote (voter, report, voted_at, weight) VALUES
     (1, 100, NOW(), 2),
     (1, 101, NOW(), 5),
     (1, 102, '1900-01-01 00:00:00', 8);
+
+INSERT INTO token (value, type, "timestamp", meta, verifies) VALUES
+    ('a', 'REGISTER', NOW(), '', 3),
+    ('b', 'REGISTER', NOW() - '59 minutes'::interval, '', 1),
+    ('c', 'REGISTER', NOW() - '61 minutes'::interval, '', 1);

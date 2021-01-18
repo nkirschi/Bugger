@@ -16,6 +16,7 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.gateway.SubscriptionGateway;
 import tech.bugger.persistence.gateway.TopicGateway;
 import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
@@ -59,6 +60,9 @@ class TopicServiceTest {
     private UserGateway userGateway;
 
     @Mock
+    private SubscriptionGateway subscriptionGateway;
+
+    @Mock
     private Event<Feedback> feedbackEvent;
 
     private List<Topic> testSelectedTopics;
@@ -87,6 +91,7 @@ class TopicServiceTest {
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(topicGateway).when(tx).newTopicGateway();
         lenient().doReturn(userGateway).when(tx).newUserGateway();
+        lenient().doReturn(subscriptionGateway).when(tx).newSubscriptionGateway();
     }
 
     @Test

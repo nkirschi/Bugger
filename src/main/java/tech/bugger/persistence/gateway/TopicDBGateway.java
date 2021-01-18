@@ -1,14 +1,17 @@
 package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.global.util.Pagitable;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
@@ -464,8 +467,28 @@ public class TopicDBGateway implements TopicGateway {
      */
     @Override
     public int countSubscribers(final Topic topic) {
-        // TODO Auto-generated method stub
-        return 0;
+        if (topic == null) {
+            log.error("Cannot count subscribers of topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot count subscribers of topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
+
+        int count = 0;
+        String sql = "SELECT COUNT(*) AS count FROM topic_subscription WHERE topic = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(topic.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt("count");
+            }
+        } catch (SQLException e) {
+            log.error("Error when counting subscribers of topic " + topic + ".", e);
+            throw new StoreException("Error when counting subscribers of topic " + topic + ".", e);
+        }
+        return count;
     }
 
     /**
@@ -527,6 +550,85 @@ public class TopicDBGateway implements TopicGateway {
         }
 
         return moderatedTopics;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Topic> selectSubscribedTopics(final User user, final Selection selection) {
+        if (selection == null) {
+            log.error("Error when trying to get topics with selection null.");
+            throw new IllegalArgumentException("Selection cannot be null.");
+        } else if (StringUtils.isBlank(selection.getSortedBy())) {
+            log.error("Error when trying to get topics sorted by nothing.");
+            throw new IllegalArgumentException("Cannot sort by nothing.");
+        } else if (user == null) {
+            log.error("Cannot select subscribed topics when user is null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot select subscribed topics when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        String sql = "SELECT s.*, t.*, l.last_activity FROM topic_subscription AS s"
+                + " LEFT OUTER JOIN topic AS t ON s.topic = t.id"
+                + " LEFT OUTER JOIN topic_last_activity AS l ON t.id = l.topic"
+                + " WHERE s.subscriber = ?"
+                + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
+                + " LIMIT ?"
+                + " OFFSET ?;";
+
+        List<Topic> selectedTopics =
+                new ArrayList<>(Math.min(Pagitable.getItemLimit(selection), Math.max(0, selection.getTotalSize())));
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .integer(Pagitable.getItemLimit(selection))
+                    .integer(Pagitable.getItemOffset(selection)).toStatement();
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                ZonedDateTime lastActivity = null;
+                if (rs.getTimestamp("last_activity") != null) {
+                    lastActivity = rs.getTimestamp("last_activity").toInstant().atZone(ZoneId.systemDefault());
+                }
+                selectedTopics.add(new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description"),
+                        lastActivity));
+            }
+        } catch (SQLException e) {
+            log.error("Error while selecting subscribed topics for user " + user + " with " + selection + ".", e);
+            throw new StoreException("Error while selecting subscribed topics for user " + user + " with " + selection
+                    + ".", e);
+        }
+        return selectedTopics;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int countSubscribedTopics(final User user) {
+        if (user == null) {
+            log.error("Cannot count subscribed topics when user is null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot count subscribed topics when user ID is null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+        String sql = "SELECT COUNT(*) AS count FROM topic_subscription WHERE subscriber = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId()).toStatement();
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            } else {
+                throw new InternalError("Could not count the number of topics.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while retrieving number of topics.", e);
+            throw new StoreException("Error while retrieving number of topics.", e);
+        }
     }
 
 }

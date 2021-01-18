@@ -1,10 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.ZonedDateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,8 +11,22 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.matches;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 
 @ExtendWith(DBExtension.class)
 @ExtendWith(LogExtension.class)
@@ -135,6 +144,22 @@ public class TokenDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).findToken(value));
+    }
+
+    @Test
+    public void testCleanExpiredTokensWhenSuccess() {
+        DBExtension.insertMinimalTestData();
+        gateway.cleanExpiredTokens(Duration.ofHours(1));
+        assertDoesNotThrow(() -> gateway.findToken("a"));
+        assertDoesNotThrow(() -> gateway.findToken("b"));
+        assertThrows(NotFoundException.class, () -> gateway.findToken("c"));
+    }
+
+    @Test
+    public void testCleanExpiredTokensWhenError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new TokenDBGateway(connectionSpy).cleanExpiredTokens(Duration.ZERO));
     }
 
 }

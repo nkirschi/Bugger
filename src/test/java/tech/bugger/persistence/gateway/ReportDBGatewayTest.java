@@ -120,7 +120,7 @@ public class ReportDBGatewayTest {
     @Test
     public void testUpdate() throws Exception {
         report.setId(100);
-        report.setTopic(topic.getId());
+        report.setTopicID(topic.getId());
         gateway.update(report);
 
         Report reportFromDatabase = gateway.find(100);
@@ -161,7 +161,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testCreate() throws Exception {
-        report.setTopic(topic.getId());
+        report.setTopicID(topic.getId());
         gateway.create(report);
         Report created = find(report.getId());
         assertEquals(report.getId(), created.getId());

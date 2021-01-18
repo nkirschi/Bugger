@@ -46,8 +46,8 @@ public class SearchDBGatewayTest {
     @BeforeEach
     public void setUp() throws Exception {
         connection = DBExtension.getConnection();
-        searchGateway = new SearchDBGateway(connection);
         userGateway = new UserDBGateway(connection);
+        searchGateway = new SearchDBGateway(connection, userGateway);
         topicGateway = new TopicDBGateway(connection);
 
         user1 = new User(null, "testuser1", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
@@ -128,7 +128,7 @@ public class SearchDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new SearchDBGateway(connectionSpy).getUserBanSuggestions(query, limit, topic)
+                () -> new SearchDBGateway(connectionSpy, userGateway).getUserBanSuggestions(query, limit, topic)
         );
     }
 
@@ -161,7 +161,7 @@ public class SearchDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new SearchDBGateway(connectionSpy).getUserUnbanSuggestions(query, limit, topic)
+                () -> new SearchDBGateway(connectionSpy, userGateway).getUserUnbanSuggestions(query, limit, topic)
         );
     }
 
@@ -194,7 +194,7 @@ public class SearchDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new SearchDBGateway(connectionSpy).getUserModSuggestions(query, limit, topic)
+                () -> new SearchDBGateway(connectionSpy, userGateway).getUserModSuggestions(query, limit, topic)
         );
     }
 
@@ -227,7 +227,7 @@ public class SearchDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new SearchDBGateway(connectionSpy).getUserUnmodSuggestions(query, limit, topic)
+                () -> new SearchDBGateway(connectionSpy, userGateway).getUserUnmodSuggestions(query, limit, topic)
         );
     }
 

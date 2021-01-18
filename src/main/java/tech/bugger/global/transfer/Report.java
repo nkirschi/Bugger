@@ -106,7 +106,7 @@ public class Report implements Serializable {
     /**
      * The ID of the topic this report is in.
      */
-    private Integer topic;
+    private Integer topicID;
 
     /**
      * Constructs a new report.
@@ -121,11 +121,11 @@ public class Report implements Serializable {
      * @param duplicateOf           The report this report is a duplicate of, loaded lazily.
      * @param relevance             The relevance value for the Report.
      * @param relevanceOverwritten  The state of the relevance overwrite.
-     * @param topic                 The topic the report belongs to, loaded lazily.
+     * @param topicID               The ID of topic the report belongs to.
      */
     public Report(final Integer id, final String title, final Type type, final Severity severity, final String version,
                   final Authorship authorship, final ZonedDateTime closingDate, final Integer duplicateOf,
-                  final Integer relevance, final boolean relevanceOverwritten, final Integer topic) {
+                  final Integer relevance, final boolean relevanceOverwritten, final Integer topicID) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -136,7 +136,7 @@ public class Report implements Serializable {
         this.duplicateOf = duplicateOf;
         this.relevance = relevance;
         this.relevanceOverwritten = relevanceOverwritten;
-        this.topic = topic;
+        this.topicID = topicID;
     }
 
     /**
@@ -153,7 +153,7 @@ public class Report implements Serializable {
      */
     public Report(final Report report) {
         this(report.id, report.title, report.type, report.severity, report.version, report.authorship,
-                report.closingDate, report.duplicateOf, report.relevance, report.relevanceOverwritten, report.topic);
+                report.closingDate, report.duplicateOf, report.relevance, report.relevanceOverwritten, report.topicID);
     }
 
     /**
@@ -323,17 +323,17 @@ public class Report implements Serializable {
      *
      * @return The associated topic.
      */
-    public Integer getTopic() {
-        return topic;
+    public Integer getTopicID() {
+        return topicID;
     }
 
     /**
      * Sets the topic this report belongs to.
      *
-     * @param topic The associated topic to be set.
+     * @param topicID The associated topic to be set.
      */
-    public void setTopic(final Integer topic) {
-        this.topic = topic;
+    public void setTopicID(final Integer topicID) {
+        this.topicID = topicID;
     }
 
     /**
@@ -401,7 +401,7 @@ public class Report implements Serializable {
                 + ", duplicateOf=" + duplicateOf
                 + ", relevance=" + relevance
                 + ", relevanceOverwritten" + relevanceOverwritten
-                + ", topic=" + topic
+                + ", topic=" + topicID
                 + '}';
     }
 
