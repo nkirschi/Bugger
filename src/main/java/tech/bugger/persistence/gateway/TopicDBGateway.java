@@ -496,7 +496,6 @@ public class TopicDBGateway implements TopicGateway {
      */
     @Override
     public int countPosts(final Topic topic) {
-        // TODO Auto-generated method stub
         return 0;
     }
 

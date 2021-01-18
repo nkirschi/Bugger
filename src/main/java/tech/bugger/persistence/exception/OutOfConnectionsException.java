@@ -15,7 +15,6 @@ public class OutOfConnectionsException extends RuntimeException {
      */
     public OutOfConnectionsException() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -29,7 +28,6 @@ public class OutOfConnectionsException extends RuntimeException {
      */
     public OutOfConnectionsException(final String message, final Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -39,7 +37,6 @@ public class OutOfConnectionsException extends RuntimeException {
      */
     public OutOfConnectionsException(final String message) {
         super(message);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -50,7 +47,6 @@ public class OutOfConnectionsException extends RuntimeException {
      */
     public OutOfConnectionsException(final Throwable cause) {
         super(cause);
-        // TODO Auto-generated constructor stub
     }
 
 }

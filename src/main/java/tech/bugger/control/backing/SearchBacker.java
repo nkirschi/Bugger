@@ -1,5 +1,16 @@
 package tech.bugger.control.backing;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
@@ -8,18 +19,6 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Backing bean for the search page.
@@ -132,17 +131,17 @@ public class SearchBacker implements Serializable {
     private boolean showHint;
 
     /**
-     * Whether to search for reports with the MINOR severity
+     * Whether to search for reports with the MINOR severity.
      */
     private boolean showMinor;
 
     /**
-     * Whether to search for reports with the RELEVANT severity
+     * Whether to search for reports with the RELEVANT severity.
      */
     private boolean showRelevant;
 
     /**
-     * Whether to search for reports with the SEVERE severity
+     * Whether to search for reports with the SEVERE severity.
      */
     private boolean showSevere;
 
@@ -184,13 +183,14 @@ public class SearchBacker implements Serializable {
     /**
      * The current faces context.
      */
-    private FacesContext fctx;
+    private final FacesContext fctx;
 
     /**
      * Constructs a new search page backing bean with the necessary dependencies.
      *
-     * @param searchService         The search service to use.
-     * @param fctx                The current {@link FacesContext} of the application.
+     * @param searchService The search service to use.
+     * @param topicService  The topic service to use.
+     * @param fctx          The current {@link FacesContext} of the application.
      */
     @Inject
     public SearchBacker(final SearchService searchService, final TopicService topicService, final FacesContext fctx) {
@@ -246,19 +246,20 @@ public class SearchBacker implements Serializable {
             @Override
             protected Iterable<Report> fetch() {
                 if (tab == Tab.REPORT) {
-                    HashMap<Report.Type, Boolean> typeHashMap = new HashMap<Report.Type, Boolean>();
+                    HashMap<Report.Type, Boolean> typeHashMap = new HashMap<>();
                     typeHashMap.put(Report.Type.BUG, showBug);
                     typeHashMap.put(Report.Type.FEATURE, showFeature);
                     typeHashMap.put(Report.Type.HINT, showHint);
-                    HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<Report.Severity, Boolean>();
+                    HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<>();
                     severityHashMap.put(Report.Severity.MINOR, showMinor);
                     severityHashMap.put(Report.Severity.RELEVANT, showRelevant);
                     severityHashMap.put(Report.Severity.SEVERE, showSevere);
                     if (topic != null && topic.isBlank()) {
                         topic = null;
                     }
-                    return searchService.getReportResults(query, getSelection(), latestCreationDateTime, earliestClosingDateTime,
-                            openReportShown, closedReportShown, duplicatesShown, topic, typeHashMap, severityHashMap );
+                    return searchService.getReportResults(query, getSelection(), latestCreationDateTime,
+                            earliestClosingDateTime, openReportShown, closedReportShown, duplicatesShown, topic,
+                            typeHashMap, severityHashMap);
                 }
                 return null;
             }
@@ -266,19 +267,20 @@ public class SearchBacker implements Serializable {
             @Override
             protected int totalSize() {
                 if (tab == Tab.REPORT) {
-                    HashMap<Report.Type, Boolean> typeHashMap = new HashMap<Report.Type, Boolean>();
+                    HashMap<Report.Type, Boolean> typeHashMap = new HashMap<>();
                     typeHashMap.put(Report.Type.BUG, showBug);
                     typeHashMap.put(Report.Type.FEATURE, showFeature);
                     typeHashMap.put(Report.Type.HINT, showHint);
-                    HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<Report.Severity, Boolean>();
+                    HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<>();
                     severityHashMap.put(Report.Severity.MINOR, showMinor);
                     severityHashMap.put(Report.Severity.RELEVANT, showRelevant);
                     severityHashMap.put(Report.Severity.SEVERE, showSevere);
                     if (topic != null && topic.isBlank()) {
                         topic = null;
                     }
-                    return searchService.getNumberOfReportResults(query, latestCreationDateTime, earliestClosingDateTime, openReportShown,
-                            closedReportShown, duplicatesShown, topic, typeHashMap, severityHashMap);
+                    return searchService.getNumberOfReportResults(query, latestCreationDateTime,
+                            earliestClosingDateTime, openReportShown, closedReportShown, duplicatesShown, topic,
+                            typeHashMap, severityHashMap);
                 }
                 return 0;
             }
@@ -305,6 +307,8 @@ public class SearchBacker implements Serializable {
 
     /**
      * Executes the search with the specified query and filters.
+     *
+     * @return The site to redirect to or {@code null} to reload the page.
      */
     public String search() {
         return null;
@@ -548,7 +552,7 @@ public class SearchBacker implements Serializable {
     }
 
     /**
-     * @param {@code true} if Bug-type reports are shown, {@code false} otherwise.
+     * @param showBug {@code true} if Bug-type reports are shown, {@code false} otherwise.
      */
     public void setShowBug(final boolean showBug) {
         this.showBug = showBug;
@@ -562,7 +566,7 @@ public class SearchBacker implements Serializable {
     }
 
     /**
-     * @param {@code true} if Hint-type reports are shown, {@code false} otherwise.
+     * @param showHint {@code true} if Hint-type reports are shown, {@code false} otherwise.
      */
     public void setShowHint(final boolean showHint) {
         this.showHint = showHint;
@@ -576,7 +580,7 @@ public class SearchBacker implements Serializable {
     }
 
     /**
-     * @param {@code true} if Feature-type reports are shown, {@code false} otherwise.
+     * @param showFeature {@code true} if Feature-type reports are shown, {@code false} otherwise.
      */
     public void setShowFeature(final boolean showFeature) {
         this.showFeature = showFeature;
@@ -590,7 +594,7 @@ public class SearchBacker implements Serializable {
     }
 
     /**
-     * @param {@code true} if Minor-Severity reports are shown, {@code false} otherwise.
+     * @param showMinor {@code true} if Minor-Severity reports are shown, {@code false} otherwise.
      */
     public void setShowMinor(final boolean showMinor) {
         this.showMinor = showMinor;
@@ -604,7 +608,7 @@ public class SearchBacker implements Serializable {
     }
 
     /**
-     * @param {@code true} if Relevant-Severity reports are shown, {@code false} otherwise.
+     * @param showRelevant {@code true} if Relevant-Severity reports are shown, {@code false} otherwise.
      */
     public void setShowRelevant(final boolean showRelevant) {
         this.showRelevant = showRelevant;
@@ -619,7 +623,7 @@ public class SearchBacker implements Serializable {
     }
 
     /**
-     * @param {@code true} if Severe-Severity reports are shown, {@code false} otherwise.
+     * @param showSevere {@code true} if Severe-Severity reports are shown, {@code false} otherwise.
      */
     public void setShowSevere(final boolean showSevere) {
         this.showSevere = showSevere;
@@ -668,4 +672,5 @@ public class SearchBacker implements Serializable {
     public void setTopic(final String topic) {
         this.topic = topic;
     }
+
 }

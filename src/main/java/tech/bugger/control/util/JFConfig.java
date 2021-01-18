@@ -1,18 +1,25 @@
 package tech.bugger.control.util;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.annotation.FacesConfig;
 import javax.faces.context.ExternalContext;
 import javax.servlet.http.HttpServletRequest;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * Enables JF 2.3 specific features.
  */
 @FacesConfig
 @ApplicationScoped
-public class JFConfig {
+public final class JFConfig {
+
+    /**
+     * Prevents instantiation of this configuration utility class.
+     */
+    private JFConfig() {
+        throw new UnsupportedOperationException(); // for reflection abusers
+    }
 
     /**
      * Retrieves the current application path using the given {@link ExternalContext}.

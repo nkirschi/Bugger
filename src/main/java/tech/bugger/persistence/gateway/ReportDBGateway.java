@@ -1,5 +1,6 @@
 package tech.bugger.persistence.gateway;
 
+import com.ocpsoft.pretty.faces.util.StringUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,8 +11,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.ocpsoft.pretty.faces.util.StringUtils;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
@@ -56,7 +55,8 @@ public class ReportDBGateway implements ReportGateway {
         this.userGateway = userGateway;
     }
 
-     static Report getReportFromResultSet(final ResultSet rs, final UserGateway userGateway) throws SQLException, NotFoundException {
+    static Report getReportFromResultSet(final ResultSet rs, final UserGateway userGateway)
+            throws SQLException, NotFoundException {
         Report report = new Report();
         report.setId(rs.getInt("id"));
         report.setTitle(rs.getString("title"));
@@ -707,8 +707,8 @@ public class ReportDBGateway implements ReportGateway {
                 try {
                     r = getReportFromResultSet(rs, userGateway);
                 } catch (NotFoundException e) {
-                    throw new InternalError("User not found! Who thought it was a good idea to let the helper methods"
-                            + " throw a NotFoundException?!", e);
+                    throw new InternalError("User not found! Who thought it was a good idea to let the helper "
+                            + "methods throw a NotFoundException?!", e);
                 }
                 selectedReports.add(r);
             }
