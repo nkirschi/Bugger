@@ -16,11 +16,15 @@ import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
+import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.gateway.ReportGateway;
 import tech.bugger.persistence.gateway.SubscriptionGateway;
 import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
@@ -28,6 +32,8 @@ import tech.bugger.persistence.util.TransactionManager;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,6 +55,7 @@ public class ProfileServiceTest {
     private User admin;
     private Topic testTopic;
     private Report testReport;
+    private Selection selection;
 
     @Mock
     private TransactionManager transactionManager;
@@ -63,6 +70,9 @@ public class ProfileServiceTest {
     private SubscriptionGateway subscriptionGateway;
 
     @Mock
+    private ReportGateway reportGateway;
+
+    @Mock
     private Event<Feedback> feedbackEvent;
 
     @Mock
@@ -74,6 +84,7 @@ public class ProfileServiceTest {
     @Mock
     private Configuration config;
 
+    private static final int ZERO = 0;
     private static final int THE_ANSWER = 42;
     private static final int MANY_POSTS = 1500;
     private static final String VOTING_WEIGHT_DEF = "1000,0,200,50,100,25,400,600,800,10";
@@ -84,6 +95,7 @@ public class ProfileServiceTest {
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(userGateway).when(tx).newUserGateway();
         lenient().doReturn(subscriptionGateway).when(tx).newSubscriptionGateway();
+        lenient().doReturn(reportGateway).when(tx).newReportGateway();
         testUser = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         admin = new User(3, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@admin.de", "Helgo", "Brötchen",
@@ -92,6 +104,7 @@ public class ProfileServiceTest {
         testTopic = new Topic(1, "title", "description");
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
                 mock(Authorship.class), mock(ZonedDateTime.class), null, null, false, null);
+        selection = new Selection(1, 0, Selection.PageSize.SMALL, "id", true);
     }
 
     @Test
@@ -322,7 +335,7 @@ public class ProfileServiceTest {
     @Test
     public void testGetNumberOfPostsNotFound() throws NotFoundException {
         doThrow(NotFoundException.class).when(userGateway).getNumberOfPosts(testUser);
-        assertEquals(0, service.getNumberOfPostsForUser(testUser));
+        assertEquals(ZERO, service.getNumberOfPostsForUser(testUser));
         verify(userGateway, times(1)).getNumberOfPosts(testUser);
         verify(feedbackEvent, times(1)).fire(any());
     }
@@ -330,7 +343,7 @@ public class ProfileServiceTest {
     @Test
     public void testGetNumberOfPostsTransactionException() throws TransactionException {
         doThrow(TransactionException.class).when(tx).commit();
-        assertEquals(0, service.getNumberOfPostsForUser(testUser));
+        assertEquals(ZERO, service.getNumberOfPostsForUser(testUser));
         verify(tx, times(1)).commit();
         verify(feedbackEvent, times(1)).fire(any());
     }
@@ -410,7 +423,7 @@ public class ProfileServiceTest {
     @Test
     public void testToggleAdminNoAdmins() {
         testUser.setAdministrator(true);
-        when(userGateway.getNumberOfAdmins()).thenReturn(0);
+        when(userGateway.getNumberOfAdmins()).thenReturn(ZERO);
         assertThrows(InternalError.class,
                 () -> service.toggleAdmin(testUser)
         );
@@ -465,7 +478,7 @@ public class ProfileServiceTest {
     @Test
     public void testGetNumberOfModeratedTopicsTransactionException() throws TransactionException {
         doThrow(TransactionException.class).when(tx).commit();
-        assertEquals(0, service.getNumberOfModeratedTopics(testUser));
+        assertEquals(ZERO, service.getNumberOfModeratedTopics(testUser));
         verify(feedbackEvent).fire(any());
     }
 
@@ -697,6 +710,248 @@ public class ProfileServiceTest {
     public void testDeleteAllUserSubscriptionsTransactionException() throws TransactionException {
         doThrow(TransactionException.class).when(tx).commit();
         service.deleteAllUserSubscriptions(testUser);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSubscribeToUser() throws DuplicateException, NotFoundException, SelfReferenceException {
+        service.subscribeToUser(testUser, admin);
+        verify(subscriptionGateway).subscribe(admin, testUser);
+        verify(feedbackEvent, never()).fire(any());
+    }
+
+    @Test
+    public void testSubscribeToUserSubscriberNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.subscribeToUser(null, admin)
+        );
+    }
+
+    @Test
+    public void testSubscribeToUserSubscriberIdNull() {
+        testUser.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> service.subscribeToUser(testUser, admin)
+        );
+    }
+
+    @Test
+    public void testSubscribeToUserSubscribeToNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.subscribeToUser(testUser, null)
+        );
+    }
+
+    @Test
+    public void testSubscribeToUserSubscribeToIdNull() {
+        admin.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> service.subscribeToUser(testUser, admin)
+        );
+    }
+
+    @Test
+    public void testSubscribeToUserDuplicate() throws DuplicateException, NotFoundException, SelfReferenceException {
+        doThrow(DuplicateException.class).when(subscriptionGateway).subscribe(admin, testUser);
+        service.subscribeToUser(testUser, admin);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSubscribeToUserNotFound() throws DuplicateException, NotFoundException, SelfReferenceException {
+        doThrow(NotFoundException.class).when(subscriptionGateway).subscribe(admin, testUser);
+        service.subscribeToUser(testUser, admin);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSubscribeToUserReference() throws DuplicateException, NotFoundException, SelfReferenceException {
+        doThrow(SelfReferenceException.class).when(subscriptionGateway).subscribe(admin, testUser);
+        service.subscribeToUser(testUser, admin);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSubscribeToUserTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        service.subscribeToUser(testUser, admin);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testIsSubscribed() throws NotFoundException {
+        doReturn(true).when(subscriptionGateway).isSubscribed(testUser, admin);
+        assertTrue(service.isSubscribed(testUser, admin));
+    }
+
+    @Test
+    public void testIsSubscribedFalse() {
+        assertFalse(service.isSubscribed(testUser, admin));
+    }
+
+    @Test
+    public void testIsSubscribedSubscriberNull() {
+        assertFalse(service.isSubscribed(null, admin));
+    }
+
+    @Test
+    public void testIsSubscribedSubscriberIdNull() {
+        testUser.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> service.isSubscribed(testUser, admin)
+        );
+    }
+
+    @Test
+    public void testIsSubscribedSubscribedToNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.isSubscribed(testUser, null)
+        );
+    }
+
+    @Test
+    public void testIsSubscribedSubscribedToIdNull() {
+        admin.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> service.isSubscribed(testUser, admin)
+        );
+    }
+
+    @Test
+    public void testIsSubscribedNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(subscriptionGateway).isSubscribed(testUser, admin);
+        assertFalse(service.isSubscribed(testUser, admin));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testIsSubscribedTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertFalse(service.isSubscribed(testUser, admin));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSelectSubscribedUsers() {
+        List<User> users = new ArrayList<>();
+        users.add(admin);
+        doReturn(users).when(userGateway).selectSubscribedUsers(testUser, selection);
+        assertEquals(users, service.selectSubscribedUsers(testUser, selection));
+    }
+
+    @Test
+    public void testSelectSubscribedUsersSelectionNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.selectSubscribedUsers(testUser, null)
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedUsersUserNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.selectSubscribedUsers(null, selection)
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedUsersUserIdNull() {
+        testUser.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> service.selectSubscribedUsers(testUser, selection)
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedUsersTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertNull(service.selectSubscribedUsers(testUser, selection));
+    }
+
+    @Test
+    public void testCountSubscribedUsers() {
+        doReturn(THE_ANSWER).when(userGateway).countSubscribedUsers(testUser);
+        assertEquals(THE_ANSWER, service.countSubscribedUsers(testUser));
+    }
+
+    @Test
+    public void testCountSubscribedUsersUserNull() {
+        assertEquals(ZERO, service.countSubscribedUsers(null));
+    }
+
+    @Test
+    public void testCountSubscribedUsersUserIdNull() {
+        testUser.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> service.countSubscribedUsers(testUser)
+        );
+    }
+
+    @Test
+    public void testCountSubscribedUsersTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertEquals(ZERO, service.countSubscribedUsers(testUser));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSelectSubscribedReports() {
+        List<Report> reports = new ArrayList<>();
+        reports.add(testReport);
+        doReturn(reports).when(reportGateway).selectSubscribedReports(testUser, selection);
+        assertEquals(reports, service.selectSubscribedReports(testUser, selection));
+    }
+
+    @Test
+    public void testSelectSubscribedReportsSelectionNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.selectSubscribedReports(testUser, null)
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedReportsUserNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.selectSubscribedReports(null, selection)
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedReportsUserIdNull() {
+        testUser.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> service.selectSubscribedReports(testUser, selection)
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedReportsTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertNull(service.selectSubscribedReports(testUser, selection));
+    }
+
+    @Test
+    public void testCountSubscribedReports() {
+        doReturn(THE_ANSWER).when(reportGateway).countSubscribedReports(testUser);
+        assertEquals(THE_ANSWER, service.countSubscribedReports(testUser));
+    }
+
+    @Test
+    public void testCountSubscribedReportsUserNull() {
+        assertEquals(ZERO, service.countSubscribedReports(null));
+    }
+
+    @Test
+    public void testCountSubscribedReportsUserIdNull() {
+        testUser.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> service.countSubscribedReports(testUser)
+        );
+    }
+
+    @Test
+    public void testCountSubscribedReportsTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertEquals(ZERO, service.countSubscribedReports(testUser));
         verify(feedbackEvent).fire(any());
     }
 

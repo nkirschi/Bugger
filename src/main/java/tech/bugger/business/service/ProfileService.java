@@ -368,16 +368,16 @@ public class ProfileService {
             tx.newSubscriptionGateway().subscribe(subscribedTo, subscriber);
             tx.commit();
         } catch (DuplicateException e) {
-            log.error("User " + subscriber + " is already subscribed to user " + subscribedTo + ".");
+            log.error("User " + subscriber + " is already subscribed to user " + subscribedTo + ".", e);
             feedback.fire(new Feedback(messages.getString("already_subscribed"), Feedback.Type.ERROR));
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
-            log.error("User " + subscriber + " or user " + subscribedTo + " not found.");
+            log.error("User " + subscriber + " or user " + subscribedTo + " not found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
-            log.error("Error when user " + subscriber + " is subscribing to user " + subscribedTo + ".");
+            log.error("Error when user " + subscriber + " is subscribing to user " + subscribedTo + ".", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (SelfReferenceException e) {
-            log.error("User cannot self-subscribe.");
+            log.error("User cannot self-subscribe.", e);
             feedback.fire(new Feedback(messages.getString("no_self_subscribe"), Feedback.Type.ERROR));
         }
     }
