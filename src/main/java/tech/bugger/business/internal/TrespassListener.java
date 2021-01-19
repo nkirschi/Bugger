@@ -2,6 +2,7 @@ package tech.bugger.business.internal;
 
 import com.ocpsoft.pretty.PrettyContext;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
+import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.User;
 
 import javax.enterprise.inject.spi.CDI;
@@ -40,12 +41,19 @@ public class TrespassListener implements PhaseListener {
     private final UserSession session;
 
     /**
+     * The dependency registry to get resource bundles from.
+     */
+    private final Registry registry;
+
+    /**
      * Constructs a new trespass listener.
      */
     public TrespassListener() {
         super();
         applicationSettings = CDI.current().select(ApplicationSettings.class).get();
         session = CDI.current().select(UserSession.class).get();
+        registry = CDI.current().select(Registry.class).get();
+        System.out.println("Constructing phase listener");
     }
 
     /**
@@ -65,6 +73,28 @@ public class TrespassListener implements PhaseListener {
      */
     @Override
     public void beforePhase(final PhaseEvent event) {
+        FacesContext fctx = event.getFacesContext();
+        UIViewRoot viewRoot = fctx.getViewRoot();
+        if (viewRoot == null) {
+            redirectToErrorPage(fctx);
+        }
+
+        User user = session != null ? session.getUser() : null;
+        String viewId = viewRoot.getViewId();
+
+        if (viewId.endsWith("admin.xhtml")) {
+            if (user == null) {
+                redirectToLoginPage(fctx);
+            } else if (!user.isAdministrator()) {
+                redirectToErrorPage(fctx);
+            }
+            return;
+        }
+
+        if (!viewId.startsWith("/view/public")
+                && (user == null || !applicationSettings.getConfiguration().isGuestReading())) {
+            redirectToLoginPage(fctx);
+        }
     }
 
     /**
@@ -74,67 +104,6 @@ public class TrespassListener implements PhaseListener {
      */
     @Override
     public void afterPhase(final PhaseEvent event) {
-        FacesContext fctx = event.getFacesContext();
-        ExternalContext ctx = fctx.getExternalContext();
-
-        // Is the user on the login page?
-        boolean publicArea = false;
-
-        User user = session.getUser();
-        UIViewRoot viewRoot = fctx.getViewRoot();
-        if (viewRoot != null) {
-            String viewId = viewRoot.getViewId();
-            if (viewId.endsWith("admin.xhtml")) {
-                if (user == null) {
-                    redirectToLoginPage(fctx);
-                } else if (!user.isAdministrator()) {
-                    redirectToErrorPage(fctx);
-                }
-                return;
-            }
-
-            if (user == null && !viewId.startsWith("/view/public")) {
-                redirectToLoginPage(fctx);
-            }
-
-
-
-
-            System.out.println(viewId);
-
-
-
-
-            publicArea = viewId.endsWith("login.xhtml");
-
-            // starts with /view/auth/ --> ok
-            // otherwise: login, show message "You have to login to perform this action"
-        }
-
-        // Is the user already authenticated?
-        boolean loggedIn = sessionMap.containsKey("loggedin");
-
-        if (!publicArea && !loggedIn) {
-            // Illegal request.
-
-            /*
-            // Define error message.
-            FacesMessage fmsg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                "Log in first.", null);
-            fctx.addMessage(null, fmsg);
-
-            // Let the faces messages of fctx also live in the next request. The
-            // flash scope lives exactly for two subsequent requests.
-            ctx.getFlash().setKeepMessages(true);
-
-            // Redirect to the login page.
-            NavigationHandler nav = fctx.getApplication().getNavigationHandler();
-            nav.handleNavigation(fctx, null, "login.xhtml?faces-redirect=true");
-
-            // Stop the life cycle for this request.
-            fctx.responseComplete();
-            */
-        }
     }
 
 
@@ -159,7 +128,8 @@ public class TrespassListener implements PhaseListener {
         fctx.addMessage(null, message);
         try {
             ExternalContext ectx = fctx.getExternalContext();
-            ectx.redirect("/login?url=" + getRedirectUrl(ectx));
+            ectx.getFlash().setKeepMessages(true);
+            ectx.redirect(ectx.getRequestContextPath() + "/login?url=" + getRedirectUrl(ectx));
         } catch (IOException e) {
             throw new InternalError("Could not redirect to error page.", e);
         }
@@ -167,7 +137,8 @@ public class TrespassListener implements PhaseListener {
 
     private void redirectToErrorPage(FacesContext fctx) {
         try {
-            fctx.getExternalContext().redirect("/error");
+            ExternalContext ectx = fctx.getExternalContext();
+            ectx.redirect(ectx.getRequestContextPath() + "/error");
         } catch (IOException e) {
             throw new InternalError("Could not redirect to error page.", e);
         }
