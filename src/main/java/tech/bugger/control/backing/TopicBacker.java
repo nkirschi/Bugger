@@ -196,7 +196,7 @@ public class TopicBacker implements Serializable {
         }
 
         ExternalContext ext = fctx.getExternalContext();
-        if ((!ext.getRequestParameterMap().containsKey("id"))) {
+        if (!ext.getRequestParameterMap().containsKey("id")) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
 
