@@ -11,14 +11,19 @@ import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.Paginator;
+import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Language;
+import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
 import javax.faces.application.Application;
 import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,9 +34,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(LogExtension.class)
 public class ProfileBackerTest {
@@ -64,17 +71,25 @@ public class ProfileBackerTest {
     private Application application;
 
     private User user;
+    private User otherUser;
+    private Topic topic;
+    private Report report;
     private static final int THE_ANSWER = 42;
     private static final String PARAMETER = "u";
-    private static final String LONG_USERNAME = "This username is much too long";
 
     @BeforeEach
-    public void setup()
-    {
+    public void setup() {
         user = new User(12345, "Helgi", "v3ry_s3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen", null,
                 new byte[]{1}, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
+        otherUser = new User(67890, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@web.de", "Helgo", "Brötchen", null,
+                new byte[]{1}, "Hallo, ich bin der Helgo | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
+                Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
+        topic = new Topic(1, "Some title", "Some description");
+        report = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
+                mock(ZonedDateTime.class), null, null, false, 1);
         MockitoAnnotations.openMocks(this);
+        profileBacker = new ProfileBacker(topicService, profileService, session, fctx);
         when(fctx.getExternalContext()).thenReturn(context);
         when(context.getRequestParameterMap()).thenReturn(map);
         when(fctx.getApplication()).thenReturn(application);
@@ -89,8 +104,9 @@ public class ProfileBackerTest {
         when(profileService.getUserByUsername(user.getUsername())).thenReturn(user);
         profileBacker.init();
         assertAll(
+                () -> assertEquals(user.getUsername(), profileBacker.getUsername()),
                 () -> assertEquals(user, profileBacker.getUser()),
-                () -> assertEquals(profileBacker.getDisplayDialog(), ProfileBacker.DialogType.NONE),
+                () -> assertEquals(profileBacker.getProfileDialog(), ProfileBacker.ProfileDialog.NONE),
                 () -> assertEquals(Selection.PageSize.SMALL,
                         profileBacker.getModeratedTopics().getSelection().getPageSize()),
                 () -> assertEquals("title", profileBacker.getModeratedTopics().getSelection().getSortedBy())
@@ -134,11 +150,14 @@ public class ProfileBackerTest {
     }
 
     @Test
-    public void testInitUsernameTooLong() {
-        when(map.containsKey(PARAMETER)).thenReturn(true);
-        when(map.get(PARAMETER)).thenReturn(LONG_USERNAME);
+    public void testInitUserSessionNotNull() {
+        when(session.getUser()).thenReturn(user);
+        when(profileService.getUserByUsername(user.getUsername())).thenReturn(user);
         profileBacker.init();
-        verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
+        assertAll(
+                () -> assertEquals(user, profileBacker.getUser()),
+                () -> assertEquals(session.getUser(), profileBacker.getUser())
+        );
     }
 
     @Test
@@ -162,13 +181,32 @@ public class ProfileBackerTest {
     @Test
     public void testOpenPromoteDemoteAdminDialog() {
         profileBacker.openPromoteDemoteAdminDialog();
-        assertEquals(ProfileBacker.DialogType.ADMIN, profileBacker.getDisplayDialog());
+        assertEquals(ProfileBacker.ProfileDialog.ADMIN, profileBacker.getProfileDialog());
     }
 
     @Test
-    public void testClosePromoteDemoteAdminDialog() {
+    public void testOpenDeleteAllTopicSubscriptionsDialog() {
+        profileBacker.openDeleteAllTopicSubscriptionsDialog();
+        assertEquals(ProfileBacker.ProfileDialog.TOPIC, profileBacker.getProfileDialog());
+    }
+
+    @Test
+    public void testOpenDeleteAllReportSubscriptionsDialog() {
+        profileBacker.openDeleteAllReportSubscriptionsDialog();
+        assertEquals(ProfileBacker.ProfileDialog.REPORT, profileBacker.getProfileDialog());
+    }
+
+    @Test
+    public void testOpenDeleteAllUserSubscriptionsDialog() {
+        profileBacker.openDeleteAllUserSubscriptionsDialog();
+        assertEquals(ProfileBacker.ProfileDialog.USER, profileBacker.getProfileDialog());
+    }
+
+    @Test
+    public void testCloseDialog() {
+        profileBacker.setProfileDialog(ProfileBacker.ProfileDialog.ADMIN);
         profileBacker.closeDialog();
-        assertEquals(ProfileBacker.DialogType.NONE, profileBacker.getDisplayDialog());
+        assertEquals(ProfileBacker.ProfileDialog.NONE, profileBacker.getProfileDialog());
     }
 
     @Test
@@ -273,4 +311,123 @@ public class ProfileBackerTest {
         verify(profileService, times(1)).matchingPassword(any(), any());
         verify(session, times(3)).getUser();
     }
+
+    @Test
+    public void testDeleteTopicSubscription() throws NoSuchFieldException, IllegalAccessException {
+        Field topics = profileBacker.getClass().getDeclaredField("topicSubscriptions");
+        topics.setAccessible(true);
+        Paginator<Topic> mockTopics = mock(Paginator.class);
+        topics.set(profileBacker, mockTopics);
+        profileBacker.setUser(user);
+        profileBacker.deleteTopicSubscription(topic);
+        assertEquals(mockTopics, profileBacker.getTopicSubscriptions());
+        verify(profileService).deleteTopicSubscription(user, topic);
+        verify(mockTopics).updateReset();
+    }
+
+    @Test
+    public void testDeleteReportSubscription() throws NoSuchFieldException, IllegalAccessException {
+        Field reports = profileBacker.getClass().getDeclaredField("reportSubscriptions");
+        reports.setAccessible(true);
+        Paginator<Topic> mockReports = mock(Paginator.class);
+        reports.set(profileBacker, mockReports);
+        profileBacker.setUser(user);
+        profileBacker.deleteReportSubscription(report);
+        assertEquals(mockReports, profileBacker.getReportSubscriptions());
+        verify(profileService).deleteReportSubscription(user, report);
+        verify(mockReports).updateReset();
+    }
+
+    @Test
+    public void testDeleteUserSubscription() throws NoSuchFieldException, IllegalAccessException {
+        Field users = profileBacker.getClass().getDeclaredField("userSubscriptions");
+        users.setAccessible(true);
+        Paginator<Topic> mockUsers = mock(Paginator.class);
+        users.set(profileBacker, mockUsers);
+        profileBacker.setUser(user);
+        profileBacker.deleteUserSubscription(user);
+        assertEquals(mockUsers, profileBacker.getUserSubscriptions());
+        verify(profileService).deleteUserSubscription(user, user);
+        verify(mockUsers).updateReset();
+    }
+
+    @Test
+    public void testDeleteAllTopicSubscription() throws NoSuchFieldException, IllegalAccessException {
+        Field topics = profileBacker.getClass().getDeclaredField("topicSubscriptions");
+        topics.setAccessible(true);
+        Paginator<Topic> mockTopics = mock(Paginator.class);
+        topics.set(profileBacker, mockTopics);
+        profileBacker.setUser(user);
+        profileBacker.deleteAllTopicSubscriptions();
+        assertEquals(ProfileBacker.ProfileDialog.NONE, profileBacker.getProfileDialog());
+        verify(profileService).deleteAllTopicSubscriptions(user);
+        verify(mockTopics).updateReset();
+    }
+
+    @Test
+    public void testDeleteAllReportSubscription() throws NoSuchFieldException, IllegalAccessException {
+        Field reports = profileBacker.getClass().getDeclaredField("reportSubscriptions");
+        reports.setAccessible(true);
+        Paginator<Topic> mockReports = mock(Paginator.class);
+        reports.set(profileBacker, mockReports);
+        profileBacker.setUser(user);
+        profileBacker.deleteAllReportSubscriptions();
+        assertEquals(ProfileBacker.ProfileDialog.NONE, profileBacker.getProfileDialog());
+        verify(profileService).deleteAllReportSubscriptions(user);
+        verify(mockReports).updateReset();
+    }
+
+    @Test
+    public void testDeleteAllUserSubscription() throws NoSuchFieldException, IllegalAccessException {
+        Field users = profileBacker.getClass().getDeclaredField("userSubscriptions");
+        users.setAccessible(true);
+        Paginator<Topic> mockUsers = mock(Paginator.class);
+        users.set(profileBacker, mockUsers);
+        profileBacker.setUser(user);
+        profileBacker.deleteAllUserSubscriptions();
+        assertEquals(ProfileBacker.ProfileDialog.NONE, profileBacker.getProfileDialog());
+        verify(profileService).deleteAllUserSubscriptions(user);
+        verify(mockUsers).updateReset();
+    }
+
+    @Test
+    public void testToggleUserSubscription() {
+        when(session.getUser()).thenReturn(user);
+        profileBacker.setUser(otherUser);
+        profileBacker.toggleUserSubscription();
+        verify(profileService).subscribeToUser(user, otherUser);
+    }
+
+    @Test
+    public void testToggleUserSubscriptionUnsub() {
+        when(session.getUser()).thenReturn(user);
+        when(profileService.isSubscribed(user, otherUser)).thenReturn(true);
+        profileBacker.setUser(otherUser);
+        profileBacker.toggleUserSubscription();
+        verify(profileService).deleteUserSubscription(user, otherUser);
+    }
+
+    @Test
+    public void testToggleUserSubscriptionUserNull() {
+        profileBacker.setUser(otherUser);
+        profileBacker.toggleUserSubscription();
+        verify(profileService, never()).deleteUserSubscription(user, otherUser);
+        verify(profileService, never()).subscribeToUser(user, otherUser);
+    }
+
+    @Test
+    public void testToggleUserSubscriptionUserProfileOwner() {
+        when(session.getUser()).thenReturn(user);
+        profileBacker.setUser(user);
+        profileBacker.toggleUserSubscription();
+        verify(profileService, never()).deleteUserSubscription(user, otherUser);
+        verify(profileService, never()).subscribeToUser(user, otherUser);
+    }
+
+    @Test
+    public void testSetPasswordForCoverage() {
+        profileBacker.setPassword(user.getPasswordHash());
+        assertEquals(user.getPasswordHash(), profileBacker.getPassword());
+    }
+
 }

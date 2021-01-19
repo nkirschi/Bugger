@@ -26,11 +26,6 @@ public class LoginBacker {
     private static final Log log = Log.forClass(LoginBacker.class);
 
     /**
-     * The user that is being logged in.
-     */
-    private User user;
-
-    /**
      * The URL to which the user will be redirected after log in, if present.
      */
     private String redirectURL;
@@ -95,7 +90,7 @@ public class LoginBacker {
      * @return the name of the page to be redirected to.
      */
     public String login() {
-        user = authenticationService.authenticate(username, password);
+        User user = authenticationService.authenticate(username, password);
         if (user == null) {
             return null;
         }
@@ -126,20 +121,6 @@ public class LoginBacker {
      */
     public void setRedirectURL(final String redirectURL) {
         this.redirectURL = redirectURL;
-    }
-
-    /**
-     * @return The user.
-     */
-    public User getUser() {
-        return user;
-    }
-
-    /**
-     * @param user The user to set.
-     */
-    public void setUser(final User user) {
-        this.user = user;
     }
 
     /**

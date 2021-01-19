@@ -2,277 +2,354 @@
                 xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
-                xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
 
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
+        <f:importConstants type="tech.bugger.control.backing.ProfileEditBacker.ProfileEditDialog" var="E"/>
     </f:metadata>
 
     <ui:param name="helpKey" value="profile_edit"/>
 
     <ui:param name="title" value="#{labels['profile_edit.title']}"/>
 
-    <ui:define name="dialogs">
-        <!-- Renders the popup dialog to delete the profile owner's profile. -->
-        <h:panelGroup layout="block" styleClass="dialog" rendered="#{profileEditBacker.dialog == 'DELETE'}">
-            <h:form id="f-del-user">
-                <h:panelGroup id="p-delete" layout="block" styleClass="row">
-                    <h:panelGroup layout="block" styleClass="col-sm-2"/>
-                    <h:panelGroup layout="block" styleClass="col-sm-8">
-                        <h:panelGroup id="p-delete-text" styleClass="row">
-                            <h:panelGroup layout="block" styleClass="col-sm-12">
-                                <h:outputText id="ot-really-del" value="#{labels['profile_edit.delete']}"
-                                              styleClass="h2"/>
-                                <h:outputText id="ot-really-del-warn" value="#{labels['profile_edit.delete_warn']}"/>
-                            </h:panelGroup>
+    <ui:define name="content">
+
+        <h:panelGroup id="p-profile-info" styleClass="d-flex p-2 justify-content-center align-items-center container">
+            <h:panelGroup layout="block" styleClass="row vw-90">
+            <!-- Renders the profile owner's user information. -->
+                <h:form id="f-profile-edit" rendered="#{userSession.user != null and userSession.user.administrator
+                        or userSession.user.id == profileEditBacker.user.id}" enctype="multipart/form-data">
+
+                    <h:panelGroup layout="block" id="p-avatar" styleClass="mb-3 form-group position-relative">
+                        <h:graphicImage id="g-avatar" value="avatar?id=#{profileEditBacker.user.id}"
+                                        styleClass="img-thumbnail" alt="The user's avatar"
+                                        rendered="#{profileEditBacker.user.existsAvatar}"/>
+                        <h:graphicImage id="g-avatar-fallback" library="images" name="bugger.png"
+                                        styleClass="img-thumbnail" alt="The user's avatar"
+                                        rendered="#{not profileEditBacker.user.existsAvatar}"/>
+                    </h:panelGroup>
+
+                    <h:panelGroup layout="block" id="p-upload" styleClass="mb-3 form-group position-relative">
+                        <h:outputLabel id="o-upload" for="i-upload" value="#{labels['profile_edit.change_avatar']}"/>
+                        <h:panelGroup layout="block" styleClass="input-group">
+                            <h:inputFile id="i-upload" validator="imageValidator"
+                                         value="#{profileEditBacker.uploadedAvatar}"/>
                         </h:panelGroup>
-                        <h:panelGroup id="p-delete-password" styleClass="row align-center">
-                            <h:panelGroup layout="block" styleClass="col-sm-3">
-                                <h:outputLabel id="o-password-del" for="i-password-del" value="#{labels.password}"/>
+                    </h:panelGroup>
+
+                    <h:panelGroup layout="block" id="p-attachments" styleClass="mb-3 form-group position-relative">
+                        <h:outputFormat id="ot-attachments-info" value="#{labels['profile_edit.avatar_info']}"
+                                        styleClass="small form-text text-muted">
+                            <f:param value="#{C.MAX_AVATAR_FILESIZE}"/>
+                        </h:outputFormat>
+                    </h:panelGroup>
+
+                    <h:panelGroup layout="block" id="p-delete-avatar" styleClass="mb-3 form-group position-relative">
+                        <h:outputLabel id="o-delete-avatar" for="s-delete-avatar"
+                                       value="#{labels['profile_edit.del_avatar']}"/>
+                        <h:selectBooleanCheckbox id="s-delete-avatar" value="#{profileEditBacker.deleteAvatar}"
+                                                 styleClass="button"/>
+                    </h:panelGroup>
+
+                    <!-- Renders the menus to select the profile visibility and preferred language. -->
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="o-visibility" for="s-visibility"
+                                               value="#{labels['profile_edit.visibility']}" styleClass="form-label"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:selectOneMenu id="s-visibility"
+                                                     value="#{profileEditBacker.user.profileVisibility}"
+                                                     required="true">
+                                        <f:selectItems id="s-visibility-values"
+                                                       value="#{profileEditBacker.user.profileVisibilities}"
+                                                       var="visibility" itemValue="#{visibility}"
+                                                       itemLabel="#{labels['visibility.'.concat(visibility)]}"/>
+                                    </h:selectOneMenu>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-visibility" for="s-visibility"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
                             </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="col-sm-6">
-                                <h:inputSecret id="i-password-del" value="#{profileEditBacker.password}"
-                                               required="true">
-                                    <f:validateLength maximum="#{C.PASSWORD_MAX}"/>
-                                </h:inputSecret>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="col-sm-3">
-                                <h:message id="m-password-del" for="i-password-del"/>
-                            </h:panelGroup>
-                        </h:panelGroup>
-                        <h:panelGroup layout="block" styleClass="row align-center">
-                            <h:panelGroup layout="blok" styleClass="col-sm-12">
-                                <h:commandButton id="cb-really-del" value="#{labels['profile_edit.really_del']}"
-                                                 action="#{profileEditBacker.delete}" styleClass="button"/>
-                                <h:commandButton id="cb-cancel-del" value="#{labels.abort}" styleClass="button"
-                                                 action="#{profileEditBacker.closeDialog}" immediate="true"/>
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="o-language" for="s-language" value="#{labels.language}"
+                                               styleClass="form-label"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:selectOneMenu id="s-language" value="#{profileEditBacker.user.preferredLanguage}"
+                                                     required="true">
+                                        <f:selectItems id="s-language-values"
+                                                       value="#{profileEditBacker.user.preferredLanguages}"
+                                                       var="lang" itemValue="#{lang}"
+                                                       itemLabel="#{labels['lang.'.concat(lang)]}"/>
+                                    </h:selectOneMenu>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-language" for="s-language"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
                             </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="col-sm-2"/>
+
+                    <!-- Contains and displays username and email information. -->
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="o-username" for="it-username" value="#{labels.username}"
+                                               styleClass="form-label"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:inputText id="it-username" value="#{profileEditBacker.usernameNew}"
+                                                 required="true" a:maxlength="#{C.USERNAME_MAX}"
+                                                 styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                 : component.valid ? 'is-valid' : 'is-invalid'}">
+                                        <f:validateLength minimum="#{C.USERNAME_MIN}" maximum="#{C.USERNAME_MAX}"/>
+                                        <f:validator validatorId="usernameRegexValidator"/>
+                                        <f:attribute name="only-on-change" value="true"/>
+                                        <f:validator validatorId="usernameAssignedValidator"/>
+                                    </h:inputText>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-username" for="it-username"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="o-email" for="it-email" value="#{labels.email}"
+                                               styleClass="form-label"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:inputText id="it-email" value="#{profileEditBacker.emailNew}" required="true"
+                                                 a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
+                                                 #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
+                                                 : 'is-invalid'}">
+                                        <f:validateLength maximum="#{C.SMALL_FIELD}"/>
+                                        <f:validator validatorId="emailRegexValidator"/>
+                                        <f:attribute name="only-on-change" value="true"/>
+                                        <f:validator validatorId="emailAssignedValidator"/>
+                                    </h:inputText>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-email" for="it-email"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <!-- Contains and displays first and last name. -->
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="o-first-name" for="it-first-name" value="#{labels.first_name}"
+                                               styleClass="form-label"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:inputText id="it-first-name" value="#{profileEditBacker.user.firstName}"
+                                                 required="true" a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
+                                                 #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
+                                                 : 'is-invalid'}">
+                                        <f:validateLength maximum="#{C.SMALL_FIELD}"/>
+                                    </h:inputText>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-first-name" for="it-first-name"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="o-last-name" for="it-last-name" value="#{labels.last_name}"
+                                               styleClass="form-label"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:inputText id="it-last-name" value="#{profileEditBacker.user.lastName}"
+                                                 required="true" a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
+                                                 #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
+                                                 : 'is-invalid'}">
+                                        <f:validateLength maximum="#{C.SMALL_FIELD}"/>
+                                    </h:inputText>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-last-name" for="it-last-name"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <!-- Contains input fields to set a new password. -->
+                    <!--@elvariable id="password1" type="javax.faces.component.UIInput"-->
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="o-password-new" for="i-password-new" styleClass="form-label"
+                                               value="#{labels['profile_edit.password_new']}"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:inputSecret id="i-password-new" value="#{profileEditBacker.passwordNew}"
+                                                   binding="#{password1}" required="#{profileEditBacker.create}"
+                                                   a:maxlength="#{C.PASSWORD_MAX}" a:placeholder="#{labels.password}"
+                                                   styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                   : component.valid ? 'is-valid' : 'is-invalid'}">
+                                        <f:validator validatorId="passwordRegexValidator"/>
+                                    </h:inputSecret>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-password-new" for="i-password-new"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="o-password-new-repeat" for="i-password-new-repeat"
+                                               styleClass="form-label"
+                                               value="#{labels['profile_edit.repeat']}"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:inputSecret id="i-password-new-repeat"
+                                                   value="#{profileEditBacker.passwordNewConfirm}"
+                                                   required="#{profileEditBacker.create
+                                                   || !profileEditBacker.passwordNew.blank}"
+                                                   a:maxlength="#{C.PASSWORD_MAX}" a:placeholder="#{labels.password}"
+                                                   styleClass="form-control #{!facesContext.validationFailed ? ''
+                                                   : component.valid ? 'is-valid' : 'is-invalid'}">
+                                        <f:attribute name="other-input" value="#{password1}"/>
+                                        <f:validator validatorId="matchingFieldValidator"/>
+                                    </h:inputSecret>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-password-new-repeat" for="i-password-new-repeat"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <!-- Renders the normal input field for the user biography. -->
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative"
+                                  rendered="#{profileEditBacker.dialog != E.PREVIEW}">
+                        <h:outputLabel id="o-bio" for="ia-bio" value="#{labels.biography}" styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:inputTextarea id="ia-bio" value="#{profileEditBacker.user.biography}"
+                                             a:maxlength="#{C.SMALL_AREA}" styleClass="form-control
+                                             #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
+                                             : 'is-invalid'}" rows="10">
+                                <f:validateLength maximum="#{C.SMALL_AREA}"/>
+                            </h:inputTextarea>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message id="m-bio" for="ia-bio"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:outputLabel id="ol-bio-hint" value="#{labels['profile_edit.bio_info']}"
+                                       styleClass="form-text"/>
+                    </h:panelGroup>
+
+                    <!-- Renders a preview version of the current biography showing the effects of markdown. -->
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative"
+                                  rendered="#{profileEditBacker.dialog == E.PREVIEW}">
+                        <h:outputLabel id="ol-biography" value="#{labels.biography}" for="ot-biography"
+                                       styleClass="form-label"/>
+                        <h:outputText id="ot-biography" value="#{profileEditBacker.sanitizedBio}" escape="false"
+                                      styleClass="form-label"/>
+                    </h:panelGroup>
+
+                    <h:panelGroup layout="block" styleClass="d-flex justify-content-center">
+                        <h:commandButton id="cb-preview" value="#{labels['profile_edit.preview']}"
+                                         action="#{profileEditBacker.openPreviewDialog}" styleClass="button"
+                                         rendered="#{profileEditBacker.dialog != E.PREVIEW}"/>
+                        <h:commandButton id="cb-stop-preview" value="#{labels['profile_edit.stop_preview']}"
+                                         action="#{profileEditBacker.closeDialog}" styleClass="button"
+                                         rendered="#{profileEditBacker.dialog == E.PREVIEW}"/>
+                    </h:panelGroup>
+
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative"
+                                  rendered="#{userSession.user.administrator}">
+                        <h:outputLabel id="o-overwrite-vote" for="it-overwrite-vote"
+                                       value="#{labels['profile_edit.overwrite']}" styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:inputText id="it-overwrite-vote" value="#{profileEditBacker.user.forcedVotingWeight}"
+                                         a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
+                                         #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
+                                         : 'is-invalid'}">
+                                <f:validateLength maximum="#{C.SMALL_FIELD}"/>
+                                <f:validateLongRange minimum="0"/>
+                            </h:inputText>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message id="m-overwrite-vote" for="it-overwrite-vote"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <h:panelGroup id="p-buttons" layout="block" styleClass="d-flex justify-content-center">
+                        <h:commandButton id="cb-apply" value="#{labels['profile_edit.apply_changes']}"
+                                         action="#{profileEditBacker.openChangeDialog}" styleClass="button"/>
+                        <h:commandButton id="cb-delete" value="#{labels['profile_edit.delete']}"
+                                         action="#{profileEditBacker.openDeleteDialog}" styleClass="button"/>
+                    </h:panelGroup>
+                </h:form>
+            </h:panelGroup>
+        </h:panelGroup>
+    </ui:define>
+
+    <ui:define name="dialogs">
+        <!-- Renders the popup dialog to delete the profile owner's profile. -->
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{profileEditBacker.dialog == E.DELETE}">
+            <h:form id="f-del-user">
+                <h:outputText id="ot-really-del" styleClass="h2" value="#{labels['profile_edit.delete']}"/>
+                <h:panelGroup layout="block" styleClass="mb-3">
+                    <h:outputText id="ot-really-del-warn" value="#{labels['profile_edit.delete_warn']}"/>
+                </h:panelGroup>
+                <h:panelGroup id="p-delete-password" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup id="p-username-ban" layout="block" styleClass="row align-center">
+                        <h:outputLabel id="o-password-del" for="i-password-del" value="#{labels.password}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:inputSecret id="i-password-del" value="#{profileEditBacker.password}" required="true"
+                                           a:maxlength="#{C.PASSWORD_MAX}" styleClass="form-control
+                                           #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
+                                           : 'is-invalid'}" a:placeholder="#{labels.password}">
+                                <f:validateLength maximum="#{C.PASSWORD_MAX}"/>
+                            </h:inputSecret>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                            <h:message id="m-password-del" for="i-password-del"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="row align-center">
+                    <h:panelGroup layout="block" styleClass="col-12">
+                        <h:commandButton id="cb-really-del" value="#{labels['profile_edit.really_del']}"
+                                         action="#{profileEditBacker.delete}" styleClass="button"/>
+                        <h:commandButton id="cb-cancel-del" value="#{labels.abort}" styleClass="button"
+                                         action="#{profileEditBacker.closeDialog}" immediate="true"/>
+                    </h:panelGroup>
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>
 
         <!-- Renders the popup dialog to update the changes made to the profile information. -->
-        <h:panelGroup layout="block" styleClass="dialog" rendered="#{profileEditBacker.dialog == 'UPDATE'}">
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{profileEditBacker.dialog == E.UPDATE}">
             <h:form id="f-change-user">
-                <h:panelGroup id="p-update" layout="block" styleClass="row">
-                    <h:panelGroup layout="block" styleClass="col-sm-2"/>
-                    <h:panelGroup layout="block" styleClass="col-sm-8">
-                        <h:panelGroup id="p-update-text" styleClass="row">
-                            <h:panelGroup layout="block" styleClass="col-sm-12">
-                                <h:outputText id="ot-really-change" value="#{labels['profile_edit.apply_changes']}"
-                                              styleClass="h2"/>
-                                <h:outputText id="ot-really-change-info" value="#{labels['profile_edit.apply_info']}"/>
-                            </h:panelGroup>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-update-password" styleClass="row align-center">
-                            <h:panelGroup layout="block" styleClass="col-sm-3">
-                                <h:outputLabel id="o-password-change" for="i-password-change"
-                                               value="#{labels.password}"/>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="col-sm-6">
-                                <h:inputSecret id="i-password-change" value="#{profileEditBacker.password}"
-                                               required="true">
+                <h:outputText id="ot-really-change" value="#{labels['profile_edit.apply_changes']}" styleClass="h2"/>
+                <h:panelGroup layout="block" styleClass="mb-3">
+                    <h:outputText id="ot-really-change-info" value="#{labels['profile_edit.apply_info']}"/>
+                </h:panelGroup>
+                <h:panelGroup id="p-update-password" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup layout="block" styleClass="row align-center">
+                        <h:outputLabel id="o-password-change" for="i-password-change" value="#{labels.password}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:inputSecret id="i-password-change" value="#{profileEditBacker.password}" required="true"
+                                           a:maxlength="#{C.PASSWORD_MAX}" styleClass="form-control
+                                           #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
+                                           : 'is-invalid'}" a:placeholder="#{labels.password}">
                                     <f:validateLength maximum="#{C.PASSWORD_MAX}"/>
-                                </h:inputSecret>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="col-sm-3">
+                            </h:inputSecret>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                 <h:message id="m-password-change" for="i-password-change"/>
                             </h:panelGroup>
                         </h:panelGroup>
-                        <h:panelGroup layout="block" styleClass="row align-center">
-                            <h:panelGroup layout="block" styleClass="col-sm-12">
-                                <h:commandButton id="cb-really-change" value="#{labels['profile_edit.really_change']}"
-                                                 action="#{profileEditBacker.saveChanges}" styleClass="button">
-                                    <f:param name="u" value="#{profileEditBacker.user.username}"/>
-                                </h:commandButton>
-                                <h:commandButton id="cb-cancel-change" value="#{labels.abort}" styleClass="button"
-                                                 action="#{profileEditBacker.closeDialog}" immediate="true"/>
-                            </h:panelGroup>
-                        </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="col-sm-2"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="row align-center">
+                    <h:panelGroup layout="block" styleClass="col-12">
+                        <h:commandButton id="cb-really-change" value="#{labels['profile_edit.really_change']}"
+                                         action="#{profileEditBacker.saveChanges}" styleClass="button">
+                            <f:param name="u" value="#{profileEditBacker.user.username}"/>
+                        </h:commandButton>
+                        <h:commandButton id="cb-cancel-change" value="#{labels.abort}" styleClass="button"
+                                         action="#{profileEditBacker.closeDialog}" immediate="true"/>
+                    </h:panelGroup>
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>
-    </ui:define>
-
-    <ui:define name="content">
-
-        <!-- Renders the profile owner's user information. -->
-        <h:form id="f-profile-edit"
-                rendered="#{userSession.user != null and userSession.user.administrator
-                            or userSession.user.id == profileEditBacker.user.id}"
-                enctype="multipart/form-data">
-
-            <h:panelGroup layout="block" id="p-avatar" styleClass="row p-avatar">
-                <h:graphicImage id="g-avatar"
-                                value="/avatar?id=#{profileEditBacker.user.id}"
-                                styleClass="g-avatar"
-                                alt="The user's avatar"
-                                rendered="#{profileEditBacker.user.existsAvatar}"/>
-                <h:graphicImage id="g-avatar-fallback"
-                                library="images" name="bugger.png"
-                                styleClass="g-avatar"
-                                alt="The user's avatar"
-                                rendered="#{not profileEditBacker.user.existsAvatar}"/>
-            </h:panelGroup>
-
-            <h:panelGroup layout="block" id="p-upload" styleClass="row p-avatar">
-                <h:outputLabel id="o-upload" for="i-upload" value="#{labels['profile_edit.change_avatar']}"/>
-                <h:inputFile id="i-upload" validator="imageValidator" value="#{profileEditBacker.uploadedAvatar}"/>
-            </h:panelGroup>
-
-            <!-- <h:panelGroup id="p-avatar-buttons" styleClass="row">
-                <h:commandButton id="cb-delete-avatar" value="#{labels['profile_edit.del_avatar']}"
-                                 action="#{profileEditBacker.deleteAvatar}" styleClass="button"/>
-            </h:panelGroup> -->
-
-            <h:panelGroup>
-                <h:selectBooleanCheckbox id="s-delete-avatar" value="#{profileEditBacker.deleteAvatar}"/>
-                <h:outputLabel id="o-delete-avatar"
-                               for="s-delete-avatar"
-                               value="#{labels['profile_edit.del_avatar']}"/>
-            </h:panelGroup>
-
-            <h:panelGroup>
-                <h:outputFormat id="first-post-attachments-info"
-                                value="#{labels['profile_edit.avatar_info']}"
-                                styleClass="small form-text text-muted">
-                    <f:param value="#{C.MAX_AVATAR_FILESIZE}"/>
-                </h:outputFormat>
-            </h:panelGroup>
-
-            <h:panelGrid id="p-profile-info" columns="2">
-                <h:outputLabel id="o-visibility" for="s-visibility" value="#{labels['profile_edit.visibility']}"/>
-                <h:selectOneMenu id="s-visibility" value="#{profileEditBacker.user.profileVisibility}"
-                                 required="true">
-                    <f:selectItems id="s-visibility-values" value="#{profileEditBacker.user.profileVisibilities}"
-                                   var="visibility" itemValue="#{visibility}"
-                                   itemLabel="#{labels['visibility.'.concat(visibility)]}"/>
-                </h:selectOneMenu>
-
-                <h:panelGroup/>
-                <h:message id="m-visibility" for="s-visibility"/>
-
-                <h:outputLabel id="o-username" for="it-username" value="#{labels.username}"/>
-                <h:inputText id="it-username" value="#{profileEditBacker.usernameNew}" styleClass="profile-info"
-                             required="true">
-                    <f:validateLength minimum="#{C.USERNAME_MIN}" maximum="#{C.USERNAME_MAX}"/>
-                    <f:validator validatorId="usernameRegexValidator"/>
-                    <f:attribute name="only-on-change" value="true"/>
-                    <f:validator validatorId="usernameAssignedValidator"/>
-                </h:inputText>
-
-                <h:panelGroup/>
-                <h:message id="m-username" for="it-username"/>
-
-                <!--@elvariable id="password1" type="javax.faces.component.UIInput"-->
-                <h:outputLabel id="o-password-new" for="i-password-new" value="#{labels['profile_edit.password_new']}"/>
-                <h:inputSecret id="i-password-new" value="#{profileEditBacker.passwordNew}" styleClass="profile-info"
-                               binding="#{password1}" required="#{profileEditBacker.create}">
-                    <f:validator validatorId="passwordRegexValidator"/>
-                </h:inputSecret>
-
-                <h:panelGroup/>
-                <h:message id="m-password-new" for="i-password-new"/>
-
-                <h:outputLabel id="o-password-new-repeat" for="i-password-new-repeat"
-                               value="#{labels['profile_edit.repeat']}"/>
-                <h:inputSecret id="i-password-new-repeat" value="#{profileEditBacker.passwordNewConfirm}"
-                               styleClass="profile-info" required="#{profileEditBacker.create
-                               || !profileEditBacker.passwordNew.blank}">
-                    <f:attribute name="other-input" value="#{password1}"/>
-                    <f:validator validatorId="matchingFieldValidator"/>
-                </h:inputSecret>
-
-                <h:panelGroup/>
-                <h:message id="m-password-new-repeat" for="i-password-new-repeat"/>
-
-                <h:outputLabel id="o-first-name" for="it-first-name" value="#{labels.first_name}"/>
-                <h:inputText id="it-first-name" value="#{profileEditBacker.user.firstName}" styleClass="profile-info"
-                             required="true">
-                    <f:validateLength maximum="#{C.SMALL_FIELD}"/>
-                </h:inputText>
-
-                <h:panelGroup/>
-                <h:message id="m-first-name" for="it-first-name"/>
-
-                <h:outputLabel id="o-last-name" for="it-last-name" value="#{labels.last_name}"/>
-                <h:inputText id="it-last-name" value="#{profileEditBacker.user.lastName}" styleClass="profile-info"
-                             required="true">
-                    <f:validateLength maximum="#{C.SMALL_FIELD}"/>
-                </h:inputText>
-
-                <h:panelGroup/>
-                <h:message id="m-last-name" for="it-last-name"/>
-
-                <h:outputLabel id="o-email" for="it-email" value="#{labels.email}"/>
-                <h:inputText id="it-email" value="#{profileEditBacker.emailNew}" styleClass="profile-info"
-                             required="true">
-                    <f:validateLength maximum="#{C.SMALL_FIELD}"/>
-                    <f:validator validatorId="emailRegexValidator"/>
-                    <f:attribute name="only-on-change" value="true"/>
-                    <f:validator validatorId="emailAssignedValidator"/>
-                </h:inputText>
-
-                <h:panelGroup/>
-                <h:message id="m-email" for="it-email"/>
-
-                <h:outputLabel id="o-bio" for="ia-bio" value="#{labels.biography}"
-                               rendered="#{profileEditBacker.dialog != 'PREVIEW'}"/>
-                <h:inputTextarea id="ia-bio" value="#{profileEditBacker.user.biography}" styleClass="profile-info"
-                                 rendered="#{profileEditBacker.dialog != 'PREVIEW'}">
-                    <f:validateLength maximum="#{C.SMALL_AREA}"/>
-                </h:inputTextarea>
-
-                <h:panelGroup/>
-                <h:message id="m-bio" for="ia-bio"/>
-
-                <h:outputLabel id="ol-biography" value="#{labels.biography}" for="ot-biography"
-                               styleClass="profile-info" rendered="#{profileEditBacker.dialog == 'PREVIEW'}"/>
-                <h:outputText id="ot-biography" value="#{profileEditBacker.sanitizedBio}" escape="false"
-                              styleClass="profile-info" rendered="#{profileEditBacker.dialog == 'PREVIEW'}"/>
-
-                <h:outputLabel id="o-language" for="s-language" value="#{labels.language}"/>
-                <h:selectOneMenu id="s-language" value="#{profileEditBacker.user.preferredLanguage}"
-                                 required="true">
-                    <f:selectItems id="s-language-values" value="#{profileEditBacker.user.preferredLanguages}"
-                                   var="lang" itemValue="#{lang}" itemLabel="#{labels['lang.'.concat(lang)]}"/>
-                </h:selectOneMenu>
-
-                <h:panelGroup/>
-                <h:message id="m-language" for="s-language"/>
-
-                <h:outputLabel id="o-overwrite-vote" for="it-overwrite-vote" value="#{labels['profile_edit.overwrite']}"
-                               rendered="#{userSession.user.administrator}"/>
-                <h:inputText id="it-overwrite-vote" value="#{profileEditBacker.user.forcedVotingWeight}"
-                             styleClass="profile-info" rendered="#{userSession.user.administrator}">
-                    <f:validateLength maximum="#{C.SMALL_FIELD}"/>
-                    <!-- TODO add maximum? -->
-                    <f:validateLongRange minimum="0"/>
-                </h:inputText>
-
-                <h:panelGroup/>
-                <h:message id="m-overwrite-vote" for="it-overwrite-vote"/>
-            </h:panelGrid>
-
-            <h:panelGroup id="p-buttons" styleClass="row align-center">
-                <h:panelGroup layout="block" styleClass="col-sm-12">
-                    <h:commandButton id="cb-preview" value="#{labels['profile_edit.preview']}"
-                                     action="#{profileEditBacker.openPreviewDialog}" styleClass="button"
-                                     rendered="#{profileEditBacker.dialog != 'PREVIEW'}"/>
-                    <h:commandButton id="cb-stop-preview" value="#{labels['profile_edit.stop_preview']}"
-                                     action="#{profileEditBacker.closeDialog}" styleClass="button"
-                                     rendered="#{profileEditBacker.dialog == 'PREVIEW'}"/>
-                    <h:commandButton id="cb-apply" value="#{labels['profile_edit.apply_changes']}"
-                                     action="#{profileEditBacker.openChangeDialog}" styleClass="button"/>
-                    <h:commandButton id="cb-delete" value="#{labels['profile_edit.delete']}"
-                                     action="#{profileEditBacker.openDeleteDialog}" styleClass="button"/>
-                </h:panelGroup>
-            </h:panelGroup>
-        </h:form>
     </ui:define>
 </ui:composition>

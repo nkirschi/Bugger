@@ -28,7 +28,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -157,7 +156,7 @@ public class PostEditBackerTest {
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
         doReturn(post).when(postService).getPostByID(5678);
-        doReturn(true).when(postService).isPrivileged(user, post);
+        doReturn(true).when(postService).canModify(user, post);
         postEditBacker.init();
         assertFalse(postEditBacker.isCreate());
         assertEquals(post.getAttachments(), postEditBacker.getAttachments());
@@ -189,7 +188,7 @@ public class PostEditBackerTest {
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
         doReturn(post).when(postService).getPostByID(5678);
-        doReturn(false).when(postService).isPrivileged(user, post);
+        doReturn(false).when(postService).canModify(user, post);
         postEditBacker.init();
         verify404Redirect();
     }
@@ -200,7 +199,7 @@ public class PostEditBackerTest {
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
         doReturn(post).when(postService).getPostByID(5678);
-        doReturn(true).when(postService).isPrivileged(user, post);
+        doReturn(true).when(postService).canModify(user, post);
         post.setReport(null);
         postEditBacker.init();
         verify404Redirect();

@@ -17,6 +17,7 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -38,7 +39,7 @@ public class ProfileEditBacker implements Serializable {
     /**
      * The type of popup dialog to be rendered on the profile page.
      */
-    enum DialogType {
+    public enum ProfileEditDialog {
         /**
          * No dialogs are to be rendered.
          */
@@ -108,7 +109,7 @@ public class ProfileEditBacker implements Serializable {
     /**
      * The type of popup dialog to be rendered.
      */
-    private DialogType dialog;
+    private ProfileEditDialog dialog;
 
     /**
      * Whether the user is being created by an administrator or not.
@@ -118,26 +119,39 @@ public class ProfileEditBacker implements Serializable {
     /**
      * The current user session.
      */
-    @Inject
-    private UserSession session;
+    private final UserSession session;
 
     /**
      * The current external context.
      */
-    @Inject
-    private FacesContext fctx;
+    private final FacesContext fctx;
 
     /**
      * The profile service providing the business logic.
      */
-    @Inject
-    private transient ProfileService profileService;
+    private final transient ProfileService profileService;
 
     /**
      * The authentication service providing the business logic for authentication.
      */
+    private final transient AuthenticationService authenticationService;
+
+    /**
+     * Constructs a new profile edit page backing bean with the necessary dependencies.
+     *
+     * @param authenticationService The authentication service to use.
+     * @param profileService        The profile service to use.
+     * @param session               The current {@link UserSession}.
+     * @param fctx                  The current faces context.
+     */
     @Inject
-    private transient AuthenticationService authenticationService;
+    public ProfileEditBacker(final AuthenticationService authenticationService, final ProfileService profileService,
+                             final UserSession session, final FacesContext fctx) {
+        this.authenticationService = authenticationService;
+        this.profileService = profileService;
+        this.session = session;
+        this.fctx = fctx;
+    }
 
     /**
      * Initializes the profile edit page. Also checks if the user is allowed to modify this profile.
@@ -154,14 +168,14 @@ public class ProfileEditBacker implements Serializable {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
             return;
         }
-        dialog = DialogType.NONE;
+        dialog = ProfileEditDialog.NONE;
 
         if (ext.getRequestParameterMap().containsKey("c") && session.getUser().isAdministrator()) {
             create = true;
             user = new User();
             log.debug("Creating new user.");
-        } else if (ext.getRequestParameterMap().containsKey("e")) {
-            user = findUser(ext.getRequestParameterMap().get("e"));
+        } else if (ext.getRequestParameterMap().containsKey("e") && session.getUser().isAdministrator()) {
+            user = profileService.getUserByUsername(ext.getRequestParameterMap().get("e"));
             log.debug("Using the edit key to find the user in the database.");
         } else {
             user = profileService.getUser(session.getUser().getId());
@@ -178,21 +192,6 @@ public class ProfileEditBacker implements Serializable {
         }
 
         deleteAvatar = false;
-    }
-
-    /**
-     * Finds the {@link User} based on the given {@code id}.
-     *
-     * @param id The id passed in the RequestParameterMap.
-     * @return The {@link User} if they exist and the {@code id} could be parsed, or {@code null} if not.
-     */
-    private User findUser(final String id) {
-        try {
-            int userID = Integer.parseInt(id);
-            return profileService.getUser(userID);
-        } catch (NumberFormatException e) {
-            return null;
-        }
     }
 
     /**
@@ -233,10 +232,10 @@ public class ProfileEditBacker implements Serializable {
 
         user.setUsername(usernameNew);
         if (create) {
-            user.setEmailAddress(emailNew);
+            user.setEmailAddress(emailNew.toLowerCase());
             profileService.createUser(user);
         } else {
-            if (!emailNew.equals(user.getEmailAddress()) && !updateEmail(user, emailNew)) {
+            if (!emailNew.equalsIgnoreCase(user.getEmailAddress()) && !updateEmail(user, emailNew.toLowerCase())) {
                 closeDialog();
                 return null;
             }
@@ -246,7 +245,16 @@ public class ProfileEditBacker implements Serializable {
             }
         }
 
-        return "pretty:profile";
+        ExternalContext ext = fctx.getExternalContext();
+
+        String base = ext.getApplicationContextPath();
+        String redirect = base + "/profile?u=" + user.getUsername();
+        try {
+            fctx.getExternalContext().redirect(redirect);
+        } catch (IOException e) {
+            // Ignore the exception and just stay on the page
+        }
+        return null;
     }
 
     /**
@@ -278,6 +286,7 @@ public class ProfileEditBacker implements Serializable {
 
         if (profileService.deleteUser(user)) {
             if (user.equals(session.getUser())) {
+                session.setUser(null);
                 session.invalidateSession();
             }
 
@@ -310,43 +319,55 @@ public class ProfileEditBacker implements Serializable {
 
     /**
      * Opens the delete profile dialog.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void openDeleteDialog() {
-        dialog = DialogType.DELETE;
+    public String openDeleteDialog() {
+        dialog = ProfileEditDialog.DELETE;
+        return null;
     }
 
     /**
      * Opens the dialog that is displayed if the user wants to save the changes made to the given profile.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void openChangeDialog() {
+    public String openChangeDialog() {
         if (uploadedAvatar != null || deleteAvatar) {
             if (!uploadAvatar()) {
-                return;
+                return null;
             }
         }
-        dialog = DialogType.UPDATE;
+        dialog = ProfileEditDialog.UPDATE;
+        return null;
     }
 
     /**
      * Opens the dialog that is displayed if the user wants a preview of the biography.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void openPreviewDialog() {
+    public String openPreviewDialog() {
         if (uploadedAvatar != null || deleteAvatar) {
             if (!uploadAvatar()) {
-                return;
+                return null;
             }
         }
         if (user.getBiography() != null) {
             sanitizedBio = MarkdownHandler.toHtml(user.getBiography());
         }
-        dialog = DialogType.PREVIEW;
+        dialog = ProfileEditDialog.PREVIEW;
+        return null;
     }
 
     /**
      * Closes all open dialogs.
+     *
+     * @return {@code null} to reload the page.
      */
-    public void closeDialog() {
-        dialog = DialogType.NONE;
+    public String closeDialog() {
+        dialog = ProfileEditDialog.NONE;
+        return null;
     }
 
     /**
@@ -482,14 +503,14 @@ public class ProfileEditBacker implements Serializable {
     /**
      * @return The dialog.
      */
-    public DialogType getDialog() {
+    public ProfileEditDialog getDialog() {
         return dialog;
     }
 
     /**
      * @param dialog The DialogType to set.
      */
-    public void setDialog(final DialogType dialog) {
+    public void setDialog(final ProfileEditDialog dialog) {
         this.dialog = dialog;
     }
 

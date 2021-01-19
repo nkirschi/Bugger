@@ -6,12 +6,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
+import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Language;
+import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
+import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.StoreException;
 
 import java.sql.Connection;
@@ -20,10 +24,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -38,12 +48,15 @@ public class UserDBGatewayTest {
 
     private UserGateway userGateway;
     private TopicGateway topicGateway;
+    private SubscriptionGateway subscriptionGateway;
+    private ReportGateway reportGateway;
 
     private Connection connection;
 
     private User user;
     private User admin;
     private Topic topic;
+    private Report report;
     private Selection selection;
 
     @BeforeEach
@@ -51,6 +64,8 @@ public class UserDBGatewayTest {
         connection = DBExtension.getConnection();
         userGateway = new UserDBGateway(connection);
         topicGateway = new TopicDBGateway(connection);
+        subscriptionGateway = new SubscriptionDBGateway(connection);
+        reportGateway = new ReportDBGateway(connection, userGateway);
 
         user = new User(2, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
                         "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
@@ -61,6 +76,8 @@ public class UserDBGatewayTest {
                          User.ProfileVisibility.MINIMAL,
                          ZonedDateTime.now(), null, true);
         topic = new Topic(null, "title", "description");
+        report = new Report(null, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
+                mock(ZonedDateTime.class), null, null, false, null);
         selection = new Selection(2, 0, Selection.PageSize.NORMAL, "id", true);
     }
 
@@ -366,12 +383,13 @@ public class UserDBGatewayTest {
         topicGateway.createTopic(topic);
         userGateway.createUser(user);
         userGateway.createUser(admin);
-        List<User> users = new ArrayList<>();
-        users.add(user);
-        users.add(admin);
         topicGateway.promoteModerator(topic, user);
         topicGateway.promoteModerator(topic, admin);
-        assertEquals(users, userGateway.getSelectedModerators(topic, selection));
+        List<User> users = userGateway.getSelectedModerators(topic, selection);
+        assertAll(
+                () -> assertTrue(users.contains(user)),
+                () -> assertTrue(users.contains(admin))
+        );
     }
 
     @Test
@@ -464,12 +482,13 @@ public class UserDBGatewayTest {
         topicGateway.createTopic(topic);
         userGateway.createUser(user);
         userGateway.createUser(admin);
-        List<User> users = new ArrayList<>();
-        users.add(user);
-        users.add(admin);
         topicGateway.banUser(topic, user);
         topicGateway.banUser(topic, admin);
-        assertEquals(users, userGateway.getSelectedBannedUsers(topic, selection));
+        List<User> users = userGateway.getSelectedBannedUsers(topic, selection);
+        assertAll(
+                () -> assertTrue(users.contains(user)),
+                () -> assertTrue(users.contains(admin))
+        );
     }
 
     @Test
@@ -544,6 +563,256 @@ public class UserDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).cleanExpiredRegistrations());
+    }
+
+    @Test
+    public void testGetSubscribersOfUser() throws DuplicateException, NotFoundException, SelfReferenceException {
+        userGateway.createUser(user);
+        userGateway.createUser(admin);
+        subscriptionGateway.subscribe(user, admin);
+        List<User> subscribers = userGateway.getSubscribersOf(user);
+        assertAll(
+                () -> assertEquals(1, subscribers.size()),
+                () -> assertTrue(subscribers.contains(admin))
+        );
+    }
+
+    @Test
+    public void testGetSubscribersOfUserUserNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.getSubscribersOf((User) null)
+        );
+    }
+
+    @Test
+    public void testGetSubscribersOfUserIdNull() {
+        user.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.getSubscribersOf(user)
+        );
+    }
+
+    @Test
+    public void testGetSubscribersOfUserStoreException() throws SQLException {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).getSubscribersOf(user));
+    }
+
+    @Test
+    public void testGetSubscribersOfUserNoSubscribers() {
+        userGateway.createUser(user);
+        assertTrue(userGateway.getSubscribersOf(user).isEmpty());
+    }
+
+    @Test
+    public void testGetSubscribersOfReport() throws DuplicateException, NotFoundException {
+        userGateway.createUser(user);
+        userGateway.createUser(admin);
+        topicGateway.createTopic(topic);
+        report.setTopicID(topic.getId());
+        reportGateway.create(report);
+        subscriptionGateway.subscribe(report, user);
+        subscriptionGateway.subscribe(report, admin);
+        List<User> subscribers = userGateway.getSubscribersOf(report);
+        assertAll(
+                () -> assertEquals(2, subscribers.size()),
+                () -> assertTrue(subscribers.contains(admin)),
+                () -> assertTrue(subscribers.contains(user))
+        );
+    }
+
+    @Test
+    public void testGetSubscribersOfReportReportNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.getSubscribersOf((Report) null)
+        );
+    }
+
+    @Test
+    public void testGetSubscribersOfReportIdNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.getSubscribersOf(report)
+        );
+    }
+
+    @Test
+    public void testGetSubscribersOfReportStoreException() throws SQLException, NotFoundException {
+        topicGateway.createTopic(topic);
+        report.setTopicID(topic.getId());
+        reportGateway.create(report);
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).getSubscribersOf(report));
+    }
+
+    @Test
+    public void testGetSubscribersOfReportNoSubscribers() throws NotFoundException {
+        topicGateway.createTopic(topic);
+        report.setTopicID(topic.getId());
+        reportGateway.create(report);
+        assertTrue(userGateway.getSubscribersOf(report).isEmpty());
+    }
+
+    @Test
+    public void testGetSubscribersOfTopic() throws DuplicateException, NotFoundException {
+        userGateway.createUser(user);
+        userGateway.createUser(admin);
+        topicGateway.createTopic(topic);
+        subscriptionGateway.subscribe(topic, user);
+        subscriptionGateway.subscribe(topic, admin);
+        List<User> subscribers = userGateway.getSubscribersOf(topic);
+        assertAll(
+                () -> assertEquals(2, subscribers.size()),
+                () -> assertTrue(subscribers.contains(admin)),
+                () -> assertTrue(subscribers.contains(user))
+        );
+    }
+
+    @Test
+    public void testGetSubscribersOfTopicTopicNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.getSubscribersOf((Topic) null)
+        );
+    }
+
+    @Test
+    public void testGetSubscribersOfTopicIdNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.getSubscribersOf(topic)
+        );
+    }
+
+    @Test
+    public void testGetSubscribersOfTopicStoreException() throws SQLException, NotFoundException {
+        topicGateway.createTopic(topic);
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).getSubscribersOf(topic));
+    }
+
+    @Test
+    public void testGetSubscribersOfTopicNoSubscribers() throws NotFoundException {
+        topicGateway.createTopic(topic);
+        assertTrue(userGateway.getSubscribersOf(topic).isEmpty());
+    }
+
+    @Test
+    public void testSelectSubscribedUsers() throws DuplicateException, NotFoundException, SelfReferenceException {
+        userGateway.createUser(user);
+        userGateway.createUser(admin);
+        subscriptionGateway.subscribe(admin, user);
+        selection.setTotalSize(1);
+        List<User> subscribers = userGateway.selectSubscribedUsers(user, selection);
+        assertAll(
+                () -> assertEquals(1, subscribers.size()),
+                () -> assertTrue(subscribers.contains(admin))
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedUsersDesc() throws DuplicateException, NotFoundException, SelfReferenceException {
+        userGateway.createUser(user);
+        userGateway.createUser(admin);
+        subscriptionGateway.subscribe(admin, user);
+        selection.setTotalSize(1);
+        selection.setAscending(false);
+        List<User> subscribers = userGateway.selectSubscribedUsers(user, selection);
+        assertAll(
+                () -> assertEquals(1, subscribers.size()),
+                () -> assertTrue(subscribers.contains(admin))
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedUsersSelectionNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.selectSubscribedUsers(user, null)
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedUsersSelectionBlank() {
+        selection.setSortedBy("");
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.selectSubscribedUsers(user, selection)
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedUsersUserNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.selectSubscribedUsers(null, selection)
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedUsersUserIdNull() {
+        user.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.selectSubscribedUsers(user, selection)
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedUsersStoreException() throws SQLException {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new UserDBGateway(connectionSpy).selectSubscribedUsers(user, selection)
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedUsersNoSubscribers() {
+        userGateway.createUser(user);
+        assertTrue(userGateway.selectSubscribedUsers(user, selection).isEmpty());
+    }
+
+    @Test
+    public void testCountSubscribedUsers() throws DuplicateException, NotFoundException, SelfReferenceException {
+        userGateway.createUser(user);
+        userGateway.createUser(admin);
+        subscriptionGateway.subscribe(admin, user);
+        assertEquals(1, userGateway.countSubscribedUsers(user));
+    }
+
+    @Test
+    public void testCountSubscribedUsersUserNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.countSubscribedUsers(null)
+        );
+    }
+
+    @Test
+    public void testCountSubscribedUsersUserIdNull() {
+        user.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.countSubscribedUsers(user)
+        );
+    }
+
+    @Test
+    public void testCountSubscribedUsersStoreException() throws SQLException {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new UserDBGateway(connectionSpy).countSubscribedUsers(user)
+        );
+    }
+
+    @Test
+    public void testCountSubscribedUsersResultSet() throws SQLException {
+        userGateway.createUser(user);
+        ResultSet resultSetMock = mock(ResultSet.class);
+        PreparedStatement stmtMock = mock(PreparedStatement.class);
+        Connection connectionSpy = spy(connection);
+        doReturn(false).when(resultSetMock).next();
+        doReturn(resultSetMock).when(stmtMock).executeQuery();
+        doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
+        assertThrows(InternalError.class,
+                () -> new UserDBGateway(connectionSpy).countSubscribedUsers(user)
+        );
     }
 
 }

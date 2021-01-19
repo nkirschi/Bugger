@@ -7,11 +7,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import tech.bugger.business.exception.CorruptImageException;
+import tech.bugger.global.util.Log;
 
 /**
  * Utility class for image processing.
  */
 public final class Images {
+
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
+    private static final Log log = Log.forClass(Images.class);
 
     /**
      * Prevents instantiation of this utility class.
@@ -46,6 +52,7 @@ public final class Images {
             BufferedImage img = ImageIO.read(in);
 
             if (img == null) {
+                log.error("The image could not be converted to a thumbnail.");
                 throw new CorruptImageException("The image could not be converted to a thumbnail.");
             }
 
@@ -57,6 +64,7 @@ public final class Images {
             ImageIO.write(imageBuff, "png", buffer);
             return buffer.toByteArray();
         } catch (IOException e) {
+            log.error("The image could not be converted to a thumbnail.", e);
             throw new CorruptImageException("The image could not be converted to a thumbnail.", e);
         }
     }
