@@ -1,8 +1,17 @@
 package tech.bugger.control.backing;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.MarkdownHandler;
@@ -12,19 +21,6 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Backing bean for the topic page.
@@ -45,10 +41,6 @@ public class TopicBacker implements Serializable {
      * The type of popup dialog to be rendered on the topic page.
      */
     public enum TopicDialog {
-        /**
-         * No dialogs are to be rendered.
-         */
-        NONE,
 
         /**
          * The dialog top delete the topic is to be rendered.
@@ -79,6 +71,7 @@ public class TopicBacker implements Serializable {
          * A dialog to confirm the current user action is to be rendered.
          */
         SIMPLE
+
     }
 
     /**
@@ -147,21 +140,6 @@ public class TopicBacker implements Serializable {
     private TopicDialog displayDialog;
 
     /**
-     * Whether or not the make mod dialog should be shown.
-     */
-    private boolean displayModDialog;
-
-    /**
-     * Whether or not the un-make mod dialog should be shown.
-     */
-    private boolean displayUnmodDialog;
-
-    /**
-     * Whether or not the delete topic dialog should be shown.
-     */
-    private boolean displayDeleteDialog;
-
-    /**
      * The current user session.
      */
     private final UserSession session;
@@ -170,11 +148,6 @@ public class TopicBacker implements Serializable {
      * A transient topic service.
      */
     private final transient TopicService topicService;
-
-    /**
-     * A transient report service.
-     */
-    private final transient ReportService reportService;
 
     /**
      * A transient search service.
@@ -195,18 +168,15 @@ public class TopicBacker implements Serializable {
      * Constructs a new topic page backing bean with the necessary dependencies.
      *
      * @param topicService  The topic service to use.
-     * @param reportService The report service to use.
      * @param searchService The search service to use.
      * @param fctx          The current faces context.
      * @param session       The current {@link UserSession}.
      * @param settings      The current application settings.
      */
     @Inject
-    public TopicBacker(final TopicService topicService, final ReportService reportService,
-                       final SearchService searchService, final FacesContext fctx, final UserSession session,
-                       final ApplicationSettings settings) {
+    public TopicBacker(final TopicService topicService, final SearchService searchService, final FacesContext fctx,
+                       final UserSession session, final ApplicationSettings settings) {
         this.topicService = topicService;
-        this.reportService = reportService;
         this.searchService = searchService;
         this.fctx = fctx;
         this.session = session;
@@ -236,13 +206,9 @@ public class TopicBacker implements Serializable {
         }
         topic = topicService.getTopicByID(topicID);
         if (topic == null) {
-            try {
-                ext.redirect("error.xhtml");
-            } catch (IOException e) {
-                throw new InternalError("Error while redirecting.", e);
-            }
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
         }
-        displayDialog = TopicDialog.NONE;
+        displayDialog = null;
         userBanSuggestions = new ArrayList<>();
         userModSuggestions = new ArrayList<>();
         openReportShown = true;
@@ -288,20 +254,10 @@ public class TopicBacker implements Serializable {
     }
 
     /**
-     * Returns the relevance of a certain report.
-     *
-     * @param report The report in question.
-     * @return The relevance.
-     */
-    public int getRelevance(final Report report) {
-        return 0;
-    }
-
-    /**
      * Enables suggestions for users to be banned.
      */
     public void searchBanUsers() {
-        if ((userBan != null) && (!userBan.isBlank())) {
+        if (userBan != null && !userBan.isBlank()) {
             userBanSuggestions = searchService.getUserBanSuggestions(userBan, topic);
         }
     }
@@ -310,7 +266,7 @@ public class TopicBacker implements Serializable {
      * Enables suggestions for users to be unbanned.
      */
     public void searchUnbanUsers() {
-        if ((userBan != null) && (!userBan.isBlank())) {
+        if (userBan != null && !userBan.isBlank()) {
             userBanSuggestions = searchService.getUserUnbanSuggestions(userBan, topic);
         }
     }
@@ -319,7 +275,7 @@ public class TopicBacker implements Serializable {
      * Enables suggestions for users to be made moderators.
      */
     public void searchModUsers() {
-        if ((userMod != null) && (!userMod.isBlank())) {
+        if (userMod != null && !userMod.isBlank()) {
             userModSuggestions = searchService.getUserModSuggestions(userMod, topic);
         }
     }
@@ -328,7 +284,7 @@ public class TopicBacker implements Serializable {
      * Enables suggestions for moderators to be demoted.
      */
     public void searchUnmodUsers() {
-        if ((userMod != null) && (!userMod.isBlank())) {
+        if (userMod != null && !userMod.isBlank()) {
             userModSuggestions = searchService.getUserUnmodSuggestions(userMod, topic);
         }
     }
@@ -396,7 +352,7 @@ public class TopicBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String closeDialog() {
-        displayDialog = TopicDialog.NONE;
+        displayDialog = null;
         return null;
     }
 
@@ -457,27 +413,21 @@ public class TopicBacker implements Serializable {
     }
 
     /**
-     * Applies the selected filters for reports and refreshes them.
-     */
-    public void updateReportFiltering() {
-    }
-
-    /**
-     * Bans the user whose username is specified in the attribute {@code userBan}. Note that administrators and
+     * Bans the user whose username is specified in the attribute {@link #userBan}. Note that administrators and
      * moderators cannot be banned.
      *
      * @return {@code null} to reload the page if no user was banned or an empty string to call init() again and update
-     * the ban results.
+     *         the ban results.
      */
     public String banUser() {
         if (!isModerator()) {
             log.error("A user was able to use the ban user functionality even though they were no moderator!");
-            displayDialog = TopicDialog.NONE;
+            displayDialog = null;
             return null;
         }
 
         if (topicService.ban(userBan, topic)) {
-            displayDialog = TopicDialog.NONE;
+            displayDialog = null;
             bannedUsers.update();
             return "";
         }
@@ -486,20 +436,20 @@ public class TopicBacker implements Serializable {
     }
 
     /**
-     * Unbans the user specified whose username is specified in the attribute {@code userToBeBanned}.
+     * Unbans the user specified whose username is specified in the attribute {@link #userBan}.
      *
      * @return {@code null} to reload the page if no user was unbanned or an empty string to call init() again and
-     * update the ban results.
+     *         update the ban results.
      */
     public String unbanUser() {
         if (!isModerator()) {
             log.error("A user was able to use the unban user functionality even though they were no moderator!");
-            displayDialog = TopicDialog.NONE;
+            displayDialog = null;
             return null;
         }
 
         if (topicService.unban(userBan, topic)) {
-            displayDialog = TopicDialog.NONE;
+            displayDialog = null;
             bannedUsers.update();
             return "";
         }
@@ -508,21 +458,21 @@ public class TopicBacker implements Serializable {
     }
 
     /**
-     * Makes the user whose username is specified in {@code userToBeModded} a moderator of the topic. This is not
+     * Makes the user whose username is specified in {@link #userMod} a moderator of the topic. This is not
      * possible if they already are a moderator.
      *
      * @return {@code null} to reload the page if no user was promoted or an empty string to call init() again and
-     * update the moderation results.
+     *         update the moderation results.
      */
     public String makeModerator() {
         if (!isModerator()) {
             log.error("A user was able to use the promote functionality even though they were no moderator!");
-            displayDialog = TopicDialog.NONE;
+            displayDialog = null;
             return null;
         }
 
         if (topicService.makeModerator(userMod, topic)) {
-            displayDialog = TopicDialog.NONE;
+            displayDialog = null;
             moderators.update();
             return "";
         }
@@ -531,21 +481,21 @@ public class TopicBacker implements Serializable {
     }
 
     /**
-     * Removes the moderator status of the user specified in {@code unmodUser}. This is not possible if they are an
+     * Removes the moderator status of the user specified in {@link #userMod}. This is not possible if they are an
      * administrator.
      *
      * @return {@code null} to reload the page if no user was promoted or an empty string to call init() again and
-     * update the moderation results.
+     *         update the moderation results.
      */
     public String removeModerator() {
         if (!isModerator()) {
             log.error("A user was able to use the demote functionality even though they were no moderator!");
-            displayDialog = TopicDialog.NONE;
+            displayDialog = null;
             return null;
         }
 
         if (topicService.removeModerator(userMod, topic)) {
-            displayDialog = TopicDialog.NONE;
+            displayDialog = null;
             moderators.update();
             return "";
         }
@@ -577,17 +527,6 @@ public class TopicBacker implements Serializable {
      */
     public boolean isSubscribed() {
         return topicService.isSubscribed(session.getUser(), topic);
-    }
-
-    /**
-     * Returns the time stamp of the last action in one particular report. Creating, editing and moving a report as well
-     * as creating and editing posts count as actions.
-     *
-     * @param report The report in question.
-     * @return The time stamp of the last action as a {@code ZonedDateTime}.
-     */
-    public ZonedDateTime lastChange(final Report report) {
-        return null;
     }
 
     /**

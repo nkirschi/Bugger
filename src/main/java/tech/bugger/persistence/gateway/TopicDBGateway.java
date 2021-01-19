@@ -118,13 +118,14 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int countModerators(final Topic topic) throws NotFoundException {
+    public int countModerators(final Topic topic) {
         if (topic.getId() == null) {
             log.error("The topic ID cannot be null!.");
             throw new IllegalArgumentException("The topic ID cannot be null!.");
         }
 
         int moderators = 0;
+
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(t.moderator) AS num_mods FROM "
                 + "topic_moderation AS t WHERE t.topic = ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
@@ -133,12 +134,6 @@ public class TopicDBGateway implements TopicGateway {
 
             if (rs.next()) {
                 moderators = rs.getInt("num_mods");
-            }
-
-            if (moderators == 0) {
-                log.warning("The topic with id " + topic.getId() + " could not the found or has no moderators.");
-                throw new NotFoundException("The topic with id " + topic.getId() + " could not the found or has no "
-                        + "moderators.");
             }
         } catch (SQLException e) {
             log.error("Error while counting the number of moderators for the topic with id " + topic.getId(), e);

@@ -538,15 +538,18 @@ public class TopicService {
      */
     public int getNumberOfModerators(final Topic topic) {
         int numberMods = 0;
+
         try (Transaction transaction = transactionManager.begin()) {
             numberMods = transaction.newTopicGateway().countModerators(topic);
             transaction.commit();
         } catch (NotFoundException e) {
-            log.warning("No moderators could be found for the topic with id " + topic.getId(), e);
+            log.error("The topic with id " + topic.getId() + " could not be found!", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while counting the number of moderators for the topic with id " + topic.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return numberMods;
     }
 
