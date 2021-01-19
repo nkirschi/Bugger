@@ -1,5 +1,7 @@
 package tech.bugger.global.transfer;
 
+import java.util.Locale;
+import tech.bugger.global.util.Constants;
 import tech.bugger.global.util.Lazy;
 
 import java.io.Serial;
@@ -89,7 +91,7 @@ public class User implements Serializable {
     /**
      * This user's preferred language.
      */
-    private Language preferredLanguage;
+    private Locale preferredLanguage;
 
     /**
      * This user's profile visibility.
@@ -116,7 +118,7 @@ public class User implements Serializable {
      */
     public User() {
         this(null, "", null, null, null, "", "", "", new Lazy<>(new byte[0]), new byte[0],
-                "", Language.ENGLISH, User.ProfileVisibility.FULL, null, null, false);
+                "", Locale.ENGLISH, User.ProfileVisibility.FULL, null, null, false);
     }
 
     /**
@@ -142,7 +144,7 @@ public class User implements Serializable {
     public User(final Integer id, final String username, final String passwordHash, final String passwordSalt,
                 final String hashingAlgorithm, final String emailAddress, final String firstName,
                 final String lastName, final Lazy<byte[]> avatar, final byte[] avatarThumbnail,
-                final String biography, final Language preferredLanguage, final ProfileVisibility profileVisibility,
+                final String biography, final Locale preferredLanguage, final ProfileVisibility profileVisibility,
                 final ZonedDateTime registrationDate, final Integer forcedVotingWeight, final boolean administrator) {
         this.id = id;
         this.username = username;
@@ -386,7 +388,7 @@ public class User implements Serializable {
      *
      * @return The user's preferred language.
      */
-    public Language getPreferredLanguage() {
+    public Locale getPreferredLanguage() {
         return preferredLanguage;
     }
 
@@ -395,7 +397,7 @@ public class User implements Serializable {
      *
      * @param preferredLanguage The user's preferred language to be set.
      */
-    public void setPreferredLanguage(final Language preferredLanguage) {
+    public void setPreferredLanguage(final Locale preferredLanguage) {
         this.preferredLanguage = preferredLanguage;
     }
 
@@ -404,8 +406,8 @@ public class User implements Serializable {
      *
      * @return All language values.
      */
-    public Language[] getPreferredLanguages() {
-        return Language.values();
+    public Locale[] getPreferredLanguages() {
+        return Constants.LANGUAGES;
     }
 
     /**

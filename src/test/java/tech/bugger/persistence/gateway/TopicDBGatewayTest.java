@@ -1,12 +1,12 @@
 package tech.bugger.persistence.gateway;
 
+import java.util.Locale;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
@@ -56,7 +56,7 @@ class TopicDBGatewayTest {
         topicGateway = new TopicDBGateway(connection);
         userGateway = new UserDBGateway(connection);
         user = new User(null, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
-                Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic1 = new Topic(null, "topic1", "description");
         topic2 = new Topic(null, "topic2", "description");
     }

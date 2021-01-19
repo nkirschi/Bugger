@@ -3,6 +3,7 @@ package tech.bugger.control.backing;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import javax.faces.context.FacesContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,6 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
@@ -52,7 +52,7 @@ public class TopicBackerTest {
     @BeforeEach
     public void setUp() {
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
-                Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic = new Topic(1, "Some title", "Some description");
         topicBacker = new TopicBacker(topicService, searchService, fctx, session, settings);
     }

@@ -33,9 +33,9 @@
                                  id="s-language"
                                  styleClass="form-control form-select me-2">
                     <f:selectItems value="#{footerBacker.availableLanguages}"
-                                   var="language"
-                                   itemValue="#{language}"
+                                   var="language" itemValue="#{language}"
                                    itemLabel="#{labels['lang.' += language]}"/>
+                    <f:converter converterId="localeConverter"/>
                 </h:selectOneMenu>
                 <h:commandButton value="#{labels.ok}"
                                  id="cb-language"

@@ -10,7 +10,7 @@ import java.sql.Types;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import tech.bugger.global.transfer.Language;
+import java.util.Locale;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
@@ -68,7 +68,7 @@ public class UserDBGateway implements UserGateway {
                 .bytes(user.getAvatar().get())
                 .bytes(user.getAvatarThumbnail())
                 .string(user.getBiography())
-                .string(user.getPreferredLanguage().name())
+                .string(user.getPreferredLanguage().getCountry())
                 .object(user.getProfileVisibility(), Types.OTHER)
                 .object(user.getForcedVotingWeight(), Types.INTEGER)
                 .bool(user.isAdministrator());
@@ -100,7 +100,7 @@ public class UserDBGateway implements UserGateway {
                 rs.getString(prefix + "first_name"), rs.getString(prefix + "last_name"),
                 new Lazy<>(rs.getBytes(prefix + "avatar")), rs.getBytes(prefix + "avatar_thumbnail"),
                 rs.getString(prefix + "biography"),
-                Language.valueOf(rs.getString(prefix + "preferred_language").toUpperCase()),
+                Locale.forLanguageTag(rs.getString(prefix + "preferred_language").toUpperCase()),
                 User.ProfileVisibility.valueOf(rs.getString(prefix + "profile_visibility").toUpperCase()),
                 rs.getTimestamp(prefix + "registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
                 rs.getObject(prefix + "forced_voting_weight", Integer.class), rs.getBoolean(prefix + "is_admin"

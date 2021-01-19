@@ -19,7 +19,6 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.util.Feedback;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -78,7 +77,7 @@ public class RegisterBackerTest {
         f.setAccessible(true);
         User internalUser = (User) f.get(registerBacker);
 
-        assertAll(() -> assertEquals(Language.GERMAN, internalUser.getPreferredLanguage()),
+        assertAll(() -> assertEquals(Locale.GERMAN, internalUser.getPreferredLanguage()),
                 () -> assertEquals("", registerBacker.getUser().getUsername()),
                 () -> assertEquals("", registerBacker.getUser().getEmailAddress()),
                 () -> assertEquals("", registerBacker.getUser().getFirstName()),
