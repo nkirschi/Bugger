@@ -40,7 +40,7 @@
                 </h:outputFormat>
             </h:panelGroup>
 
-            <h:panelGroup styleClass="row"
+            <h:panelGroup styleClass="row my-3"
                           layout="block"
                           rendered="#{postEditBacker.attachments.size()
                                       lt applicationSettings.configuration.maxAttachmentsPerPost}">
@@ -53,18 +53,18 @@
                 <h:commandButton id="cb-add-attachment"
                                  value="#{labels.add_attachment}"
                                  action="#{postEditBacker.uploadAttachment}"
-                                 styleClass="button style-button"/>
+                                 styleClass="btn btn-primary"/>
             </h:panelGroup>
 
-            <h:panelGroup styleClass="row" layout="block">
+            <h:panelGroup styleClass="row my-3" layout="block">
                 <h:commandButton id="cb-remove-attachments"
                                  value="#{labels.remove_all_attachments}"
                                  action="#{postEditBacker.deleteAllAttachments}"
-                                 styleClass="button style-button"/>
+                                 styleClass="btn btn-primary"/>
             </h:panelGroup>
 
             <h:commandButton value="#{postEditBacker.create ? labels.post_create : labels.post_save_changes}"
-                             action="#{postEditBacker.saveChanges}"/>
+                             action="#{postEditBacker.saveChanges}" styleClass="btn btn-primary"/>
         </h:form>
     </ui:define>
 </ui:composition>

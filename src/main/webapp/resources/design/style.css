@@ -247,3 +247,8 @@ body {
 .vote-not-cast {
     background-color: #157347;
 }
+
+.form-check-input {
+    margin-left: 1%;
+    margin-right: 1%;
+}

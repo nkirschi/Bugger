@@ -1,0 +1,56 @@
+/**
+ * Template
+ */
+
+body {
+    background: #deeff5;
+}
+
+#p-header {
+    background: #1E88E5;
+    color: white;
+}
+
+#p-header #ot-comp-name {
+    color: white;
+}
+
+#p-footer {
+    background: #1565C0;
+    color: white;
+}
+
+#p-footer a {
+    color: white;
+}
+
+#p-footer a:hover {
+    color: white;
+}
+
+#p-content {
+    background: #fff;
+}
+
+#p-profile-menu {
+    background-color: #deeff5;
+    color: #1E88E5;
+}
+
+.btn {
+    color: #1E88E5;
+    background-color: white;
+}
+
+.dialog {
+    background-color: #deeff5;
+}
+
+.vote-cast {
+    background-color: #1E88E5;
+    color: white;
+}
+
+.vote-not-cast {
+    background-color: #6c757d;
+}

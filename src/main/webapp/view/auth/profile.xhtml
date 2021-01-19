@@ -28,18 +28,18 @@
                         <h:panelGroup styleClass="col-12 align-right">
                             <h:commandButton id="cb-subscribe" action="#{profileBacker.toggleUserSubscription()}"
                                              value="#{profileBacker.subscribed ? labels.unsubscribe : labels.subscribe}"
-                                             styleClass="button" rendered="#{userSession.user != null
+                                             styleClass="button btn btn-primary" rendered="#{userSession.user != null
                                              and userSession.user.id != profileBacker.user.id}"/>
                             <h:commandButton id="cb-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
-                                             styleClass="button" value="#{labels.promote}"
+                                             styleClass="button btn btn-primary" value="#{labels.promote}"
                                              rendered="#{userSession.user.administrator
                                              and not profileBacker.user.administrator}"/>
                             <h:commandButton id="cb-rem-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
-                                             styleClass="button" value="#{labels.demote}"
+                                             styleClass="button btn btn-primary" value="#{labels.demote}"
                                              rendered="#{userSession.user.administrator
                                              and profileBacker.user.administrator}"/>
                             <h:link id="l-edit" value="#{labels.edit}" outcome="/view/restr/profile-edit.xhtml"
-                                    rendered="#{profileBacker.privileged}" styleClass="button style-button">
+                                    rendered="#{profileBacker.privileged}" styleClass="button btn btn-secondary">
                                 <f:param name="e" value="#{profileBacker.user.username}"/>
                             </h:link>
                         </h:panelGroup>
@@ -199,7 +199,7 @@
                                          action="#{profileBacker.openDeleteAllTopicSubscriptionsDialog}"
                                          rendered="#{not profileBacker.topicSubscriptions.isEmpty()
                                          and profileBacker.privileged}" value="#{labels.unsub_all}"
-                                         styleClass="button"/>
+                                         styleClass="btn btn-primary"/>
                     </h:panelGroup>
                 </h:form>
 
@@ -240,7 +240,7 @@
                                          action="#{profileBacker.openDeleteAllReportSubscriptionsDialog}"
                                          rendered="#{not profileBacker.reportSubscriptions.isEmpty()
                                          and profileBacker.privileged}" value="#{labels.unsub_all}"
-                                         styleClass="button"/>
+                                         styleClass="btn btn-primary"/>
                     </h:panelGroup>
                 </h:form>
 
@@ -290,7 +290,7 @@
                                          action="#{profileBacker.openDeleteAllUserSubscriptionsDialog}"
                                          rendered="#{not profileBacker.userSubscriptions.isEmpty()
                                          and profileBacker.privileged}" value="#{labels.unsub_all}"
-                                         styleClass="button"/>
+                                         styleClass="btn btn-primary"/>
                     </h:panelGroup>
                 </h:form>
 
@@ -345,13 +345,11 @@
                         <h:message for="i-user-password"/>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="row">
-                    <h:panelGroup layout="block" styleClass="col-12 align-center">
-                        <h:commandButton id="cb-change-status" value="#{labels.change_status}"
-                                         action="#{profileBacker.toggleAdmin}" styleClass="button"/>
-                        <h:commandButton id="cb-abort-change" value="#{labels.abort}" styleClass="button"
-                                         action="#{profileBacker.closeDialog}" immediate="true"/>
-                    </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
+                    <h:commandButton id="cb-change-status" value="#{labels.change_status}"
+                                     action="#{profileBacker.toggleAdmin}" styleClass="btn btn-primary"/>
+                    <h:commandButton id="cb-abort-change" value="#{labels.abort}" styleClass="btn btn-secondary"
+                                     action="#{profileBacker.closeDialog}" immediate="true"/>
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>
@@ -363,13 +361,12 @@
                 <h:panelGroup layout="block" styleClass="mb-3">
                     <h:outputText id="ot-really-unsub-topics-warn" value="#{labels.really_unsub_all_topics}"/>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="row">
-                    <h:panelGroup layout="block" styleClass="col-12 align-center">
-                        <h:commandButton id="cb-really-unsub-topics" value="#{labels.really_unsub}"
-                                         action="#{profileBacker.deleteAllTopicSubscriptions}" styleClass="button"/>
-                        <h:commandButton id="cb-abort-unsub-topics" value="#{labels.abort}" styleClass="button"
-                                         action="#{profileBacker.closeDialog}"/>
-                    </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
+                    <h:commandButton id="cb-really-unsub-topics" value="#{labels.really_unsub}"
+                                     action="#{profileBacker.deleteAllTopicSubscriptions}"
+                                     styleClass="btn btn-primary"/>
+                    <h:commandButton id="cb-abort-unsub-topics" value="#{labels.abort}" styleClass="btn btn-secondary"
+                                     action="#{profileBacker.closeDialog}"/>
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>
@@ -381,13 +378,12 @@
                 <h:panelGroup layout="block" styleClass="mb-3">
                     <h:outputText id="ot-really-unsub-reports-warn" value="#{labels.really_unsub_all_reports}"/>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="row">
-                    <h:panelGroup layout="block" styleClass="col-12 align-center">
-                        <h:commandButton id="cb-really-unsub-reports" value="#{labels.really_unsub}"
-                                         action="#{profileBacker.deleteAllReportSubscriptions}" styleClass="button"/>
-                        <h:commandButton id="cb-abort-unsub-reports" value="#{labels.abort}" styleClass="button"
-                                         action="#{profileBacker.closeDialog}"/>
-                    </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
+                    <h:commandButton id="cb-really-unsub-reports" value="#{labels.really_unsub}"
+                                     action="#{profileBacker.deleteAllReportSubscriptions}"
+                                     styleClass="btn btn-primary"/>
+                    <h:commandButton id="cb-abort-unsub-reports" value="#{labels.abort}" styleClass="btn btn-secondary"
+                                     action="#{profileBacker.closeDialog}"/>
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>
@@ -399,13 +395,11 @@
                 <h:panelGroup layout="block" styleClass="mb-3">
                     <h:outputText id="ot-really-unsub-users-warn" value="#{labels.really_unsub_all_users}"/>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="row">
-                    <h:panelGroup layout="block" styleClass="col-12 align-center">
-                        <h:commandButton id="cb-really-unsub-users" value="#{labels.really_unsub}"
-                                         action="#{profileBacker.deleteAllUserSubscriptions}" styleClass="button"/>
-                        <h:commandButton id="cb-abort-unsub-users" value="#{labels.abort}" styleClass="button"
-                                         action="#{profileBacker.closeDialog}"/>
-                    </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
+                    <h:commandButton id="cb-really-unsub-users" value="#{labels.really_unsub}"
+                                     action="#{profileBacker.deleteAllUserSubscriptions}" styleClass="btn btn-primary"/>
+                    <h:commandButton id="cb-abort-unsub-users" value="#{labels.abort}" styleClass="btn btn-secondary"
+                                     action="#{profileBacker.closeDialog}"/>
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>
