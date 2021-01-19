@@ -1,5 +1,13 @@
 package tech.bugger.persistence.gateway;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,27 +22,9 @@ import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
@@ -435,9 +425,7 @@ class TopicDBGatewayTest {
     @Test
     public void testCountModeratorsNotFound() {
         topicGateway.createTopic(topic1);
-        assertThrows(NotFoundException.class,
-                () -> topicGateway.countModerators(topic1)
-        );
+        assertEquals(0, topicGateway.countModerators(topic1));
     }
 
     @Test
@@ -466,9 +454,7 @@ class TopicDBGatewayTest {
         doReturn(false).when(resultSetMock).next();
         doReturn(resultSetMock).when(stmtMock).executeQuery();
         doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
-        assertThrows(NotFoundException.class,
-                () -> new TopicDBGateway(connectionSpy).countModerators(topic1)
-        );
+        assertEquals(0, new TopicDBGateway(connectionSpy).countModerators(topic1));
     }
 
     @Test
