@@ -15,7 +15,6 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.global.util.Pagitable;
 import tech.bugger.persistence.exception.NotFoundException;
@@ -65,7 +64,7 @@ public class UserDBGateway implements UserGateway {
                 .string(user.getEmailAddress())
                 .string(user.getFirstName())
                 .string(user.getLastName())
-                .bytes(user.getAvatar().get())
+                .bytes(user.getAvatar())
                 .bytes(user.getAvatarThumbnail())
                 .string(user.getBiography())
                 .string(user.getPreferredLanguage().getLanguage())
@@ -98,7 +97,7 @@ public class UserDBGateway implements UserGateway {
                 rs.getString(prefix + "password_hash"), rs.getString(prefix + "password_salt"),
                 rs.getString(prefix + "hashing_algorithm"), rs.getString(prefix + "email_address"),
                 rs.getString(prefix + "first_name"), rs.getString(prefix + "last_name"),
-                new Lazy<>(rs.getBytes(prefix + "avatar")), rs.getBytes(prefix + "avatar_thumbnail"),
+                new byte[0], rs.getBytes(prefix + "avatar_thumbnail"),
                 rs.getString(prefix + "biography"),
                 Locale.forLanguageTag(rs.getString(prefix + "preferred_language").toUpperCase()),
                 User.ProfileVisibility.valueOf(rs.getString(prefix + "profile_visibility").toUpperCase()),
@@ -195,6 +194,26 @@ public class UserDBGateway implements UserGateway {
         }
 
         return user;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public byte[] getAvatarForUser(final int id) throws NotFoundException {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT avatar FROM \"user\" WHERE id = ?")) {
+            ResultSet rs = new StatementParametrizer(stmt).integer(id).toStatement().executeQuery();
+
+            if (rs.next()) {
+                return rs.getBytes("avatar");
+            } else {
+                log.error("No user with the given id could be found in the database.");
+                throw new NotFoundException("No user with the given id could be found in the database.");
+            }
+        } catch (SQLException e) {
+            log.error("Error while retrieving user avatar.", e);
+            throw new StoreException("Error while retrieving user avatar.", e);
+        }
     }
 
     /**
@@ -299,10 +318,6 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public void createUser(final User user) {
-        if (!user.getAvatar().isPresent()) {
-            throw new IllegalArgumentException("Avatar must be present!");
-        }
-
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO \"user\" "
                         + "(username, password_hash, password_salt, "
                         + "hashing_algorithm, email_address, first_name, "
@@ -338,8 +353,6 @@ public class UserDBGateway implements UserGateway {
     public void updateUser(final User user) throws NotFoundException {
         if (user.getId() == null) {
             throw new IllegalArgumentException("User ID may not be null!");
-        } else if (!user.getAvatar().isPresent()) {
-            throw new IllegalArgumentException("Avatar must be present!");
         }
 
         try (PreparedStatement stmt = conn.prepareStatement("UPDATE \"user\" SET "
@@ -564,13 +577,13 @@ public class UserDBGateway implements UserGateway {
         // @formatter:off
         String query =
                 "DELETE FROM \"user\""
-              + "WHERE password_hash IS NULL "
-              + "AND NOT EXISTS("
-              + "    SELECT * "
-              + "    FROM   token "
-              + "    WHERE  type = 'REGISTER' "
-              + "    AND    verifies = id"
-              + ");";
+                        + "WHERE password_hash IS NULL "
+                        + "AND NOT EXISTS("
+                        + "    SELECT * "
+                        + "    FROM   token "
+                        + "    WHERE  type = 'REGISTER' "
+                        + "    AND    verifies = id"
+                        + ");";
         // @formatter:on
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.executeUpdate();

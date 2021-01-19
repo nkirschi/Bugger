@@ -17,6 +17,7 @@ import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
@@ -294,6 +295,40 @@ public class ReportServiceTest {
         doThrow(TransactionException.class).when(tx).commit();
         assertEquals(0, service.getNumberOfDuplicates(testReport));
         verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testCanPostInReportWhenUserNull() {
+        assertFalse(service.canPostInReport(null, testReport));
+    }
+
+    @Test
+    public void testCanPostInReportWhenReportNull() {
+        assertFalse(service.canPostInReport(new User(), null));
+    }
+
+    @Test
+    public void testCanPostInReportWhenAdministrator() {
+        User user = new User();
+        user.setAdministrator(true);
+        assertTrue(service.canPostInReport(user, testReport));
+    }
+
+    @Test
+    public void testCanPostInReportWhenTopicNull() {
+        testReport.setTopicID(1234);
+        doReturn(null).when(topicService).getTopicByID(1234);
+        assertFalse(service.canPostInReport(new User(), testReport));
+    }
+
+    @Test
+    public void testCanPostInReportWhenNotBanned() {
+        Topic topic = new Topic(1234, "title", "description");
+        testReport.setTopicID(1234);
+        doReturn(topic).when(topicService).getTopicByID(1234);
+        User user = new User();
+        doReturn(false).when(topicService).isBanned(user, topic);
+        assertTrue(service.canPostInReport(new User(), testReport));
     }
 
 }

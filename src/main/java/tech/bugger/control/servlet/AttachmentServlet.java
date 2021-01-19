@@ -77,6 +77,12 @@ public class AttachmentServlet extends MediaServlet {
             redirectToNotFoundPage(response);
             return;
         }
+        byte[] content = postService.getAttachmentContent(attachmentID);
+        if (content == null) {
+            log.debug("Content of attachment with ID " + attachmentID + " not found.");
+            redirectToNotFoundPage(response);
+            return;
+        }
 
         // Initialize servlet response.
         response.reset();
@@ -84,11 +90,11 @@ public class AttachmentServlet extends MediaServlet {
 
         response.setHeader("Content-Disposition", "attachment; filename=\"" + attachment.getName() + '\"');
         response.setContentType(attachment.getMimetype());
-        response.setContentLength(attachment.getContent().get().length);
+        response.setContentLength(content.length);
 
         // Write attachment content to response.
         try {
-            response.getOutputStream().write(attachment.getContent().get());
+            response.getOutputStream().write(content);
         } catch (IOException e) {
             log.error("Could not write servlet response.", e);
         }

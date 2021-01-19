@@ -103,7 +103,8 @@ public class AuthenticationServiceTest {
         lenient().doReturn(16).when(configReader).getInt("SALT_LENGTH");
 
         String passwordHash = Hasher.hash(password, salt, hashingAlgo);
-        testUser = new User(1, "testuser", passwordHash, salt, hashingAlgo, "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
+        testUser = new User(1, "testuser", passwordHash, salt, hashingAlgo, "test@test.de", "Test", "User",
+                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, 3, false);
         testToken = new Token(tokenValue, Token.Type.REGISTER, null, "", testUser);
     }
