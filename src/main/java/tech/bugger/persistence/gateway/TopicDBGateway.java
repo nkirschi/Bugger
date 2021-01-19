@@ -1,12 +1,14 @@
 package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
@@ -15,11 +17,6 @@ import tech.bugger.global.util.Pagitable;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
-
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Topic gateway that gives access to topics stored in a database.
@@ -62,37 +59,31 @@ public class TopicDBGateway implements TopicGateway {
      */
     @Override
     public int countReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
+        if (!showOpenReports && !showClosedReports) {
+            return 0;
+        }
+
         int numberOfReports = 0;
-        if (showOpenReports) {
-            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM report "
-                    + "WHERE topic = ? AND closed_at IS NULL;")) {
-                ResultSet resultSet = new StatementParametrizer(stmt)
-                        .integer(topic.getId()).toStatement().executeQuery();
-                int numReports;
-                if (resultSet.next()) {
-                    numReports = resultSet.getInt(1);
-                    numberOfReports += numReports;
-                }
-            } catch (SQLException e) {
-                log.error("Error while searching for report by topic.", e);
-                throw new StoreException("Error while searching for report by topic.", e);
-            }
+        String sql = "SELECT COUNT(*) FROM report WHERE topic = ?";
+        if (showOpenReports && !showClosedReports) {
+            sql += " AND closed_at IS NULL";
+        } else if (!showOpenReports) {
+            sql += " AND closed_at IS NOT NULL";
         }
-        if (showClosedReports) {
-            try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM report "
-                    + "WHERE topic = ? AND closed_at IS NOT NULL;")) {
-                ResultSet resultSet = new StatementParametrizer(stmt)
-                        .integer(topic.getId()).toStatement().executeQuery();
-                int numReports;
-                if (resultSet.next()) {
-                    numReports = resultSet.getInt(1);
-                    numberOfReports += numReports;
-                }
-            } catch (SQLException e) {
-                log.error("Error while searching for report by topic.", e);
-                throw new StoreException("Error while searching for report by topic.", e);
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet resultSet = new StatementParametrizer(stmt)
+                    .integer(topic.getId()).toStatement().executeQuery();
+            int numReports;
+            if (resultSet.next()) {
+                numReports = resultSet.getInt(1);
+                numberOfReports += numReports;
             }
+        } catch (SQLException e) {
+            log.error("Error while searching for report by topic.", e);
+            throw new StoreException("Error while searching for report by topic.", e);
         }
+
         return numberOfReports;
     }
 
@@ -118,13 +109,14 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public int countModerators(final Topic topic) throws NotFoundException {
+    public int countModerators(final Topic topic) {
         if (topic.getId() == null) {
             log.error("The topic ID cannot be null!.");
             throw new IllegalArgumentException("The topic ID cannot be null!.");
         }
 
         int moderators = 0;
+
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(t.moderator) AS num_mods FROM "
                 + "topic_moderation AS t WHERE t.topic = ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
@@ -133,12 +125,6 @@ public class TopicDBGateway implements TopicGateway {
 
             if (rs.next()) {
                 moderators = rs.getInt("num_mods");
-            }
-
-            if (moderators == 0) {
-                log.warning("The topic with id " + topic.getId() + " could not the found or has no moderators.");
-                throw new NotFoundException("The topic with id " + topic.getId() + " could not the found or has no "
-                        + "moderators.");
             }
         } catch (SQLException e) {
             log.error("Error while counting the number of moderators for the topic with id " + topic.getId(), e);
@@ -160,6 +146,7 @@ public class TopicDBGateway implements TopicGateway {
         }
 
         int banned = 0;
+
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(t.outcast) AS num_mods FROM "
                 + "topic_ban AS t WHERE t.topic = ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
@@ -198,6 +185,7 @@ public class TopicDBGateway implements TopicGateway {
             log.error("Error while searching for user with id " + id, e);
             throw new StoreException("Error while searching for user with id " + id, e);
         }
+
         return topic;
     }
 

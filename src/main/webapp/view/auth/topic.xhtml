@@ -20,6 +20,9 @@
                 <h:panelGroup class="col-sm-12" layout="block">
                     <h:panelGroup layout="block" styleClass="row">
                         <h:panelGroup layout="block" styleClass="col-sm-12 align-right">
+                            <h:link id="l-statistics" outcome="pretty:statistics" value="#{labels.statistics}">
+                                <f:param name="t" value="#{topicBacker.topic.id}"/>
+                            </h:link>
                             <h:commandButton id="cb-subscribe" action="#{topicBacker.toggleTopicSubscription}"
                                              styleClass="button btn btn-primary" value="#{topicBacker.subscribed
                                              ? labels.unsubscribe : labels.subscribe}"

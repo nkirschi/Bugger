@@ -97,6 +97,7 @@ public class SearchService {
      */
     public List<String> getUserBanSuggestions(final String query, final Topic topic) {
         List<String> users = new ArrayList<>();
+
         try (Transaction tx = transactionManager.begin()) {
             users = tx.newSearchGateway().getUserBanSuggestions(query, MAX_SUGGESTIONS, topic);
             tx.commit();
@@ -104,6 +105,7 @@ public class SearchService {
             log.error("Error while loading the user search suggestions.", e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return users;
     }
 
@@ -117,6 +119,7 @@ public class SearchService {
      */
     public List<String> getUserUnbanSuggestions(final String query, final Topic topic) {
         List<String> users = null;
+
         try (Transaction tx = transactionManager.begin()) {
             users = tx.newSearchGateway().getUserUnbanSuggestions(query, MAX_SUGGESTIONS, topic);
             tx.commit();
@@ -124,6 +127,7 @@ public class SearchService {
             log.error("Error while loading the user search suggestions.", e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return users;
     }
 
@@ -137,6 +141,7 @@ public class SearchService {
      */
     public List<String> getUserModSuggestions(final String query, final Topic topic) {
         List<String> users = new ArrayList<>();
+
         try (Transaction tx = transactionManager.begin()) {
             users = tx.newSearchGateway().getUserModSuggestions(query, MAX_SUGGESTIONS, topic);
             tx.commit();
@@ -144,6 +149,7 @@ public class SearchService {
             log.error("Error while loading the user search suggestions.", e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return users;
     }
 
@@ -157,6 +163,7 @@ public class SearchService {
      */
     public List<String> getUserUnmodSuggestions(final String query, final Topic topic) {
         List<String> users = null;
+
         try (Transaction tx = transactionManager.begin()) {
             users = tx.newSearchGateway().getUserUnmodSuggestions(query, MAX_SUGGESTIONS, topic);
             tx.commit();
@@ -164,6 +171,7 @@ public class SearchService {
             log.error("Error while loading the user search suggestions.", e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return users;
     }
 

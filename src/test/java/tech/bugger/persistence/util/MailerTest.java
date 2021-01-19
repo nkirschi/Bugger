@@ -1,30 +1,26 @@
 package tech.bugger.persistence.util;
 
 import com.dumbster.smtp.SimpleSmtpServer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import tech.bugger.LogExtension;
-
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
+import java.net.Socket;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(LogExtension.class)
 public class MailerTest {
+
     private SimpleSmtpServer smtpServer;
 
     private static final int SMTP_PORT = 42424;
@@ -41,6 +37,7 @@ public class MailerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
+        while (isPortBlocked(SMTP_PORT)) ;
         smtpServer = SimpleSmtpServer.start(SMTP_PORT);
         mailer = new Mailer(ClassLoader.getSystemResourceAsStream("mailing.properties"));
     }
@@ -48,6 +45,14 @@ public class MailerTest {
     @AfterEach
     public void tearDown() {
         smtpServer.stop();
+    }
+
+    private static boolean isPortBlocked(int port) {
+        try (Socket ignored = new Socket("localhost", port)) {
+            return true;
+        } catch (IOException ignored) {
+            return false;
+        }
     }
 
     @Test

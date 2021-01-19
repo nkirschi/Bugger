@@ -1,6 +1,7 @@
 package tech.bugger.business.service;
 
 import java.lang.reflect.Field;
+import java.util.Locale;
 import javax.enterprise.event.Event;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +16,6 @@ import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Hasher;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
@@ -104,7 +104,7 @@ public class AuthenticationServiceTest {
 
         String passwordHash = Hasher.hash(password, salt, hashingAlgo);
         testUser = new User(1, "testuser", passwordHash, salt, hashingAlgo, "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
-                Language.GERMAN, User.ProfileVisibility.MINIMAL, null, 3, false);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, 3, false);
         testToken = new Token(tokenValue, Token.Type.REGISTER, null, "", testUser);
     }
 

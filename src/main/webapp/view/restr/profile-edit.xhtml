@@ -83,6 +83,7 @@
                                                        value="#{profileEditBacker.user.preferredLanguages}"
                                                        var="lang" itemValue="#{lang}"
                                                        itemLabel="#{labels['lang.'.concat(lang)]}"/>
+                                        <f:converter converterId="localeConverter"/>
                                     </h:selectOneMenu>
                                     <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                         <h:message id="m-language" for="s-language"/>
