@@ -1,11 +1,12 @@
 package tech.bugger.control.util;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.annotation.FacesConfig;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Enables JF 2.3 specific features.
@@ -37,6 +38,10 @@ public final class JFConfig {
 
         return String.format("%s://%s%s", currentUrl.getProtocol(), currentUrl.getAuthority(),
                 ectx.getApplicationContextPath());
+    }
+
+    public boolean hasGlobalMessages() {
+        return !FacesContext.getCurrentInstance().getMessageList(null).isEmpty();
     }
 
 }

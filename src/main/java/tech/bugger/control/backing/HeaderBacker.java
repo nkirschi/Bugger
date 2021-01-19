@@ -4,11 +4,14 @@ import com.ocpsoft.pretty.PrettyContext;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Event;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -20,6 +23,7 @@ import java.io.Serializable;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.ResourceBundle;
 
 
 /**
@@ -68,18 +72,44 @@ public class HeaderBacker implements Serializable {
     private final FacesContext fctx;
 
     /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Resource bundle for feedback messages.
+     */
+    private final ResourceBundle messagesBundle;
+
+    /**
      * Constructs a new header backing bean.
      *
      * @param applicationSettings The current application settings.
      * @param session             The currently active {@link UserSession}.
      * @param fctx                The current {@link FacesContext} of the application.
+     * @param feedbackEvent         The feedback event to use for user feedback.
+     * @param messagesBundle        The resource bundle for feedback messages.
      */
     @Inject
-    public HeaderBacker(final ApplicationSettings applicationSettings, final UserSession session,
-                        final FacesContext fctx) {
+    public HeaderBacker(final ApplicationSettings applicationSettings,
+                        final UserSession session,
+                        final FacesContext fctx,
+                        final Event<Feedback> feedbackEvent,
+                        @RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.applicationSettings = applicationSettings;
         this.session = session;
         this.fctx = fctx;
+        this.feedbackEvent = feedbackEvent;
+        this.messagesBundle = messagesBundle;
+    }
+
+    /**
+     * Adds a generic error message to the global feedback on validation errors.
+     */
+    public void validateForm() {
+        if (fctx.isValidationFailed() && fctx.getMessageList(null).isEmpty()) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("validation_errors"), Feedback.Type.ERROR));
+        }
     }
 
     /**
@@ -148,7 +178,7 @@ public class HeaderBacker implements Serializable {
     public String determineAlertClass() {
         if (!fctx.getMessageList(null).isEmpty()) {
             FacesMessage.Severity maxSeverity = fctx.getMessageList().stream().map(FacesMessage::getSeverity)
-                    .max(FacesMessage.Severity::compareTo).orElseThrow();
+                                                    .max(FacesMessage.Severity::compareTo).orElseThrow();
             if (maxSeverity.equals(FacesMessage.SEVERITY_ERROR)) {
                 return " alert-danger";
             } else if (maxSeverity.equals(FacesMessage.SEVERITY_WARN)) {
