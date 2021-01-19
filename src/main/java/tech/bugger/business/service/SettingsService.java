@@ -71,6 +71,7 @@ public class SettingsService {
      */
     public Configuration loadConfiguration() {
         Configuration configuration = null;
+
         try (Transaction tx = transactionManager.begin()) {
             configuration = tx.newSettingsGateway().getConfiguration();
             tx.commit();
@@ -81,6 +82,7 @@ public class SettingsService {
             log.error("Error when loading application configuration.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return configuration;
     }
 
@@ -91,6 +93,7 @@ public class SettingsService {
      */
     public Organization loadOrganization() {
         Organization organization = null;
+
         try (Transaction tx = transactionManager.begin()) {
             organization = tx.newSettingsGateway().getOrganization();
             tx.commit();
@@ -101,6 +104,7 @@ public class SettingsService {
             log.error("Error when loading organization data.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return organization;
     }
 

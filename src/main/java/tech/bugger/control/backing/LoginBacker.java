@@ -95,6 +95,7 @@ public class LoginBacker {
             return null;
         }
         session.setUser(user);
+        session.setLocale(user.getPreferredLanguage());
 
         if (redirectURL != null) {
             try {

@@ -1,5 +1,7 @@
 package tech.bugger.global.util;
 
+import java.util.Locale;
+
 /**
  * Collection of application-wide constants.
  */
@@ -86,5 +88,10 @@ public final class Constants {
      * Maximum amount of decimal places to display to the user.
      */
     public static final int MAX_FRACTION_DIGITS = 2;
+
+    /**
+     * The available languages for the frontend.
+     */
+    public static final Locale[] LANGUAGES = new Locale[]{Locale.ENGLISH, Locale.GERMAN};
 
 }

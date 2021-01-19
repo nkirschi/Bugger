@@ -151,6 +151,7 @@ public class TopicService {
      */
     public boolean makeModerator(final String username, final Topic topic) {
         User user;
+
         try (Transaction tx = transactionManager.begin()) {
             UserGateway gateway = tx.newUserGateway();
             user = gateway.getUserByUsername(username);
@@ -185,6 +186,7 @@ public class TopicService {
             return false;
         }
         subscribeToTopic(user, topic);
+
         return true;
     }
 
@@ -330,6 +332,7 @@ public class TopicService {
      */
     public Topic getTopicByID(final int topicID) {
         Topic topic = null;
+
         try (Transaction transaction = transactionManager.begin()) {
             topic = transaction.newTopicGateway().findTopic(topicID);
             transaction.commit();
@@ -340,6 +343,7 @@ public class TopicService {
             log.error("Error while loading the topic with id " + topicID, e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return topic;
     }
 
@@ -440,6 +444,7 @@ public class TopicService {
     public List<Report> getSelectedReports(final Topic topic, final Selection selection, final boolean showOpenReports,
                                            final boolean showClosedReports) {
         List<Report> reports = null;
+
         try (Transaction transaction = transactionManager.begin()) {
             reports = transaction.newReportGateway()
                     .getSelectedReports(topic, selection, showOpenReports, showClosedReports);
@@ -451,6 +456,7 @@ public class TopicService {
             log.error("Error while loading the selected reports in a topic", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return reports;
     }
 
@@ -463,6 +469,7 @@ public class TopicService {
      */
     public List<User> getSelectedModerators(final Topic topic, final Selection selection) {
         List<User> users = null;
+
         try (Transaction tx = transactionManager.begin()) {
             users = tx.newUserGateway().getSelectedModerators(topic, selection);
             tx.commit();
@@ -472,6 +479,7 @@ public class TopicService {
             log.error("Error while loading the selected moderators for the topic with id " + topic.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return users;
     }
 
@@ -484,6 +492,7 @@ public class TopicService {
      */
     public List<User> getSelectedBannedUsers(final Topic topic, final Selection selection) {
         List<User> users = null;
+
         try (Transaction tx = transactionManager.begin()) {
             users = tx.newUserGateway().getSelectedBannedUsers(topic, selection);
             tx.commit();
@@ -493,6 +502,7 @@ public class TopicService {
             log.error("Error while loading the banned users for the topic with id " + topic.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return users;
     }
 
@@ -517,9 +527,10 @@ public class TopicService {
      */
     public int getNumberOfReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
         int numberOfTopics = 0;
-        try (Transaction transaction = transactionManager.begin()) {
-            numberOfTopics = transaction.newTopicGateway().countReports(topic, showOpenReports, showClosedReports);
-            transaction.commit();
+
+        try (Transaction tx = transactionManager.begin()) {
+            numberOfTopics = tx.newTopicGateway().countReports(topic, showOpenReports, showClosedReports);
+            tx.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The topic could not be found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
@@ -527,6 +538,7 @@ public class TopicService {
             log.error("Error while loading the topic.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return numberOfTopics;
     }
 
@@ -538,15 +550,18 @@ public class TopicService {
      */
     public int getNumberOfModerators(final Topic topic) {
         int numberMods = 0;
+
         try (Transaction transaction = transactionManager.begin()) {
             numberMods = transaction.newTopicGateway().countModerators(topic);
             transaction.commit();
         } catch (NotFoundException e) {
-            log.warning("No moderators could be found for the topic with id " + topic.getId(), e);
+            log.error("The topic with id " + topic.getId() + " could not be found!", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while counting the number of moderators for the topic with id " + topic.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return numberMods;
     }
 
@@ -558,6 +573,7 @@ public class TopicService {
      */
     public int getNumberOfBannedUsers(final Topic topic) {
         int bannedUsers = 0;
+
         try (Transaction tx = transactionManager.begin()) {
             bannedUsers = tx.newTopicGateway().countBannedUsers(topic);
             tx.commit();
@@ -567,6 +583,7 @@ public class TopicService {
             log.error("Error while counting the number of banned users for the topic with id " + topic.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return bannedUsers;
     }
 
@@ -635,6 +652,7 @@ public class TopicService {
      */
     public boolean isModerator(final User user, final Topic topic) {
         boolean isMod = false;
+
         try (Transaction tx = transactionManager.begin()) {
             isMod = tx.newUserGateway().isModerator(user, topic);
             tx.commit();
@@ -643,6 +661,7 @@ public class TopicService {
                     + "topic with id " + topic.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return isMod;
     }
 
@@ -655,6 +674,7 @@ public class TopicService {
      */
     public boolean isBanned(final User user, final Topic topic) {
         boolean isBanned = false;
+
         try (Transaction tx = transactionManager.begin()) {
             isBanned = tx.newUserGateway().isBanned(user, topic);
             tx.commit();
@@ -663,6 +683,7 @@ public class TopicService {
                     + "with id " + topic.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return isBanned;
     }
 
@@ -688,6 +709,7 @@ public class TopicService {
         }
 
         boolean status;
+
         try (Transaction tx = transactionManager.begin()) {
             status = tx.newSubscriptionGateway().isSubscribed(user, topic);
             tx.commit();
@@ -700,6 +722,7 @@ public class TopicService {
             log.error("Error when determining subscription status of user " + user + " to topic " + topic + ".");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
         return status;
     }
 
