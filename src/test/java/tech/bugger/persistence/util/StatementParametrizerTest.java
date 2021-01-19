@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
-import tech.bugger.global.transfer.Language;
+import tech.bugger.global.transfer.User;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -123,10 +123,10 @@ public class StatementParametrizerTest {
 
     @Test
     public void testObject4() throws Exception {
-        Language lang = Language.ENGLISH;
+        User.ProfileVisibility vis = User.ProfileVisibility.FULL;
         int type = Types.OTHER;
-        parametrizer.object(lang, type);
-        verify(stmt).setObject(1, lang, type);
+        parametrizer.object(vis, type);
+        verify(stmt).setObject(1, vis, type);
     }
 
     @Test

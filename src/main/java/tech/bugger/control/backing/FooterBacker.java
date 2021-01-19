@@ -10,7 +10,7 @@ import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Registry;
-import tech.bugger.global.transfer.Language;
+import tech.bugger.global.util.Constants;
 
 /**
  * Backing Bean for the footer.
@@ -35,7 +35,7 @@ public class FooterBacker implements Serializable {
     /**
      * The currently selected language.
      */
-    private Language language;
+    private Locale language;
 
     /**
      * Whether the help is displayed for the current page.
@@ -52,19 +52,14 @@ public class FooterBacker implements Serializable {
     public FooterBacker(final UserSession session, final Registry registry) {
         this.session = session;
         this.helpBundle = registry.getBundle("help", session);
-        language = Language.of(session.getLocale());
+        language = session.getLocale();
     }
 
     /**
-     * Changes language. The change is effective for the whole session.
+     * Reloads the language. The change is effective for the whole session.
      */
     public void changeLanguage() {
-        session.setLocale(
-                switch (language) {
-                    case ENGLISH -> Locale.ENGLISH;
-                    case GERMAN -> Locale.GERMAN;
-                }
-        );
+        session.setLocale(language);
     }
 
     /**
@@ -93,8 +88,8 @@ public class FooterBacker implements Serializable {
      *
      * @return An array of supported website languages.
      */
-    public Language[] getAvailableLanguages() {
-        return Language.values();
+    public Locale[] getAvailableLanguages() {
+        return Constants.LANGUAGES;
     }
 
     /**
@@ -102,8 +97,8 @@ public class FooterBacker implements Serializable {
      *
      * @return The selected language.
      */
-    public Language getLanguage() {
-        return language;
+    public Locale getLanguage() {
+        return session.getLocale();
     }
 
     /**
@@ -111,8 +106,9 @@ public class FooterBacker implements Serializable {
      *
      * @param language The language to set.
      */
-    public void setLanguage(final Language language) {
+    public void setLanguage(final Locale language) {
         this.language = language;
+        session.setLocale(language);
     }
 
     /**

@@ -13,7 +13,6 @@ import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.control.util.JFConfig;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
@@ -97,7 +96,7 @@ public class RegisterBacker {
         }
 
         user = new User();
-        user.setPreferredLanguage(Language.of(session.getLocale()));
+        user.setPreferredLanguage(session.getLocale());
     }
 
     /**
