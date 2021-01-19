@@ -7,7 +7,6 @@ import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;

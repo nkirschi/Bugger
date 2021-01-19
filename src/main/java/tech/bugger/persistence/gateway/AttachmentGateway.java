@@ -26,7 +26,7 @@ public interface AttachmentGateway {
      * @return The attachment's content.
      * @throws NotFoundException The attachment could not be found.
      */
-    byte[] findContent(final int id) throws NotFoundException;
+    byte[] findContent(int id) throws NotFoundException;
 
     /**
      * Retrieves the list of attachments of a given post.
