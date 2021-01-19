@@ -199,15 +199,18 @@ public class TopicBacker implements Serializable {
         if ((!ext.getRequestParameterMap().containsKey("id"))) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
+
         try {
             topicID = Integer.parseInt(ext.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
+
         topic = topicService.getTopicByID(topicID);
         if (topic == null) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
         }
+
         displayDialog = null;
         userBanSuggestions = new ArrayList<>();
         userModSuggestions = new ArrayList<>();
@@ -228,7 +231,6 @@ public class TopicBacker implements Serializable {
         };
 
         bannedUsers = new Paginator<>("username", Selection.PageSize.TINY) {
-
             @Override
             protected Iterable<User> fetch() {
                 return topicService.getSelectedBannedUsers(topic, getSelection());

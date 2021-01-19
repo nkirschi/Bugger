@@ -528,9 +528,9 @@ public class TopicService {
     public int getNumberOfReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
         int numberOfTopics = 0;
 
-        try (Transaction transaction = transactionManager.begin()) {
-            numberOfTopics = transaction.newTopicGateway().countReports(topic, showOpenReports, showClosedReports);
-            transaction.commit();
+        try (Transaction tx = transactionManager.begin()) {
+            numberOfTopics = tx.newTopicGateway().countReports(topic, showOpenReports, showClosedReports);
+            tx.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The topic could not be found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
