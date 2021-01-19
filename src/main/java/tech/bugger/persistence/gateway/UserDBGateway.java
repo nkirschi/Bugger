@@ -68,7 +68,7 @@ public class UserDBGateway implements UserGateway {
                 .bytes(user.getAvatar().get())
                 .bytes(user.getAvatarThumbnail())
                 .string(user.getBiography())
-                .string(user.getPreferredLanguage().getCountry())
+                .string(user.getPreferredLanguage().getLanguage())
                 .object(user.getProfileVisibility(), Types.OTHER)
                 .object(user.getForcedVotingWeight(), Types.INTEGER)
                 .bool(user.isAdministrator());
