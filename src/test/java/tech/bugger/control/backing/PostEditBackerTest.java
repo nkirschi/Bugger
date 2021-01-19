@@ -87,7 +87,8 @@ public class PostEditBackerTest {
                 new Authorship(null, null, null, null), mock(ZonedDateTime.class),
                 null, null, false, 1);
         post = new Post(5678, "Some content", new Lazy<>(report), new Authorship(null, null, null, null), attachments);
-        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
+        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
+                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
 
         lenient().doReturn(ectx).when(fctx).getExternalContext();
@@ -156,7 +157,7 @@ public class PostEditBackerTest {
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
         doReturn(post).when(postService).getPostByID(5678);
-        doReturn(true).when(postService).canModify(user, post);
+        doReturn(true).when(postService).isPrivileged(user, post);
         postEditBacker.init();
         assertFalse(postEditBacker.isCreate());
         assertEquals(post.getAttachments(), postEditBacker.getAttachments());
@@ -188,7 +189,7 @@ public class PostEditBackerTest {
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
         doReturn(post).when(postService).getPostByID(5678);
-        doReturn(false).when(postService).canModify(user, post);
+        doReturn(false).when(postService).isPrivileged(user, post);
         postEditBacker.init();
         verify404Redirect();
     }
@@ -199,7 +200,7 @@ public class PostEditBackerTest {
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
         doReturn(post).when(postService).getPostByID(5678);
-        doReturn(true).when(postService).canModify(user, post);
+        doReturn(true).when(postService).isPrivileged(user, post);
         post.setReport(null);
         postEditBacker.init();
         verify404Redirect();

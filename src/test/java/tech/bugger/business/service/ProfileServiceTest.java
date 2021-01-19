@@ -106,10 +106,11 @@ public class ProfileServiceTest {
         lenient().doReturn(userGateway).when(tx).newUserGateway();
         lenient().doReturn(subscriptionGateway).when(tx).newSubscriptionGateway();
         lenient().doReturn(reportGateway).when(tx).newReportGateway();
-        testUser = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
+        testUser = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
+                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         admin = new User(3, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@admin.de", "Helgo", "Brötchen",
-                new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "Ich bin der Administrator hier!",
+                new byte[]{1, 2, 3, 4}, new byte[]{1}, "Ich bin der Administrator hier!",
                 Locale.ENGLISH, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, true);
         testTopic = new Topic(1, "title", "description");
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",

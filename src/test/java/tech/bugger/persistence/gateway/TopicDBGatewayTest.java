@@ -45,7 +45,8 @@ class TopicDBGatewayTest {
         connection = DBExtension.getConnection();
         topicGateway = new TopicDBGateway(connection);
         userGateway = new UserDBGateway(connection);
-        user = new User(null, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
+        user = new User(null, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
+                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic1 = new Topic(null, "topic1", "description");
         topic2 = new Topic(null, "topic2", "description");
