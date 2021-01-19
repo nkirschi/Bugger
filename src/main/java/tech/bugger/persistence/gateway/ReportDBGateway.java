@@ -10,6 +10,7 @@ import java.sql.Types;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Report;
@@ -187,26 +188,30 @@ public class ReportDBGateway implements ReportGateway {
     @Override
     public List<Report> getSelectedReports(final Topic topic, final Selection selection, final boolean showOpenReports,
                                            final boolean showClosedReports) {
-        List<Report> selectedReports = new ArrayList<>(Math.max(0, selection.getTotalSize()));
-        String filter = "";
-        if (!showClosedReports && !showOpenReports) {
-            return selectedReports;
-        } else if (!showClosedReports) {
-            filter = "AND closed_at IS NULL";
-        } else if (!showOpenReports) {
-            filter = "AND closed_at IS NOT NULL";
+        if (!showOpenReports && !showClosedReports) {
+            return Collections.emptyList();
         }
+
+        List<Report> selectedReports = new ArrayList<>();
+        String filter = "";
+        if (showOpenReports && !showClosedReports) {
+            filter = " AND closed_at IS NULL";
+        } else if (!showOpenReports) {
+            filter = " AND closed_at IS NOT NULL";
+        }
+
         String sql = "SELECT * FROM report AS r"
                 + " LEFT OUTER JOIN report_relevance AS v ON r.id = v.report"
                 + " WHERE topic = ? " + filter
                 + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
                 + " LIMIT ? OFFSET ?;";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            PreparedStatement statement = new StatementParametrizer(stmt)
+            ResultSet rs = new StatementParametrizer(stmt)
                     .integer(topic.getId())
                     .integer(Pagitable.getItemLimit(selection))
-                    .integer(Pagitable.getItemOffset(selection)).toStatement();
-            ResultSet rs = statement.executeQuery();
+                    .integer(Pagitable.getItemOffset(selection))
+                    .toStatement().executeQuery();
+
             while (rs.next()) {
                 selectedReports.add(extractRelevanceFromResultSet(getReportFromResultSet(rs, userGateway), rs));
             }

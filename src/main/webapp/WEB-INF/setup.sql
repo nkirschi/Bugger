@@ -63,7 +63,7 @@ CREATE TABLE "user" (
     avatar BYTEA NOT NULL DEFAULT '',
     avatar_thumbnail BYTEA NOT NULL DEFAULT '',
     biography VARCHAR,
-    preferred_language VARCHAR NOT NULL DEFAULT 'ENGLISH',
+    preferred_language VARCHAR NOT NULL DEFAULT 'en',
     profile_visibility user_profile_visibility NOT NULL DEFAULT 'FULL',
     registered_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     forced_voting_weight INTEGER,

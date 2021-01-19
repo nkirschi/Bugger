@@ -1,5 +1,9 @@
 package tech.bugger.persistence.gateway;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
@@ -8,11 +12,6 @@ import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Subscription gateway that gives access to subscription relationships stored in a database.
@@ -389,11 +388,11 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
         }
         String sql = "SELECT * FROM topic_subscription WHERE subscriber = ? AND topic = ?;";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            PreparedStatement statement = new StatementParametrizer(stmt)
+            return new StatementParametrizer(stmt)
                     .integer(user.getId())
-                    .integer(topic.getId()).toStatement();
-            ResultSet rs = statement.executeQuery();
-            return rs.next();
+                    .integer(topic.getId())
+                    .toStatement().executeQuery()
+                    .next();
         } catch (SQLException e) {
             log.error("Error when determining subscription status of user " + user + " to topic " + topic + ".", e);
             throw new StoreException("Error when determining subscription status of user " + user + " to topic "
@@ -421,11 +420,11 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
         }
         String sql = "SELECT * FROM report_subscription WHERE subscriber = ? AND report = ?;";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            PreparedStatement statement = new StatementParametrizer(stmt)
+            return new StatementParametrizer(stmt)
                     .integer(user.getId())
-                    .integer(report.getId()).toStatement();
-            ResultSet rs = statement.executeQuery();
-            return rs.next();
+                    .integer(report.getId())
+                    .toStatement().executeQuery()
+                    .next();
         } catch (SQLException e) {
             log.error("Error when determining subscription status of user " + user + " to report " + report + ".", e);
             throw new StoreException("Error when determining subscription status of user " + user + " to report "
@@ -453,11 +452,11 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
         }
         String sql = "SELECT * FROM user_subscription WHERE subscriber = ? AND subscribee = ?;";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            PreparedStatement statement = new StatementParametrizer(stmt)
+            return new StatementParametrizer(stmt)
                     .integer(subscriber.getId())
-                    .integer(subscribedTo.getId()).toStatement();
-            ResultSet rs = statement.executeQuery();
-            return rs.next();
+                    .integer(subscribedTo.getId())
+                    .toStatement().executeQuery()
+                    .next();
         } catch (SQLException e) {
             log.error("Error when determining subscription status of user " + subscriber + " to user " + subscribedTo
                     + ".", e);

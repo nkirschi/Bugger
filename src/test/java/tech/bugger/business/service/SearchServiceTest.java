@@ -7,10 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.business.util.Feedback;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.SearchGateway;
 import tech.bugger.persistence.util.Transaction;
@@ -19,15 +17,16 @@ import tech.bugger.persistence.util.TransactionManager;
 import javax.enterprise.event.Event;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -61,7 +60,7 @@ public class SearchServiceTest {
         when(tx.newSearchGateway()).thenReturn(searchGateway);
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
-                Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic = new Topic(1, "title", "description");
     }
 

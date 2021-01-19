@@ -1,19 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import tech.bugger.DBExtension;
-import tech.bugger.LogExtension;
-import tech.bugger.global.transfer.Language;
-import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
-import tech.bugger.persistence.exception.NotFoundException;
-import tech.bugger.persistence.exception.StoreException;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,19 +8,23 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.DBExtension;
+import tech.bugger.LogExtension;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Lazy;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.StoreException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
@@ -57,7 +47,7 @@ class TopicDBGatewayTest {
         userGateway = new UserDBGateway(connection);
         user = new User(null, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
-                Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic1 = new Topic(null, "topic1", "description");
         topic2 = new Topic(null, "topic2", "description");
     }
@@ -436,9 +426,7 @@ class TopicDBGatewayTest {
     @Test
     public void testCountModeratorsNotFound() {
         topicGateway.createTopic(topic1);
-        assertThrows(NotFoundException.class,
-                () -> topicGateway.countModerators(topic1)
-        );
+        assertEquals(0, topicGateway.countModerators(topic1));
     }
 
     @Test
@@ -467,9 +455,7 @@ class TopicDBGatewayTest {
         doReturn(false).when(resultSetMock).next();
         doReturn(resultSetMock).when(stmtMock).executeQuery();
         doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
-        assertThrows(NotFoundException.class,
-                () -> new TopicDBGateway(connectionSpy).countModerators(topic1)
-        );
+        assertEquals(0, new TopicDBGateway(connectionSpy).countModerators(topic1));
     }
 
     @Test

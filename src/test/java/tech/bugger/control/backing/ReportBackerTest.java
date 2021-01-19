@@ -3,6 +3,7 @@ package tech.bugger.control.backing;
 import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -22,7 +23,6 @@ import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
@@ -70,7 +70,7 @@ public class ReportBackerTest {
         reportBacker = new ReportBacker(settings, topicService, reportService, postService, session, fctx);
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
-                Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         report = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
                 mock(ZonedDateTime.class), null, null, false, 1);
     }

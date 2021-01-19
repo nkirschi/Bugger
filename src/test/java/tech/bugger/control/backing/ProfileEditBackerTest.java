@@ -1,6 +1,7 @@
 package tech.bugger.control.backing;
 
 import com.sun.faces.context.RequestParameterMap;
+import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,10 +12,8 @@ import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 
 import javax.faces.application.Application;
 import javax.faces.application.NavigationHandler;
@@ -91,7 +90,7 @@ public class ProfileEditBackerTest {
     public void setup() throws NoSuchFieldException {
         user = new User(12345, "Helgi", "v3ry_s3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen",
                 new byte[1], new byte[]{1}, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
-                Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         emailToken = new Token(TOKEN, Token.Type.CHANGE_EMAIL, ZonedDateTime.now(), EMAIL, user);
         MockitoAnnotations.openMocks(this);
         profileEditBacker = new ProfileEditBacker(authenticationService, profileService, session, fctx);

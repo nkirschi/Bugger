@@ -1,17 +1,6 @@
 package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
-import tech.bugger.global.transfer.Language;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-import tech.bugger.global.util.Pagitable;
-import tech.bugger.persistence.exception.NotFoundException;
-import tech.bugger.persistence.exception.StoreException;
-import tech.bugger.persistence.util.StatementParametrizer;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,6 +10,16 @@ import java.sql.Types;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
+import tech.bugger.global.util.Pagitable;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
 
 /**
  * User gateway that gives access to user stored in a database.
@@ -68,7 +67,7 @@ public class UserDBGateway implements UserGateway {
                 .bytes(user.getAvatar())
                 .bytes(user.getAvatarThumbnail())
                 .string(user.getBiography())
-                .string(user.getPreferredLanguage().name())
+                .string(user.getPreferredLanguage().getLanguage())
                 .object(user.getProfileVisibility(), Types.OTHER)
                 .object(user.getForcedVotingWeight(), Types.INTEGER)
                 .bool(user.isAdministrator());
@@ -100,7 +99,7 @@ public class UserDBGateway implements UserGateway {
                 rs.getString(prefix + "first_name"), rs.getString(prefix + "last_name"),
                 new byte[0], rs.getBytes(prefix + "avatar_thumbnail"),
                 rs.getString(prefix + "biography"),
-                Language.valueOf(rs.getString(prefix + "preferred_language").toUpperCase()),
+                Locale.forLanguageTag(rs.getString(prefix + "preferred_language").toUpperCase()),
                 User.ProfileVisibility.valueOf(rs.getString(prefix + "profile_visibility").toUpperCase()),
                 rs.getTimestamp(prefix + "registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
                 rs.getObject(prefix + "forced_voting_weight", Integer.class), rs.getBoolean(prefix + "is_admin"
@@ -245,7 +244,7 @@ public class UserDBGateway implements UserGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<User> getSelectedModerators(final Topic topic, final Selection selection) throws NotFoundException {
+    public List<User> getSelectedModerators(final Topic topic, final Selection selection) {
         validTopicSelection(topic, selection);
 
         List<User> moderators = new ArrayList<>(Math.max(0, selection.getTotalSize()));
@@ -253,17 +252,12 @@ public class UserDBGateway implements UserGateway {
                 + "WHERE t.topic = ? AND u.id = t.moderator ORDER BY u.username ASC LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(topic.getId())
-                    .integer(selection.getPageSize().getSize())
-                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
+                    .integer(Pagitable.getItemLimit(selection))
+                    .integer(Pagitable.getItemOffset(selection))
                     .toStatement().executeQuery();
 
             while (rs.next()) {
                 moderators.add(getUserFromResultSet(rs));
-            }
-
-            if (moderators.size() == 0) {
-                log.warning("The topic with id " + topic.getId() + " has no moderators.");
-                throw new NotFoundException("The topic with id " + topic.getId() + " has no moderators.");
             }
         } catch (SQLException e) {
             log.error("Error while loading the moderators of the topic with id " + topic.getId(), e);

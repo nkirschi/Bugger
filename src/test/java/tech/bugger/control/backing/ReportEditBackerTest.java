@@ -1,6 +1,7 @@
 package tech.bugger.control.backing;
 
 import java.time.ZonedDateTime;
+import java.util.Locale;
 import java.util.Map;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -16,7 +17,6 @@ import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Authorship;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
@@ -82,7 +82,7 @@ public class ReportEditBackerTest {
         testTopic = new Topic(1, "Some title", "Some description");
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
-                Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         reportEditBacker.setCurrentTopic(testTopic);
         lenient().doReturn(testTopic).when(topicService).getTopicByID(1);
         lenient().doReturn(ectx).when(fctx).getExternalContext();

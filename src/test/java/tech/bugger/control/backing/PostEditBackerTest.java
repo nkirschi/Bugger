@@ -1,5 +1,6 @@
 package tech.bugger.control.backing;
 
+import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +12,6 @@ import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
@@ -89,7 +89,7 @@ public class PostEditBackerTest {
         post = new Post(5678, "Some content", new Lazy<>(report), new Authorship(null, null, null, null), attachments);
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
-                Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
 
         lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
