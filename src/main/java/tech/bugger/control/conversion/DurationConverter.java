@@ -1,4 +1,4 @@
-package tech.bugger.control.util;
+package tech.bugger.control.conversion;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
