@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
+import java.util.Locale;
 import javax.faces.application.Application;
 import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
@@ -18,18 +19,11 @@ import org.mockito.MockitoAnnotations;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.doThrow;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class LoginBackerTest {
@@ -67,7 +61,7 @@ public class LoginBackerTest {
     public void setup() {
         user = new User(12345, "Helgi", "v3rys3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen",
                 new Lazy<>(new byte[0]), null, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= "
-                + "endorsement", Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
+                + "endorsement", Locale.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         MockitoAnnotations.openMocks(this);
         loginBacker = new LoginBacker(authenticationService, session, fctx);
         loginBacker.setUsername(user.getUsername());

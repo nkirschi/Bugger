@@ -1,6 +1,7 @@
 package tech.bugger.control.backing;
 
 import com.sun.faces.context.RequestParameterMap;
+import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +14,6 @@ import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Authorship;
-import tech.bugger.global.transfer.Language;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
@@ -81,10 +81,10 @@ public class ProfileBackerTest {
     public void setup() {
         user = new User(12345, "Helgi", "v3ry_s3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen", null,
                 new byte[]{1}, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
-                Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         otherUser = new User(67890, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@web.de", "Helgo", "Brötchen", null,
                 new byte[]{1}, "Hallo, ich bin der Helgo | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
-                Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         topic = new Topic(1, "Some title", "Some description");
         report = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
                 mock(ZonedDateTime.class), null, null, false, 1);

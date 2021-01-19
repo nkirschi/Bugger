@@ -173,8 +173,12 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      * Updates the paginated data model using the current parameters in {@code pagination}.
      */
     public void update() {
-        setWrappedData(fetch());
-        selection.setTotalSize(totalSize());
+        int size = totalSize();
+        selection.setTotalSize(size);
+
+        if (size != 0 || !isEmpty()) {
+            setWrappedData(fetch());
+        }
     }
 
     /**
