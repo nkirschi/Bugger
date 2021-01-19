@@ -68,13 +68,11 @@ public class UserDBGatewayTest {
         reportGateway = new ReportDBGateway(connection, userGateway);
 
         user = new User(2, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
-                        "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
+                        "User", new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                         Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         admin = new User(3, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@admin.de", "Helgo", "Brötchen",
-                         new Lazy<>(new byte[]{1, 2, 3, 4}),
-                         new byte[]{1}, "Ich bin der Administrator hier!", Language.ENGLISH,
-                         User.ProfileVisibility.MINIMAL,
-                         ZonedDateTime.now(), null, true);
+                         new byte[]{1, 2, 3, 4}, new byte[]{1}, "Ich bin der Administrator hier!", Language.ENGLISH,
+                         User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, true);
         topic = new Topic(null, "title", "description");
         report = new Report(null, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
                 mock(ZonedDateTime.class), null, null, false, null);
@@ -119,12 +117,6 @@ public class UserDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any(), anyInt());
         assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).createUser(new User(user)));
-    }
-
-    @Test
-    public void testCreateUserAbsentAvatar() {
-        user.setAvatar(new Lazy<>(() -> null));
-        assertThrows(IllegalArgumentException.class, () -> userGateway.createUser(user));
     }
 
     @Test
@@ -196,13 +188,6 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testUpdateUserAbsentAvatar() {
-        user.setId(1);
-        user.setAvatar(new Lazy<>(() -> null));
-        assertThrows(IllegalArgumentException.class, () -> userGateway.updateUser(user));
-    }
-
-    @Test
     public void testGetUserByEmailNotFound() {
         assertThrows(NotFoundException.class, () -> userGateway.getUserByEmail("t@t.tk"));
     }
@@ -236,6 +221,24 @@ public class UserDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).getUserByUsername("testuser"));
+    }
+
+    @Test
+    public void testGetAvatarForUserNotFound() {
+        assertThrows(NotFoundException.class, () -> userGateway.getAvatarForUser(42));
+    }
+
+    @Test
+    public void testGetAvatarForUserFound() throws Exception {
+        DBExtension.insertMinimalTestData();
+        assertArrayEquals("testavatar".getBytes(), userGateway.getAvatarForUser(2));
+    }
+
+    @Test
+    public void testGetAvatarForUserWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new UserDBGateway(connectionSpy).getAvatarForUser(0));
     }
 
     @Test

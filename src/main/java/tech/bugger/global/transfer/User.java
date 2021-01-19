@@ -74,7 +74,7 @@ public class User implements Serializable {
     /**
      * This user's avatar, loaded lazily.
      */
-    private Lazy<byte[]> avatar;
+    private byte[] avatar;
 
     /**
      * This user's avatar thumbnail.
@@ -115,7 +115,7 @@ public class User implements Serializable {
      * Constructs an empty user.
      */
     public User() {
-        this(null, "", null, null, null, "", "", "", new Lazy<>(new byte[0]), new byte[0],
+        this(null, "", null, null, null, "", "", "", new byte[0], new byte[0],
                 "", Language.ENGLISH, User.ProfileVisibility.FULL, null, null, false);
     }
 
@@ -141,7 +141,7 @@ public class User implements Serializable {
      */
     public User(final Integer id, final String username, final String passwordHash, final String passwordSalt,
                 final String hashingAlgorithm, final String emailAddress, final String firstName,
-                final String lastName, final Lazy<byte[]> avatar, final byte[] avatarThumbnail,
+                final String lastName, final byte[] avatar, final byte[] avatarThumbnail,
                 final String biography, final Language preferredLanguage, final ProfileVisibility profileVisibility,
                 final ZonedDateTime registrationDate, final Integer forcedVotingWeight, final boolean administrator) {
         this.id = id;
@@ -323,7 +323,7 @@ public class User implements Serializable {
      *
      * @return The user's avatar.
      */
-    public Lazy<byte[]> getAvatar() {
+    public byte[] getAvatar() {
         return avatar;
     }
 
@@ -332,7 +332,7 @@ public class User implements Serializable {
      *
      * @param avatar The user's avatar to be set.
      */
-    public void setAvatar(final Lazy<byte[]> avatar) {
+    public void setAvatar(final byte[] avatar) {
         this.avatar = avatar;
     }
 
@@ -355,9 +355,9 @@ public class User implements Serializable {
     }
 
     /**
-     * Returns whether the avatar is non-empty.
+     * Returns whether the avatar thumbnail is non-empty.
      *
-     * @return Whether the avatar is non-empty.
+     * @return Whether the avatar thumbnail is non-empty.
      */
     public boolean isExistsAvatar() {
         return avatarThumbnail != null && avatarThumbnail.length > 0;
@@ -536,10 +536,8 @@ public class User implements Serializable {
                 + ", emailAddress='" + emailAddress + '\''
                 + ", firstName='" + firstName + '\''
                 + ", lastName='" + lastName + '\''
-                + ", avatar=" + (avatar == null ? "null"
-                : avatar.toString(a -> String.format("%.20s", Arrays.toString(a))))
-                + ", avatarThumbnail=" + (avatar == null ? "null"
-                : String.format("%.20s", Arrays.toString(avatarThumbnail)))
+                + ", avatar=byte[" + (avatar == null ? 0 : avatar.length) + ']'
+                + ", avatar=byte[" + (avatarThumbnail == null ? 0 : avatarThumbnail.length) + ']'
                 + ", biography='" + biography + '\''
                 + ", preferredLanguage=" + preferredLanguage
                 + ", profileVisibility=" + profileVisibility

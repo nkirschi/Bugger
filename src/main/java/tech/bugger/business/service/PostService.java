@@ -241,27 +241,6 @@ public class PostService {
     }
 
     /**
-     * Returns the content of an attachment.
-     *
-     * @param attachment The attachment whose content to retrieve.
-     * @return The content of the attachment if it was found, {@code null} otherwise.
-     */
-    public byte[] getAttachmentContent(final Attachment attachment) {
-        try (Transaction tx = transactionManager.begin()) {
-            byte[] content = tx.newAttachmentGateway().findContent(attachment);
-            tx.commit();
-            return content;
-        } catch (NotFoundException e) {
-            log.debug("Attachment content not found.", e);
-            return null;
-        } catch (TransactionException e) {
-            log.error("Error while searching for attachment content.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
-            return null;
-        }
-    }
-
-    /**
      * Checks whether an uploaded attachment can be added to a given post and, if so, adds it to the post.
      *
      * @param post The post to add the attachment to.
@@ -286,7 +265,7 @@ public class PostService {
 
         Attachment attachment = new Attachment();
         attachment.setName(part.getSubmittedFileName());
-        attachment.setContent(new Lazy<>(content));
+        attachment.setContent(content);
         attachment.setMimetype(part.getContentType());
         attachment.setPost(new Lazy<>(post));
 
@@ -370,6 +349,27 @@ public class PostService {
     }
 
     /**
+     * Returns the content of an attachment with the specified ID.
+     *
+     * @param id The ID of the attachment whose content to retrieve.
+     * @return The content of the attachment if it was found, {@code null} otherwise.
+     */
+    public byte[] getAttachmentContent(final int id) {
+        try (Transaction tx = transactionManager.begin()) {
+            byte[] content = tx.newAttachmentGateway().findContent(id);
+            tx.commit();
+            return content;
+        } catch (NotFoundException e) {
+            log.debug("Attachment content not found.", e);
+            return null;
+        } catch (TransactionException e) {
+            log.error("Error while searching for attachment content.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            return null;
+        }
+    }
+
+    /**
      * Returns the attachments of one particular post.
      *
      * @param post The post in question.
@@ -407,7 +407,7 @@ public class PostService {
      * @param post The post in question.
      * @return {@code true} iff the user is allowed to modify the post.
      */
-    public boolean canModify(final User user, final Post post) {
+    public boolean isPrivileged(final User user, final Post post) {
         if (user == null || post == null) {
             return false;
         } else if (user.isAdministrator()) {

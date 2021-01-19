@@ -66,7 +66,7 @@ public class LoginBackerTest {
     @BeforeEach
     public void setup() {
         user = new User(12345, "Helgi", "v3rys3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen",
-                new Lazy<>(new byte[0]), null, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= "
+                new byte[0], null, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= "
                 + "endorsement", Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         MockitoAnnotations.openMocks(this);
         loginBacker = new LoginBacker(authenticationService, session, fctx);

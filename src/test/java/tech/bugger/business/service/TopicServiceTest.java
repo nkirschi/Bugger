@@ -86,7 +86,8 @@ class TopicServiceTest {
         testSelectedTopics.add(testTopic3);
         testNumberOfTopics = testSelectedTopics.size();
         testSelection = new Selection(3, 1, Selection.PageSize.NORMAL, "", true);
-        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
+        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
+                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(topicGateway).when(tx).newTopicGateway();

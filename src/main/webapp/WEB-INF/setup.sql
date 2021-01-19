@@ -21,7 +21,7 @@ CREATE TABLE metadata (
 INSERT INTO metadata DEFAULT VALUES;
 
 
-CREATE TABLE system_settings(
+CREATE TABLE system_settings (
     id INTEGER NOT NULL PRIMARY KEY DEFAULT 0,
 
     organization_name VARCHAR NOT NULL DEFAULT 'Bugger',

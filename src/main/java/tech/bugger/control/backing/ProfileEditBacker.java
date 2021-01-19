@@ -182,6 +182,11 @@ public class ProfileEditBacker implements Serializable {
             log.debug("Using the session user's id to find the user in the database.");
         }
 
+        // When editing an existing user, fetch their avatar.
+        if (user != null && !create) {
+            user.setAvatar(profileService.getAvatarForUser(user.getId()));
+        }
+
         if (user == null) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
         } else {
@@ -303,9 +308,9 @@ public class ProfileEditBacker implements Serializable {
      * @return {@code true} iff the avatar was successfully processed.
      */
     boolean uploadAvatar() {
-        Lazy<byte[]> image = deleteAvatar ? new Lazy<>(new byte[0]) : profileService.uploadAvatar(uploadedAvatar);
+        byte[] image = deleteAvatar ? new byte[0] : profileService.uploadAvatar(uploadedAvatar);
         if (image != null) {
-            byte[] thumbnail = deleteAvatar ? new byte[0] : profileService.generateThumbnail(image.get());
+            byte[] thumbnail = deleteAvatar ? new byte[0] : profileService.generateThumbnail(image);
             if (thumbnail != null) {
                 user.setAvatar(image);
                 user.setAvatarThumbnail(thumbnail);

@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Serial;
+import java.util.Date;
 
 /**
  * Custom servlet that serves avatars and avatar thumbnails.
@@ -17,7 +18,7 @@ public abstract class MediaServlet extends HttpServlet {
     /**
      * The time in milliseconds clients should cache content.
      */
-    private static final int CACHE_AGE = 10 * 60 * 1000;
+    private static final int CACHE_AGE = 10 * 60 * 1000; // 10 minutes
 
     /**
      * Handles a media request.
@@ -69,7 +70,8 @@ public abstract class MediaServlet extends HttpServlet {
      * @param response The response to add headers to.
      */
     protected void configureClientCaching(final HttpServletResponse response) {
-        response.setHeader("Cache-Control", "no-cache");
+        long expiry = new Date().getTime() + CACHE_AGE;
+        response.setDateHeader("Expires", expiry);
     }
 
 }

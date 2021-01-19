@@ -11,7 +11,7 @@ import tech.bugger.persistence.exception.NotFoundException;
 public interface AttachmentGateway {
 
     /**
-     * Retrieves an attachment by its ID.
+     * Retrieves an attachment by its ID, leaving its content empty.
      *
      * @param id The ID of the attachment to look for.
      * @return The attachment identified by the ID.
@@ -20,13 +20,13 @@ public interface AttachmentGateway {
     Attachment find(int id) throws NotFoundException;
 
     /**
-     * Retrieves the content of an attachment.
+     * Retrieves the content of an attachment by its ID.
      *
-     * @param attachment The attachment whose content to look for.
+     * @param id The ID of attachment whose content to look for.
      * @return The attachment's content.
      * @throws NotFoundException The attachment could not be found.
      */
-    byte[] findContent(Attachment attachment) throws NotFoundException;
+    byte[] findContent(final int id) throws NotFoundException;
 
     /**
      * Retrieves the list of attachments of a given post.

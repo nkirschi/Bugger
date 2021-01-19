@@ -1,6 +1,5 @@
 package tech.bugger.business.service;
 
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -99,15 +99,14 @@ public class PostServiceTest {
     private Post testPost = new Post(300, "Hi", new Lazy<>(testReport), null, null);
     private Topic testTopic = new Topic(100, "Hi", "I am a topic");
 
-
     @BeforeEach
     public void setUp() {
         service = new PostService(notificationService, topicService, applicationSettings, transactionManager,
                 feedbackEvent, ResourceBundleMocker.mock(""));
         List<Attachment> attachments = Arrays.asList(
-                new Attachment(1, "test1.txt", new Lazy<>(new byte[0]), "", new Lazy<>(testPost)),
-                new Attachment(2, "test2.txt", new Lazy<>(new byte[0]), "", new Lazy<>(testPost)),
-                new Attachment(3, "test3.txt", new Lazy<>(new byte[0]), "", new Lazy<>(testPost))
+                new Attachment(1, "test1.txt", new byte[0], "", new Lazy<>(testPost)),
+                new Attachment(2, "test2.txt", new byte[0], "", new Lazy<>(testPost)),
+                new Attachment(3, "test3.txt", new byte[0], "", new Lazy<>(testPost))
         );
         testPost.setAttachments(new ArrayList<>(attachments));
         testUser.setId(1);
@@ -126,7 +125,7 @@ public class PostServiceTest {
     @Test
     public void testUpdatePost() throws Exception {
         List<Attachment> oldAttachments = new ArrayList<>(testPost.getAttachments());
-        Attachment attachmentToAdd = new Attachment(4, "a-unique-filename.txt", new Lazy<>(new byte[0]), "",
+        Attachment attachmentToAdd = new Attachment(4, "a-unique-filename.txt", new byte[0], "",
                 new Lazy<>(mock(Post.class)));
         Attachment attachmentToDelete = testPost.getAttachments().get(1);
         testPost.getAttachments().add(attachmentToAdd);
@@ -270,7 +269,7 @@ public class PostServiceTest {
         Attachment attachment = testPost.getAttachments().get(testPost.getAttachments().size() - 1);
         assertEquals("a-unique-filename.txt", attachment.getName());
         assertEquals("text/plain", attachment.getMimetype());
-        assertArrayEquals(new byte[]{1, 2, 3, 4}, attachment.getContent().get());
+        assertArrayEquals(new byte[]{1, 2, 3, 4}, attachment.getContent());
         assertEquals(testPost, attachment.getPost().get());
     }
 
@@ -308,8 +307,30 @@ public class PostServiceTest {
     }
 
     @Test
+    public void testGetPostByID() throws Exception {
+        testPost.setId(1234);
+        doReturn(testPost).when(postGateway).find(1234);
+        assertEquals(testPost, service.getPostByID(1234));
+    }
+
+    @Test
+    public void testGetPostByIDWhenNotFound() throws Exception {
+        testPost.setId(1234);
+        doThrow(NotFoundException.class).when(postGateway).find(1234);
+        assertDoesNotThrow(() -> service.getPostByID(1234));
+        verify(feedbackEvent, never()).fire(any());
+    }
+
+    @Test
+    public void testGetPostByIDWhenCommitFailed() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertDoesNotThrow(() -> service.getPostByID(1234));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
     public void testGetAttachmentByID() throws Exception {
-        Attachment attachment = new Attachment(1234, "test1.txt", new Lazy<>(new byte[0]), "", new Lazy<>(testPost));
+        Attachment attachment = new Attachment(1234, "test1.txt", new byte[0], "", new Lazy<>(testPost));
         doReturn(attachment).when(attachmentGateway).find(1234);
         assertEquals(attachment, service.getAttachmentByID(1234));
     }
@@ -318,7 +339,7 @@ public class PostServiceTest {
     public void testGetAttachmentByIDWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(attachmentGateway).find(1234);
         assertDoesNotThrow(() -> service.getAttachmentByID(1234));
-        verify(feedbackEvent, times(0)).fire(any());
+        verify(feedbackEvent, never()).fire(any());
     }
 
     @Test
@@ -329,19 +350,40 @@ public class PostServiceTest {
     }
 
     @Test
+    public void testGetAttachmentContent() throws Exception {
+        byte[] content = new byte[]{1, 2, 3, 4};
+        doReturn(content).when(attachmentGateway).findContent(1234);
+        assertEquals(content, service.getAttachmentContent(1234));
+    }
+
+    @Test
+    public void testGetAttachmentContentWhenNotFound() throws Exception {
+        doThrow(NotFoundException.class).when(attachmentGateway).findContent(1234);
+        assertDoesNotThrow(() -> service.getAttachmentContent(1234));
+        verify(feedbackEvent, never()).fire(any());
+    }
+
+    @Test
+    public void testGetAttachmentContentWhenCommitFailed() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertDoesNotThrow(() -> service.getAttachmentContent(1234));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
     public void testIsPrivilegedWhenUserIsAnon() {
-        assertFalse(service.canModify(null, testPost));
+        assertFalse(service.isPrivileged(null, testPost));
     }
 
     @Test
     public void testIsPrivilegedPostNull() {
-        assertFalse(service.canModify(testUser, null));
+        assertFalse(service.isPrivileged(testUser, null));
     }
 
     @Test
     public void testIsPrivilegedWhenUserIsAdmin() {
         testUser.setAdministrator(true);
-        assertTrue(service.canModify(testUser, testPost));
+        assertTrue(service.isPrivileged(testUser, testPost));
     }
 
     @Test
@@ -349,7 +391,7 @@ public class PostServiceTest {
         testUser.setAdministrator(false);
         doReturn(testTopic).when(topicGateway).findTopic(anyInt());
         doReturn(true).when(userGateway).isBanned(any(), any());
-        assertFalse(service.canModify(testUser, testPost));
+        assertFalse(service.isPrivileged(testUser, testPost));
     }
 
     @Test
@@ -357,7 +399,7 @@ public class PostServiceTest {
         testUser.setAdministrator(false);
         doReturn(testTopic).when(topicGateway).findTopic(anyInt());
         doReturn(true).when(userGateway).isModerator(testUser, testTopic);
-        assertTrue(service.canModify(testUser, testPost));
+        assertTrue(service.isPrivileged(testUser, testPost));
     }
 
     @Test
@@ -366,7 +408,7 @@ public class PostServiceTest {
         Authorship authorship = new Authorship(testUser, null, null, null);
         testPost.setAuthorship(authorship);
         doReturn(testTopic).when(topicGateway).findTopic(anyInt());
-        assertTrue(service.canModify(testUser, testPost));
+        assertTrue(service.isPrivileged(testUser, testPost));
     }
 
     @Test
@@ -374,13 +416,13 @@ public class PostServiceTest {
         doReturn(testTopic).when(topicGateway).findTopic(anyInt());
         Authorship authorship = new Authorship(null, null, null, null);
         testPost.setAuthorship(authorship);
-        assertFalse(service.canModify(testUser, testPost));
+        assertFalse(service.isPrivileged(testUser, testPost));
     }
 
     @Test
     public void testIsPrivilegedNotFound() throws NotFoundException {
         doThrow(NotFoundException.class).when(topicGateway).findTopic(anyInt());
-        assertFalse(service.canModify(testUser, testPost));
+        assertFalse(service.isPrivileged(testUser, testPost));
         verify(feedbackEvent).fire(any());
     }
 
@@ -390,7 +432,7 @@ public class PostServiceTest {
         doThrow(TransactionException.class).when(tx).commit();
         Authorship authorship = new Authorship(null, null, null, null);
         testPost.setAuthorship(authorship);
-        assertFalse(service.canModify(testUser, testPost));
+        assertFalse(service.isPrivileged(testUser, testPost));
         verify(feedbackEvent).fire(any());
     }
 

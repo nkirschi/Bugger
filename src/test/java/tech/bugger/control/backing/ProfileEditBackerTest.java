@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
@@ -88,8 +89,8 @@ public class ProfileEditBackerTest {
 
     @BeforeEach
     public void setup() throws NoSuchFieldException {
-        user = new User(12345, "Helgi", "v3ry_s3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen", new Lazy<>(new byte[1]),
-                new byte[]{1}, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
+        user = new User(12345, "Helgi", "v3ry_s3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen",
+                new byte[1], new byte[]{1}, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         emailToken = new Token(TOKEN, Token.Type.CHANGE_EMAIL, ZonedDateTime.now(), EMAIL, user);
         MockitoAnnotations.openMocks(this);
@@ -205,6 +206,7 @@ public class ProfileEditBackerTest {
                 () -> assertEquals(user.getUsername(), profileEditBacker.getUsernameNew()),
                 () -> assertEquals(ProfileEditBacker.ProfileEditDialog.NONE, profileEditBacker.getDialog())
         );
+        verify(profileService).getAvatarForUser(anyInt());
     }
 
     @Test
@@ -400,14 +402,14 @@ public class ProfileEditBackerTest {
 
     @Test
     public void testUploadAvatar() {
-        Lazy<byte[]> avatar = new Lazy<>(new byte[]{1, 2, 3, 4});
+        byte[] avatar = new byte[]{1, 2, 3, 4};
         byte[] thumbnail = new byte[]{1, 2, 3, 4};
         when(profileService.uploadAvatar(any())).thenReturn(avatar);
         when(profileService.generateThumbnail(any())).thenReturn(thumbnail);
         profileEditBacker.setUser(user);
         assertAll(
                 () -> assertTrue(profileEditBacker.uploadAvatar()),
-                () -> assertEquals(avatar.get(), user.getAvatar().get()),
+                () -> assertEquals(avatar, user.getAvatar()),
                 () -> assertEquals(thumbnail, user.getAvatarThumbnail())
         );
         verify(profileService).uploadAvatar(any());
@@ -420,7 +422,7 @@ public class ProfileEditBackerTest {
         profileEditBacker.setUser(user);
         assertAll(
                 () -> assertTrue(profileEditBacker.uploadAvatar()),
-                () -> assertArrayEquals(new byte[0], user.getAvatar().get()),
+                () -> assertArrayEquals(new byte[0], user.getAvatar()),
                 () -> assertArrayEquals(new byte[0], user.getAvatarThumbnail())
         );
         verify(profileService, never()).generateThumbnail(any());
@@ -428,9 +430,9 @@ public class ProfileEditBackerTest {
 
     @Test
     public void testUploadAvatarGenerateThumbnailFails() {
-        Lazy<byte[]> oldAvatar = user.getAvatar();
+        byte[] oldAvatar = user.getAvatar();
         byte[] oldThumbnail = user.getAvatarThumbnail();
-        Lazy<byte[]> avatar = new Lazy<>(new byte[]{1, 2, 3, 4});
+        byte[] avatar = new byte[]{1, 2, 3, 4};
         when(profileService.uploadAvatar(any())).thenReturn(avatar);
         profileEditBacker.setUser(user);
         assertAll(
@@ -444,7 +446,7 @@ public class ProfileEditBackerTest {
 
     @Test
     public void testUploadAvatarFails() {
-        Lazy<byte[]> oldAvatar = user.getAvatar();
+        byte[] oldAvatar = user.getAvatar();
         byte[] oldThumbnail = user.getAvatarThumbnail();
         profileEditBacker.setUser(user);
         assertAll(

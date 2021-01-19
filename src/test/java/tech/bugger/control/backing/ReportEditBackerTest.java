@@ -80,7 +80,8 @@ public class ReportEditBackerTest {
         reportEditBacker.setReport(testReport);
         reportEditBacker.setReportID(testReport.getId());
         testTopic = new Topic(1, "Some title", "Some description");
-        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
+        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
+                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         reportEditBacker.setCurrentTopic(testTopic);
         lenient().doReturn(testTopic).when(topicService).getTopicByID(1);
