@@ -9,7 +9,6 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Constants;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
@@ -20,7 +19,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 
 /**
  * Backing bean for the profile page.
@@ -40,7 +38,7 @@ public class ProfileBacker implements Serializable {
     /**
      * The type of popup dialog to be rendered on the profile page.
      */
-    enum DialogType {
+    public enum ProfileDialog {
         /**
          * No dialogs are to be rendered.
          */
@@ -110,31 +108,44 @@ public class ProfileBacker implements Serializable {
     /**
      * The type of popup dialog to be rendered.
      */
-    private DialogType displayDialog;
+    private ProfileDialog displayDialog;
 
     /**
      * The current user session.
      */
-    @Inject
-    private UserSession session;
+    private final UserSession session;
 
     /**
      * The current external context.
      */
-    @Inject
-    private FacesContext fctx;
+    private final FacesContext fctx;
 
     /**
      * The profile service providing the business logic for user functionality.
      */
-    @Inject
-    private transient ProfileService profileService;
+    private final transient ProfileService profileService;
 
     /**
      * The topic service providing the business logic for topic functionality.
      */
+    private final transient TopicService topicService;
+
+    /**
+     * Constructs a new profile page backing bean with the necessary dependencies.
+     *
+     * @param topicService      The topic service to use.
+     * @param profileService    The profile service to use.
+     * @param session           The current {@link UserSession}.
+     * @param fctx              The current faces context.
+     */
     @Inject
-    private transient TopicService topicService;
+    public ProfileBacker(final TopicService topicService, final ProfileService profileService,
+                         final UserSession session, final FacesContext fctx) {
+        this.topicService = topicService;
+        this.profileService = profileService;
+        this.session = session;
+        this.fctx = fctx;
+    }
 
     /**
      * Initializes the profile page. Checks whether this is the user's own profile page.
@@ -143,13 +154,18 @@ public class ProfileBacker implements Serializable {
     void init() {
         ExternalContext ext = fctx.getExternalContext();
         // The initialization of the subscriptions will be implemented in the subscriptions feature.
-        if ((!ext.getRequestParameterMap().containsKey("u")) || (ext.getRequestParameterMap().get("u").length()
-                > Constants.USERNAME_MAX)) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
-            return;
+        if (!ext.getRequestParameterMap().containsKey("u")) {
+            if (session.getUser() != null) {
+                username = session.getUser().getUsername();
+            } else {
+                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+                return;
+            }
         }
 
-        username = ext.getRequestParameterMap().get("u");
+        if (username == null) {
+            username = ext.getRequestParameterMap().get("u");
+        }
         user = profileService.getUserByUsername(username);
 
         if (user == null) {
@@ -164,7 +180,7 @@ public class ProfileBacker implements Serializable {
         if ((session.getUser() != null) && (session.getUser().equals(user))) {
             session.setUser(new User(user));
         }
-        displayDialog = DialogType.NONE;
+        displayDialog = ProfileDialog.NONE;
 
         moderatedTopics = new Paginator<>("title", Selection.PageSize.SMALL) {
             @Override
@@ -179,7 +195,7 @@ public class ProfileBacker implements Serializable {
         };
 
         if (isPrivileged()) {
-            topicSubscriptions = new Paginator<>("title", Selection.PageSize.NORMAL) {
+            topicSubscriptions = new Paginator<>("title", Selection.PageSize.SMALL) {
                 @Override
                 protected Iterable<Topic> fetch() {
                     return topicService.selectSubscribedTopics(user, getSelection());
@@ -191,7 +207,7 @@ public class ProfileBacker implements Serializable {
                 }
             };
 
-            userSubscriptions = new Paginator<>("username", Selection.PageSize.NORMAL) {
+            userSubscriptions = new Paginator<>("username", Selection.PageSize.SMALL) {
                 @Override
                 protected Iterable<User> fetch() {
                     return profileService.selectSubscribedUsers(user, getSelection());
@@ -203,7 +219,7 @@ public class ProfileBacker implements Serializable {
                 }
             };
 
-            reportSubscriptions = new Paginator<>("title", Selection.PageSize.NORMAL) {
+            reportSubscriptions = new Paginator<>("title", Selection.PageSize.SMALL) {
                 @Override
                 protected Iterable<Report> fetch() {
                     return profileService.selectSubscribedReports(user, getSelection());
@@ -219,58 +235,51 @@ public class ProfileBacker implements Serializable {
 
     /**
      * Opens the administrator promotion/demotion dialog.
-     */
-    public void openPromoteDemoteAdminDialog() {
-        displayDialog = DialogType.ADMIN;
-    }
-
-    /**
-     * Opens the dialog for deleting all topic subscriptions.
-     */
-    public void openDeleteAllTopicSubscriptionsDialog() {
-        displayDialog = DialogType.TOPIC;
-    }
-
-    /**
-     * Opens the dialog for deleting all report subscriptions.
-     */
-    public void openDeleteAllReportSubscriptionsDialog() {
-        displayDialog = DialogType.REPORT;
-    }
-
-    /**
-     * Opens the dialog for deleting all user subscriptions.
-     */
-    public void openDeleteAllUserSubscriptionsDialog() {
-        displayDialog = DialogType.USER;
-    }
-
-    /**
-     * Closes any open dialog.
-     */
-    public void closeDialog() {
-        displayDialog = DialogType.NONE;
-    }
-
-    /**
-     * Returns the timestamp of the last action in one particular topic. Creating, editing and moving a report as well
-     * as creating and editing posts count as actions. Moving a report is an action in the destination topic only.
      *
-     * @param topic The topic in question.
-     * @return The timestamp of the last action as a {@code ZonedDateTime}.
+     * @return {@code null} to reload the page.
      */
-    public ZonedDateTime lastChanged(final Topic topic) {
+    public String openPromoteDemoteAdminDialog() {
+        displayDialog = ProfileDialog.ADMIN;
         return null;
     }
 
     /**
-     * Returns the timestamp of the last action in one particular report. Creating, editing and moving a report as well
-     * as creating and editing posts count as actions.
+     * Opens the dialog for deleting all topic subscriptions.
      *
-     * @param report The report in question.
-     * @return The timestamp of the last action as a {@code ZonedDateTime}.
+     * @return {@code null} to reload the page.
      */
-    public ZonedDateTime lastChanged(final Report report) {
+    public String openDeleteAllTopicSubscriptionsDialog() {
+        displayDialog = ProfileDialog.TOPIC;
+        return null;
+    }
+
+    /**
+     * Opens the dialog for deleting all report subscriptions.
+     *
+     * @return {@code null} to reload the page.
+     */
+    public String openDeleteAllReportSubscriptionsDialog() {
+        displayDialog = ProfileDialog.REPORT;
+        return null;
+    }
+
+    /**
+     * Opens the dialog for deleting all user subscriptions.
+     *
+     * @return {@code null} to reload the page.
+     */
+    public String openDeleteAllUserSubscriptionsDialog() {
+        displayDialog = ProfileDialog.USER;
+        return null;
+    }
+
+    /**
+     * Closes any open dialog.
+     *
+     * @return {@code null} to reload the page.
+     */
+    public String closeDialog() {
+        displayDialog = ProfileDialog.NONE;
         return null;
     }
 
@@ -490,14 +499,14 @@ public class ProfileBacker implements Serializable {
     /**
      * @return The DialogType.
      */
-    public DialogType getDisplayDialog() {
+    public ProfileDialog getProfileDialog() {
         return displayDialog;
     }
 
     /**
      * @param displayDialog The DialogType to set.
      */
-    public void setDisplayDialog(final DialogType displayDialog) {
+    public void setProfileDialog(final ProfileDialog displayDialog) {
         this.displayDialog = displayDialog;
     }
 

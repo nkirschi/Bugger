@@ -17,7 +17,7 @@ import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.text.MessageFormat;
@@ -26,7 +26,7 @@ import java.util.ResourceBundle;
 /**
  * Service for user authentication. A {@link Feedback} {@link Event} is fired, if unexpected circumstances occur.
  */
-@Dependent
+@ApplicationScoped
 public class AuthenticationService {
 
     /**

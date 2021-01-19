@@ -151,6 +151,10 @@ body {
     max-height: 1em;
 }
 
+.button {
+    margin: 1%;
+}
+
 .style-button {
     text-decoration: none;
     background-color: white;
@@ -174,19 +178,9 @@ body {
     max-height: 200px;
 }
 
-.col-sm-2 {
-    background-color: #f3f3f3;
-    height: 100%;
-}
-
-.col-sm-8 {
-    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
-    height: 100%;
-    padding: 1%;
-}
-
 .p-avatar {
     width: 50%;
+    margin: 1%;
 }
 
 .g-avatar {
@@ -207,12 +201,20 @@ body {
     font-size: 1.3em;
 }
 
+.profile-h2 {
+    margin: 1em 0;
+}
+
 .hide {
     display: none !important;
 }
 
 .vw-50 {
     width: 50vw;
+}
+
+.vw-90 {
+    width: 90vw;
 }
 
 .no-ul {
@@ -230,8 +232,12 @@ body {
 }
 
 .search {
-    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
-    margin: 1%;
+    border: 1px solid #ddd;
+    margin-top: -1px;
+    background-color: #f6f6f6;
+    padding: 1%;
+    text-decoration: none;
+    color: black;
 }
 
 .vote-cast {

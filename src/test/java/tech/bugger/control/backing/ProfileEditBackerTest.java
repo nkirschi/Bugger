@@ -20,11 +20,9 @@ import javax.faces.application.Application;
 import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
 
@@ -35,15 +33,16 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(LogExtension.class)
 public class ProfileEditBackerTest {
@@ -94,6 +93,7 @@ public class ProfileEditBackerTest {
                 Language.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
         emailToken = new Token(TOKEN, Token.Type.CHANGE_EMAIL, ZonedDateTime.now(), EMAIL, user);
         MockitoAnnotations.openMocks(this);
+        profileEditBacker = new ProfileEditBacker(authenticationService, profileService, session, fctx);
         createUser = profileEditBacker.getClass().getDeclaredField("create");
         createUser.setAccessible(true);
         profileEditBacker.setPasswordNew("");
@@ -115,8 +115,11 @@ public class ProfileEditBackerTest {
                 () -> assertEquals(user, profileEditBacker.getUser()),
                 () -> assertEquals(user.getEmailAddress(), profileEditBacker.getEmailNew()),
                 () -> assertEquals(user.getUsername(), profileEditBacker.getUsernameNew()),
-                () -> assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog()),
-                () -> assertEquals(false, profileEditBacker.isDeleteAvatar())
+                () -> assertEquals(ProfileEditBacker.ProfileEditDialog.NONE, profileEditBacker.getDialog()),
+                () -> assertFalse(profileEditBacker.isDeleteAvatar()),
+                () -> assertTrue(profileEditBacker.getPasswordNew().isBlank()),
+                () -> assertTrue(profileEditBacker.getPasswordNewConfirm().isBlank()),
+                () -> assertNull(profileEditBacker.getPassword())
         );
     }
 
@@ -132,7 +135,7 @@ public class ProfileEditBackerTest {
                 () -> assertEquals(user, profileEditBacker.getUser()),
                 () -> assertEquals(user.getEmailAddress(), profileEditBacker.getEmailNew()),
                 () -> assertEquals(user.getUsername(), profileEditBacker.getUsernameNew()),
-                () -> assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog())
+                () -> assertEquals(ProfileEditBacker.ProfileEditDialog.NONE, profileEditBacker.getDialog())
         );
     }
 
@@ -169,7 +172,7 @@ public class ProfileEditBackerTest {
                 () -> assertEquals(createUser, profileEditBacker.getUser()),
                 () -> assertEquals(createUser.getEmailAddress(), profileEditBacker.getEmailNew()),
                 () -> assertEquals(createUser.getUsername(), profileEditBacker.getUsernameNew()),
-                () -> assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog()),
+                () -> assertEquals(ProfileEditBacker.ProfileEditDialog.NONE, profileEditBacker.getDialog()),
                 () -> assertTrue(profileEditBacker.isCreate())
         );
     }
@@ -184,23 +187,32 @@ public class ProfileEditBackerTest {
                 () -> assertEquals(user, profileEditBacker.getUser()),
                 () -> assertEquals(user.getEmailAddress(), profileEditBacker.getEmailNew()),
                 () -> assertEquals(user.getUsername(), profileEditBacker.getUsernameNew()),
-                () -> assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog())
+                () -> assertEquals(ProfileEditBacker.ProfileEditDialog.NONE, profileEditBacker.getDialog())
         );
     }
 
     @Test
     public void testInitWithEdit() {
+        user.setAdministrator(true);
         when(session.getUser()).thenReturn(user);
         when(map.containsKey(EDIT)).thenReturn(true);
-        when(map.get(EDIT)).thenReturn(user.getId().toString());
-        when(profileService.getUser(user.getId())).thenReturn(user);
+        when(map.get(EDIT)).thenReturn(user.getUsername());
+        when(profileService.getUserByUsername(user.getUsername())).thenReturn(user);
         profileEditBacker.init();
         assertAll(
                 () -> assertEquals(user, profileEditBacker.getUser()),
                 () -> assertEquals(user.getEmailAddress(), profileEditBacker.getEmailNew()),
                 () -> assertEquals(user.getUsername(), profileEditBacker.getUsernameNew()),
-                () -> assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog())
+                () -> assertEquals(ProfileEditBacker.ProfileEditDialog.NONE, profileEditBacker.getDialog())
         );
+    }
+
+    @Test
+    public void testInitWithEditNoAdmin() {
+        when(session.getUser()).thenReturn(user);
+        when(map.containsKey(EDIT)).thenReturn(true);
+        profileEditBacker.init();
+        verify(navHandler).handleNavigation(any(), any(), any());
     }
 
     @Test
@@ -211,22 +223,22 @@ public class ProfileEditBackerTest {
         profileEditBacker.init();
         assertAll(
                 () -> assertNull(profileEditBacker.getUser()),
-                () -> assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog())
+                () -> assertEquals(ProfileEditBacker.ProfileEditDialog.NONE, profileEditBacker.getDialog())
         );
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
+        verify(navHandler).handleNavigation(any(), any(), any());
     }
 
     @Test
     public void testInitSessionUserNull() {
         profileEditBacker.init();
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
+        verify(navHandler).handleNavigation(any(), any(), any());
     }
 
     @Test
     public void testInitGetUserNull() {
         when(session.getUser()).thenReturn(user);
         profileEditBacker.init();
-        verify(navHandler, times(1)).handleNavigation(any(), any(), any());
+        verify(navHandler).handleNavigation(any(), any(), any());
     }
 
     @Test
@@ -235,9 +247,10 @@ public class ProfileEditBackerTest {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         when(profileService.createUser(any())).thenReturn(true);
         profileEditBacker.setUser(user);
+        profileEditBacker.setEmailNew(user.getEmailAddress());
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(profileService, times(1)).createUser(any());
+        verify(profileService).matchingPassword(any(), any());
+        verify(profileService).createUser(any());
     }
 
     @Test
@@ -245,9 +258,10 @@ public class ProfileEditBackerTest {
         createUser.setBoolean(profileEditBacker, true);
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         profileEditBacker.setUser(user);
+        profileEditBacker.setEmailNew(user.getEmailAddress());
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(profileService, times(1)).createUser(any());
+        verify(profileService).matchingPassword(any(), any());
+        verify(profileService).createUser(any());
     }
 
     @Test
@@ -255,8 +269,8 @@ public class ProfileEditBackerTest {
         createUser.setBoolean(profileEditBacker, true);
         when(profileService.matchingPassword(any(), any())).thenReturn(false);
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(profileService, times(0)).createUser(any());
+        verify(profileService).matchingPassword(any(), any());
+        verify(profileService, never()).createUser(any());
     }
 
     @Test
@@ -266,7 +280,7 @@ public class ProfileEditBackerTest {
         profileEditBacker.setUser(user);
         profileEditBacker.setEmailNew(user.getEmailAddress());
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
+        verify(profileService).matchingPassword(any(), any());
     }
 
     @Test
@@ -275,7 +289,7 @@ public class ProfileEditBackerTest {
         profileEditBacker.setUser(user);
         profileEditBacker.setEmailNew(user.getEmailAddress());
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
+        verify(profileService).matchingPassword(any(), any());
     }
 
     @Test
@@ -288,9 +302,9 @@ public class ProfileEditBackerTest {
         profileEditBacker.setUser(user);
         profileEditBacker.setEmailNew(EMAIL);
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(authenticationService, times(1)).updateEmail(any(), any(), any());
-        verify(profileService, times(1)).updateUser(user);
+        verify(profileService).matchingPassword(any(), any());
+        verify(authenticationService).updateEmail(any(), any(), any());
+        verify(profileService).updateUser(user);
     }
 
     @Test
@@ -301,8 +315,8 @@ public class ProfileEditBackerTest {
         profileEditBacker.setUser(user);
         profileEditBacker.setEmailNew(EMAIL);
         profileEditBacker.saveChanges();
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(authenticationService, times(1)).updateEmail(any(), any(), any());
+        verify(profileService).matchingPassword(any(), any());
+        verify(authenticationService).updateEmail(any(), any(), any());
     }
 
     @Test
@@ -323,7 +337,7 @@ public class ProfileEditBackerTest {
         profileEditBacker.setPasswordNewConfirm(PASSWORD);
         profileEditBacker.setUser(user);
         profileEditBacker.saveChanges();
-        verify(authenticationService, times(1)).hashPassword(user, PASSWORD);
+        verify(authenticationService).hashPassword(user, PASSWORD);
     }
 
     @Test
@@ -331,8 +345,18 @@ public class ProfileEditBackerTest {
         profileEditBacker.setPasswordNew(PASSWORD);
         profileEditBacker.setUser(user);
         profileEditBacker.saveChanges();
-        verify(authenticationService, times(0)).hashPassword(user, PASSWORD);
-        verify(profileService, times(0)).matchingPassword(any(), any());
+        verify(authenticationService, never()).hashPassword(user, PASSWORD);
+        verify(profileService, never()).matchingPassword(any(), any());
+    }
+
+    @Test
+    public void testSaveChangesIOException() throws IOException {
+        when(profileService.matchingPassword(any(), any())).thenReturn(true);
+        when(profileService.updateUser(user)).thenReturn(true);
+        doThrow(IOException.class).when(ext).redirect(any());
+        profileEditBacker.setUser(user);
+        profileEditBacker.setEmailNew(user.getEmailAddress());
+        assertNull(profileEditBacker.saveChanges());
     }
 
     @Test
@@ -341,8 +365,8 @@ public class ProfileEditBackerTest {
         when(profileService.deleteUser(user)).thenReturn(true);
         profileEditBacker.setUser(user);
         assertEquals("pretty:home", profileEditBacker.delete());
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(profileService, times(1)).deleteUser(user);
+        verify(profileService).matchingPassword(any(), any());
+        verify(profileService).deleteUser(user);
     }
 
     @Test
@@ -350,15 +374,15 @@ public class ProfileEditBackerTest {
         when(profileService.matchingPassword(any(), any())).thenReturn(true);
         profileEditBacker.setUser(user);
         profileEditBacker.delete();
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(profileService, times(1)).deleteUser(user);
+        verify(profileService).matchingPassword(any(), any());
+        verify(profileService).deleteUser(user);
     }
 
     @Test
     public void testDeleteWrongPassword() {
         profileEditBacker.setUser(user);
         profileEditBacker.delete();
-        verify(profileService, times(1)).matchingPassword(any(), any());
+        verify(profileService).matchingPassword(any(), any());
     }
 
     @Test
@@ -369,9 +393,9 @@ public class ProfileEditBackerTest {
         when(session.getUser()).thenReturn(user);
         profileEditBacker.setUser(user);
         assertEquals("pretty:home", profileEditBacker.delete());
-        verify(profileService, times(1)).matchingPassword(any(), any());
-        verify(profileService, times(1)).deleteUser(user);
-        verify(session, times(1)).invalidateSession();
+        verify(profileService).matchingPassword(any(), any());
+        verify(profileService).deleteUser(user);
+        verify(session).invalidateSession();
     }
 
     @Test
@@ -386,8 +410,8 @@ public class ProfileEditBackerTest {
                 () -> assertEquals(avatar.get(), user.getAvatar().get()),
                 () -> assertEquals(thumbnail, user.getAvatarThumbnail())
         );
-        verify(profileService, times(1)).uploadAvatar(any());
-        verify(profileService, times(1)).generateThumbnail(any());
+        verify(profileService).uploadAvatar(any());
+        verify(profileService).generateThumbnail(any());
     }
 
     @Test
@@ -399,7 +423,7 @@ public class ProfileEditBackerTest {
                 () -> assertArrayEquals(new byte[0], user.getAvatar().get()),
                 () -> assertArrayEquals(new byte[0], user.getAvatarThumbnail())
         );
-        verify(profileService, times(0)).generateThumbnail(any());
+        verify(profileService, never()).generateThumbnail(any());
     }
 
     @Test
@@ -414,8 +438,8 @@ public class ProfileEditBackerTest {
                 () -> assertEquals(oldAvatar, user.getAvatar()),
                 () -> assertEquals(oldThumbnail, user.getAvatarThumbnail())
         );
-        verify(profileService, times(1)).uploadAvatar(any());
-        verify(profileService, times(1)).generateThumbnail(any());
+        verify(profileService).uploadAvatar(any());
+        verify(profileService).generateThumbnail(any());
     }
 
     @Test
@@ -428,23 +452,34 @@ public class ProfileEditBackerTest {
                 () -> assertEquals(oldAvatar, user.getAvatar()),
                 () -> assertEquals(oldThumbnail, user.getAvatarThumbnail())
         );
-        verify(profileService, times(1)).uploadAvatar(any());
+        verify(profileService).uploadAvatar(any());
     }
 
     @Test
     public void testOpenDeleteDialog() {
-        profileEditBacker.setDialog(ProfileEditBacker.DialogType.NONE);
+        profileEditBacker.setDialog(ProfileEditBacker.ProfileEditDialog.NONE);
         profileEditBacker.openDeleteDialog();
-        assertEquals(ProfileEditBacker.DialogType.DELETE, profileEditBacker.getDialog());
+        assertEquals(ProfileEditBacker.ProfileEditDialog.DELETE, profileEditBacker.getDialog());
     }
 
     @Test
     public void testOpenChangeDialog() {
         profileEditBacker.setUploadedAvatar(null);
         profileEditBacker.setDeleteAvatar(false);
-        profileEditBacker.setDialog(ProfileEditBacker.DialogType.NONE);
+        profileEditBacker.setDialog(ProfileEditBacker.ProfileEditDialog.NONE);
         profileEditBacker.openChangeDialog();
-        assertEquals(ProfileEditBacker.DialogType.UPDATE, profileEditBacker.getDialog());
+        assertEquals(ProfileEditBacker.ProfileEditDialog.UPDATE, profileEditBacker.getDialog());
+    }
+
+    @Test
+    public void testOpenChangeDialogUpload() {
+        ProfileEditBacker spyBacker = spy(profileEditBacker);
+        spyBacker.setUploadedAvatar(mock(Part.class));
+        spyBacker.setDeleteAvatar(true);
+        doReturn(true).when(spyBacker).uploadAvatar();
+        spyBacker.setDialog(ProfileEditBacker.ProfileEditDialog.NONE);
+        spyBacker.openChangeDialog();
+        assertEquals(ProfileEditBacker.ProfileEditDialog.UPDATE, spyBacker.getDialog());
     }
 
     @Test
@@ -453,9 +488,9 @@ public class ProfileEditBackerTest {
         spyBacker.setUploadedAvatar(null);
         spyBacker.setDeleteAvatar(true);
         doReturn(false).when(spyBacker).uploadAvatar();
-        spyBacker.setDialog(ProfileEditBacker.DialogType.NONE);
+        spyBacker.setDialog(ProfileEditBacker.ProfileEditDialog.NONE);
         spyBacker.openChangeDialog();
-        assertEquals(ProfileEditBacker.DialogType.NONE, spyBacker.getDialog());
+        assertEquals(ProfileEditBacker.ProfileEditDialog.NONE, spyBacker.getDialog());
     }
 
     @Test
@@ -464,16 +499,17 @@ public class ProfileEditBackerTest {
         spyBacker.setUploadedAvatar(null);
         spyBacker.setDeleteAvatar(true);
         doReturn(true).when(spyBacker).uploadAvatar();
-        spyBacker.setDialog(ProfileEditBacker.DialogType.NONE);
+        spyBacker.setDialog(ProfileEditBacker.ProfileEditDialog.NONE);
         spyBacker.openChangeDialog();
-        assertEquals(ProfileEditBacker.DialogType.UPDATE, spyBacker.getDialog());
+        assertEquals(ProfileEditBacker.ProfileEditDialog.UPDATE, spyBacker.getDialog());
     }
 
+    @Test
     public void testOpenPreviewDialog() {
         profileEditBacker.setUser(user);
         profileEditBacker.openPreviewDialog();
         assertAll(
-                () -> assertEquals(ProfileEditBacker.DialogType.PREVIEW, profileEditBacker.getDialog()),
+                () -> assertEquals(ProfileEditBacker.ProfileEditDialog.PREVIEW, profileEditBacker.getDialog()),
                 () -> assertNotNull(profileEditBacker.getSanitizedBio())
         );
     }
@@ -484,15 +520,64 @@ public class ProfileEditBackerTest {
         profileEditBacker.setUser(user);
         profileEditBacker.openPreviewDialog();
         assertAll(
-                () -> assertEquals(ProfileEditBacker.DialogType.PREVIEW, profileEditBacker.getDialog()),
+                () -> assertEquals(ProfileEditBacker.ProfileEditDialog.PREVIEW, profileEditBacker.getDialog()),
                 () -> assertNull(profileEditBacker.getSanitizedBio())
         );
     }
 
     @Test
-    public void testCloseChangeDialog() {
-        profileEditBacker.setDialog(ProfileEditBacker.DialogType.UPDATE);
-        profileEditBacker.closeDialog();
-        assertEquals(ProfileEditBacker.DialogType.NONE, profileEditBacker.getDialog());
+    public void testOpenPreviewDialogUpload() {
+        ProfileEditBacker spyBacker = spy(profileEditBacker);
+        spyBacker.setUser(user);
+        spyBacker.setUploadedAvatar(mock(Part.class));
+        doReturn(true).when(spyBacker).uploadAvatar();
+        spyBacker.openPreviewDialog();
+        assertAll(
+                () -> assertEquals(ProfileEditBacker.ProfileEditDialog.PREVIEW, spyBacker.getDialog()),
+                () -> assertNotNull(spyBacker.getSanitizedBio()),
+                () -> assertNotNull(spyBacker.getUploadedAvatar())
+        );
     }
+
+    @Test
+    public void testOpenPreviewDialogDeleteAvatar() {
+        ProfileEditBacker spyBacker = spy(profileEditBacker);
+        spyBacker.setUser(user);
+        spyBacker.setUploadedAvatar(null);
+        spyBacker.setDeleteAvatar(true);
+        doReturn(true).when(spyBacker).uploadAvatar();
+        spyBacker.openPreviewDialog();
+        assertEquals(ProfileEditBacker.ProfileEditDialog.PREVIEW, spyBacker.getDialog());
+    }
+
+    @Test
+    public void testOpenPreviewDialogWhenUploadFailed() {
+        ProfileEditBacker spyBacker = spy(profileEditBacker);
+        spyBacker.setUploadedAvatar(null);
+        spyBacker.setDeleteAvatar(true);
+        doReturn(false).when(spyBacker).uploadAvatar();
+        spyBacker.setDialog(ProfileEditBacker.ProfileEditDialog.NONE);
+        spyBacker.openPreviewDialog();
+        assertEquals(ProfileEditBacker.ProfileEditDialog.NONE, spyBacker.getDialog());
+    }
+
+    @Test
+    public void testCloseDialog() {
+        profileEditBacker.setDialog(ProfileEditBacker.ProfileEditDialog.UPDATE);
+        profileEditBacker.closeDialog();
+        assertEquals(ProfileEditBacker.ProfileEditDialog.NONE, profileEditBacker.getDialog());
+    }
+
+    @Test
+    public void testSettersForCoverage() {
+        profileEditBacker.setPassword(user.getPasswordHash());
+        profileEditBacker.setSanitizedBio(user.getBiography());
+        profileEditBacker.setCreate(true);
+        assertAll(
+                () -> assertEquals(user.getPasswordHash(), profileEditBacker.getPassword()),
+                () -> assertEquals(user.getBiography(), profileEditBacker.getSanitizedBio()),
+                () -> assertTrue(profileEditBacker.isCreate())
+        );
+    }
+
 }

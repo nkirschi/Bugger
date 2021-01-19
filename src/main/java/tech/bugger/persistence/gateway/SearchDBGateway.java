@@ -105,17 +105,14 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getUserBanSuggestions(final String query, final int limit, final Topic topic) {
         validateSuggestionParams(query, limit, topic);
         List<String> userResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u WHERE u.username "
-                + "LIKE ? AND u.is_admin = false AND u.id NOT IN (SELECT t.outcast FROM topic_ban AS t WHERE t.topic "
-                + "= ?) LIMIT ?;")) {
+                + "LIKE CONCAT('%', ?, '%') AND u.is_admin = false AND u.id NOT IN (SELECT t.outcast FROM topic_ban "
+                + "AS t WHERE t.topic = ?) AND u.id NOT IN (SELECT m.moderator FROM topic_moderation AS m "
+                + "WHERE m.topic = ?) LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + newQuery + "%")
+                    .string(query)
+                    .integer(topic.getId())
                     .integer(topic.getId())
                     .integer(limit)
                     .toStatement().executeQuery();
@@ -138,16 +135,12 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getUserUnbanSuggestions(final String query, final int limit, final Topic topic) {
         validateSuggestionParams(query, limit, topic);
         List<String> userResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u INNER JOIN "
-                + "topic_ban as t ON t.outcast = u.id WHERE u.username LIKE ? AND t.topic = ? LIMIT ?;")) {
+                + "topic_ban as t ON t.outcast = u.id WHERE u.username LIKE CONCAT('%', ?, '%') AND t.topic = ? "
+                + "LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + newQuery + "%")
+                    .string(query)
                     .integer(topic.getId())
                     .integer(limit)
                     .toStatement().executeQuery();
@@ -170,17 +163,12 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getUserModSuggestions(final String query, final int limit, final Topic topic) {
         validateSuggestionParams(query, limit, topic);
         List<String> modResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u WHERE u.username "
-                + "LIKE ? AND u.is_admin = false AND u.id NOT IN (SELECT t.moderator FROM topic_moderation AS t WHERE "
-                + "t.topic = ?) LIMIT ?;")) {
+                + "LIKE CONCAT('%', ?, '%') AND u.is_admin = false AND u.id NOT IN (SELECT t.moderator FROM "
+                + "topic_moderation AS t WHERE t.topic = ?) LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + newQuery + "%")
+                    .string(query)
                     .integer(topic.getId())
                     .integer(limit)
                     .toStatement().executeQuery();
@@ -202,16 +190,12 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getUserUnmodSuggestions(final String query, final int limit, final Topic topic) {
         validateSuggestionParams(query, limit, topic);
         List<String> unmodResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u INNER JOIN "
-                + "topic_moderation as t ON t.moderator = u.id WHERE u.username LIKE ? AND t.topic = ? LIMIT ?;")) {
+                + "topic_moderation as t ON t.moderator = u.id WHERE u.username LIKE CONCAT('%', ?, '%') AND "
+                + "t.topic = ? LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + newQuery + "%")
+                    .string(query)
                     .integer(topic.getId())
                     .integer(limit)
                     .toStatement().executeQuery();
@@ -326,9 +310,18 @@ public class SearchDBGateway implements SearchGateway {
      * @throws IllegalArgumentException if the given parameters are invalid.
      */
     private void validateSuggestionParams(final String query, final int limit, final Topic topic) {
-        if (query == null || query.isBlank() || topic.getId() == null || limit < 0) {
-            log.error("The topic cannot be null and the query cannot be null or blank!");
-            throw new IllegalArgumentException("The topic cannot be null and the query cannot be null or blank!");
+        if (query == null) {
+            log.error("The search query cannot be null!");
+            throw new IllegalArgumentException("The search query cannot be null!");
+        } else if (query.isBlank()) {
+            log.error("The search query cannot be blank!");
+            throw new IllegalArgumentException("The search query cannot be blank!");
+        } else if (limit < 0) {
+            log.error("The limit of search suggestions to return cannot be negative!");
+            throw new IllegalArgumentException("The limit of search suggestions to return cannot be negative!");
+        } else if (topic.getId() == null) {
+            log.error("The topic cannot be null!");
+            throw new IllegalArgumentException("The topic cannot be null!");
         }
     }
 
