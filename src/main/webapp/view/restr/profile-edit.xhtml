@@ -24,10 +24,11 @@
 
                     <h:panelGroup layout="block" id="p-avatar" styleClass="mb-3 form-group position-relative">
                         <h:graphicImage id="g-avatar" value="avatar?id=#{profileEditBacker.user.id}"
-                                        styleClass="g-avatar" alt="The user's avatar"
+                                        styleClass="img-thumbnail" alt="The user's avatar"
                                         rendered="#{profileEditBacker.user.existsAvatar}"/>
-                        <h:graphicImage id="g-avatar-fallback" library="images" name="bugger.png" styleClass="g-avatar"
-                                        alt="The user's avatar" rendered="#{not profileEditBacker.user.existsAvatar}"/>
+                        <h:graphicImage id="g-avatar-fallback" library="images" name="bugger.png"
+                                        styleClass="img-thumbnail" alt="The user's avatar"
+                                        rendered="#{not profileEditBacker.user.existsAvatar}"/>
                     </h:panelGroup>
 
                     <h:panelGroup layout="block" id="p-upload" styleClass="mb-3 form-group position-relative">
@@ -55,7 +56,7 @@
                     <!-- Renders the menus to select the profile visibility and preferred language. -->
                     <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
                         <h:panelGroup layout="block" styleClass="row">
-                            <h:panelGroup layout="block" styleClass="col-sm-6">
+                            <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-visibility" for="s-visibility"
                                                value="#{labels['profile_edit.visibility']}" styleClass="form-label"/>
                                 <h:panelGroup layout="block" styleClass="input-group has-validation">
@@ -72,7 +73,7 @@
                                     </h:panelGroup>
                                 </h:panelGroup>
                             </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="col-sm-6">
+                            <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-language" for="s-language" value="#{labels.language}"
                                                styleClass="form-label"/>
                                 <h:panelGroup layout="block" styleClass="input-group has-validation">
@@ -94,7 +95,7 @@
                     <!-- Contains and displays username and email information. -->
                     <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
                         <h:panelGroup layout="block" styleClass="row">
-                            <h:panelGroup layout="block" styleClass="col-sm-6">
+                            <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-username" for="it-username" value="#{labels.username}"
                                                styleClass="form-label"/>
                                 <h:panelGroup layout="block" styleClass="input-group has-validation">
@@ -112,7 +113,7 @@
                                     </h:panelGroup>
                                 </h:panelGroup>
                             </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="col-sm-6">
+                            <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-email" for="it-email" value="#{labels.email}"
                                                styleClass="form-label"/>
                                 <h:panelGroup layout="block" styleClass="input-group has-validation">
@@ -136,7 +137,7 @@
                     <!-- Contains and displays first and last name. -->
                     <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
                         <h:panelGroup layout="block" styleClass="row">
-                            <h:panelGroup layout="block" styleClass="col-sm-6">
+                            <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-first-name" for="it-first-name" value="#{labels.first_name}"
                                                styleClass="form-label"/>
                                 <h:panelGroup layout="block" styleClass="input-group has-validation">
@@ -151,7 +152,7 @@
                                     </h:panelGroup>
                                 </h:panelGroup>
                             </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="col-sm-6">
+                            <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-last-name" for="it-last-name" value="#{labels.last_name}"
                                                styleClass="form-label"/>
                                 <h:panelGroup layout="block" styleClass="input-group has-validation">
@@ -173,7 +174,7 @@
                     <!--@elvariable id="password1" type="javax.faces.component.UIInput"-->
                     <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
                         <h:panelGroup layout="block" styleClass="row">
-                            <h:panelGroup layout="block" styleClass="col-sm-6">
+                            <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-password-new" for="i-password-new" styleClass="form-label"
                                                value="#{labels['profile_edit.password_new']}"/>
                                 <h:panelGroup layout="block" styleClass="input-group has-validation">
@@ -189,7 +190,7 @@
                                     </h:panelGroup>
                                 </h:panelGroup>
                             </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="col-sm-6">
+                            <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-password-new-repeat" for="i-password-new-repeat"
                                                styleClass="form-label"
                                                value="#{labels['profile_edit.repeat']}"/>
@@ -304,7 +305,7 @@
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="row align-center">
-                    <h:panelGroup layout="block" styleClass="col-sm-12">
+                    <h:panelGroup layout="block" styleClass="col-12">
                         <h:commandButton id="cb-really-del" value="#{labels['profile_edit.really_del']}"
                                          action="#{profileEditBacker.delete}" styleClass="button"/>
                         <h:commandButton id="cb-cancel-del" value="#{labels.abort}" styleClass="button"
@@ -339,7 +340,7 @@
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="row align-center">
-                    <h:panelGroup layout="block" styleClass="col-sm-12">
+                    <h:panelGroup layout="block" styleClass="col-12">
                         <h:commandButton id="cb-really-change" value="#{labels['profile_edit.really_change']}"
                                          action="#{profileEditBacker.saveChanges}" styleClass="button">
                             <f:param name="u" value="#{profileEditBacker.user.username}"/>
