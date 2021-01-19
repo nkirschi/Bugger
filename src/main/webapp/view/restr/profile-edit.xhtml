@@ -62,7 +62,7 @@
                                 <h:panelGroup layout="block" styleClass="input-group has-validation">
                                     <h:selectOneMenu id="s-visibility"
                                                      value="#{profileEditBacker.user.profileVisibility}"
-                                                     required="true">
+                                                     required="true" styleClass="form-select">
                                         <f:selectItems id="s-visibility-values"
                                                        value="#{profileEditBacker.user.profileVisibilities}"
                                                        var="visibility" itemValue="#{visibility}"
@@ -78,7 +78,7 @@
                                                styleClass="form-label"/>
                                 <h:panelGroup layout="block" styleClass="input-group has-validation">
                                     <h:selectOneMenu id="s-language" value="#{profileEditBacker.user.preferredLanguage}"
-                                                     required="true">
+                                                     required="true" styleClass="form-select">
                                         <f:selectItems id="s-language-values"
                                                        value="#{profileEditBacker.user.preferredLanguages}"
                                                        var="lang" itemValue="#{lang}"

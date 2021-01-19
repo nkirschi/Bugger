@@ -1,0 +1,89 @@
+body {
+    background: #fcf5ef;
+}
+
+#p-header {
+    background: #005eb8;
+    color: #fcf5ef;
+}
+
+#p-header #ot-comp-name {
+    color: #fcf5ef;
+}
+
+#p-footer {
+    background: #005eb8;
+    color: #fcf5ef;
+}
+
+#p-footer a {
+    color: #fcf5ef;
+}
+
+#p-footer a:hover {
+    color: white;
+}
+
+#p-content {
+    background: #f1f8fb;
+}
+
+#p-content a {
+    color: #00008b;
+}
+
+#p-profile-menu {
+    background-color: #00008b;
+    color: white;
+}
+
+#p-profile-menu a {
+    color: white;
+}
+
+#p-profile-menu a:hover {
+    color: #00008b;
+}
+
+.btn {
+    background-color: #f1f8fb;
+    color: #00008b;
+}
+
+.btn-primary:hover {
+    background-color: #00008b;
+    color: white !important;
+}
+
+.btn-secondary:hover {
+    background-color: #0aa3cf;
+    color: white !important;
+}
+
+.dialog {
+    background-color: #fcf5ef;
+    color: black;
+}
+
+.vote-cast {
+    background-color: #00008b;
+    color: white;
+}
+
+.vote-not-cast {
+    background-color: #6c757d;
+}
+
+.form-check-input:checked {
+    background-color: #00008b;
+}
+
+select:focus {
+    border-color: #00008b;
+    box-shadow: 0 1px 1px #00008d inset, 0 0 8px #00008b;
+}
+
+.form-control:focus, .form-check-input:focus, .form-select:focus {
+    border-color: #00008b;
+    box-shadow: 0 1px 1px #00008d inset, 0 0 8px #00008b;
+}

@@ -1,0 +1,108 @@
+body {
+    background: #e0fde0;
+}
+
+#p-header {
+    background: #228b22;
+    color: black;
+}
+
+#p-header #ot-comp-name {
+    color: black;
+}
+
+#p-footer {
+    background: #228b22;
+    color: black;
+}
+
+#p-footer a {
+    color: black;
+}
+
+#p-footer a:hover {
+    color: #e0fde0;
+}
+
+#p-content {
+    background: #fff;
+}
+
+#p-content a {
+    color: #228b22;
+}
+
+#p-profile-menu {
+    background-color: #e0fde0;
+    color: black;
+}
+
+#p-profile-menu a {
+    color: black;
+}
+
+#p-profile-menu a:hover {
+    color: #228b22;
+}
+
+.btn {
+    background-color: #e0fde0;
+    color: #228b22;
+}
+
+.btn-primary, .btn-secondary, .btn-outline-primary {
+    border-color: #228b22;
+}
+
+.btn-primary:focus, .btn-primary:active {
+    border-color: #228b22 !important;
+    box-shadow: 0 1px 1px #004600 inset, 0 0 8px #228b22 !important;
+}
+
+.btn-primary:hover {
+    background-color: #004600;
+    color: white !important;
+    border-color: #228b22;
+}
+
+.btn-secondary:hover {
+    background-color: #e0fde0;
+    color: black !important;
+    border-color: #228b22;
+}
+
+.btn-link {
+    background-color: #fff;
+}
+
+.btn-link:hover {
+    color: black;
+}
+
+.dialog {
+    background-color: #e0fde0;
+    color: black;
+}
+
+.vote-cast {
+    background-color: #228b22;
+    color: black;
+}
+
+.vote-not-cast {
+    background-color: #6c757d;
+}
+
+.form-check-input:checked {
+    background-color: #228b22;
+}
+
+select:focus {
+    border-color: #228b22;
+    box-shadow: 0 1px 1px #004600 inset, 0 0 8px #228b22;
+}
+
+.form-control:focus, .form-check-input:focus, .form-select:focus {
+    border-color: #228b22;
+    box-shadow: 0 1px 1px #004600 inset, 0 0 8px #228b22;
+}

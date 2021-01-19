@@ -1,13 +1,9 @@
-/**
- * Template
- */
-
 body {
-    background: #deeff5;
+    background-color: #f1f8fb;
 }
 
 #p-header {
-    background: #1E88E5;
+    background: #1e88e5;
     color: white;
 }
 
@@ -34,20 +30,20 @@ body {
 
 #p-profile-menu {
     background-color: #deeff5;
-    color: #1E88E5;
+    color: #1e88e5;
 }
 
 .btn {
-    color: #1E88E5;
+    color: #1e88e5;
     background-color: white;
 }
 
 .dialog {
-    background-color: #deeff5;
+    background-color: #f1f8fb;
 }
 
 .vote-cast {
-    background-color: #1E88E5;
+    background-color: #1e88e5;
     color: white;
 }
 
