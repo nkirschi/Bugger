@@ -57,7 +57,6 @@ public class AttachmentDBGateway implements AttachmentGateway {
                 rs.getString("mimetype"),
                 new Lazy<>(() -> {
                     // Lazily retrieve the post of the attachment.
-                    // TODO: simply use post ID instead of Lazy<Post>
                     PostService postService = CDI.current().select(PostService.class).get();
                     return postService.getPostByID(postID);
                 })
