@@ -170,7 +170,7 @@ public class StatisticsBacker implements Serializable {
      * @return {@code null} in order to reload the page.
      */
     public String applyFilters() {
-        ResourceBundle messagesBundle = registry.getBundle("messages", userSession);
+        ResourceBundle messagesBundle = registry.getBundle("messages", userSession.getLocale());
         feedbackEvent.fire(new Feedback(messagesBundle.getString("filters_applied"), Feedback.Type.INFO));
         return null;
     }

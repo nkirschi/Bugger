@@ -51,7 +51,7 @@ public class FooterBacker implements Serializable {
     @Inject
     public FooterBacker(final UserSession session, final Registry registry) {
         this.session = session;
-        this.helpBundle = registry.getBundle("help", session);
+        this.helpBundle = registry.getBundle("help", session.getLocale());
         language = session.getLocale();
     }
 

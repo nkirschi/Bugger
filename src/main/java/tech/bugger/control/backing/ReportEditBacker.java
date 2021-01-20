@@ -97,7 +97,7 @@ public class ReportEditBacker implements Serializable {
         this.reportService = reportService;
         this.session = session;
         this.fctx = fctx;
-        this.messagesBundle = registry.getBundle("messages", session);
+        this.messagesBundle = registry.getBundle("messages", session.getLocale());
     }
 
     /**
