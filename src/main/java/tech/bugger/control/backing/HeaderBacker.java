@@ -57,17 +57,17 @@ public class HeaderBacker implements Serializable {
     private String search;
 
     /**
-     * userSearchSuggestion
+     * The userSearchSuggestion.
      */
     private List<String> userSearchSuggestion;
 
     /**
-     * userSearchSuggestion
+     * The topicSearchSuggestion.
      */
     private List<String> topicSearchSuggestion;
 
     /**
-     * userSearchSuggestion
+     * The reportSearchSuggestion.
      */
     private List<String> reportSearchSuggestion;
 
@@ -95,12 +95,13 @@ public class HeaderBacker implements Serializable {
      * Constructs a new header backing bean.
      *
      * @param applicationSettings The current application settings.
+     * @param searchService       The SearchService for the backer.
      * @param session             The currently active {@link UserSession}.
      * @param fctx                The current {@link FacesContext} of the application.
      */
     @Inject
-    public HeaderBacker(final ApplicationSettings applicationSettings, final SearchService searchService, final UserSession session,
-                        final FacesContext fctx) {
+    public HeaderBacker(final ApplicationSettings applicationSettings, final SearchService searchService,
+                        final UserSession session, final FacesContext fctx) {
         this.applicationSettings = applicationSettings;
         this.searchService = searchService;
         this.session = session;

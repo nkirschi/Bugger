@@ -239,7 +239,7 @@ public class SearchBacker implements Serializable {
                     return searchService.getNumberOfUserResults(query, adminShown, nonAdminShown);
                 }
             };
-        };
+        }
 
         if (tab == Tab.REPORT) {
             reportResults = new Paginator<>("title", Selection.PageSize.NORMAL) {

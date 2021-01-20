@@ -230,8 +230,8 @@ public class SearchDBGateway implements SearchGateway {
                 .replace("_", "!_")
                 .replace("[", "![");
 
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct u.username FROM \"user\" AS u WHERE u.username "
-                + "LIKE ? LIMIT ?;")) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct u.username FROM \"user\" AS u " +
+                "WHERE u.username LIKE ? LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string("%" + newQuery + "%")
                     .integer(limit)
@@ -261,8 +261,8 @@ public class SearchDBGateway implements SearchGateway {
                 .replace("_", "!_")
                 .replace("[", "![");
 
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct t.title FROM \"topic\" AS t WHERE t.title "
-                + "LIKE ? LIMIT ?;")) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct t.title FROM \"topic\" AS t " +
+                "WHERE t.title LIKE ? LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string("%" + newQuery + "%")
                     .integer(limit)
@@ -292,8 +292,8 @@ public class SearchDBGateway implements SearchGateway {
                 .replace("_", "!_")
                 .replace("[", "![");
 
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct t.title FROM \"report\" AS t WHERE t.title "
-                + "LIKE ? LIMIT ?;")) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct t.title FROM \"report\" AS t " +
+                "WHERE t.title LIKE ? LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string("%" + newQuery + "%")
                     .integer(limit)
