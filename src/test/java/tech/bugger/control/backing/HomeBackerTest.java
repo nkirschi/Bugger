@@ -11,7 +11,7 @@ import tech.bugger.business.service.NotificationService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.global.transfer.Topic;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +64,7 @@ class HomeBackerTest {
 
     @Test
     public void testLastChange() {
-        ZonedDateTime mockDate = ZonedDateTime.now();
+        OffsetDateTime mockDate = OffsetDateTime.now();
         doReturn(mockDate).when(topicService).lastChange(any());
         assertEquals(mockDate, homeBacker.lastChange(testTopic1));
     }

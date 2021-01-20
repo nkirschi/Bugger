@@ -2,7 +2,7 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 /**
@@ -86,7 +86,7 @@ public class Report implements Serializable {
     /**
      * The date and time when the report was closed.
      */
-    private ZonedDateTime closingDate;
+    private OffsetDateTime closingDate;
 
     /**
      * The ID of the report this report is a duplicate of.
@@ -124,7 +124,7 @@ public class Report implements Serializable {
      * @param topicID               The ID of topic the report belongs to.
      */
     public Report(final Integer id, final String title, final Type type, final Severity severity, final String version,
-                  final Authorship authorship, final ZonedDateTime closingDate, final Integer duplicateOf,
+                  final Authorship authorship, final OffsetDateTime closingDate, final Integer duplicateOf,
                   final Integer relevance, final boolean relevanceOverwritten, final Integer topicID) {
         this.id = id;
         this.title = title;
@@ -269,7 +269,7 @@ public class Report implements Serializable {
      *
      * @return The report closing date.
      */
-    public ZonedDateTime getClosingDate() {
+    public OffsetDateTime getClosingDate() {
         return closingDate;
     }
 
@@ -278,7 +278,7 @@ public class Report implements Serializable {
      *
      * @param closingDate The report closing date.
      */
-    public void setClosingDate(final ZonedDateTime closingDate) {
+    public void setClosingDate(final OffsetDateTime closingDate) {
         this.closingDate = closingDate;
     }
 

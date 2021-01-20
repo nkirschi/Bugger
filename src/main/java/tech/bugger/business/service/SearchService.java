@@ -15,7 +15,7 @@ import tech.bugger.persistence.util.TransactionManager;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +68,6 @@ public class SearchService {
         this.transactionManager = transactionManager;
     }
 
-
     /**
      * Returns at most the first five results when searching the data source for users.
      *
@@ -85,6 +84,42 @@ public class SearchService {
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return users;
+    }
+
+    /**
+     * Returns at most the first five results when searching the data source for reports.
+     *
+     * @param query The search query for report titles.
+     * @return A list containing the first few results.
+     */
+    public List<String> getReportSuggestions(final String query) {
+        List<String> reports = new ArrayList<>();
+        try (Transaction tx = transactionManager.begin()) {
+            reports = tx.newSearchGateway().getReportSuggestions(query, MAX_SUGGESTIONS);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while loading the report search suggestions.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return reports;
+    }
+
+    /**
+     * Returns at most the first five results when searching the data source for topics.
+     *
+     * @param query The search query for topic titles.
+     * @return A list containing the first few results.
+     */
+    public List<String> getTopicSuggestions(final String query) {
+        List<String> topics = new ArrayList<>();
+        try (Transaction tx = transactionManager.begin()) {
+            topics = tx.newSearchGateway().getTopicSuggestions(query, MAX_SUGGESTIONS);
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Error while loading the user search suggestions.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return topics;
     }
 
     /**
@@ -176,42 +211,6 @@ public class SearchService {
     }
 
     /**
-     * Returns at most the first five results when searching the data source for topics.
-     *
-     * @param query The search query for topic titles.
-     * @return A list containing the first few results.
-     */
-    public List<String> getTopicSuggestions(final String query) {
-        List<String> topics = new ArrayList<>();
-        try (Transaction tx = transactionManager.begin()) {
-            topics = tx.newSearchGateway().getTopicSuggestions(query, MAX_SUGGESTIONS);
-            tx.commit();
-        } catch (TransactionException e) {
-            log.error("Error while loading the topic search suggestions.", e);
-            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
-        }
-        return topics;
-    }
-
-    /**
-     * Returns at most the first five results when searching the data source for reports.
-     *
-     * @param query The search query for report titles.
-     * @return A list containing the first few results.
-     */
-    public List<String> getReportSuggestions(final String query) {
-        List<String> reports = new ArrayList<>();
-        try (Transaction tx = transactionManager.begin()) {
-            reports = tx.newSearchGateway().getReportSuggestions(query, MAX_SUGGESTIONS);
-            tx.commit();
-        } catch (TransactionException e) {
-            log.error("Error while loading the user search suggestions.", e);
-            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
-        }
-        return reports;
-    }
-
-    /**
      * Searches the data source for specific users.
      *
      * @param query         The search query for usernames.
@@ -272,8 +271,8 @@ public class SearchService {
      * @return A list of reports containing the selected search results.
      */
     public List<Report> getReportResults(final String query, final Selection selection,
-                                         final ZonedDateTime latestCreationDateTime,
-                                         final ZonedDateTime earliestClosingDateTime,
+                                         final OffsetDateTime latestCreationDateTime,
+                                         final OffsetDateTime earliestClosingDateTime,
                                          final boolean showOpenReports, final boolean showClosedReports,
                                          final boolean showDuplicates, final String topic,
                                          final HashMap<Report.Type, Boolean> reportTypeFilter,
@@ -315,8 +314,8 @@ public class SearchService {
      * @return A list of reports containing the selected search results.
      */
     public List<Report> getFulltextResults(final String query, final Selection selection,
-                                           final ZonedDateTime latestCreationDateTime,
-                                           final ZonedDateTime earliestClosingDateTime, final boolean showOpenReports,
+                                           final OffsetDateTime latestCreationDateTime,
+                                           final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                            final boolean showClosedReports, final boolean showDuplicates,
                                            final Topic topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                            final HashMap<Report.Severity, Boolean> severityFilter) {
@@ -392,8 +391,8 @@ public class SearchService {
      * @param severityFilter          Which reports of certain severities to include or exclude.
      * @return The number of results as an {@code int}.
      */
-    public int getNumberOfReportResults(final String query, final ZonedDateTime latestCreationDateTime,
-                                        final ZonedDateTime earliestClosingDateTime, final boolean showOpenReports,
+    public int getNumberOfReportResults(final String query, final OffsetDateTime latestCreationDateTime,
+                                        final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                         final boolean showClosedReports, final boolean showDuplicates,
                                         final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                         final HashMap<Report.Severity, Boolean> severityFilter) {
@@ -431,8 +430,8 @@ public class SearchService {
      * @param severityFilter          Which reports of certain severities to include or exclude.
      * @return The number of results as an {@code int}.
      */
-    public int getNumberOfFulltextResults(final String query, final ZonedDateTime latestCreationDateTime,
-                                          final ZonedDateTime earliestClosingDateTime, final boolean showOpenReports,
+    public int getNumberOfFulltextResults(final String query, final OffsetDateTime latestCreationDateTime,
+                                          final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                           final boolean showClosedReports, final boolean showDuplicates,
                                           final Topic topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                           final HashMap<Report.Severity, Boolean> severityFilter) {

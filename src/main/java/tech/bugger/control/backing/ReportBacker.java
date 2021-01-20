@@ -2,7 +2,7 @@ package tech.bugger.control.backing;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.StreamSupport;
 import javax.annotation.PostConstruct;
@@ -403,7 +403,7 @@ public class ReportBacker implements Serializable {
      * Closes the current report.
      */
     private void close() {
-        report.setClosingDate(ZonedDateTime.now());
+        report.setClosingDate(OffsetDateTime.now());
         reportService.close(report);
     }
 

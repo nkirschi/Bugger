@@ -18,7 +18,6 @@ import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.TokenDBGateway;
@@ -30,19 +29,7 @@ import tech.bugger.persistence.util.TransactionManager;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -93,8 +80,12 @@ public class AuthenticationServiceTest {
             return null;
         }).when(priorityExecutor).enqueue(any());
 
-        service = new AuthenticationService(transactionManager, feedbackEvent, ResourceBundleMocker.mock(""),
-                ResourceBundleMocker.mock(""), priorityExecutor, mailer, configReader);
+        NotificationService notificationService = new NotificationService(transactionManager, feedbackEvent,
+                ResourceBundleMocker.mock(""), ResourceBundleMocker.mock(""),
+                priorityExecutor, mailer);
+
+        service = new AuthenticationService(transactionManager, feedbackEvent, notificationService,
+                ResourceBundleMocker.mock(""), ResourceBundleMocker.mock(""), configReader);
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(tokenGateway).when(tx).newTokenGateway();

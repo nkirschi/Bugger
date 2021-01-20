@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.time.ZoneId;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -101,7 +101,7 @@ public class UserDBGateway implements UserGateway {
                 rs.getString(prefix + "biography"),
                 Locale.forLanguageTag(rs.getString(prefix + "preferred_language").toUpperCase()),
                 User.ProfileVisibility.valueOf(rs.getString(prefix + "profile_visibility").toUpperCase()),
-                rs.getTimestamp(prefix + "registered_at").toLocalDateTime().atZone(ZoneId.systemDefault()),
+                rs.getObject(prefix + "registered_at", OffsetDateTime.class),
                 rs.getObject(prefix + "forced_voting_weight", Integer.class), rs.getBoolean(prefix + "is_admin"
         ));
     }
@@ -334,8 +334,7 @@ public class UserDBGateway implements UserGateway {
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 user.setId(rs.getInt("id"));
-                user.setRegistrationDate(rs.getTimestamp("registered_at").toLocalDateTime()
-                        .atZone(ZoneId.systemDefault()));
+                user.setRegistrationDate(rs.getObject("registered_at", OffsetDateTime.class));
             } else {
                 log.error("Couldn't read new user data.");
                 throw new StoreException("Couldn't read new user data.");

@@ -24,7 +24,7 @@ import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.event.Event;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,7 +128,7 @@ class TopicServiceTest {
 
     @Test
     public void testLastChange() throws Exception {
-        ZonedDateTime lastChange = ZonedDateTime.now();
+        OffsetDateTime lastChange = OffsetDateTime.now();
         doReturn(lastChange).when(topicGateway).determineLastActivity(any());
         assertEquals(lastChange, topicService.lastChange(testTopic1));
     }

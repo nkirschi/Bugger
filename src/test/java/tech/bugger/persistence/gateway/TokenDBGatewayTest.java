@@ -1,5 +1,11 @@
 package tech.bugger.persistence.gateway;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,22 +17,8 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.Duration;
-import java.time.ZonedDateTime;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.matches;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(DBExtension.class)
 @ExtendWith(LogExtension.class)
@@ -54,7 +46,7 @@ public class TokenDBGatewayTest {
 
     @Test
     public void testCreateToken() throws Exception {
-        ZonedDateTime dt = ZonedDateTime.now();
+        OffsetDateTime dt = OffsetDateTime.now();
         User user = new User();
         user.setId(admin.getId());
         Token toInsert = new Token(value, Token.Type.CHANGE_EMAIL, null, "meta", user);

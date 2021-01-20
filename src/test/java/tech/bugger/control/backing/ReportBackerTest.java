@@ -1,7 +1,7 @@
 package tech.bugger.control.backing;
 
 import java.lang.reflect.Field;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -72,12 +72,12 @@ public class ReportBackerTest {
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         report = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(ZonedDateTime.class), null, null, false, 1);
+                mock(OffsetDateTime.class), null, null, false, 1);
     }
 
     @Test
     public void testIsPrivileged() {
-        Authorship authorship = new Authorship(user, ZonedDateTime.now(), null, null);
+        Authorship authorship = new Authorship(user, OffsetDateTime.now(), null, null);
         report.setAuthorship(authorship);
         reportBacker.setReport(report);
         when(session.getUser()).thenReturn(user);
@@ -102,7 +102,7 @@ public class ReportBackerTest {
 
     @Test
     public void testIsPrivilegedNot() {
-        Authorship authorship = new Authorship(new User(user), ZonedDateTime.now(), null, null);
+        Authorship authorship = new Authorship(new User(user), OffsetDateTime.now(), null, null);
         user.setId(2);
         report.setAuthorship(authorship);
         reportBacker.setReport(report);

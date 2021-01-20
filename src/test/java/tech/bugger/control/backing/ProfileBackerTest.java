@@ -24,7 +24,7 @@ import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import java.lang.reflect.Field;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -81,13 +81,13 @@ public class ProfileBackerTest {
     public void setup() {
         user = new User(12345, "Helgi", "v3ry_s3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen", null,
                 new byte[]{1}, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
-                Locale.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, false);
         otherUser = new User(67890, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@web.de", "Helgo", "Brötchen", null,
                 new byte[]{1}, "Hallo, ich bin der Helgo | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
-                Locale.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, false);
         topic = new Topic(1, "Some title", "Some description");
         report = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(ZonedDateTime.class), null, null, false, 1);
+                mock(OffsetDateTime.class), null, null, false, 1);
         MockitoAnnotations.openMocks(this);
         profileBacker = new ProfileBacker(topicService, profileService, session, fctx);
         when(fctx.getExternalContext()).thenReturn(context);

@@ -1,6 +1,6 @@
 package tech.bugger.control.backing;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Locale;
 import java.util.Map;
 import javax.faces.context.ExternalContext;
@@ -75,7 +75,7 @@ public class ReportEditBackerTest {
         reportEditBacker = new ReportEditBacker(topicService, reportService, session, fctx, registry);
 
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
-                new Authorship(null, null, null, null), mock(ZonedDateTime.class),
+                new Authorship(null, null, null, null), mock(OffsetDateTime.class),
                 null, null, false, 1);
         reportEditBacker.setReport(testReport);
         reportEditBacker.setReportID(testReport.getId());
@@ -283,7 +283,7 @@ public class ReportEditBackerTest {
 
     @Test
     public void testIsPrivileged() {
-        Authorship authorship = new Authorship(user, ZonedDateTime.now(), null, null);
+        Authorship authorship = new Authorship(user, OffsetDateTime.now(), null, null);
         testReport.setAuthorship(authorship);
         reportEditBacker.setReport(testReport);
         reportEditBacker.setCurrentTopic(testTopic);
@@ -311,7 +311,7 @@ public class ReportEditBackerTest {
 
     @Test
     public void testIsPrivilegedFalse() {
-        Authorship authorship = new Authorship(new User(user), ZonedDateTime.now(), null, null);
+        Authorship authorship = new Authorship(new User(user), OffsetDateTime.now(), null, null);
         user.setId(5);
         testReport.setAuthorship(authorship);
         reportEditBacker.setReport(testReport);
