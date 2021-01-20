@@ -1,12 +1,11 @@
 package tech.bugger.persistence.gateway;
 
+import java.time.OffsetDateTime;
+import java.util.List;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
-
-import java.time.ZonedDateTime;
-import java.util.List;
 
 /**
  * A topic gateway allows to query and modify a persistent storage of topics.
@@ -75,7 +74,7 @@ public interface TopicGateway {
      * @return The last activity on {@code topic}.
      * @throws NotFoundException The topic could not be found.
      */
-    ZonedDateTime determineLastActivity(Topic topic) throws NotFoundException;
+    OffsetDateTime determineLastActivity(Topic topic) throws NotFoundException;
 
     /**
      * Retrieves a topic by its ID.

@@ -2,7 +2,7 @@ package tech.bugger.control.backing;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -88,12 +88,12 @@ public class SearchBacker implements Serializable {
     /**
      * The latest creation date to search for.
      */
-    private ZonedDateTime latestCreationDateTime;
+    private OffsetDateTime latestCreationDateTime;
 
     /**
      * The earliest closing date to search for.
      */
-    private ZonedDateTime earliestClosingDateTime;
+    private OffsetDateTime earliestClosingDateTime;
 
     /**
      * Whether to show open reports in the report search results.
@@ -339,9 +339,9 @@ public class SearchBacker implements Serializable {
      * as creating and editing posts count as actions. Moving a report is an action in the destination topic only.
      *
      * @param topic The topic in question.
-     * @return The time stamp of the last action as a {@code ZonedDateTime}.
+     * @return The time stamp of the last action as a {@link OffsetDateTime}.
      */
-    public ZonedDateTime lastChange(final Topic topic) {
+    public OffsetDateTime lastChange(final Topic topic) {
         return null;
     }
 
@@ -350,9 +350,9 @@ public class SearchBacker implements Serializable {
      * as creating and editing posts count as actions.
      *
      * @param report The report in question.
-     * @return The time stamp of the last action as a {@code ZonedDateTime}.
+     * @return The time stamp of the last action as a {@link OffsetDateTime}.
      */
-    public ZonedDateTime lastChange(final Report report) {
+    public OffsetDateTime lastChange(final Report report) {
         return null;
     }
 
@@ -407,28 +407,28 @@ public class SearchBacker implements Serializable {
     /**
      * @return The latestOpeningDate.
      */
-    public ZonedDateTime getLatestOpeningDateTime() {
+    public OffsetDateTime getLatestOpeningDateTime() {
         return latestCreationDateTime;
     }
 
     /**
      * @param latestOpeningDate The latestOpeningDate to set.
      */
-    public void setLatestOpeningDateTime(final ZonedDateTime latestOpeningDate) {
+    public void setLatestOpeningDateTime(final OffsetDateTime latestOpeningDate) {
         this.latestCreationDateTime = latestOpeningDate;
     }
 
     /**
      * @return The earliestClosingDate.
      */
-    public ZonedDateTime getEarliestClosingDateTime() {
+    public OffsetDateTime getEarliestClosingDateTime() {
         return earliestClosingDateTime;
     }
 
     /**
      * @param earliestClosingDate The earliestClosingDate to set.
      */
-    public void setEarliestClosingDateTime(final ZonedDateTime earliestClosingDate) {
+    public void setEarliestClosingDateTime(final OffsetDateTime earliestClosingDate) {
         this.earliestClosingDateTime = earliestClosingDate;
     }
 

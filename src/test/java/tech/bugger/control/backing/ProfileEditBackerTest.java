@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -90,8 +90,8 @@ public class ProfileEditBackerTest {
     public void setup() throws NoSuchFieldException {
         user = new User(12345, "Helgi", "v3ry_s3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen",
                 new byte[1], new byte[]{1}, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
-                Locale.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
-        emailToken = new Token(TOKEN, Token.Type.CHANGE_EMAIL, ZonedDateTime.now(), EMAIL, user);
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, false);
+        emailToken = new Token(TOKEN, Token.Type.CHANGE_EMAIL, OffsetDateTime.now(), EMAIL, user);
         MockitoAnnotations.openMocks(this);
         profileEditBacker = new ProfileEditBacker(authenticationService, profileService, session, fctx);
         createUser = profileEditBacker.getClass().getDeclaredField("create");

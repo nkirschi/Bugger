@@ -1,7 +1,7 @@
 package tech.bugger.control.backing;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Locale;
 import javax.enterprise.event.Event;
 import javax.faces.application.Application;
@@ -65,7 +65,7 @@ public class PasswordSetBackerTest {
                 ResourceBundleMocker.mock(""));
         testUser = new User();
         testToken = new Token("0123456789abcdef", Token.Type.REGISTER,
-                ZonedDateTime.of(1999, 10, 3, 22, 13, 0, 0, ZoneId.systemDefault()), "", testUser);
+                OffsetDateTime.of(1999, 10, 3, 22, 13, 0, 0, ZoneOffset.UTC), "", testUser);
     }
 
     @Test

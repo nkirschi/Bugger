@@ -15,7 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,9 +136,9 @@ public class NotificationDBGateway implements NotificationGateway {
 
     private Notification getNotificationFromResultSet(final ResultSet rs) throws SQLException {
         Notification notification;
-        ZonedDateTime date = null;
-        if (rs.getTimestamp("created_at") != null) {
-            date = rs.getTimestamp("created_at").toInstant().atZone(ZoneId.systemDefault());
+        OffsetDateTime date = null;
+        if (rs.getObject("created_at", OffsetDateTime.class) != null) {
+            date = rs.getObject("created_at", OffsetDateTime.class);
         }
         notification = new Notification(
                 rs.getObject("id", Integer.class),
