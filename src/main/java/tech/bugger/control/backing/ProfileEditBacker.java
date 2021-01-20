@@ -121,9 +121,14 @@ public class ProfileEditBacker implements Serializable {
     private final UserSession session;
 
     /**
-     * The current external context.
+     * The current {@link FacesContext} of the application.
      */
     private final FacesContext fctx;
+
+    /**
+     * The current {@link ExternalContext} of the application.
+     */
+    private final ExternalContext ectx;
 
     /**
      * The profile service providing the business logic.
@@ -144,12 +149,16 @@ public class ProfileEditBacker implements Serializable {
      * @param fctx                  The current faces context.
      */
     @Inject
-    public ProfileEditBacker(final AuthenticationService authenticationService, final ProfileService profileService,
-                             final UserSession session, final FacesContext fctx) {
+    public ProfileEditBacker(final AuthenticationService authenticationService,
+                             final ProfileService profileService,
+                             final UserSession session,
+                             final FacesContext fctx,
+                             final ExternalContext ectx) {
         this.authenticationService = authenticationService;
         this.profileService = profileService;
         this.session = session;
         this.fctx = fctx;
+        this.ectx = ectx;
     }
 
     /**
@@ -157,9 +166,8 @@ public class ProfileEditBacker implements Serializable {
      */
     @PostConstruct
     void init() {
-        ExternalContext ext = fctx.getExternalContext();
-        if (ext.getRequestParameterMap().containsKey("token")) {
-            updateUserEmail(authenticationService.findToken(ext.getRequestParameterMap().get("token")));
+        if (ectx.getRequestParameterMap().containsKey("token")) {
+            updateUserEmail(authenticationService.findToken(ectx.getRequestParameterMap().get("token")));
             log.debug("Updating the user's email address with the given token.");
         }
 
@@ -169,12 +177,12 @@ public class ProfileEditBacker implements Serializable {
         }
         dialog = ProfileEditDialog.NONE;
 
-        if (ext.getRequestParameterMap().containsKey("c") && session.getUser().isAdministrator()) {
+        if (ectx.getRequestParameterMap().containsKey("c") && session.getUser().isAdministrator()) {
             create = true;
             user = new User();
             log.debug("Creating new user.");
-        } else if (ext.getRequestParameterMap().containsKey("e") && session.getUser().isAdministrator()) {
-            user = profileService.getUserByUsername(ext.getRequestParameterMap().get("e"));
+        } else if (ectx.getRequestParameterMap().containsKey("e") && session.getUser().isAdministrator()) {
+            user = profileService.getUserByUsername(ectx.getRequestParameterMap().get("e"));
             log.debug("Using the edit key to find the user in the database.");
         } else {
             user = profileService.getUser(session.getUser().getId());
@@ -249,12 +257,10 @@ public class ProfileEditBacker implements Serializable {
             }
         }
 
-        ExternalContext ext = fctx.getExternalContext();
-
-        String base = ext.getApplicationContextPath();
+        String base = ectx.getApplicationContextPath();
         String redirect = base + "/profile?u=" + user.getUsername();
         try {
-            fctx.getExternalContext().redirect(redirect);
+            ectx.redirect(redirect);
         } catch (IOException e) {
             // Ignore the exception and just stay on the page
         }
@@ -272,8 +278,7 @@ public class ProfileEditBacker implements Serializable {
     private boolean updateEmail(final User user, final String email) {
         User updateUser = new User(user);
 
-        return authenticationService.updateEmail(updateUser,
-                                                 JFConfig.getApplicationPath(fctx.getExternalContext()), email);
+        return authenticationService.updateEmail(updateUser, JFConfig.getApplicationPath(ectx), email);
     }
 
     /**
@@ -291,7 +296,7 @@ public class ProfileEditBacker implements Serializable {
         if (profileService.deleteUser(user)) {
             if (user.equals(session.getUser())) {
                 session.setUser(null);
-                session.invalidateSession();
+                ectx.invalidateSession();
             }
 
             return "pretty:home";

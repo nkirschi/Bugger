@@ -72,6 +72,11 @@ public class HeaderBacker implements Serializable {
     private final FacesContext fctx;
 
     /**
+     * The current {@link ExternalContext} of the application.
+     */
+    private final ExternalContext ectx;
+
+    /**
      * Feedback Event for user feedback.
      */
     private final Event<Feedback> feedbackEvent;
@@ -94,11 +99,13 @@ public class HeaderBacker implements Serializable {
     public HeaderBacker(final ApplicationSettings applicationSettings,
                         final UserSession session,
                         final FacesContext fctx,
+                        final ExternalContext ectx,
                         final Event<Feedback> feedbackEvent,
                         @RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.applicationSettings = applicationSettings;
         this.session = session;
         this.fctx = fctx;
+        this.ectx = ectx;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;
     }
@@ -118,7 +125,7 @@ public class HeaderBacker implements Serializable {
     @PostConstruct
     void init() {
         user = session.getUser();
-        displayMenu = Boolean.parseBoolean(fctx.getExternalContext().getRequestParameterMap().get("d"));
+        displayMenu = Boolean.parseBoolean(ectx.getRequestParameterMap().get("d"));
     }
 
     /**
@@ -129,7 +136,7 @@ public class HeaderBacker implements Serializable {
     public String logout() {
         log.debug("Logout called for user " + session.getUser() + ".");
         session.setUser(null);
-        session.invalidateSession();
+        ectx.invalidateSession();
         return "pretty:home";
     }
 
@@ -198,8 +205,6 @@ public class HeaderBacker implements Serializable {
      * @return The URL to redirect to after login.
      */
     public String getRedirectUrl() {
-        ExternalContext ectx = fctx.getExternalContext();
-
         String base = ectx.getApplicationContextPath();
         HttpServletRequest request = (HttpServletRequest) ectx.getRequest();
         UrlMapping mapping = PrettyContext.getCurrentInstance().getCurrentMapping();
