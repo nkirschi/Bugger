@@ -32,6 +32,15 @@
         <h:form id="f-report-edit"
                 enctype="multipart/form-data"
                 rendered="#{reportEditBacker.privileged}">
+
+            <h:panelGroup>
+                <h:outputText value="#{labels.report_edit_info} "/>
+                <h:link value="##{reportEditBacker.reportID}" outcome="pretty:report">
+                    <f:param name="id" value="#{reportEditBacker.reportID}"/>
+                </h:link>
+                <h:outputText value="#{labels.report_edit_info2}"/>
+            </h:panelGroup>
+
             <h:panelGrid columns="2">
                 <h:outputLabel id="o-title" for="it-title" value="#{labels.report_title}"/>
                 <h:inputText id="it-title" value="#{reportEditBacker.report.title}" maxlength="#{C.LARGE_FIELD}"

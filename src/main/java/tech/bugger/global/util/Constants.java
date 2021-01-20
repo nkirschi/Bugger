@@ -80,6 +80,16 @@ public final class Constants {
     public static final int MB_TO_BYTES = 1_000_000;
 
     /**
+     * The minimum width images are required to have.
+     */
+    public static final int MIN_IMAGE_WIDTH = 128;
+
+    /**
+     * The minimum height images are required to have.
+     */
+    public static final int MIN_IMAGE_HEIGHT = 128;
+
+    /**
      * The available languages for the frontend.
      */
     public static final Locale[] LANGUAGES = new Locale[]{Locale.ENGLISH, Locale.GERMAN};

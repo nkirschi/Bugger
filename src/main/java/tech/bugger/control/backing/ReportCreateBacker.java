@@ -35,18 +35,13 @@ import java.util.List;
 @Named
 public class ReportCreateBacker implements Serializable {
 
-    /**
-     * The {@link Log} instance associated with this class for logging purposes.
-     */
-    private static final Log log = Log.forClass(ReportCreateBacker.class);
-
     @Serial
     private static final long serialVersionUID = 6375834226080077144L;
 
     /**
-     * The ID of the topic to create the report in.
+     * The topic to create the report in.
      */
-    private int topicID;
+    private Topic topic;
 
     /**
      * The report to create.
@@ -141,6 +136,7 @@ public class ReportCreateBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        int topicID;
         try {
             topicID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
@@ -150,7 +146,7 @@ public class ReportCreateBacker implements Serializable {
         }
 
         User user = session.getUser();
-        Topic topic = topicService.getTopicByID(topicID);
+        topic = topicService.getTopicByID(topicID);
         if (user == null || topic == null || !topicService.canCreateReportIn(user, topic)) {
             redirectTo404Page();
             return;
@@ -218,21 +214,21 @@ public class ReportCreateBacker implements Serializable {
     }
 
     /**
-     * Returns the ID of the topic the report is to be created in.
+     * Returns the topic the report is to be created in.
      *
-     * @return The ID of the topic the report is to be created in.
+     * @return The topic the report is to be created in.
      */
-    public int getTopicID() {
-        return topicID;
+    public Topic getTopic() {
+        return topic;
     }
 
     /**
-     * Sets the ID of the topic the report is to be created in.
+     * Sets the topic the report is to be created in.
      *
-     * @param topicID The ID of the topic the report is to be created in.
+     * @param topic The topic the report is to be created in.
      */
-    public void setTopicID(final int topicID) {
-        this.topicID = topicID;
+    public void setTopic(Topic topic) {
+        this.topic = topic;
     }
 
     /**

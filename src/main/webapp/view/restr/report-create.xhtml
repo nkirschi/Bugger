@@ -18,6 +18,15 @@
         <h:form id="f-create-report"
                 enctype="multipart/form-data"
                 rendered="#{reportCreateBacker.session.user != null and !reportCreateBacker.isBanned()}">
+
+            <h:panelGroup>
+                <h:outputText value="#{labels.report_create_info} "/>
+                <h:link value="#{reportCreateBacker.topic.title}" outcome="pretty:topic">
+                    <f:param name="id" value="#{reportCreateBacker.topic.id}"/>
+                </h:link>
+                <h:outputText value="#{labels.report_create_info2}"/>
+            </h:panelGroup>
+
             <h:panelGrid columns="2">
                 <h:outputLabel id="o-title" for="it-title" value="#{labels.title}"/>
                 <h:inputText id="it-title" value="#{reportCreateBacker.report.title}"
@@ -57,8 +66,6 @@
                 <h:message for="it-post-content"/>
             </h:panelGroup>
 
-            <!-- TODO Adding attachment when post content is empty will trigger a "value is required" message and will
-                 not add attachment. -->
             <ul>
                 <ui:repeat var="attachment" value="#{reportCreateBacker.attachments}">
                     <li><h:outputText value="#{attachment.name}"/></li>
@@ -71,6 +78,7 @@
                                 styleClass="small form-text text-muted">
                     <f:param value="#{applicationSettings.configuration.maxAttachmentsPerPost}"/>
                     <f:param value="#{C.MAX_ATTACHMENT_FILESIZE}"/>
+                    <f:param value="#{applicationSettings.configuration.allowedFileExtensions}"/>
                 </h:outputFormat>
             </h:panelGroup>
 
