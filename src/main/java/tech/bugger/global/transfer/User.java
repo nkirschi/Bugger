@@ -115,7 +115,7 @@ public class User implements Serializable {
      * Constructs an empty user.
      */
     public User() {
-        this(null, "", null, null, null, "", "", "", new byte[0], new byte[0],
+        this(null, "", "", "", "", "", "", "", new byte[0], new byte[0],
                 "", Locale.ENGLISH, User.ProfileVisibility.FULL, null, null, false);
     }
 
