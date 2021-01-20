@@ -1,52 +1,52 @@
+/* Define variables for the primary colors to use */
+/* Template */
 body {
-    background-color: #f1f8fb;
+  background-color: #f1f8fb;
 }
 
 #p-header {
-    background: #1e88e5;
-    color: white;
+  background-color: #1e88e5;
+  color: white;
 }
-
 #p-header #ot-comp-name {
-    color: white;
+  color: white;
 }
 
 #p-footer {
-    background: #1565C0;
-    color: white;
+  background-color: #1565C0;
+  color: white;
 }
-
 #p-footer a {
-    color: white;
+  color: white;
 }
-
 #p-footer a:hover {
-    color: white;
-}
-
-#p-content {
-    background: #fff;
+  color: white;
 }
 
 #p-profile-menu {
-    background-color: #deeff5;
-    color: #1e88e5;
+  background-color: #f1f8fb;
+  color: #1e88e5;
 }
 
+/* Bootstrap buttons */
 .btn {
-    color: #1e88e5;
-    background-color: white;
+  background-color: white;
+  color: #1e88e5;
 }
 
+/* Popup dialogs */
 .dialog {
-    background-color: #f1f8fb;
+  background-color: #f1f8fb;
 }
 
+/* Voting buttons */
 .vote-cast {
-    background-color: #1e88e5;
-    color: white;
+  background-color: #1e88e5;
+  color: white;
 }
 
 .vote-not-cast {
-    background-color: #6c757d;
+  background-color: gray;
 }
+
+/*# sourceMappingURL=light.css.map */
