@@ -17,8 +17,6 @@ import tech.bugger.global.transfer.Topic;
 
 import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
-import java.math.BigDecimal;
-import java.time.Duration;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
@@ -107,36 +105,19 @@ public class StatisticsBackerTest {
 
     @Test
     public void testGetOpenReportCount() {
-        statisticsBacker.getOpenReportCount();
-        verify(statisticsService).countOpenReports(any());
+        assertDoesNotThrow(() -> statisticsBacker.getOpenReportCount());
     }
 
     @Test
-    public void testGetAverageTimeOpenWhenDurationNull() {
-        doReturn(null).when(statisticsService).averageTimeOpen(any());
-        assertEquals("-", statisticsBacker.getAverageTimeOpen());
+    public void testGetAverageTimeOpen() {
+        assertDoesNotThrow(() -> statisticsBacker.getAverageTimeOpen());
     }
 
     @Test
-    public void testGetAverageTimeOpenWhenDurationNotNull() {
-        statisticsBacker.init();
-        Duration duration = Duration.ofMinutes(90);
-        doReturn(duration).when(statisticsService).averageTimeOpen(any());
-        assertEquals("1.5", statisticsBacker.getAverageTimeOpen());
+    public void testGetAveragePostsPerReport() {
+        assertDoesNotThrow(() -> statisticsBacker.getAveragePostsPerReport());
     }
 
-    @Test
-    public void testGetAveragePostsPerReportWhenAvgNull() {
-        doReturn(null).when(statisticsService).averagePostsPerReport(any());
-        assertEquals("-", statisticsBacker.getAveragePostsPerReport());
-    }
-
-    @Test
-    public void testGetAveragePostsPerReportWhenAvgNotNull() {
-        statisticsBacker.init();
-        doReturn(BigDecimal.valueOf(1.337)).when(statisticsService).averagePostsPerReport(any());
-        assertEquals("1.34", statisticsBacker.getAveragePostsPerReport());
-    }
 
     @Test
     public void testGetTopReports() {
@@ -152,6 +133,7 @@ public class StatisticsBackerTest {
     public void testGetTopicTitles() {
         assertDoesNotThrow(() -> statisticsBacker.getTopicTitles());
     }
+
 
     @Test
     public void testSetReportCriteria() {

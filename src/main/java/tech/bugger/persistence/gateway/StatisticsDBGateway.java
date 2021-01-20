@@ -45,6 +45,10 @@ public class StatisticsDBGateway implements StatisticsGateway {
      */
     @Override
     public int getNumberOfOpenReports(final ReportCriteria criteria) {
+        if (criteria == null) {
+            throw new IllegalArgumentException("Report criteria must not be null!");
+        }
+
         // @formatter:off
         String query =
                 "SELECT COUNT(*) "
@@ -79,6 +83,10 @@ public class StatisticsDBGateway implements StatisticsGateway {
      */
     @Override
     public Duration getAverageTimeToClose(final ReportCriteria criteria) {
+        if (criteria == null) {
+            throw new IllegalArgumentException("Report criteria must not be null!");
+        }
+
         // @formatter:off
         String query =
                 "SELECT EXTRACT (epoch FROM AVG(r.closed_at - r.created_at)) " // duration in seconds
@@ -117,6 +125,10 @@ public class StatisticsDBGateway implements StatisticsGateway {
      */
     @Override
     public BigDecimal getAveragePostsPerReport(final ReportCriteria criteria) {
+        if (criteria == null) {
+            throw new IllegalArgumentException("Report criteria must not be null!");
+        }
+
         // @formatter:off
         String query =
                 "SELECT AVG(c) "
@@ -155,8 +167,12 @@ public class StatisticsDBGateway implements StatisticsGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<TopReport> getTopTenReports() {
-        List<TopReport> topTenReports = new ArrayList<>();
+    public List<TopReport> getTopReports(final int limit) {
+        if (limit < 0) {
+            throw new IllegalArgumentException("Top reports limit cannot be negative!");
+        }
+
+        List<TopReport> topReports = new ArrayList<>();
         // @formatter:off
         String query =
                 "SELECT   * "
@@ -166,12 +182,12 @@ public class StatisticsDBGateway implements StatisticsGateway {
               + "JOIN     \"user\" AS u "
               + "ON       r.created_by = u.id "
               + "ORDER BY t.relevance_gain DESC "
-              + "LIMIT    10;";
+              + "LIMIT    ?;";
         // @formatter:on
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = new StatementParametrizer(stmt).integer(limit).toStatement().executeQuery();
             while (rs.next()) {
-                topTenReports.add(new TopReport(
+                topReports.add(new TopReport(
                         rs.getInt("report"),
                         rs.getString("title"),
                         rs.getString("username"),
@@ -182,15 +198,19 @@ public class StatisticsDBGateway implements StatisticsGateway {
             log.error("Unable to determine top ten reports.", e);
             throw new StoreException("Unable to determine top ten reports.", e);
         }
-        return topTenReports;
+        return topReports;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public List<TopUser> getTopTenUsers() {
-        List<TopUser> topTenUsers = new ArrayList<>();
+    public List<TopUser> getTopUsers(final int limit) {
+        if (limit < 0) {
+            throw new IllegalArgumentException("Top users limit cannot be negative!");
+        }
+
+        List<TopUser> topUsers = new ArrayList<>();
         // @formatter:off
         String query =
                 "SELECT   * "
@@ -198,18 +218,18 @@ public class StatisticsDBGateway implements StatisticsGateway {
               + "JOIN     \"user\" AS u "
               + "ON       t.user = u.id "
               + "ORDER BY t.earned_relevance DESC "
-              + "LIMIT    10;";
+              + "LIMIT    ?;";
         // @formatter:on
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = new StatementParametrizer(stmt).integer(limit).toStatement().executeQuery();
             while (rs.next()) {
-                topTenUsers.add(new TopUser(rs.getString("username"), rs.getInt("earned_relevance")));
+                topUsers.add(new TopUser(rs.getString("username"), rs.getInt("earned_relevance")));
             }
         } catch (SQLException e) {
             log.error("Unable to determine top ten users.", e);
             throw new StoreException("Unable to determine top ten users.", e);
         }
-        return topTenUsers;
+        return topUsers;
     }
 
 }

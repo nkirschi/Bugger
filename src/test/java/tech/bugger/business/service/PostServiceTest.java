@@ -33,25 +33,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -103,7 +97,7 @@ public class PostServiceTest {
     public void setUp() {
         service = new PostService(notificationService, topicService, applicationSettings, transactionManager,
                 feedbackEvent, ResourceBundleMocker.mock(""));
-        List<Attachment> attachments = Arrays.asList(
+        List<Attachment> attachments = List.of(
                 new Attachment(1, "test1.txt", new byte[0], "", new Lazy<>(testPost)),
                 new Attachment(2, "test2.txt", new byte[0], "", new Lazy<>(testPost)),
                 new Attachment(3, "test3.txt", new byte[0], "", new Lazy<>(testPost))

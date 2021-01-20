@@ -25,26 +25,19 @@ import javax.faces.context.ExternalContext;
 import javax.servlet.http.Part;
 import java.io.InputStream;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 public class ReportCreateBackerTest {
@@ -91,7 +84,7 @@ public class ReportCreateBackerTest {
         reportCreateBacker = new ReportCreateBacker(applicationSettings, topicService, reportService, postService,
                 session, ectx, feedbackEvent);
 
-        List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
+        List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
                 mock(OffsetDateTime.class), null, null, false, 1);
@@ -188,7 +181,7 @@ public class ReportCreateBackerTest {
 
     @Test
     public void testDeleteAllAttachments() {
-        reportCreateBacker.setAttachments(new LinkedList<>(Arrays.asList(new Attachment(), new Attachment())));
+        reportCreateBacker.setAttachments(new LinkedList<>(List.of(new Attachment(), new Attachment())));
         reportCreateBacker.deleteAllAttachments();
         assertEquals(0, reportCreateBacker.getAttachments().size());
     }

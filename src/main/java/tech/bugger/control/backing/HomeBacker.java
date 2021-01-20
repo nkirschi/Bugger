@@ -80,7 +80,7 @@ public class HomeBacker implements Serializable {
     @PostConstruct
     void init() {
         if (session.getUser() != null) {
-            inbox = new Paginator<>("created_at", Selection.PageSize.NORMAL) {
+            inbox = new Paginator<>("created_at", Selection.PageSize.SMALL) {
                 @Override
                 protected Iterable<Notification> fetch() {
                     return notificationService.selectNotifications(session.getUser(), getSelection());

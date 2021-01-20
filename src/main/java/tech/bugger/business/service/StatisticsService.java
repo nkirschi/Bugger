@@ -118,13 +118,14 @@ public class StatisticsService {
     }
 
     /**
-     * Returns the ten users with the most relevance summed up over their created reports.
+     * Returns the users with the most relevance summed up over their created reports.
      *
-     * @return The top ten users.
+     * @param limit The maximum number of top reports to return.
+     * @return The {@code limit} top users sorted by total received relevance descending.
      */
-    public List<TopUser> determineTopTenUsers() {
+    public List<TopUser> determineTopUsers(final int limit) {
         try (Transaction tx = transactionManager.begin()) {
-            List<TopUser> topTenUsers = tx.newStatisticsGateway().getTopTenUsers();
+            List<TopUser> topTenUsers = tx.newStatisticsGateway().getTopUsers(limit);
             tx.commit();
             return topTenUsers;
         } catch (TransactionException e) {
@@ -135,13 +136,14 @@ public class StatisticsService {
     }
 
     /**
-     * Returns the ten reports that have gained the most relevance in the last 24 hours system-wide.
+     * Returns the reports that have gained the most relevance in the last 24 hours system-wide.
      *
-     * @return The top ten reports.
+     * @param limit The maximum number of top users to return.
+     * @return The {@code limit} top reports sorted by relevance gain descending.
      */
-    public List<TopReport> determineTopTenReports() {
+    public List<TopReport> determineTopReports(final int limit) {
         try (Transaction tx = transactionManager.begin()) {
-            List<TopReport> topTenReports = tx.newStatisticsGateway().getTopTenReports();
+            List<TopReport> topTenReports = tx.newStatisticsGateway().getTopReports(limit);
             tx.commit();
             return topTenReports;
         } catch (TransactionException e) {

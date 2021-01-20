@@ -37,14 +37,14 @@ import java.sql.SQLException;
 public class DBTransaction implements Transaction {
 
     /**
-     * Database connection reserved for this transaction.
-     */
-    private Connection connection;
-
-    /**
      * Connection pool to borrow connections from.
      */
     private final ConnectionPool connectionPool;
+
+    /**
+     * Database connection reserved for this transaction.
+     */
+    private Connection connection;
 
     /**
      * Whether this transaction has been completed, i.e. committed or aborted.
@@ -58,7 +58,7 @@ public class DBTransaction implements Transaction {
      */
     public DBTransaction(final ConnectionPool connectionPool) {
         this.connectionPool = connectionPool;
-        this.connection = connectionPool.getConnection();
+        connection = connectionPool.getConnection();
         completed = false;
         try {
             connection.setAutoCommit(false);
