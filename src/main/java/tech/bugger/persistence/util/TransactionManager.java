@@ -11,6 +11,9 @@ import javax.inject.Singleton;
 @Singleton
 public final class TransactionManager {
 
+    /**
+     * The ID of the application's main connection pool.
+     */
     private static final String MAIN_DB_POOL = "db";
 
     /**
