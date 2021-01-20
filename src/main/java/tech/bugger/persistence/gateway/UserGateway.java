@@ -48,7 +48,7 @@ public interface UserGateway {
     int getNumberOfAdmins();
 
     /**
-     * Retrieves a user by their ID.
+     * Retrieves a user by their ID, leaving the avatar empty.
      *
      * @param id The ID of the user to look for.
      * @return The user identified by the ID.
@@ -57,7 +57,7 @@ public interface UserGateway {
     User getUserByID(int id) throws NotFoundException;
 
     /**
-     * Retrieves a user by their username.
+     * Retrieves a user by their username, leaving the avatar empty.
      *
      * @param username The username of the user to look for.
      * @return The user identified by the username.
@@ -66,13 +66,22 @@ public interface UserGateway {
     User getUserByUsername(String username) throws NotFoundException;
 
     /**
-     * Retrieves a user by their e-mail address.
+     * Retrieves a user by their e-mail address, leaving the avatar empty.
      *
      * @param emailAddress The username of the user to look for.
      * @return The user identified by the given {@code emailAddress}.
      * @throws NotFoundException The user could not be found.
      */
     User getUserByEmail(String emailAddress) throws NotFoundException;
+
+    /**
+     * Retrieves a user's avatar.
+     *
+     * @param id The id of the user to look for.
+     * @return The avatar of the user identified by the given {@code id}.
+     * @throws NotFoundException The user could not be found.
+     */
+    byte[] getAvatarForUser(int id) throws NotFoundException;
 
     /**
      * Retrieves a list of moderators for a topic that match the given selection criteria.

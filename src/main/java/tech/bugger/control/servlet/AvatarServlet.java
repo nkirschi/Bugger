@@ -44,8 +44,8 @@ public class AvatarServlet extends MediaServlet {
     private ProfileService profileService;
 
     /**
-     * Handles a request for a user's avatar. Expects the user's ID and the type of avatar (full image or thumbnail) as
-     * a request parameter.
+     * Handles a request for a user's avatar. Expects the user's ID or username and the type of avatar (full image or
+     * thumbnail) as a request parameter.
      * <p>
      * Verifies if the client is authorized to view the avatar, retrieves it and writes the attachment or potential
      * errors to the response.
@@ -61,27 +61,19 @@ public class AvatarServlet extends MediaServlet {
             return;
         }
 
-        // Retrieve user ID and image type from the request.
-        int userID;
-        try {
-            userID = Integer.parseInt(request.getParameter("id"));
-        } catch (NumberFormatException e) {
-            log.debug("Invalid user ID given.");
+        // Retrieve user and image type.
+        User user = fetchUser(request);
+        if (user == null) {
+            log.debug("Invalid user ID or username given.");
             redirectToNotFoundPage(response);
             return;
         }
         boolean serveThumbnail = "thumbnail".equals(request.getParameter("type"));
 
         // Fetch the requested image.
-        User user = profileService.getUser(userID);
-        if (user == null) {
-            log.debug("User with ID " + userID + " not found.");
-            redirectToNotFoundPage(response);
-            return;
-        }
-        byte[] image = serveThumbnail ? user.getAvatarThumbnail() : user.getAvatar().get();
+        byte[] image = serveThumbnail ? user.getAvatarThumbnail() : profileService.getAvatarForUser(user.getId());
         if (image == null) {
-            log.debug("Avatar or thumbnail for user with ID " + userID + " not found.");
+            log.debug("Avatar or thumbnail for user with ID " + user.getId() + " not found.");
             redirectToNotFoundPage(response);
             return;
         }
@@ -95,6 +87,22 @@ public class AvatarServlet extends MediaServlet {
             response.getOutputStream().write(image);
         } catch (IOException e) {
             log.error("Could not write servlet response.", e);
+        }
+    }
+
+    /**
+     * Parses the request parameters and fetches the user identified by them. Users can be specified by their id (using
+     * request parameter {@code id}) or by their username (using request parameter {@code u}).
+     *
+     * @param request The request object to parse the parameters from.
+     * @return The user if they could be found, {@code null} otherwise.
+     */
+    private User fetchUser(final HttpServletRequest request) {
+        try {
+            return profileService.getUser(Integer.parseInt(request.getParameter("id")));
+        } catch (NumberFormatException e) {
+            String username = request.getParameter("u");
+            return username != null ? profileService.getUserByUsername(username) : null;
         }
     }
 

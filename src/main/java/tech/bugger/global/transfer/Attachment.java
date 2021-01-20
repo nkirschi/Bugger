@@ -27,7 +27,7 @@ public class Attachment implements Serializable {
     /**
      * The content of the attachment, loaded lazily.
      */
-    private Lazy<byte[]> content;
+    private byte[] content;
 
     /**
      * The media type (MIME type) of the attachment.
@@ -55,7 +55,7 @@ public class Attachment implements Serializable {
      * @param mimetype The MIME type of the attachment.
      * @param post     The post the attachment belongs to.
      */
-    public Attachment(final int id, final String name, final Lazy<byte[]> content, final String mimetype,
+    public Attachment(final int id, final String name, final byte[] content, final String mimetype,
                       final Lazy<Post> post) {
         this.id = id;
         this.name = name;
@@ -105,7 +105,7 @@ public class Attachment implements Serializable {
      *
      * @return The attachment data.
      */
-    public Lazy<byte[]> getContent() {
+    public byte[] getContent() {
         return content;
     }
 
@@ -114,7 +114,7 @@ public class Attachment implements Serializable {
      *
      * @param content The data to be set.
      */
-    public void setContent(final Lazy<byte[]> content) {
+    public void setContent(final byte[] content) {
         this.content = content;
     }
 
@@ -190,12 +190,11 @@ public class Attachment implements Serializable {
      */
     @Override
     public String toString() {
-        String length = content.isPresent() ? String.valueOf(content.get().length) : "<absent>";
         String postId = post.isPresent() ? String.valueOf(post.get().getId()) : "<absent>";
         return "Attachment{"
                 + "id='" + id + '\''
                 + ", name='" + name + '\''
-                + ", content=byte[" + length + "]"
+                + ", content=byte[" + (content != null ? content.length : 0) + "]"
                 + ", mimetype='" + mimetype + '\''
                 + ", post='##" + postId + '\''
                 + '}';

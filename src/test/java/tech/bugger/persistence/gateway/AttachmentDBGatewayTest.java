@@ -8,6 +8,7 @@ import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Post;
+import tech.bugger.global.transfer.Report;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
@@ -17,7 +18,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,7 +53,7 @@ public class AttachmentDBGatewayTest {
 
         post = new Post(100, "", null, null, null);
         byte[] content = "Some random byte string".getBytes();
-        attachment = new Attachment(10000, "test.txt", new Lazy<>(content), "text/plain", new Lazy<>(post));
+        attachment = new Attachment(10000, "test.txt", content, "text/plain", new Lazy<>(post));
     }
 
     @AfterEach
@@ -65,7 +70,7 @@ public class AttachmentDBGatewayTest {
             return new Attachment(
                     rs.getInt("id"),
                     rs.getString("name"),
-                    new Lazy<>(rs.getBytes("content")),
+                    rs.getBytes("content"),
                     rs.getString("mimetype"),
                     null);
         } else {
@@ -107,7 +112,7 @@ public class AttachmentDBGatewayTest {
     }
 
     @Test
-    public void testUpdateWhenNotExists() throws Exception {
+    public void testUpdateWhenNotExists() {
         attachment.setId(42);
         assertThrows(NotFoundException.class, () -> gateway.update(attachment));
     }
@@ -128,9 +133,9 @@ public class AttachmentDBGatewayTest {
     }
 
     @Test
-    public void testDeleteWhenNotExists() throws Exception {
+    public void testDeleteWhenNotExists() {
         attachment.setId(42);
-        assertThrows(NotFoundException.class, () -> gateway.update(attachment));
+        assertThrows(NotFoundException.class, () -> gateway.delete(attachment));
     }
 
     @Test
@@ -139,6 +144,69 @@ public class AttachmentDBGatewayTest {
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         Attachment attachmentMock = mock(Attachment.class);
         assertThrows(StoreException.class, () -> new AttachmentDBGateway(connectionSpy).delete(attachmentMock));
+    }
+
+    @Test
+    public void testFind() throws Exception {
+        Attachment attachment = gateway.find(1);
+
+        // Check if attachment is equal to attachment from test data.
+        assertAll(() -> assertEquals(1, attachment.getId()),
+                () -> assertEquals("testattachment.txt", attachment.getName()),
+                () -> assertEquals("text/plain", attachment.getMimetype())
+        );
+    }
+
+    @Test
+    public void testFindWhenNotExists() {
+        assertThrows(NotFoundException.class, () -> gateway.find(42));
+    }
+
+    @Test
+    public void testFindWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new AttachmentDBGateway(connectionSpy).find(1));
+    }
+
+    @Test
+    public void testFindContent() throws Exception {
+        assertArrayEquals("testcontent".getBytes(), gateway.findContent(1));
+    }
+
+    @Test
+    public void testFindContentWhenNotExists() {
+        assertThrows(NotFoundException.class, () -> gateway.findContent(42));
+    }
+
+    @Test
+    public void testFindContentWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new AttachmentDBGateway(connectionSpy).findContent(1));
+    }
+
+    @Test
+    public void testGetAttachmentsForPost() {
+        Post post = new Post(100, null, null, null, null);
+        List<Attachment> attachments = gateway.getAttachmentsForPost(post);
+
+        // Check if attachments are equal to attachments from test data.
+        assertAll(() -> assertEquals(1, attachments.get(0).getId()),
+                () -> assertEquals("testattachment.txt", attachments.get(0).getName()),
+                () -> assertEquals("text/plain", attachments.get(0).getMimetype()),
+                () -> assertEquals(2, attachments.get(1).getId()),
+                () -> assertEquals("another-attachment.png", attachments.get(1).getName()),
+                () -> assertEquals("image/png", attachments.get(1).getMimetype())
+        );
+    }
+
+    @Test
+    public void testGetAttachmentsForPostWhenDatabaseError() throws Exception {
+        Post post = new Post(100, null, null, null, null);
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new AttachmentDBGateway(connectionSpy).getAttachmentsForPost(post));
     }
 
 }

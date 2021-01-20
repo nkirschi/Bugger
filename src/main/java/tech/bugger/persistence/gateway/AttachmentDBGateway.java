@@ -49,11 +49,11 @@ public class AttachmentDBGateway implements AttachmentGateway {
      * @throws SQLException Some parsing error occurred.
      */
     private Attachment getAttachmentFromResultSet(final ResultSet rs) throws SQLException {
-        int postID = rs.getInt("id");
-        Attachment attachment = new Attachment(
-                postID,
+        int postID = rs.getInt("post");
+        return new Attachment(
+                rs.getInt("id"),
                 rs.getString("name"),
-                null,
+                new byte[0],
                 rs.getString("mimetype"),
                 new Lazy<>(() -> {
                     // Lazily retrieve the post of the attachment.
@@ -61,13 +61,6 @@ public class AttachmentDBGateway implements AttachmentGateway {
                     return postService.getPostByID(postID);
                 })
         );
-        attachment.setContent(new Lazy<>(() -> {
-            // Lazily retrieve the content of the attachment.
-            PostService postService = CDI.current().select(PostService.class).get();
-            System.out.println("Fetching attachment content");
-            return postService.getAttachmentContent(attachment);
-        }));
-        return attachment;
     }
 
     /**
@@ -82,7 +75,7 @@ public class AttachmentDBGateway implements AttachmentGateway {
         )) {
             PreparedStatement statement = new StatementParametrizer(stmt)
                     .string(attachment.getName())
-                    .bytes(attachment.getContent().get())
+                    .bytes(attachment.getContent())
                     .string(attachment.getMimetype())
                     .integer(attachment.getPost().get().getId())
                     .toStatement();
@@ -113,7 +106,7 @@ public class AttachmentDBGateway implements AttachmentGateway {
         )) {
             int rowsAffected = new StatementParametrizer(stmt)
                     .string(attachment.getName())
-                    .bytes(attachment.getContent().get())
+                    .bytes(attachment.getContent())
                     .string(attachment.getMimetype())
                     .integer(attachment.getPost().get().getId())
                     .integer(attachment.getId())
@@ -156,7 +149,7 @@ public class AttachmentDBGateway implements AttachmentGateway {
     @Override
     public Attachment find(final int id) throws NotFoundException {
         try (PreparedStatement stmt = conn.prepareStatement(
-                "SELECT * FROM attachment WHERE id = ?;"
+                "SELECT id, name, mimetype, post FROM attachment WHERE id = ?;"
         )) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(id)
@@ -175,20 +168,20 @@ public class AttachmentDBGateway implements AttachmentGateway {
      * {@inheritDoc}
      */
     @Override
-    public byte[] findContent(final Attachment attachment) throws NotFoundException {
+    public byte[] findContent(final int id) throws NotFoundException {
         try (PreparedStatement stmt = conn.prepareStatement(
                 "SELECT content FROM attachment WHERE id = ?;"
         )) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .integer(attachment.getId())
+                    .integer(id)
                     .toStatement().executeQuery();
             if (rs.next()) {
                 return rs.getBytes("content");
             } else {
-                throw new NotFoundException("Post could not be found.");
+                throw new NotFoundException("Attachment content could not be found.");
             }
         } catch (SQLException e) {
-            throw new StoreException("Error while searching for post.", e);
+            throw new StoreException("Error while searching for attachment content.", e);
         }
     }
 
@@ -198,7 +191,7 @@ public class AttachmentDBGateway implements AttachmentGateway {
     @Override
     public List<Attachment> getAttachmentsForPost(final Post post) {
         try (PreparedStatement stmt = conn.prepareStatement(
-                "SELECT * FROM attachment WHERE post = ?;"
+                "SELECT id, name, mimetype, post FROM attachment WHERE post = ?;"
         )) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(post.getId())
