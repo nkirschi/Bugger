@@ -8,9 +8,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * Enables JF 2.3 specific features.
+ * Configuration Utility Class.
  */
-@FacesConfig
+@FacesConfig(version = FacesConfig.Version.JSF_2_3) // enables JF 2.3 specific features
 @ApplicationScoped
 public final class JFConfig {
 
