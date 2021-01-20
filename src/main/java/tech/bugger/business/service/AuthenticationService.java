@@ -1,8 +1,12 @@
 package tech.bugger.business.service;
 
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Hasher;
-import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Token;
@@ -12,16 +16,9 @@ import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Mail;
 import tech.bugger.persistence.util.MailBuilder;
-import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
 
 /**
  * Service for user authentication. A {@link Feedback} {@link Event} is fired, if unexpected circumstances occur.
@@ -40,11 +37,6 @@ public class AuthenticationService {
     private static final int TOKEN_LENGTH = 32;
 
     /**
-     * Maximum amount of times an email should be tried to resend.
-     */
-    private static final int MAX_EMAIL_TRIES = 3;
-
-    /**
      * Transaction manager used for creating transactions.
      */
     private final TransactionManager transactionManager;
@@ -53,6 +45,11 @@ public class AuthenticationService {
      * Feedback Event for user feedback.
      */
     private final Event<Feedback> feedbackEvent;
+
+    /**
+     * The service responsible for sending notifications.
+     */
+    private final NotificationService notificationService;
 
     /**
      * Resource bundle for feedback messages.
@@ -65,16 +62,6 @@ public class AuthenticationService {
     private final ResourceBundle interactionsBundle;
 
     /**
-     * The {@link PriorityExecutor} instance to use when sending e-mails.
-     */
-    private final PriorityExecutor priorityExecutor;
-
-    /**
-     * The {@link Mailer} instance to use when sending e-mails.
-     */
-    private final Mailer mailer;
-
-    /**
      * The {@link PropertiesReader} instance to use when reading the current configuration.
      */
     private final PropertiesReader configReader;
@@ -82,27 +69,24 @@ public class AuthenticationService {
     /**
      * Constructs a new authentication service with the given dependencies.
      *
-     * @param transactionManager The transaction manager to use for creating transactions.
-     * @param feedbackEvent      The feedback event to use for user feedback.
-     * @param messagesBundle     The resource bundle for feedback messages.
-     * @param interactionsBundle The resource bundle for interaction messages.
-     * @param priorityExecutor   The priority executor to use when sending e-mails.
-     * @param mailer             The mailer to use.
-     * @param configReader       The configuration reader to use.
+     * @param transactionManager  The transaction manager to use for creating transactions.
+     * @param notificationService The notification service to use.
+     * @param feedbackEvent       The feedback event to use for user feedback.
+     * @param messagesBundle      The resource bundle for feedback messages.
+     * @param interactionsBundle  The resource bundle for interaction messages.
+     * @param configReader        The configuration reader to use.
      */
     @Inject
     public AuthenticationService(final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
+                                 final NotificationService notificationService,
                                  @RegistryKey("messages") final ResourceBundle messagesBundle,
                                  @RegistryKey("interactions") final ResourceBundle interactionsBundle,
-                                 @RegistryKey("mails") final PriorityExecutor priorityExecutor,
-                                 @RegistryKey("main") final Mailer mailer,
                                  @RegistryKey("config") final PropertiesReader configReader) {
         this.transactionManager = transactionManager;
         this.feedbackEvent = feedbackEvent;
+        this.notificationService = notificationService;
         this.messagesBundle = messagesBundle;
         this.interactionsBundle = interactionsBundle;
-        this.priorityExecutor = priorityExecutor;
-        this.mailer = mailer;
         this.configReader = configReader;
     }
 
@@ -225,7 +209,7 @@ public class AuthenticationService {
                 .content(new MessageFormat(interactionsBundle.getString("email_register_content"))
                         .format(new String[]{token.getUser().getFirstName(), token.getUser().getLastName(), link}))
                 .envelop();
-        sendMail(mail);
+        notificationService.sendMail(mail, PriorityTask.Priority.HIGH);
 
         return true;
     }
@@ -299,7 +283,7 @@ public class AuthenticationService {
                 .content(new MessageFormat(interactionsBundle.getString("email_update_content"))
                         .format(new String[]{token.getUser().getFirstName(), token.getUser().getLastName(), link}))
                 .envelop();
-        sendMail(mail);
+        notificationService.sendMail(mail, PriorityTask.Priority.HIGH);
 
         feedbackEvent.fire(new Feedback(messagesBundle.getString("email_success"), Feedback.Type.INFO));
 
@@ -376,7 +360,7 @@ public class AuthenticationService {
                 .content(new MessageFormat(interactionsBundle.getString("email_password_forgot_content"))
                         .format(new String[]{token.getUser().getFirstName(), token.getUser().getLastName(), link}))
                 .envelop();
-        sendMail(mail);
+        notificationService.sendMail(mail, PriorityTask.Priority.HIGH);
 
         return true;
     }
@@ -389,24 +373,6 @@ public class AuthenticationService {
      */
     public boolean isValid(final String token) {
         return findToken(token) != null;
-    }
-
-    /**
-     * Tries to send the given {@link Mail}.
-     *
-     * @param mail The e-mail to send.
-     */
-    private void sendMail(final Mail mail) {
-        priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.HIGH, () -> {
-            int tries = 1;
-            log.debug("Sending e-mail " + mail + ".");
-            while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
-                log.warning("Trying to send e-mail again. Try #" + tries + '.');
-            }
-            if (tries > MAX_EMAIL_TRIES) {
-                log.error("Couldn't send e-mail for more than " + MAX_EMAIL_TRIES + " times! Please investigate!");
-            }
-        }));
     }
 
 }

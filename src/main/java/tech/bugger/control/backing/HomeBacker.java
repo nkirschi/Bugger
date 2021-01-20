@@ -1,5 +1,15 @@
 package tech.bugger.control.backing;
 
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.ZonedDateTime;
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.NotificationService;
 import tech.bugger.business.service.TopicService;
@@ -8,17 +18,6 @@ import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.ZonedDateTime;
 
 /**
  * Backing Bean for the home page.
@@ -63,9 +62,9 @@ public class HomeBacker implements Serializable {
     /**
      * Constructs a new home page backing bean.
      *
-     * @param session The current user session.
+     * @param session             The current user session.
      * @param notificationService The notification service to use.
-     * @param topicService The topic service to use.
+     * @param topicService        The topic service to use.
      */
     @Inject
     public HomeBacker(final UserSession session, final NotificationService notificationService,
@@ -128,8 +127,13 @@ public class HomeBacker implements Serializable {
     public String openNotification(final Notification notification) {
         notificationService.markAsRead(notification);
         ExternalContext ext = FacesContext.getCurrentInstance().getExternalContext();
-        String query = "/report?id=" + notification.getReportID()
-                + (notification.getPostID() != null ? "&p=" + notification.getPostID() : "");
+        String query = "/report?";
+        if (notification.getPostID() != null) {
+            query += "p=" + notification.getPostID() + "#post-" + notification.getPostID();
+        } else {
+            query += "id=" + notification.getReportID();
+        }
+
         try {
             ext.redirect(ext.getApplicationContextPath() + query);
         } catch (IOException e) {
