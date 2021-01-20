@@ -2,7 +2,7 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 /**
@@ -23,7 +23,7 @@ public class Authorship implements Serializable {
     /**
      * The Point in Time where the creation of the content happened.
      */
-    private ZonedDateTime creationDate;
+    private OffsetDateTime creationDate;
 
     /**
      * The user listed as the last modifier of the content.
@@ -33,7 +33,7 @@ public class Authorship implements Serializable {
     /**
      * The Point in Time where the last modification of the content happened.
      */
-    private ZonedDateTime modifiedDate;
+    private OffsetDateTime modifiedDate;
 
     /**
      * Constructs a new authorship metadata object from the specified parameters.
@@ -43,8 +43,8 @@ public class Authorship implements Serializable {
      * @param modifier     The last modifier of the associated content.
      * @param modifiedDate The last modification date of the associated content.
      */
-    public Authorship(final User creator, final ZonedDateTime creationDate, final User modifier,
-                      final ZonedDateTime modifiedDate) {
+    public Authorship(final User creator, final OffsetDateTime creationDate, final User modifier,
+                      final OffsetDateTime modifiedDate) {
         this.creator = creator;
         this.creationDate = creationDate;
         this.modifier = modifier;
@@ -101,7 +101,7 @@ public class Authorship implements Serializable {
      *
      * @return The original creation date.
      */
-    public ZonedDateTime getCreationDate() {
+    public OffsetDateTime getCreationDate() {
         return creationDate;
     }
 
@@ -110,7 +110,7 @@ public class Authorship implements Serializable {
      *
      * @param creationDate The original creation date.
      */
-    public void setCreationDate(final ZonedDateTime creationDate) {
+    public void setCreationDate(final OffsetDateTime creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -119,7 +119,7 @@ public class Authorship implements Serializable {
      *
      * @return The last modification date.
      */
-    public ZonedDateTime getModifiedDate() {
+    public OffsetDateTime getModifiedDate() {
         return modifiedDate;
     }
 
@@ -128,7 +128,7 @@ public class Authorship implements Serializable {
      *
      * @param modifiedDate The last modification date.
      */
-    public void setModifiedDate(final ZonedDateTime modifiedDate) {
+    public void setModifiedDate(final OffsetDateTime modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
 

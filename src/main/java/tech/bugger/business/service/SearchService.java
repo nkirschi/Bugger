@@ -16,7 +16,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -315,8 +314,8 @@ public class SearchService {
      * @return A list of reports containing the selected search results.
      */
     public List<Report> getFulltextResults(final String query, final Selection selection,
-                                           final ZonedDateTime latestCreationDateTime,
-                                           final ZonedDateTime earliestClosingDateTime, final boolean showOpenReports,
+                                           final OffsetDateTime latestCreationDateTime,
+                                           final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                            final boolean showClosedReports, final boolean showDuplicates,
                                            final Topic topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                            final HashMap<Report.Severity, Boolean> severityFilter) {
@@ -431,8 +430,8 @@ public class SearchService {
      * @param severityFilter          Which reports of certain severities to include or exclude.
      * @return The number of results as an {@code int}.
      */
-    public int getNumberOfFulltextResults(final String query, final ZonedDateTime latestCreationDateTime,
-                                          final ZonedDateTime earliestClosingDateTime, final boolean showOpenReports,
+    public int getNumberOfFulltextResults(final String query, final OffsetDateTime latestCreationDateTime,
+                                          final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                           final boolean showClosedReports, final boolean showDuplicates,
                                           final Topic topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                           final HashMap<Report.Severity, Boolean> severityFilter) {

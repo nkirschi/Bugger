@@ -14,7 +14,7 @@ import tech.bugger.persistence.exception.StoreException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -58,7 +58,7 @@ public class SearchDBGatewayTest {
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         admin = new User(null, "testadmin", "v3ry_s3cur3", "salt", "algorithm", "admin@admin.de", "Helgo", "Brötchen",
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "Ich bin der Administrator hier!", Locale.ENGLISH,
-                User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, true);
+                User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, true);
         topic = new Topic(null, "title", "description");
     }
 

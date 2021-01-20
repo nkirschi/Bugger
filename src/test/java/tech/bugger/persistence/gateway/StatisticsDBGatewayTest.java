@@ -80,24 +80,24 @@ public class StatisticsDBGatewayTest {
         }
 
         @Test
-        public void testGetTopTenReports() {
+        public void testGetTopReports() {
             List<TopReport> expected = List.of(
                     new TopReport(101, "bestreport", "testuser", 5),
                     new TopReport(100, "testreport", "admin", 2),
                     new TopReport(102, "westreport", "admin", 0)
             );
-            assertEquals(expected, gateway.getTopTenReports());
+            assertEquals(expected, gateway.getTopReports(42));
         }
 
         @Test
-        public void testGetTopTenUsers() {
+        public void testGetTopUsers() {
             List<TopUser> expected = List.of(
                     new TopUser("admin", 10),
                     new TopUser("testuser", 5),
                     new TopUser("pending", 0),
                     new TopUser("corpse", 0)
             );
-            assertEquals(expected, gateway.getTopTenUsers());
+            assertEquals(expected, gateway.getTopUsers(42));
         }
 
     }
@@ -137,12 +137,12 @@ public class StatisticsDBGatewayTest {
 
         @Test
         public void testGetTopTenReportsWhenDatabaseError() {
-            assertThrows(StoreException.class, () -> gateway.getTopTenReports());
+            assertThrows(StoreException.class, () -> gateway.getTopReports(42));
         }
 
         @Test
         public void testGetTopTenUsersWhenDatabaseError() {
-            assertThrows(StoreException.class, () -> gateway.getTopTenUsers());
+            assertThrows(StoreException.class, () -> gateway.getTopUsers(42));
         }
 
     }
@@ -181,6 +181,45 @@ public class StatisticsDBGatewayTest {
         @Test
         public void testGetAveragePostsPerReportWhenEmptyResultSet() {
             assertThrows(InternalError.class, () -> gateway.getAveragePostsPerReport(criteriaMock));
+        }
+
+    }
+
+    @Nested
+    public class StatisticsDBGatewayIllegalArgumentsTest {
+
+        @InjectMocks
+        private StatisticsDBGateway gateway;
+
+        @Mock
+        private Connection connectionMock;
+
+        @Mock
+        private ReportCriteria criteriaMock;
+
+        @Test
+        public void testGetNumberOfOpenReportsWhenCriteriaNull() {
+            assertThrows(IllegalArgumentException.class, () -> gateway.getNumberOfOpenReports(null));
+        }
+
+        @Test
+        public void testGetAverageTimeToCloseWhenCriteriaNull() {
+            assertThrows(IllegalArgumentException.class, () -> gateway.getAverageTimeToClose(null));
+        }
+
+        @Test
+        public void testGetAveragePostsPerReportWhenCriteriaNull() {
+            assertThrows(IllegalArgumentException.class, () -> gateway.getAveragePostsPerReport(null));
+        }
+
+        @Test
+        public void testGetTopReportsWhenLimitNegative() {
+            assertThrows(IllegalArgumentException.class, () -> gateway.getTopReports(-42));
+        }
+
+        @Test
+        public void testGetTopUsersWhenLimitNegative() {
+            assertThrows(IllegalArgumentException.class, () -> gateway.getTopUsers(-42));
         }
 
     }

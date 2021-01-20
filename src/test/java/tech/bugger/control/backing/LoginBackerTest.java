@@ -4,7 +4,7 @@ import com.sun.faces.context.RequestParameterMap;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Locale;
 import javax.faces.application.Application;
 import javax.faces.application.NavigationHandler;
@@ -61,7 +61,7 @@ public class LoginBackerTest {
     public void setup() {
         user = new User(12345, "Helgi", "v3rys3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen",
                 new byte[0], null, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= "
-                + "endorsement", Locale.GERMAN, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, false);
+                + "endorsement", Locale.GERMAN, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, false);
         MockitoAnnotations.openMocks(this);
         loginBacker = new LoginBacker(authenticationService, session, fctx);
         loginBacker.setUsername(user.getUsername());

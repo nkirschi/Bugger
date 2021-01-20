@@ -5,8 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import tech.bugger.global.transfer.Selection;
@@ -212,9 +211,9 @@ public class TopicDBGateway implements TopicGateway {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                ZonedDateTime lastActivity = null;
-                if (rs.getTimestamp("last_activity") != null) {
-                    lastActivity = rs.getTimestamp("last_activity").toInstant().atZone(ZoneId.systemDefault());
+                OffsetDateTime lastActivity = null;
+                if (rs.getObject("last_activity", OffsetDateTime.class) != null) {
+                    lastActivity = rs.getObject("last_activity", OffsetDateTime.class);
                 }
                 selectedTopics.add(new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description"),
                         lastActivity));
@@ -420,7 +419,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public ZonedDateTime determineLastActivity(final Topic topic) throws NotFoundException {
+    public OffsetDateTime determineLastActivity(final Topic topic) throws NotFoundException {
         if (topic == null) {
             log.error("Error when trying to determine last activity in topic null.");
             throw new IllegalArgumentException("Topic must not be null!");
@@ -429,13 +428,13 @@ public class TopicDBGateway implements TopicGateway {
             throw new IllegalArgumentException("Topic ID must not be null!");
         }
 
-        ZonedDateTime lastActivity = null;
+        OffsetDateTime lastActivity = null;
         String sql = "SELECT * FROM topic_last_activity WHERE topic =" + topic.getId();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                if (rs.getTimestamp("last_activity") != null) {
-                    lastActivity = rs.getTimestamp("last_activity").toInstant().atZone(ZoneId.systemDefault());
+                if (rs.getObject("last_activity", OffsetDateTime.class) != null) {
+                    lastActivity = rs.getObject("last_activity", OffsetDateTime.class);
                 }
             } else {
                 log.error("Topic " + topic + " could not be found when trying to determine last activity.");
@@ -575,9 +574,9 @@ public class TopicDBGateway implements TopicGateway {
                     .integer(Pagitable.getItemOffset(selection)).toStatement();
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                ZonedDateTime lastActivity = null;
-                if (rs.getTimestamp("last_activity") != null) {
-                    lastActivity = rs.getTimestamp("last_activity").toInstant().atZone(ZoneId.systemDefault());
+                OffsetDateTime lastActivity = null;
+                if (rs.getObject("last_activity", OffsetDateTime.class) != null) {
+                    lastActivity = rs.getObject("last_activity", OffsetDateTime.class);
                 }
                 selectedTopics.add(new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description"),
                         lastActivity));

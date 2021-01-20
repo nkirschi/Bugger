@@ -24,7 +24,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -68,7 +68,7 @@ public class PostDBGatewayTest {
         gateway = new PostDBGateway(connection, userGateway, attachmentGateway);
 
         report = new Report(100, "title", Report.Type.BUG, Report.Severity.MINOR, "", null, null, null, null, false, 0);
-        Authorship authorship = new Authorship(new User(), ZonedDateTime.now(), new User(), ZonedDateTime.now());
+        Authorship authorship = new Authorship(new User(), OffsetDateTime.now(), new User(), OffsetDateTime.now());
         authorship.getCreator().setId(1);
         authorship.getModifier().setId(1);
         post = new Post(10000, "test.txt", new Lazy<>(report), authorship, null);

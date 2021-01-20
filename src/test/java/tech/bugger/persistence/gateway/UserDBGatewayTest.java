@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
 import org.junit.jupiter.api.AfterEach;
@@ -59,10 +59,10 @@ public class UserDBGatewayTest {
                                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         admin = new User(3, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@admin.de", "Helgo", "Brötchen",
                          new byte[]{1, 2, 3, 4}, new byte[]{1}, "Ich bin der Administrator hier!", Locale.ENGLISH,
-                         User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, true);
+                         User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, true);
         topic = new Topic(null, "title", "description");
         report = new Report(null, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(ZonedDateTime.class), null, null, false, null);
+                mock(OffsetDateTime.class), null, null, false, null);
         selection = new Selection(2, 0, Selection.PageSize.NORMAL, "id", true);
     }
 

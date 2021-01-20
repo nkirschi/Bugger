@@ -5,7 +5,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -501,8 +500,8 @@ public class SearchDBGateway implements SearchGateway {
      */
     @Override
     public List<Report> getFulltextResults(final String query, final Selection selection,
-                                           final ZonedDateTime latestOpeningDateTime,
-                                           final ZonedDateTime earliestClosingDateTime, final boolean showOpenReports,
+                                           final OffsetDateTime latestOpeningDateTime,
+                                           final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                            final boolean showClosedReports, final boolean showDuplicates,
                                            final Topic topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                            final HashMap<Report.Severity, Boolean> severityFilter) {
@@ -690,8 +689,8 @@ public class SearchDBGateway implements SearchGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfFulltextResults(final String query, final ZonedDateTime latestOpeningDateTime,
-                                          final ZonedDateTime earliestClosingDateTime, final boolean showOpenReports,
+    public int getNumberOfFulltextResults(final String query, final OffsetDateTime latestOpeningDateTime,
+                                          final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                           final boolean showClosedReports, final boolean showDuplicates,
                                           final Topic topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                           final HashMap<Report.Severity, Boolean> severityFilter) {

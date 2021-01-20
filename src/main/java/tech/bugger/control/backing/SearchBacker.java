@@ -2,7 +2,6 @@ package tech.bugger.control.backing;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -338,9 +337,9 @@ public class SearchBacker implements Serializable {
      * as creating and editing posts count as actions. Moving a report is an action in the destination topic only.
      *
      * @param topic The topic in question.
-     * @return The time stamp of the last action as a {@code ZonedDateTime}.
+     * @return The time stamp of the last action as a {@link OffsetDateTime}.
      */
-    public ZonedDateTime lastChange(final Topic topic) {
+    public OffsetDateTime lastChange(final Topic topic) {
         return null;
     }
 
@@ -349,9 +348,9 @@ public class SearchBacker implements Serializable {
      * as creating and editing posts count as actions.
      *
      * @param report The report in question.
-     * @return The time stamp of the last action as a {@code ZonedDateTime}.
+     * @return The time stamp of the last action as a {@link OffsetDateTime}.
      */
-    public ZonedDateTime lastChange(final Report report) {
+    public OffsetDateTime lastChange(final Report report) {
         return null;
     }
 

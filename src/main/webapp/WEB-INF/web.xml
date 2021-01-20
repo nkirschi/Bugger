@@ -75,6 +75,9 @@
         <param-value>true</param-value>
     </context-param>
 
+    <session-config>
+        <session-timeout>20</session-timeout>
+    </session-config>
 
     <!-- miscellaneous settings -->
 

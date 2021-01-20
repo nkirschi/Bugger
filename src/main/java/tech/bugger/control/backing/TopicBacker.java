@@ -1,15 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
@@ -21,6 +11,17 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Backing bean for the topic page.
@@ -155,9 +156,14 @@ public class TopicBacker implements Serializable {
     private final transient SearchService searchService;
 
     /**
-     * The current faces context.
+     * The current {@link FacesContext} of the application.
      */
     private final FacesContext fctx;
+
+    /**
+     * The current {@link ExternalContext} of the application.
+     */
+    private final ExternalContext ectx;
 
     /**
      * The application settings cache.
@@ -169,16 +175,22 @@ public class TopicBacker implements Serializable {
      *
      * @param topicService  The topic service to use.
      * @param searchService The search service to use.
-     * @param fctx          The current faces context.
+     * @param fctx          The current {@link FacesContext} of the application.
+     * @param ectx          The current {@link ExternalContext} of the application.
      * @param session       The current {@link UserSession}.
      * @param settings      The current application settings.
      */
     @Inject
-    public TopicBacker(final TopicService topicService, final SearchService searchService, final FacesContext fctx,
-                       final UserSession session, final ApplicationSettings settings) {
+    public TopicBacker(final TopicService topicService,
+                       final SearchService searchService,
+                       final FacesContext fctx,
+                       final ExternalContext ectx,
+                       final UserSession session,
+                       final ApplicationSettings settings) {
         this.topicService = topicService;
         this.searchService = searchService;
         this.fctx = fctx;
+        this.ectx = ectx;
         this.session = session;
         this.settings = settings;
     }
@@ -189,25 +201,18 @@ public class TopicBacker implements Serializable {
      */
     @PostConstruct
     void init() {
-        if (!settings.getConfiguration().isGuestReading()) {
-            if (session.getUser() == null || isBanned()) {
-                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-            }
-        }
-
-        ExternalContext ext = fctx.getExternalContext();
-        if (!ext.getRequestParameterMap().containsKey("id")) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+        if (!ectx.getRequestParameterMap().containsKey("id")) {
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
         }
 
         try {
-            topicID = Integer.parseInt(ext.getRequestParameterMap().get("id"));
+            topicID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
         }
 
         topic = topicService.getTopicByID(topicID);
-        if (topic == null) {
+        if (topic == null || isBanned()) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
         }
 
@@ -460,8 +465,8 @@ public class TopicBacker implements Serializable {
     }
 
     /**
-     * Makes the user whose username is specified in {@link #userMod} a moderator of the topic. This is not
-     * possible if they already are a moderator.
+     * Makes the user whose username is specified in {@link #userMod} a moderator of the topic. This is not possible if
+     * they already are a moderator.
      *
      * @return {@code null} to reload the page if no user was promoted or an empty string to call init() again and
      *         update the moderation results.

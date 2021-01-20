@@ -1,6 +1,6 @@
 package tech.bugger.business.service;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -460,7 +460,7 @@ public class ReportService {
      */
     public boolean updateReport(final Report report) {
         try (Transaction tx = transactionManager.begin()) {
-            report.getAuthorship().setModifiedDate(ZonedDateTime.now());
+            report.getAuthorship().setModifiedDate(OffsetDateTime.now());
             tx.newReportGateway().update(report);
             tx.commit();
         } catch (NotFoundException e) {
@@ -684,9 +684,9 @@ public class ReportService {
      * as creating and editing posts count as actions.
      *
      * @param report The report in question.
-     * @return The time stamp of the last action as a {@code ZonedDateTime}.
+     * @return The time stamp of the last action as a {@link OffsetDateTime}.
      */
-    public ZonedDateTime lastChange(final Report report) {
+    public OffsetDateTime lastChange(final Report report) {
         return null;
     }
 

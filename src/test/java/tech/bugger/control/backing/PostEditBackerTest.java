@@ -1,6 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,15 +21,13 @@ import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.Part;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
+import java.time.OffsetDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -82,9 +79,9 @@ public class PostEditBackerTest {
     public void setUp() throws Exception {
         postEditBacker = new PostEditBacker(applicationSettings, reportService, postService, session, fctx);
 
-        List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
+        List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         report = new Report(1234, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
-                new Authorship(null, null, null, null), mock(ZonedDateTime.class),
+                new Authorship(null, null, null, null), mock(OffsetDateTime.class),
                 null, null, false, 1);
         post = new Post(5678, "Some content", new Lazy<>(report), new Authorship(null, null, null, null), attachments);
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
@@ -258,7 +255,7 @@ public class PostEditBackerTest {
 
     @Test
     public void testDeleteAllAttachments() {
-        postEditBacker.setAttachments(new LinkedList<>(Arrays.asList(new Attachment(), new Attachment())));
+        postEditBacker.setAttachments(new LinkedList<>(List.of(new Attachment(), new Attachment())));
         postEditBacker.deleteAllAttachments();
         assertEquals(0, postEditBacker.getAttachments().size());
     }

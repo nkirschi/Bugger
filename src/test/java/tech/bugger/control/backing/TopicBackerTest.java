@@ -1,10 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import javax.faces.context.FacesContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,11 +13,20 @@ import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
@@ -43,6 +47,9 @@ public class TopicBackerTest {
     private FacesContext fctx;
 
     @Mock
+    private ExternalContext ectx;
+
+    @Mock
     private ApplicationSettings settings;
 
     private User user;
@@ -55,7 +62,7 @@ public class TopicBackerTest {
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic = new Topic(1, "Some title", "Some description");
-        topicBacker = new TopicBacker(topicService, searchService, fctx, session, settings);
+        topicBacker = new TopicBacker(topicService, searchService, fctx, ectx, session, settings);
     }
 
     @Test

@@ -2,7 +2,7 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 /**
@@ -31,7 +31,7 @@ public class Topic implements Serializable {
     /**
      * The point in time of the last activity in the topic.
      */
-    private ZonedDateTime lastActivity;
+    private OffsetDateTime lastActivity;
 
     /**
      * Constructs an empty topic.
@@ -59,7 +59,7 @@ public class Topic implements Serializable {
      * @param description The topic description.
      * @param lastActivity The time of the last activity in the topic.
      */
-    public Topic(final Integer id, final String title, final String description, final ZonedDateTime lastActivity) {
+    public Topic(final Integer id, final String title, final String description, final OffsetDateTime lastActivity) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -125,7 +125,7 @@ public class Topic implements Serializable {
      *
      * @return The last activity.
      */
-    public ZonedDateTime getLastActivity() {
+    public OffsetDateTime getLastActivity() {
         return lastActivity;
     }
 
@@ -134,7 +134,7 @@ public class Topic implements Serializable {
      *
      * @param lastActivity The last activity to be set.
      */
-    public void setLastActivity(final ZonedDateTime lastActivity) {
+    public void setLastActivity(final OffsetDateTime lastActivity) {
         this.lastActivity = lastActivity;
     }
 
