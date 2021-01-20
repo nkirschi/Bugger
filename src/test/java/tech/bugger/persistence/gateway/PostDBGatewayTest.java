@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
+import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
@@ -91,6 +92,30 @@ public class PostDBGatewayTest {
         } else {
             return null;
         }
+    }
+
+    @Test
+    public void testFind() throws Exception {
+        Post post = gateway.find(100);
+
+        // Check if post is equal to post from test data.
+        assertAll(() -> assertEquals(100, post.getId()),
+                () -> assertEquals("testpost", post.getContent())
+        );
+    }
+
+    @Test
+    public void testFindWhenNotExists() {
+        assertThrows(NotFoundException.class, () -> gateway.find(42));
+    }
+
+    @Test
+    public void testFindWhenDatabaseError() throws Exception {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new PostDBGateway(connectionSpy, mock(UserGateway.class), mock(AttachmentGateway.class))
+                        .find(100));
     }
 
     @Test

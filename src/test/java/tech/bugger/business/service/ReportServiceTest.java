@@ -1,9 +1,5 @@
 package tech.bugger.business.service;
 
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
-import javax.enterprise.event.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +13,7 @@ import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
@@ -28,10 +25,21 @@ import tech.bugger.persistence.gateway.SubscriptionGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.event.Event;
+import java.time.ZonedDateTime;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -77,7 +85,7 @@ public class ReportServiceTest {
     public void setUp() {
         service = new ReportService(notificationService, topicService, postService, profileService, transactionManager,
                 feedbackEvent, ResourceBundleMocker.mock(""));
-        List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
+        List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
         User testUser = new User();
         testUser.setId(1);
@@ -294,6 +302,40 @@ public class ReportServiceTest {
         doThrow(TransactionException.class).when(tx).commit();
         assertEquals(0, service.getNumberOfDuplicates(testReport));
         verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testCanPostInReportWhenUserNull() {
+        assertFalse(service.canPostInReport(null, testReport));
+    }
+
+    @Test
+    public void testCanPostInReportWhenReportNull() {
+        assertFalse(service.canPostInReport(new User(), null));
+    }
+
+    @Test
+    public void testCanPostInReportWhenAdministrator() {
+        User user = new User();
+        user.setAdministrator(true);
+        assertTrue(service.canPostInReport(user, testReport));
+    }
+
+    @Test
+    public void testCanPostInReportWhenTopicNull() {
+        testReport.setTopicID(1234);
+        doReturn(null).when(topicService).getTopicByID(1234);
+        assertFalse(service.canPostInReport(new User(), testReport));
+    }
+
+    @Test
+    public void testCanPostInReportWhenNotBanned() {
+        Topic topic = new Topic(1234, "title", "description");
+        testReport.setTopicID(1234);
+        doReturn(topic).when(topicService).getTopicByID(1234);
+        User user = new User();
+        doReturn(false).when(topicService).isBanned(user, topic);
+        assertTrue(service.canPostInReport(new User(), testReport));
     }
 
 }

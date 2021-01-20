@@ -50,13 +50,15 @@ public class SearchDBGatewayTest {
         searchGateway = new SearchDBGateway(connection, userGateway);
         topicGateway = new TopicDBGateway(connection);
 
-        user1 = new User(null, "testuser1", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
+        user1 = new User(null, "testuser1", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
+                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
-        user2 = new User(null, "testuser2", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.com", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
+        user2 = new User(null, "testuser2", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.com", "Test", "User",
+                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
-        admin = new User(null, "testadmin", "v3ry_s3cur3", "salt", "algorithm", "admin@admin.de", "Helgo", "Brötchen", new Lazy<>(new byte[]{1, 2, 3, 4}),
-                new byte[]{1}, "Ich bin der Administrator hier!", Locale.ENGLISH, User.ProfileVisibility.MINIMAL,
-                ZonedDateTime.now(), null, true);
+        admin = new User(null, "testadmin", "v3ry_s3cur3", "salt", "algorithm", "admin@admin.de", "Helgo", "Brötchen",
+                new byte[]{1, 2, 3, 4}, new byte[]{1}, "Ich bin der Administrator hier!", Locale.ENGLISH,
+                User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, true);
         topic = new Topic(null, "title", "description");
     }
 

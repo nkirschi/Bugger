@@ -40,15 +40,17 @@ public interface StatisticsGateway {
     /**
      * Retrieves the list of those ten reports that gained the most relevance in the last 24 hours.
      *
-     * @return The list of the top ten reports of the last 24 hours.
+     * @param limit The maximum number of top reports to return.
+     * @return The {@code limit} top reports sorted by gained relevance descending.
      */
-    List<TopReport> getTopTenReports();
+    List<TopReport> getTopReports(int limit);
 
     /**
      * Retrieves the list of those ten users with the greatest total relevance of the reports created.
      *
-     * @return The top then users.
+     * @param limit The maximum number of top users to return.
+     * @return The {@code limit} top users sorted by total received relevance descending.
      */
-    List<TopUser> getTopTenUsers();
+    List<TopUser> getTopUsers(int limit);
 
 }

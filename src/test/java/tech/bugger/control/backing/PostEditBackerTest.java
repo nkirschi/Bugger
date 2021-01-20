@@ -1,6 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,14 +22,12 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.Part;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -82,12 +79,13 @@ public class PostEditBackerTest {
     public void setUp() throws Exception {
         postEditBacker = new PostEditBacker(applicationSettings, reportService, postService, session, fctx);
 
-        List<Attachment> attachments = Arrays.asList(new Attachment(), new Attachment(), new Attachment());
+        List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         report = new Report(1234, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
                 new Authorship(null, null, null, null), mock(ZonedDateTime.class),
                 null, null, false, 1);
         post = new Post(5678, "Some content", new Lazy<>(report), new Authorship(null, null, null, null), attachments);
-        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User", new Lazy<>(new byte[]{1, 2, 3, 4}), new byte[]{1}, "# I am a test user.",
+        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
+                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
 
         lenient().doReturn(ectx).when(fctx).getExternalContext();
@@ -156,7 +154,7 @@ public class PostEditBackerTest {
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
         doReturn(post).when(postService).getPostByID(5678);
-        doReturn(true).when(postService).canModify(user, post);
+        doReturn(true).when(postService).isPrivileged(user, post);
         postEditBacker.init();
         assertFalse(postEditBacker.isCreate());
         assertEquals(post.getAttachments(), postEditBacker.getAttachments());
@@ -188,7 +186,7 @@ public class PostEditBackerTest {
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
         doReturn(post).when(postService).getPostByID(5678);
-        doReturn(false).when(postService).canModify(user, post);
+        doReturn(false).when(postService).isPrivileged(user, post);
         postEditBacker.init();
         verify404Redirect();
     }
@@ -199,7 +197,7 @@ public class PostEditBackerTest {
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
         doReturn(post).when(postService).getPostByID(5678);
-        doReturn(true).when(postService).canModify(user, post);
+        doReturn(true).when(postService).isPrivileged(user, post);
         post.setReport(null);
         postEditBacker.init();
         verify404Redirect();
@@ -257,7 +255,7 @@ public class PostEditBackerTest {
 
     @Test
     public void testDeleteAllAttachments() {
-        postEditBacker.setAttachments(new LinkedList<>(Arrays.asList(new Attachment(), new Attachment())));
+        postEditBacker.setAttachments(new LinkedList<>(List.of(new Attachment(), new Attachment())));
         postEditBacker.deleteAllAttachments();
         assertEquals(0, postEditBacker.getAttachments().size());
     }

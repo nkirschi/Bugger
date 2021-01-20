@@ -21,7 +21,7 @@ CREATE TABLE metadata (
 INSERT INTO metadata DEFAULT VALUES;
 
 
-CREATE TABLE system_settings(
+CREATE TABLE system_settings (
     id INTEGER NOT NULL PRIMARY KEY DEFAULT 0,
 
     organization_name VARCHAR NOT NULL DEFAULT 'Bugger',
@@ -185,7 +185,7 @@ CREATE TABLE notification (
     type notification_type NOT NULL,
 
     recipient INTEGER NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
-    causer INTEGER REFERENCES "user" (id),
+    causer INTEGER REFERENCES "user" (id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
     topic INTEGER REFERENCES topic (id) ON DELETE CASCADE,

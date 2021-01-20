@@ -27,6 +27,8 @@
     </application>
 
     <lifecycle>
+        <phase-listener>tech.bugger.business.internal.TrespassListener</phase-listener>
         <phase-listener>com.ocpsoft.pretty.faces.event.MultiPageMessagesSupport</phase-listener>
+        <phase-listener>tech.bugger.business.internal.SessionIDChanger</phase-listener>
     </lifecycle>
 </faces-config>

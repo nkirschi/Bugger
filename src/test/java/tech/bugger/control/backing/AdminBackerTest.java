@@ -16,7 +16,7 @@ import javax.faces.event.ValueChangeEvent;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -123,7 +123,7 @@ public class AdminBackerTest {
     @Test
     public void testGetAvailableThemesWhenThereAreNone() {
         doReturn(new ArrayList<>()).when(settingsService).discoverFiles(any());
-        assertEquals(Arrays.asList(adminBacker.getOrganization().getTheme()), adminBacker.getAvailableThemes());
+        assertEquals(List.of(adminBacker.getOrganization().getTheme()), adminBacker.getAvailableThemes());
     }
 
     @Test

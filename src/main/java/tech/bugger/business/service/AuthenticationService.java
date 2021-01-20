@@ -11,7 +11,6 @@ import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Mail;
-import tech.bugger.persistence.util.MailBuilder;
 import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
@@ -219,7 +218,7 @@ public class AuthenticationService {
         }
 
         String link = domain + "/password-set?token=" + token.getValue();
-        Mail mail = new MailBuilder()
+        Mail mail = new Mail.Builder()
                 .to(user.getEmailAddress())
                 .subject(interactionsBundle.getString("email_register_subject"))
                 .content(new MessageFormat(interactionsBundle.getString("email_register_content"))
@@ -293,7 +292,7 @@ public class AuthenticationService {
         }
 
         String link = domain + "/profile-edit?token=" + token.getValue();
-        Mail mail = new MailBuilder()
+        Mail mail = new Mail.Builder()
                 .to(email)
                 .subject(interactionsBundle.getString("email_update_subject"))
                 .content(new MessageFormat(interactionsBundle.getString("email_update_content"))
@@ -370,7 +369,7 @@ public class AuthenticationService {
         }
 
         String link = domain + "/password-set?token=" + token.getValue();
-        Mail mail = new MailBuilder()
+        Mail mail = new Mail.Builder()
                 .to(user.getEmailAddress())
                 .subject(interactionsBundle.getString("email_password_forgot_subject"))
                 .content(new MessageFormat(interactionsBundle.getString("email_password_forgot_content"))

@@ -137,7 +137,7 @@ public class PostEditBacker implements Serializable {
                 return;
             }
             post = postService.getPostByID(postID);
-            if (post == null || !postService.canModify(user, post)) {
+            if (post == null || !postService.isPrivileged(user, post)) {
                 redirectToErrorPage();
                 return;
             }

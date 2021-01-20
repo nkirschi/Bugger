@@ -10,7 +10,6 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.business.exception.NotFoundException;
 import tech.bugger.persistence.exception.DuplicateException;
@@ -625,6 +624,28 @@ public class ProfileService {
     }
 
     /**
+     * Searches and returns the avatar of the {@link User} with the given {@code id}.
+     *
+     * @param id The ID of the user whose avatar to search for.
+     * @return The user's avatar or {@code null} if no such user exists.
+     */
+    public byte[] getAvatarForUser(final int id) {
+        byte[] avatar = null;
+
+        try (Transaction tx = transactionManager.begin()) {
+            avatar = tx.newUserGateway().getAvatarForUser(id);
+            tx.commit();
+        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+            log.debug("Avatar could not be found for user.");
+        } catch (TransactionException e) {
+            log.error("Error while searching for user avatar.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+
+        return avatar;
+    }
+
+    /**
      * Counts the number of topics moderated by {@code user}.
      *
      * @param user The user to search for.
@@ -645,14 +666,14 @@ public class ProfileService {
     }
 
     /**
-     * Converts the given {@code avatar} into an {@link Lazy} byte array.
+     * Converts the given {@code avatar} into a byte array.
      *
      * @param avatar The input {@link Part} to be converted.
-     * @return The new {@link Lazy} byte array or {@code null} iff the input could not be converted.
+     * @return The new byte array or {@code null} iff the input could not be converted.
      */
-    public Lazy<byte[]> uploadAvatar(final Part avatar) {
+    public byte[] uploadAvatar(final Part avatar) {
         try {
-            return new Lazy<>(avatar.getInputStream().readAllBytes());
+            return avatar.getInputStream().readAllBytes();
         } catch (IOException e) {
             log.debug("Error while uploading an avatar.", e);
             feedback.fire(new Feedback(messages.getString("upload_avatar"), Feedback.Type.ERROR));

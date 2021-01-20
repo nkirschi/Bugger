@@ -80,6 +80,16 @@ public final class Constants {
     public static final int MB_TO_BYTES = 1_000_000;
 
     /**
+     * Symbol to use when no meaningful value can be displayed.
+     */
+    public static final String NO_VALUE_INDICATOR = "-";
+
+    /**
+     * Maximum amount of decimal places to display to the user.
+     */
+    public static final int MAX_FRACTION_DIGITS = 2;
+
+    /**
      * The available languages for the frontend.
      */
     public static final Locale[] LANGUAGES = new Locale[]{Locale.ENGLISH, Locale.GERMAN};
