@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.ZoneId;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -327,7 +328,8 @@ public class ReportDBGatewayTest {
         try (Statement stmt = connection.createStatement()) {
             ResultSet rs = stmt.executeQuery("SELECT * FROM report WHERE id = 100");
             if (rs.next()) {
-                fromDatabase = rs.getObject("closed_at", OffsetDateTime.class);
+                fromDatabase = rs.getObject("closed_at", OffsetDateTime.class)
+                        .withOffsetSameInstant(OffsetDateTime.now().getOffset());
             }
         }
         assertEquals(report.getClosingDate().truncatedTo(ChronoUnit.SECONDS), fromDatabase.truncatedTo(ChronoUnit.SECONDS));

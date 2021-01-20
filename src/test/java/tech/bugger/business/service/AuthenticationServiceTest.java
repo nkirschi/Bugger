@@ -49,9 +49,6 @@ public class AuthenticationServiceTest {
     private final String email = "test@test.de";
 
     @Mock
-    private NotificationService notificationService;
-
-    @Mock
     private TransactionManager transactionManager;
 
     @Mock
@@ -83,9 +80,12 @@ public class AuthenticationServiceTest {
             return null;
         }).when(priorityExecutor).enqueue(any());
 
-        service = new AuthenticationService(transactionManager, feedbackEvent, notificationService,
+        NotificationService notificationService = new NotificationService(transactionManager, feedbackEvent,
                 ResourceBundleMocker.mock(""), ResourceBundleMocker.mock(""),
-                configReader);
+                priorityExecutor, mailer);
+
+        service = new AuthenticationService(transactionManager, feedbackEvent, notificationService,
+                ResourceBundleMocker.mock(""), ResourceBundleMocker.mock(""), configReader);
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(tokenGateway).when(tx).newTokenGateway();
