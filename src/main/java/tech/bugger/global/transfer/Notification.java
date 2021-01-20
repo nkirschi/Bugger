@@ -2,7 +2,7 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 /**
@@ -66,7 +66,7 @@ public class Notification implements Serializable {
     /**
      * The date of this notification.
      */
-    private ZonedDateTime date;
+    private OffsetDateTime date;
 
     /**
      * Whether this notification was read.
@@ -126,7 +126,7 @@ public class Notification implements Serializable {
      * @param recipientMail    The recipient's e-mail address.
      */
     public Notification(final Integer id, final Integer actuatorID, final Integer recipientID, final Type type,
-                        final ZonedDateTime date, final boolean read, final boolean sent, final Integer topicID,
+                        final OffsetDateTime date, final boolean read, final boolean sent, final Integer topicID,
                         final Integer reportID, final Integer postID, final String actuatorUsername,
                         final String reportTitle, final String recipientMail) {
         this.id = id;
@@ -240,7 +240,7 @@ public class Notification implements Serializable {
      *
      * @return The notification creation date.
      */
-    public ZonedDateTime getDate() {
+    public OffsetDateTime getDate() {
         return date;
     }
 
@@ -249,7 +249,7 @@ public class Notification implements Serializable {
      *
      * @param date The notification creation date to be set.
      */
-    public void setDate(final ZonedDateTime date) {
+    public void setDate(final OffsetDateTime date) {
         this.date = date;
     }
 

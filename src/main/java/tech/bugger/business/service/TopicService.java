@@ -1,5 +1,6 @@
 package tech.bugger.business.service;
 
+import java.time.OffsetDateTime;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Topic;
@@ -18,7 +19,6 @@ import tech.bugger.persistence.util.TransactionManager;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -731,9 +731,9 @@ public class TopicService {
      * as creating and editing posts count as actions. Moving a report is an action in the destination topic only.
      *
      * @param topic The topic in question.
-     * @return The time stamp of the last action as a {@code ZonedDateTime}.
+     * @return The time stamp of the last action as a {@link OffsetDateTime}.
      */
-    public ZonedDateTime lastChange(final Topic topic) {
+    public OffsetDateTime lastChange(final Topic topic) {
         if (topic == null) {
             log.error("Error while determining last change with topic null.");
             throw new IllegalArgumentException("Topic cannot be null.");
@@ -742,7 +742,7 @@ public class TopicService {
             throw new IllegalArgumentException("Topic ID cannot be null.");
         }
 
-        ZonedDateTime lastChange = null;
+        OffsetDateTime lastChange = null;
         try (Transaction tx = transactionManager.begin()) {
             lastChange = tx.newTopicGateway().determineLastActivity(topic);
             tx.commit();

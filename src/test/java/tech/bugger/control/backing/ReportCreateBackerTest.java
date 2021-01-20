@@ -24,7 +24,7 @@ import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.servlet.http.Part;
 import java.io.InputStream;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +87,7 @@ public class ReportCreateBackerTest {
         List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(ZonedDateTime.class), null, null, false, 1);
+                mock(OffsetDateTime.class), null, null, false, 1);
         reportCreateBacker.setReport(testReport);
         reportCreateBacker.setFirstPost(testFirstPost);
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();

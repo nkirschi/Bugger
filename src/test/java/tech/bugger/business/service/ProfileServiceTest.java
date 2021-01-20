@@ -31,7 +31,7 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import java.io.IOException;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -111,10 +111,10 @@ public class ProfileServiceTest {
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         admin = new User(3, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@admin.de", "Helgo", "Brötchen",
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "Ich bin der Administrator hier!",
-                Locale.ENGLISH, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, true);
+                Locale.ENGLISH, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, true);
         testTopic = new Topic(1, "title", "description");
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
-                mock(Authorship.class), mock(ZonedDateTime.class), null, null, false, null);
+                mock(Authorship.class), mock(OffsetDateTime.class), null, null, false, null);
         selection = new Selection(1, 0, Selection.PageSize.SMALL, "id", true);
     }
 

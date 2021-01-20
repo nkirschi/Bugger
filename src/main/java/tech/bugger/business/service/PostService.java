@@ -24,7 +24,7 @@ import javax.inject.Inject;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -103,7 +103,7 @@ public class PostService {
      */
     public boolean updatePost(final Post post) {
         try (Transaction tx = transactionManager.begin()) {
-            post.getAuthorship().setModifiedDate(ZonedDateTime.now());
+            post.getAuthorship().setModifiedDate(OffsetDateTime.now());
             tx.newPostGateway().update(post);
             AttachmentGateway attachmentGateway = tx.newAttachmentGateway();
             List<Attachment> newAttachments = post.getAttachments();

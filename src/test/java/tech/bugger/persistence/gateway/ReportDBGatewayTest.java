@@ -6,7 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -57,11 +58,11 @@ public class ReportDBGatewayTest {
         gateway = new ReportDBGateway(connection, userGateway);
 
         topic = new Topic(1, "topictitle", "topicdescription");
-        Authorship authorship = new Authorship(new User(), ZonedDateTime.now(), new User(), ZonedDateTime.now());
+        Authorship authorship = new Authorship(new User(), OffsetDateTime.now(), new User(), OffsetDateTime.now());
         authorship.getCreator().setId(1);
         authorship.getModifier().setId(1);
         report = new Report(0, "App crashes", Report.Type.HINT, Report.Severity.SEVERE, "1.4.1",
-                new Authorship(null, ZonedDateTime.now(), null, ZonedDateTime.now()), null,
+                new Authorship(null, OffsetDateTime.now(), null, OffsetDateTime.now()), null,
                 null, null, false, 1);
         selection = new Selection(0, 0, Selection.PageSize.LARGE, "ID", true);
     }
@@ -297,15 +298,15 @@ public class ReportDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         report.setId(100);
-        report.setClosingDate(ZonedDateTime.now());
+        report.setClosingDate(OffsetDateTime.now());
         assertThrows(StoreException.class, () -> new ReportDBGateway(connectionSpy, userGateway).closeReport(report));
     }
 
     @Test
     public void testCloseReportWhenReportDoesNotExist() {
         report.setId(21);
-        report.setClosingDate(ZonedDateTime.now());
-        // assertNull(ZonedDateTime.now());
+        report.setClosingDate(OffsetDateTime.now());
+        // assertNull(OffsetDateTime.now());
         assertThrows(NotFoundException.class, () -> gateway.closeReport(report));
     }
 
@@ -313,7 +314,7 @@ public class ReportDBGatewayTest {
     public void testCloseReport() throws Exception {
         insertReports();
         report.setId(100);
-        report.setClosingDate(ZonedDateTime.now());
+        report.setClosingDate(OffsetDateTime.now());
         assertDoesNotThrow(() -> gateway.closeReport(report));
     }
 
@@ -321,13 +322,14 @@ public class ReportDBGatewayTest {
     public void testCloseReportVerifyClosingDate() throws Exception {
         insertReports();
         report.setId(100);
-        report.setClosingDate(ZonedDateTime.now());
+        report.setClosingDate(OffsetDateTime.now());
         gateway.closeReport(report);
-        ZonedDateTime fromDatabase = null;
+        OffsetDateTime fromDatabase = null;
         try (Statement stmt = connection.createStatement()) {
             ResultSet rs = stmt.executeQuery("SELECT * FROM report WHERE id = 100");
             if (rs.next()) {
-                fromDatabase = rs.getTimestamp("closed_at").toInstant().atZone(ZoneId.systemDefault());
+                fromDatabase = rs.getObject("closed_at", OffsetDateTime.class)
+                        .withOffsetSameInstant(OffsetDateTime.now().getOffset());
             }
         }
         assertEquals(report.getClosingDate().truncatedTo(ChronoUnit.SECONDS), fromDatabase.truncatedTo(ChronoUnit.SECONDS));
@@ -370,7 +372,7 @@ public class ReportDBGatewayTest {
     public void testOpenReportWhenReportIsClosed() throws Exception {
         insertReports();
         report.setId(100);
-        report.setClosingDate(ZonedDateTime.now());
+        report.setClosingDate(OffsetDateTime.now());
         gateway.closeReport(report);
         assertDoesNotThrow(() -> gateway.openReport(report));
     }

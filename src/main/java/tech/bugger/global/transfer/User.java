@@ -5,7 +5,7 @@ import tech.bugger.global.util.Constants;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 /**
@@ -99,7 +99,7 @@ public class User implements Serializable {
     /**
      * This user's date of registration.
      */
-    private ZonedDateTime registrationDate;
+    private OffsetDateTime registrationDate;
 
     /**
      * This user's forced voting weight or {@code null} if none.
@@ -115,7 +115,7 @@ public class User implements Serializable {
      * Constructs an empty user.
      */
     public User() {
-        this(null, "", null, null, null, "", "", "", new byte[0], new byte[0],
+        this(null, "", "", "", "", "", "", "", new byte[0], new byte[0],
                 "", Locale.ENGLISH, User.ProfileVisibility.FULL, null, null, false);
     }
 
@@ -143,7 +143,7 @@ public class User implements Serializable {
                 final String hashingAlgorithm, final String emailAddress, final String firstName,
                 final String lastName, final byte[] avatar, final byte[] avatarThumbnail,
                 final String biography, final Locale preferredLanguage, final ProfileVisibility profileVisibility,
-                final ZonedDateTime registrationDate, final Integer forcedVotingWeight, final boolean administrator) {
+                final OffsetDateTime registrationDate, final Integer forcedVotingWeight, final boolean administrator) {
         this.id = id;
         this.username = username;
         this.passwordHash = passwordHash;
@@ -440,7 +440,7 @@ public class User implements Serializable {
      *
      * @return The user's registration date.
      */
-    public ZonedDateTime getRegistrationDate() {
+    public OffsetDateTime getRegistrationDate() {
         return registrationDate;
     }
 
@@ -449,7 +449,7 @@ public class User implements Serializable {
      *
      * @param registrationDate The user's registration date to be set.
      */
-    public void setRegistrationDate(final ZonedDateTime registrationDate) {
+    public void setRegistrationDate(final OffsetDateTime registrationDate) {
         this.registrationDate = registrationDate;
     }
 

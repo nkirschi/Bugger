@@ -1,5 +1,14 @@
 package tech.bugger.persistence.gateway;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import javax.enterprise.inject.spi.CDI;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
@@ -12,17 +21,6 @@ import tech.bugger.global.util.Pagitable;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
-
-import javax.enterprise.inject.spi.CDI;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Post gateway that gives access to posts stored in a database.
@@ -283,13 +281,13 @@ public class PostDBGateway implements PostGateway {
                 if (rs.getInt("p_last_modified_by") != 0) {
                     modifier = UserDBGateway.getUserFromResultSet("modifier_", rs);
                 }
-                ZonedDateTime creationDate = null;
-                if (rs.getTimestamp("p_created_at") != null) {
-                    creationDate = rs.getTimestamp("p_created_at").toInstant().atZone(ZoneId.systemDefault());
+                OffsetDateTime creationDate = null;
+                if (rs.getObject("p_created_at", OffsetDateTime.class) != null) {
+                    creationDate = rs.getObject("p_created_at", OffsetDateTime.class);
                 }
-                ZonedDateTime modificationDate = null;
-                if (rs.getTimestamp("p_last_modified_at") != null) {
-                    modificationDate = rs.getTimestamp("p_last_modified_at").toInstant().atZone(ZoneId.systemDefault());
+                OffsetDateTime modificationDate = null;
+                if (rs.getObject("p_last_modified_at", OffsetDateTime.class) != null) {
+                    modificationDate = rs.getObject("p_last_modified_at", OffsetDateTime.class);
                 }
                 Authorship authorship = new Authorship(author, creationDate, modifier, modificationDate);
                 Post post = new Post(rs.getInt("p_id"), rs.getString("p_content"), reportLazy, authorship,

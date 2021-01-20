@@ -5,10 +5,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,9 +64,9 @@ public class ReportDBGateway implements ReportGateway {
         report.setVersion(rs.getString("version"));
         report.setTopicID(rs.getInt("topic"));
         report.setDuplicateOf(rs.getInt("duplicate_of"));
-        ZonedDateTime closed = null;
-        if (rs.getTimestamp("closed_at") != null) {
-            closed = (rs.getTimestamp("closed_at").toInstant().atZone(ZoneId.systemDefault()));
+        OffsetDateTime closed = null;
+        if (rs.getObject("closed_at", OffsetDateTime.class) != null) {
+            closed = rs.getObject("closed_at", OffsetDateTime.class);
         }
         report.setClosingDate(closed);
         report.setAuthorship(getAuthorshipFromResultSet(rs, userGateway));
@@ -100,12 +98,10 @@ public class ReportDBGateway implements ReportGateway {
             throws SQLException, NotFoundException {
         Integer creatorID = rs.getObject("created_by", Integer.class);
         User creator = creatorID == null ? null : userGateway.getUserByID(creatorID);
-        ZonedDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime()
-                .atZone(ZoneId.systemDefault());
+        OffsetDateTime createdAt = rs.getObject("created_at", OffsetDateTime.class);
         Integer modifierID = rs.getObject("last_modified_by", Integer.class);
         User modifier = modifierID == null ? null : userGateway.getUserByID(modifierID);
-        ZonedDateTime modifiedAt = rs.getTimestamp("last_modified_at").toLocalDateTime()
-                .atZone(ZoneId.systemDefault());
+        OffsetDateTime modifiedAt = rs.getObject("last_modified_at", OffsetDateTime.class);
         return new Authorship(creator, createdAt, modifier, modifiedAt);
     }
 
@@ -159,7 +155,7 @@ public class ReportDBGateway implements ReportGateway {
                 }
 
                 Integer duplicateOf = rs.getObject("duplicate_of", Integer.class);
-                Timestamp closingDate = rs.getTimestamp("closed_at");
+                OffsetDateTime closingDate = rs.getObject("closed_at", OffsetDateTime.class);
 
                 return new Report(
                         id,
@@ -168,7 +164,7 @@ public class ReportDBGateway implements ReportGateway {
                         Report.Severity.valueOf(rs.getString("severity")),
                         rs.getString("version"),
                         getAuthorshipFromResultSet(rs, userGateway),
-                        closingDate != null ? closingDate.toLocalDateTime().atZone(ZoneId.systemDefault()) : null,
+                        closingDate,
                         duplicateOf,
                         relevance,
                         relevanceOverwritten,
@@ -402,7 +398,7 @@ public class ReportDBGateway implements ReportGateway {
 
         try (PreparedStatement stmt = conn.prepareStatement("UPDATE report SET closed_at = ? WHERE id = ?;")) {
             PreparedStatement statement = new StatementParametrizer(stmt)
-                    .object(Timestamp.from(report.getClosingDate().toInstant()))
+                    .object(report.getClosingDate())
                     .integer(report.getId()).toStatement();
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {

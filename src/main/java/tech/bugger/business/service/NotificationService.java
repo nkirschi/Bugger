@@ -1,5 +1,16 @@
 package tech.bugger.business.service;
 
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
@@ -18,18 +29,6 @@ import tech.bugger.persistence.util.Mail;
 import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import java.io.Serializable;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
 
 /**
  * Service providing methods related to notifications. A {@code Feedback} event is fired, if unexpected circumstances
@@ -228,31 +227,6 @@ public class NotificationService implements Serializable {
         sendMails(notifications);
     }
 
-    private void sendMails(final List<Notification> notifications) {
-        String domain = JFConfig.getApplicationPath(FacesContext.getCurrentInstance().getExternalContext());
-        for (Notification n : notifications) {
-            String link = domain + "/report?id=" + n.getReportID()
-                    + (n.getPostID() != null ? "&p=" + n.getPostID() : "");
-            Mail mail = new Mail.Builder()
-                    .to(n.getRecipientMail())
-                    .subject(interactionsBundle.getString("email_notification_subject." + n.getType()))
-                    .content(new MessageFormat(interactionsBundle.getString("email_notification_content."
-                            + n.getType()))
-                            .format(new String[]{n.getReportTitle(), link}))
-                    .envelop();
-            priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.LOW, () -> {
-                int tries = 1;
-                log.debug("Sending e-mail " + mail + ".");
-                while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
-                    log.warning("Trying to send e-mail again. Try #" + tries + '.');
-                }
-                if (tries > MAX_EMAIL_TRIES) {
-                    log.error("Couldn't send e-mail for more than " + MAX_EMAIL_TRIES + " times! Please investigate!");
-                }
-            }));
-        }
-    }
-
     /**
      * Queues sending of e-mails for notifications which have not yet been sent.
      */
@@ -265,6 +239,50 @@ public class NotificationService implements Serializable {
             return;
         }
         sendMails(unsentNotifications);
+    }
+
+    private void sendMails(final List<Notification> notifications) {
+        String domain = JFConfig.getApplicationPath(FacesContext.getCurrentInstance().getExternalContext());
+        for (Notification n : notifications) {
+            if (n.getRecipientMail() == null || n.getRecipientMail().isBlank()) {
+                continue;
+            }
+
+            String link = domain + "/report?";
+            if (n.getPostID() != null) {
+                link += "p=" + n.getPostID() + "#post-" + n.getPostID();
+            } else {
+                link += "id=" + n.getReportID();
+            }
+
+            Mail mail = new Mail.Builder()
+                    .to(n.getRecipientMail())
+                    .subject(interactionsBundle.getString("email_notification_subject." + n.getType()))
+                    .content(new MessageFormat(interactionsBundle.getString("email_notification_content."
+                            + n.getType()))
+                            .format(new String[]{n.getReportTitle(), link}))
+                    .envelop();
+            sendMail(mail, PriorityTask.Priority.LOW);
+        }
+    }
+
+    /**
+     * Tries to send the given {@link Mail} with the given {@link PriorityTask.Priority}.
+     *
+     * @param mail     The e-mail to send.
+     * @param priority The priority for this mail.
+     */
+    public void sendMail(final Mail mail, final PriorityTask.Priority priority) {
+        priorityExecutor.enqueue(new PriorityTask(priority, () -> {
+            int tries = 1;
+            log.debug("Sending e-mail " + mail + ".");
+            while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
+                log.warning("Trying to send e-mail again. Try #" + tries + '.');
+            }
+            if (tries > MAX_EMAIL_TRIES) {
+                log.error("Couldn't send e-mail for more than " + MAX_EMAIL_TRIES + " times! Please investigate!");
+            }
+        }));
     }
 
 }
