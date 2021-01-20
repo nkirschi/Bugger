@@ -114,7 +114,7 @@ select:focus {
 }
 
 /* Other elements */
-td {
+td, th {
   color: white;
 }
 

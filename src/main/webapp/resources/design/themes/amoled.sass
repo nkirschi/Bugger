@@ -1,10 +1,14 @@
 /* Define variables for the primary colors to use */
 $lightBlack: #1a1a1a
 $darkGray: #2b2b2b
-$lightGray: #666666
-$textColor: white
-$red: red
-$boxShadow: 0 1px 1px darkred inset, 0 0 8px red !important
+$lightGray: #999999
+$textColor: #dfbf66
+$darkerBlue: #3c4cba
+$lightBlue: #a3d2e1
+$darkGold: #7c6e43
+$red: #c62a25
+$boxShadow: 0 1px 1px $darkGold inset, 0 0 8px $textColor !important
+$boxShadowBlue: 0 1px 1px $darkerBlue inset, 0 0 8px $lightBlue !important
 
 /* Template */
 body
@@ -14,7 +18,7 @@ body
     color: $textColor
 
   a:hover
-    color: $red
+    color: $lightBlue
 
 #p-header
   background-color: $darkGray
@@ -28,7 +32,7 @@ body
   color: $textColor
 
 #p-content
-  background-color: $lightBlack
+  background-color: $darkGray
   color: $textColor
 
 #p-profile-menu
@@ -37,51 +41,43 @@ body
 
 /* Bootstrap buttons */
 .btn-outline-primary
-  border-color: $textColor
-  color: $textColor
+  border-color: $lightBlue
+  color: $lightBlue
 
   &:hover
-    background-color: $textColor
-    border-color: $lightBlack
-    color: $lightBlack
+    background-color: $lightBlue
+    border-color: $darkerBlue
+    color: $darkerBlue
 
-  &:active
-    background-color: $textColor
-    color: $lightBlack
+  &:active, &:focus
+    background-color: $lightBlue
+    color: $darkerBlue
+    box-shadow: $boxShadowBlue
 
 .btn-primary
   border-color: $textColor
   background-color: $textColor
-  color: $lightBlack !important
+  color: $darkGray !important
 
-  &:hover
-    background-color: $lightBlack
-    border-color: $red
-    color: $red !important
+  &:hover, &:active, &:focus
+    background-color: $darkGray
+    border-color: $darkGold
+    color: $darkGold !important
 
-  &:active
-    background-color: $lightBlack
-    color: $red
-
-  &:focus
-    background-color: $lightBlack
-    color: $red
-
-.btn-primary:focus, .btn-primary:active, .btn-link:focus, .btn-link:active, .btn-outline-primary:focus,
-.btn-outline-primary:active
-  border-color: $red !important
+.btn-primary:focus, .btn-primary:active, .btn-link:focus, .btn-link:active
+  border-color: $darkGold !important
   box-shadow: $boxShadow
 
 .btn-link
-  background-color: $lightBlack
+  background-color: $darkGray
   color: $textColor
 
   &:hover
-    color: $red
+    color: $lightBlue
 
 /* Popup dialogs */
 .dialog
-  background-color: $lightGray
+  background-color: $darkGray
   color: $textColor
 
 /* Voting buttons */
@@ -90,19 +86,19 @@ body
   color: $lightBlack
 
 .vote-not-cast
-  background-color: gray
+  background-color: $lightGray
 
 /* Form input fields focus */
 .form-check-input:checked
-  background-color: $red
-  border-color: darkred
+  background-color: $textColor
+  border-color: $darkGold
 
 select:focus
-  border-color: $red
+  border-color: $darkGold
   box-shadow: $boxShadow
 
 .form-control:focus, .form-check-input:focus, .form-select:focus
-  border-color: $red
+  border-color: $darkGold
   box-shadow: $boxShadow
 
 /* Other elements */
@@ -113,16 +109,14 @@ td, th
   background-color: $lightGray
 
 .alert-success td, .alert-info td, .alert-warning td
-  color: $lightBlack !important
+  color: $darkGray !important
 
 .alert-success
   background-color: #3c763d
-  border-color: $lightBlack
+  border-color: $darkGray
 
 .alert-danger td
   color: $red !important
 
 .alert-danger
   border-color: $red
-  background-color: $textColor
-  box-shadow: $boxShadow
