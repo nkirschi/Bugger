@@ -15,9 +15,19 @@ public class SessionIDChanger implements PhaseListener {
     private static final long serialVersionUID = -3371104134499525455L;
 
     /**
+     * Performs nothing.
+     *
+     * @param phaseEvent The event fired before the phase {@link #getPhaseId()}.
+     */
+    @Override
+    public void beforePhase(final PhaseEvent phaseEvent) {
+        // nop
+    }
+
+    /**
      * Changes the HTTP session ID upon request initialization.
      *
-     * @param phaseEvent The event fired for the phase {@link #getPhaseId()}.
+     * @param phaseEvent The event fired after the phase {@link #getPhaseId()}.
      */
     @Override
     public void afterPhase(final PhaseEvent phaseEvent) {
@@ -28,19 +38,9 @@ public class SessionIDChanger implements PhaseListener {
     }
 
     /**
-     * Performs nothing.
-     *
-     * @param phaseEvent The event fired for the phase {@link #getPhaseId()}.
-     */
-    @Override
-    public void beforePhase(final PhaseEvent phaseEvent) {
-        // nop
-    }
-
-    /**
      * Returns the phase before rendering the response.
      *
-     * @return {@link PhaseId#RENDER_RESPONSE}.
+     * @return {@link PhaseId#RESTORE_VIEW}.
      */
     @Override
     public PhaseId getPhaseId() {
