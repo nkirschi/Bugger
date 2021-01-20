@@ -18,7 +18,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -113,8 +116,8 @@ public class AdminBackerTest {
 
     @Test
     public void testGetAvailableThemesWhenThereAreSome() {
-        doReturn(Arrays.asList("a", "b")).when(settingsService).discoverFiles(any());
-        assertEquals(Arrays.asList("a", "b"), adminBacker.getAvailableThemes());
+        doReturn(Arrays.asList("a", "b.css")).when(settingsService).discoverFiles(any());
+        assertEquals(Arrays.asList("b.css"), adminBacker.getAvailableThemes());
     }
 
     @Test
