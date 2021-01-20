@@ -41,7 +41,6 @@ public class TrespassListener implements PhaseListener {
      * Constructs a new trespass listener.
      */
     public TrespassListener() {
-        super();
         applicationSettings = CDI.current().select(ApplicationSettings.class).get();
         registry = CDI.current().select(Registry.class).get();
     }
@@ -91,12 +90,8 @@ public class TrespassListener implements PhaseListener {
         User user = session != null ? session.getUser() : null;
         Locale locale = session != null ? session.getLocale() : ectx.getRequestLocale();
 
-        if (viewId.endsWith("admin.xhtml")) {
-            if (user == null) {
-                redirectToLoginPage(fctx, locale);
-            } else if (!user.isAdministrator()) {
-                redirectToErrorPage(ectx);
-            }
+        if (viewId.endsWith("admin.xhtml") && (user == null || !user.isAdministrator())) {
+            redirectToErrorPage(ectx);
             return;
         }
 
