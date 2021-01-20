@@ -1,5 +1,6 @@
 package tech.bugger.persistence.gateway;
 
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -120,8 +121,8 @@ public interface SearchGateway {
      * @return The list of reports that match the search criteria.
      * @throws NotFoundException The topic could not be found.
      */
-    List<Report> getReportResults(String query, Selection selection, ZonedDateTime latestOpeningDateTime,
-                                  ZonedDateTime earliestClosingDateTime, boolean showOpenReports,
+    List<Report> getReportResults(String query, Selection selection, OffsetDateTime latestOpeningDateTime,
+                                  OffsetDateTime earliestClosingDateTime, boolean showOpenReports,
                                   boolean showClosedReports, boolean showDuplicates, String topic,
                                   HashMap<Report.Type, Boolean> reportTypeFilter,
                                   HashMap<Report.Severity, Boolean> severityFilter) throws NotFoundException;
@@ -190,8 +191,8 @@ public interface SearchGateway {
      * @return The number of reports that match the search criteria.
      * @throws NotFoundException The topic could not be found.
      */
-    int getNumberOfReportResults(String query, ZonedDateTime latestOpeningDateTime,
-                                 ZonedDateTime earliestClosingDateTime, boolean showOpenReports,
+    int getNumberOfReportResults(String query, OffsetDateTime latestOpeningDateTime,
+                                 OffsetDateTime earliestClosingDateTime, boolean showOpenReports,
                                  boolean showClosedReports,
                                  boolean showDuplicates, String topic,
                                  HashMap<Report.Type, Boolean> reportTypeFilter,

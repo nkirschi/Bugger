@@ -4,6 +4,7 @@ import com.ocpsoft.pretty.PrettyContext;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.service.SearchService;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
@@ -15,11 +16,14 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -53,6 +57,21 @@ public class HeaderBacker implements Serializable {
     private String search;
 
     /**
+     * userSearchSuggestion
+     */
+    private List<String> userSearchSuggestion;
+
+    /**
+     * userSearchSuggestion
+     */
+    private List<String> topicSearchSuggestion;
+
+    /**
+     * userSearchSuggestion
+     */
+    private List<String> reportSearchSuggestion;
+
+    /**
      * The current application settings.
      */
     private final ApplicationSettings applicationSettings;
@@ -61,6 +80,11 @@ public class HeaderBacker implements Serializable {
      * The current user session.
      */
     private final UserSession session;
+
+    /**
+     * The SearchService for Suggestions in the search bar.
+     */
+    private final SearchService searchService;
 
     /**
      * The current {@link FacesContext} of the application.
@@ -75,9 +99,10 @@ public class HeaderBacker implements Serializable {
      * @param fctx                The current {@link FacesContext} of the application.
      */
     @Inject
-    public HeaderBacker(final ApplicationSettings applicationSettings, final UserSession session,
+    public HeaderBacker(final ApplicationSettings applicationSettings, final SearchService searchService, final UserSession session,
                         final FacesContext fctx) {
         this.applicationSettings = applicationSettings;
+        this.searchService = searchService;
         this.session = session;
         this.fctx = fctx;
     }
@@ -88,6 +113,9 @@ public class HeaderBacker implements Serializable {
     @PostConstruct
     void init() {
         user = session.getUser();
+        userSearchSuggestion = new ArrayList<>();
+        topicSearchSuggestion = new ArrayList<>();
+        reportSearchSuggestion = new ArrayList<>();
         displayMenu = Boolean.parseBoolean(fctx.getExternalContext().getRequestParameterMap().get("d"));
     }
 
@@ -104,12 +132,30 @@ public class HeaderBacker implements Serializable {
     }
 
     /**
-     * Takes the user to the search page with the current {@code searchQuery} already typed in.
+     * Takes the user to the search page with the current {@code search} already typed in.
      *
      * @return The location to redirect to.
      */
-    public String search() {
-        return "pretty:search";
+    public String executeSearch() throws IOException {
+        try {
+            ExternalContext ectx = fctx.getExternalContext();
+            ectx.redirect(ectx.getRequestContextPath() + "/search?q=" + search);
+        } catch (IOException e) {
+            redirectTo404Page();
+        }
+        return null;
+    }
+
+    /**
+     * Redirects the user to a 404 page.
+     */
+    private void redirectTo404Page() {
+        try {
+            ExternalContext ectx = fctx.getExternalContext();
+            ectx.redirect(ectx.getRequestContextPath() + "/error");
+        } catch (IOException e) {
+            throw new InternalError("Redirection to error page failed.");
+        }
     }
 
     /**
@@ -204,6 +250,17 @@ public class HeaderBacker implements Serializable {
     }
 
     /**
+     * Enables suggestions for users to be unbanned.
+     */
+    public void updateSuggestions() {
+        if (search != null && !search.isBlank()) {
+            userSearchSuggestion = searchService.getUserSuggestions(search);
+            topicSearchSuggestion = searchService.getTopicSuggestions(search);
+            reportSearchSuggestion = searchService.getReportSuggestions(search);
+        }
+    }
+
+    /**
      * @param search The new search query.
      */
     public void setSearch(final String search) {
@@ -215,6 +272,48 @@ public class HeaderBacker implements Serializable {
      */
     public String getSearch() {
         return search;
+    }
+
+    /**
+     * @return The userSearchSuggestion.
+     */
+    public List<String> getUserSearchSuggestion() {
+        return userSearchSuggestion;
+    }
+
+    /**
+     * @param userSearchSuggestion The userSearchSuggestion to set.
+     */
+    public void setUserSearchSuggestion(final List<String> userSearchSuggestion) {
+        this.userSearchSuggestion = userSearchSuggestion;
+    }
+
+    /**
+     * @return The topicSearchSuggestion.
+     */
+    public List<String> getTopicSearchSuggestion() {
+        return topicSearchSuggestion;
+    }
+
+    /**
+     * @param topicSearchSuggestion The topicSearchSuggestion to set.
+     */
+    public void setTopicSearchSuggestion(final List<String> topicSearchSuggestion) {
+        this.topicSearchSuggestion = topicSearchSuggestion;
+    }
+
+    /**
+     * @return The reportSearchSuggestion.
+     */
+    public List<String> getReportSearchSuggestion() {
+        return reportSearchSuggestion;
+    }
+
+    /**
+     * @param reportSearchSuggestion The reportSearchSuggestion to set.
+     */
+    public void setReportSearchSuggestion(final List<String> reportSearchSuggestion) {
+        this.reportSearchSuggestion = reportSearchSuggestion;
     }
 
 

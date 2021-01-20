@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,19 +69,24 @@ public class SearchDBGateway implements SearchGateway {
         }
         String adminFilter = "";
         if (showAdmins) {
-            adminFilter = "AND is_admin = true";
+            adminFilter = "AND is_admin = true ";
         }
         if (showNonAdmins) {
             if (showAdmins) {
                 adminFilter = "";
             } else {
-                adminFilter = "AND is_admin = false";
+                adminFilter = "AND is_admin = false ";
             }
         }
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE username LIKE ? "
                 + adminFilter
                 + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
+            System.out.println(new StatementParametrizer(stmt)
+                    .string(query + "%")
+                    .integer(selection.getPageSize().getSize())
+                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
+                    .toStatement().toString());
             ResultSet rs = new StatementParametrizer(stmt)
                     .string(query + "%")
                     .integer(selection.getPageSize().getSize())
@@ -224,10 +230,11 @@ public class SearchDBGateway implements SearchGateway {
                 .replace("_", "!_")
                 .replace("[", "![");
 
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT u.username FROM \"user\" AS u WHERE u.username "
-                + "LIKE ? ;")) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct u.username FROM \"user\" AS u WHERE u.username "
+                + "LIKE ? LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string("%" + newQuery + "%")
+                    .integer(limit)
                     .toStatement().executeQuery();
 
             while (rs.next()) {
@@ -254,10 +261,11 @@ public class SearchDBGateway implements SearchGateway {
                 .replace("_", "!_")
                 .replace("[", "![");
 
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT t.title FROM \"topic\" AS t WHERE t.title "
-                + "LIKE ? ;")) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct t.title FROM \"topic\" AS t WHERE t.title "
+                + "LIKE ? LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string("%" + newQuery + "%")
+                    .integer(limit)
                     .toStatement().executeQuery();
 
             while (rs.next()) {
@@ -284,10 +292,11 @@ public class SearchDBGateway implements SearchGateway {
                 .replace("_", "!_")
                 .replace("[", "![");
 
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT t.title FROM \"report\" AS t WHERE t.title "
-                + "LIKE ? ;")) {
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct t.title FROM \"report\" AS t WHERE t.title "
+                + "LIKE ? LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string("%" + newQuery + "%")
+                    .integer(limit)
                     .toStatement().executeQuery();
 
             while (rs.next()) {
@@ -377,8 +386,8 @@ public class SearchDBGateway implements SearchGateway {
      */
     @Override
     public List<Report> getReportResults(final String query, final Selection selection,
-                                         final ZonedDateTime latestOpeningDateTime,
-                                         final ZonedDateTime earliestClosingDateTime, final boolean showOpenReports,
+                                         final OffsetDateTime latestOpeningDateTime,
+                                         final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                          final boolean showClosedReports, final boolean showDuplicates,
                                          final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                          final HashMap<Report.Severity, Boolean> severityFilter)
@@ -575,8 +584,8 @@ public class SearchDBGateway implements SearchGateway {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfReportResults(final String query, final ZonedDateTime latestOpeningDateTime,
-                                        final ZonedDateTime earliestClosingDateTime, final boolean showOpenReports,
+    public int getNumberOfReportResults(final String query, final OffsetDateTime latestOpeningDateTime,
+                                        final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                         final boolean showClosedReports, final boolean showDuplicates,
                                         final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                         final HashMap<Report.Severity, Boolean> severityFilter) {
