@@ -16,7 +16,7 @@ import javax.faces.event.ValueChangeEvent;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -113,14 +113,14 @@ public class AdminBackerTest {
 
     @Test
     public void testGetAvailableThemesWhenThereAreSome() {
-        doReturn(Arrays.asList("a", "b")).when(settingsService).discoverFiles(any());
-        assertEquals(Arrays.asList("a", "b"), adminBacker.getAvailableThemes());
+        doReturn(List.of("a", "b")).when(settingsService).discoverFiles(any());
+        assertEquals(List.of("a", "b"), adminBacker.getAvailableThemes());
     }
 
     @Test
     public void testGetAvailableThemesWhenThereAreNone() {
         doReturn(new ArrayList<>()).when(settingsService).discoverFiles(any());
-        assertEquals(Arrays.asList(adminBacker.getOrganization().getTheme()), adminBacker.getAvailableThemes());
+        assertEquals(List.of(adminBacker.getOrganization().getTheme()), adminBacker.getAvailableThemes());
     }
 
     @Test
