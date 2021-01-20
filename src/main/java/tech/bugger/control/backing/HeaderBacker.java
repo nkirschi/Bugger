@@ -92,6 +92,7 @@ public class HeaderBacker implements Serializable {
      * @param applicationSettings The current application settings.
      * @param session             The currently active {@link UserSession}.
      * @param fctx                The current {@link FacesContext} of the application.
+     * @param ectx                The current {@link ExternalContext} of the application.
      * @param feedbackEvent         The feedback event to use for user feedback.
      * @param messagesBundle        The resource bundle for feedback messages.
      */

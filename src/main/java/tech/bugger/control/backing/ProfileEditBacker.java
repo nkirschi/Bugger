@@ -146,7 +146,8 @@ public class ProfileEditBacker implements Serializable {
      * @param authenticationService The authentication service to use.
      * @param profileService        The profile service to use.
      * @param session               The current {@link UserSession}.
-     * @param fctx                  The current faces context.
+     * @param fctx                The current {@link FacesContext} of the application.
+     * @param ectx                The current {@link ExternalContext} of the application.
      */
     @Inject
     public ProfileEditBacker(final AuthenticationService authenticationService,
