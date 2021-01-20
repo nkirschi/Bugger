@@ -1,10 +1,8 @@
 package tech.bugger.business.internal;
 
 import com.ocpsoft.pretty.PrettyContext;
-import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
 
 import javax.enterprise.inject.spi.CDI;
 import javax.faces.application.FacesMessage;
@@ -14,7 +12,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Serial;
 import java.net.URLEncoder;
@@ -29,11 +26,6 @@ public class TrespassListener implements PhaseListener {
 
     @Serial
     private static final long serialVersionUID = -6409448769566271889L;
-
-    /**
-     * The {@link Log} instance associated with this class for logging purposes.
-     */
-    private static final Log log = Log.forClass(TrespassListener.class);
 
     /**
      * The current application settings.
@@ -87,19 +79,17 @@ public class TrespassListener implements PhaseListener {
         UIViewRoot viewRoot = fctx.getViewRoot();
         if (viewRoot == null) {
             redirectToErrorPage(ectx);
+            return;
         }
         String viewId = viewRoot.getViewId();
         if (viewId == null) {
             redirectToErrorPage(ectx);
+            return;
         }
 
         UserSession session = CDI.current().select(UserSession.class).get();
         User user = session != null ? session.getUser() : null;
         Locale locale = session != null ? session.getLocale() : ectx.getRequestLocale();
-
-        log.debug("Session:" + session);
-        log.debug(user == null ? "User null" : user.toString());
-        log.debug("Locale:" + locale);
 
         if (viewId.endsWith("admin.xhtml")) {
             if (user == null) {
@@ -116,20 +106,16 @@ public class TrespassListener implements PhaseListener {
         }
     }
 
-
     /**
      * Retrieves and returns the URL to redirect to after login.
      *
+     * @param ectx The {@link ExternalContext} of the current request.
      * @return The URL to redirect to after login.
      */
     private String getRedirectUrl(final ExternalContext ectx) {
-        String base = ectx.getApplicationContextPath();
-        HttpServletRequest request = (HttpServletRequest) ectx.getRequest();
-        UrlMapping mapping = PrettyContext.getCurrentInstance().getCurrentMapping();
-        String uri = mapping != null ? mapping.getPattern() : request.getRequestURI();
-        String queryString = request.getQueryString();
-
-        return URLEncoder.encode(base + uri + (queryString == null ? "" : '?' + queryString), StandardCharsets.UTF_8);
+        PrettyContext pctx = PrettyContext.getCurrentInstance();
+        String url = ectx.getRequestContextPath() + pctx.getRequestURL() + pctx.getRequestQueryString();
+        return URLEncoder.encode(url, StandardCharsets.UTF_8);
     }
 
     /**
@@ -144,6 +130,7 @@ public class TrespassListener implements PhaseListener {
         FacesMessage message = new FacesMessage(
                 FacesMessage.SEVERITY_WARN, resourceBundle.getString("login_to_continue"), null);
         fctx.addMessage(null, message);
+
         ExternalContext ectx = fctx.getExternalContext();
         ectx.getFlash().setKeepMessages(true);
         try {
