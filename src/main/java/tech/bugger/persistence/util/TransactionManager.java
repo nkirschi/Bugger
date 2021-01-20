@@ -12,6 +12,11 @@ import javax.inject.Singleton;
 public final class TransactionManager {
 
     /**
+     * The ID of the application's main connection pool.
+     */
+    private static final String MAIN_DB_POOL = "db";
+
+    /**
      * The connection pool registry of the application.
      */
     private final Registry registry;
@@ -32,7 +37,7 @@ public final class TransactionManager {
      * @return The fresh transaction.
      */
     public Transaction begin() {
-        return new DBTransaction(registry.getConnectionPool("db"));
+        return new DBTransaction(registry.getConnectionPool(MAIN_DB_POOL));
     }
 
 }

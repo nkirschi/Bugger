@@ -15,7 +15,6 @@ import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Mail;
-import tech.bugger.persistence.util.MailBuilder;
 import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
@@ -234,7 +233,7 @@ public class NotificationService implements Serializable {
         for (Notification n : notifications) {
             String link = domain + "/report?id=" + n.getReportID()
                     + (n.getPostID() != null ? "&p=" + n.getPostID() : "");
-            Mail mail = new MailBuilder()
+            Mail mail = new Mail.Builder()
                     .to(n.getRecipientMail())
                     .subject(interactionsBundle.getString("email_notification_subject." + n.getType()))
                     .content(new MessageFormat(interactionsBundle.getString("email_notification_content."

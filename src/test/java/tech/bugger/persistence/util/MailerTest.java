@@ -1,6 +1,14 @@
 package tech.bugger.persistence.util;
 
 import com.dumbster.smtp.SimpleSmtpServer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
+
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -8,13 +16,6 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.Socket;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import tech.bugger.LogExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,7 +58,7 @@ public class MailerTest {
 
     @Test
     public void testSend() {
-        Mail mail = new MailBuilder()
+        Mail mail = new Mail.Builder()
                 .to(RECIPIENT)
                 .cc(CC).cc(CC2)
                 .bcc(BCC)
@@ -80,7 +81,7 @@ public class MailerTest {
 
     @Test
     public void testSendWhenNoRecipients() {
-        boolean sent = mailer.send(new Mail());
+        boolean sent = mailer.send(new Mail.Builder().envelop());
         assertAll(
                 () -> assertFalse(sent),
                 () -> assertTrue(smtpServer.getReceivedEmails().isEmpty())
@@ -89,7 +90,7 @@ public class MailerTest {
 
     @Test
     public void testSendWhenAddressInvalid() {
-        Mail mail = new MailBuilder().to("?nväliD").to(RECIPIENT).envelop();
+        Mail mail = new Mail.Builder().to("?nväliD").to(RECIPIENT).envelop();
         boolean sent = mailer.send(mail);
         assertAll(
                 () -> assertTrue(sent),
