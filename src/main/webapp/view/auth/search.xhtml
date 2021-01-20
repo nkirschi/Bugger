@@ -206,7 +206,7 @@
                                     <b:column title="#{labels.col_duplicate}" paginator="#{searchBacker.reportResults}" key="duplicate_of">
                                         <h:outputText value="#{var.duplicateOf}"/>
                                     </b:column>
-                                    <b:column title="#{labels.col_change}" paginator="#{searchBacker.reportResults}" key="last_modified_at">
+                                    <b:column title="#{labels.last_activity}" paginator="#{searchBacker.reportResults}" key="last_modified_at">
                                         <h:outputText value="#{var.authorship.creationDate}"/>
                                     </b:column>
                                 </b:pagitable>
