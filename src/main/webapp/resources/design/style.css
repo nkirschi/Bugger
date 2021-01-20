@@ -120,14 +120,6 @@ body {
     display: block;
 }
 
-.title {
-    margin-top: 0;
-    display: inline-block;
-    float: left;
-    font-size: 2em;
-    font-weight: bold;
-}
-
 .align-right {
     display: flex;
     justify-content: end;
@@ -153,24 +145,6 @@ body {
 
 .button {
     margin: 1%;
-}
-
-.style-button {
-    text-decoration: none;
-    background-color: white;
-    color: black;
-    border: 1px solid #cccccc;
-    display: inline-block;
-    padding: 4px 24px;
-    line-height: 24px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-.style-button:hover {
-    text-decoration: none;
-    color: black;
 }
 
 .logo-preview {
@@ -199,10 +173,6 @@ body {
     display: block;
     margin: 0.3em 0 0;
     font-size: 1.3em;
-}
-
-.profile-h2 {
-    margin: 1em 0;
 }
 
 .hide {

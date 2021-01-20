@@ -83,128 +83,76 @@
                                     <h:message for="it-earliest-closing-date"/>
                                 </h:panelGroup>
                             </h:panelGroup>
-                            <h:panelGroup id="p-earliest-closing-date" layout="block" styleClass="mb-2">
-                                <h:outputLabel id="ol-earliest-closing-date"
-                                               for="it-earliest-closing-date"
-                                               value="#{labels.earliest_closing_date}"/>
-                                <h:panelGroup layout="block" styleClass="form-group position-relative">
-                                    <h:inputText id="it-earliest-closing-date"
-                                                 value="#{searchBacker.earliestClosingDateTime}"
-                                                 a:placeholder="#{labels.date_time_pattern}"
-                                                 styleClass="form-control #{!facesContext.validationFailed ? ''
-                                                 : component.valid ? 'is-valid' : 'is-invalid'}">
-                                        <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
-                                    </h:inputText>
-                                    <h:panelGroup layout="block" styleClass="invalid-feedback">
-                                        <h:message for="it-earliest-closing-date"/>
-                                    </h:panelGroup>
-                                </h:panelGroup>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="mb-2">
-                                <h:outputLabel for="s-show-open-reports"
-                                               value="#{labels.topic_show_open_reports}"/>
-                                <h:selectBooleanCheckbox id="s-show-open-reports"
-                                                         value="#{searchBacker.openReportShown}"
-                                                         styleClass="form-check-input"/>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="mb-2">
-                                <h:outputLabel for="s-show-closed-reports"
-                                               value="#{labels.topic_show_closed_reports}"/>
-                                <h:selectBooleanCheckbox id="s-show-closed-reports"
-                                                         value="#{searchBacker.closedReportShown}"
-                                                         styleClass="form-check-input"/>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="mb-2">
-                                <h:outputLabel for="s-show-duplicate-reports"
-                                               value="#{labels.show_duplicate}"/>
-                                <h:selectBooleanCheckbox id="s-show-duplicate-reports"
-                                                         value="#{searchBacker.duplicatesShown}"
-                                                         styleClass="form-check-input"/>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="mb-2">
-                                <h:outputLabel for="s-show-bug-reports"
-                                               value="#{labels.show_bug_reports}"/>
-                                <h:selectBooleanCheckbox id="s-show-bug-reports" value="#{searchBacker.showBug}"
-                                                         styleClass="form-check-input"/>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="mb-2">
-                                <h:outputLabel for="s-show-hint-reports"
-                                               value="#{labels.show_hint_reports}"/>
-                                <h:selectBooleanCheckbox id="s-show-hint-reports" value="#{searchBacker.showHint}"
-                                                         styleClass="form-check-input"/>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="mb-2">
-                                <h:outputLabel for="s-show-feature-reports"
-                                               value="#{labels.show_feature_reports}"/>
-                                <h:selectBooleanCheckbox id="s-show-feature-reports" value="#{searchBacker.showFeature}"
-                                                         styleClass="form-check-input"/>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="mb-2">
-                                <h:outputLabel for="s-show-minor-reports"
-                                               value="#{labels.show_minor_reports}"/>
-                                <h:selectBooleanCheckbox id="s-show-minor-reports" value="#{searchBacker.showMinor}"
-                                                         styleClass="form-check-input"/>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="mb-2">
-                                <h:outputLabel for="s-show-relevante-reports"
-                                               value="#{labels.show_relevant_reports}"/>
-                                <h:selectBooleanCheckbox id="s-show-relevante-reports"
-                                                         value="#{searchBacker.showRelevant}"
-                                                         styleClass="form-check-input"/>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="mb-2">
-                                <h:outputLabel for="s-show-severe-reports"
-                                               value="#{labels.show_severe_reports}"/>
-                                <h:selectBooleanCheckbox id="s-show-severe-reports" value="#{searchBacker.showSevere}"
-                                                         styleClass="form-check-input"/>
-                            </h:panelGroup>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-open-reports"
                                            value="#{labels.topic_show_open_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-open-reports" value="#{searchBacker.openReportShown}"/>
+                            <h:selectBooleanCheckbox id="s-show-open-reports"
+                                                     value="#{searchBacker.openReportShown}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-closed-reports"
                                            value="#{labels.topic_show_closed_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-closed-reports" value="#{searchBacker.closedReportShown}"/>
+                            <h:selectBooleanCheckbox id="s-show-closed-reports"
+                                                     value="#{searchBacker.closedReportShown}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-duplicate-reports"
                                            value="#{labels.show_duplicate}"/>
-                            <h:selectBooleanCheckbox id="s-show-duplicate-reports" value="#{searchBacker.duplicatesShown}"/>
+                            <h:selectBooleanCheckbox id="s-show-duplicate-reports"
+                                                     value="#{searchBacker.duplicatesShown}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-bug-reports"
                                            value="#{labels.show_bug_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-bug-reports" value="#{searchBacker.showBug}"/>
+                            <h:selectBooleanCheckbox id="s-show-bug-reports" value="#{searchBacker.showBug}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-hint-reports"
                                            value="#{labels.show_hint_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-hint-reports" value="#{searchBacker.showHint}"/>
+                            <h:selectBooleanCheckbox id="s-show-hint-reports" value="#{searchBacker.showHint}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-feature-reports"
                                            value="#{labels.show_feature_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-feature-reports" value="#{searchBacker.showFeature}"/>
+                            <h:selectBooleanCheckbox id="s-show-feature-reports" value="#{searchBacker.showFeature}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-minor-reports"
                                            value="#{labels.show_minor_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-minor-reports" value="#{searchBacker.showMinor}"/>
+                            <h:selectBooleanCheckbox id="s-show-minor-reports" value="#{searchBacker.showMinor}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-relevante-reports"
                                            value="#{labels.show_relevant_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-relevante-reports" value="#{searchBacker.showRelevant}"/>
+                            <h:selectBooleanCheckbox id="s-show-relevante-reports"
+                                                     value="#{searchBacker.showRelevant}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-severe-reports"
                                            value="#{labels.show_severe_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-severe-reports" value="#{searchBacker.showSevere}"/>
+                            <h:selectBooleanCheckbox id="s-show-severe-reports" value="#{searchBacker.showSevere}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
                     </h:panelGroup>
+
                     <h:panelGroup id="p-topic-filter" layout="block" styleClass="mb-2" rendered="#{searchBacker.tab == 'TOPIC'}">
                         <h:outputLabel id="ol-topic-filter"
                                        for="s-topic-filter"
