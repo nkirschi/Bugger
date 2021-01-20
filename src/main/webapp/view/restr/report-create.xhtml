@@ -3,8 +3,7 @@
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                lang="#{userSession.locale.language}"
-                xml:lang="#{userSession.locale.language}">
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
 
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
@@ -15,90 +14,136 @@
     <ui:param name="title" value="#{labels.create_report}"/>
 
     <ui:define name="content">
-        <h:form id="f-create-report"
-                enctype="multipart/form-data"
-                rendered="#{reportCreateBacker.session.user != null and !reportCreateBacker.isBanned()}">
-            <h:panelGrid columns="2">
-                <h:outputLabel id="o-title" for="it-title" value="#{labels.title}"/>
-                <h:inputText id="it-title" value="#{reportCreateBacker.report.title}"
-                             required="true"
-                             maxlength="#{C.LARGE_FIELD}"/>
-                <h:panelGroup/>
-                <h:message for="it-title"/>
+        <h:panelGroup id="p-profile-info" styleClass="d-flex p-2 justify-content-center align-items-center container">
+            <h:panelGroup layout="block" styleClass="row vw-90">
+                <h:form id="f-create-report" enctype="multipart/form-data"
+                        rendered="#{reportCreateBacker.session.user != null and !reportCreateBacker.isBanned()}">
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:outputLabel id="ol-title" for="it-title" value="#{labels.title}" styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:inputText id="it-title" value="#{reportCreateBacker.report.title}"
+                                         a:maxlength="#{C.LARGE_FIELD}" required="true" styleClass="form-control
+                                         #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
+                                         : 'is-invalid'}" a:placeholder="#{labels.title}">
+                                <f:validateLength maximum="#{C.LARGE_FIELD}"/>
+                            </h:inputText>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message id="m-title" for="it-title"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
 
-                <h:outputLabel id="o-type" for="s-type" value="#{labels.type}"/>
-                <h:selectOneMenu id="s-type" value="#{reportCreateBacker.report.type}">
-                    <f:selectItems value="#{reportCreateBacker.reportTypes}" var="type"
-                                   itemValue="#{type}" itemLabel="#{labels['report_type.'.concat(type)]}"/>
-                </h:selectOneMenu>
-                <h:panelGroup/>
-                <h:message for="s-type"/>
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="ol-type" for="s-type" value="#{labels.type}"
+                                               styleClass="form-label"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:selectOneMenu id="s-type" value="#{reportCreateBacker.report.type}"
+                                                     required="true" styleClass="form-select">
+                                        <f:selectItems value="#{reportCreateBacker.reportTypes}" var="type"
+                                                       itemValue="#{type}"
+                                                       itemLabel="#{labels['report_type.'.concat(type)]}"/>
+                                    </h:selectOneMenu>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-type" for="s-type"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="ol-severity" for="s-severity" value="#{labels.severity}"
+                                               styleClass="form-label"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:selectOneMenu id="s-severity" value="#{reportCreateBacker.report.severity}"
+                                                     required="true" styleClass="form-select">
+                                        <f:selectItems value="#{reportCreateBacker.reportSeverities}" var="severity"
+                                                       itemValue="#{severity}"
+                                                       itemLabel="#{labels['report_severity.'.concat(severity)]}"/>
+                                    </h:selectOneMenu>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-severity" for="s-severity"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
 
-                <h:outputLabel id="o-severity" for="s-severity" value="#{labels.severity}"/>
-                <h:selectOneMenu id="s-severity" value="#{reportCreateBacker.report.severity}">
-                    <f:selectItems value="#{reportCreateBacker.reportSeverities}" var="severity"
-                                   itemValue="#{severity}" itemLabel="#{labels['report_severity.'.concat(severity)]}"/>
-                </h:selectOneMenu>
-                <h:panelGroup/>
-                <h:message for="s-severity"/>
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:outputLabel id="ol-version" for="it-version" value="#{labels.version}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:inputText id="it-version" value="#{reportCreateBacker.report.version}"
+                                         a:maxlength="#{C.SMALL_FIELD}" required="true" styleClass="form-control
+                                         #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
+                                         : 'is-invalid'}" a:placeholder="#{labels.version}">
+                                <f:validateLength maximum="#{C.SMALL_FIELD}"/>
+                            </h:inputText>
+                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                <h:message id="m-version" for="it-version"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
 
-                <h:outputLabel id="o-version" for="it-version" value="#{labels.version}"/>
-                <h:inputText id="it-version" value="#{reportCreateBacker.report.version}" maxlength="#{C.SMALL_FIELD}"/>
-                <h:panelGroup/>
-                <h:message for="it-version"/>
-            </h:panelGrid>
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:outputLabel id="ol-post-content" for="it-post-content" value="#{labels.first_post_content}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:inputTextarea id="it-post-content" value="#{reportCreateBacker.firstPost.content}"
+                                             required="true" styleClass="form-control #{!facesContext.validationFailed
+                                             ? '' : component.valid ? 'is-valid' : 'is-invalid'}" rows="10"
+                                             a:maxlength="#{C.SMALL_AREA}">
+                                <f:validateLength maximum="#{C.SMALL_AREA}"/>
+                            </h:inputTextarea>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                            <h:message id="m-post-content" for="it-post-content"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
 
-            <h:panelGroup>
-                <h:outputLabel id="o-post-content" for="it-post-content" value="#{labels.first_post_content}"/>
-                <h:inputTextarea id="it-post-content" value="#{reportCreateBacker.firstPost.content}"
-                                 required="true" styleClass="form-control" rows="10">
-                    <f:validateLength maximum="#{C.SMALL_AREA}"/>
-                </h:inputTextarea>
-                <h:message for="it-post-content"/>
-            </h:panelGroup>
+                    <!-- TODO Adding attachment when post content is empty will trigger a "value is required" message and will
+                         not add attachment. -->
+                    <ul>
+                        <ui:repeat var="attachment" value="#{reportCreateBacker.attachments}">
+                            <li><h:outputText value="#{attachment.name}"/></li>
+                        </ui:repeat>
+                    </ul>
 
-            <!-- TODO Adding attachment when post content is empty will trigger a "value is required" message and will
-                 not add attachment. -->
-            <ul>
-                <ui:repeat var="attachment" value="#{reportCreateBacker.attachments}">
-                    <li><h:outputText value="#{attachment.name}"/></li>
-                </ui:repeat>
-            </ul>
+                    <h:panelGroup>
+                        <h:outputFormat id="first-post-attachments-info"
+                                        value="#{labels.post_attachments_info}"
+                                        styleClass="small form-text text-muted">
+                            <f:param value="#{applicationSettings.configuration.maxAttachmentsPerPost}"/>
+                            <f:param value="#{C.MAX_ATTACHMENT_FILESIZE}"/>
+                        </h:outputFormat>
+                    </h:panelGroup>
 
-            <h:panelGroup>
-                <h:outputFormat id="first-post-attachments-info"
-                                value="#{labels.post_attachments_info}"
-                                styleClass="small form-text text-muted">
-                    <f:param value="#{applicationSettings.configuration.maxAttachmentsPerPost}"/>
-                    <f:param value="#{C.MAX_ATTACHMENT_FILESIZE}"/>
-                </h:outputFormat>
-            </h:panelGroup>
-
-            <h:panelGroup styleClass="row my-3"
-                          layout="block"
-                          rendered="#{reportCreateBacker.attachments.size()
+                    <h:panelGroup styleClass="row my-3"
+                                  layout="block"
+                                  rendered="#{reportCreateBacker.attachments.size()
                                       lt applicationSettings.configuration.maxAttachmentsPerPost}">
-                <h:outputLabel id="o-attachment" for="it-attachment" value="#{labels.add_attachment}"/>
-                <h:inputFile id="it-attachment" value="#{reportCreateBacker.uploadedAttachment}">
-                    <f:validator validatorId="fileValidator"/>
-                </h:inputFile>
-                <h:panelGroup/>
-                <h:message for="it-attachment"/>
-                <h:commandButton id="cb-add-attachment"
-                                 value="#{labels.add_attachment}"
-                                 action="#{reportCreateBacker.saveAttachment}"
-                                 styleClass="btn btn-primary"/>
-            </h:panelGroup>
+                        <h:outputLabel id="ol-attachment" for="it-attachment" value="#{labels.add_attachment}"/>
+                        <h:inputFile id="it-attachment" value="#{reportCreateBacker.uploadedAttachment}">
+                            <f:validator validatorId="fileValidator"/>
+                        </h:inputFile>
+                        <h:panelGroup/>
+                        <h:message for="it-attachment"/>
+                        <h:commandButton id="cb-add-attachment"
+                                         value="#{labels.add_attachment}"
+                                         action="#{reportCreateBacker.saveAttachment}"
+                                         styleClass="btn btn-primary"/>
+                    </h:panelGroup>
 
-            <h:panelGroup styleClass="row my-3" layout="block">
-                <h:commandButton id="cb-remove-attachments"
-                                 value="#{labels.remove_all_attachments}"
-                                 action="#{reportCreateBacker.deleteAllAttachments}"
-                                 styleClass="btn btn-primary"/>
-            </h:panelGroup>
+                    <h:panelGroup styleClass="row my-3" layout="block">
+                        <h:commandButton id="cb-remove-attachments"
+                                         value="#{labels.remove_all_attachments}"
+                                         action="#{reportCreateBacker.deleteAllAttachments}"
+                                         styleClass="btn btn-primary"/>
+                    </h:panelGroup>
 
-            <h:commandButton value="#{labels.create}" action="#{reportCreateBacker.create}"
-                             styleClass="btn btn-primary"/>
-        </h:form>
+                    <h:commandButton value="#{labels.create}" action="#{reportCreateBacker.create}"
+                                     styleClass="btn btn-primary"/>
+                </h:form>
+            </h:panelGroup>
+        </h:panelGroup>
     </ui:define>
 </ui:composition>

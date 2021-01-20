@@ -1,0 +1,128 @@
+/* Define variables for the primary colors to use */
+$lightBlack: #1a1a1a
+$darkGray: #2b2b2b
+$lightGray: #666666
+$textColor: white
+$red: red
+$boxShadow: 0 1px 1px darkred inset, 0 0 8px red !important
+
+/* Template */
+body
+  background-color: $lightGray
+
+  a
+    color: $textColor
+
+  a:hover
+    color: $red
+
+#p-header
+  background-color: $darkGray
+  color: $textColor
+
+  #ot-comp-name
+    color: $textColor
+
+#p-footer
+  background: $darkGray
+  color: $textColor
+
+#p-content
+  background-color: $lightBlack
+  color: $textColor
+
+#p-profile-menu
+  background-color: $lightGray
+  color: $textColor
+
+/* Bootstrap buttons */
+.btn-outline-primary
+  border-color: $textColor
+  color: $textColor
+
+  &:hover
+    background-color: $textColor
+    border-color: $lightBlack
+    color: $lightBlack
+
+  &:active
+    background-color: $textColor
+    color: $lightBlack
+
+.btn-primary
+  border-color: $textColor
+  background-color: $textColor
+  color: $lightBlack !important
+
+  &:hover
+    background-color: $lightBlack
+    border-color: $red
+    color: $red !important
+
+  &:active
+    background-color: $lightBlack
+    color: $red
+
+  &:focus
+    background-color: $lightBlack
+    color: $red
+
+.btn-primary:focus, .btn-primary:active, .btn-link:focus, .btn-link:active, .btn-outline-primary:focus,
+.btn-outline-primary:active
+  border-color: $red !important
+  box-shadow: $boxShadow
+
+.btn-link
+  background-color: $lightBlack
+  color: $textColor
+
+  &:hover
+    color: $red
+
+/* Popup dialogs */
+.dialog
+  background-color: $lightGray
+  color: $textColor
+
+/* Voting buttons */
+.vote-cast
+  background-color: $textColor
+  color: $lightBlack
+
+.vote-not-cast
+  background-color: gray
+
+/* Form input fields focus */
+.form-check-input:checked
+  background-color: $red
+  border-color: darkred
+
+select:focus
+  border-color: $red
+  box-shadow: $boxShadow
+
+.form-control:focus, .form-check-input:focus, .form-select:focus
+  border-color: $red
+  box-shadow: $boxShadow
+
+/* Other elements */
+td
+  color: $textColor
+
+.card
+  background-color: $lightGray
+
+.alert-success td, .alert-info td, .alert-warning td
+  color: $lightBlack !important
+
+.alert-success
+  background-color: #3c763d
+  border-color: $lightBlack
+
+.alert-danger td
+  color: $red !important
+
+.alert-danger
+  border-color: $red
+  background-color: $textColor
+  box-shadow: $boxShadow

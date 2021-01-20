@@ -2,7 +2,8 @@
                 xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
-                xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
 
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
@@ -16,58 +17,118 @@
         <h:panelGroup id="p-confirm" layout="block" styleClass="dialog"
                       rendered="#{reportEditBacker.displayConfirmDialog}">
             <h:form id="f-confirm-dialogs">
-                <h:outputText value="#{labels.report_edit_move_warning}"
-                              rendered="#{not reportEditBacker.displayNoModerationWarning}"/>
-                <h:outputText value="#{labels.report_edit_no_moderation_warning}"
-                              rendered="#{reportEditBacker.displayNoModerationWarning}"/>
-                <h:commandButton value="#{labels.report_edit_confirm}" action="#{reportEditBacker.saveChanges}">
-                    <f:param name="id" value="#{reportBacker.report.id}"/>
-                </h:commandButton>
-                <h:commandButton value="#{labels.report_edit_cancel}" action="#{reportEditBacker.closeConfirmDialog}"/>
+                <h:outputText id="ot-really-move-report" styleClass="h2" value="#{labels.report_edit_move}"/>
+                <h:panelGroup layout="block" styleClass="mb-3">
+                    <h:outputText value="#{labels.report_edit_move_warning}"
+                                  rendered="#{not reportEditBacker.displayNoModerationWarning}"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="mb-3">
+                    <h:outputText value="#{labels.report_edit_no_moderation_warning}"
+                                  rendered="#{reportEditBacker.displayNoModerationWarning}"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
+                    <h:commandButton value="#{labels.report_edit_confirm}" action="#{reportEditBacker.saveChanges}"
+                                     styleClass="btn btn-primary">
+                        <f:param name="id" value="#{reportBacker.report.id}"/>
+                    </h:commandButton>
+                    <h:commandButton value="#{labels.report_edit_cancel}"
+                                     action="#{reportEditBacker.closeConfirmDialog}" styleClass="btn btn-secondary"/>
+                </h:panelGroup>
             </h:form>
         </h:panelGroup>
     </ui:define>
 
     <ui:define name="content">
-        <h:form id="f-report-edit"
-                enctype="multipart/form-data"
-                rendered="#{reportEditBacker.privileged}">
-            <h:panelGrid columns="2">
-                <h:outputLabel id="o-title" for="it-title" value="#{labels.report_title}"/>
-                <h:inputText id="it-title" value="#{reportEditBacker.report.title}" maxlength="#{C.LARGE_FIELD}"
-                             required="true"/>
-                <h:panelGroup/>
-                <h:message for="it-title"/>
+        <h:panelGroup id="p-profile-info" styleClass="d-flex p-2 justify-content-center align-items-center container">
+            <h:panelGroup layout="block" styleClass="row vw-90">
+                <h:form id="f-report-edit" enctype="multipart/form-data" rendered="#{reportEditBacker.privileged}">
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:outputLabel id="ol-title" for="it-title" value="#{labels.report_title}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:inputText id="it-title" value="#{reportEditBacker.report.title}"
+                                         a:maxlength="#{C.LARGE_FIELD}" required="true" styleClass="form-control
+                                         #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
+                                         : 'is-invalid'}">
+                                <f:validateLength maximum="#{C.LARGE_FIELD}"/>
+                            </h:inputText>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                            <h:message id="m-title" for="it-title"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
 
-                <h:outputLabel id="o-type" for="s-type" value="#{labels.report_type}"/>
-                <h:selectOneMenu id="s-type" value="#{reportEditBacker.report.type}">
-                    <f:selectItems value="#{reportEditBacker.reportTypes}" var="type"
-                                   itemValue="#{type}" itemLabel="#{labels['report_type.'.concat(type)]}"/>
-                </h:selectOneMenu>
-                <h:panelGroup/>
-                <h:message for="s-type"/>
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="ol-type" for="s-type" value="#{labels.report_type}"
+                                               styleClass="form-label"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:selectOneMenu id="s-type" value="#{reportEditBacker.report.type}" required="true"
+                                                     styleClass="form-select">
+                                        <f:selectItems value="#{reportEditBacker.reportTypes}" var="type"
+                                                       itemValue="#{type}"
+                                                       itemLabel="#{labels['report_type.'.concat(type)]}"/>
+                                    </h:selectOneMenu>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-type" for="s-type"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="ol-severity" for="s-severity" value="#{labels.report_severity}"
+                                               styleClass="form-label"/>
+                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                    <h:selectOneMenu id="s-severity" value="#{reportEditBacker.report.severity}"
+                                                     required="true" styleClass="form-select">
+                                        <f:selectItems value="#{reportEditBacker.reportSeverities}" var="severity"
+                                                       itemValue="#{severity}"
+                                                       itemLabel="#{labels['report_severity.'.concat(severity)]}"/>
+                                    </h:selectOneMenu>
+                                    <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                        <h:message id="m-severity" for="s-severity"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
 
-                <h:outputLabel id="o-severity" for="s-severity" value="#{labels.report_severity}"/>
-                <h:selectOneMenu id="s-severity" value="#{reportEditBacker.report.severity}">
-                    <f:selectItems value="#{reportEditBacker.reportSeverities}" var="severity"
-                                   itemValue="#{severity}" itemLabel="#{labels['report_severity.'.concat(severity)]}"/>
-                </h:selectOneMenu>
-                <h:panelGroup/>
-                <h:message for="s-severity"/>
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:outputLabel id="ol-version" for="it-version" value="#{labels.report_version}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:inputText id="it-version" a:maxlength="#{C.SMALL_FIELD}"
+                                         value="#{reportEditBacker.report.version}"
+                                         styleClass="form-control #{!facesContext.validationFailed ? ''
+                                         : component.valid ? 'is-valid' : 'is-invalid'}">
+                                <f:validateLength maximum="#{C.SMALL_FIELD}"/>
+                            </h:inputText>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                            <h:message id="m-version" for="it-version"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
 
-                <h:outputLabel id="o-version" for="it-version" value="#{labels.report_version}"/>
-                <h:inputText id="it-version" maxlength="#{C.SMALL_FIELD}" value="#{reportEditBacker.report.version}"/>
-                <h:panelGroup/>
-                <h:message for="it-version"/>
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                        <h:outputLabel id="ol-topic" for="it-topic" value="#{labels.report_topic}"
+                                       styleClass="form-label"/>
+                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                            <h:inputText id="it-topic" value="#{reportEditBacker.destinationID}"
+                                         a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
+                                         #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
+                                         : 'is-invalid'}">
+                                <f:validateLength maximum="#{C.SMALL_FIELD}"/>
+                            </h:inputText>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                            <h:message id="m-topic" for="it-topic"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
 
-                <h:outputLabel id="o-topic" for="it-topic" value="#{labels.report_topic}"/>
-                <h:inputText id="it-topic" value="#{reportEditBacker.destinationID}"/>
-                <h:panelGroup/>
-                <h:message for="it-topic"/>
-            </h:panelGrid>
-
-            <h:commandButton value="#{labels.report_edit_submit}" action="#{reportEditBacker.saveChangesWithConfirm}"
-                             styleClass="btn btn-primary"/>
-        </h:form>
+                    <h:commandButton value="#{labels.report_edit_submit}"
+                                     action="#{reportEditBacker.saveChangesWithConfirm}" styleClass="btn btn-primary"/>
+                </h:form>
+            </h:panelGroup>
+        </h:panelGroup>
     </ui:define>
 </ui:composition>
