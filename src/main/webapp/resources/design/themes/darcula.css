@@ -53,18 +53,10 @@ body a:hover {
   background-color: white;
   color: #1a1a1a !important;
 }
-.btn-primary:hover {
+.btn-primary:hover, .btn-primary:active, .btn-primary:focus {
   background-color: #1a1a1a;
   border-color: red;
   color: red !important;
-}
-.btn-primary:active {
-  background-color: #1a1a1a;
-  color: red;
-}
-.btn-primary:focus {
-  background-color: #1a1a1a;
-  color: red;
 }
 
 .btn-primary:focus, .btn-primary:active, .btn-link:focus, .btn-link:active, .btn-outline-primary:focus,

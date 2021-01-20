@@ -1,0 +1,130 @@
+/* Define variables for the primary colors to use */
+$gleaming: #fefcd5
+$yellow: #fccd38
+$orange: #fc990f
+$darkOrange: #ef5e01
+$red: #cf0107
+$darkRed: #740200
+$boxShadow: 0 1px 1px $orange inset, 0 0 8px $gleaming !important
+
+/* Template */
+body
+  background: $orange
+
+#p-header
+  background: $darkRed
+  color: $orange
+
+  #ot-comp-name
+    color: $orange
+
+#p-footer
+  background: $darkRed
+  color: $orange
+
+  a
+    color: $orange
+
+  a:hover
+    color: $gleaming
+
+#p-content
+  background-color: $gleaming
+  color: $darkOrange
+
+  a
+    color: $orange
+
+  a:hover
+    color: $darkOrange
+
+#p-profile-menu
+  background-color: $yellow
+  color: $darkOrange
+
+  a
+    color: $darkRed
+
+  a:hover
+    color: $red
+
+/* Bootstrap buttons */
+.btn-outline-primary
+  border-color: $gleaming
+  color: $gleaming
+
+  &:hover
+    background-color: $gleaming
+    border-color: $darkOrange
+    color: $darkOrange
+
+  &:active
+    background-color: $gleaming
+    color: $darkOrange
+
+.btn-primary
+  border-color: $darkOrange
+  background-color: $orange
+  color: $darkOrange !important
+
+  &:hover, &:active, &:focus
+    background-color: $darkRed
+    border-color: $red
+    color: $red !important
+
+.btn-primary:focus, .btn-primary:active, .btn-secondary:focus, .btn-secondary:active, .btn-link:focus, .btn-link:active,
+.btn-outline-primary:focus, .btn-outline-primary:active
+  border-color: $darkOrange !important
+  box-shadow: $boxShadow
+
+.btn-secondary
+  border-color: white
+  color: white
+  background-color: $yellow
+
+  &:hover, &:active, &:focus
+    background-color: $darkOrange
+    color: $gleaming !important
+
+.btn-link
+  background-color: $gleaming
+  color: $orange
+
+  &:hover
+    color: $darkOrange
+
+/* Popup dialogs */
+.dialog
+  background-color: $gleaming
+  color: $darkOrange
+
+/* Voting buttons */
+.vote-cast
+  background-color: $darkOrange
+  color: $gleaming
+
+.vote-not-cast
+  background-color: gray
+
+/* Form input fields focus */
+.form-check-input:checked
+  background-color: $orange
+  border-color: $darkOrange
+
+select:focus
+  border-color: $darkOrange
+  box-shadow: $boxShadow
+
+.form-control:focus, .form-check-input:focus, .form-select:focus
+  border-color: $darkOrange
+  box-shadow: $boxShadow
+
+/* Other elements */
+td, th
+  color: $darkOrange
+
+a.search:hover
+  color: $darkOrange
+
+.alert-success td
+  color: #3c763d !important
