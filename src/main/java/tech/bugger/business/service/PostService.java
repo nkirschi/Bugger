@@ -9,7 +9,6 @@ import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
@@ -99,9 +98,10 @@ public class PostService {
      * NotificationService}.
      *
      * @param post The post to update.
+     * @param report The report the {@code post} is in.
      * @return {@code true} iff updating the post succeeded.
      */
-    public boolean updatePost(final Post post) {
+    public boolean updatePost(final Post post, final Report report) {
         try (Transaction tx = transactionManager.begin()) {
             post.getAuthorship().setModifiedDate(OffsetDateTime.now());
             tx.newPostGateway().update(post);
@@ -136,10 +136,10 @@ public class PostService {
         Notification notification = new Notification();
         notification.setType(Notification.Type.EDITED_POST);
         notification.setActuatorID(post.getAuthorship().getModifier().getId());
-        notification.setTopicID(post.getReport().get().getTopicID());
-        notification.setReportID(post.getReport().get().getId());
+        notification.setTopicID(report.getTopicID());
+        notification.setReportID(report.getId());
         notification.setPostID(post.getId());
-        notification.setReportTitle(post.getReport().get().getTitle());
+        notification.setReportTitle(report.getTitle());
         notificationService.createNotification(notification);
         return true;
     }
@@ -152,7 +152,7 @@ public class PostService {
      */
     public boolean isAttachmentNameValid(final String name) {
         return Arrays.stream(applicationSettings.getConfiguration().getAllowedFileExtensions().split(","))
-                .anyMatch(suffix -> name.endsWith(suffix.trim()));
+                     .anyMatch(suffix -> name.endsWith(suffix.trim()));
     }
 
     /**
@@ -166,7 +166,7 @@ public class PostService {
         if (attachments.size() > maxAttachments) {
             log.info("Trying to create post with too many attachments.");
             String message = MessageFormat.format(messagesBundle.getString("too_many_attachments"),
-                    maxAttachments);
+                                                  maxAttachments);
             feedbackEvent.fire(new Feedback(message, Feedback.Type.ERROR));
             return false;
         }
@@ -174,14 +174,14 @@ public class PostService {
         if (attachments.size() != attachments.stream().map(Attachment::getName).distinct().count()) {
             log.info("Trying to create post where attachment names are not unique.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("attachment_names_not_unique"),
-                    Feedback.Type.ERROR));
+                                            Feedback.Type.ERROR));
             return false;
         }
 
         if (!attachments.stream().map(Attachment::getName).allMatch(this::isAttachmentNameValid)) {
             log.info("Trying to create post with invalid attachment name.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("attachment_names_invalid"),
-                    Feedback.Type.ERROR));
+                                            Feedback.Type.ERROR));
             return false;
         }
 
@@ -210,10 +210,11 @@ public class PostService {
      * Creates a new post for an existing report and notifies users about the creation. Notifications are handled by the
      * {@code NotificationService}.
      *
-     * @param post The post to be created.
+     * @param post   The post to be created.
+     * @param report The report the {@code post} shall be in.
      * @return {@code true} iff creating the post succeeded.
      */
-    public boolean createPost(final Post post) {
+    public boolean createPost(final Post post, final Report report) {
         boolean success;
         try (Transaction tx = transactionManager.begin()) {
             success = createPostWithTransaction(post, tx);
@@ -231,10 +232,10 @@ public class PostService {
             Notification notification = new Notification();
             notification.setType(Notification.Type.NEW_POST);
             notification.setActuatorID(post.getAuthorship().getCreator().getId());
-            notification.setTopicID(post.getReport().get().getTopicID());
-            notification.setReportID(post.getReport().get().getId());
+            notification.setTopicID(report.getTopicID());
+            notification.setReportID(report.getId());
             notification.setPostID(post.getId());
-            notification.setReportTitle(post.getReport().get().getTitle());
+            notification.setReportTitle(report.getTitle());
             notificationService.createNotification(notification);
         }
         return success;
@@ -267,7 +268,7 @@ public class PostService {
         attachment.setName(part.getSubmittedFileName());
         attachment.setContent(content);
         attachment.setMimetype(part.getContentType());
-        attachment.setPost(new Lazy<>(post));
+        attachment.setPost(post.getId());
 
         List<Attachment> attachments = post.getAttachments();
         attachments.add(attachment);
@@ -279,16 +280,17 @@ public class PostService {
     }
 
     /**
-     * Irreversibly deletes a post and its attachments.
+     * Irreversibly deletes a post and its attachments. If {@code post} happens to be the last in its {@code report},
+     * then the latter will be deleted as well.
      *
      * @param post The post to be deleted.
+     * @param report The report the {@code post} is in.
      */
-    public void deletePost(final Post post) {
+    public void deletePost(final Post post, final Report report) {
         if (post == null) {
             log.error("Cannot delete post null.");
             throw new IllegalArgumentException("Post cannot be null.");
         }
-        Report report = post.getReport().get();
         try (Transaction tx = transactionManager.begin()) {
             Post firstPost = tx.newPostGateway().getFirstPost(report);
             if (post.equals(firstPost)) {
@@ -399,22 +401,21 @@ public class PostService {
 
     /**
      * Checks if a user is allowed to modify (edit or delete) a certain post. Administrators can modify any post,
-     * moderators can modify all posts within their moderated topic, regular users can modify their own posts as
-     * long as they have not been banned from the topic the post belongs to. Anonymous users cannot modify any
-     * posts.
+     * moderators can modify all posts within their moderated topic, regular users can modify their own posts as long as
+     * they have not been banned from the topic the post belongs to. Anonymous users cannot modify any posts.
      *
      * @param user The user in question.
      * @param post The post in question.
+     * @param report The report of the post in question.
      * @return {@code true} iff the user is allowed to modify the post.
      */
-    public boolean isPrivileged(final User user, final Post post) {
+    public boolean isPrivileged(final User user, final Post post, final Report report) {
         if (user == null || post == null) {
             return false;
         } else if (user.isAdministrator()) {
             return true;
         }
 
-        Report report = post.getReport() != null ? post.getReport().get() : null;
         if (report == null || report.getTopicID() == null) {
             return false;
         }
@@ -432,11 +433,11 @@ public class PostService {
             tx.commit();
         } catch (NotFoundException e) {
             log.error("Unable to find an answer, if the user with id " + user.getId() + " is privileged for the "
-                    + "post with id " + post.getId(), e);
+                              + "post with id " + post.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while trying to determine if the user with id " + user.getId() + " is privileged for "
-                    + "the post with id " + post.getId(), e);
+                              + "the post with id " + post.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
         }
         return false;

@@ -1,15 +1,6 @@
 package tech.bugger.control.backing;
 
 import com.sun.faces.context.RequestParameterMap;
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.OffsetDateTime;
-import java.util.Locale;
-import javax.faces.application.Application;
-import javax.faces.application.NavigationHandler;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,10 +11,24 @@ import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
+
+import javax.faces.application.Application;
+import javax.faces.application.NavigationHandler;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(LogExtension.class)
 public class LoginBackerTest {
@@ -60,8 +65,9 @@ public class LoginBackerTest {
     @BeforeEach
     public void setup() {
         user = new User(12345, "Helgi", "v3rys3cur3", "salt", "algorithm", "helga@web.de", "Helga", "Brötchen",
-                new byte[0], null, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= "
-                + "endorsement", Locale.GERMAN, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, false);
+                        new byte[0], null, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= "
+                                + "endorsement", Locale.GERMAN, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(),
+                        null, false);
         MockitoAnnotations.openMocks(this);
         loginBacker = new LoginBacker(authenticationService, session, fctx);
         loginBacker.setUsername(user.getUsername());

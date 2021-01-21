@@ -1,14 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.lang.reflect.Field;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,12 +16,26 @@ import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.lang.reflect.Field;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
@@ -68,11 +73,12 @@ public class ReportBackerTest {
     @BeforeEach
     public void setUp() {
         reportBacker = new ReportBacker(settings, topicService, reportService, postService, session, fctx);
-        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
-                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
-                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
+                        "User",
+                        new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
+                        Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         report = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(OffsetDateTime.class), null, null, false, 1);
+                            mock(OffsetDateTime.class), null, null, false, 1);
     }
 
     @Test
@@ -162,7 +168,7 @@ public class ReportBackerTest {
         reportBacker.setDuplicateOfID(null);
         reportBacker.markDuplicate();
         assertAll(() -> verify(reportService, never()).markDuplicate(any(), anyInt()),
-                () -> verify(reportService, never()).close(any()));
+                  () -> verify(reportService, never()).close(any()));
     }
 
     @Test
@@ -215,7 +221,7 @@ public class ReportBackerTest {
         reportBacker.setDuplicateOfID(100);
         reportBacker.unmarkDuplicate();
         assertAll(() -> assertNotNull(reportBacker.getDuplicateOfID()),
-                () -> verify(reportService, never()).unmarkDuplicate(any()));
+                  () -> verify(reportService, never()).unmarkDuplicate(any()));
     }
 
     @Test
@@ -254,11 +260,11 @@ public class ReportBackerTest {
         reportBacker.init();
 
         List<Report> paginatedList = StreamSupport.stream(reportBacker.getDuplicates().spliterator(), false)
-                .collect(Collectors.toList());
+                                                  .collect(Collectors.toList());
         assertAll(() -> assertEquals(duplicates, paginatedList),
-                () -> assertEquals(duplicates.size(), reportBacker.getDuplicates().getSelection().getTotalSize()),
-                () -> verify(reportService).getNumberOfDuplicates(any()),
-                () -> verify(reportService).getDuplicatesFor(any(), any()));
+                  () -> assertEquals(duplicates.size(), reportBacker.getDuplicates().getSelection().getTotalSize()),
+                  () -> verify(reportService).getNumberOfDuplicates(any()),
+                  () -> verify(reportService).getDuplicatesFor(any(), any()));
     }
 
 }

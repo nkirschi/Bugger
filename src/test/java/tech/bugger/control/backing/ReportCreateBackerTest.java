@@ -18,7 +18,6 @@ import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 
 import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
@@ -82,12 +81,13 @@ public class ReportCreateBackerTest {
     @BeforeEach
     public void setUp() throws Exception {
         reportCreateBacker = new ReportCreateBacker(applicationSettings, topicService, reportService, postService,
-                session, ectx, feedbackEvent);
+                                                    session, ectx, feedbackEvent);
 
         List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
-        testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
-        testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(OffsetDateTime.class), null, null, false, 1);
+        testFirstPost = new Post(100, "Some content", 42, mock(Authorship.class), attachments);
+        testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
+                                mock(Authorship.class),
+                                mock(OffsetDateTime.class), null, null, false, 1);
         reportCreateBacker.setReport(testReport);
         reportCreateBacker.setFirstPost(testFirstPost);
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
@@ -110,7 +110,7 @@ public class ReportCreateBackerTest {
         doReturn(true).when(topicService).canCreateReportIn(any(), any());
         reportCreateBacker.init();
         assertEquals(1234, reportCreateBacker.getReport().getTopicID());
-        assertEquals(reportCreateBacker.getReport(), reportCreateBacker.getFirstPost().getReport().get());
+        assertEquals(reportCreateBacker.getReport().getId(), reportCreateBacker.getFirstPost().getReport());
     }
 
     @Test

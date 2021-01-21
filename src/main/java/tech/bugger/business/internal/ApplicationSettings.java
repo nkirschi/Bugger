@@ -8,18 +8,13 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * Cache of application-wide settings.
  */
 @ApplicationScoped
 @Named
-public class ApplicationSettings implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 215148767008692866L;
+public class ApplicationSettings {
 
     /**
      * The cached application configuration.
@@ -34,14 +29,7 @@ public class ApplicationSettings implements Serializable {
     /**
      * Settings service providing logic.
      */
-    private transient SettingsService settingsService;
-
-    /**
-     * Constructs a new application settings cache for proxying.
-     */
-    public ApplicationSettings() {
-        // default constructor for CDI
-    }
+    private final SettingsService settingsService;
 
     /**
      * Constructs a new application settings cache with the necessary dependencies.

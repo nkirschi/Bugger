@@ -8,8 +8,6 @@ import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Post;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
@@ -18,13 +16,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doReturn;
@@ -53,7 +47,7 @@ public class AttachmentDBGatewayTest {
 
         post = new Post(100, "", null, null, null);
         byte[] content = "Some random byte string".getBytes();
-        attachment = new Attachment(10000, "test.txt", content, "text/plain", new Lazy<>(post));
+        attachment = new Attachment(10000, "test.txt", content, "text/plain", post.getId());
     }
 
     @AfterEach
@@ -105,7 +99,7 @@ public class AttachmentDBGatewayTest {
     @Test
     public void testUpdate() throws Exception {
         Attachment attachment = find(1);
-        attachment.setPost(new Lazy<>(post));
+        attachment.setPost(post.getId());
         attachment.setName("a-different-file-name.txt");
         gateway.update(attachment);
         assertEquals(attachment, find(attachment.getId()));
@@ -152,8 +146,8 @@ public class AttachmentDBGatewayTest {
 
         // Check if attachment is equal to attachment from test data.
         assertAll(() -> assertEquals(1, attachment.getId()),
-                () -> assertEquals("testattachment.txt", attachment.getName()),
-                () -> assertEquals("text/plain", attachment.getMimetype())
+                  () -> assertEquals("testattachment.txt", attachment.getName()),
+                  () -> assertEquals("text/plain", attachment.getMimetype())
         );
     }
 
@@ -193,11 +187,11 @@ public class AttachmentDBGatewayTest {
 
         // Check if attachments are equal to attachments from test data.
         assertAll(() -> assertEquals(1, attachments.get(0).getId()),
-                () -> assertEquals("testattachment.txt", attachments.get(0).getName()),
-                () -> assertEquals("text/plain", attachments.get(0).getMimetype()),
-                () -> assertEquals(2, attachments.get(1).getId()),
-                () -> assertEquals("another-attachment.png", attachments.get(1).getName()),
-                () -> assertEquals("image/png", attachments.get(1).getMimetype())
+                  () -> assertEquals("testattachment.txt", attachments.get(0).getName()),
+                  () -> assertEquals("text/plain", attachments.get(0).getMimetype()),
+                  () -> assertEquals(2, attachments.get(1).getId()),
+                  () -> assertEquals("another-attachment.png", attachments.get(1).getName()),
+                  () -> assertEquals("image/png", attachments.get(1).getMimetype())
         );
     }
 
