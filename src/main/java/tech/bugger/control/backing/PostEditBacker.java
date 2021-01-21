@@ -9,7 +9,6 @@ import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
@@ -129,7 +128,7 @@ public class PostEditBacker implements Serializable {
                 return;
             }
             Authorship authorship = new Authorship(user, null, user, null);
-            post = new Post(0, "", new Lazy<>(report), authorship, attachments);
+            post = new Post(0, "", report.getId(), authorship, attachments);
         } else {
             Integer postID = parseRequestParameter("p");
             if (postID == null) {
@@ -137,15 +136,20 @@ public class PostEditBacker implements Serializable {
                 return;
             }
             post = postService.getPostByID(postID);
-            if (post == null || !postService.isPrivileged(user, post)) {
+            if (post == null) {
                 redirectToErrorPage();
                 return;
             }
-            report = post.getReport() != null ? post.getReport().get() : null;
+            report = reportService.getReportByID(post.getReport());
             if (report == null) {
                 redirectToErrorPage();
                 return;
             }
+            if (!postService.isPrivileged(user, post, report)) {
+                redirectToErrorPage();
+                return;
+            }
+
             attachments = post.getAttachments();
             post.getAuthorship().setModifier(user);
         }
@@ -156,7 +160,7 @@ public class PostEditBacker implements Serializable {
      * in its report page.
      */
     public void saveChanges() {
-        boolean success = create ? postService.createPost(post) : postService.updatePost(post);
+        boolean success = create ? postService.createPost(post, report) : postService.updatePost(post, report);
         if (success) {
             ExternalContext ectx = fctx.getExternalContext();
             try {

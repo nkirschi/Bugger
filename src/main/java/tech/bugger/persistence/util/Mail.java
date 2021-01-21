@@ -173,7 +173,7 @@ public final class Mail {
      * @param subject The subject of the e-mail.
      * @param content The content fo the e-mail.
      */
-    public Mail(final Collection<String> to, final Collection<String> cc, final Collection<String> bcc,
+    private Mail(final Collection<String> to, final Collection<String> cc, final Collection<String> bcc,
                 final Collection<String> replyto, final String subject, final String content) {
         this.to = to;
         this.cc = cc;

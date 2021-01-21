@@ -1,14 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,13 +9,26 @@ import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
@@ -45,9 +49,10 @@ class TopicDBGatewayTest {
         connection = DBExtension.getConnection();
         topicGateway = new TopicDBGateway(connection);
         userGateway = new UserDBGateway(connection);
-        user = new User(null, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
-                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
-                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+        user = new User(null, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
+                        "User",
+                        new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
+                        Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic1 = new Topic(null, "topic1", "description");
         topic2 = new Topic(null, "topic2", "description");
     }
@@ -64,15 +69,16 @@ class TopicDBGatewayTest {
     private void addTopics() throws Exception {
         try (Statement stmt = connection.createStatement()) {
             stmt.execute("DO\n" +
-                    "$$\n" +
-                    "BEGIN\n" +
-                    "FOR i IN 1.." + numberOfTopics + " LOOP\n" +
-                    "    INSERT INTO topic (title, description) VALUES\n" +
-                    "        (CONCAT('testtopic', CURRVAL('topic_id_seq')), CONCAT('Description for testtopic', CURRVAL('topic_id_seq')));\n" +
-                    "END LOOP;\n" +
-                    "END;\n" +
-                    "$$\n" +
-                    ";\n");
+                                 "$$\n" +
+                                 "BEGIN\n" +
+                                 "FOR i IN 1.." + numberOfTopics + " LOOP\n" +
+                                 "    INSERT INTO topic (title, description) VALUES\n" +
+                                 "        (CONCAT('testtopic', CURRVAL('topic_id_seq')), CONCAT('Description for "
+                                 + "testtopic', CURRVAL('topic_id_seq')));\n" +
+                                 "END LOOP;\n" +
+                                 "END;\n" +
+                                 "$$\n" +
+                                 ";\n");
         }
     }
 
@@ -324,7 +330,7 @@ class TopicDBGatewayTest {
         topicGateway.createTopic(topic1);
         user.setId(10);
         assertThrows(NotFoundException.class,
-                () -> topicGateway.promoteModerator(topic1, user)
+                     () -> topicGateway.promoteModerator(topic1, user)
         );
     }
 
@@ -337,7 +343,7 @@ class TopicDBGatewayTest {
         doThrow(mockException).when(connectionSpy).prepareStatement(any());
         when(mockException.getSQLState()).thenReturn("");
         assertThrows(StoreException.class,
-                () -> new TopicDBGateway(connectionSpy).promoteModerator(topic1, user)
+                     () -> new TopicDBGateway(connectionSpy).promoteModerator(topic1, user)
         );
     }
 
@@ -346,7 +352,7 @@ class TopicDBGatewayTest {
         userGateway.createUser(user);
         topic1.setId(1);
         assertThrows(NotFoundException.class,
-                () -> topicGateway.promoteModerator(topic1, user)
+                     () -> topicGateway.promoteModerator(topic1, user)
         );
     }
 
@@ -354,7 +360,7 @@ class TopicDBGatewayTest {
     public void testPromoteModeratorUserIdNull() {
         topic1.setId(1);
         assertThrows(IllegalArgumentException.class,
-                () -> topicGateway.promoteModerator(topic1, user)
+                     () -> topicGateway.promoteModerator(topic1, user)
         );
     }
 
@@ -362,7 +368,7 @@ class TopicDBGatewayTest {
     public void testPromoteModeratorTopicIdNull() {
         user.setId(1);
         assertThrows(IllegalArgumentException.class,
-                () -> topicGateway.promoteModerator(topic1, user)
+                     () -> topicGateway.promoteModerator(topic1, user)
         );
     }
 
@@ -380,7 +386,7 @@ class TopicDBGatewayTest {
         userGateway.createUser(user);
         topicGateway.createTopic(topic1);
         assertThrows(NotFoundException.class,
-                () -> topicGateway.demoteModerator(topic1, user)
+                     () -> topicGateway.demoteModerator(topic1, user)
         );
     }
 
@@ -388,7 +394,7 @@ class TopicDBGatewayTest {
     public void testDemoteModeratorTopicIdNull() {
         userGateway.createUser(user);
         assertThrows(IllegalArgumentException.class,
-                () -> topicGateway.demoteModerator(topic1, user)
+                     () -> topicGateway.demoteModerator(topic1, user)
         );
     }
 
@@ -396,7 +402,7 @@ class TopicDBGatewayTest {
     public void testDemoteModeratorUserIdNull() {
         topicGateway.createTopic(topic1);
         assertThrows(IllegalArgumentException.class,
-                () -> topicGateway.demoteModerator(topic1, user)
+                     () -> topicGateway.demoteModerator(topic1, user)
         );
     }
 
@@ -407,7 +413,7 @@ class TopicDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new TopicDBGateway(connectionSpy).demoteModerator(topic1, user)
+                     () -> new TopicDBGateway(connectionSpy).demoteModerator(topic1, user)
         );
     }
 
@@ -435,14 +441,14 @@ class TopicDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new TopicDBGateway(connectionSpy).countModerators(topic1)
+                     () -> new TopicDBGateway(connectionSpy).countModerators(topic1)
         );
     }
 
     @Test
     public void testCountModeratorsTopicIdNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> topicGateway.countModerators(topic1)
+                     () -> topicGateway.countModerators(topic1)
         );
     }
 
@@ -476,7 +482,7 @@ class TopicDBGatewayTest {
     public void testGetModeratedTopicsSelectionNull() {
         user.setId(1);
         assertThrows(IllegalArgumentException.class,
-                () -> topicGateway.getModeratedTopics(user, null)
+                     () -> topicGateway.getModeratedTopics(user, null)
         );
     }
 
@@ -484,7 +490,7 @@ class TopicDBGatewayTest {
     public void testGetModeratedTopicsUserIdNull() {
         Selection selection = new Selection(2, 0, Selection.PageSize.SMALL, "title", true);
         assertThrows(IllegalArgumentException.class,
-                () -> topicGateway.getModeratedTopics(user, selection)
+                     () -> topicGateway.getModeratedTopics(user, selection)
         );
     }
 
@@ -493,7 +499,7 @@ class TopicDBGatewayTest {
         user.setId(1);
         Selection selection = new Selection(2, 0, Selection.PageSize.SMALL, "", true);
         assertThrows(IllegalArgumentException.class,
-                () -> topicGateway.getModeratedTopics(user, selection)
+                     () -> topicGateway.getModeratedTopics(user, selection)
         );
     }
 
@@ -504,7 +510,7 @@ class TopicDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new TopicDBGateway(connectionSpy).getModeratedTopics(user, selection)
+                     () -> new TopicDBGateway(connectionSpy).getModeratedTopics(user, selection)
         );
     }
 
@@ -521,7 +527,7 @@ class TopicDBGatewayTest {
         topic1.setId(1);
         userGateway.createUser(user);
         assertThrows(NotFoundException.class,
-                () -> topicGateway.banUser(topic1, user)
+                     () -> topicGateway.banUser(topic1, user)
         );
     }
 
@@ -530,7 +536,7 @@ class TopicDBGatewayTest {
         user.setId(5);
         topicGateway.createTopic(topic1);
         assertThrows(NotFoundException.class,
-                () -> topicGateway.banUser(topic1, user)
+                     () -> topicGateway.banUser(topic1, user)
         );
     }
 
@@ -538,7 +544,7 @@ class TopicDBGatewayTest {
     public void testBanUserUserIdNull() {
         topic1.setId(1);
         assertThrows(IllegalArgumentException.class,
-                () -> topicGateway.banUser(topic1, user)
+                     () -> topicGateway.banUser(topic1, user)
         );
     }
 
@@ -546,7 +552,7 @@ class TopicDBGatewayTest {
     public void testBanUserTopicIdNull() {
         user.setId(1);
         assertThrows(IllegalArgumentException.class,
-                () -> topicGateway.banUser(topic1, user)
+                     () -> topicGateway.banUser(topic1, user)
         );
     }
 
@@ -559,7 +565,7 @@ class TopicDBGatewayTest {
         doThrow(mockException).when(connectionSpy).prepareStatement(any());
         when(mockException.getSQLState()).thenReturn("");
         assertThrows(StoreException.class,
-                () -> new TopicDBGateway(connectionSpy).banUser(topic1, user)
+                     () -> new TopicDBGateway(connectionSpy).banUser(topic1, user)
         );
     }
 
@@ -577,7 +583,7 @@ class TopicDBGatewayTest {
         userGateway.createUser(user);
         topicGateway.createTopic(topic1);
         assertThrows(NotFoundException.class,
-                () -> topicGateway.unbanUser(topic1, user)
+                     () -> topicGateway.unbanUser(topic1, user)
         );
     }
 
@@ -585,7 +591,7 @@ class TopicDBGatewayTest {
     public void testUnbanUserUserIdNull() {
         topicGateway.createTopic(topic1);
         assertThrows(IllegalArgumentException.class,
-                () -> topicGateway.unbanUser(topic1, user)
+                     () -> topicGateway.unbanUser(topic1, user)
         );
     }
 
@@ -593,7 +599,7 @@ class TopicDBGatewayTest {
     public void testUnbanUserTopicIdNull() {
         userGateway.createUser(user);
         assertThrows(IllegalArgumentException.class,
-                () -> topicGateway.unbanUser(topic1, user)
+                     () -> topicGateway.unbanUser(topic1, user)
         );
     }
 
@@ -604,7 +610,7 @@ class TopicDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new TopicDBGateway(connectionSpy).unbanUser(topic1, user)
+                     () -> new TopicDBGateway(connectionSpy).unbanUser(topic1, user)
         );
     }
 
@@ -623,7 +629,7 @@ class TopicDBGatewayTest {
     @Test
     public void testCountBannedUsersTopicIdNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> topicGateway.countBannedUsers(topic1)
+                     () -> topicGateway.countBannedUsers(topic1)
         );
     }
 
@@ -633,7 +639,7 @@ class TopicDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new TopicDBGateway(connectionSpy).countBannedUsers(topic1)
+                     () -> new TopicDBGateway(connectionSpy).countBannedUsers(topic1)
         );
     }
 

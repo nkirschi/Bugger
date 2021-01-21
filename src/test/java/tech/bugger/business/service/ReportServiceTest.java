@@ -15,7 +15,6 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.TransactionException;
@@ -86,7 +85,7 @@ public class ReportServiceTest {
         service = new ReportService(notificationService, topicService, postService, profileService, transactionManager,
                 feedbackEvent, ResourceBundleMocker.mock(""));
         List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
-        testFirstPost = new Post(100, "Some content", new Lazy<>(mock(Report.class)), mock(Authorship.class), attachments);
+        testFirstPost = new Post(100, "Some content", 42, mock(Authorship.class), attachments);
         User testUser = new User();
         testUser.setId(1);
         Authorship authorship = new Authorship(testUser, OffsetDateTime.now(), testUser, OffsetDateTime.now());

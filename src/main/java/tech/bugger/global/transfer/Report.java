@@ -118,7 +118,7 @@ public class Report implements Serializable {
      * @param version               The version the report is associated with.
      * @param authorship            The report authorship metadata.
      * @param closingDate           The closing date of the report.
-     * @param duplicateOf           The report this report is a duplicate of, loaded lazily.
+     * @param duplicateOf           The report this report is a duplicate of.
      * @param relevance             The relevance value for the Report.
      * @param relevanceOverwritten  The state of the relevance overwrite.
      * @param topicID               The ID of topic the report belongs to.

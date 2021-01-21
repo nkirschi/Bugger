@@ -1,17 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.stream.StreamSupport;
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
@@ -21,10 +9,22 @@ import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.stream.StreamSupport;
 
 /**
  * Backing bean for the report page.
@@ -464,7 +464,8 @@ public class ReportBacker implements Serializable {
      * Deletes the {@code postToBeDeleted} irreversibly. If it is the first post, this deletes the whole report.
      */
     public void deletePost() {
-        postService.deletePost(postToBeDeleted);
+        postService.deletePost(postToBeDeleted, report);
+        displayDialog(null);
     }
 
     /**
@@ -490,7 +491,7 @@ public class ReportBacker implements Serializable {
      */
     public boolean privilegedForPost(final Post post) {
         if (session.getUser() != null) {
-            return postService.isPrivileged(session.getUser(), post);
+            return postService.isPrivileged(session.getUser(), post, report);
         }
         return false;
     }

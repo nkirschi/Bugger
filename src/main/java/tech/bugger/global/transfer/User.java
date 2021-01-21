@@ -1,11 +1,11 @@
 package tech.bugger.global.transfer;
 
-import java.util.Locale;
 import tech.bugger.global.util.Constants;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -72,7 +72,7 @@ public class User implements Serializable {
     private String lastName;
 
     /**
-     * This user's avatar, loaded lazily.
+     * This user's avatar.
      */
     private byte[] avatar;
 
@@ -130,7 +130,7 @@ public class User implements Serializable {
      * @param emailAddress       The e-mail address of the user.
      * @param firstName          The first name of the user.
      * @param lastName           The last name of the user.
-     * @param avatar             The avatar of the user, loaded lazily.
+     * @param avatar             The avatar of the user.
      * @param avatarThumbnail    The avatar thumbnail of the user.
      * @param biography          The biography of the user.
      * @param preferredLanguage  The preferred language of the user.
