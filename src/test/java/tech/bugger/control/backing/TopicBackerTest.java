@@ -1,12 +1,17 @@
 package tech.bugger.control.backing;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
-import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
@@ -14,19 +19,9 @@ import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
@@ -49,9 +44,6 @@ public class TopicBackerTest {
     @Mock
     private ExternalContext ectx;
 
-    @Mock
-    private ApplicationSettings settings;
-
     private User user;
     private Topic topic;
     private static final String USERNAME = "Helgi";
@@ -62,7 +54,7 @@ public class TopicBackerTest {
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic = new Topic(1, "Some title", "Some description");
-        topicBacker = new TopicBacker(topicService, searchService, fctx, ectx, session, settings);
+        topicBacker = new TopicBacker(topicService, searchService, fctx, ectx, session);
     }
 
     @Test
