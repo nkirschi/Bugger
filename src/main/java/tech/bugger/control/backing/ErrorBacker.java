@@ -43,6 +43,15 @@ public class ErrorBacker {
     }
 
     /**
+     * Throws an InternalError for testing purposes.
+     *
+     * @return Never returns.
+     */
+    public String throwInternalError() {
+        throw new InternalError("Test internal error thrown from error backer.");
+    }
+
+    /**
      * Throws an IOException for testing purposes.
      *
      * @return Never returns.
@@ -66,7 +75,7 @@ public class ErrorBacker {
      * @param exception The given exception.
      * @return The stack trace as a String.
      */
-    public static String stackTrace(final Exception exception) {
+    public static String stackTrace(final Throwable exception) {
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
         exception.printStackTrace(printWriter);
