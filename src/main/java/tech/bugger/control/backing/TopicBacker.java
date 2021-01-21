@@ -224,9 +224,8 @@ public class TopicBacker implements Serializable {
         }
 
         User user = session.getUser();
-        banned = topicService.isBanned(user, topic);
-
         topic = topicService.getTopicByID(topicID);
+        banned = topicService.isBanned(user, topic);
         if (topic == null || banned) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
             return;
