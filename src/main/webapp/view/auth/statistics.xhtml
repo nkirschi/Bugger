@@ -168,7 +168,8 @@
                         <h:panelGroup styleClass="text-nowrap">
                             <h:outputLink value="/faces/view/auth/profile.xhtml">
                                 <h:graphicImage styleClass="img-size-mini me-2 rounded-circle"
-                                                value="/avatar?u=#{report.creator}&amp;type=thumbnail"/>#{report.creator}
+                                                value="/avatar?u=#{report.creator}&amp;type=thumbnail"
+                                                alt="#{report.creator}'s avatar"/>#{report.creator}
                                 <f:param name="u" value="#{report.creator}"/>
                             </h:outputLink>
                         </h:panelGroup>
@@ -197,7 +198,8 @@
                         <f:facet name="header">#{labels.user}</f:facet>
                         <h:outputLink value="/faces/view/auth/profile.xhtml">
                             <h:graphicImage styleClass="img-size-mini me-2 rounded-circle"
-                                            value="/avatar?u=#{user.username}&amp;type=thumbnail"/>#{user.username}
+                                            value="/avatar?u=#{user.username}&amp;type=thumbnail"
+                                            alt="#{report.creator}'s avatar"/>#{user.username}
                             <f:param name="u" value="#{user.username}"/>
                         </h:outputLink>
                     </h:column>
