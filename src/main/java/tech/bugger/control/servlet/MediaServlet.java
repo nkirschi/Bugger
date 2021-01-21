@@ -1,5 +1,7 @@
 package tech.bugger.control.servlet;
 
+import tech.bugger.global.util.Log;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,6 +16,11 @@ public abstract class MediaServlet extends HttpServlet {
 
     @Serial
     private static final long serialVersionUID = -4981163493957399645L;
+
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
+    private static final Log log = Log.forClass(AvatarServlet.class);
 
     /**
      * The time in milliseconds clients should cache content.
@@ -60,7 +67,7 @@ public abstract class MediaServlet extends HttpServlet {
             // TODO Redirect to our own error page.
             response.sendError(HttpServletResponse.SC_NOT_FOUND); // 404.
         } catch (IOException e) {
-            throw new InternalError("Could not redirect to 404 page.");
+            log.warning("Could not redirect to 404 page.");
         }
     }
 

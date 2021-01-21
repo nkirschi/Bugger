@@ -6,11 +6,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.ResourceBundleMocker;
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Authorship;
+import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
@@ -39,6 +41,9 @@ public class ReportEditBackerTest {
     private ReportEditBacker reportEditBacker;
 
     @Mock
+    private ApplicationSettings applicationSettings;
+
+    @Mock
     private TopicService topicService;
 
     @Mock
@@ -59,6 +64,9 @@ public class ReportEditBackerTest {
     @Mock
     private Registry registry;
 
+    @Mock
+    private Configuration configuration;
+
     private Topic testTopic;
     private Report testReport;
     private User user;
@@ -66,7 +74,8 @@ public class ReportEditBackerTest {
     @BeforeEach
     public void setUp() throws Exception {
         doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(anyString(), any());
-        reportEditBacker = new ReportEditBacker(topicService, reportService, session, fctx, registry);
+        reportEditBacker = new ReportEditBacker(applicationSettings, topicService, reportService, session, fctx,
+                registry);
 
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
                                 new Authorship(null, null, null, null), mock(OffsetDateTime.class),
@@ -80,8 +89,10 @@ public class ReportEditBackerTest {
                         Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         reportEditBacker.setCurrentTopic(testTopic);
         lenient().doReturn(testTopic).when(topicService).getTopicByID(1);
+
         lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
+        lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
     }
 
     @Test
@@ -90,6 +101,7 @@ public class ReportEditBackerTest {
         doReturn(testReport).when(reportService).getReportByID(1234);
         doReturn(user).when(session).getUser();
         testReport.getAuthorship().setCreator(user);
+        testReport.setClosingDate(null);
         doReturn(false).when(topicService).isBanned(any(), any());
         reportEditBacker.init();
         assertEquals(testReport, reportEditBacker.getReport());
@@ -114,20 +126,23 @@ public class ReportEditBackerTest {
     }
 
     @Test
-    public void testInitWhenNoUser() throws Exception {
-        doReturn("1234").when(requestParameterMap).get("id");
-        doReturn(testReport).when(reportService).getReportByID(1234);
-        doReturn(user).when(session).getUser();
-        reportEditBacker.init();
-        verify(ectx).redirect(any());
-    }
-
-    @Test
     public void testInitWhenNotPrivileged() throws Exception {
         doReturn("1234").when(requestParameterMap).get("id");
         doReturn(testReport).when(reportService).getReportByID(1234);
         doReturn(user).when(session).getUser();
         testReport.getAuthorship().setCreator(mock(User.class));
+        reportEditBacker.init();
+        verify(ectx).redirect(any());
+    }
+
+    @Test
+    public void testInitWhenReportClosed() throws Exception {
+        doReturn("1234").when(requestParameterMap).get("id");
+        doReturn(testReport).when(reportService).getReportByID(1234);
+        doReturn(user).when(session).getUser();
+        testReport.getAuthorship().setCreator(user);
+        doReturn(false).when(configuration).isClosedReportPosting();
+        testReport.setClosingDate(mock(OffsetDateTime.class));
         reportEditBacker.init();
         verify(ectx).redirect(any());
     }
@@ -155,16 +170,6 @@ public class ReportEditBackerTest {
         reportEditBacker.setDestinationID(42);
         doReturn(mock(User.class)).when(session).getUser();
         doReturn(null).when(topicService).getTopicByID(42);
-        assertFalse(reportEditBacker.isDisplayConfirmDialog());
-        reportEditBacker.saveChangesWithConfirm();
-        verify(fctx).addMessage(any(), any());
-    }
-
-    @Test
-    public void testSaveChangesWithConfirmWhenNotLoggedIn() {
-        reportEditBacker.setDestinationID(42);
-        doReturn(testTopic).when(topicService).getTopicByID(anyInt());
-        doReturn(null).when(session).getUser();
         assertFalse(reportEditBacker.isDisplayConfirmDialog());
         reportEditBacker.saveChangesWithConfirm();
         verify(fctx).addMessage(any(), any());
@@ -312,12 +317,6 @@ public class ReportEditBackerTest {
         reportEditBacker.setReport(testReport);
         reportEditBacker.setCurrentTopic(testTopic);
         when(session.getUser()).thenReturn(user);
-        assertFalse(reportEditBacker.isPrivileged());
-    }
-
-    @Test
-    public void testIsPrivilegedUserNull() {
-        reportEditBacker.setCurrentTopic(testTopic);
         assertFalse(reportEditBacker.isPrivileged());
     }
 

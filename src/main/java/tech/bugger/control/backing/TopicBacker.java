@@ -10,6 +10,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
@@ -436,7 +437,7 @@ public class TopicBacker implements Serializable {
      * moderators cannot be banned.
      *
      * @return {@code null} to reload the page if no user was banned or an empty string to call init() again and update
-     *         the ban results.
+     * the ban results.
      */
     public String banUser() {
         User user = session.getUser();
@@ -459,7 +460,7 @@ public class TopicBacker implements Serializable {
      * Unbans the user specified whose username is specified in the attribute {@link #userBan}.
      *
      * @return {@code null} to reload the page if no user was unbanned or an empty string to call init() again and
-     *         update the ban results.
+     * update the ban results.
      */
     public String unbanUser() {
         User user = session.getUser();
@@ -483,7 +484,7 @@ public class TopicBacker implements Serializable {
      * they already are a moderator.
      *
      * @return {@code null} to reload the page if no user was promoted or an empty string to call init() again and
-     *         update the moderation results.
+     * update the moderation results.
      */
     public String makeModerator() {
         User user = session.getUser();
@@ -507,7 +508,7 @@ public class TopicBacker implements Serializable {
      * administrator.
      *
      * @return {@code null} to reload the page if no user was promoted or an empty string to call init() again and
-     *         update the moderation results.
+     * update the moderation results.
      */
     public String removeModerator() {
         User user = session.getUser();

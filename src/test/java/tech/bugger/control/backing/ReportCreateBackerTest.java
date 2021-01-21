@@ -44,9 +44,6 @@ public class ReportCreateBackerTest {
     private ReportCreateBacker reportCreateBacker;
 
     @Mock
-    private ApplicationSettings applicationSettings;
-
-    @Mock
     private TopicService topicService;
 
     @Mock
@@ -62,9 +59,6 @@ public class ReportCreateBackerTest {
     private ExternalContext ectx;
 
     @Mock
-    private Event<Feedback> feedbackEvent;
-
-    @Mock
     private Part uploadedAttachment;
 
     @Mock
@@ -74,14 +68,9 @@ public class ReportCreateBackerTest {
 
     private Post testFirstPost;
 
-    private InputStream inputStream;
-
-    private Configuration configuration;
-
     @BeforeEach
     public void setUp() throws Exception {
-        reportCreateBacker = new ReportCreateBacker(applicationSettings, topicService, reportService, postService,
-                                                    session, ectx, feedbackEvent);
+        reportCreateBacker = new ReportCreateBacker(topicService, reportService, postService, session, ectx);
 
         List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         testFirstPost = new Post(100, "Some content", 42, mock(Authorship.class), attachments);
@@ -93,13 +82,7 @@ public class ReportCreateBackerTest {
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
 
         uploadedAttachment = mock(Part.class);
-        inputStream = mock(InputStream.class);
-        lenient().doReturn(inputStream).when(uploadedAttachment).getInputStream();
         reportCreateBacker.setUploadedAttachment(uploadedAttachment);
-
-        configuration = mock(Configuration.class);
-        lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
-        lenient().doReturn(5).when(configuration).getMaxAttachmentsPerPost();
     }
 
     @Test

@@ -21,6 +21,11 @@ public class AttachmentServlet extends MediaServlet {
     private static final long serialVersionUID = -2411022287149244216L;
 
     /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
+    private static final Log log = Log.forClass(AttachmentServlet.class);
+
+    /**
      * The current application settings.
      */
     @Inject
@@ -32,10 +37,6 @@ public class AttachmentServlet extends MediaServlet {
     @Inject
     private UserSession session;
 
-    /**
-     * The {@link Log} instance associated with this class for logging purposes.
-     */
-    private static final Log log = Log.forClass(AttachmentServlet.class);
 
     /**
      * The post service providing attachments.
@@ -96,7 +97,7 @@ public class AttachmentServlet extends MediaServlet {
         try {
             response.getOutputStream().write(content);
         } catch (IOException e) {
-            log.error("Could not write servlet response.", e);
+            log.warning("Could not write servlet response.", e);
         }
     }
 

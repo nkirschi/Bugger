@@ -85,6 +85,16 @@
                                     <h:message for="i-logo"/>
                                 </h:panelGroup>
                             </h:panelGroup>
+
+                            <h:panelGroup layout="block" id="p-attachments" styleClass="mb-3 form-group position-relative">
+                                <h:outputFormat id="ot-attachments-info" value="#{labels.organization_logo_hint}"
+                                                styleClass="small form-text text-muted">
+                                    <f:param value="#{Constants.MAX_AVATAR_FILESIZE}"/>
+                                    <f:param value="#{Constants.MIN_IMAGE_WIDTH}"/>
+                                    <f:param value="#{Constants.MIN_IMAGE_HEIGHT}"/>
+                                </h:outputFormat>
+                            </h:panelGroup>
+
                             <h:panelGroup styleClass="form-check">
                                 <h:selectBooleanCheckbox id="s-remove-logo"
                                                          valueChangeListener="#{adminBacker.removeLogo}"
@@ -136,9 +146,7 @@
                                 <h:message for="it-imprint"/>
                             </h:panelGroup>
                         </h:panelGroup>
-
                     </h:panelGroup>
-
 
                     <!-- organization privacy policy (Markdown) -->
                     <h:panelGroup layout="block" styleClass="mb-3">
