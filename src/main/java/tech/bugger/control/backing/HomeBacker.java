@@ -17,7 +17,6 @@ import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.util.Log;
 
 /**
  * Backing Bean for the home page.
@@ -25,11 +24,6 @@ import tech.bugger.global.util.Log;
 @ViewScoped
 @Named
 public class HomeBacker implements Serializable {
-
-    /**
-     * The {@link Log} instance associated with this class for logging purposes.
-     */
-    private static final Log log = Log.forClass(HomeBacker.class);
 
     @Serial
     private static final long serialVersionUID = -6982333692294902179L;
@@ -80,7 +74,7 @@ public class HomeBacker implements Serializable {
     @PostConstruct
     void init() {
         if (session.getUser() != null) {
-            inbox = new Paginator<>("created_at", Selection.PageSize.SMALL) {
+            inbox = new Paginator<>("created_at", Selection.PageSize.SMALL, false) {
                 @Override
                 protected Iterable<Notification> fetch() {
                     return notificationService.selectNotifications(session.getUser(), getSelection());
@@ -91,9 +85,8 @@ public class HomeBacker implements Serializable {
                     return notificationService.countNotifications(session.getUser());
                 }
             };
-            inbox.getSelection().setAscending(false);
         }
-        topics = new Paginator<>("title", Selection.PageSize.NORMAL) {
+        topics = new Paginator<>("id", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Topic> fetch() {
                 return topicService.selectTopics(getSelection());

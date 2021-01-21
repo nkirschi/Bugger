@@ -549,7 +549,7 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public boolean isBanned(final User user, final Topic topic) {
-        if (user.getId() == null || topic.getId() == null) {
+        if (user == null || user.getId() == null || topic == null || topic.getId() == null) {
             throw new IllegalArgumentException("The user or topic ID cannot be null!");
         }
 
