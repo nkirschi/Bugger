@@ -1,5 +1,8 @@
 package tech.bugger.control.backing;
 
+import com.sun.faces.context.RequestParameterMap;
+import org.checkerframework.checker.units.qual.A;
+import org.checkerframework.checker.units.qual.K;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,19 +17,20 @@ import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
+import javax.faces.application.Application;
+import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
@@ -52,9 +56,20 @@ public class TopicBackerTest {
     @Mock
     private ApplicationSettings settings;
 
+    @Mock
+    private RequestParameterMap map;
+
+    @Mock
+    private NavigationHandler navHandler;
+
+    @Mock
+    private Application application;
+
     private User user;
     private Topic topic;
     private static final String USERNAME = "Helgi";
+    private static final String KEY = "id";
+    private static final String ID = "1";
 
     @BeforeEach
     public void setUp() {
@@ -63,6 +78,61 @@ public class TopicBackerTest {
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic = new Topic(1, "Some title", "Some description");
         topicBacker = new TopicBacker(topicService, searchService, fctx, ectx, session, settings);
+        lenient().doReturn(ectx).when(fctx).getExternalContext();
+        lenient().doReturn(map).when(ectx).getRequestParameterMap();
+        lenient().doReturn(application).when(fctx).getApplication();
+        lenient().doReturn(navHandler).when(application).getNavigationHandler();
+    }
+
+    @Test
+    public void testInit() {
+        doReturn(true).when(map).containsKey(KEY);
+        doReturn(ID).when(map).get(KEY);
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        topicBacker.init();
+        assertAll(
+                () -> assertEquals(topic, topicBacker.getTopic()),
+                () -> assertEquals(topic.getId(), topicBacker.getTopicID()),
+                () -> assertTrue(topicBacker.isOpenReportShown()),
+                () -> assertFalse(topicBacker.isClosedReportShown()),
+                () -> assertNotNull(topicBacker.getSanitizedDescription()),
+                () -> assertNotNull(topicBacker.getModerators()),
+                () -> assertNotNull(topicBacker.getReports()),
+                () -> assertNotNull(topicBacker.getBannedUsers())
+        );
+    }
+
+    @Test
+    public void testInitTopicNull() {
+        doReturn(true).when(map).containsKey(KEY);
+        doReturn(ID).when(map).get(KEY);
+        topicBacker.init();
+        verify(navHandler).handleNavigation(any(), any(), any());
+    }
+
+    @Test
+    public void testInitUserBanned() {
+        doReturn(true).when(map).containsKey(KEY);
+        doReturn(ID).when(map).get(KEY);
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        doReturn(user).when(session).getUser();
+        doReturn(true).when(topicService).isBanned(user, topic);
+        topicBacker.init();
+        verify(navHandler).handleNavigation(any(), any(), any());
+    }
+
+    @Test
+    public void testInitNumberFormat() {
+        doReturn(true).when(map).containsKey(KEY);
+        doReturn(KEY).when(map).get(KEY);
+        topicBacker.init();
+        verify(navHandler).handleNavigation(any(), any(), any());
+    }
+
+    @Test
+    public void testInitNoKey() {
+        topicBacker.init();
+        verify(navHandler).handleNavigation(any(), any(), any());
     }
 
     @Test
@@ -431,6 +501,60 @@ public class TopicBackerTest {
         topicBacker.setUserMod("");
         topicBacker.searchUnmodUsers();
         verify(searchService, times(0)).getUserUnmodSuggestions(any(), any());
+    }
+
+    @Test
+    public void testToggleTopicSubscription() {
+        doReturn(user).when(session).getUser();
+        topicBacker.toggleTopicSubscription();
+        verify(topicService).subscribeToTopic(any(), any());
+    }
+
+    @Test
+    public void testToggleTopicSubscriptionSubscribed() {
+        doReturn(user).when(session).getUser();
+        doReturn(true).when(topicService).isSubscribed(any(), any());
+        topicBacker.toggleTopicSubscription();
+        verify(topicService).unsubscribeFromTopic(any(), any());
+    }
+
+    @Test
+    public void testToggleTopicSubscriptionUserNull() {
+        topicBacker.toggleTopicSubscription();
+        verify(topicService, never()).subscribeToTopic(any(), any());
+        verify(topicService, never()).unsubscribeFromTopic(any(), any());
+    }
+
+    @Test
+    public void testDelete() {
+        topicBacker.setTopic(topic);
+        topicBacker.delete();
+        verify(topicService).deleteTopic(topic);
+    }
+
+    @Test
+    public void testApplyFilters() throws NoSuchFieldException, IllegalAccessException {
+        Field field = topicBacker.getClass().getDeclaredField("reports");
+        field.setAccessible(true);
+        field.set(topicBacker, mock(Paginator.class));
+        topicBacker.applyFilters();
+        verify(topicBacker.getReports()).update();
+    }
+
+    @Test
+    public void testSettersForCoverage() {
+        topicBacker.setOpenReportShown(true);
+        topicBacker.setClosedReportShown(true);
+        topicBacker.setTopicID(topic.getId());
+        topicBacker.setUserBanSuggestions(new ArrayList<>());
+        topicBacker.setUserModSuggestions(new ArrayList<>());
+        assertAll(
+                () -> assertTrue(topicBacker.isOpenReportShown()),
+                () -> assertTrue(topicBacker.isClosedReportShown()),
+                () -> assertEquals(topic.getId(), topicBacker.getTopicID()),
+                () -> assertTrue(topicBacker.getUserBanSuggestions().isEmpty()),
+                () -> assertTrue(topicBacker.getUserModSuggestions().isEmpty())
+        );
     }
 
 }

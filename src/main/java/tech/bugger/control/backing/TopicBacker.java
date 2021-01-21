@@ -203,17 +203,20 @@ public class TopicBacker implements Serializable {
     void init() {
         if (!ectx.getRequestParameterMap().containsKey("id")) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
         }
 
         try {
             topicID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
         }
 
         topic = topicService.getTopicByID(topicID);
         if (topic == null || isBanned()) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
         }
 
         displayDialog = null;
@@ -519,7 +522,7 @@ public class TopicBacker implements Serializable {
         if (session.getUser() == null) {
             return null;
         }
-        if (topicService.isSubscribed(session.getUser(), topic)) {
+        if (isSubscribed()) {
             topicService.unsubscribeFromTopic(session.getUser(), topic);
         } else {
             topicService.subscribeToTopic(session.getUser(), topic);
