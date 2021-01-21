@@ -13,7 +13,7 @@
             <h:outputText value="The content you are looking for does not exist. It may have been deleted or moved elsewhere. If you feel this is not actually the case, please contact the organization hosting this instance of bugger."/>
             <h:outputText value="Contact information"/>
             <h:outputText value="#{applicationSettings.organization.supportInfo}"/>
-            <a href="#{errorBacker.goHome}">Return to homepage</a>
+            <a href="#{errorBacker.goHome()}">Return to homepage</a>
         </h:panelGrid>
 
         <h:panelGrid id="pg-error-details" columns="1" rendered="#{(facesContext.application.projectStage eq 'Development') and requestScope['javax.servlet.error.exception'] != null}">

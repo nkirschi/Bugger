@@ -13,7 +13,7 @@
         <h:outputText value="If you find yourself on this page too often, please contact the organization hosting this instance of bugger."/>
         <h:outputText value="Contact information"/>
         <h:outputText value="#{applicationSettings.organization.supportInfo}"/>
-        <a href="#{errorBacker.goHome}">Return to homepage</a>
+        <a href="#{errorBacker.goHome()}">Return to homepage</a>
     </h:panelGrid>
 
     <h:panelGrid id="pg-error-details" columns="1" rendered="#{facesContext.application.projectStage eq 'Development'}">
