@@ -21,7 +21,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
@@ -61,11 +60,6 @@ public class ReportBacker implements Serializable {
     private Paginator<Report> duplicates;
 
     /**
-     * The ID of the report the current report is potentially a duplicate of.
-     */
-    private Integer duplicateOfID;
-
-    /**
      * The post to be deleted.
      */
     private Post postToBeDeleted;
@@ -103,12 +97,12 @@ public class ReportBacker implements Serializable {
     /**
      * Whether the user has upvoted the report.
      */
-    private boolean hasUpvoted;
+    private boolean upvoted;
 
     /**
      * Whether the user has downvoted the report.
      */
-    private boolean hasDownvoted;
+    private boolean downvoted;
 
     /**
      * Whether the user is privileged for this report.
@@ -172,6 +166,7 @@ public class ReportBacker implements Serializable {
      * @param postService         The post service to use.
      * @param session             The user session.
      * @param fctx                The current {@link FacesContext} of the application.
+     * @param ectx                The current {@link ExternalContext} of the application.
      */
     @Inject
     public ReportBacker(final ApplicationSettings applicationSettings,
@@ -196,6 +191,8 @@ public class ReportBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        log.debug(">>>>>> INIT");
+
         int reportID;
         Integer postID = null;
         if (ectx.getRequestParameterMap().containsKey("p")) {
@@ -237,7 +234,6 @@ public class ReportBacker implements Serializable {
 
         // now begin actually initializing the page content
 
-        duplicateOfID = report.getDuplicateOf();
         currentDialog = null;
         subscribed = reportService.isSubscribed(session.getUser(), report);
         banned = topicService.isBanned(session.getUser(), topic);
@@ -291,19 +287,18 @@ public class ReportBacker implements Serializable {
      * Updates the values for the relevance interface.
      */
     private void updateRelevance() {
+        log.debug(">>>>>> updateRelevance");
+
         report = reportService.getReportByID(report.getId());
         if (report == null) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
             return;
         }
         if (session.getUser() != null) {
-            hasUpvoted = hasUpvoted();
-            hasDownvoted = hasDownvoted();
-            boolean overwriteRelevance = report.getRelevanceOverwritten();
-            if (overwriteRelevance) {
+            upvoted = reportService.hasUpvoted(report, session.getUser());
+            downvoted = reportService.hasDownvoted(report, session.getUser());
+            if (report.isRelevanceOverwritten()) {
                 overwriteRelevanceValue = report.getRelevance();
-            } else {
-                overwriteRelevanceValue = null;
             }
         }
     }
@@ -315,6 +310,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String displayDialog(final ReportPageDialog dialog) {
+        log.debug(">>>>>> displayDialog");
         currentDialog = dialog;
         log.info("Displaying dialog " + dialog + ".");
         return null;
@@ -327,6 +323,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String deletePostDialog(final Post post) {
+        log.debug(">>>>>> deletePostDialog");
         postToBeDeleted = post;
         return displayDialog(ReportPageDialog.DELETE_POST);
     }
@@ -337,6 +334,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null}
      */
     public String toggleReportSubscription() {
+        log.debug(">>>>>> toggleReportSubscription");
         if (session.getUser() == null) {
             return null;
         }
@@ -355,6 +353,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String upvote() {
+        log.debug(">>>>>> upvote");
         if (session.getUser() != null) {
             reportService.upvote(report, session.getUser());
         }
@@ -368,6 +367,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String downvote() {
+        log.debug(">>>>>> downvote");
         if (session.getUser() != null) {
             reportService.downvote(report, session.getUser());
         }
@@ -381,6 +381,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String removeVote() {
+        log.debug(">>>>>> removeVote");
         if (session.getUser() != null) {
             reportService.removeVote(report, session.getUser());
         }
@@ -389,53 +390,14 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     * Returns if the user has voted to increase the relevance of the report.
-     *
-     * @return {@code true} if the user has voted up and {@code false} otherwise.
-     */
-    public boolean hasUpvoted() {
-        if (session.getUser() != null) {
-            return reportService.hasUpvoted(report, session.getUser());
-        }
-        return false;
-    }
-
-    /**
-     * Returns if the user has voted to decrease the relevance of the report.
-     *
-     * @return {@code true} if the user has voted down and {@code false} otherwise.
-     */
-    public boolean hasDownvoted() {
-        if (session.getUser() != null) {
-            return reportService.hasDownvoted(report, session.getUser());
-        }
-        return false;
-    }
-
-    /**
-     * Opens the current report.
-     */
-    private void open() {
-        report.setClosingDate(null);
-        reportService.open(report);
-    }
-
-    /**
-     * Closes the current report.
-     */
-    private void close() {
-        report.setClosingDate(OffsetDateTime.now());
-        reportService.close(report);
-    }
-
-    /**
      * Opens a closed report and closes an open one.
      */
     public void toggleOpenClosed() {
+        log.debug(">>>>>> toggleOpenClosed");
         if (report.getClosingDate() == null) {
-            close();
+            reportService.close(report);
         } else {
-            open();
+            reportService.open(report);
         }
         displayDialog(null);
     }
@@ -444,6 +406,7 @@ public class ReportBacker implements Serializable {
      * Deletes the report along with all its posts irreversibly.
      */
     public void delete() {
+        log.debug(">>>>>> delete");
         reportService.deleteReport(report);
     }
 
@@ -451,8 +414,9 @@ public class ReportBacker implements Serializable {
      * Marks the report as a duplicate of another report. This automatically closes the report.
      */
     public void markDuplicate() {
-        if (duplicateOfID != null && isPrivileged() && reportService.markDuplicate(report, duplicateOfID)) {
-            close();
+        log.debug(">>>>>> markDuplicate");
+        if (isPrivileged() && reportService.markDuplicate(report, report.getDuplicateOf())) {
+            reportService.close(report);
             displayDialog(null);
             duplicates.update();
         }
@@ -462,8 +426,9 @@ public class ReportBacker implements Serializable {
      * Removes the marking signifying that the report is a duplicate of another one.
      */
     public void unmarkDuplicate() {
-        if (isPrivileged() && reportService.unmarkDuplicate(report)) {
-            duplicateOfID = null;
+        log.debug(">>>>>> unmarkDuplicate");
+        if (isPrivileged()) {
+            reportService.unmarkDuplicate(report);
         }
     }
 
@@ -473,6 +438,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String applyOverwriteRelevance() {
+        log.debug(">>>>>> applyOverwriteRelevance");
         if (session.getUser() != null && session.getUser().isAdministrator()) {
             reportService.overwriteRelevance(report, overwriteRelevanceValue);
             updateRelevance();
@@ -485,6 +451,7 @@ public class ReportBacker implements Serializable {
      * Deletes the {@code postToBeDeleted} irreversibly. If it is the first post, this deletes the whole report.
      */
     public void deletePost() {
+        log.debug(">>>>>> deletePost");
         postService.deletePost(postToBeDeleted, report);
         displayDialog(null);
     }
@@ -496,11 +463,16 @@ public class ReportBacker implements Serializable {
      * @return {@code true} iff the user is privileged.
      */
     public boolean privilegedForPost(final Post post) {
+        log.debug(">>>>>> privilegedForPost");
         if (session.getUser() != null) {
             return postService.isPrivileged(session.getUser(), post, report);
         }
         return false;
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // getters and setters                                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * @return The report.
@@ -526,15 +498,15 @@ public class ReportBacker implements Serializable {
     /**
      * @return Whether the user has upvoted this report.
      */
-    public boolean getHasUpvoted() {
-        return hasUpvoted;
+    public boolean isUpvoted() {
+        return upvoted;
     }
 
     /**
      * @return Whether the user has downvoted this report.
      */
-    public boolean getHasDownvoted() {
-        return hasDownvoted;
+    public boolean isDownvoted() {
+        return downvoted;
     }
 
     /**
@@ -542,24 +514,6 @@ public class ReportBacker implements Serializable {
      */
     public void setReport(final Report report) {
         this.report = report;
-    }
-
-    /**
-     * Returns the ID of the report this report is a duplicate of.
-     *
-     * @return The duplicateOfID.
-     */
-    public Integer getDuplicateOfID() {
-        return duplicateOfID;
-    }
-
-    /**
-     * Sets the ID of the report this report is a duplicate of.
-     *
-     * @param duplicateOfID The duplicateOfID to set.
-     */
-    public void setDuplicateOfID(final Integer duplicateOfID) {
-        this.duplicateOfID = duplicateOfID;
     }
 
     /**

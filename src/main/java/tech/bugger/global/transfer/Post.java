@@ -39,6 +39,11 @@ public class Post implements Serializable {
     private List<Attachment> attachments;
 
     /**
+     * Whether the current user is privileged to modify this post.
+     */
+    private boolean privileged;
+
+    /**
      * Constructs a new post from the specified parameters.
      *
      * @param id          The post ID.

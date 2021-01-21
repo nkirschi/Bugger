@@ -6,6 +6,7 @@
                 xmlns:b="http://tech.bugger/tags">
 
     <ui:param name="title" value="#{reportBacker.report.title}"/>
+    <ui:param name="helpKey" value="report"/>
 
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
@@ -20,7 +21,7 @@
             <h:form id="f-duplicate">
                 <h:panelGroup layout="block" styleClass="mb-3 input-group">
                     <h:outputLabel styleClass="input-group-text" id="ol-username-icon">#</h:outputLabel>
-                    <h:inputText id="it-duplicate" value="#{reportBacker.duplicateOfID}"
+                    <h:inputText id="it-duplicate" value="#{reportBacker.report.duplicateOf}"
                                  styleClass="form-control#{component.valid ? '' : ' border-danger'}"/>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="mb-3">
@@ -106,13 +107,13 @@
         <h:form>
             <h:panelGroup rendered="#{userSession.user != null}">
                 <h:commandButton value="#{labels.upvote_button}" action="#{reportBacker.removeVote}"
-                                 rendered="#{reportBacker.hasUpvoted}" styleClass="vote-cast"/>
+                                 rendered="#{reportBacker.upvoted}" styleClass="vote-cast"/>
                 <h:commandButton value="#{labels.upvote_button}" action="#{reportBacker.upvote}"
-                                 rendered="#{!reportBacker.hasUpvoted}" styleClass="vote-not-cast"/>
+                                 rendered="#{!reportBacker.upvoted}" styleClass="vote-not-cast"/>
                 <h:commandButton value="#{labels.downvote_button}" action="#{reportBacker.removeVote}"
-                                 rendered="#{reportBacker.hasDownvoted}" styleClass="vote-cast"/>
+                                 rendered="#{reportBacker.downvoted}" styleClass="vote-cast"/>
                 <h:commandButton value="#{labels.downvote_button}" action="#{reportBacker.downvote}"
-                                 rendered="#{!reportBacker.hasDownvoted}" styleClass="vote-not-cast"/>
+                                 rendered="#{!reportBacker.downvoted}" styleClass="vote-not-cast"/>
                 <h:outputLabel value="#{labels.relevance_overwritten}" rendered="#{reportBacker.report.relevanceOverwritten}"/>
                 <h:outputLabel value="#{labels.current_relevance}:&#xA0;"/>
                 <h:outputLabel value="#{reportBacker.report.relevance}"/>

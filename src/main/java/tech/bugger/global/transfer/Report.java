@@ -341,7 +341,7 @@ public class Report implements Serializable {
      *
      * @return {@code true} iff relevance of this topic is overwritten.
      */
-    public boolean getRelevanceOverwritten() {
+    public boolean isRelevanceOverwritten() {
         return relevanceOverwritten;
     }
 
