@@ -1,30 +1,30 @@
 <ui:composition template="/WEB-INF/template/error-template.xhtml"
                 xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
-                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                xmlns:f="http://xmlns.jcp.org/jsf/core"
-                xmlns:b="http://tech.bugger/tags">
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
-<ui:param name="title" value="An unexpected error has occured."/>
+    <ui:param name="title" value="An unexpected error has occured."/>
 
-<ui:define name="content">
+    <ui:define name="content">
 
-    <h:panelGrid id="pg-error-general" columns="1">
-        <h:outputText value="If you find yourself on this page too often, please contact the organization hosting this instance of bugger."/>
-        <h:outputText value="Contact information"/>
-        <h:outputText value="#{applicationSettings.organization.supportInfo}"/>
-        <a href="#{errorBacker.goHome()}">Return to homepage</a>
-    </h:panelGrid>
+        <h:panelGrid id="pg-error-general" columns="1">
+            <h:outputText
+                    value="If you find yourself on this page too often, please contact the organization hosting this instance of bugger."/>
+            <h:outputText value="Contact information" styleClass="h2"/>
+            <h:outputText value="#{applicationSettings.organization.supportInfo}"/>
+            <a href="#{errorBacker.goHome()}">Return to homepage</a>
+        </h:panelGrid>
 
-    <h:panelGrid id="pg-error-details" columns="1" rendered="#{facesContext.application.projectStage eq 'Development'}">
-        <h:outputText value="Request URI"/>
-        <h:outputText value="#{requestScope['javax.servlet.error.request_uri']}"/>
-        <h:outputText value="Exception type"/>
-        <h:outputText value="#{requestScope['javax.servlet.error.exception']['class']}"/>
-        <h:outputText value="Exception message"/>
-        <h:outputText value="#{requestScope['javax.servlet.error.exception'].message}"/>
-        <h:outputText value="Stack trace"/>
-        <h:outputText value="#{errorBacker.stackTrace(requestScope['javax.servlet.error.exception'])}"/>
-    </h:panelGrid>
-</ui:define>
+        <h:panelGrid id="pg-error-details" columns="1"
+                     rendered="#{facesContext.application.projectStage eq 'Development'}">
+            <h:outputText value="Request URI"/>
+            <h:outputText value="#{requestScope['javax.servlet.error.request_uri']}"/>
+            <h:outputText value="Exception type"/>
+            <h:outputText value="#{requestScope['javax.servlet.error.exception']['class']}"/>
+            <h:outputText value="Exception message"/>
+            <h:outputText value="#{requestScope['javax.servlet.error.exception'].message}"/>
+            <h:outputText value="Stack trace"/>
+            <h:outputText value="#{errorBacker.stackTrace(requestScope['javax.servlet.error.exception'])}"/>
+        </h:panelGrid>
+    </ui:define>
 </ui:composition>

@@ -23,14 +23,14 @@ import java.util.Map;
 /**
  * Enables customized handling of exceptions.
  */
-public class ExceptHand extends ExceptionHandlerWrapper {
+public class CustomExceptionHandler extends ExceptionHandlerWrapper {
 
     /**
-     * Constructs a new {@link ExceptHand} wrapping an {@code ExceptionHandler}.
+     * Constructs a new {@link CustomExceptionHandler} wrapping an {@code ExceptionHandler}.
      *
      * @param wrapped The exceptionHandler being wrapped.
      */
-    public ExceptHand(final ExceptionHandler wrapped) {
+    public CustomExceptionHandler(final ExceptionHandler wrapped) {
         super(wrapped);
     }
 
@@ -124,7 +124,7 @@ public class ExceptHand extends ExceptionHandlerWrapper {
          */
         @Override
         public ExceptionHandler getExceptionHandler() {
-            return new ExceptHand(getWrapped().getExceptionHandler());
+            return new CustomExceptionHandler(getWrapped().getExceptionHandler());
         }
     }
 

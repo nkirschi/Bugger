@@ -34,7 +34,7 @@
 
     <factory>
         <exception-handler-factory>
-            tech.bugger.business.internal.ExceptHand$Factory
+            tech.bugger.business.internal.CustomExceptionHandler$Factory
         </exception-handler-factory>
     </factory>
 </faces-config>
