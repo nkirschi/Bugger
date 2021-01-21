@@ -9,9 +9,7 @@ import tech.bugger.global.util.Log;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serial;
 
 /**
@@ -111,7 +109,7 @@ public class AvatarServlet extends MediaServlet {
      * @param serveThumbnail Whether to return the thumbnail or the entire avatar.
      * @return The default avatar or thumbnail.
      */
-    private byte[] loadDefaultAvatar(boolean serveThumbnail) {
+    private byte[] loadDefaultAvatar(final boolean serveThumbnail) {
         try {
             String path = serveThumbnail ? DEFAULT_THUMBNAIL_PATH : DEFAULT_AVATAR_PATH;
             return getServletContext().getResourceAsStream(path).readAllBytes();
