@@ -17,7 +17,6 @@ import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.util.Log;
 
 /**
  * Backing Bean for the home page.
@@ -25,11 +24,6 @@ import tech.bugger.global.util.Log;
 @ViewScoped
 @Named
 public class HomeBacker implements Serializable {
-
-    /**
-     * The {@link Log} instance associated with this class for logging purposes.
-     */
-    private static final Log log = Log.forClass(HomeBacker.class);
 
     @Serial
     private static final long serialVersionUID = -6982333692294902179L;
