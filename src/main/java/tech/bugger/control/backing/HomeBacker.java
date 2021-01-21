@@ -74,7 +74,7 @@ public class HomeBacker implements Serializable {
     @PostConstruct
     void init() {
         if (session.getUser() != null) {
-            inbox = new Paginator<>("created_at", Selection.PageSize.SMALL) {
+            inbox = new Paginator<>("created_at", Selection.PageSize.SMALL, false) {
                 @Override
                 protected Iterable<Notification> fetch() {
                     return notificationService.selectNotifications(session.getUser(), getSelection());
@@ -85,7 +85,6 @@ public class HomeBacker implements Serializable {
                     return notificationService.countNotifications(session.getUser());
                 }
             };
-            inbox.getSelection().setAscending(false);
         }
         topics = new Paginator<>("id", Selection.PageSize.NORMAL) {
             @Override
