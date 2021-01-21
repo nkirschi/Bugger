@@ -9,7 +9,9 @@ import tech.bugger.global.util.Log;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serial;
 
 /**
@@ -24,6 +26,16 @@ public class AvatarServlet extends MediaServlet {
      * The {@link Log} instance associated with this class for logging purposes.
      */
     private static final Log log = Log.forClass(AvatarServlet.class);
+
+    /**
+     * The resource path to the default avatar.
+     */
+    private static final String DEFAULT_AVATAR_PATH = "/resources/images/avatar.jpg";
+
+    /**
+     * The resource path to the default avatar thumbnail.
+     */
+    private static final String DEFAULT_THUMBNAIL_PATH = "/resources/images/thumbnail.jpg";
 
     /**
      * The current application settings.
@@ -72,6 +84,9 @@ public class AvatarServlet extends MediaServlet {
 
         // Fetch the requested image.
         byte[] image = serveThumbnail ? user.getAvatarThumbnail() : profileService.getAvatarForUser(user.getId());
+        if (image == null || image.length == 0) {
+            image = loadDefaultAvatar(serveThumbnail);
+        }
         if (image == null) {
             log.debug("Avatar or thumbnail for user with ID " + user.getId() + " not found.");
             redirectToNotFoundPage(response);
@@ -86,7 +101,23 @@ public class AvatarServlet extends MediaServlet {
         try {
             response.getOutputStream().write(image);
         } catch (IOException e) {
-            log.error("Could not write servlet response.", e);
+            log.warning("Could not write servlet response.", e);
+        }
+    }
+
+    /**
+     * Loads the default avatar or avatar thumbnail.
+     *
+     * @param serveThumbnail Whether to return the thumbnail or the entire avatar.
+     * @return The default avatar or thumbnail.
+     */
+    private byte[] loadDefaultAvatar(boolean serveThumbnail) {
+        try {
+            String path = serveThumbnail ? DEFAULT_THUMBNAIL_PATH : DEFAULT_AVATAR_PATH;
+            return getServletContext().getResourceAsStream(path).readAllBytes();
+        } catch (IOException e) {
+            log.warning("Could not load default avatar or thumbnail.", e);
+            return null;
         }
     }
 

@@ -97,7 +97,7 @@ public class AttachmentServlet extends MediaServlet {
         try {
             response.getOutputStream().write(content);
         } catch (IOException e) {
-            log.error("Could not write servlet response.", e);
+            log.warning("Could not write servlet response.", e);
         }
     }
 

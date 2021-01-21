@@ -15,10 +15,12 @@ import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.User;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
@@ -87,15 +89,23 @@ public class AvatarServletTest {
     }
 
     @Test
-    public void testHandleRequestNoImage() {
+    public void testHandleRequestNoDefaultImage() throws Exception {
         doReturn(true).when(configuration).isGuestReading();
         doReturn("1234").when(request).getParameter("id");
+        doReturn("thumbnail").when(request).getParameter("type");
+
+        ServletContext sctx = mock(ServletContext.class);
+        doReturn(sctx).when(servlet).getServletContext();
+        InputStream is = mock(InputStream.class);
+        doReturn(is).when(sctx).getResourceAsStream(any());
+        doThrow(IOException.class).when(is).readAllBytes();
 
         User user = new User();
         user.setId(1234);
+        user.setAvatarThumbnail(new byte[0]);
         doReturn(user).when(profileService).getUser(1234);
-        doReturn(null).when(profileService).getAvatarForUser(1234);
-        servlet.handleRequest(request, response);
+
+        assertDoesNotThrow(() -> servlet.handleRequest(request, response));
         verify(servlet).redirectToNotFoundPage(response);
     }
 
@@ -129,11 +139,17 @@ public class AvatarServletTest {
         user.setId(1234);
         lenient().doReturn(user).when(profileService).getUserByUsername("admin");
 
-        byte[] avatar = new byte[]{1, 2, 3, 4};
-        doReturn(avatar).when(profileService).getAvatarForUser(1234);
+        ServletContext sctx = mock(ServletContext.class);
+        doReturn(sctx).when(servlet).getServletContext();
+        InputStream is = mock(InputStream.class);
+        doReturn(is).when(sctx).getResourceAsStream(any());
+        byte[] defaultAvatar = new byte[]{1, 2, 3, 4};
+        doReturn(defaultAvatar).when(is).readAllBytes();
+
+        doReturn(new byte[0]).when(profileService).getAvatarForUser(1234);
         ServletOutputStream os = mock(ServletOutputStream.class);
         doReturn(os).when(response).getOutputStream();
-        doThrow(IOException.class).when(os).write(any());
+        doThrow(IOException.class).when(os).write(defaultAvatar);
 
         assertDoesNotThrow(() -> servlet.handleRequest(request, response));
     }
