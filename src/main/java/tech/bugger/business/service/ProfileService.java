@@ -396,10 +396,10 @@ public class ProfileService {
             throw new IllegalArgumentException("User ID cannot be null.");
         } else if (subscribedTo == null) {
             log.error("Cannot determine subscription status to user null.");
-            throw new IllegalArgumentException("Report cannot be null.");
+            throw new IllegalArgumentException("User cannot be null.");
         } else if (subscribedTo.getId() == null) {
             log.error("Cannot determine subscription status to user with ID null.");
-            throw new IllegalArgumentException("Report ID cannot be null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
         }
 
         boolean status;
