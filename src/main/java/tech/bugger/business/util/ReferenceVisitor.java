@@ -1,5 +1,6 @@
 package tech.bugger.business.util;
 
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.commonmark.node.AbstractVisitor;
@@ -141,10 +142,16 @@ public class ReferenceVisitor extends AbstractVisitor {
      * @return A link node if the input is a valid reference, otherwise just a text node.
      */
     private Node parseLink(final String sequence, final String refId, final String dest) {
+        Optional<Integer> parsedInt = getInteger(refId);
         // Users can also contain other characters
-        if (isInteger(refId) || (sequence.equals(USER_REFERENCE) && PATTERN_USER.matcher(refId).matches())) {
+        if (sequence.equals(USER_REFERENCE) && PATTERN_USER.matcher(refId).matches()) {
             Link node = new Link(String.format(dest, refId), refId);
             node.appendChild(new Text(sequence + refId));
+            return node;
+        } else if (parsedInt.isPresent()) {
+            String ref = parsedInt.get() + "";
+            Link node = new Link(String.format(dest, ref), ref);
+            node.appendChild(new Text(sequence + ref));
             return node;
         } else {
             return new Text(sequence + refId);
@@ -174,12 +181,11 @@ public class ReferenceVisitor extends AbstractVisitor {
      * @param str The string to check.
      * @return {@code true} iff the given string represents an integer, {@code false} otherwise.
      */
-    private boolean isInteger(final String str) {
+    private Optional<Integer> getInteger(final String str) {
         try {
-            Integer.parseInt(str);
-            return true;
+            return Optional.of(Integer.parseInt(str));
         } catch (NumberFormatException e) {
-            return false;
+            return Optional.empty();
         }
     }
 
