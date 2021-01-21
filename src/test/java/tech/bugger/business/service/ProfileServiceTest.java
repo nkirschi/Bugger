@@ -107,7 +107,7 @@ public class ProfileServiceTest {
                          Locale.ENGLISH, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, true);
         testTopic = new Topic(1, "title", "description");
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
-                                mock(Authorship.class), mock(OffsetDateTime.class), null, null, false, null);
+                                mock(Authorship.class), mock(OffsetDateTime.class), null, null, false, 0);
         selection = new Selection(1, 0, Selection.PageSize.SMALL, "id", true);
     }
 

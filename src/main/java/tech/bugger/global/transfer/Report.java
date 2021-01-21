@@ -106,7 +106,7 @@ public class Report implements Serializable {
     /**
      * The ID of the topic this report is in.
      */
-    private Integer topicID;
+    private int topicID;
 
     /**
      * Constructs a new report.
@@ -125,7 +125,7 @@ public class Report implements Serializable {
      */
     public Report(final Integer id, final String title, final Type type, final Severity severity, final String version,
                   final Authorship authorship, final OffsetDateTime closingDate, final Integer duplicateOf,
-                  final Integer relevance, final boolean relevanceOverwritten, final Integer topicID) {
+                  final Integer relevance, final boolean relevanceOverwritten, final int topicID) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -323,7 +323,7 @@ public class Report implements Serializable {
      *
      * @return The associated topic.
      */
-    public Integer getTopicID() {
+    public int getTopicID() {
         return topicID;
     }
 
@@ -332,7 +332,7 @@ public class Report implements Serializable {
      *
      * @param topicID The associated topic to be set.
      */
-    public void setTopicID(final Integer topicID) {
+    public void setTopicID(final int topicID) {
         this.topicID = topicID;
     }
 

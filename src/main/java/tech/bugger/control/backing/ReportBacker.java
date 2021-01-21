@@ -274,8 +274,8 @@ public class ReportBacker implements Serializable {
         };
 
         if (postID != null) {
-            Post post = new Post(postID, null, null, null, null);
-            while (StreamSupport.stream(posts.spliterator(), false).noneMatch(post::equals)) {
+            int pID = postID;
+            while (StreamSupport.stream(posts.spliterator(), false).noneMatch(p -> p.getId() == pID)) {
                 try {
                     posts.nextPage();
                 } catch (IllegalStateException e) {

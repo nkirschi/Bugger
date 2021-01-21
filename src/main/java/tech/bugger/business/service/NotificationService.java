@@ -1,16 +1,5 @@
 package tech.bugger.business.service;
 
-import java.io.Serializable;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
@@ -29,6 +18,18 @@ import tech.bugger.persistence.util.Mail;
 import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Service providing methods related to notifications. A {@code Feedback} event is fired, if unexpected circumstances
@@ -186,9 +187,6 @@ public class NotificationService implements Serializable {
         if (notification == null) {
             log.error("Cannot create notification null.");
             throw new IllegalArgumentException("Notification cannot be null.");
-        } else if (notification.getActuatorID() == null) {
-            log.error("Cannot create notification without causer.");
-            throw new IllegalArgumentException("Actuator ID cannot be null.");
         } else if (notification.getReportID() == null) {
             log.error("Cannot create notification without report.");
             throw new IllegalArgumentException("Report ID cannot be null.");
