@@ -5,6 +5,7 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
@@ -66,7 +67,7 @@ public class ReportBacker implements Serializable {
     /**
      * The currently displayed dialog.
      */
-    private ReportPageDialog currentDialog;
+    private Dialog currentDialog;
 
     /**
      * The application settings cache.
@@ -138,7 +139,7 @@ public class ReportBacker implements Serializable {
      */
     private final ExternalContext ectx;
 
-    public enum ReportPageDialog {
+    public enum Dialog {
 
         /**
          * Delete a post.
@@ -230,14 +231,8 @@ public class ReportBacker implements Serializable {
             throw new InternalError("Report " + report + " without topic!");
         }
 
-        // disallow access for banned users if guest mode is inactive
-        if (!applicationSettings.getConfiguration().isGuestReading() && session.getUser() != null && isBanned()) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-            return;
-        }
 
         // now begin actually initializing the page content
-
         currentDialog = null;
         banned = topicService.isBanned(session.getUser(), topic);
         moderator = topicService.isModerator(session.getUser(), topic);
@@ -246,11 +241,17 @@ public class ReportBacker implements Serializable {
                 || session.getUser().equals(report.getAuthorship().getCreator()));
         subscribed = reportService.isSubscribed(session.getUser(), report);
 
+        // disallow access for banned users if guest mode is inactive
+        if (!applicationSettings.getConfiguration().isGuestReading() && session.getUser() != null && banned) {
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
+        }
+
         posts = new Paginator<>("created_at", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Post> fetch() {
                 List<Post> posts = reportService.getPostsFor(report, getSelection());
-                //posts.forEach(p -> p.setContent(MarkdownHandler.toHtml(p.getContent())));
+                posts.forEach(p -> p.setContent(MarkdownHandler.toHtml(p.getContent())));
                 return posts;
             }
 
@@ -313,7 +314,7 @@ public class ReportBacker implements Serializable {
      * @param dialog The dialog to display.
      * @return {@code null} to reload the page.
      */
-    public String displayDialog(final ReportPageDialog dialog) {
+    public String displayDialog(final Dialog dialog) {
         log.debug(">>>>>> displayDialog");
         currentDialog = dialog;
         log.info("Displaying dialog " + dialog + ".");
@@ -329,7 +330,7 @@ public class ReportBacker implements Serializable {
     public String deletePostDialog(final Post post) {
         log.debug(">>>>>> deletePostDialog");
         postToBeDeleted = post;
-        return displayDialog(ReportPageDialog.DELETE_POST);
+        return displayDialog(Dialog.DELETE_POST);
     }
 
     /**
@@ -556,7 +557,7 @@ public class ReportBacker implements Serializable {
      *
      * @return The current dialog.
      */
-    public ReportPageDialog getCurrentDialog() {
+    public Dialog getCurrentDialog() {
         return currentDialog;
     }
 
