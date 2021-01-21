@@ -16,26 +16,29 @@
         <h:form id="f-edit-post"
                 enctype="multipart/form-data">
 
-
             <h:panelGroup rendered="#{postEditBacker.create}">
-                <h:outputText value="#{labels.post_create_info} "/>
-                <h:link value="###{postEditBacker.report.id} (#{postEditBacker.report.title})" outcome="pretty:report">
-                    <f:param name="id" value="#{postEditBacker.report.id}"/>
-                </h:link>
-                <h:outputText value="#{labels.post_create_info2}"/>
+                <p>
+                    <h:outputText value="#{labels.post_create_info} "/>
+                    <h:link value="###{postEditBacker.report.id} (#{postEditBacker.report.title})" outcome="pretty:report">
+                        <f:param name="id" value="#{postEditBacker.report.id}"/>
+                    </h:link>
+                    <h:outputText value="#{labels.post_create_info2}"/>
+                </p>
             </h:panelGroup>
 
             <h:panelGroup rendered="#{not postEditBacker.create}">
-                <h:outputText value="#{labels.post_edit_info} "/>
-                <h:link value="###{postEditBacker.post.id}" outcome="pretty:report">
-                    <f:param name="id" value="#{postEditBacker.report.id}"/>
-                    <f:param name="p" value="#{postEditBacker.post.id}"/>
-                </h:link>
-                <h:outputText value=" #{labels.post_edit_info2} "/>
-                <h:link value="###{postEditBacker.report.id} (#{postEditBacker.report.title})" outcome="pretty:report">
-                    <f:param name="id" value="#{postEditBacker.report.id}"/>
-                </h:link>
-                <h:outputText value="#{labels.post_edit_info3}"/>
+                <p>
+                    <h:outputText value="#{labels.post_edit_info} "/>
+                    <h:link value="###{postEditBacker.post.id}" outcome="pretty:report">
+                        <f:param name="id" value="#{postEditBacker.report.id}"/>
+                        <f:param name="p" value="#{postEditBacker.post.id}"/>
+                    </h:link>
+                    <h:outputText value=" #{labels.post_edit_info2} "/>
+                    <h:link value="###{postEditBacker.report.id} (#{postEditBacker.report.title})" outcome="pretty:report">
+                        <f:param name="id" value="#{postEditBacker.report.id}"/>
+                    </h:link>
+                    <h:outputText value="#{labels.post_edit_info3}"/>
+                </p>
             </h:panelGroup>
 
             <h:panelGroup styleClass="row" layout="block">
@@ -48,12 +51,6 @@
                 <h:message for="it-content"/>
             </h:panelGroup>
 
-            <ul>
-                <ui:repeat var="attachment" value="#{postEditBacker.attachments}">
-                    <li><h:outputText value="#{attachment.name}"/></li>
-                </ui:repeat>
-            </ul>
-
             <h:panelGroup>
                 <h:outputFormat id="post-attachments-info"
                                 value="#{labels.post_attachments_info}"
@@ -64,7 +61,13 @@
                 </h:outputFormat>
             </h:panelGroup>
 
-            <h:panelGroup styleClass="row"
+            <ul>
+                <ui:repeat var="attachment" value="#{postEditBacker.attachments}">
+                    <li><h:outputText value="#{attachment.name}"/></li>
+                </ui:repeat>
+                </ul>
+
+            <h:panelGroup styleClass="row my-3"
                           layout="block"
                           rendered="#{postEditBacker.attachments.size()
                                       lt applicationSettings.configuration.maxAttachmentsPerPost}">
@@ -77,18 +80,18 @@
                 <h:commandButton id="cb-add-attachment"
                                  value="#{labels.add_attachment}"
                                  action="#{postEditBacker.uploadAttachment}"
-                                 styleClass="button style-button"/>
+                                 styleClass="btn btn-primary"/>
             </h:panelGroup>
 
-            <h:panelGroup styleClass="row" layout="block">
+            <h:panelGroup styleClass="row my-3" layout="block">
                 <h:commandButton id="cb-remove-attachments"
                                  value="#{labels.remove_all_attachments}"
                                  action="#{postEditBacker.deleteAllAttachments}"
-                                 styleClass="button style-button"/>
+                                 styleClass="btn btn-primary"/>
             </h:panelGroup>
 
             <h:commandButton value="#{postEditBacker.create ? labels.post_create : labels.post_save_changes}"
-                             action="#{postEditBacker.saveChanges}"/>
+                             action="#{postEditBacker.saveChanges}" styleClass="btn btn-primary"/>
         </h:form>
     </ui:define>
 </ui:composition>
