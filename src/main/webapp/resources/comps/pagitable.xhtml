@@ -71,7 +71,7 @@
             <h:panelGroup layout="block" styleClass="align-right col p-2"
                           rendered="#{not cc.attrs.simple}">
                 <h:form id="f-entries">
-                    <h:outputText id="ot-entriesPP" value="#{labels.paginator_entries_per_page}: "
+                    <h:outputText id="ot-entriesPP" value="#{labels.paginator_entries_per_page}:&#xA0;"
                                   styleClass="col"/>
                     <h:selectOneMenu id="s-entriesPP" value="#{cc.attrs.paginator.selection.pageSize}"
                                      onchange="document.getElementById('#{cc.refreshBtnID}').click()"

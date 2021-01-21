@@ -5,8 +5,9 @@
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:b="http://tech.bugger/tags">
 
-    <ui:param name="title" value="#{reportBacker.report.title}"/>
     <ui:param name="helpKey" value="report"/>
+
+    <ui:param name="title" value="#{reportBacker.report.title}"/>
 
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
@@ -147,7 +148,8 @@
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="col 9">
-                    <h:outputLabel value="#{labels.relevance_overwritten}" rendered="#{reportBacker.report.relevanceOverwritten}"/>
+                    <h:outputLabel value="#{labels.relevance_overwritten}"
+                                   rendered="#{reportBacker.report.relevanceOverwritten}"/>
                     <h:outputLabel value="#{labels.current_relevance}:&#xA0;"/>
                     <h:outputLabel value="#{reportBacker.report.relevance}"/>
                 </h:panelGroup>
@@ -168,7 +170,18 @@
                 <h:outputLabel value="#{labels.id}" for="ot-id" styleClass="form-label"/>
             </h:panelGroup>
             <h:panelGroup styleClass="col-9">
-                <h:outputText id="ot-id" value="#{reportBacker.report.id}"/>
+                <h:outputText id="ot-id" value="##{reportBacker.report.id}"/>
+            </h:panelGroup>
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" styleClass="row mb3">
+            <h:panelGroup styleClass="col-3">
+                <h:outputLabel value="#{labels.topic}" for="ot-topic" styleClass="form-label"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="col-9">
+                <h:link id="ot-topic" value="!#{reportBacker.report.topicID}" outcome="pretty:topic">
+                    <f:param name="id" value="#{reportBacker.report.topicID}"/>
+                </h:link>
             </h:panelGroup>
         </h:panelGroup>
 
