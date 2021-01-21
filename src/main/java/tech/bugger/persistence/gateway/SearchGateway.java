@@ -3,10 +3,8 @@ package tech.bugger.persistence.gateway;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
+
+import tech.bugger.global.transfer.*;
 import tech.bugger.persistence.exception.NotFoundException;
 
 /**
@@ -23,7 +21,7 @@ public interface SearchGateway {
      * @param showNonAdmins Whether to include non-administrators.
      * @return The list of users that match the search criteria.
      */
-    List<User> getUserResults(String query, Selection selection, boolean showAdmins, boolean showNonAdmins);
+    List<SearchedUser> getUserResults(String query, Selection selection, boolean showAdmins, boolean showNonAdmins);
 
     /**
      * Searches for users by their username and filters the results according to given selection criteria.

@@ -1,5 +1,6 @@
 package tech.bugger.global.transfer;
 
+
 import tech.bugger.global.util.Constants;
 
 import java.io.Serial;
@@ -30,7 +31,6 @@ public class User implements Serializable {
          */
         MINIMAL
     }
-
     /**
      * This user's unique ID.
      */

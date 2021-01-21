@@ -24,6 +24,11 @@ public class Topic implements Serializable {
     private String title;
 
     /**
+     * Number of Posts in this topic
+     */
+    private int numPosts;
+
+    /**
      * The description.
      */
     private String description;
@@ -118,6 +123,20 @@ public class Topic implements Serializable {
      */
     public void setDescription(final String description) {
         this.description = description;
+    }
+
+    /**
+     * @return The number of Posts.
+     */
+    public int getNumPosts() {
+        return numPosts;
+    }
+
+    /**
+     * @param numPosts The new number of Posts.
+     */
+    public void setNumPosts(int numPosts) {
+        this.numPosts = numPosts;
     }
 
     /**

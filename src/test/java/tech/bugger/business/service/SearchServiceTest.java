@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
@@ -38,6 +39,9 @@ public class SearchServiceTest {
     private TransactionManager transactionManager;
 
     @Mock
+    private ApplicationSettings applicationSettings;
+
+    @Mock
     private Transaction tx;
 
     @Mock
@@ -55,7 +59,7 @@ public class SearchServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new SearchService(feedbackEvent, messages, transactionManager);
+        service = new SearchService(feedbackEvent, messages, transactionManager, applicationSettings);
         when(transactionManager.begin()).thenReturn(tx);
         when(tx.newSearchGateway()).thenReturn(searchGateway);
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",

@@ -1,11 +1,9 @@
 package tech.bugger.business.service;
 
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
+import tech.bugger.global.transfer.*;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
@@ -16,10 +14,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * Service providing methods related to searching for specific topics, reports and users. A {@code Feedback} event is
@@ -44,6 +39,11 @@ public class SearchService {
     private final ResourceBundle messages;
 
     /**
+     * The current application Settings.
+     */
+    private final ApplicationSettings applicationSettings;
+
+    /**
      * Transaction manager used for creating transactions.
      */
     private final TransactionManager transactionManager;
@@ -59,10 +59,12 @@ public class SearchService {
      * @param transactionManager The transaction manager to use for creating transactions.
      * @param feedback           The feedback event to be used for user feedback.
      * @param messages           The resource bundle to look up feedback messages.
+     * @param applicationSettings The application settings for the service.
      */
     @Inject
     public SearchService(final Event<Feedback> feedback, final @RegistryKey("messages") ResourceBundle messages,
-                         final TransactionManager transactionManager) {
+                         final TransactionManager transactionManager, ApplicationSettings applicationSettings) {
+        this.applicationSettings = applicationSettings;
         this.feedback = feedback;
         this.messages = messages;
         this.transactionManager = transactionManager;
@@ -219,9 +221,9 @@ public class SearchService {
      * @param showNonAdmins Whether or not to include non-administrators.
      * @return A list of users containing the selected search results.
      */
-    public List<User> getUserResults(final String query, final Selection selection, final boolean showAdmins,
-                                     final boolean showNonAdmins) {
-        List<User> users = new ArrayList<>();
+    public List<SearchedUser> getUserResults(final String query, final Selection selection, final boolean showAdmins,
+                                             final boolean showNonAdmins) {
+        List<SearchedUser> users = new ArrayList<>();
         try (Transaction tx = transactionManager.begin()) {
             users = tx.newSearchGateway().getUserResults(query, selection, showAdmins, showNonAdmins);
             tx.commit();
@@ -229,7 +231,61 @@ public class SearchService {
             log.error("Error while loading the user search results.", e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
+        for (SearchedUser u : users) {
+            u.setCalculatedVotingWeight(getVotingWeightFromPosts(u.getNumPosts()));
+        }
         return users;
+    }
+
+    /**
+     * Returns the voting weight calculated from a given number of posts.
+     *
+     * @param posts The number of posts.
+     * @return The voting weight as an {@code int}.
+     */
+    public int getVotingWeightFromPosts(final int posts) {
+        int votingWeight = 0;
+
+        if (posts == 0) {
+            votingWeight = 1;
+        } else {
+            String[] votingDef = applicationSettings.getConfiguration().getVotingWeightDefinition().split(",");
+            if (votingDef.length == 0) {
+                log.error("The voting weight definition is empty");
+                feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
+                return votingWeight;
+            }
+
+            try {
+                int[] votingWeightDef = Arrays.stream(votingDef).mapToInt(Integer::parseInt).sorted().toArray();
+                votingWeight = calculateVotingWeight(posts, votingWeightDef);
+            } catch (NumberFormatException e) {
+                log.error("The voting weight definition could not be parsed to a number");
+                feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
+            }
+        }
+        return votingWeight;
+    }
+
+    /**
+     * Calculates the voting weight from the given number of posts and the voting weight definition.
+     *
+     * @param numPosts        The number of posts.
+     * @param votingWeightDef The voting weight definition.
+     * @return The calculated voting weight.
+     */
+    private int calculateVotingWeight(final int numPosts, final int[] votingWeightDef) {
+        if (votingWeightDef[0] != 0) {
+            log.error("The voting weight definition needs to contain a 0.");
+            feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
+            return 0;
+        }
+        for (int i = 1; i < votingWeightDef.length; i++) {
+            if (numPosts < votingWeightDef[i]) {
+                return i;
+            }
+        }
+        return votingWeightDef.length;
     }
 
     /**

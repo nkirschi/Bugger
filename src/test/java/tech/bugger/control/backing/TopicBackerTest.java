@@ -62,7 +62,7 @@ public class TopicBackerTest {
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic = new Topic(1, "Some title", "Some description");
-        topicBacker = new TopicBacker(topicService, searchService, fctx, ectx, session, settings);
+        topicBacker = new TopicBacker(topicService, searchService, fctx, ectx, session);
     }
 
     @Test

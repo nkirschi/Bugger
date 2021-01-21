@@ -9,10 +9,9 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
+import java.util.Locale;
+
+import tech.bugger.global.transfer.*;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
@@ -53,8 +52,8 @@ public class SearchDBGateway implements SearchGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<User> getUserResults(final String query, final Selection selection, final boolean showAdmins,
-                                     final boolean showNonAdmins) {
+    public List<SearchedUser> getUserResults(final String query, final Selection selection, final boolean showAdmins,
+                                             final boolean showNonAdmins) {
         if (selection == null || query == null) {
             log.error("The selection or query cannot be null!");
             throw new IllegalArgumentException("The selection or query cannot be null!");
@@ -62,7 +61,7 @@ public class SearchDBGateway implements SearchGateway {
             log.error("Error when trying to get users sorted by nothing.");
             throw new IllegalArgumentException("The selection needs to have a column to sort by.");
         }
-        List<User> userResults = new ArrayList<>(Math.max(0, selection.getTotalSize()));
+        List<SearchedUser> userResults = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         if (!showAdmins && !showNonAdmins) {
             return userResults;
         }
@@ -77,15 +76,10 @@ public class SearchDBGateway implements SearchGateway {
                 adminFilter = "AND is_admin = false ";
             }
         }
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" WHERE username LIKE ? "
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" as u JOIN user_num_posts as p on u.id = p.author WHERE username LIKE ? "
                 + adminFilter
                 + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
-            System.out.println(new StatementParametrizer(stmt)
-                    .string(query + "%")
-                    .integer(selection.getPageSize().getSize())
-                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
-                    .toStatement().toString());
             ResultSet rs = new StatementParametrizer(stmt)
                     .string(query + "%")
                     .integer(selection.getPageSize().getSize())
@@ -93,14 +87,26 @@ public class SearchDBGateway implements SearchGateway {
                     .toStatement().executeQuery();
 
             while (rs.next()) {
-                userResults.add(UserDBGateway.getUserFromResultSet(rs));
+                userResults.add(getSearchedUserFromResultSet(rs));
             }
         } catch (SQLException e) {
             log.error("Error while loading the user search suggestions for the query " + query, e);
             throw new StoreException("Error while loading the user search suggestions for the query " + query, e);
         }
-
         return userResults;
+    }
+
+    /**
+     * Parses the given {@link ResultSet} and returns the corresponding {@link SearchedUser}.
+     *
+     * @param rs     The {@link ResultSet} to parse.
+     * @return The parsed {@link User}.
+     * @throws SQLException Some parsing error occurred.
+     */
+    static SearchedUser getSearchedUserFromResultSet(final ResultSet rs) throws SQLException {
+        return new SearchedUser(rs.getString("username"), rs.getString("first_name"), rs.getString("last_name"),
+                rs.getBoolean("is_admin"), User.ProfileVisibility.valueOf(rs.getString("profile_visibility").toUpperCase()),
+                rs.getObject("forced_voting_weight", Integer.class), rs.getInt("num_posts"));
     }
 
     /**
@@ -361,7 +367,7 @@ public class SearchDBGateway implements SearchGateway {
         }
 
         List<Topic> topicResults = new ArrayList<>(Math.max(0, selection.getTotalSize()));
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"topic\" WHERE title LIKE ?"
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"topic\" as t JOIN WHERE title LIKE ?"
                 + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)

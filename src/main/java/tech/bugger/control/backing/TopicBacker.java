@@ -166,11 +166,6 @@ public class TopicBacker implements Serializable {
     private final ExternalContext ectx;
 
     /**
-     * The application settings cache.
-     */
-    private final ApplicationSettings settings;
-
-    /**
      * Constructs a new topic page backing bean with the necessary dependencies.
      *
      * @param topicService  The topic service to use.
@@ -178,21 +173,18 @@ public class TopicBacker implements Serializable {
      * @param fctx          The current {@link FacesContext} of the application.
      * @param ectx          The current {@link ExternalContext} of the application.
      * @param session       The current {@link UserSession}.
-     * @param settings      The current application settings.
      */
     @Inject
     public TopicBacker(final TopicService topicService,
                        final SearchService searchService,
                        final FacesContext fctx,
                        final ExternalContext ectx,
-                       final UserSession session,
-                       final ApplicationSettings settings) {
+                       final UserSession session) {
         this.topicService = topicService;
         this.searchService = searchService;
         this.fctx = fctx;
         this.ectx = ectx;
         this.session = session;
-        this.settings = settings;
     }
 
     /**
