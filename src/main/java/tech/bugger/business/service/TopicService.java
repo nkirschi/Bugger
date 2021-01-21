@@ -651,8 +651,10 @@ public class TopicService {
      * @return {@code true} if the user is a moderator, {@code false} otherwise.
      */
     public boolean isModerator(final User user, final Topic topic) {
+        if (user == null) { // anonymous users are never moderators
+            return false;
+        }
         boolean isMod = false;
-
         try (Transaction tx = transactionManager.begin()) {
             isMod = tx.newUserGateway().isModerator(user, topic);
             tx.commit();

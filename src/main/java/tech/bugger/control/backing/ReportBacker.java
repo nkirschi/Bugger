@@ -5,7 +5,6 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
@@ -105,14 +104,19 @@ public class ReportBacker implements Serializable {
     private boolean downvoted;
 
     /**
-     * Whether the user is privileged for this report.
-     */
-    private boolean privileged;
-
-    /**
      * Whether the user is banned in the topic this report is in.
      */
     private boolean banned;
+
+    /**
+     * Whether the user is moderator for the topic this report is in.
+     */
+    private boolean moderator;
+
+    /**
+     * Whether the user is privileged for this report.
+     */
+    private boolean privileged;
 
     /**
      * Whether the user is subscribed to this report.
@@ -235,18 +239,18 @@ public class ReportBacker implements Serializable {
         // now begin actually initializing the page content
 
         currentDialog = null;
-        subscribed = reportService.isSubscribed(session.getUser(), report);
         banned = topicService.isBanned(session.getUser(), topic);
+        moderator = topicService.isModerator(session.getUser(), topic);
         privileged = session.getUser() != null && !banned
-                && (session.getUser().isAdministrator()
-                || topicService.isModerator(session.getUser(), topic)
+                && (session.getUser().isAdministrator() || moderator
                 || session.getUser().equals(report.getAuthorship().getCreator()));
+        subscribed = reportService.isSubscribed(session.getUser(), report);
 
         posts = new Paginator<>("created_at", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Post> fetch() {
                 List<Post> posts = reportService.getPostsFor(report, getSelection());
-                posts.forEach(p -> p.setContent(MarkdownHandler.toHtml(p.getContent())));
+                //posts.forEach(p -> p.setContent(MarkdownHandler.toHtml(p.getContent())));
                 return posts;
             }
 
@@ -464,10 +468,9 @@ public class ReportBacker implements Serializable {
      */
     public boolean privilegedForPost(final Post post) {
         log.debug(">>>>>> privilegedForPost");
-        if (session.getUser() != null) {
-            return postService.isPrivileged(session.getUser(), post, report);
-        }
-        return false;
+        return session.getUser() != null
+                && (session.getUser().isAdministrator() || moderator
+                || session.getUser().equals(post.getAuthorship().getCreator()));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
