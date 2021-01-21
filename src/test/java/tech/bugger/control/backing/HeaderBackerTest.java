@@ -12,7 +12,6 @@ import tech.bugger.global.transfer.User;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.lenient;
@@ -32,8 +31,6 @@ public class HeaderBackerTest {
     @Mock
     private ExternalContext ectx;
 
-    private Field field;
-
     private User user;
 
     @BeforeEach
@@ -42,8 +39,6 @@ public class HeaderBackerTest {
         lenient().doReturn(user).when(session).getUser();
         lenient().doReturn(ectx).when(fctx).getExternalContext();
         MockitoAnnotations.openMocks(this);
-        field = headerBacker.getClass().getDeclaredField("displayMenu");
-        field.setAccessible(true);
     }
 
     @Test
