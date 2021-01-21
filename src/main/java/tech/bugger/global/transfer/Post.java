@@ -26,7 +26,7 @@ public class Post implements Serializable {
     /**
      * The associated report ID.
      */
-    private Integer report;
+    private int report;
 
     /**
      * The manipulation metadata.
@@ -49,7 +49,7 @@ public class Post implements Serializable {
      */
     public Post(final int id,
                 final String content,
-                final Integer report,
+                final int report,
                 final Authorship authorship,
                 final List<Attachment> attachments) {
         this.id = id;
@@ -100,7 +100,7 @@ public class Post implements Serializable {
      *
      * @return The associated report ID.
      */
-    public Integer getReport() {
+    public int getReport() {
         return report;
     }
 
@@ -109,7 +109,7 @@ public class Post implements Serializable {
      *
      * @param report The associated report ID to be set.
      */
-    public void setReport(final Integer report) {
+    public void setReport(final int report) {
         this.report = report;
     }
 

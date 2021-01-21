@@ -86,6 +86,11 @@ public class TrespassListener implements PhaseListener {
             return;
         }
 
+        // sometimes there strangely is no HTTP session and everything breaks
+        if (ectx.getSession(false) == null) {
+            return;
+        }
+
         UserSession session = CDI.current().select(UserSession.class).get();
         User user = session != null ? session.getUser() : null;
         Locale locale = session != null ? session.getLocale() : ectx.getRequestLocale();

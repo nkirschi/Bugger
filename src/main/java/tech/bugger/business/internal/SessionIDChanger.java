@@ -1,5 +1,6 @@
 package tech.bugger.business.internal;
 
+import javax.faces.context.ExternalContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
@@ -31,9 +32,9 @@ public class SessionIDChanger implements PhaseListener {
      */
     @Override
     public void afterPhase(final PhaseEvent phaseEvent) {
-        HttpServletRequest req = (HttpServletRequest) phaseEvent.getFacesContext().getExternalContext().getRequest();
-        if (req.getSession(false) != null) {
-            req.changeSessionId();
+        ExternalContext ectx = phaseEvent.getFacesContext().getExternalContext();
+        if (ectx.getSession(false) != null) {
+            ((HttpServletRequest) ectx.getRequest()).changeSessionId();
         }
     }
 

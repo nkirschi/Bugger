@@ -22,6 +22,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.context.Flash;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
@@ -89,6 +90,7 @@ public class TrespassListenerTest {
         lenient().doReturn(fctx).when(event).getFacesContext();
         lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(mock(Flash.class)).when(ectx).getFlash();
+        lenient().doReturn(mock(HttpSession.class)).when(ectx).getSession(false);
         lenient().doReturn(mock(ResourceBundle.class)).when(registry).getBundle(anyString(), any());
         lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
     }

@@ -416,7 +416,7 @@ public class PostService {
             return true;
         }
 
-        if (report == null || report.getTopicID() == null) {
+        if (report == null) {
             return false;
         }
 

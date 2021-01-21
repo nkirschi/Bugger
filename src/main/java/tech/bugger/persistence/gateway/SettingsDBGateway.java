@@ -44,10 +44,14 @@ public class SettingsDBGateway implements SettingsGateway {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM system_settings;")) {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return new Configuration(rs.getBoolean("guest_reading"), rs.getBoolean("closed_report_posting"),
-                                         rs.getString("user_email_format"), rs.getString("allowed_file_extensions"),
-                                         rs.getInt("max_attachments_per_post"), rs.getString(
-                        "voting_weight_definition"));
+                return new Configuration(
+                        rs.getBoolean("guest_reading"),
+                        rs.getBoolean("closed_report_posting"),
+                        rs.getString("user_email_format"),
+                        rs.getString("allowed_file_extensions"),
+                        rs.getInt("max_attachments_per_post"),
+                        rs.getString("voting_weight_definition")
+                );
             } else {
                 throw new NotFoundException("System configuration not found in database.");
             }
@@ -62,12 +66,18 @@ public class SettingsDBGateway implements SettingsGateway {
      */
     @Override
     public void setConfiguration(final Configuration configuration) {
-        try (PreparedStatement stmt = conn.prepareStatement(
+        // @formatter:off
+        String query =
                 "UPDATE system_settings "
-                        + "SET guest_reading = ?, closed_report_posting = ?, user_email_format = ?, "
-                        + "allowed_file_extensions = ?, max_attachments_per_post = ?, voting_weight_definition = ? "
-                        + "WHERE id = 0;"
-        )) {
+              + "SET    guest_reading = ?, "
+              + "       closed_report_posting = ?, "
+              + "       user_email_format = ?, "
+              + "       allowed_file_extensions = ?,"
+              + "       max_attachments_per_post = ?, "
+              + "       voting_weight_definition = ? "
+              + "WHERE  id = 0;";
+        // @formatter:on
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
             new StatementParametrizer(stmt)
                     .bool(configuration.isGuestReading())
                     .bool(configuration.isClosedReportPosting())
@@ -90,10 +100,14 @@ public class SettingsDBGateway implements SettingsGateway {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM system_settings;")) {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return new Organization(rs.getString("organization_name"), rs.getBytes("organization_logo"),
-                                        rs.getString("organization_theme"), rs.getString("organization_privacy_policy"),
-                                        rs.getString("organization_imprint"), rs.getString("organization_support_info"
-                ));
+                return new Organization(
+                        rs.getString("organization_name"),
+                        rs.getBytes("organization_logo"),
+                        rs.getString("organization_theme"),
+                        rs.getString("organization_privacy_policy"),
+                        rs.getString("organization_imprint"),
+                        rs.getString("organization_support_info")
+                );
             } else {
                 throw new NotFoundException("Organization data not found in database.");
             }
@@ -108,12 +122,18 @@ public class SettingsDBGateway implements SettingsGateway {
      */
     @Override
     public void setOrganization(final Organization organization) {
-        try (PreparedStatement stmt = conn.prepareStatement(
+        // @formatter:off
+        String query =
                 "UPDATE system_settings "
-                        + "SET organization_name = ?, organization_logo = ?, organization_theme = ?, "
-                        + "organization_privacy_policy = ?, organization_imprint = ?, organization_support_info = ? "
-                        + "WHERE id = 0;"
-        )) {
+              + "SET    organization_name = ?, "
+              + "       organization_logo = ?, "
+              + "       organization_theme = ?, "
+              + "       organization_privacy_policy = ?, "
+              + "       organization_imprint = ?, "
+              + "       organization_support_info = ? "
+              + "WHERE  id = 0;";
+        // @formatter:on
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
             new StatementParametrizer(stmt)
                     .string(organization.getName())
                     .bytes(organization.getLogo())
