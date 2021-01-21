@@ -44,6 +44,11 @@ public class ReferenceVisitor extends AbstractVisitor {
     private static final String USER_REFERENCE = "@";
 
     /**
+     * The intro sequence for a topic reference.
+     */
+    private static final String TOPIC_REFERENCE = "!";
+
+    /**
      * The intro sequence for a post reference.
      */
     private static final String POST_REFERENCE = "##";
@@ -57,6 +62,11 @@ public class ReferenceVisitor extends AbstractVisitor {
      * The endpoint URL for a user reference.
      */
     private static final String USER_ENDPOINT = "/profile?u=%1$s";
+
+    /**
+     * The endpoint URL for a topic reference.
+     */
+    private static final String TOPIC_ENDPOINT = "/topic?id=%1$s";
 
     /**
      * The endpoint URL for a post reference.
@@ -78,6 +88,8 @@ public class ReferenceVisitor extends AbstractVisitor {
         String str = text.getLiteral();
         if (str.contains(USER_REFERENCE)) {
             parseText(text, USER_REFERENCE, USER_ENDPOINT);
+        } else if (str.contains(TOPIC_REFERENCE)) {
+            parseText(text, TOPIC_REFERENCE, TOPIC_ENDPOINT);
         } else if (str.contains(POST_REFERENCE)) {
             parseText(text, POST_REFERENCE, POST_ENDPOINT);
         } else if (str.contains(REPORT_REFERENCE)) {
