@@ -78,6 +78,13 @@ body {
     width: 200px;
 }
 
+.header-search-suggestions {
+    position: absolute;
+    top: 60px;
+    left: 20%;
+    right: 20%;
+}
+
 .alert {
     display: block;
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);

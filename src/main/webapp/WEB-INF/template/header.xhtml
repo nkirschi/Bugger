@@ -3,6 +3,7 @@
         xmlns:h="http://xmlns.jcp.org/jsf/html"
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
         xmlns:f="http://xmlns.jcp.org/jsf/core">
+
     <h:panelGroup id="p-header" layout="block" styleClass="d-flex p-3">
         <h:panelGroup layout="block"
                       id="p-organization"
@@ -35,7 +36,7 @@
                         <f:ajax listener="#{headerBacker.updateSuggestions}" event="keyup"
                                 render="p-search-suggestions"/>
                     </h:inputText>
-                    <h:panelGroup id="p-search-suggestions" layout="block">
+                    <h:panelGroup id="p-search-suggestions" layout="block" styleClass="header-search-suggestions">
                         <ui:repeat value="#{empty headerBacker.userSearchSuggestion ? null
                                 : headerBacker.userSearchSuggestion}" var="user">
                             <h:link value="#{user}" outcome="pretty:search" styleClass="row search">
