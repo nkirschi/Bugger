@@ -159,6 +159,10 @@ body {
     margin-bottom: auto;
 }
 
+.text-justify {
+    text-align: justify;
+}
+
 .img-size-small {
     max-height: 200px;
 }

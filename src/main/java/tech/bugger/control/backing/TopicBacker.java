@@ -1,15 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
@@ -20,6 +10,17 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Backing bean for the topic page.
@@ -265,7 +266,7 @@ public class TopicBacker implements Serializable {
             }
         };
 
-        reports = new Paginator<>("id", Selection.PageSize.NORMAL) {
+        reports = new Paginator<>("last_modified_at", Selection.PageSize.NORMAL, false) {
             @Override
             protected Iterable<Report> fetch() {
                 return topicService.getSelectedReports(topic, getSelection(), openReportShown, closedReportShown);

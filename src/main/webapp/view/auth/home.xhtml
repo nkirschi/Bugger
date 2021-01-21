@@ -26,7 +26,7 @@
                     <f:param name="id" value="#{var.reportID}"/>
                 </h:link>
             </b:column>
-            <b:column title="#{labels.user}" paginator="#{homeBacker.inbox}" key="causer">
+            <b:column title="#{labels.causer}" paginator="#{homeBacker.inbox}" key="causer">
                 <h:link value="@#{var.actuatorUsername}" outcome="pretty:profile">
                     <f:param name="u" value="#{var.actuatorUsername}"/>
                 </h:link>
