@@ -72,7 +72,7 @@ public class ReportBackerTest {
 
     @BeforeEach
     public void setUp() {
-        reportBacker = new ReportBacker(settings, topicService, reportService, postService, session, fctx);
+        reportBacker = new ReportBacker(settings, topicService, reportService, postService, session, fctx, ectx);
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
                         "User",
                         new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",

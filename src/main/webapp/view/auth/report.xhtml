@@ -7,8 +7,6 @@
 
     <ui:param name="title" value="#{reportBacker.report.title}"/>
 
-    <ui:param name="helpKey" value="report"/>
-
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
@@ -115,7 +113,7 @@
                                  rendered="#{reportBacker.hasDownvoted}" styleClass="vote-cast"/>
                 <h:commandButton value="#{labels.downvote_button}" action="#{reportBacker.downvote}"
                                  rendered="#{!reportBacker.hasDownvoted}" styleClass="vote-not-cast"/>
-                <h:outputLabel value="#{labels.relevance_overwritten}" rendered="#{reportBacker.overwriteRelevance}"/>
+                <h:outputLabel value="#{labels.relevance_overwritten}" rendered="#{reportBacker.report.relevanceOverwritten}"/>
                 <h:outputLabel value="#{labels.current_relevance}:&#xA0;"/>
                 <h:outputLabel value="#{reportBacker.report.relevance}"/>
                 <h:panelGroup rendered="#{reportBacker.privileged}">
@@ -214,7 +212,7 @@
                 outcome="pretty:post-edit"
                 value="#{labels.post_create}"
                 styleClass="btn btn-primary"
-                rendered="#{reportBacker.loggedIn and !reportBacker.banned}">
+                rendered="#{userSession.user != null and !reportBacker.banned}">
             <f:param name="r" value="#{reportBacker.report.id}"/>
             <f:param name="c" value="1"/>
         </h:link>
