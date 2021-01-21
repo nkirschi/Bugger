@@ -35,7 +35,7 @@ public class Attachment implements Serializable {
     /**
      * The id of the post this attachment is attached to.
      */
-    private Integer post;
+    private int post;
 
     /**
      * Constructs an empty attachment.
@@ -57,7 +57,7 @@ public class Attachment implements Serializable {
                       final String name,
                       final byte[] content,
                       final String mimetype,
-                      final Integer post) {
+                      final int post) {
         this.id = id;
         this.name = name;
         this.content = content;
@@ -142,7 +142,7 @@ public class Attachment implements Serializable {
      *
      * @return The associated post.
      */
-    public Integer getPost() {
+    public int getPost() {
         return post;
     }
 
@@ -151,7 +151,7 @@ public class Attachment implements Serializable {
      *
      * @param post The post to be set.
      */
-    public void setPost(final Integer post) {
+    public void setPost(final int post) {
         this.post = post;
     }
 

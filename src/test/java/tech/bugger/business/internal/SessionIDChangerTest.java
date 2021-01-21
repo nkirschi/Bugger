@@ -59,14 +59,14 @@ public class SessionIDChangerTest {
 
     @Test
     public void testAfterPhaseWhenSessionExists() {
-        doReturn(mock(HttpSession.class)).when(request).getSession(false);
+        doReturn(mock(HttpSession.class)).when(ectx).getSession(false);
         sessionIDChanger.afterPhase(phaseEvent);
         verify(request).changeSessionId();
     }
 
     @Test
     public void testAfterPhaseWhenSessionNotExists() {
-        lenient().doReturn(null).when(request).getSession(false);
+        lenient().doReturn(null).when(ectx).getSession(false);
         sessionIDChanger.afterPhase(phaseEvent);
         verify(request, times(0)).changeSessionId();
     }
