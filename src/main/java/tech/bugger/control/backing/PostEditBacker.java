@@ -136,7 +136,7 @@ public class PostEditBacker implements Serializable {
                 return;
             }
             post = postService.getPostByID(postID);
-            if (post == null || !postService.isPrivileged(user, post, report)) {
+            if (post == null) {
                 redirectToErrorPage();
                 return;
             }
@@ -145,6 +145,11 @@ public class PostEditBacker implements Serializable {
                 redirectToErrorPage();
                 return;
             }
+            if (!postService.isPrivileged(user, post, report)) {
+                redirectToErrorPage();
+                return;
+            }
+
             attachments = post.getAttachments();
             post.getAuthorship().setModifier(user);
         }

@@ -69,7 +69,7 @@ public class PostDBGatewayTest {
         Authorship authorship = new Authorship(new User(), OffsetDateTime.now(), new User(), OffsetDateTime.now());
         authorship.getCreator().setId(1);
         authorship.getModifier().setId(1);
-        post = new Post(10000, "test.txt", report.getId(), authorship, null);
+        post = new Post(10000, "test.txt", report.getId(), authorship, new ArrayList<>());
     }
 
     @AfterEach
