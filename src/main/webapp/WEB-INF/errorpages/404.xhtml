@@ -15,7 +15,7 @@
             <h:outputText value="#{applicationSettings.organization.supportInfo}"/>
         </h:panelGrid>
 
-        <h:panelGrid id="pg-error-details" columns="1" rendered="#{facesContext.application.projectStage eq 'Development'}">
+        <h:panelGrid id="pg-error-details" columns="1" rendered="#{(facesContext.application.projectStage eq 'Development') and requestScope['javax.servlet.error.exception'] != null}">
             <h:outputText value="Request URI"/>
             <h:outputText value="#{requestScope['javax.servlet.error.request_uri']}"/>
             <h:outputText value="Exception type"/>
