@@ -218,7 +218,6 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-
                     <!-- closed report policy -->
                     <h:panelGroup layout="block" styleClass="form-check mb-3">
                         <h:panelGroup layout="block" styleClass="form-group position-relative">
@@ -239,7 +238,6 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-
                     <!-- user e-mail address format -->
                     <h:panelGroup layout="block" styleClass="mb-3">
                         <h:outputLabel id="o-user-email-format"
@@ -251,6 +249,7 @@
                                          value="#{adminBacker.configuration.userEmailFormat}"
                                          validator="regexValidator"
                                          a:maxlength="#{Constants.LARGE_FIELD}"
+                                         a:placeholder="#{labels.exempli_gratia} .+@.+"
                                          styleClass="form-control #{!facesContext.validationFailed ? ''
                                                  : component.valid ? 'is-valid' : 'is-invalid'}">
                                 <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>

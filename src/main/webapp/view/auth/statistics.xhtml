@@ -96,6 +96,7 @@
                             <h:inputText id="it-latest-opening-date"
                                          value="#{statisticsBacker.reportCriteria.latestOpeningDate}"
                                          a:placeholder="#{labels.date_time_pattern}"
+                                         a:maxlength="#{Constants.SMALL_FIELD}"
                                          styleClass="form-control #{!facesContext.validationFailed ? ''
                                                  : component.valid ? 'is-valid' : 'is-invalid'}">
                                 <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
@@ -114,6 +115,7 @@
                             <h:inputText id="it-earliest-closing-date"
                                          value="#{statisticsBacker.reportCriteria.earliestClosingDate}"
                                          a:placeholder="#{labels.date_time_pattern}"
+                                         a:maxlength="#{Constants.SMALL_FIELD}"
                                          styleClass="form-control #{!facesContext.validationFailed ? ''
                                                  : component.valid ? 'is-valid' : 'is-invalid'}">
                                 <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
