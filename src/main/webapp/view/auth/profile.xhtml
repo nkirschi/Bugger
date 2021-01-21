@@ -26,7 +26,7 @@
                     <!-- Contains the buttons for changing administration status, profile editing and subscribing -->
                     <h:panelGroup id="p-profile-buttons" layout="block" styleClass="row">
                         <h:panelGroup styleClass="col-12 align-right">
-                            <h:commandButton id="cb-subscribe" action="#{profileBacker.toggleUserSubscription()}"
+                            <h:commandButton id="cb-subscribe" action="#{profileBacker.toggleUserSubscription}"
                                              value="#{profileBacker.subscribed ? labels.unsubscribe : labels.subscribe}"
                                              styleClass="button btn btn-primary" rendered="#{userSession.user != null
                                              and userSession.user.id != profileBacker.user.id}"/>
@@ -176,11 +176,17 @@
                                       rendered="#{not profileBacker.user.administrator}">
                             <b:pagitable paginator="#{profileBacker.moderatedTopics}" simple="true">
                                 <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
-                                <h:column>
+                                <b:column title="#{labels.id}" paginator="#{profileBacker.moderatedTopics}" key="id">
+                                    <h:link value="!#{var.id}" outcome="pretty:topic">
+                                        <f:param name="id" value="#{var.id}"/>
+                                    </h:link>
+                                </b:column>
+                                <b:column title="#{labels.title}" paginator="#{profileBacker.moderatedTopics}"
+                                          key="title">
                                     <h:link value="#{var.title}" outcome="pretty:topic">
                                         <f:param name="id" value="#{var.id}"/>
                                     </h:link>
-                                </h:column>
+                                </b:column>
                             </b:pagitable>
                         </h:panelGroup>
                         <h:panelGroup id="p-moderated-admin" layout="block" styleClass="col-12"
@@ -211,7 +217,7 @@
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                         <b:pagitable paginator="#{profileBacker.topicSubscriptions}">
                             <b:column title="#{labels.id}" paginator="#{profileBacker.topicSubscriptions}" key="id">
-                                <h:link value="#{var.id}" outcome="pretty:topic">
+                                <h:link value="!#{var.id}" outcome="pretty:topic">
                                     <f:param name="id" value="#{var.id}"/>
                                 </h:link>
                             </b:column>
@@ -252,7 +258,7 @@
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
                         <b:pagitable paginator="#{profileBacker.reportSubscriptions}">
                             <b:column title="#{labels.id}" paginator="#{profileBacker.reportSubscriptions}" key="id">
-                                <h:link value="#{var.id}" outcome="pretty:report">
+                                <h:link value="##{var.id}" outcome="pretty:report">
                                     <f:param name="id" value="#{var.id}"/>
                                 </h:link>
                             </b:column>
@@ -303,7 +309,7 @@
                         <b:pagitable paginator="#{profileBacker.userSubscriptions}">
                             <b:column title="#{labels.username}" paginator="#{profileBacker.userSubscriptions}"
                                       key="username">
-                                <h:link value="#{var.username}" outcome="pretty:profile">
+                                <h:link value="@#{var.username}" outcome="pretty:profile">
                                     <f:param name="u" value="#{var.username}"/>
                                 </h:link>
                             </b:column>

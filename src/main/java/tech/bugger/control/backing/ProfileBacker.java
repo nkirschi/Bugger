@@ -193,22 +193,22 @@ public class ProfileBacker implements Serializable {
             return;
         }
 
+        User sessionUser = session.getUser();
         votingWeight = profileService.getVotingWeightForUser(user);
         numberOfPosts = profileService.getNumberOfPostsForUser(user);
-        subscribed = profileService.isSubscribed(session.getUser(), user);
-        privileged = session.getUser() != null
-                && (session.getUser().isAdministrator() || session.getUser().equals(user));
+        subscribed = profileService.isSubscribed(sessionUser, user);
+        privileged = sessionUser != null && (sessionUser.isAdministrator() || sessionUser.equals(user));
 
         if (user.getBiography() != null) {
             sanitizedBiography = MarkdownHandler.toHtml(user.getBiography());
         }
 
-        if ((session.getUser() != null) && (session.getUser().equals(user))) {
+        if (sessionUser != null && sessionUser.equals(user)) {
             session.setUser(new User(user));
         }
         displayDialog = ProfileDialog.NONE;
 
-        moderatedTopics = new Paginator<>("title", Selection.PageSize.SMALL) {
+        moderatedTopics = new Paginator<>("id", Selection.PageSize.SMALL) {
             @Override
             protected Iterable<Topic> fetch() {
                 return topicService.getModeratedTopics(user, getSelection());
@@ -221,7 +221,7 @@ public class ProfileBacker implements Serializable {
         };
 
         if (isPrivileged()) {
-            topicSubscriptions = new Paginator<>("title", Selection.PageSize.SMALL) {
+            topicSubscriptions = new Paginator<>("id", Selection.PageSize.SMALL) {
                 @Override
                 protected Iterable<Topic> fetch() {
                     return topicService.selectSubscribedTopics(user, getSelection());
@@ -230,6 +230,18 @@ public class ProfileBacker implements Serializable {
                 @Override
                 protected int totalSize() {
                     return topicService.countSubscribedTopics(user);
+                }
+            };
+
+            reportSubscriptions = new Paginator<>("id", Selection.PageSize.SMALL) {
+                @Override
+                protected Iterable<Report> fetch() {
+                    return profileService.selectSubscribedReports(user, getSelection());
+                }
+
+                @Override
+                protected int totalSize() {
+                    return profileService.countSubscribedReports(user);
                 }
             };
 
@@ -242,18 +254,6 @@ public class ProfileBacker implements Serializable {
                 @Override
                 protected int totalSize() {
                     return profileService.countSubscribedUsers(user);
-                }
-            };
-
-            reportSubscriptions = new Paginator<>("title", Selection.PageSize.SMALL) {
-                @Override
-                protected Iterable<Report> fetch() {
-                    return profileService.selectSubscribedReports(user, getSelection());
-                }
-
-                @Override
-                protected int totalSize() {
-                    return profileService.countSubscribedReports(user);
                 }
             };
         }
@@ -388,22 +388,19 @@ public class ProfileBacker implements Serializable {
 
     /**
      * Subscribes the user to the user whose profile is being viewed.
-     *
-     * @return {@code null}
      */
-    public String toggleUserSubscription() {
-        if (session.getUser() == null) {
-            return null;
-        } else if (session.getUser().equals(user)) {
-            return null;
+    public void toggleUserSubscription() {
+        User sessionUser = session.getUser();
+        if (sessionUser == null || sessionUser.equals(user)) {
+            return;
         }
 
         if (isSubscribed()) {
-            profileService.deleteUserSubscription(session.getUser(), user);
+            profileService.deleteUserSubscription(sessionUser, user);
         } else {
-            profileService.subscribeToUser(session.getUser(), user);
+            profileService.subscribeToUser(sessionUser, user);
         }
-        return null;
+        subscribed = profileService.isSubscribed(sessionUser, user);
     }
 
     /**
@@ -430,7 +427,7 @@ public class ProfileBacker implements Serializable {
      * displayed instead.
      */
     public void toggleAdmin() {
-        if ((session.getUser() == null) || (!session.getUser().isAdministrator())) {
+        if (session.getUser() == null || !session.getUser().isAdministrator()) {
             log.error("A user was able to to use the promote or demote administrator functionality even though "
                     + "they had no administrator status!");
             return;
@@ -442,6 +439,7 @@ public class ProfileBacker implements Serializable {
         if (session.getUser().equals(user)) {
             session.getUser().setAdministrator(user.isAdministrator());
         }
+        displayDialog = ProfileDialog.NONE;
     }
 
     /**
