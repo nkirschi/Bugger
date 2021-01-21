@@ -87,7 +87,7 @@ public class HomeBacker implements Serializable {
             };
             inbox.getSelection().setAscending(false);
         }
-        topics = new Paginator<>("title", Selection.PageSize.NORMAL) {
+        topics = new Paginator<>("id", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Topic> fetch() {
                 return topicService.selectTopics(getSelection());

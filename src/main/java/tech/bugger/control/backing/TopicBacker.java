@@ -265,7 +265,7 @@ public class TopicBacker implements Serializable {
             }
         };
 
-        reports = new Paginator<>("title", Selection.PageSize.NORMAL) {
+        reports = new Paginator<>("id", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Report> fetch() {
                 return topicService.getSelectedReports(topic, getSelection(), openReportShown, closedReportShown);

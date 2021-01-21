@@ -44,6 +44,11 @@
                 rendered="#{userSession.user.administrator}" styleClass="button"/>
         <b:pagitable paginator="#{homeBacker.topics}">
             <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+            <b:column title="#{labels.id}" paginator="#{homeBacker.topics}" key="id">
+                <h:link value="!#{var.id}" outcome="pretty:topic">
+                    <f:param name="id" value="#{var.id}"/>
+                </h:link>
+            </b:column>
             <b:column title="#{labels.title}" paginator="#{homeBacker.topics}" key="title">
                 <h:link value="#{var.title}" outcome="pretty:topic">
                     <f:param name="id" value="#{var.id}"/>
@@ -53,7 +58,9 @@
                 <h:outputText value="#{var.description}" escape="false"/>
             </b:column>
             <b:column title="#{labels.last_activity}" paginator="#{homeBacker.topics}" key="last_activity">
-                <h:outputText value="#{var.lastActivity}"/>
+                <h:outputText value="#{var.lastActivity}">
+                    <f:convertDateTime type="offsetDateTime" pattern="#{labels.date_time_pattern}"/>
+                </h:outputText>
             </b:column>
         </b:pagitable>
     </ui:define>

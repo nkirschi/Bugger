@@ -148,7 +148,9 @@
                                 </h:panelGroup>
                                 <h:panelGroup id="p-register-date-output" styleClass="col-9">
                                     <h:outputText id="ot-register-date" value="#{profileBacker.user.registrationDate}"
-                                                  styleClass="profile-info"/>
+                                                  styleClass="profile-info">
+                                        <f:convertDateTime type="offsetDateTime" pattern="#{labels.date_time_pattern}"/>
+                                    </h:outputText>
                                 </h:panelGroup>
                             </h:panelGroup>
                         </h:panelGroup>
