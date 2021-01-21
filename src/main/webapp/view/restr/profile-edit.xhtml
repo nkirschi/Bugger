@@ -50,7 +50,7 @@
                         <h:outputLabel id="o-delete-avatar" for="s-delete-avatar"
                                        value="#{labels['profile_edit.del_avatar']}"/>
                         <h:selectBooleanCheckbox id="s-delete-avatar" value="#{profileEditBacker.deleteAvatar}"
-                                                 styleClass="button"/>
+                                                 styleClass="form-check-input"/>
                     </h:panelGroup>
 
                     <!-- Renders the menus to select the profile visibility and preferred language. -->
@@ -62,7 +62,7 @@
                                 <h:panelGroup layout="block" styleClass="input-group has-validation">
                                     <h:selectOneMenu id="s-visibility"
                                                      value="#{profileEditBacker.user.profileVisibility}"
-                                                     required="true">
+                                                     required="true" styleClass="form-select">
                                         <f:selectItems id="s-visibility-values"
                                                        value="#{profileEditBacker.user.profileVisibilities}"
                                                        var="visibility" itemValue="#{visibility}"
@@ -78,7 +78,7 @@
                                                styleClass="form-label"/>
                                 <h:panelGroup layout="block" styleClass="input-group has-validation">
                                     <h:selectOneMenu id="s-language" value="#{profileEditBacker.user.preferredLanguage}"
-                                                     required="true">
+                                                     required="true" styleClass="form-select">
                                         <f:selectItems id="s-language-values"
                                                        value="#{profileEditBacker.user.preferredLanguages}"
                                                        var="lang" itemValue="#{lang}"
@@ -244,10 +244,10 @@
 
                     <h:panelGroup layout="block" styleClass="d-flex justify-content-center">
                         <h:commandButton id="cb-preview" value="#{labels['profile_edit.preview']}"
-                                         action="#{profileEditBacker.openPreviewDialog}" styleClass="button"
+                                         action="#{profileEditBacker.openPreviewDialog}" styleClass="btn btn-primary"
                                          rendered="#{profileEditBacker.dialog != E.PREVIEW}"/>
                         <h:commandButton id="cb-stop-preview" value="#{labels['profile_edit.stop_preview']}"
-                                         action="#{profileEditBacker.closeDialog}" styleClass="button"
+                                         action="#{profileEditBacker.closeDialog}" styleClass="btn btn-primary"
                                          rendered="#{profileEditBacker.dialog == E.PREVIEW}"/>
                     </h:panelGroup>
 
@@ -269,11 +269,11 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <h:panelGroup id="p-buttons" layout="block" styleClass="d-flex justify-content-center">
+                    <h:panelGroup id="p-buttons" layout="block" styleClass="d-flex justify-content-between">
                         <h:commandButton id="cb-apply" value="#{labels['profile_edit.apply_changes']}"
-                                         action="#{profileEditBacker.openChangeDialog}" styleClass="button"/>
+                                         action="#{profileEditBacker.openChangeDialog}" styleClass="btn btn-primary"/>
                         <h:commandButton id="cb-delete" value="#{labels['profile_edit.delete']}"
-                                         action="#{profileEditBacker.openDeleteDialog}" styleClass="button"/>
+                                         action="#{profileEditBacker.openDeleteDialog}" styleClass="btn btn-primary"/>
                     </h:panelGroup>
                 </h:form>
             </h:panelGroup>
@@ -305,13 +305,11 @@
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="row align-center">
-                    <h:panelGroup layout="block" styleClass="col-12">
-                        <h:commandButton id="cb-really-del" value="#{labels['profile_edit.really_del']}"
-                                         action="#{profileEditBacker.delete}" styleClass="button"/>
-                        <h:commandButton id="cb-cancel-del" value="#{labels.abort}" styleClass="button"
-                                         action="#{profileEditBacker.closeDialog}" immediate="true"/>
-                    </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="d-flex justify-content-between my-3">
+                    <h:commandButton id="cb-really-del" value="#{labels['profile_edit.really_del']}"
+                                     action="#{profileEditBacker.delete}" styleClass="btn btn-primary"/>
+                    <h:commandButton id="cb-cancel-del" value="#{labels.abort}" styleClass="btn btn-secondary"
+                                     action="#{profileEditBacker.closeDialog}" immediate="true"/>
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>
@@ -340,15 +338,13 @@
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="row align-center">
-                    <h:panelGroup layout="block" styleClass="col-12">
-                        <h:commandButton id="cb-really-change" value="#{labels['profile_edit.really_change']}"
-                                         action="#{profileEditBacker.saveChanges}" styleClass="button">
-                            <f:param name="u" value="#{profileEditBacker.user.username}"/>
-                        </h:commandButton>
-                        <h:commandButton id="cb-cancel-change" value="#{labels.abort}" styleClass="button"
-                                         action="#{profileEditBacker.closeDialog}" immediate="true"/>
-                    </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="d-flex justify-content-between my-3">
+                    <h:commandButton id="cb-really-change" value="#{labels['profile_edit.really_change']}"
+                                     action="#{profileEditBacker.saveChanges}" styleClass="btn btn-primary">
+                        <f:param name="u" value="#{profileEditBacker.user.username}"/>
+                    </h:commandButton>
+                    <h:commandButton id="cb-cancel-change" value="#{labels.abort}" styleClass="btn btn-secondary"
+                                     action="#{profileEditBacker.closeDialog}" immediate="true"/>
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>
