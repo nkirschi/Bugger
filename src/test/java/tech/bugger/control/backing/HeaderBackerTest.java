@@ -1,9 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.lang.reflect.Field;
-import java.util.Map;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +10,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.global.transfer.User;
 
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.lang.reflect.Field;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 public class HeaderBackerTest {
@@ -50,23 +50,8 @@ public class HeaderBackerTest {
     public void testInit() throws IllegalAccessException, NoSuchFieldException {
         headerBacker.init();
         assertAll(
-                () -> assertEquals(user, headerBacker.getUser()),
-                () -> assertFalse(headerBacker.isDisplayMenu())
+                () -> assertEquals(user, headerBacker.getUser())
         );
-    }
-
-    @Test
-    public void testToggleMenuActivate() throws IllegalAccessException {
-        field.setBoolean(headerBacker, false);
-        headerBacker.toggleMenu();
-        assertTrue(headerBacker.isDisplayMenu());
-    }
-
-    @Test
-    public void testToggleMenuDeactivate() throws IllegalAccessException {
-        field.setBoolean(headerBacker, true);
-        headerBacker.toggleMenu();
-        assertFalse(headerBacker.isDisplayMenu());
     }
 
 }
