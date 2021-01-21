@@ -28,7 +28,10 @@
                 <h:outputText value="#{var.actuatorUsername}"/>
             </b:column>
             <h:column>
-                <h:commandButton value="#{labels.delete}" action="#{homeBacker.deleteNotification(var)}"/>
+                <h:commandLink action="#{homeBacker.deleteNotification(var)}" styleClass="button">
+                    <h:graphicImage value="/resources/images/trash.png"
+                                    styleClass="trashcan-small"/>
+                </h:commandLink>
             </h:column>
         </b:pagitable>
 

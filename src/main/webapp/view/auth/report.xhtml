@@ -89,52 +89,148 @@
     </ui:define>
 
     <ui:define name="content">
-        <h:form>
-            <h:panelGroup rendered="#{userSession.user != null}">
-                <h:commandButton value="#{labels.upvote_button}" action="#{reportBacker.removeVote}"
-                                 rendered="#{reportBacker.upvoted}" styleClass="vote-cast"/>
-                <h:commandButton value="#{labels.upvote_button}" action="#{reportBacker.upvote}"
-                                 rendered="#{!reportBacker.upvoted}" styleClass="vote-not-cast"/>
-                <h:commandButton value="#{labels.downvote_button}" action="#{reportBacker.removeVote}"
-                                 rendered="#{reportBacker.downvoted}" styleClass="vote-cast"/>
-                <h:commandButton value="#{labels.downvote_button}" action="#{reportBacker.downvote}"
-                                 rendered="#{!reportBacker.downvoted}" styleClass="vote-not-cast"/>
-                <h:outputLabel value="#{labels.relevance_overwritten}" rendered="#{reportBacker.report.relevanceOverwritten}"/>
-                <h:outputLabel value="#{labels.current_relevance}:&#xA0;"/>
-                <h:outputLabel value="#{reportBacker.report.relevance}"/>
-                <h:panelGroup rendered="#{reportBacker.privileged}">
-                    <h:inputText value="#{reportBacker.overwriteRelevanceValue}"/>
+        <h:form id="f-report">
+            <h:panelGroup layout="block" styleClass="row">
+                <h:panelGroup styleClass="col-12 align-right">
+                    <h:panelGroup rendered="#{reportBacker.privileged}">
+                        <h:commandButton id="cb-open-close-report-dialog"
+                                         action="#{reportBacker.displayDialog('OPEN_CLOSE')}"
+                                         value="#{reportBacker.report.closingDate == null ? labels.report_action_close
+                                         : labels.report_action_open}"
+                                         styleClass="button btn btn-primary"/>
+                        <h:link id="cb-edit-report" value="#{labels.edit}" outcome="pretty:report-edit"
+                                styleClass="button btn btn-secondary">
+                            <f:param name="id" value="#{reportBacker.report.id}"/>
+                        </h:link>
+                        <h:commandButton id="cb-delete-report-dialog"
+                                         action="#{reportBacker.displayDialog('DELETE_REPORT')}"
+                                         value="#{labels.delete}" styleClass="button btn btn-primary"/>
+                        <h:commandButton id="cb-mark-duplicate" action="#{reportBacker.displayDialog('DUPLICATE')}"
+                                         value="#{labels.report_mark_duplicate}" styleClass="button btn btn-primary"/>
+                        <h:commandButton id="cb-unmark-duplicate" action="#{reportBacker.unmarkDuplicate}"
+                                         value="#{labels.report_unmark_duplicate}" styleClass="button btn btn-primary"
+                                         rendered="#{reportBacker.report.duplicateOf != null}"/>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{userSession.user != null}">
+                        <h:commandButton id="cb-subscribe" action="#{reportBacker.toggleReportSubscription}"
+                                         value="#{reportBacker.subscribed ? labels.unsubscribe : labels.subscribe}"
+                                         styleClass="button btn btn-primary"/>
+                    </h:panelGroup>
+                    <h:link id="cb-add-post"
+                            outcome="pretty:post-edit"
+                            value="#{labels.post_create}"
+                            styleClass="button btn btn-secondary"
+                            rendered="#{userSession.user != null and !reportBacker.banned}">
+                        <f:param name="r" value="#{reportBacker.report.id}"/>
+                        <f:param name="c" value="1"/>
+                    </h:link>
+                </h:panelGroup>
+            </h:panelGroup>
+        </h:form>
+
+        <h:form rendered="#{userSession.user != null}">
+            <h:panelGroup layout="block" styleClass="row my-3">
+                <h:panelGroup layout="block" styleClass="col-3">
+                    <h:panelGroup layout="block" styleClass="row">
+                        <h:commandButton value="#{labels.upvote_button}" action="#{reportBacker.removeVote}"
+                                         rendered="#{reportBacker.upvoted}" styleClass="vote-cast"/>
+                        <h:commandButton value="#{labels.upvote_button}" action="#{reportBacker.upvote}"
+                                         rendered="#{!reportBacker.upvoted}" styleClass="vote-not-cast"/>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" styleClass="row">
+                        <h:commandButton value="#{labels.downvote_button}" action="#{reportBacker.removeVote}"
+                                         rendered="#{reportBacker.downvoted}" styleClass="vote-cast"/>
+                        <h:commandButton value="#{labels.downvote_button}" action="#{reportBacker.downvote}"
+                                         rendered="#{!reportBacker.downvoted}" styleClass="vote-not-cast"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="col 9">
+                    <h:outputLabel value="#{labels.relevance_overwritten}" rendered="#{reportBacker.report.relevanceOverwritten}"/>
+                    <h:outputLabel value="#{labels.current_relevance}:&#xA0;"/>
+                    <h:outputLabel value="#{reportBacker.report.relevance}"/>
+                </h:panelGroup>
+            </h:panelGroup>
+            <h:panelGroup layout="block" styleClass="row my-3">
+                <h:panelGroup layout="block" styleClass="col 9" rendered="#{reportBacker.privileged}">
+                    <h:inputText value="#{reportBacker.overwriteRelevanceValue}" styleClass="form-control"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="col 3" rendered="#{reportBacker.privileged}">
                     <h:commandButton value="#{labels.overwrite_relevance}" styleClass="button btn btn-primary"
                                      action="#{reportBacker.applyOverwriteRelevance}"/>
                 </h:panelGroup>
             </h:panelGroup>
         </h:form>
-        <h:panelGrid columns="5">
-            <h:outputText id="ot-id" value="#{labels.id}: #{reportBacker.report.id}"/>
-            <h:outputText id="ot-status" value="#{labels.status}: #{reportBacker.report.closingDate
+
+        <h:panelGroup layout="block" styleClass="row mb3">
+            <h:panelGroup styleClass="col-3">
+                <h:outputLabel value="#{labels.id}" for="ot-id" styleClass="form-label"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="col-9">
+                <h:outputText id="ot-id" value="#{reportBacker.report.id}"/>
+            </h:panelGroup>
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" styleClass="row mb3">
+            <h:panelGroup styleClass="col-3">
+                <h:outputLabel value="#{labels.status}" for="ot-status" styleClass="form-label"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="col-9">
+                <h:outputText id="ot-status" value="#{reportBacker.report.closingDate
                           == null ? labels.report_status_open
                           : labels.report_status_closed.concat(' ').concat(reportBacker.report.closingDate)}"/>
-            <h:outputText id="ot-type"
-                          value="#{labels.report_type}: #{labels['report_type.'.concat(reportBacker.report.type)]}"/>
-            <h:outputLabel id="ol-duplicate-desc" rendered="#{reportBacker.report.duplicateOf != null}"
-                           value="#{labels.report_original}: "/>
-            <h:link id="l-duplicate" outcome="pretty:report" rendered="#{reportBacker.report.duplicateOf != null}"
-                    value="##{reportBacker.report.duplicateOf}">
-                <f:param name="id" value="#{reportBacker.report.duplicateOf}"/>
-            </h:link>
-            <h:outputText id="ot-severity"
-                          value="#{labels.report_severity}: #{labels['report_severity.'.concat(reportBacker.report.severity)]}"/>
-            <h:outputText id="ot-version" value="#{labels.report_version}: #{reportBacker.report.version}"/>
-            <b:pagitable id="p-duplicates" paginator="#{reportBacker.duplicates}" simple="true"
-                         rendered="#{not reportBacker.duplicates.isEmpty()}">
-                <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
-                <b:column title="#{labels.report_duplicates}" paginator="#{reportBacker.duplicates}" key="ID">
-                    <h:link outcome="pretty:report" value="##{var.id}">
-                        <f:param name="id" value="#{var.id}"/>
-                    </h:link>
-                </b:column>
-            </b:pagitable>
-        </h:panelGrid>
+            </h:panelGroup>
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" styleClass="row mb3">
+            <h:panelGroup styleClass="col-3">
+                <h:outputLabel value="#{labels.report_type}" for="ot-type" styleClass="form-label"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="col-9">
+                <h:outputText id="ot-type" value="#{labels['report_type.'.concat(reportBacker.report.type)]}"/>
+            </h:panelGroup>
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" styleClass="row mb3" rendered="#{reportBacker.report.duplicateOf != null}">
+            <h:panelGroup styleClass="col-3">
+                <h:outputLabel id="ol-duplicate-desc" value="#{labels.report_original}: " styleClass="form-label"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="col-9">
+                <h:link id="l-duplicate" outcome="pretty:report" rendered="#{reportBacker.report.duplicateOf != null}"
+                        value="##{reportBacker.report.duplicateOf}">
+                    <f:param name="id" value="#{reportBacker.report.duplicateOf}"/>
+                </h:link>
+            </h:panelGroup>
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" styleClass="row mb3">
+            <h:panelGroup styleClass="col-3">
+                <h:outputLabel value="#{labels.report_severity}" for="ot-severity" styleClass="form-label"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="col-9">
+                <h:outputText id="ot-severity"
+                              value="#{labels['report_severity.'.concat(reportBacker.report.severity)]}"/>
+            </h:panelGroup>
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" styleClass="row mb3">
+            <h:panelGroup styleClass="col-3">
+                <h:outputLabel value="#{labels.report_version}" for="ot-version" styleClass="form-label"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="col-9">
+                <h:outputText id="ot-version" value="#{reportBacker.report.version}"/>
+            </h:panelGroup>
+        </h:panelGroup>
+
+        <b:pagitable id="p-duplicates" paginator="#{reportBacker.duplicates}" simple="true"
+                     rendered="#{not reportBacker.duplicates.isEmpty()}">
+            <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
+            <b:column title="#{labels.report_duplicates}" paginator="#{reportBacker.duplicates}" key="ID">
+                <h:link outcome="pretty:report" value="##{var.id}">
+                    <f:param name="id" value="#{var.id}"/>
+                </h:link>
+            </b:column>
+        </b:pagitable>
+
         <h:panelGrid columns="3">
             <h:outputText id="ot-creator" value="#{labels.report_created_by}:
                           #{reportBacker.report.authorship.creator == null ? labels.deleted_user
@@ -184,39 +280,6 @@
                                 or !reportBacker.report.authorship.modifier.existsAvatar}"/>
             </h:panelGroup>
         </h:panelGrid>
-        <h:form id="f-report">
-            <h:panelGrid rendered="#{reportBacker.privileged}">
-                <h:commandButton id="cb-open-close-report-dialog" action="#{reportBacker.displayDialog('OPEN_CLOSE')}"
-                                 value="#{reportBacker.report.closingDate == null ? labels.report_action_close
-                                 : labels.report_action_open}"
-                                 styleClass="btn btn-primary"/>
-                <h:link id="cb-edit-report" value="#{labels.edit}" outcome="pretty:report-edit"
-                        styleClass="btn btn-secondary">
-                    <f:param name="id" value="#{reportBacker.report.id}"/>
-                </h:link>
-                <h:commandButton id="cb-delete-report-dialog" action="#{reportBacker.displayDialog('DELETE_REPORT')}"
-                                 value="#{labels.delete}" styleClass="btn btn-primary"/>
-                <h:commandButton id="cb-mark-duplicate" action="#{reportBacker.displayDialog('DUPLICATE')}"
-                                 value="#{labels.report_mark_duplicate}" styleClass="btn btn-primary"/>
-                <h:commandButton id="cb-unmark-duplicate" action="#{reportBacker.unmarkDuplicate}"
-                                 value="#{labels.report_unmark_duplicate}" styleClass="btn btn-primary"
-                                 rendered="#{reportBacker.report.duplicateOf != null}"/>
-            </h:panelGrid>
-            <h:panelGrid rendered="#{userSession.user != null}">
-                <h:commandButton id="cb-subscribe" action="#{reportBacker.toggleReportSubscription}"
-                                 value="#{reportBacker.subscribed ? labels.unsubscribe : labels.subscribe}"
-                                 styleClass="btn btn-primary"/>
-            </h:panelGrid>
-        </h:form>
-
-        <h:link id="cb-add-post"
-                outcome="pretty:post-edit"
-                value="#{labels.post_create}"
-                styleClass="btn btn-secondary"
-                rendered="#{reportBacker.loggedIn and !reportBacker.banned}">
-            <f:param name="r" value="#{reportBacker.report.id}"/>
-            <f:param name="c" value="1"/>
-        </h:link>
 
         <b:pagitable_post paginator="#{reportBacker.posts}">
             <!--@elvariable id="var" type="tech.bugger.global.transfer.Post"-->
@@ -253,11 +316,11 @@
                                 <h:link id="cb-edit-post"
                                         outcome="pretty:post-edit"
                                         value="#{labels.edit}"
-                                        styleClass="btn btn-secondary">
+                                        styleClass="button btn btn-secondary">
                                     <f:param name="p" value="#{var.id}"/>
                                 </h:link>
                                 <h:commandButton id="cb-delete-post-dialog"
-                                                 styleClass="btn btn-primary"
+                                                 styleClass="button btn btn-primary"
                                                  action="#{reportBacker.deletePostDialog(var)}"
                                                  value="#{labels.delete}"/>
                             </h:panelGroup>
