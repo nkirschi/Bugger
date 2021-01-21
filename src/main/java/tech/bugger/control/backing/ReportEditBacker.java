@@ -13,6 +13,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
@@ -20,6 +21,7 @@ import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
 
 /**
  * Backing Bean for the report edit page.
@@ -30,6 +32,11 @@ public class ReportEditBacker implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -1310546265441099227L;
+
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
+    private static final Log log = Log.forClass(ProfileBacker.class);
 
     /**
      * The topic service giving access to topics.
@@ -114,9 +121,9 @@ public class ReportEditBacker implements Serializable {
             return;
         }
 
-        report = reportService.getReportByID(reportID);
         User user = session.getUser();
-        if (report != null && user != null) {
+        report = reportService.getReportByID(reportID);
+        if (report != null) {
             destinationID = report.getTopicID();
             currentTopic = topicService.getTopicByID(destinationID);
         } else {
@@ -134,22 +141,16 @@ public class ReportEditBacker implements Serializable {
 
     /**
      * Opens the confirmation dialog.
-     *
-     * @return {@code null} to reload the page.
      */
-    public String openConfirmDialog() {
+    public void openConfirmDialog() {
         displayConfirmDialog = true;
-        return null;
     }
 
     /**
      * Closes the confirmation dialog.
-     *
-     * @return {@code null} to reload the page.
      */
-    public String closeConfirmDialog() {
+    public void closeConfirmDialog() {
         displayConfirmDialog = false;
-        return null;
     }
 
     /**
@@ -198,8 +199,7 @@ public class ReportEditBacker implements Serializable {
         if (destinationID != currentTopic.getId()) {
             Topic destination = topicService.getTopicByID(destinationID);
             User user = session.getUser();
-            return user != null
-                    && destination != null
+            return destination != null
                     && topicService.isModerator(user, currentTopic)
                     && !topicService.isModerator(user, destination);
         }
@@ -216,7 +216,7 @@ public class ReportEditBacker implements Serializable {
         Topic destination = topicService.getTopicByID(destinationID);
         User user = session.getUser();
 
-        if (destination == null || user == null || topicService.isBanned(user, destination)) {
+        if (destination == null || topicService.isBanned(user, destination)) {
             String message = MessageFormat.format(messagesBundle.getString("report_edit_topic_not_found"),
                     destinationID);
             fctx.addMessage("f-report-edit:it-topic", new FacesMessage(message));
@@ -235,7 +235,7 @@ public class ReportEditBacker implements Serializable {
             ExternalContext ectx = fctx.getExternalContext();
             ectx.redirect(ectx.getRequestContextPath() + "/error");
         } catch (IOException e) {
-            throw new InternalError("Redirection to error page failed.");
+            log.debug("Redirection to error page failed.");
         }
     }
 
@@ -247,7 +247,7 @@ public class ReportEditBacker implements Serializable {
      */
     public boolean isPrivileged() {
         User user = session.getUser();
-        if (user == null || currentTopic == null) {
+        if (currentTopic == null) {
             return false;
         }
         if (user.isAdministrator() || topicService.isModerator(user, currentTopic)) {

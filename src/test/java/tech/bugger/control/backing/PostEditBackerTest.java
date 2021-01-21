@@ -20,6 +20,7 @@ import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.Part;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -40,9 +42,6 @@ import static org.mockito.Mockito.verify;
 public class PostEditBackerTest {
 
     private PostEditBacker postEditBacker;
-
-    @Mock
-    private ApplicationSettings applicationSettings;
 
     @Mock
     private ReportService reportService;
@@ -76,7 +75,7 @@ public class PostEditBackerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        postEditBacker = new PostEditBacker(applicationSettings, reportService, postService, session, fctx);
+        postEditBacker = new PostEditBacker(reportService, postService, session, fctx);
 
         List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         report = new Report(1234, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
@@ -191,17 +190,30 @@ public class PostEditBackerTest {
         verify404Redirect();
     }
 
-    /*@Test // TODO fix me
+    @Test
     public void testInitEditReportNull() {
         doReturn("5678").when(requestParameterMap).get("p");
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
         doReturn(post).when(postService).getPostByID(5678);
-        doReturn(true).when(postService).isPrivileged(user, post, report);
-        post.setReport(null);
+        post.setReport(4321);
+        doReturn(null).when(reportService).getReportByID(4321);
         postEditBacker.init();
         verify404Redirect();
-    }*/
+    }
+
+    @Test
+    public void testInitEditNotPrivileged() {
+        doReturn("5678").when(requestParameterMap).get("p");
+        doReturn(false).when(requestParameterMap).containsKey("c");
+        doReturn(user).when(session).getUser();
+        doReturn(post).when(postService).getPostByID(5678);
+        post.setReport(4321);
+        doReturn(report).when(reportService).getReportByID(4321);
+        doReturn(false).when(postService).isPrivileged(user, post, report);
+        postEditBacker.init();
+        verify404Redirect();
+    }
 
     @Test
     public void testSaveChangesCreate() throws Exception {
@@ -233,6 +245,17 @@ public class PostEditBackerTest {
         doReturn(false).when(postService).updatePost(post, report);
         postEditBacker.saveChanges();
         verify(fctx, times(0)).getApplication();
+    }
+
+    @Test
+    public void testSaveChangesRedirectFails() throws Exception {
+        postEditBacker.setPost(post);
+        postEditBacker.setReport(report);
+        postEditBacker.setCreate(false);
+        doReturn(true).when(postService).updatePost(post, report);
+        doThrow(IOException.class).when(ectx).redirect(anyString());
+        assertDoesNotThrow(() -> postEditBacker.saveChanges());
+        verify(postService).updatePost(post, report);
     }
 
     @Test

@@ -231,7 +231,6 @@ public class ReportBacker implements Serializable {
             throw new InternalError("Report " + report + " without topic!");
         }
 
-
         // now begin actually initializing the page content
         currentDialog = null;
         banned = topicService.isBanned(session.getUser(), topic);

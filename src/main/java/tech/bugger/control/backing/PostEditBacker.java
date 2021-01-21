@@ -1,6 +1,5 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
@@ -59,11 +58,6 @@ public class PostEditBacker implements Serializable {
     private List<Attachment> attachments;
 
     /**
-     * The current application settings.
-     */
-    private final ApplicationSettings applicationSettings;
-
-    /**
      * The report service creating reports.
      */
     private final ReportService reportService;
@@ -86,16 +80,16 @@ public class PostEditBacker implements Serializable {
     /**
      * Constructs a new post editing backing bean with the necessary dependencies.
      *
-     * @param applicationSettings The current application settings.
      * @param reportService       The report service to use.
      * @param postService         The post service to use.
      * @param session             The current user session.
      * @param fctx                The current {@link FacesContext} of the application.
      */
     @Inject
-    public PostEditBacker(final ApplicationSettings applicationSettings, final ReportService reportService,
-                          final PostService postService, final UserSession session, final FacesContext fctx) {
-        this.applicationSettings = applicationSettings;
+    public PostEditBacker(final ReportService reportService,
+                          final PostService postService,
+                          final UserSession session,
+                          final FacesContext fctx) {
         this.reportService = reportService;
         this.postService = postService;
         this.session = session;
@@ -110,11 +104,6 @@ public class PostEditBacker implements Serializable {
     @PostConstruct
     void init() {
         User user = session.getUser();
-        if (user == null) {
-            redirectToErrorPage();
-            return;
-        }
-
         create = fctx.getExternalContext().getRequestParameterMap().containsKey("c");
         if (create) {
             Integer reportID = parseRequestParameter("r");
@@ -141,11 +130,7 @@ public class PostEditBacker implements Serializable {
                 return;
             }
             report = reportService.getReportByID(post.getReport());
-            if (report == null) {
-                redirectToErrorPage();
-                return;
-            }
-            if (!postService.isPrivileged(user, post, report)) {
+            if (report == null || !postService.isPrivileged(user, post, report)) {
                 redirectToErrorPage();
                 return;
             }

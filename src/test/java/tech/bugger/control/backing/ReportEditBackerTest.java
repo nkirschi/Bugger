@@ -161,16 +161,6 @@ public class ReportEditBackerTest {
     }
 
     @Test
-    public void testSaveChangesWithConfirmWhenNotLoggedIn() {
-        reportEditBacker.setDestinationID(42);
-        doReturn(testTopic).when(topicService).getTopicByID(anyInt());
-        doReturn(null).when(session).getUser();
-        assertFalse(reportEditBacker.isDisplayConfirmDialog());
-        reportEditBacker.saveChangesWithConfirm();
-        verify(fctx).addMessage(any(), any());
-    }
-
-    @Test
     public void testSaveChangesWithConfirmWhenBanned() {
         reportEditBacker.setDestinationID(42);
         doReturn(mock(User.class)).when(session).getUser();
@@ -312,12 +302,6 @@ public class ReportEditBackerTest {
         reportEditBacker.setReport(testReport);
         reportEditBacker.setCurrentTopic(testTopic);
         when(session.getUser()).thenReturn(user);
-        assertFalse(reportEditBacker.isPrivileged());
-    }
-
-    @Test
-    public void testIsPrivilegedUserNull() {
-        reportEditBacker.setCurrentTopic(testTopic);
         assertFalse(reportEditBacker.isPrivileged());
     }
 
