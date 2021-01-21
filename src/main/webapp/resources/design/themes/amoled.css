@@ -1,0 +1,134 @@
+/* Define variables for the primary colors to use */
+/* Template */
+body {
+  background-color: #999999;
+}
+body a {
+  color: #dfbf66;
+}
+body a:hover {
+  color: #a3d2e1;
+}
+
+#p-header {
+  background-color: #2b2b2b;
+  color: #dfbf66;
+}
+#p-header #ot-comp-name {
+  color: #dfbf66;
+}
+
+#p-footer {
+  background: #2b2b2b;
+  color: #dfbf66;
+}
+
+#p-content {
+  background-color: #2b2b2b;
+  color: #dfbf66;
+}
+
+#p-profile-menu {
+  background-color: #999999;
+  color: #dfbf66;
+}
+
+/* Bootstrap buttons */
+.btn-outline-primary {
+  border-color: #a3d2e1;
+  color: #a3d2e1;
+}
+.btn-outline-primary:hover {
+  background-color: #a3d2e1;
+  border-color: #3c4cba;
+  color: #3c4cba;
+}
+.btn-outline-primary:active, .btn-outline-primary:focus {
+  background-color: #a3d2e1;
+  color: #3c4cba;
+  box-shadow: 0 1px 1px #3c4cba inset, 0 0 8px #a3d2e1 !important;
+}
+
+.btn-primary {
+  border-color: #dfbf66;
+  background-color: #dfbf66;
+  color: #2b2b2b !important;
+}
+.btn-primary:hover, .btn-primary:active, .btn-primary:focus {
+  background-color: #2b2b2b;
+  border-color: #7c6e43;
+  color: #7c6e43 !important;
+}
+
+.btn-primary:focus, .btn-primary:active, .btn-link:focus, .btn-link:active {
+  border-color: #7c6e43 !important;
+  box-shadow: 0 1px 1px #7c6e43 inset, 0 0 8px #dfbf66 !important;
+}
+
+.btn-link {
+  background-color: #2b2b2b;
+  color: #dfbf66;
+}
+.btn-link:hover {
+  color: #a3d2e1;
+}
+
+/* Popup dialogs */
+.dialog {
+  background-color: #2b2b2b;
+  color: #dfbf66;
+}
+
+/* Voting buttons */
+.vote-cast {
+  background-color: #dfbf66;
+  color: #1a1a1a;
+}
+
+.vote-not-cast {
+  background-color: #999999;
+}
+
+/* Form input fields focus */
+.form-check-input:checked {
+  background-color: #dfbf66;
+  border-color: #7c6e43;
+}
+
+select:focus {
+  border-color: #7c6e43;
+  box-shadow: 0 1px 1px #7c6e43 inset, 0 0 8px #dfbf66 !important;
+}
+
+.form-control:focus, .form-check-input:focus, .form-select:focus {
+  border-color: #7c6e43;
+  box-shadow: 0 1px 1px #7c6e43 inset, 0 0 8px #dfbf66 !important;
+}
+
+/* Other elements */
+td, th {
+  color: #dfbf66;
+}
+
+.card {
+  background-color: #999999;
+}
+
+.alert-success td, .alert-info td, .alert-warning td {
+  color: #2b2b2b !important;
+}
+
+.alert-success {
+  background-color: #3c763d;
+  border-color: #2b2b2b;
+}
+
+.alert-danger td {
+  color: #c62a25 !important;
+}
+
+.alert-danger {
+  border-color: #c62a25;
+}
+
+/*# sourceMappingURL=amoled.css.map */
