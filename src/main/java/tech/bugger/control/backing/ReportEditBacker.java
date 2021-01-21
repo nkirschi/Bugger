@@ -14,6 +14,7 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
@@ -36,7 +37,12 @@ public class ReportEditBacker implements Serializable {
     /**
      * The {@link Log} instance associated with this class for logging purposes.
      */
-    private static final Log log = Log.forClass(ProfileBacker.class);
+    private static final Log log = Log.forClass(ReportEditBacker.class);
+
+    /**
+     * The current application settings.
+     */
+    private final ApplicationSettings applicationSettings;
 
     /**
      * The topic service giving access to topics.
@@ -91,6 +97,7 @@ public class ReportEditBacker implements Serializable {
     /**
      * Constructs a new report editing page backing bean with the necessary dependencies.
      *
+     * @param applicationSettings The current application settings.
      * @param topicService  The topic service to use.
      * @param reportService The report service to use.
      * @param session       The current user session.
@@ -98,8 +105,13 @@ public class ReportEditBacker implements Serializable {
      * @param registry      The dependency registry to use.
      */
     @Inject
-    public ReportEditBacker(final TopicService topicService, final ReportService reportService,
-                            final UserSession session, final FacesContext fctx, final Registry registry) {
+    public ReportEditBacker(final ApplicationSettings applicationSettings,
+                            final TopicService topicService,
+                            final ReportService reportService,
+                            final UserSession session,
+                            final FacesContext fctx,
+                            final Registry registry) {
+        this.applicationSettings = applicationSettings;
         this.topicService = topicService;
         this.reportService = reportService;
         this.session = session;
@@ -123,7 +135,7 @@ public class ReportEditBacker implements Serializable {
 
         User user = session.getUser();
         report = reportService.getReportByID(reportID);
-        if (report != null) {
+        if (report != null || !isPrivileged()) {
             destinationID = report.getTopicID();
             currentTopic = topicService.getTopicByID(destinationID);
         } else {
@@ -131,7 +143,7 @@ public class ReportEditBacker implements Serializable {
             return;
         }
 
-        if (!isPrivileged()) {
+        if (report.getClosingDate() != null && !applicationSettings.getConfiguration().isClosedReportPosting()) {
             redirectTo404Page();
             return;
         }

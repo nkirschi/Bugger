@@ -461,6 +461,17 @@ public class ReportBacker implements Serializable {
     }
 
     /**
+     * Checks if the user is allowed to edit the report.
+     *
+     * @return  {@code true} iff the user is allowed to edit the report.
+     */
+    public boolean isAllowedToEdit() {
+        return session.getUser() != null
+                && !isBanned()
+                && (report.getClosingDate() == null || applicationSettings.getConfiguration().isClosedReportPosting());
+    }
+
+    /**
      * Checks if the user is privileged for the post.
      *
      * @param post The post in question.
@@ -469,6 +480,7 @@ public class ReportBacker implements Serializable {
     public boolean privilegedForPost(final Post post) {
         log.debug(">>>>>> privilegedForPost");
         return session.getUser() != null
+                && (report.getClosingDate() == null || applicationSettings.getConfiguration().isClosedReportPosting())
                 && (session.getUser().isAdministrator() || moderator
                 || session.getUser().equals(post.getAuthorship().getCreator()));
     }

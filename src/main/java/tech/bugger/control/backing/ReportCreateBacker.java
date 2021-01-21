@@ -37,7 +37,7 @@ public class ReportCreateBacker implements Serializable {
     /**
      * The {@link Log} instance associated with this class for logging purposes.
      */
-    private static final Log log = Log.forClass(ProfileBacker.class);
+    private static final Log log = Log.forClass(ReportCreateBacker.class);
 
     /**
      * The topic to create the report in.

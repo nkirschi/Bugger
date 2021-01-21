@@ -99,7 +99,9 @@
                                          : labels.report_action_open}"
                                          styleClass="button btn btn-primary"/>
                         <h:link id="cb-edit-report" value="#{labels.edit}" outcome="pretty:report-edit"
-                                styleClass="button btn btn-secondary">
+                                styleClass="button btn btn-secondary"
+                                rendered="#{empty reportBacker.report.closingDate
+                                            or applicationSettings.configuration.closedReportPosting}">
                             <f:param name="id" value="#{reportBacker.report.id}"/>
                         </h:link>
                         <h:commandButton id="cb-delete-report-dialog"
@@ -120,7 +122,7 @@
                             outcome="pretty:post-edit"
                             value="#{labels.post_create}"
                             styleClass="button btn btn-secondary"
-                            rendered="#{userSession.user != null and !reportBacker.banned}">
+                            rendered="#{reportBacker.allowedToEdit}">
                         <f:param name="r" value="#{reportBacker.report.id}"/>
                         <f:param name="c" value="1"/>
                     </h:link>

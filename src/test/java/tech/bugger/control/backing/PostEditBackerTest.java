@@ -11,6 +11,7 @@ import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
+import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
@@ -44,6 +45,9 @@ public class PostEditBackerTest {
     private PostEditBacker postEditBacker;
 
     @Mock
+    private ApplicationSettings applicationSettings;
+
+    @Mock
     private ReportService reportService;
 
     @Mock
@@ -67,6 +71,9 @@ public class PostEditBackerTest {
     @Mock
     private NavigationHandler navigationHandler;
 
+    @Mock
+    private Configuration configuration;
+
     private Post post;
 
     private Report report;
@@ -75,7 +82,7 @@ public class PostEditBackerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        postEditBacker = new PostEditBacker(reportService, postService, session, fctx);
+        postEditBacker = new PostEditBacker(applicationSettings, reportService, postService, session, fctx);
 
         List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         report = new Report(1234, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
@@ -90,6 +97,7 @@ public class PostEditBackerTest {
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
         lenient().doReturn(app).when(fctx).getApplication();
         lenient().doReturn(navigationHandler).when(app).getNavigationHandler();
+        lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
     }
 
     private void verify404Redirect() {
@@ -211,6 +219,19 @@ public class PostEditBackerTest {
         post.setReport(4321);
         doReturn(report).when(reportService).getReportByID(4321);
         doReturn(false).when(postService).isPrivileged(user, post, report);
+        postEditBacker.init();
+        verify404Redirect();
+    }
+
+    @Test
+    public void testInitReportClosed() {
+        doReturn("1234").when(requestParameterMap).get("r");
+        doReturn(true).when(requestParameterMap).containsKey("c");
+        doReturn(user).when(session).getUser();
+        doReturn(report).when(reportService).getReportByID(1234);
+        doReturn(true).when(reportService).canPostInReport(user, report);
+        doReturn(false).when(configuration).isClosedReportPosting();
+        report.setClosingDate(mock(OffsetDateTime.class));
         postEditBacker.init();
         verify404Redirect();
     }
