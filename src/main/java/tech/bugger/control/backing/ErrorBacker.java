@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.StoreException;
 
 /**
  * Backing Bean for the error page.
@@ -57,6 +58,10 @@ public class ErrorBacker {
      */
     @PostConstruct
     public void init() {
+    }
+
+    public String throwStoreException() {
+        throw new StoreException("Test exception thrown from backer.");
     }
 
     /**

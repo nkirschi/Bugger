@@ -91,4 +91,8 @@
         <pattern value="/privacy"/>
         <view-id value="/faces/view/public/privacy.xhtml"/>
     </url-mapping>
+    <url-mapping id="error">
+        <pattern value="/error"/>
+        <view-id value="/faces/view/public/error.xhtml"/>
+    </url-mapping>
 </pretty-config>
