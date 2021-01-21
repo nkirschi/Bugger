@@ -1,6 +1,15 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.internal.ApplicationSettings;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
@@ -11,17 +20,6 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Backing bean for the topic page.
@@ -121,6 +119,26 @@ public class TopicBacker implements Serializable {
     private Paginator<User> bannedUsers;
 
     /**
+     * Whether the user is subscribed to the current topic.
+     */
+    private boolean subscribed;
+
+    /**
+     * Whether the user is banned.
+     */
+    private boolean banned;
+
+    /**
+     * Whether the user is administrator.
+     */
+    private boolean administrator;
+
+    /**
+     * Whether the user is moderator in the current topic.
+     */
+    private boolean moderator;
+
+    /**
      * Whether or not open reports should be shown in the Pagination.
      */
     private boolean openReportShown; // default: true
@@ -166,11 +184,6 @@ public class TopicBacker implements Serializable {
     private final ExternalContext ectx;
 
     /**
-     * The application settings cache.
-     */
-    private final ApplicationSettings settings;
-
-    /**
      * Constructs a new topic page backing bean with the necessary dependencies.
      *
      * @param topicService  The topic service to use.
@@ -178,21 +191,18 @@ public class TopicBacker implements Serializable {
      * @param fctx          The current {@link FacesContext} of the application.
      * @param ectx          The current {@link ExternalContext} of the application.
      * @param session       The current {@link UserSession}.
-     * @param settings      The current application settings.
      */
     @Inject
     public TopicBacker(final TopicService topicService,
                        final SearchService searchService,
                        final FacesContext fctx,
                        final ExternalContext ectx,
-                       final UserSession session,
-                       final ApplicationSettings settings) {
+                       final UserSession session) {
         this.topicService = topicService;
         this.searchService = searchService;
         this.fctx = fctx;
         this.ectx = ectx;
         this.session = session;
-        this.settings = settings;
     }
 
     /**
@@ -203,19 +213,27 @@ public class TopicBacker implements Serializable {
     void init() {
         if (!ectx.getRequestParameterMap().containsKey("id")) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
         }
 
         try {
             topicID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
         }
 
+        User user = session.getUser();
         topic = topicService.getTopicByID(topicID);
-        if (topic == null || isBanned()) {
+        banned = topicService.isBanned(user, topic);
+        if (topic == null || banned) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            return;
         }
 
+        administrator = user != null && user.isAdministrator();
+        moderator = topicService.isModerator(user, topic);
+        subscribed = topicService.isSubscribed(user, topic);
         displayDialog = null;
         userBanSuggestions = new ArrayList<>();
         userModSuggestions = new ArrayList<>();
@@ -247,7 +265,7 @@ public class TopicBacker implements Serializable {
             }
         };
 
-        reports = new Paginator<>("title", Selection.PageSize.NORMAL) {
+        reports = new Paginator<>("id", Selection.PageSize.NORMAL) {
             @Override
             protected Iterable<Report> fetch() {
                 return topicService.getSelectedReports(topic, getSelection(), openReportShown, closedReportShown);
@@ -300,7 +318,9 @@ public class TopicBacker implements Serializable {
      * Apply the current filter to the report pagination.
      */
     public void applyFilters() {
-        reports.update();
+        if (reports != null) {
+            reports.updateReset();
+        }
     }
 
     /**
@@ -389,11 +409,7 @@ public class TopicBacker implements Serializable {
      * @return {@code true} if the user is a moderator, {@code false} otherwise.
      */
     public boolean isModerator() {
-        User user = session.getUser();
-        if (user == null) {
-            return false;
-        }
-        return user.isAdministrator() || topicService.isModerator(user, topic);
+        return administrator || moderator;
     }
 
     /**
@@ -402,11 +418,7 @@ public class TopicBacker implements Serializable {
      * @return {@code true} if the user is banned, {@code false} otherwise.
      */
     public boolean isBanned() {
-        User user = session.getUser();
-        if (user == null) {
-            return false;
-        }
-        return topicService.isBanned(user, topic);
+        return banned;
     }
 
     /**
@@ -427,7 +439,8 @@ public class TopicBacker implements Serializable {
      *         the ban results.
      */
     public String banUser() {
-        if (!isModerator()) {
+        User user = session.getUser();
+        if (!topicService.isModerator(user, topic) && !user.isAdministrator()) {
             log.error("A user was able to use the ban user functionality even though they were no moderator!");
             displayDialog = null;
             return null;
@@ -449,7 +462,8 @@ public class TopicBacker implements Serializable {
      *         update the ban results.
      */
     public String unbanUser() {
-        if (!isModerator()) {
+        User user = session.getUser();
+        if (!topicService.isModerator(user, topic) && !user.isAdministrator()) {
             log.error("A user was able to use the unban user functionality even though they were no moderator!");
             displayDialog = null;
             return null;
@@ -472,7 +486,8 @@ public class TopicBacker implements Serializable {
      *         update the moderation results.
      */
     public String makeModerator() {
-        if (!isModerator()) {
+        User user = session.getUser();
+        if (!topicService.isModerator(user, topic) && !user.isAdministrator()) {
             log.error("A user was able to use the promote functionality even though they were no moderator!");
             displayDialog = null;
             return null;
@@ -495,7 +510,8 @@ public class TopicBacker implements Serializable {
      *         update the moderation results.
      */
     public String removeModerator() {
-        if (!isModerator()) {
+        User user = session.getUser();
+        if (!topicService.isModerator(user, topic) && !user.isAdministrator()) {
             log.error("A user was able to use the demote functionality even though they were no moderator!");
             displayDialog = null;
             return null;
@@ -516,13 +532,15 @@ public class TopicBacker implements Serializable {
      * @return {@code null}
      */
     public String toggleTopicSubscription() {
-        if (session.getUser() == null) {
+        User user = session.getUser();
+        if (user == null) {
             return null;
         }
-        if (topicService.isSubscribed(session.getUser(), topic)) {
-            topicService.unsubscribeFromTopic(session.getUser(), topic);
+
+        if (topicService.isSubscribed(user, topic)) {
+            topicService.unsubscribeFromTopic(user, topic);
         } else {
-            topicService.subscribeToTopic(session.getUser(), topic);
+            topicService.subscribeToTopic(user, topic);
         }
         return null;
     }
@@ -533,7 +551,7 @@ public class TopicBacker implements Serializable {
      * @return {@code true} iff the user is subscribed to the topic.
      */
     public boolean isSubscribed() {
-        return topicService.isSubscribed(session.getUser(), topic);
+        return subscribed;
     }
 
     /**

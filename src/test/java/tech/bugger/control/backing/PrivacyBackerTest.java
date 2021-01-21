@@ -41,11 +41,13 @@ public class PrivacyBackerTest {
 
     @Test
     public void testGetPrivacyPolicySuccess() {
-        doReturn("# Imprint").when(organization).getPrivacyPolicy();
+        String key = "# Privacy";
+        doReturn(key).when(organization).getPrivacyPolicy();
         try (MockedStatic<MarkdownHandler> handlerMock = mockStatic(MarkdownHandler.class)) {
             String parsed = "Parsed string";
-            handlerMock.when(() -> MarkdownHandler.toHtml(any())).thenReturn(parsed);
+            handlerMock.when(() -> MarkdownHandler.toHtml(key)).thenReturn(parsed);
             assertEquals(parsed, backer.getPrivacyPolicy());
+            handlerMock.verify(() -> MarkdownHandler.toHtml(key));
         }
     }
 

@@ -17,16 +17,25 @@
                 <h:outputText value="#{var.read ? '&#x2713;' : ' '}"/>
             </b:column>
             <b:column title="#{labels.type}" paginator="#{homeBacker.inbox}" key="type">
-                <h:commandButton value="#{labels['notification_type.'.concat(var.type)]}" action="#{homeBacker.openNotification(var)}" styleClass="btn-link"/>
+                <h:commandButton value="#{labels['notification_type.'.concat(var.type)]}"
+                                 action="#{homeBacker.openNotification(var)}"
+                                 styleClass="btn btm-sm btn-link"/>
             </b:column>
             <b:column title="#{labels.report}" paginator="#{homeBacker.inbox}" key="report">
-                <h:outputText value="##{var.reportID}: #{var.reportTitle}"/>
+                <h:link value="##{var.reportID}: #{var.reportTitle}" outcome="pretty:report">
+                    <f:param name="id" value="#{var.reportID}"/>
+                </h:link>
             </b:column>
             <b:column title="#{labels.user}" paginator="#{homeBacker.inbox}" key="causer">
-                <h:outputText value="#{var.actuatorUsername}"/>
+                <h:link value="@#{var.actuatorUsername}" outcome="pretty:profile">
+                    <f:param name="u" value="#{var.actuatorUsername}"/>
+                </h:link>
             </b:column>
             <h:column>
-                <h:commandButton value="#{labels.delete}" action="#{homeBacker.deleteNotification(var)}"/>
+                <h:commandLink action="#{homeBacker.deleteNotification(var)}" styleClass="button">
+                    <h:graphicImage value="/resources/images/trash.png"
+                                    styleClass="trashcan-small"/>
+                </h:commandLink>
             </h:column>
         </b:pagitable>
 
@@ -35,6 +44,11 @@
                 rendered="#{userSession.user.administrator}" styleClass="button"/>
         <b:pagitable paginator="#{homeBacker.topics}">
             <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
+            <b:column title="#{labels.id}" paginator="#{homeBacker.topics}" key="id">
+                <h:link value="!#{var.id}" outcome="pretty:topic">
+                    <f:param name="id" value="#{var.id}"/>
+                </h:link>
+            </b:column>
             <b:column title="#{labels.title}" paginator="#{homeBacker.topics}" key="title">
                 <h:link value="#{var.title}" outcome="pretty:topic">
                     <f:param name="id" value="#{var.id}"/>
@@ -44,7 +58,9 @@
                 <h:outputText value="#{var.description}" escape="false"/>
             </b:column>
             <b:column title="#{labels.last_activity}" paginator="#{homeBacker.topics}" key="last_activity">
-                <h:outputText value="#{var.lastActivity}"/>
+                <h:outputText value="#{var.lastActivity}">
+                    <f:convertDateTime type="offsetDateTime" pattern="#{labels.date_time_pattern}"/>
+                </h:outputText>
             </b:column>
         </b:pagitable>
     </ui:define>

@@ -1,5 +1,11 @@
 package tech.bugger.control.backing;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.faces.context.ExternalContext;
+import javax.faces.event.ValueChangeEvent;
+import javax.servlet.http.Part;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,19 +17,9 @@ import tech.bugger.business.service.SettingsService;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Organization;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.event.ValueChangeEvent;
-import javax.servlet.http.Part;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -113,8 +109,8 @@ public class AdminBackerTest {
 
     @Test
     public void testGetAvailableThemesWhenThereAreSome() {
-        doReturn(List.of("a", "b")).when(settingsService).discoverFiles(any());
-        assertEquals(List.of("a", "b"), adminBacker.getAvailableThemes());
+        doReturn(List.of("a", "b.css")).when(settingsService).discoverFiles(any());
+        assertEquals(List.of("b.css"), adminBacker.getAvailableThemes());
     }
 
     @Test

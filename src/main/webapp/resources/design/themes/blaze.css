@@ -1,0 +1,143 @@
+/* Define variables for the primary colors to use */
+/* Template */
+body {
+  background: #fc990f;
+}
+
+#p-header {
+  background: #740200;
+  color: #fc990f;
+}
+#p-header #ot-comp-name {
+  color: #fc990f;
+}
+
+#p-footer {
+  background: #740200;
+  color: #fc990f;
+}
+#p-footer a {
+  color: #fc990f;
+}
+#p-footer a:hover {
+  color: #fefcd5;
+}
+
+#p-content {
+  background-color: #fefcd5;
+  color: #ef5e01;
+}
+#p-content a {
+  color: #fc990f;
+}
+#p-content a:hover {
+  color: #ef5e01;
+}
+
+#p-profile-menu {
+  background-color: #fccd38;
+  color: #ef5e01;
+}
+#p-profile-menu a {
+  color: #740200;
+}
+#p-profile-menu a:hover {
+  color: #cf0107;
+}
+
+/* Bootstrap buttons */
+.btn-outline-primary {
+  border-color: #fefcd5;
+  color: #fefcd5;
+}
+.btn-outline-primary:hover {
+  background-color: #fefcd5;
+  border-color: #ef5e01;
+  color: #ef5e01;
+}
+.btn-outline-primary:active {
+  background-color: #fefcd5;
+  color: #ef5e01;
+}
+
+.btn-primary {
+  border-color: #ef5e01;
+  background-color: #fc990f;
+  color: #ef5e01 !important;
+}
+.btn-primary:hover, .btn-primary:active, .btn-primary:focus {
+  background-color: #740200;
+  border-color: #cf0107;
+  color: #cf0107 !important;
+}
+
+.btn-primary:focus, .btn-primary:active, .btn-secondary:focus, .btn-secondary:active, .btn-link:focus, .btn-link:active,
+.btn-outline-primary:focus, .btn-outline-primary:active {
+  border-color: #ef5e01 !important;
+  box-shadow: 0 1px 1px #fc990f inset, 0 0 8px #fefcd5 !important;
+}
+
+.btn-secondary {
+  border-color: white;
+  color: white;
+  background-color: #fccd38;
+}
+.btn-secondary:hover, .btn-secondary:active, .btn-secondary:focus {
+  background-color: #ef5e01;
+  color: #fefcd5 !important;
+}
+
+.btn-link {
+  background-color: #fefcd5;
+  color: #fc990f;
+}
+.btn-link:hover {
+  color: #ef5e01;
+}
+
+/* Popup dialogs */
+.dialog {
+  background-color: #fefcd5;
+  color: #ef5e01;
+}
+
+/* Voting buttons */
+.vote-cast {
+  background-color: #ef5e01;
+  color: #fefcd5;
+}
+
+.vote-not-cast {
+  background-color: gray;
+}
+
+/* Form input fields focus */
+.form-check-input:checked {
+  background-color: #fc990f;
+  border-color: #ef5e01;
+}
+
+select:focus {
+  border-color: #ef5e01;
+  box-shadow: 0 1px 1px #fc990f inset, 0 0 8px #fefcd5 !important;
+}
+
+.form-control:focus, .form-check-input:focus, .form-select:focus {
+  border-color: #ef5e01;
+  box-shadow: 0 1px 1px #fc990f inset, 0 0 8px #fefcd5 !important;
+}
+
+/* Other elements */
+td, th {
+  color: #ef5e01;
+}
+
+a.search:hover {
+  color: #ef5e01;
+}
+
+.alert-success td {
+  color: #3c763d !important;
+}
+
+/*# sourceMappingURL=blaze.css.map */
