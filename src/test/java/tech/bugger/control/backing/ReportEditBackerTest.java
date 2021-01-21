@@ -101,6 +101,7 @@ public class ReportEditBackerTest {
         doReturn(testReport).when(reportService).getReportByID(1234);
         doReturn(user).when(session).getUser();
         testReport.getAuthorship().setCreator(user);
+        testReport.setClosingDate(null);
         doReturn(false).when(topicService).isBanned(any(), any());
         reportEditBacker.init();
         assertEquals(testReport, reportEditBacker.getReport());
@@ -120,15 +121,6 @@ public class ReportEditBackerTest {
     public void testInitWhenNoReport() throws Exception {
         doReturn("1234").when(requestParameterMap).get("id");
         doReturn(null).when(reportService).getReportByID(1234);
-        reportEditBacker.init();
-        verify(ectx).redirect(any());
-    }
-
-    @Test
-    public void testInitWhenNoUser() throws Exception {
-        doReturn("1234").when(requestParameterMap).get("id");
-        doReturn(testReport).when(reportService).getReportByID(1234);
-        doReturn(user).when(session).getUser();
         reportEditBacker.init();
         verify(ectx).redirect(any());
     }

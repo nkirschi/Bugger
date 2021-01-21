@@ -135,7 +135,7 @@ public class ReportEditBacker implements Serializable {
 
         User user = session.getUser();
         report = reportService.getReportByID(reportID);
-        if (report != null || !isPrivileged()) {
+        if (report != null) {
             destinationID = report.getTopicID();
             currentTopic = topicService.getTopicByID(destinationID);
         } else {
@@ -143,7 +143,8 @@ public class ReportEditBacker implements Serializable {
             return;
         }
 
-        if (report.getClosingDate() != null && !applicationSettings.getConfiguration().isClosedReportPosting()) {
+        boolean closedReportPosting = applicationSettings.getConfiguration().isClosedReportPosting();
+        if (!isPrivileged() || (report.getClosingDate() != null && !closedReportPosting)) {
             redirectTo404Page();
             return;
         }
