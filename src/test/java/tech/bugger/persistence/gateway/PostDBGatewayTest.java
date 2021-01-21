@@ -85,7 +85,7 @@ public class PostDBGatewayTest {
         if (rs.next()) {
             return new Post(
                     rs.getInt("id"), rs.getString("content"),
-                    null, null, null
+                    0, null, null
             );
         } else {
             return null;

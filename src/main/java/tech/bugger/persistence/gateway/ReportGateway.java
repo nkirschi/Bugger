@@ -1,6 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import java.util.List;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
@@ -8,6 +7,8 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.SelfReferenceException;
+
+import java.util.List;
 
 /**
  * A report gateway allows to query and modify a persistent storage of reports.
@@ -90,22 +91,6 @@ public interface ReportGateway {
     void delete(Report report) throws NotFoundException;
 
     /**
-     * Closes a report in the report storage.
-     *
-     * @param report The report to close.
-     * @throws NotFoundException The report could not be found.
-     */
-    void closeReport(Report report) throws NotFoundException;
-
-    /**
-     * Opens a report in the report storage.
-     *
-     * @param report The report to open.
-     * @throws NotFoundException The report could not be found.
-     */
-    void openReport(Report report) throws NotFoundException;
-
-    /**
      * Marks a report as a duplicate of another report.
      *
      * @param duplicate  The report to mark as a duplicate.
@@ -131,16 +116,7 @@ public interface ReportGateway {
      * @param report The report under inspection.
      * @return {@code true} iff the user has cast an upvote on the specified report.
      */
-    boolean hasUpvoted(User user, Report report);
-
-    /**
-     * Finds out weather a specified user has cast an downvote on a specified report.
-     *
-     * @param user   The user who cast the vote.
-     * @param report The report under inspection.
-     * @return {@code true} iff the user has cast an downvote on the specified report.
-     */
-    boolean hasDownvoted(User user, Report report);
+    Integer getVote(User user, Report report);
 
     /**
      * Overwrites the calculated relevance of a report by a fixed relevance value or removes the override, restoring the
@@ -161,18 +137,7 @@ public interface ReportGateway {
      * @throws DuplicateException A vote on the report by the user already existed.
      * @throws NotFoundException  The report or the user could not be found.
      */
-    void upvote(Report report, User user, Integer votingWeight) throws DuplicateException, NotFoundException;
-
-    /**
-     * Stores an downvote, i.e. a negative vote for the relevance, of a report by a user.
-     *
-     * @param report       The report to downvote.
-     * @param user         The downvoting user.
-     * @param votingWeight The users voting weight.
-     * @throws DuplicateException A vote on the report by the user already existed.
-     * @throws NotFoundException  The report or the user could not be found.
-     */
-    void downvote(Report report, User user, Integer votingWeight) throws DuplicateException, NotFoundException;
+    void addVote(Report report, User user, Integer votingWeight) throws DuplicateException, NotFoundException;
 
     /**
      * Removes a user's vote on a report.
