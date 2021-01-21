@@ -16,7 +16,6 @@ import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentGateway;
@@ -31,27 +30,21 @@ import javax.enterprise.event.Event;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -95,22 +88,23 @@ public class PostServiceTest {
     private Event<Feedback> feedbackEvent;
 
     private User testUser = new User();
-    private Report testReport = new Report(100, "Hi", Report.Type.BUG, Report.Severity.MINOR, "1", null, null, null, null, false, 100);
-    private Post testPost = new Post(300, "Hi", new Lazy<>(testReport), null, null);
+    private Report testReport = new Report(100, "Hi", Report.Type.BUG, Report.Severity.MINOR, "1", null, null, null,
+                                           null, false, 100);
+    private Post testPost = new Post(300, "Hi", testReport.getId(), null, null);
     private Topic testTopic = new Topic(100, "Hi", "I am a topic");
 
     @BeforeEach
     public void setUp() {
         service = new PostService(notificationService, topicService, applicationSettings, transactionManager,
-                feedbackEvent, ResourceBundleMocker.mock(""));
-        List<Attachment> attachments = Arrays.asList(
-                new Attachment(1, "test1.txt", new byte[0], "", new Lazy<>(testPost)),
-                new Attachment(2, "test2.txt", new byte[0], "", new Lazy<>(testPost)),
-                new Attachment(3, "test3.txt", new byte[0], "", new Lazy<>(testPost))
+                                  feedbackEvent, ResourceBundleMocker.mock(""));
+        List<Attachment> attachments = List.of(
+                new Attachment(1, "test1.txt", new byte[0], "", testPost.getId()),
+                new Attachment(2, "test2.txt", new byte[0], "", testPost.getId()),
+                new Attachment(3, "test3.txt", new byte[0], "", testPost.getId())
         );
         testPost.setAttachments(new ArrayList<>(attachments));
         testUser.setId(1);
-        Authorship authorship = new Authorship(testUser, ZonedDateTime.now(), testUser, ZonedDateTime.now());
+        Authorship authorship = new Authorship(testUser, OffsetDateTime.now(), testUser, OffsetDateTime.now());
         testPost.setAuthorship(authorship);
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(postGateway).when(tx).newPostGateway();
@@ -125,13 +119,12 @@ public class PostServiceTest {
     @Test
     public void testUpdatePost() throws Exception {
         List<Attachment> oldAttachments = new ArrayList<>(testPost.getAttachments());
-        Attachment attachmentToAdd = new Attachment(4, "a-unique-filename.txt", new byte[0], "",
-                new Lazy<>(mock(Post.class)));
+        Attachment attachmentToAdd = new Attachment(4, "a-unique-filename.txt", new byte[0], "", 42);
         Attachment attachmentToDelete = testPost.getAttachments().get(1);
         testPost.getAttachments().add(attachmentToAdd);
         testPost.getAttachments().remove(attachmentToDelete);
         doReturn(oldAttachments).when(attachmentGateway).getAttachmentsForPost(testPost);
-        assertTrue(service.updatePost(testPost));
+        assertTrue(service.updatePost(testPost, testReport));
         verify(attachmentGateway).delete(attachmentToDelete);
         verify(attachmentGateway).create(attachmentToAdd);
     }
@@ -139,7 +132,7 @@ public class PostServiceTest {
     @Test
     public void testUpdatePostWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(postGateway).update(testPost);
-        assertFalse(service.updatePost(testPost));
+        assertFalse(service.updatePost(testPost, testReport));
         verify(feedbackEvent).fire(any());
     }
 
@@ -147,7 +140,7 @@ public class PostServiceTest {
     public void testUpdatePostWhenCommitFailed() throws Exception {
         doReturn(testPost.getAttachments()).when(attachmentGateway).getAttachmentsForPost(testPost);
         doThrow(TransactionException.class).when(tx).commit();
-        assertFalse(service.updatePost(testPost));
+        assertFalse(service.updatePost(testPost, testReport));
         verify(feedbackEvent).fire(any());
     }
 
@@ -205,7 +198,7 @@ public class PostServiceTest {
     public void testCreatePostWhenFine() throws Exception {
         PostService serviceSpy = spy(service);
         lenient().doReturn(true).when(serviceSpy).createPostWithTransaction(any(), any());
-        assertTrue(serviceSpy.createPost(testPost));
+        assertTrue(serviceSpy.createPost(testPost, testReport));
         verify(tx).commit();
     }
 
@@ -213,7 +206,7 @@ public class PostServiceTest {
     public void testCreatePostWhenNoSuccess() throws Exception {
         PostService serviceSpy = spy(service);
         lenient().doReturn(false).when(serviceSpy).createPostWithTransaction(any(), any());
-        assertFalse(serviceSpy.createPost(testPost));
+        assertFalse(serviceSpy.createPost(testPost, testReport));
     }
 
     @Test
@@ -221,7 +214,7 @@ public class PostServiceTest {
         PostService serviceSpy = spy(service);
         lenient().doReturn(true).when(serviceSpy).createPostWithTransaction(any(), any());
         doThrow(TransactionException.class).when(tx).commit();
-        assertFalse(serviceSpy.createPost(testPost));
+        assertFalse(serviceSpy.createPost(testPost, testReport));
         verify(feedbackEvent).fire(any());
     }
 
@@ -270,39 +263,39 @@ public class PostServiceTest {
         assertEquals("a-unique-filename.txt", attachment.getName());
         assertEquals("text/plain", attachment.getMimetype());
         assertArrayEquals(new byte[]{1, 2, 3, 4}, attachment.getContent());
-        assertEquals(testPost, attachment.getPost().get());
+        assertEquals(testPost.getId(), attachment.getPost());
     }
 
     @Test
     public void deletePostWhenPostIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> service.deletePost(null));
+        assertThrows(IllegalArgumentException.class, () -> service.deletePost(null, testReport));
     }
 
     @Test
     public void deletePostWhenPostIsFirstPost() throws Exception {
         doReturn(testPost).when(postGateway).getFirstPost(any());
-        assertDoesNotThrow(() -> service.deletePost(testPost));
+        assertDoesNotThrow(() -> service.deletePost(testPost, testReport));
         verify(reportGateway).delete(any());
     }
 
     @Test
     public void deletePostWhenPostIsNotFirstPost() throws Exception {
         doReturn(null).when(postGateway).getFirstPost(any());
-        assertDoesNotThrow(() -> service.deletePost(testPost));
+        assertDoesNotThrow(() -> service.deletePost(testPost, testReport));
         verify(postGateway).delete(any());
     }
 
     @Test
-    public void deletePostWhenCommitFails() throws Exception{
+    public void deletePostWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertDoesNotThrow(() -> service.deletePost(testPost));
+        assertDoesNotThrow(() -> service.deletePost(testPost, testReport));
         verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void deletePostWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(postGateway).delete(any());
-        assertDoesNotThrow(() -> service.deletePost(testPost));
+        assertDoesNotThrow(() -> service.deletePost(testPost, testReport));
         verify(feedbackEvent).fire(any());
     }
 
@@ -330,7 +323,7 @@ public class PostServiceTest {
 
     @Test
     public void testGetAttachmentByID() throws Exception {
-        Attachment attachment = new Attachment(1234, "test1.txt", new byte[0], "", new Lazy<>(testPost));
+        Attachment attachment = new Attachment(1234, "test1.txt", new byte[0], "", testPost.getId());
         doReturn(attachment).when(attachmentGateway).find(1234);
         assertEquals(attachment, service.getAttachmentByID(1234));
     }
@@ -372,18 +365,18 @@ public class PostServiceTest {
 
     @Test
     public void testIsPrivilegedWhenUserIsAnon() {
-        assertFalse(service.isPrivileged(null, testPost));
+        assertFalse(service.isPrivileged(null, testPost, testReport));
     }
 
     @Test
     public void testIsPrivilegedPostNull() {
-        assertFalse(service.isPrivileged(testUser, null));
+        assertFalse(service.isPrivileged(testUser, null, testReport));
     }
 
     @Test
     public void testIsPrivilegedWhenUserIsAdmin() {
         testUser.setAdministrator(true);
-        assertTrue(service.isPrivileged(testUser, testPost));
+        assertTrue(service.isPrivileged(testUser, testPost, testReport));
     }
 
     @Test
@@ -391,7 +384,7 @@ public class PostServiceTest {
         testUser.setAdministrator(false);
         doReturn(testTopic).when(topicGateway).findTopic(anyInt());
         doReturn(true).when(userGateway).isBanned(any(), any());
-        assertFalse(service.isPrivileged(testUser, testPost));
+        assertFalse(service.isPrivileged(testUser, testPost, testReport));
     }
 
     @Test
@@ -399,7 +392,7 @@ public class PostServiceTest {
         testUser.setAdministrator(false);
         doReturn(testTopic).when(topicGateway).findTopic(anyInt());
         doReturn(true).when(userGateway).isModerator(testUser, testTopic);
-        assertTrue(service.isPrivileged(testUser, testPost));
+        assertTrue(service.isPrivileged(testUser, testPost, testReport));
     }
 
     @Test
@@ -408,7 +401,7 @@ public class PostServiceTest {
         Authorship authorship = new Authorship(testUser, null, null, null);
         testPost.setAuthorship(authorship);
         doReturn(testTopic).when(topicGateway).findTopic(anyInt());
-        assertTrue(service.isPrivileged(testUser, testPost));
+        assertTrue(service.isPrivileged(testUser, testPost, testReport));
     }
 
     @Test
@@ -416,13 +409,13 @@ public class PostServiceTest {
         doReturn(testTopic).when(topicGateway).findTopic(anyInt());
         Authorship authorship = new Authorship(null, null, null, null);
         testPost.setAuthorship(authorship);
-        assertFalse(service.isPrivileged(testUser, testPost));
+        assertFalse(service.isPrivileged(testUser, testPost, testReport));
     }
 
     @Test
     public void testIsPrivilegedNotFound() throws NotFoundException {
         doThrow(NotFoundException.class).when(topicGateway).findTopic(anyInt());
-        assertFalse(service.isPrivileged(testUser, testPost));
+        assertFalse(service.isPrivileged(testUser, testPost, testReport));
         verify(feedbackEvent).fire(any());
     }
 
@@ -432,7 +425,7 @@ public class PostServiceTest {
         doThrow(TransactionException.class).when(tx).commit();
         Authorship authorship = new Authorship(null, null, null, null);
         testPost.setAuthorship(authorship);
-        assertFalse(service.isPrivileged(testUser, testPost));
+        assertFalse(service.isPrivileged(testUser, testPost, testReport));
         verify(feedbackEvent).fire(any());
     }
 

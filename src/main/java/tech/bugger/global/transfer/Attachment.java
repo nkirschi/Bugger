@@ -1,7 +1,5 @@
 package tech.bugger.global.transfer;
 
-import tech.bugger.global.util.Lazy;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
@@ -25,7 +23,7 @@ public class Attachment implements Serializable {
     private String name;
 
     /**
-     * The content of the attachment, loaded lazily.
+     * The content of the attachment.
      */
     private byte[] content;
 
@@ -35,9 +33,9 @@ public class Attachment implements Serializable {
     private String mimetype;
 
     /**
-     * The post of the attachment, loaded lazily.
+     * The id of the post this attachment is attached to.
      */
-    private Lazy<Post> post;
+    private int post;
 
     /**
      * Constructs an empty attachment.
@@ -55,8 +53,11 @@ public class Attachment implements Serializable {
      * @param mimetype The MIME type of the attachment.
      * @param post     The post the attachment belongs to.
      */
-    public Attachment(final int id, final String name, final byte[] content, final String mimetype,
-                      final Lazy<Post> post) {
+    public Attachment(final int id,
+                      final String name,
+                      final byte[] content,
+                      final String mimetype,
+                      final int post) {
         this.id = id;
         this.name = name;
         this.content = content;
@@ -141,7 +142,7 @@ public class Attachment implements Serializable {
      *
      * @return The associated post.
      */
-    public Lazy<Post> getPost() {
+    public int getPost() {
         return post;
     }
 
@@ -150,7 +151,7 @@ public class Attachment implements Serializable {
      *
      * @param post The post to be set.
      */
-    public void setPost(final Lazy<Post> post) {
+    public void setPost(final int post) {
         this.post = post;
     }
 
@@ -190,13 +191,12 @@ public class Attachment implements Serializable {
      */
     @Override
     public String toString() {
-        String postId = post.isPresent() ? String.valueOf(post.get().getId()) : "<absent>";
         return "Attachment{"
                 + "id='" + id + '\''
                 + ", name='" + name + '\''
                 + ", content=byte[" + (content != null ? content.length : 0) + "]"
                 + ", mimetype='" + mimetype + '\''
-                + ", post='##" + postId + '\''
+                + ", post='##" + post + '\''
                 + '}';
     }
 

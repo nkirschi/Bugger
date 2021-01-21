@@ -2,10 +2,10 @@ package tech.bugger.business.service;
 
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
-import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.User;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
@@ -18,7 +18,7 @@ import tech.bugger.persistence.util.TransactionManager;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -651,8 +651,10 @@ public class TopicService {
      * @return {@code true} if the user is a moderator, {@code false} otherwise.
      */
     public boolean isModerator(final User user, final Topic topic) {
+        if (user == null) { // anonymous users are never moderators
+            return false;
+        }
         boolean isMod = false;
-
         try (Transaction tx = transactionManager.begin()) {
             isMod = tx.newUserGateway().isModerator(user, topic);
             tx.commit();
@@ -673,8 +675,10 @@ public class TopicService {
      * @return {@code true} if the user is banned, {@code false} otherwise.
      */
     public boolean isBanned(final User user, final Topic topic) {
+        if (user == null) { // anonymous users are never banned
+            return false;
+        }
         boolean isBanned = false;
-
         try (Transaction tx = transactionManager.begin()) {
             isBanned = tx.newUserGateway().isBanned(user, topic);
             tx.commit();
@@ -683,7 +687,6 @@ public class TopicService {
                     + "with id " + topic.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
-
         return isBanned;
     }
 
@@ -731,9 +734,9 @@ public class TopicService {
      * as creating and editing posts count as actions. Moving a report is an action in the destination topic only.
      *
      * @param topic The topic in question.
-     * @return The time stamp of the last action as a {@code ZonedDateTime}.
+     * @return The time stamp of the last action as a {@link OffsetDateTime}.
      */
-    public ZonedDateTime lastChange(final Topic topic) {
+    public OffsetDateTime lastChange(final Topic topic) {
         if (topic == null) {
             log.error("Error while determining last change with topic null.");
             throw new IllegalArgumentException("Topic cannot be null.");
@@ -742,7 +745,7 @@ public class TopicService {
             throw new IllegalArgumentException("Topic ID cannot be null.");
         }
 
-        ZonedDateTime lastChange = null;
+        OffsetDateTime lastChange = null;
         try (Transaction tx = transactionManager.begin()) {
             lastChange = tx.newTopicGateway().determineLastActivity(topic);
             tx.commit();

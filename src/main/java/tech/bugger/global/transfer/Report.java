@@ -2,7 +2,7 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 /**
@@ -86,7 +86,7 @@ public class Report implements Serializable {
     /**
      * The date and time when the report was closed.
      */
-    private ZonedDateTime closingDate;
+    private OffsetDateTime closingDate;
 
     /**
      * The ID of the report this report is a duplicate of.
@@ -106,7 +106,7 @@ public class Report implements Serializable {
     /**
      * The ID of the topic this report is in.
      */
-    private Integer topicID;
+    private int topicID;
 
     /**
      * Constructs a new report.
@@ -118,14 +118,14 @@ public class Report implements Serializable {
      * @param version               The version the report is associated with.
      * @param authorship            The report authorship metadata.
      * @param closingDate           The closing date of the report.
-     * @param duplicateOf           The report this report is a duplicate of, loaded lazily.
+     * @param duplicateOf           The report this report is a duplicate of.
      * @param relevance             The relevance value for the Report.
      * @param relevanceOverwritten  The state of the relevance overwrite.
      * @param topicID               The ID of topic the report belongs to.
      */
     public Report(final Integer id, final String title, final Type type, final Severity severity, final String version,
-                  final Authorship authorship, final ZonedDateTime closingDate, final Integer duplicateOf,
-                  final Integer relevance, final boolean relevanceOverwritten, final Integer topicID) {
+                  final Authorship authorship, final OffsetDateTime closingDate, final Integer duplicateOf,
+                  final Integer relevance, final boolean relevanceOverwritten, final int topicID) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -269,7 +269,7 @@ public class Report implements Serializable {
      *
      * @return The report closing date.
      */
-    public ZonedDateTime getClosingDate() {
+    public OffsetDateTime getClosingDate() {
         return closingDate;
     }
 
@@ -278,7 +278,7 @@ public class Report implements Serializable {
      *
      * @param closingDate The report closing date.
      */
-    public void setClosingDate(final ZonedDateTime closingDate) {
+    public void setClosingDate(final OffsetDateTime closingDate) {
         this.closingDate = closingDate;
     }
 
@@ -323,7 +323,7 @@ public class Report implements Serializable {
      *
      * @return The associated topic.
      */
-    public Integer getTopicID() {
+    public int getTopicID() {
         return topicID;
     }
 
@@ -332,7 +332,7 @@ public class Report implements Serializable {
      *
      * @param topicID The associated topic to be set.
      */
-    public void setTopicID(final Integer topicID) {
+    public void setTopicID(final int topicID) {
         this.topicID = topicID;
     }
 
@@ -341,7 +341,7 @@ public class Report implements Serializable {
      *
      * @return {@code true} iff relevance of this topic is overwritten.
      */
-    public boolean getRelevanceOverwritten() {
+    public boolean isRelevanceOverwritten() {
         return relevanceOverwritten;
     }
 

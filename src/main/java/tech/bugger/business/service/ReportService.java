@@ -1,13 +1,5 @@
 package tech.bugger.business.service;
 
-import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Notification;
@@ -23,6 +15,15 @@ import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.ResourceBundle;
 
 /**
  * Service providing methods related to reports. A {@link Feedback} event is fired, if unexpected circumstances occur.
@@ -208,8 +209,9 @@ public class ReportService {
      * @param report The report to be closed.
      */
     public void close(final Report report) {
+        report.setClosingDate(OffsetDateTime.now());
         try (Transaction tx = transactionManager.begin()) {
-            tx.newReportGateway().closeReport(report);
+            tx.newReportGateway().update(report);
             tx.commit();
         } catch (NotFoundException e) {
             log.error("Could not find report " + report + ".", e);
@@ -226,8 +228,9 @@ public class ReportService {
      * @param report The report to be opened.
      */
     public void open(final Report report) {
+        report.setClosingDate(null);
         try (Transaction tx = transactionManager.begin()) {
-            tx.newReportGateway().openReport(report);
+            tx.newReportGateway().update(report);
             tx.commit();
         } catch (NotFoundException e) {
             log.error("Could not find report " + report + ".", e);
@@ -249,7 +252,7 @@ public class ReportService {
         int votingWeight = profileService.getVotingWeightForUser(user);
         if (votingWeight > 0) {
             try (Transaction tx = transactionManager.begin()) {
-                tx.newReportGateway().upvote(report, user, votingWeight);
+                tx.newReportGateway().addVote(report, user, votingWeight);
                 tx.commit();
             } catch (NotFoundException e) {
                 log.error("Could not find report " + report + ".", e);
@@ -278,7 +281,7 @@ public class ReportService {
         int votingWeight = profileService.getVotingWeightForUser(user);
         if (votingWeight > 0) {
             try (Transaction tx = transactionManager.begin()) {
-                tx.newReportGateway().downvote(report, user, votingWeight);
+                tx.newReportGateway().addVote(report, user, -votingWeight);
                 tx.commit();
             } catch (NotFoundException e) {
                 log.error("Could not find report " + report + ".", e);
@@ -323,9 +326,9 @@ public class ReportService {
      */
     public boolean hasUpvoted(final Report report, final User user) {
         try (Transaction tx = transactionManager.begin()) {
-            boolean upvote = tx.newReportGateway().hasUpvoted(user, report);
+            Integer vote = tx.newReportGateway().getVote(user, report);
             tx.commit();
-            return upvote;
+            return vote != null && vote > 0;
         } catch (TransactionException e) {
             log.error("Error while searching for vote for report.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
@@ -342,9 +345,9 @@ public class ReportService {
      */
     public boolean hasDownvoted(final Report report, final User user) {
         try (Transaction tx = transactionManager.begin()) {
-            boolean upvote = tx.newReportGateway().hasDownvoted(user, report);
+            Integer vote = tx.newReportGateway().getVote(user, report);
             tx.commit();
-            return upvote;
+            return vote != null && vote < 0;
         } catch (TransactionException e) {
             log.error("Error while searching for vote for report.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
@@ -460,7 +463,7 @@ public class ReportService {
      */
     public boolean updateReport(final Report report) {
         try (Transaction tx = transactionManager.begin()) {
-            report.getAuthorship().setModifiedDate(ZonedDateTime.now());
+            report.getAuthorship().setModifiedDate(OffsetDateTime.now());
             tx.newReportGateway().update(report);
             tx.commit();
         } catch (NotFoundException e) {
@@ -684,9 +687,9 @@ public class ReportService {
      * as creating and editing posts count as actions.
      *
      * @param report The report in question.
-     * @return The time stamp of the last action as a {@code ZonedDateTime}.
+     * @return The time stamp of the last action as a {@link OffsetDateTime}.
      */
-    public ZonedDateTime lastChange(final Report report) {
+    public OffsetDateTime lastChange(final Report report) {
         return null;
     }
 

@@ -1,9 +1,5 @@
 package tech.bugger.business.service;
 
-import java.util.Locale;
-import javax.enterprise.event.Event;
-import javax.servlet.http.Part;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +15,6 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.SelfReferenceException;
@@ -30,30 +25,27 @@ import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.event.Event;
+import javax.servlet.http.Part;
 import java.io.IOException;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -106,15 +98,16 @@ public class ProfileServiceTest {
         lenient().doReturn(userGateway).when(tx).newUserGateway();
         lenient().doReturn(subscriptionGateway).when(tx).newSubscriptionGateway();
         lenient().doReturn(reportGateway).when(tx).newReportGateway();
-        testUser = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
-                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
-                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+        testUser = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test"
+                , "User",
+                            new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
+                            Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         admin = new User(3, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@admin.de", "Helgo", "Brötchen",
-                new byte[]{1, 2, 3, 4}, new byte[]{1}, "Ich bin der Administrator hier!",
-                Locale.ENGLISH, User.ProfileVisibility.MINIMAL, ZonedDateTime.now(), null, true);
+                         new byte[]{1, 2, 3, 4}, new byte[]{1}, "Ich bin der Administrator hier!",
+                         Locale.ENGLISH, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, true);
         testTopic = new Topic(1, "title", "description");
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
-                mock(Authorship.class), mock(ZonedDateTime.class), null, null, false, null);
+                                mock(Authorship.class), mock(OffsetDateTime.class), null, null, false, 0);
         selection = new Selection(1, 0, Selection.PageSize.SMALL, "id", true);
     }
 
@@ -128,8 +121,8 @@ public class ProfileServiceTest {
         }).when(userGateway).createUser(any());
 
         assertAll(() -> assertTrue(service.createUser(testUser)),
-                () -> assertEquals(1, testUser.getId()),
-                () -> verify(userGateway).createUser(any()));
+                  () -> assertEquals(1, testUser.getId()),
+                  () -> verify(userGateway).createUser(any()));
     }
 
     @Test
@@ -175,7 +168,7 @@ public class ProfileServiceTest {
     @Test
     public void testUpdateUser() throws Exception {
         assertAll(() -> assertTrue(service.updateUser(testUser)),
-                () -> assertEquals(1, testUser.getId()));
+                  () -> assertEquals(1, testUser.getId()));
         verify(userGateway).updateUser(any());
     }
 
@@ -183,7 +176,7 @@ public class ProfileServiceTest {
     public void testUpdateWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(userGateway).updateUser(any());
         assertThrows(tech.bugger.business.exception.NotFoundException.class,
-                () -> service.updateUser(testUser)
+                     () -> service.updateUser(testUser)
         );
     }
 
@@ -206,7 +199,7 @@ public class ProfileServiceTest {
     public void testGetUserWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(userGateway).getUserByID(1);
         assertThrows(tech.bugger.business.exception.NotFoundException.class,
-                () -> service.getUser(1)
+                     () -> service.getUser(1)
         );
     }
 
@@ -220,7 +213,7 @@ public class ProfileServiceTest {
     @Test
     public void testMatchingPassword() {
         String hashedPassword = Hasher.hash(testUser.getPasswordHash(), testUser.getPasswordSalt(),
-                testUser.getHashingAlgorithm());
+                                            testUser.getHashingAlgorithm());
         String password = testUser.getPasswordHash();
         testUser.setPasswordHash(hashedPassword);
         assertTrue(service.matchingPassword(testUser, password));
@@ -436,7 +429,7 @@ public class ProfileServiceTest {
         testUser.setAdministrator(true);
         when(userGateway.getNumberOfAdmins()).thenReturn(ZERO);
         assertThrows(InternalError.class,
-                () -> service.toggleAdmin(testUser)
+                     () -> service.toggleAdmin(testUser)
         );
         assertTrue(testUser.isAdministrator());
         verify(userGateway, times(1)).getNumberOfAdmins();
@@ -503,7 +496,7 @@ public class ProfileServiceTest {
     @Test
     public void testDeleteTopicSubscriptionSubscriberNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteTopicSubscription(null, testTopic)
+                     () -> service.deleteTopicSubscription(null, testTopic)
         );
     }
 
@@ -511,14 +504,14 @@ public class ProfileServiceTest {
     public void testDeleteTopicSubscriptionSubscriberIdNull() {
         testUser.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteTopicSubscription(testUser, testTopic)
+                     () -> service.deleteTopicSubscription(testUser, testTopic)
         );
     }
 
     @Test
     public void testDeleteTopicSubscriptionTopicNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteTopicSubscription(testUser, null)
+                     () -> service.deleteTopicSubscription(testUser, null)
         );
     }
 
@@ -526,7 +519,7 @@ public class ProfileServiceTest {
     public void testDeleteTopicSubscriptionTopicIdNull() {
         testTopic.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteTopicSubscription(testUser, testTopic)
+                     () -> service.deleteTopicSubscription(testUser, testTopic)
         );
     }
 
@@ -554,7 +547,7 @@ public class ProfileServiceTest {
     @Test
     public void testDeleteReportSubscriptionsReportNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteReportSubscription(testUser, null)
+                     () -> service.deleteReportSubscription(testUser, null)
         );
     }
 
@@ -562,7 +555,7 @@ public class ProfileServiceTest {
     public void testDeleteReportSubscriptionsReportIdNull() {
         testReport.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteReportSubscription(testUser, testReport)
+                     () -> service.deleteReportSubscription(testUser, testReport)
         );
     }
 
@@ -590,7 +583,7 @@ public class ProfileServiceTest {
     @Test
     public void testDeleteUserSubscriptionsUserNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteUserSubscription(testUser, null)
+                     () -> service.deleteUserSubscription(testUser, null)
         );
     }
 
@@ -598,7 +591,7 @@ public class ProfileServiceTest {
     public void testDeleteUserSubscriptionsUserIdNull() {
         admin.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteUserSubscription(testUser, admin)
+                     () -> service.deleteUserSubscription(testUser, admin)
         );
     }
 
@@ -626,7 +619,7 @@ public class ProfileServiceTest {
     @Test
     public void testDeleteAllTopicSubscriptionsUserNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteAllTopicSubscriptions(null)
+                     () -> service.deleteAllTopicSubscriptions(null)
         );
     }
 
@@ -634,7 +627,7 @@ public class ProfileServiceTest {
     public void testDeleteAllTopicSubscriptionsUserIdNull() {
         testUser.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteAllTopicSubscriptions(testUser)
+                     () -> service.deleteAllTopicSubscriptions(testUser)
         );
     }
 
@@ -662,7 +655,7 @@ public class ProfileServiceTest {
     @Test
     public void testDeleteAllReportSubscriptionsUserNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteAllReportSubscriptions(null)
+                     () -> service.deleteAllReportSubscriptions(null)
         );
     }
 
@@ -670,7 +663,7 @@ public class ProfileServiceTest {
     public void testDeleteAllReportSubscriptionsUserIdNull() {
         testUser.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteAllReportSubscriptions(testUser)
+                     () -> service.deleteAllReportSubscriptions(testUser)
         );
     }
 
@@ -698,7 +691,7 @@ public class ProfileServiceTest {
     @Test
     public void testDeleteAllUserSubscriptionsUserNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteAllUserSubscriptions(null)
+                     () -> service.deleteAllUserSubscriptions(null)
         );
     }
 
@@ -706,7 +699,7 @@ public class ProfileServiceTest {
     public void testDeleteAllUserSubscriptionsUserIdNull() {
         testUser.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.deleteAllUserSubscriptions(testUser)
+                     () -> service.deleteAllUserSubscriptions(testUser)
         );
     }
 
@@ -734,7 +727,7 @@ public class ProfileServiceTest {
     @Test
     public void testSubscribeToUserSubscriberNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.subscribeToUser(null, admin)
+                     () -> service.subscribeToUser(null, admin)
         );
     }
 
@@ -742,14 +735,14 @@ public class ProfileServiceTest {
     public void testSubscribeToUserSubscriberIdNull() {
         testUser.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.subscribeToUser(testUser, admin)
+                     () -> service.subscribeToUser(testUser, admin)
         );
     }
 
     @Test
     public void testSubscribeToUserSubscribeToNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.subscribeToUser(testUser, null)
+                     () -> service.subscribeToUser(testUser, null)
         );
     }
 
@@ -757,7 +750,7 @@ public class ProfileServiceTest {
     public void testSubscribeToUserSubscribeToIdNull() {
         admin.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.subscribeToUser(testUser, admin)
+                     () -> service.subscribeToUser(testUser, admin)
         );
     }
 
@@ -809,14 +802,14 @@ public class ProfileServiceTest {
     public void testIsSubscribedSubscriberIdNull() {
         testUser.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.isSubscribed(testUser, admin)
+                     () -> service.isSubscribed(testUser, admin)
         );
     }
 
     @Test
     public void testIsSubscribedSubscribedToNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.isSubscribed(testUser, null)
+                     () -> service.isSubscribed(testUser, null)
         );
     }
 
@@ -824,7 +817,7 @@ public class ProfileServiceTest {
     public void testIsSubscribedSubscribedToIdNull() {
         admin.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.isSubscribed(testUser, admin)
+                     () -> service.isSubscribed(testUser, admin)
         );
     }
 
@@ -853,14 +846,14 @@ public class ProfileServiceTest {
     @Test
     public void testSelectSubscribedUsersSelectionNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.selectSubscribedUsers(testUser, null)
+                     () -> service.selectSubscribedUsers(testUser, null)
         );
     }
 
     @Test
     public void testSelectSubscribedUsersUserNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.selectSubscribedUsers(null, selection)
+                     () -> service.selectSubscribedUsers(null, selection)
         );
     }
 
@@ -868,7 +861,7 @@ public class ProfileServiceTest {
     public void testSelectSubscribedUsersUserIdNull() {
         testUser.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.selectSubscribedUsers(testUser, selection)
+                     () -> service.selectSubscribedUsers(testUser, selection)
         );
     }
 
@@ -893,7 +886,7 @@ public class ProfileServiceTest {
     public void testCountSubscribedUsersUserIdNull() {
         testUser.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.countSubscribedUsers(testUser)
+                     () -> service.countSubscribedUsers(testUser)
         );
     }
 
@@ -915,14 +908,14 @@ public class ProfileServiceTest {
     @Test
     public void testSelectSubscribedReportsSelectionNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.selectSubscribedReports(testUser, null)
+                     () -> service.selectSubscribedReports(testUser, null)
         );
     }
 
     @Test
     public void testSelectSubscribedReportsUserNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.selectSubscribedReports(null, selection)
+                     () -> service.selectSubscribedReports(null, selection)
         );
     }
 
@@ -930,7 +923,7 @@ public class ProfileServiceTest {
     public void testSelectSubscribedReportsUserIdNull() {
         testUser.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.selectSubscribedReports(testUser, selection)
+                     () -> service.selectSubscribedReports(testUser, selection)
         );
     }
 
@@ -955,7 +948,7 @@ public class ProfileServiceTest {
     public void testCountSubscribedReportsUserIdNull() {
         testUser.setId(null);
         assertThrows(IllegalArgumentException.class,
-                () -> service.countSubscribedReports(testUser)
+                     () -> service.countSubscribedReports(testUser)
         );
     }
 

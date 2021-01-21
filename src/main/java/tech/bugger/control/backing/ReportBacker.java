@@ -1,17 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.stream.StreamSupport;
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
@@ -21,10 +9,20 @@ import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.User;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
+
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+import java.util.stream.StreamSupport;
 
 /**
  * Backing bean for the report page.
@@ -32,29 +30,6 @@ import tech.bugger.global.util.Log;
 @ViewScoped
 @Named
 public class ReportBacker implements Serializable {
-
-    public enum ReportPageDialog {
-
-        /**
-         * Delete a post.
-         */
-        DELETE_POST,
-
-        /**
-         * Delete the report.
-         */
-        DELETE_REPORT,
-
-        /**
-         * Open or close the report.
-         */
-        OPEN_CLOSE,
-
-        /**
-         * Mark the report as a duplicate of another report.
-         */
-        DUPLICATE
-    }
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.
@@ -65,9 +40,14 @@ public class ReportBacker implements Serializable {
     private static final long serialVersionUID = 7260516443406682026L;
 
     /**
-     * The report.
+     * The report for this page.
      */
     private Report report;
+
+    /**
+     * The topic the {@code report} is in.
+     */
+    private Topic topic;
 
     /**
      * The paginated list of posts.
@@ -80,11 +60,6 @@ public class ReportBacker implements Serializable {
     private Paginator<Report> duplicates;
 
     /**
-     * The ID of the report the current report is potentially a duplicate of.
-     */
-    private Integer duplicateOfID;
-
-    /**
      * The post to be deleted.
      */
     private Post postToBeDeleted;
@@ -92,7 +67,7 @@ public class ReportBacker implements Serializable {
     /**
      * The currently displayed dialog.
      */
-    private ReportPageDialog currentDialog;
+    private Dialog currentDialog;
 
     /**
      * The application settings cache.
@@ -122,12 +97,32 @@ public class ReportBacker implements Serializable {
     /**
      * Whether the user has upvoted the report.
      */
-    private boolean hasUpvoted;
+    private boolean upvoted;
 
     /**
      * Whether the user has downvoted the report.
      */
-    private boolean hasDownvoted;
+    private boolean downvoted;
+
+    /**
+     * Whether the user is banned in the topic this report is in.
+     */
+    private boolean banned;
+
+    /**
+     * Whether the user is moderator for the topic this report is in.
+     */
+    private boolean moderator;
+
+    /**
+     * Whether the user is privileged for this report.
+     */
+    private boolean privileged;
+
+    /**
+     * Whether the user is subscribed to this report.
+     */
+    private boolean subscribed;
 
     /**
      * The user session.
@@ -135,9 +130,37 @@ public class ReportBacker implements Serializable {
     private final UserSession session;
 
     /**
-     * The current {@link FacesContext}.
+     * The current {@link FacesContext} of the application.
      */
     private final FacesContext fctx;
+
+    /**
+     * The current {@link ExternalContext} of the application.
+     */
+    private final ExternalContext ectx;
+
+    public enum Dialog {
+
+        /**
+         * Delete a post.
+         */
+        DELETE_POST,
+
+        /**
+         * Delete the report.
+         */
+        DELETE_REPORT,
+
+        /**
+         * Open or close the report.
+         */
+        OPEN_CLOSE,
+
+        /**
+         * Mark the report as a duplicate of another report.
+         */
+        DUPLICATE
+    }
 
     /**
      * Constructs a new report page backing bean with the necessary dependencies.
@@ -148,17 +171,23 @@ public class ReportBacker implements Serializable {
      * @param postService         The post service to use.
      * @param session             The user session.
      * @param fctx                The current {@link FacesContext} of the application.
+     * @param ectx                The current {@link ExternalContext} of the application.
      */
     @Inject
-    public ReportBacker(final ApplicationSettings applicationSettings, final TopicService topicService,
-                        final ReportService reportService, final PostService postService, final UserSession session,
-                        final FacesContext fctx) {
+    public ReportBacker(final ApplicationSettings applicationSettings,
+                        final TopicService topicService,
+                        final ReportService reportService,
+                        final PostService postService,
+                        final UserSession session,
+                        final FacesContext fctx,
+                        final ExternalContext ectx) {
         this.applicationSettings = applicationSettings;
         this.topicService = topicService;
         this.reportService = reportService;
         this.postService = postService;
         this.session = session;
         this.fctx = fctx;
+        this.ectx = ectx;
     }
 
     /**
@@ -167,29 +196,25 @@ public class ReportBacker implements Serializable {
      */
     @PostConstruct
     void init() {
-        if (!applicationSettings.getConfiguration().isGuestReading()) {
-            if (session.getUser() == null || isBanned()) {
-                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-            }
-        }
-        ExternalContext ext = fctx.getExternalContext();
+        log.debug(">>>>>> INIT");
+
         int reportID;
         Integer postID = null;
-        if (ext.getRequestParameterMap().containsKey("p")) {
+        if (ectx.getRequestParameterMap().containsKey("p")) {
             try {
-                postID = Integer.parseInt(ext.getRequestParameterMap().get("p"));
+                postID = Integer.parseInt(ectx.getRequestParameterMap().get("p"));
             } catch (NumberFormatException e) {
                 fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
                 return;
             }
             reportID = reportService.findReportOfPost(postID);
         } else {
-            if (!ext.getRequestParameterMap().containsKey("id")) {
+            if (!ectx.getRequestParameterMap().containsKey("id")) {
                 fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
                 return;
             }
             try {
-                reportID = Integer.parseInt(ext.getRequestParameterMap().get("id"));
+                reportID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
             } catch (NumberFormatException e) {
                 fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
                 return;
@@ -197,25 +222,30 @@ public class ReportBacker implements Serializable {
         }
 
         report = reportService.getReportByID(reportID);
-        if (report == null) {
+        if (report == null) { // no report with this ID
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
             return;
         }
-
-        duplicateOfID = report.getDuplicateOf();
-        User user = session.getUser();
-        boolean maySee = false;
-
-        if (applicationSettings.getConfiguration().isGuestReading()) {
-            maySee = true;
-        } else if (user != null && !isBanned()) {
-            maySee = true;
+        topic = topicService.getTopicByID(report.getTopicID());
+        if (topic == null) { // this should never happen!
+            throw new InternalError("Report " + report + " without topic!");
         }
-        if (!maySee) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
+
+
+        // now begin actually initializing the page content
+        currentDialog = null;
+        banned = topicService.isBanned(session.getUser(), topic);
+        moderator = topicService.isModerator(session.getUser(), topic);
+        privileged = session.getUser() != null && !banned
+                && (session.getUser().isAdministrator() || moderator
+                || session.getUser().equals(report.getAuthorship().getCreator()));
+        subscribed = reportService.isSubscribed(session.getUser(), report);
+
+        // disallow access for banned users if guest mode is inactive
+        if (!applicationSettings.getConfiguration().isGuestReading() && session.getUser() != null && banned) {
+            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
             return;
         }
-        currentDialog = null;
 
         posts = new Paginator<>("created_at", Selection.PageSize.NORMAL) {
             @Override
@@ -244,8 +274,8 @@ public class ReportBacker implements Serializable {
         };
 
         if (postID != null) {
-            Post post = new Post(postID, null, null, null, null);
-            while (StreamSupport.stream(posts.spliterator(), false).noneMatch(post::equals)) {
+            int pID = postID;
+            while (StreamSupport.stream(posts.spliterator(), false).noneMatch(p -> p.getId() == pID)) {
                 try {
                     posts.nextPage();
                 } catch (IllegalStateException e) {
@@ -262,19 +292,18 @@ public class ReportBacker implements Serializable {
      * Updates the values for the relevance interface.
      */
     private void updateRelevance() {
+        log.debug(">>>>>> updateRelevance");
+
         report = reportService.getReportByID(report.getId());
         if (report == null) {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
             return;
         }
         if (session.getUser() != null) {
-            hasUpvoted = hasUpvoted();
-            hasDownvoted = hasDownvoted();
-            boolean overwriteRelevance = report.getRelevanceOverwritten();
-            if (overwriteRelevance) {
+            upvoted = reportService.hasUpvoted(report, session.getUser());
+            downvoted = reportService.hasDownvoted(report, session.getUser());
+            if (report.isRelevanceOverwritten()) {
                 overwriteRelevanceValue = report.getRelevance();
-            } else {
-                overwriteRelevanceValue = null;
             }
         }
     }
@@ -285,7 +314,8 @@ public class ReportBacker implements Serializable {
      * @param dialog The dialog to display.
      * @return {@code null} to reload the page.
      */
-    public String displayDialog(final ReportPageDialog dialog) {
+    public String displayDialog(final Dialog dialog) {
+        log.debug(">>>>>> displayDialog");
         currentDialog = dialog;
         log.info("Displaying dialog " + dialog + ".");
         return null;
@@ -298,8 +328,9 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String deletePostDialog(final Post post) {
+        log.debug(">>>>>> deletePostDialog");
         postToBeDeleted = post;
-        return displayDialog(ReportPageDialog.DELETE_POST);
+        return displayDialog(Dialog.DELETE_POST);
     }
 
     /**
@@ -308,6 +339,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null}
      */
     public String toggleReportSubscription() {
+        log.debug(">>>>>> toggleReportSubscription");
         if (session.getUser() == null) {
             return null;
         }
@@ -316,16 +348,8 @@ public class ReportBacker implements Serializable {
         } else {
             reportService.subscribeToReport(session.getUser(), report);
         }
+        subscribed = !subscribed;
         return null;
-    }
-
-    /**
-     * Returns whether the user is subscribed to the report.
-     *
-     * @return {@code true} iff the user is subscribed to the report.
-     */
-    public boolean isSubscribed() {
-        return reportService.isSubscribed(session.getUser(), report);
     }
 
     /**
@@ -334,6 +358,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String upvote() {
+        log.debug(">>>>>> upvote");
         if (session.getUser() != null) {
             reportService.upvote(report, session.getUser());
         }
@@ -347,6 +372,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String downvote() {
+        log.debug(">>>>>> downvote");
         if (session.getUser() != null) {
             reportService.downvote(report, session.getUser());
         }
@@ -360,6 +386,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String removeVote() {
+        log.debug(">>>>>> removeVote");
         if (session.getUser() != null) {
             reportService.removeVote(report, session.getUser());
         }
@@ -368,53 +395,14 @@ public class ReportBacker implements Serializable {
     }
 
     /**
-     * Returns if the user has voted to increase the relevance of the report.
-     *
-     * @return {@code true} if the user has voted up and {@code false} otherwise.
-     */
-    public boolean hasUpvoted() {
-        if (session.getUser() != null) {
-            return reportService.hasUpvoted(report, session.getUser());
-        }
-        return false;
-    }
-
-    /**
-     * Returns if the user has voted to decrease the relevance of the report.
-     *
-     * @return {@code true} if the user has voted down and {@code false} otherwise.
-     */
-    public boolean hasDownvoted() {
-        if (session.getUser() != null) {
-            return reportService.hasDownvoted(report, session.getUser());
-        }
-        return false;
-    }
-
-    /**
-     * Opens the current report.
-     */
-    private void open() {
-        report.setClosingDate(null);
-        reportService.open(report);
-    }
-
-    /**
-     * Closes the current report.
-     */
-    private void close() {
-        report.setClosingDate(ZonedDateTime.now());
-        reportService.close(report);
-    }
-
-    /**
      * Opens a closed report and closes an open one.
      */
     public void toggleOpenClosed() {
+        log.debug(">>>>>> toggleOpenClosed");
         if (report.getClosingDate() == null) {
-            close();
+            reportService.close(report);
         } else {
-            open();
+            reportService.open(report);
         }
         displayDialog(null);
     }
@@ -423,6 +411,7 @@ public class ReportBacker implements Serializable {
      * Deletes the report along with all its posts irreversibly.
      */
     public void delete() {
+        log.debug(">>>>>> delete");
         reportService.deleteReport(report);
     }
 
@@ -430,8 +419,9 @@ public class ReportBacker implements Serializable {
      * Marks the report as a duplicate of another report. This automatically closes the report.
      */
     public void markDuplicate() {
-        if (duplicateOfID != null && isPrivileged() && reportService.markDuplicate(report, duplicateOfID)) {
-            close();
+        log.debug(">>>>>> markDuplicate");
+        if (isPrivileged() && reportService.markDuplicate(report, report.getDuplicateOf())) {
+            reportService.close(report);
             displayDialog(null);
             duplicates.update();
         }
@@ -441,8 +431,9 @@ public class ReportBacker implements Serializable {
      * Removes the marking signifying that the report is a duplicate of another one.
      */
     public void unmarkDuplicate() {
-        if (isPrivileged() && reportService.unmarkDuplicate(report)) {
-            duplicateOfID = null;
+        log.debug(">>>>>> unmarkDuplicate");
+        if (isPrivileged()) {
+            reportService.unmarkDuplicate(report);
         }
     }
 
@@ -452,6 +443,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String applyOverwriteRelevance() {
+        log.debug(">>>>>> applyOverwriteRelevance");
         if (session.getUser() != null && session.getUser().isAdministrator()) {
             reportService.overwriteRelevance(report, overwriteRelevanceValue);
             updateRelevance();
@@ -464,22 +456,9 @@ public class ReportBacker implements Serializable {
      * Deletes the {@code postToBeDeleted} irreversibly. If it is the first post, this deletes the whole report.
      */
     public void deletePost() {
-        postService.deletePost(postToBeDeleted);
-    }
-
-    /**
-     * Checks if the user is privileged, i.e. an admin, a mod or the creator of the report.
-     *
-     * @return {@code true} if the user is privileged and {@code false} otherwise.
-     */
-    public boolean isPrivileged() {
-        User user = session.getUser();
-        if (user == null || report == null || topicService.isBanned(user, new Topic(report.getTopicID(), "", ""))) {
-            return false;
-        }
-        Topic topic = new Topic(report.getTopicID(), "", "");
-        return user.isAdministrator() || topicService.isModerator(user, topic)
-                || user.equals(report.getAuthorship().getCreator());
+        log.debug(">>>>>> deletePost");
+        postService.deletePost(postToBeDeleted, report);
+        displayDialog(null);
     }
 
     /**
@@ -489,50 +468,21 @@ public class ReportBacker implements Serializable {
      * @return {@code true} iff the user is privileged.
      */
     public boolean privilegedForPost(final Post post) {
-        if (session.getUser() != null) {
-            return postService.isPrivileged(session.getUser(), post);
-        }
-        return false;
+        log.debug(">>>>>> privilegedForPost");
+        return session.getUser() != null
+                && (session.getUser().isAdministrator() || moderator
+                || session.getUser().equals(post.getAuthorship().getCreator()));
     }
 
-    /**
-     * Checks if the user is banned from the topic the report is located in.
-     *
-     * @return {@code true} if the user is banned and {@code false} otherwise.
-     */
-    public boolean isBanned() {
-        User user = session.getUser();
-        if (user == null || report == null) {
-            return false;
-        }
-        Topic topic = new Topic(report.getTopicID(), "", "");
-        return topicService.isBanned(user, topic);
-    }
-
-    /**
-     * Checks whether the user is currently logged in.
-     *
-     * @return {@code true} if the user is currently logged in and {@code false} otherwise.
-     */
-    public boolean isLoggedIn() {
-        return session.getUser() != null;
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // getters and setters                                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * @return The report.
      */
     public Report getReport() {
         return report;
-    }
-
-    /**
-     * @return Whether the relevance was overwritten.
-     */
-    public boolean getOverwriteRelevance() {
-        if (report != null) {
-            return report.getRelevanceOverwritten();
-        }
-        return false;
     }
 
     /**
@@ -552,15 +502,15 @@ public class ReportBacker implements Serializable {
     /**
      * @return Whether the user has upvoted this report.
      */
-    public boolean getHasUpvoted() {
-        return hasUpvoted;
+    public boolean isUpvoted() {
+        return upvoted;
     }
 
     /**
      * @return Whether the user has downvoted this report.
      */
-    public boolean getHasDownvoted() {
-        return hasDownvoted;
+    public boolean isDownvoted() {
+        return downvoted;
     }
 
     /**
@@ -568,24 +518,6 @@ public class ReportBacker implements Serializable {
      */
     public void setReport(final Report report) {
         this.report = report;
-    }
-
-    /**
-     * Returns the ID of the report this report is a duplicate of.
-     *
-     * @return The duplicateOfID.
-     */
-    public Integer getDuplicateOfID() {
-        return duplicateOfID;
-    }
-
-    /**
-     * Sets the ID of the report this report is a duplicate of.
-     *
-     * @param duplicateOfID The duplicateOfID to set.
-     */
-    public void setDuplicateOfID(final Integer duplicateOfID) {
-        this.duplicateOfID = duplicateOfID;
     }
 
     /**
@@ -625,8 +557,35 @@ public class ReportBacker implements Serializable {
      *
      * @return The current dialog.
      */
-    public ReportPageDialog getCurrentDialog() {
+    public Dialog getCurrentDialog() {
         return currentDialog;
+    }
+
+    /**
+     * Returns whether the user is subscribed to the report.
+     *
+     * @return {@code true} iff the user is subscribed to the report.
+     */
+    public boolean isSubscribed() {
+        return subscribed;
+    }
+
+    /**
+     * Checks if the user is banned from the topic the report is located in.
+     *
+     * @return {@code true} if the user is banned and {@code false} otherwise.
+     */
+    public boolean isBanned() {
+        return banned;
+    }
+
+    /**
+     * Checks if the user is privileged, i.e. an admin, a mod or the creator of the report.
+     *
+     * @return {@code true} if the user is privileged and {@code false} otherwise.
+     */
+    public boolean isPrivileged() {
+        return privileged;
     }
 
 }

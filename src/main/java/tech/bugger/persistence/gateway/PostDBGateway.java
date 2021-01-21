@@ -1,26 +1,23 @@
 package tech.bugger.persistence.gateway;
 
-import tech.bugger.business.service.ReportService;
+import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.global.util.Pagitable;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
 
-import javax.enterprise.inject.spi.CDI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,10 +78,7 @@ public class PostDBGateway implements PostGateway {
                 Post post = new Post(
                         id,
                         rs.getString("content"),
-                        new Lazy<>(() -> {
-                            ReportService reportService = CDI.current().select(ReportService.class).get();
-                            return reportService.getReportByID(reportID);
-                        }),
+                        rs.getInt("report"),
                         ReportDBGateway.getAuthorshipFromResultSet(rs, userGateway),
                         null
                 );
@@ -114,13 +108,17 @@ public class PostDBGateway implements PostGateway {
                     .string(post.getContent())
                     .object(creator == null ? null : creator.getId(), Types.INTEGER)
                     .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
-                    .integer(post.getReport().get().getId())
+                    .integer(post.getReport())
                     .toStatement();
             statement.executeUpdate();
 
             ResultSet generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next()) {
-                post.setId(generatedKeys.getInt("id"));
+                int postId = generatedKeys.getInt("id");
+                post.setId(postId);
+                for (Attachment a : post.getAttachments()) {
+                    a.setPost(postId);
+                }
             } else {
                 log.error("Error while retrieving new post ID.");
                 throw new StoreException("Error while retrieving new post ID.");
@@ -174,7 +172,7 @@ public class PostDBGateway implements PostGateway {
             if (rs.next()) {
                 if (rs.getInt("id") != post.getId()) {
                     throw new InternalError("Wrong post deleted! Please investigate! Expected: " + post + ", actual: "
-                            + rs.getInt("id"));
+                                                    + rs.getInt("id"));
                 }
             } else {
                 log.error("Post to delete " + post + " not found.");
@@ -200,14 +198,13 @@ public class PostDBGateway implements PostGateway {
         }
 
         String sql = "SELECT * FROM post WHERE report = ? ORDER BY created_at ASC LIMIT 1;";
-        Post firstPost;
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             PreparedStatement statement = new StatementParametrizer(stmt)
                     .integer(report.getId()).toStatement();
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 // TODO authorship, attachments
-                firstPost = new Post(rs.getInt("id"), rs.getString("content"), new Lazy<>(report), null, null);
+                return new Post(rs.getInt("id"), rs.getString("content"), report.getId(), null, null);
             } else {
                 log.error("Could not find first post of report " + report + ".");
                 throw new NotFoundException("Could not find first post of report " + report + ".");
@@ -216,7 +213,6 @@ public class PostDBGateway implements PostGateway {
             log.error("Error when retrieving first post of report " + report + ".", e);
             throw new StoreException("Error when retrieving first post of report " + report + ".", e);
         }
-        return firstPost;
     }
 
     /**
@@ -267,7 +263,6 @@ public class PostDBGateway implements PostGateway {
                 + " LIMIT ?"
                 + " OFFSET ?;";
         List<Post> selectedPosts = new ArrayList<>(Math.max(0, selection.getTotalSize()));
-        Lazy<Report> reportLazy = new Lazy<>(report);
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             PreparedStatement statement = new StatementParametrizer(stmt)
                     .integer(report.getId())
@@ -283,24 +278,24 @@ public class PostDBGateway implements PostGateway {
                 if (rs.getInt("p_last_modified_by") != 0) {
                     modifier = UserDBGateway.getUserFromResultSet("modifier_", rs);
                 }
-                ZonedDateTime creationDate = null;
-                if (rs.getTimestamp("p_created_at") != null) {
-                    creationDate = rs.getTimestamp("p_created_at").toInstant().atZone(ZoneId.systemDefault());
+                OffsetDateTime creationDate = null;
+                if (rs.getObject("p_created_at", OffsetDateTime.class) != null) {
+                    creationDate = rs.getObject("p_created_at", OffsetDateTime.class);
                 }
-                ZonedDateTime modificationDate = null;
-                if (rs.getTimestamp("p_last_modified_at") != null) {
-                    modificationDate = rs.getTimestamp("p_last_modified_at").toInstant().atZone(ZoneId.systemDefault());
+                OffsetDateTime modificationDate = null;
+                if (rs.getObject("p_last_modified_at", OffsetDateTime.class) != null) {
+                    modificationDate = rs.getObject("p_last_modified_at", OffsetDateTime.class);
                 }
                 Authorship authorship = new Authorship(author, creationDate, modifier, modificationDate);
-                Post post = new Post(rs.getInt("p_id"), rs.getString("p_content"), reportLazy, authorship,
-                        new ArrayList<>());
+                Post post = new Post(rs.getInt("p_id"), rs.getString("p_content"), report.getId(), authorship,
+                                     new ArrayList<>());
                 post.setAttachments(attachmentGateway.getAttachmentsForPost(post));
                 selectedPosts.add(post);
             }
         } catch (SQLException e) {
             log.error("Error when selecting posts of report " + report + " with selection " + selection + ".", e);
             throw new StoreException("Error when selecting posts of report " + report + " with selection " + selection
-                    + ".", e);
+                                             + ".", e);
         }
 
         return selectedPosts;

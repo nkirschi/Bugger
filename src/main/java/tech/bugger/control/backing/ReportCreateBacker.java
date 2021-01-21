@@ -12,7 +12,6 @@ import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
@@ -157,7 +156,7 @@ public class ReportCreateBacker implements Serializable {
         report = new Report(0, "", Report.Type.BUG, Report.Severity.MINOR, "", authorship, null, null, null, false, 0);
         report.setTopicID(topicID);
         attachments = new ArrayList<>();
-        firstPost = new Post(0, "", new Lazy<>(report), authorship, attachments);
+        firstPost = new Post(0, "", report.getId(), authorship, attachments);
     }
 
     /**

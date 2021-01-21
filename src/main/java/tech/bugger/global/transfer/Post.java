@@ -1,7 +1,5 @@
 package tech.bugger.global.transfer;
 
-import tech.bugger.global.util.Lazy;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
@@ -26,9 +24,9 @@ public class Post implements Serializable {
     private String content;
 
     /**
-     * The associated report, loaded lazily.
+     * The associated report ID.
      */
-    private Lazy<Report> report;
+    private int report;
 
     /**
      * The manipulation metadata.
@@ -45,11 +43,14 @@ public class Post implements Serializable {
      *
      * @param id          The post ID.
      * @param content     The post content.
-     * @param report      The associated report, loaded lazily.
+     * @param report      The associated report ID.
      * @param authorship  The manipulation metadata.
      * @param attachments The post attachments.
      */
-    public Post(final int id, final String content, final Lazy<Report> report, final Authorship authorship,
+    public Post(final int id,
+                final String content,
+                final int report,
+                final Authorship authorship,
                 final List<Attachment> attachments) {
         this.id = id;
         this.content = content;
@@ -95,20 +96,20 @@ public class Post implements Serializable {
     }
 
     /**
-     * Returns the report associated with this post.
+     * Returns the report ID associated with this post.
      *
-     * @return The associated report.
+     * @return The associated report ID.
      */
-    public Lazy<Report> getReport() {
+    public int getReport() {
         return report;
     }
 
     /**
-     * Sets the report associated with this post.
+     * Sets the report ID associated with this post.
      *
-     * @param report The associated report to be set.
+     * @param report The associated report ID to be set.
      */
-    public void setReport(final Lazy<Report> report) {
+    public void setReport(final int report) {
         this.report = report;
     }
 
@@ -184,11 +185,10 @@ public class Post implements Serializable {
      */
     @Override
     public String toString() {
-        String reportId = report.isPresent() ? String.valueOf(report.get().getId()) : "<absent>";
         return "Post{"
                 + "id='" + id + '\''
                 + ", content='" + String.format("%.20s", content) + '\''
-                + ", report='#" + reportId + '\''
+                + ", report='#" + report + '\''
                 + ", authorship='" + authorship + '\''
                 + ", attachments='" + attachments + '\''
                 + '}';

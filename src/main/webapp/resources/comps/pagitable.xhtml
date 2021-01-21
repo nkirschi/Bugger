@@ -10,7 +10,7 @@
     </cc:interface>
 
     <cc:implementation>
-        <h:outputText id="ot-no-entry" value="#{labels['paginator.empty']}"
+        <h:outputText id="ot-no-entry" value="#{labels.paginator_empty}"
                       rendered="#{cc.attrs.paginator.isEmpty()}"/>
 
         <h:form id="f-table" rendered="#{not cc.attrs.paginator.isEmpty()}">
@@ -20,13 +20,13 @@
             </h:dataTable>
         </h:form>
 
-        <h:panelGroup layout="block" styleClass="row d-flex justify-content-between"
+        <h:panelGroup layout="block" styleClass="d-flex justify-content-between"
                       rendered="#{not cc.attrs.paginator.isEmpty()}">
             <h:panelGroup layout="block" styleClass="col p-2">
                 <h:outputFormat id="ot-pag-count" styleClass="text-sm-left"
                                 value="#{cc.attrs.paginator.selection.totalSize == 1
-                        ? labels['paginator.entry']
-                        : labels['paginator.entries']}">
+                        ? labels.paginator_entry
+                        : labels.paginator_entries}">
                     <f:param value="#{cc.attrs.paginator.selection.totalSize}"/>
                 </h:outputFormat>
             </h:panelGroup>
@@ -71,7 +71,7 @@
             <h:panelGroup layout="block" styleClass="align-right col p-2"
                           rendered="#{not cc.attrs.simple}">
                 <h:form id="f-entries">
-                    <h:outputText id="ot-entriesPP" value="#{labels['paginator.entries_per_page']}: "
+                    <h:outputText id="ot-entriesPP" value="#{labels.paginator_entries_per_page}: "
                                   styleClass="col"/>
                     <h:selectOneMenu id="s-entriesPP" value="#{cc.attrs.paginator.selection.pageSize}"
                                      onchange="document.getElementById('#{cc.refreshBtnID}').click()"

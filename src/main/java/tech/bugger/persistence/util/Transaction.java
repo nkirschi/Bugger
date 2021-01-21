@@ -20,7 +20,7 @@ import tech.bugger.persistence.gateway.UserGateway;
  * Once created, a transaction object provides factory methods for all available data gateways that can be used to add
  * actions to the current transaction.
  */
-public interface Transaction extends ExceptionlessAutoCloseable {
+public interface Transaction extends AutoCloseable {
 
     /**
      * Commits the current transaction. Changes are applied as single work unit.
@@ -115,6 +115,12 @@ public interface Transaction extends ExceptionlessAutoCloseable {
      * @return A brand-new user gateway tied to this transaction's connection.
      */
     UserGateway newUserGateway();
+
+    /**
+     * Closes this transaction without the need to throw an exception as predefined by {@link AutoCloseable}.
+     */
+    @Override
+    void close();
 
 }
 

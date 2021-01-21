@@ -2,7 +2,7 @@ package tech.bugger.control.backing;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -88,12 +88,12 @@ public class SearchBacker implements Serializable {
     /**
      * The latest creation date to search for.
      */
-    private ZonedDateTime latestCreationDateTime;
+    private OffsetDateTime latestCreationDateTime;
 
     /**
      * The earliest closing date to search for.
      */
-    private ZonedDateTime earliestClosingDateTime;
+    private OffsetDateTime earliestClosingDateTime;
 
     /**
      * Whether to show open reports in the report search results.
@@ -204,8 +204,9 @@ public class SearchBacker implements Serializable {
      */
     @PostConstruct
     public void init() {
+        System.out.println("Running Search Init()");
         tab = Tab.REPORT;
-        query = null;
+        query = "";
         ExternalContext ext = fctx.getExternalContext();
         if (ext.getRequestParameterMap().containsKey("q")) {
             query = ext.getRequestParameterMap().get("q");
@@ -214,7 +215,7 @@ public class SearchBacker implements Serializable {
             tab = Tab.valueOf(ext.getRequestParameterMap().get("t"));
         }
         openReportShown = true;
-        closedReportShown = false;
+        closedReportShown = true;
         duplicatesShown = true;
         nonAdminShown = true;
         adminShown = true;
@@ -225,27 +226,24 @@ public class SearchBacker implements Serializable {
         showSevere = true;
         showRelevant = true;
         topic = null;
-        userResults = new Paginator<>("username", Selection.PageSize.NORMAL) {
-            @Override
-            protected Iterable<User> fetch() {
-                if (tab == Tab.USER) {
+        if (tab == Tab.USER) {
+            userResults = new Paginator<>("username", Selection.PageSize.NORMAL) {
+                @Override
+                protected Iterable<User> fetch() {
                     return searchService.getUserResults(query, getSelection(), adminShown, nonAdminShown);
                 }
-                return null;
-            }
 
-            @Override
-            protected int totalSize() {
-                if (tab == Tab.REPORT) {
+                @Override
+                protected int totalSize() {
                     return searchService.getNumberOfUserResults(query, adminShown, nonAdminShown);
                 }
-                return 0;
-            }
-        };
-        reportResults = new Paginator<>("title", Selection.PageSize.NORMAL) {
-            @Override
-            protected Iterable<Report> fetch() {
-                if (tab == Tab.REPORT) {
+            };
+        }
+
+        if (tab == Tab.REPORT) {
+            reportResults = new Paginator<>("title", Selection.PageSize.NORMAL) {
+                @Override
+                protected Iterable<Report> fetch() {
                     HashMap<Report.Type, Boolean> typeHashMap = new HashMap<>();
                     typeHashMap.put(Report.Type.BUG, showBug);
                     typeHashMap.put(Report.Type.FEATURE, showFeature);
@@ -261,12 +259,9 @@ public class SearchBacker implements Serializable {
                             earliestClosingDateTime, openReportShown, closedReportShown, duplicatesShown, topic,
                             typeHashMap, severityHashMap);
                 }
-                return null;
-            }
 
-            @Override
-            protected int totalSize() {
-                if (tab == Tab.REPORT) {
+                @Override
+                protected int totalSize() {
                     HashMap<Report.Type, Boolean> typeHashMap = new HashMap<>();
                     typeHashMap.put(Report.Type.BUG, showBug);
                     typeHashMap.put(Report.Type.FEATURE, showFeature);
@@ -282,27 +277,23 @@ public class SearchBacker implements Serializable {
                             earliestClosingDateTime, openReportShown, closedReportShown, duplicatesShown, topic,
                             typeHashMap, severityHashMap);
                 }
-                return 0;
-            }
-        };
-        topicResults = new Paginator<>("title", Selection.PageSize.NORMAL) {
-            @Override
-            protected Iterable<Topic> fetch() {
-                if (tab == Tab.TOPIC) {
+            };
+        }
+
+        if (tab == Tab.TOPIC) {
+            topicResults = new Paginator<>("title", Selection.PageSize.NORMAL) {
+                @Override
+                protected Iterable<Topic> fetch() {
                     return searchService.getTopicResults(query, getSelection());
                 }
-                return null;
-            }
 
-            @Override
-            protected int totalSize() {
-                if (tab == Tab.TOPIC) {
+                @Override
+                protected int totalSize() {
                     return searchService.getNumberOfTopicResults(query);
                 }
-                return 0;
-            }
-        };
-        topicTitles = topicService.discoverTopics();
+            };
+            topicTitles = topicService.discoverTopics();
+        }
     }
 
     /**
@@ -311,6 +302,13 @@ public class SearchBacker implements Serializable {
      * @return The site to redirect to or {@code null} to reload the page.
      */
     public String search() {
+        if (tab == Tab.REPORT) {
+            reportResults.updateReset();
+        } else if (tab == Tab.USER) {
+            userResults.updateReset();
+        } else if (tab == Tab.TOPIC) {
+            topicResults.updateReset();
+        }
         return null;
     }
 
@@ -339,9 +337,9 @@ public class SearchBacker implements Serializable {
      * as creating and editing posts count as actions. Moving a report is an action in the destination topic only.
      *
      * @param topic The topic in question.
-     * @return The time stamp of the last action as a {@code ZonedDateTime}.
+     * @return The time stamp of the last action as a {@link OffsetDateTime}.
      */
-    public ZonedDateTime lastChange(final Topic topic) {
+    public OffsetDateTime lastChange(final Topic topic) {
         return null;
     }
 
@@ -350,9 +348,9 @@ public class SearchBacker implements Serializable {
      * as creating and editing posts count as actions.
      *
      * @param report The report in question.
-     * @return The time stamp of the last action as a {@code ZonedDateTime}.
+     * @return The time stamp of the last action as a {@link OffsetDateTime}.
      */
-    public ZonedDateTime lastChange(final Report report) {
+    public OffsetDateTime lastChange(final Report report) {
         return null;
     }
 
@@ -402,33 +400,36 @@ public class SearchBacker implements Serializable {
      */
     public void setTab(final Tab tab) {
         this.tab = tab;
+        if (tab == Tab.REPORT) {
+            topicTitles = topicService.discoverTopics();
+        }
     }
 
     /**
      * @return The latestOpeningDate.
      */
-    public ZonedDateTime getLatestOpeningDateTime() {
+    public OffsetDateTime getLatestOpeningDateTime() {
         return latestCreationDateTime;
     }
 
     /**
      * @param latestOpeningDate The latestOpeningDate to set.
      */
-    public void setLatestOpeningDateTime(final ZonedDateTime latestOpeningDate) {
+    public void setLatestOpeningDateTime(final OffsetDateTime latestOpeningDate) {
         this.latestCreationDateTime = latestOpeningDate;
     }
 
     /**
      * @return The earliestClosingDate.
      */
-    public ZonedDateTime getEarliestClosingDateTime() {
+    public OffsetDateTime getEarliestClosingDateTime() {
         return earliestClosingDateTime;
     }
 
     /**
      * @param earliestClosingDate The earliestClosingDate to set.
      */
-    public void setEarliestClosingDateTime(final ZonedDateTime earliestClosingDate) {
+    public void setEarliestClosingDateTime(final OffsetDateTime earliestClosingDate) {
         this.earliestClosingDateTime = earliestClosingDate;
     }
 

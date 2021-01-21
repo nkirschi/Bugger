@@ -2,7 +2,7 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 /**
@@ -46,7 +46,7 @@ public class Token implements Serializable {
     /**
      * This token's timestamp of creation.
      */
-    private ZonedDateTime timestamp;
+    private OffsetDateTime timestamp;
 
     /**
      * This token's meta information.
@@ -67,7 +67,7 @@ public class Token implements Serializable {
      * @param meta      The token's meta information.
      * @param user      The associated user.
      */
-    public Token(final String value, final Type type, final ZonedDateTime timestamp, final String meta,
+    public Token(final String value, final Type type, final OffsetDateTime timestamp, final String meta,
                  final User user) {
         this.value = value;
         this.type = type;
@@ -117,7 +117,7 @@ public class Token implements Serializable {
      *
      * @return The token creation time.
      */
-    public ZonedDateTime getTimestamp() {
+    public OffsetDateTime getTimestamp() {
         return timestamp;
     }
 
@@ -126,7 +126,7 @@ public class Token implements Serializable {
      *
      * @param timestamp The token creation time to be set.
      */
-    public void setTimestamp(final ZonedDateTime timestamp) {
+    public void setTimestamp(final OffsetDateTime timestamp) {
         this.timestamp = timestamp;
     }
 

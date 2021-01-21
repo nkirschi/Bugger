@@ -8,6 +8,7 @@ import tech.bugger.persistence.util.PropertiesReader;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
+import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
@@ -199,19 +200,19 @@ public class Registry {
     @Produces
     @RegistryKey
     public ResourceBundle getBundle(final InjectionPoint ip, final UserSession userSession) {
-        return getBundle(extractKey(ip), userSession);
+        return getBundle(extractKey(ip), userSession.getLocale());
     }
 
     /**
      * Returns the {@link ResourceBundle} registered for the given key.
      *
      * @param key         The key of the desired resource bundle.
-     * @param userSession The current user session yielding locale information.
+     * @param locale      The locale of the desired resource bundle.
      * @return The resource bundle associated with {@code key}.
      */
-    public ResourceBundle getBundle(final String key, final UserSession userSession) {
+    public ResourceBundle getBundle(final String key, final Locale locale) {
         try {
-            return ResourceBundle.getBundle("tech.bugger.i18n." + key, userSession.getLocale());
+            return ResourceBundle.getBundle("tech.bugger.i18n." + key, locale);
         } catch (MissingResourceException e) {
             throw new InternalError("No resource bundle found for key '" + key + "'", e);
         }

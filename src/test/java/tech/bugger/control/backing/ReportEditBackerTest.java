@@ -1,11 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.time.ZonedDateTime;
-import java.util.Locale;
-import java.util.Map;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,24 +14,24 @@ import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.time.OffsetDateTime;
+import java.util.Locale;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
 public class ReportEditBackerTest {
@@ -75,14 +69,15 @@ public class ReportEditBackerTest {
         reportEditBacker = new ReportEditBacker(topicService, reportService, session, fctx, registry);
 
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
-                new Authorship(null, null, null, null), mock(ZonedDateTime.class),
-                null, null, false, 1);
+                                new Authorship(null, null, null, null), mock(OffsetDateTime.class),
+                                null, null, false, 1);
         reportEditBacker.setReport(testReport);
         reportEditBacker.setReportID(testReport.getId());
         testTopic = new Topic(1, "Some title", "Some description");
-        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
-                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
-                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
+                        "User",
+                        new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
+                        Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         reportEditBacker.setCurrentTopic(testTopic);
         lenient().doReturn(testTopic).when(topicService).getTopicByID(1);
         lenient().doReturn(ectx).when(fctx).getExternalContext();
@@ -283,7 +278,7 @@ public class ReportEditBackerTest {
 
     @Test
     public void testIsPrivileged() {
-        Authorship authorship = new Authorship(user, ZonedDateTime.now(), null, null);
+        Authorship authorship = new Authorship(user, OffsetDateTime.now(), null, null);
         testReport.setAuthorship(authorship);
         reportEditBacker.setReport(testReport);
         reportEditBacker.setCurrentTopic(testTopic);
@@ -311,7 +306,7 @@ public class ReportEditBackerTest {
 
     @Test
     public void testIsPrivilegedFalse() {
-        Authorship authorship = new Authorship(new User(user), ZonedDateTime.now(), null, null);
+        Authorship authorship = new Authorship(new User(user), OffsetDateTime.now(), null, null);
         user.setId(5);
         testReport.setAuthorship(authorship);
         reportEditBacker.setReport(testReport);

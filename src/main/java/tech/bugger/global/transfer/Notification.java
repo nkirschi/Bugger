@@ -2,7 +2,7 @@ package tech.bugger.global.transfer;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 /**
@@ -51,12 +51,12 @@ public class Notification implements Serializable {
     /**
      * The user responsible for the action causing this notification.
      */
-    private Integer actuatorID;
+    private int actuatorID;
 
     /**
      * The user receiving this notification.
      */
-    private Integer recipientID;
+    private int recipientID;
 
     /**
      * The type of this notification.
@@ -66,7 +66,7 @@ public class Notification implements Serializable {
     /**
      * The date of this notification.
      */
-    private ZonedDateTime date;
+    private OffsetDateTime date;
 
     /**
      * Whether this notification was read.
@@ -125,8 +125,8 @@ public class Notification implements Serializable {
      * @param reportTitle      The title of the associated report.
      * @param recipientMail    The recipient's e-mail address.
      */
-    public Notification(final Integer id, final Integer actuatorID, final Integer recipientID, final Type type,
-                        final ZonedDateTime date, final boolean read, final boolean sent, final Integer topicID,
+    public Notification(final Integer id, final int actuatorID, final int recipientID, final Type type,
+                        final OffsetDateTime date, final boolean read, final boolean sent, final Integer topicID,
                         final Integer reportID, final Integer postID, final String actuatorUsername,
                         final String reportTitle, final String recipientMail) {
         this.id = id;
@@ -148,7 +148,7 @@ public class Notification implements Serializable {
      * Constructs an empty notification.
      */
     public Notification() {
-        this(null, null, null, null, null, false, false, null, null, null, null, null, null);
+
     }
 
     /**
@@ -186,7 +186,7 @@ public class Notification implements Serializable {
      *
      * @return The notification actuator.
      */
-    public Integer getActuatorID() {
+    public int getActuatorID() {
         return actuatorID;
     }
 
@@ -195,7 +195,7 @@ public class Notification implements Serializable {
      *
      * @param actuatorID The notification actuator to be set.
      */
-    public void setActuatorID(final Integer actuatorID) {
+    public void setActuatorID(final int actuatorID) {
         this.actuatorID = actuatorID;
     }
 
@@ -204,7 +204,7 @@ public class Notification implements Serializable {
      *
      * @return The notification recipient.
      */
-    public Integer getRecipientID() {
+    public int getRecipientID() {
         return recipientID;
     }
 
@@ -213,7 +213,7 @@ public class Notification implements Serializable {
      *
      * @param recipientID The notification recipient to be set.
      */
-    public void setRecipientID(final Integer recipientID) {
+    public void setRecipientID(final int recipientID) {
         this.recipientID = recipientID;
     }
 
@@ -240,7 +240,7 @@ public class Notification implements Serializable {
      *
      * @return The notification creation date.
      */
-    public ZonedDateTime getDate() {
+    public OffsetDateTime getDate() {
         return date;
     }
 
@@ -249,7 +249,7 @@ public class Notification implements Serializable {
      *
      * @param date The notification creation date to be set.
      */
-    public void setDate(final ZonedDateTime date) {
+    public void setDate(final OffsetDateTime date) {
         this.date = date;
     }
 

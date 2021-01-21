@@ -24,6 +24,7 @@ import java.util.ResourceBundle;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -108,16 +109,16 @@ public class StatisticsServiceTest {
     public void testDetermineTopTenReportsWhenSuccess() {
         TopReport topReport = mock(TopReport.class);
         List<TopReport> topReports = Collections.singletonList(topReport);
-        doReturn(topReports).when(statisticsGateway).getTopTenReports();
-        assertEquals(topReports, statisticsService.determineTopTenReports());
-        verify(statisticsGateway).getTopTenReports();
+        doReturn(topReports).when(statisticsGateway).getTopReports(anyInt());
+        assertEquals(topReports, statisticsService.determineTopReports(42));
+        verify(statisticsGateway).getTopReports(anyInt());
     }
 
     @Test
     public void testDetermineTopTenReportsWhenCommitsFails()throws Exception {
         doThrow(TransactionException.class).when(transaction).commit();
-        assertTrue(statisticsService.determineTopTenReports().isEmpty());
-        verify(statisticsGateway).getTopTenReports();
+        assertTrue(statisticsService.determineTopReports(42).isEmpty());
+        verify(statisticsGateway).getTopReports(anyInt());
         verify(feedbackEvent).fire(any());
     }
 
@@ -125,16 +126,16 @@ public class StatisticsServiceTest {
     public void testDetermineTopTenUsersWhenSuccess() {
         TopUser topUser = mock(TopUser.class);
         List<TopUser> topUsers = Collections.singletonList(topUser);
-        doReturn(topUsers).when(statisticsGateway).getTopTenUsers();
-        assertEquals(topUsers, statisticsService.determineTopTenUsers());
-        verify(statisticsGateway).getTopTenUsers();
+        doReturn(topUsers).when(statisticsGateway).getTopUsers(anyInt());
+        assertEquals(topUsers, statisticsService.determineTopUsers(42));
+        verify(statisticsGateway).getTopUsers(anyInt());
     }
 
     @Test
     public void testDetermineTopTenUsersWhenCommitFails()throws Exception {
         doThrow(TransactionException.class).when(transaction).commit();
-        assertTrue(statisticsService.determineTopTenUsers().isEmpty());
-        verify(statisticsGateway).getTopTenUsers();
+        assertTrue(statisticsService.determineTopUsers(42).isEmpty());
+        verify(statisticsGateway).getTopUsers(anyInt());
         verify(feedbackEvent).fire(any());
     }
 
