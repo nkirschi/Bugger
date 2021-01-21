@@ -1,25 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Created by IntelliJ IDEA.
-  User: Ben
-  Date: 21/01/2021
-  Time: 17:40
--->
-<!DOCTYPE html
-        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition template="/WEB-INF/template/main.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:b="http://tech.bugger/tags">
 
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html">
+<ui:param name="title" value="An unexpected error has occured."/>
 
-<h:head>
-    <title>You fucked up!</title>
-</h:head>
+<ui:define name="content">
 
-<h:body>
-    <h:outputText value="An error has occured." styleClass="h1"/>
+    <h:panelGrid id="pg-error-general" columns="1">
+        <h:outputText value="If you find yourself on this page too often, please contact the organization hosting this instance of bugger."/>
+        <h:outputText value="Contact information"/>
+        <h:outputText value="#{applicationSettings.organization.supportInfo}"/>
+    </h:panelGrid>
 
-    <h:panelGroup id="pg-error-details" rendered="#{facesContext.application.projectStage eq 'Development'}">
+    <h:panelGrid id="pg-error-details" columns="1" rendered="#{facesContext.application.projectStage eq 'Development'}">
         <h:outputText value="Request URI"/>
         <h:outputText value="#{requestScope['javax.servlet.error.request_uri']}"/>
         <h:outputText value="Exception type"/>
@@ -27,9 +23,7 @@
         <h:outputText value="Exception message"/>
         <h:outputText value="#{requestScope['javax.servlet.error.exception'].message}"/>
         <h:outputText value="Stack trace"/>
-        <pre>#{facesContext.externalContext.response.writer.flush()}#{requestScope['javax.servlet.error.exception'].printStackTrace(facesContext.externalContext.response.writer)}</pre>
-    </h:panelGroup>
-
-</h:body>
-
-</html>
+        <h:outputText value="#{facesContext.externalContext.response.writer.flush()}#{requestScope['javax.servlet.error.exception'].printStackTrace(facesContext.externalContext.response.writer)}"/>
+    </h:panelGrid>
+</ui:define>
+</ui:composition>
