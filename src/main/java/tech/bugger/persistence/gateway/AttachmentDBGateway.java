@@ -1,15 +1,12 @@
 package tech.bugger.persistence.gateway;
 
-import tech.bugger.business.service.PostService;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Post;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
 
-import javax.enterprise.inject.spi.CDI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -45,21 +42,16 @@ public class AttachmentDBGateway implements AttachmentGateway {
      * Parses the given {@link ResultSet} and returns the corresponding {@link Attachment}.
      *
      * @param rs The {@link ResultSet} to parse.
-     * @return The parsed {@link Attachment}.
+     * @return The parsed {@link Attachment} without its (possibly large) content.
      * @throws SQLException Some parsing error occurred.
      */
     private Attachment getAttachmentFromResultSet(final ResultSet rs) throws SQLException {
-        int postID = rs.getInt("post");
         return new Attachment(
                 rs.getInt("id"),
                 rs.getString("name"),
                 new byte[0],
                 rs.getString("mimetype"),
-                new Lazy<>(() -> {
-                    // Lazily retrieve the post of the attachment.
-                    PostService postService = CDI.current().select(PostService.class).get();
-                    return postService.getPostByID(postID);
-                })
+                rs.getInt("post")
         );
     }
 
@@ -77,7 +69,7 @@ public class AttachmentDBGateway implements AttachmentGateway {
                     .string(attachment.getName())
                     .bytes(attachment.getContent())
                     .string(attachment.getMimetype())
-                    .integer(attachment.getPost().get().getId())
+                    .integer(attachment.getPost())
                     .toStatement();
             statement.executeUpdate();
 
@@ -108,7 +100,7 @@ public class AttachmentDBGateway implements AttachmentGateway {
                     .string(attachment.getName())
                     .bytes(attachment.getContent())
                     .string(attachment.getMimetype())
-                    .integer(attachment.getPost().get().getId())
+                    .integer(attachment.getPost())
                     .integer(attachment.getId())
                     .toStatement().executeUpdate();
             if (rowsAffected == 0) {
@@ -193,14 +185,10 @@ public class AttachmentDBGateway implements AttachmentGateway {
         try (PreparedStatement stmt = conn.prepareStatement(
                 "SELECT id, name, mimetype, post FROM attachment WHERE post = ?;"
         )) {
-            ResultSet rs = new StatementParametrizer(stmt)
-                    .integer(post.getId())
-                    .toStatement().executeQuery();
+            ResultSet rs = new StatementParametrizer(stmt).integer(post.getId()).toStatement().executeQuery();
             List<Attachment> attachments = new ArrayList<>();
             while (rs.next()) {
-                Attachment attachment = getAttachmentFromResultSet(rs);
-                attachment.setPost(new Lazy<>(post));
-                attachments.add(attachment);
+                attachments.add(getAttachmentFromResultSet(rs));
             }
             return attachments;
         } catch (SQLException e) {

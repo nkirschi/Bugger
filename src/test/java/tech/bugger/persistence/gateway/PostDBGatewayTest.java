@@ -8,13 +8,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
-import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Lazy;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
@@ -71,7 +69,7 @@ public class PostDBGatewayTest {
         Authorship authorship = new Authorship(new User(), OffsetDateTime.now(), new User(), OffsetDateTime.now());
         authorship.getCreator().setId(1);
         authorship.getModifier().setId(1);
-        post = new Post(10000, "test.txt", new Lazy<>(report), authorship, null);
+        post = new Post(10000, "test.txt", report.getId(), authorship, null);
     }
 
     @AfterEach
@@ -100,7 +98,7 @@ public class PostDBGatewayTest {
 
         // Check if post is equal to post from test data.
         assertAll(() -> assertEquals(100, post.getId()),
-                () -> assertEquals("testpost", post.getContent())
+                  () -> assertEquals("testpost", post.getContent())
         );
     }
 
@@ -114,8 +112,8 @@ public class PostDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                () -> new PostDBGateway(connectionSpy, mock(UserGateway.class), mock(AttachmentGateway.class))
-                        .find(100));
+                     () -> new PostDBGateway(connectionSpy, mock(UserGateway.class), mock(AttachmentGateway.class))
+                             .find(100));
     }
 
     @Test
@@ -133,7 +131,7 @@ public class PostDBGatewayTest {
         when(stmtMock.getGeneratedKeys()).thenReturn(rsMock);
         when(rsMock.next()).thenReturn(false);
         assertThrows(StoreException.class,
-                () -> new PostDBGateway(connectionSpy, userGateway, attachmentGateway).create(post));
+                     () -> new PostDBGateway(connectionSpy, userGateway, attachmentGateway).create(post));
     }
 
     @Test
@@ -141,7 +139,7 @@ public class PostDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any(), anyInt());
         assertThrows(StoreException.class,
-                () -> new PostDBGateway(connectionSpy, userGateway, attachmentGateway).create(post));
+                     () -> new PostDBGateway(connectionSpy, userGateway, attachmentGateway).create(post));
     }
 
     public void validSelection() {
@@ -158,15 +156,15 @@ public class PostDBGatewayTest {
     public void insertPosts(int reportID) throws Exception {
         try (Statement stmt = connection.createStatement()) {
             stmt.execute("DO\n" +
-                    "$$\n" +
-                    "BEGIN\n" +
-                    "FOR i IN 1.." + numberOfPosts + " LOOP\n" +
-                    "    INSERT INTO post (content, report) VALUES\n" +
-                    "        (CONCAT('testpost', CURRVAL('post_id_seq'))," + reportID + ");\n" +
-                    "END LOOP;\n" +
-                    "END;\n" +
-                    "$$\n" +
-                    ";\n");
+                                 "$$\n" +
+                                 "BEGIN\n" +
+                                 "FOR i IN 1.." + numberOfPosts + " LOOP\n" +
+                                 "    INSERT INTO post (content, report) VALUES\n" +
+                                 "        (CONCAT('testpost', CURRVAL('post_id_seq'))," + reportID + ");\n" +
+                                 "END LOOP;\n" +
+                                 "END;\n" +
+                                 "$$\n" +
+                                 ";\n");
         }
     }
 
@@ -179,7 +177,7 @@ public class PostDBGatewayTest {
     }
 
     public Post makeTestPost(int postID) {
-        return new Post(postID, "testpost" + postID, new Lazy<>(testReport), null, null);
+        return new Post(postID, "testpost" + postID, testReport.getId(), null, null);
     }
 
     public boolean isGone(int postID) throws Exception {
@@ -297,4 +295,5 @@ public class PostDBGatewayTest {
     public void testDeletePostWhenPostIsNull() {
         assertThrows(IllegalArgumentException.class, () -> gateway.delete(null));
     }
+
 }

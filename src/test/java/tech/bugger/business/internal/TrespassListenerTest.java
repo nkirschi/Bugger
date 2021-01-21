@@ -1,12 +1,10 @@
 package tech.bugger.business.internal;
 
 import com.ocpsoft.pretty.PrettyContext;
-import com.sun.faces.lifecycle.Phase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -15,12 +13,6 @@ import tech.bugger.LogExtension;
 import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.TransactionException;
-import tech.bugger.persistence.gateway.TokenGateway;
-import tech.bugger.persistence.gateway.UserGateway;
-import tech.bugger.persistence.util.Transaction;
-import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
@@ -30,23 +22,17 @@ import javax.faces.context.FacesContext;
 import javax.faces.context.Flash;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
-
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ResourceBundle;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(LogExtension.class)
