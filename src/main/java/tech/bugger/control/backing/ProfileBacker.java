@@ -111,6 +111,26 @@ public class ProfileBacker implements Serializable {
     private ProfileDialog displayDialog;
 
     /**
+     * The voting weight of the currently shown user.
+     */
+    private int votingWeight;
+
+    /**
+     * The number of posts of the currently shown user.
+     */
+    private int numberOfPosts;
+
+    /**
+     * The current subscription status.
+     */
+    private boolean subscribed;
+
+    /**
+     * Whether the user is privileged.
+     */
+    private boolean privileged;
+
+    /**
      * The current user session.
      */
     private final UserSession session;
@@ -172,6 +192,12 @@ public class ProfileBacker implements Serializable {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
             return;
         }
+
+        votingWeight = profileService.getVotingWeightForUser(user);
+        numberOfPosts = profileService.getNumberOfPostsForUser(user);
+        subscribed = profileService.isSubscribed(session.getUser(), user);
+        privileged = session.getUser() != null
+                && (session.getUser().isAdministrator() || session.getUser().equals(user));
 
         if (user.getBiography() != null) {
             sanitizedBiography = MarkdownHandler.toHtml(user.getBiography());
@@ -290,7 +316,7 @@ public class ProfileBacker implements Serializable {
      * @return The voting weight.
      */
     public int getVotingWeight() {
-        return profileService.getVotingWeightForUser(user);
+        return votingWeight;
     }
 
     /**
@@ -300,7 +326,7 @@ public class ProfileBacker implements Serializable {
      * @return The number of posts.
      */
     public int getNumberOfPosts() {
-        return profileService.getNumberOfPostsForUser(user);
+        return numberOfPosts;
     }
 
     /**
@@ -386,7 +412,7 @@ public class ProfileBacker implements Serializable {
      * @return {@code true} iff the current user is a subscriber of the user whose profile is being viewed.
      */
     public boolean isSubscribed() {
-        return profileService.isSubscribed(session.getUser(), user);
+        return subscribed;
     }
 
     /**
@@ -395,8 +421,7 @@ public class ProfileBacker implements Serializable {
      * @return Whether the user is privileged.
      */
     public boolean isPrivileged() {
-        return (session.getUser() != null) && ((session.getUser().isAdministrator())
-                || (session.getUser().equals(user)));
+        return privileged;
     }
 
     /**
