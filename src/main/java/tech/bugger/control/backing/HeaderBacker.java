@@ -2,15 +2,14 @@ package tech.bugger.control.backing;
 
 import com.ocpsoft.pretty.PrettyContext;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
-import java.io.IOException;
-import java.io.Serial;
-import java.io.Serializable;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import tech.bugger.business.internal.ApplicationSettings;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.service.SearchService;
+import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
@@ -20,13 +19,15 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
-import tech.bugger.business.internal.ApplicationSettings;
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.SearchService;
-import tech.bugger.business.util.Feedback;
-import tech.bugger.business.util.RegistryKey;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 
 
 /**
@@ -225,7 +226,7 @@ public class HeaderBacker implements Serializable {
     public String determineAlertClass() {
         if (!fctx.getMessageList(null).isEmpty()) {
             FacesMessage.Severity maxSeverity = fctx.getMessageList().stream().map(FacesMessage::getSeverity)
-                    .max(FacesMessage.Severity::compareTo).orElseThrow();
+                                                    .max(FacesMessage.Severity::compareTo).orElseThrow();
             if (maxSeverity.equals(FacesMessage.SEVERITY_ERROR)) {
                 return " alert-danger";
             } else if (maxSeverity.equals(FacesMessage.SEVERITY_WARN)) {
@@ -245,13 +246,16 @@ public class HeaderBacker implements Serializable {
      * @return The URL to redirect to after login.
      */
     public String getRedirectUrl() {
-        String base = ectx.getApplicationContextPath();
-        HttpServletRequest request = (HttpServletRequest) ectx.getRequest();
-        UrlMapping mapping = PrettyContext.getCurrentInstance().getCurrentMapping();
-        String uri = mapping != null ? mapping.getPattern() : request.getRequestURI();
-        String queryString = request.getQueryString();
-
-        return URLEncoder.encode(base + uri + (queryString == null ? "" : '?' + queryString), StandardCharsets.UTF_8);
+        if (ectx.getRequestParameterMap().containsKey("url")) {
+            return ectx.getRequestParameterMap().get("url");
+        } else {
+            String base = ectx.getApplicationContextPath();
+            HttpServletRequest request = (HttpServletRequest) ectx.getRequest();
+            UrlMapping mapping = PrettyContext.getCurrentInstance().getCurrentMapping();
+            String uri = mapping != null ? mapping.getPattern() : request.getRequestURI();
+            String queryString = request.getQueryString() == null ? "" : "?" + request.getQueryString();
+            return URLEncoder.encode(base + uri + queryString, StandardCharsets.UTF_8);
+        }
     }
 
     /**

@@ -15,6 +15,7 @@ import javax.inject.Named;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Backing Bean for the admin page.
@@ -113,7 +114,8 @@ public class AdminBacker {
      * @return The filenames of the available themes.
      */
     public List<String> getAvailableThemes() {
-        List<String> themes = settingsService.discoverFiles(ectx.getRealPath("/resources/design/themes"));
+        List<String> themes = settingsService.discoverFiles(ectx.getRealPath("/resources/design/themes"))
+                .stream().filter(f -> f.endsWith("css")).collect(Collectors.toList());
         if (themes.isEmpty()) {
             themes.add(organization.getTheme()); // at least current theme for displaying
         }

@@ -45,7 +45,7 @@ public class AttachmentDBGatewayTest {
         connection = DBExtension.getConnection();
         gateway = new AttachmentDBGateway(connection);
 
-        post = new Post(100, "", null, null, null);
+        post = new Post(100, "", 0, null, null);
         byte[] content = "Some random byte string".getBytes();
         attachment = new Attachment(10000, "test.txt", content, "text/plain", post.getId());
     }
@@ -66,7 +66,7 @@ public class AttachmentDBGatewayTest {
                     rs.getString("name"),
                     rs.getBytes("content"),
                     rs.getString("mimetype"),
-                    null);
+                    0);
         } else {
             return null;
         }
@@ -182,7 +182,7 @@ public class AttachmentDBGatewayTest {
 
     @Test
     public void testGetAttachmentsForPost() {
-        Post post = new Post(100, null, null, null, null);
+        Post post = new Post(100, null, 0, null, null);
         List<Attachment> attachments = gateway.getAttachmentsForPost(post);
 
         // Check if attachments are equal to attachments from test data.
@@ -197,7 +197,7 @@ public class AttachmentDBGatewayTest {
 
     @Test
     public void testGetAttachmentsForPostWhenDatabaseError() throws Exception {
-        Post post = new Post(100, null, null, null, null);
+        Post post = new Post(100, null, 0, null, null);
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class, () -> new AttachmentDBGateway(connectionSpy).getAttachmentsForPost(post));
