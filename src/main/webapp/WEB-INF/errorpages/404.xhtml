@@ -3,16 +3,16 @@
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
-    <ui:param name="title" value="Requested content not found!"/>
+    <ui:param name="title" value="#{labels.content_not_found}"/>
 
     <ui:define name="content">
 
         <h:panelGrid id="pg-error-general" columns="1">
             <h:outputText
-                    value="The content you are looking for does not exist. It may have been deleted or moved elsewhere. If you feel this is not actually the case, please contact the organization hosting this instance of bugger."/>
-            <h:outputText value="Contact information" styleClass="h2"/>
+                    value="#{labels.not_found_message}"/>
+            <h:outputText value="#{labels.contact_info}" styleClass="h2"/>
             <h:outputText value="#{applicationSettings.organization.supportInfo}"/>
-            <a href="#{errorBacker.goHome()}">Return to homepage</a>
+            <a href="#{errorBacker.goHome()}">#{labels.go_home}</a>
         </h:panelGrid>
 
         <h:panelGrid id="pg-error-details" columns="1"

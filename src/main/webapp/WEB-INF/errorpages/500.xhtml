@@ -3,16 +3,16 @@
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
-    <ui:param name="title" value="An unexpected error has occured."/>
+    <ui:param name="title" value="#{labels.generic_error}"/>
 
     <ui:define name="content">
 
         <h:panelGrid id="pg-error-general" columns="1">
             <h:outputText
-                    value="If you find yourself on this page too often, please contact the organization hosting this instance of bugger."/>
-            <h:outputText value="Contact information" styleClass="h2"/>
+                    value="#{labels.generic_message}"/>
+            <h:outputText value="#{labels.contact_info}" styleClass="h2"/>
             <h:outputText value="#{applicationSettings.organization.supportInfo}"/>
-            <a href="#{errorBacker.goHome()}">Return to homepage</a>
+            <a href="#{errorBacker.goHome()}">#{labels.go_home}</a>
         </h:panelGrid>
 
         <h:panelGrid id="pg-error-details" columns="1"
