@@ -91,8 +91,9 @@ public class AvatarServlet extends MediaServlet {
     }
 
     /**
-     * Parses the request parameters and fetches the user identified by them. Users can be specified by their id (using
-     * request parameter {@code id}) or by their username (using request parameter {@code u}).
+     * Parses the request parameters and fetches the user identified by them. Users can be specified by their ID (using
+     * request parameter {@code id}) or by their username (using request parameter {@code u}). The ID has precedence
+     * over the username.
      *
      * @param request The request object to parse the parameters from.
      * @return The user if they could be found, {@code null} otherwise.
