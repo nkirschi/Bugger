@@ -146,19 +146,37 @@
                              value="#{statisticsBacker.topReports}"
                              styleClass="table table-hover">
                     <h:column>
-                        <f:facet name="header">#{labels.report}</f:facet>
+                        <f:facet name="header">
+                            <h:panelGroup styleClass="text-nowrap">#{labels.id}</h:panelGroup>
+                        </f:facet>
+                        <h:link value="##{report.id}" outcome="pretty:report">
+                            <f:param name="id" value="#{report.id}"/>
+                        </h:link>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">
+                            <h:panelGroup styleClass="text-nowrap">#{labels.title}</h:panelGroup>
+                        </f:facet>
                         <h:link value="#{report.title}" outcome="pretty:report">
                             <f:param name="id" value="#{report.id}"/>
                         </h:link>
                     </h:column>
                     <h:column>
-                        <f:facet name="header">#{labels.creator}</f:facet>
-                        <h:link value="#{report.creator}" outcome="pretty:profile">
-                            <f:param name="u" value="#{report.creator}"/>
-                        </h:link>
+                        <f:facet name="header">
+                            <h:panelGroup styleClass="text-nowrap">#{labels.creator}</h:panelGroup>
+                        </f:facet>
+                        <h:panelGroup styleClass="text-nowrap">
+                            <h:outputLink value="/faces/view/auth/profile.xhtml">
+                                <h:graphicImage styleClass="img-size-mini me-2 rounded-circle"
+                                                value="/avatar?u=#{report.creator}&amp;type=thumbnail"/>#{report.creator}
+                                <f:param name="u" value="#{report.creator}"/>
+                            </h:outputLink>
+                        </h:panelGroup>
                     </h:column>
                     <h:column>
-                        <f:facet name="header">#{labels.relevance_gain}</f:facet>
+                        <f:facet name="header">
+                            <h:panelGroup styleClass="text-nowrap">#{labels.relevance_gain}</h:panelGroup>
+                        </f:facet>
                         <h:outputLabel value="#{report.relevanceGain}"/>
                     </h:column>
                 </h:dataTable>
@@ -177,9 +195,11 @@
                              styleClass="table table-hover">
                     <h:column>
                         <f:facet name="header">#{labels.user}</f:facet>
-                        <h:link value="#{user.username}" outcome="pretty:profile">
+                        <h:outputLink value="/faces/view/auth/profile.xhtml">
+                            <h:graphicImage styleClass="img-size-mini me-2 rounded-circle"
+                                            value="/avatar?u=#{user.username}&amp;type=thumbnail"/>#{user.username}
                             <f:param name="u" value="#{user.username}"/>
-                        </h:link>
+                        </h:outputLink>
                     </h:column>
                     <h:column>
                         <f:facet name="header">#{labels.earned_relevance}</f:facet>

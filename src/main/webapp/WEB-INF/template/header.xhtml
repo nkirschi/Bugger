@@ -31,8 +31,8 @@
                       styleClass="d-flex justify-content-center align-items-center mx-5 px-5 col">
             <h:form styleClass="d-flex justify-content-center align-items-center col"
                     id="f-search-header">
-                <h:panelGroup styleClass="col">
-                    <h:inputText styleClass="form-control form-text mt-0 me-3"
+                <h:panelGroup styleClass="col me-2">
+                    <h:inputText styleClass="form-control form-text mt-0"
                                  id="it-search"
                                  value="#{headerBacker.search}"
                                  a:placeholder="#{labels.search}...">
@@ -91,9 +91,11 @@
                       rendered="#{userSession.user != null}">
             <h:panelGroup id="p-avatar-thumbnail" layout="block">
                 <h:panelGroup layout="block" styleClass="dropdown-toggle">
-                    <h:graphicImage library="images" name="bugger.png" rendered="#{!userSession.user.existsAvatar}"/>
+                    <h:graphicImage library="images" name="bugger.png" rendered="#{!userSession.user.existsAvatar}"
+                                    styleClass="rounded-circle me-2"/>
                     <h:graphicImage value="/avatar?id=#{userSession.user.id}"
-                                    rendered="#{userSession.user.existsAvatar}"/>
+                                    rendered="#{userSession.user.existsAvatar}"
+                                    styleClass="rounded-circle me-2"/>
                 </h:panelGroup>
                 <h:panelGroup layout="block"
                               id="p-profile-menu"
