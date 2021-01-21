@@ -1,11 +1,17 @@
 package tech.bugger.business.internal;
 
+import tech.bugger.control.exception.Error404Exception;
+
 import javax.el.ELException;
 import javax.faces.FacesException;
 import javax.faces.application.Application;
 import javax.faces.application.ViewHandler;
 import javax.faces.component.UIViewRoot;
-import javax.faces.context.*;
+import javax.faces.context.ExceptionHandler;
+import javax.faces.context.ExceptionHandlerFactory;
+import javax.faces.context.ExceptionHandlerWrapper;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.faces.event.ExceptionQueuedEvent;
 import javax.faces.view.ViewDeclarationLanguage;
 import javax.servlet.RequestDispatcher;
@@ -13,21 +19,36 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
 
+/**
+ * Enables customized handling of exceptions.
+ */
 public class ExceptHand extends ExceptionHandlerWrapper {
 
-    public ExceptHand(ExceptionHandler wrapped) {
+    /**
+     * Constructs a new {@link ExceptHand} wrapping an {@code ExceptionHandler}.
+     *
+     * @param wrapped The exceptionHandler being wrapped.
+     */
+    public ExceptHand(final ExceptionHandler wrapped) {
         super(wrapped);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void handle() {
         handleException(FacesContext.getCurrentInstance());
         getWrapped().handle();
     }
 
-    protected void handleException(FacesContext context) {
+    /**
+     * Handles exceptions.
+     *
+     * @param context The {@link FacesContext}.
+     */
+    protected void handleException(final FacesContext context) {
         Iterator<ExceptionQueuedEvent> unhandledEvents = getUnhandledExceptionQueuedEvents().iterator();
 
         if (context == null
@@ -49,7 +70,12 @@ public class ExceptHand extends ExceptionHandlerWrapper {
         requestScope.put(RequestDispatcher.ERROR_REQUEST_URI, uri);
         requestScope.put(RequestDispatcher.ERROR_EXCEPTION, exception);
 
-        String viewID = "/WEB-INF/errorpages/500.xhtml"; // TODO replace with proper String
+        String viewID;
+        if (exception instanceof Error404Exception) {
+            viewID = "/WEB-INF/errorpages/404.xhtml";
+        } else {
+            viewID = "/WEB-INF/errorpages/500.xhtml";
+        }
         Application application = context.getApplication();
         ViewHandler viewHandler = application.getViewHandler();
         UIViewRoot viewRoot = viewHandler.createView(context, viewID);
@@ -79,12 +105,23 @@ public class ExceptHand extends ExceptionHandlerWrapper {
         }
     }
 
+    /**
+     * Factory producing custom exception handlers.
+     */
     public static class Factory extends ExceptionHandlerFactory {
 
-        public Factory(ExceptionHandlerFactory wrapped) {
+        /**
+         * Constructs a new custom exception handler factory wrapping an {@link ExceptionHandlerFactory}.
+         *
+         * @param wrapped The exceptionHandlerFactory to wrap.
+         */
+        public Factory(final ExceptionHandlerFactory wrapped) {
             super(wrapped);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public ExceptionHandler getExceptionHandler() {
             return new ExceptHand(getWrapped().getExceptionHandler());
