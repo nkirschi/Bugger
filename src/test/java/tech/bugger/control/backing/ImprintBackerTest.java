@@ -40,11 +40,13 @@ public class ImprintBackerTest {
 
     @Test
     public void testGetImprintSuccess() {
-        doReturn("# Imprint").when(organization).getImprint();
+        String key = "# Imprint";
+        doReturn(key).when(organization).getImprint();
         try (MockedStatic<MarkdownHandler> handlerMock = mockStatic(MarkdownHandler.class)) {
             String parsed = "Parsed string";
-            handlerMock.when(() -> MarkdownHandler.toHtml(any())).thenReturn(parsed);
+            handlerMock.when(() -> MarkdownHandler.toHtml(key)).thenReturn(parsed);
             assertEquals(parsed, backer.getImprint());
+            handlerMock.verify(() -> MarkdownHandler.toHtml(key));
         }
     }
 
