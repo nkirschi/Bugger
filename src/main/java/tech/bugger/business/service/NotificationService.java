@@ -1,5 +1,15 @@
 package tech.bugger.business.service;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
@@ -19,24 +29,12 @@ import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import java.io.Serializable;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
-
 /**
  * Service providing methods related to notifications. A {@code Feedback} event is fired, if unexpected circumstances
  * occur.
  */
 @ApplicationScoped
-public class NotificationService implements Serializable {
+public class NotificationService {
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.
@@ -126,7 +124,7 @@ public class NotificationService implements Serializable {
      * @param notification The notification to be marked as read.
      */
     public void markAsRead(final Notification notification) {
-        notification.setRead(false);
+        notification.setRead(true);
         try (Transaction tx = transactionManager.begin()) {
             tx.newNotificationGateway().update(notification);
             tx.commit();

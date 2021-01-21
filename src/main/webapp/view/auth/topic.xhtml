@@ -50,22 +50,27 @@
                     <h:panelGroup layout="block" styleClass="row">
                         <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
                     </h:panelGroup>
-                    <!-- statistik link -->
-                    <h:panelGroup class="row" layout="block">
+                    <h:panelGroup styleClass="row" layout="block">
+                        <h:panelGroup layout="block" styleClass="col-12">
+                            <h:outputLabel value="#{labels.id}:&#xA0;" for="ot-id"/>
+                            <h:outputText id="ot-id" value="!#{topicBacker.topicID}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup styleClass="row" layout="block">
                         <h:panelGroup layout="block" styleClass="col-12">
                             <h:outputLabel value="#{labels.topic_show_open_reports}:"/>
                             <h:selectBooleanCheckbox id="s-showOpen" value="#{topicBacker.openReportShown}"
                                                      styleClass="form-check-input"/>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup class="row" layout="block">
+                    <h:panelGroup styleClass="row" layout="block">
                         <h:panelGroup layout="block" styleClass="col-12">
                             <h:outputLabel value="#{labels.topic_show_closed_reports}:"/>
                             <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"
                                                      styleClass="form-check-input"/>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup class="row" layout="block">
+                    <h:panelGroup styleClass="row" layout="block">
                         <h:panelGroup layout="block" styleClass="col-sm-12">
                             <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}"
                                              styleClass="btn btn-primary" value="#{labels.apply_filter}"/>
@@ -99,11 +104,13 @@
                 <h:form id="f-moderator-status">
                     <h:commandLink id="l-promote" action="#{topicBacker.openModDialog}" styleClass="button"
                                    rendered="#{topicBacker.moderator}">
-                        <h:graphicImage id="g-promote" value="/resources/images/add.png" alt="Button to promote moderators"/>
+                        <h:graphicImage id="g-promote" value="/resources/images/add.png"
+                                        alt="Button to promote moderators"/>
                     </h:commandLink>
                     <h:commandLink id="l-demote" action="#{topicBacker.openUnmodDialog}" styleClass="button"
                                    rendered="#{topicBacker.moderator and topicBacker.moderators.selection.totalSize gt 0}">
-                        <h:graphicImage id="g-demote" value="/resources/images/delete.png" alt="Button to demote moderators"/>
+                        <h:graphicImage id="g-demote" value="/resources/images/delete.png"
+                                        alt="Button to demote moderators"/>
                     </h:commandLink>
                 </h:form>
             </h:panelGroup>
@@ -169,11 +176,13 @@
                     <b:column title="#{labels.col_duplicate}" paginator="#{topicBacker.reports}" key="duplicate_of">
                         <h:outputText value="#{var.duplicateOf}"/>
                     </b:column>
-                    <b:column title="#{labels.col_relevance}" paginator="#{topicBacker.reports}" key="relevance" >
+                    <b:column title="#{labels.col_relevance}" paginator="#{topicBacker.reports}" key="relevance">
                         <h:outputText value="#{var.relevance}"/>
                     </b:column>
                     <b:column title="#{labels.last_activity}" paginator="#{topicBacker.reports}" key="last_modified_at">
-                        <h:outputText value="#{var.authorship.creationDate}"/>
+                        <h:outputText value="#{var.authorship.creationDate}">
+                            <f:convertDateTime type="offsetDateTime" pattern="#{labels.date_time_pattern}"/>
+                        </h:outputText>
                     </b:column>
                 </b:pagitable>
             </h:panelGroup>
