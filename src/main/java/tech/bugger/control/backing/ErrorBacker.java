@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -39,6 +40,15 @@ public class ErrorBacker {
      */
     public String throwStoreException() {
         throw new StoreException("Test exception thrown from error backer.");
+    }
+
+    /**
+     * Throws an IOException for testing purposes.
+     *
+     * @return Never returns.
+     */
+    public String throwIOException() throws IOException {
+        throw new IOException("Test exception thrown from error backer.");
     }
 
     /**
