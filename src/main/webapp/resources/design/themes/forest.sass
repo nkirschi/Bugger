@@ -1,0 +1,111 @@
+/* Define variables for the primary colors to use */
+$darkGreen: #004600
+$woodGreen: #228b22
+$lightGreen: #e0fde0
+$cadetblue: cadetblue
+$textColor: black
+$white: white
+$boxShadow: 0 1px 1px #004600 inset, 0 0 8px #228b22 !important
+
+/* Template */
+body
+  background: $lightGreen
+
+#p-header
+  background: $woodGreen
+  color: $textColor
+
+  #ot-comp-name
+    color: $textColor
+
+#p-footer
+  background: $woodGreen
+  color: $textColor
+
+  a
+    color: $textColor
+
+  a:hover
+    color: $lightGreen
+
+#p-content
+  a
+    color: $woodGreen
+
+#p-profile-menu
+  background-color: $lightGreen
+  color: $textColor
+
+  a
+    color: $textColor
+
+  a:hover
+    color: $woodGreen
+
+/* Bootstrap buttons */
+.btn-primary, .btn-secondary, .btn-outline-primary
+  border-color: $woodGreen
+
+.btn-outline-primary
+  background-color: $white
+  color: $darkGreen
+
+  &:hover
+    background-color: gray
+    border-color: $darkGreen
+
+.btn-primary
+  background-color: $lightGreen
+  color: $textColor !important
+
+  &:hover
+    background-color: $darkGreen
+    color: $white !important
+    border-color: $woodGreen
+
+.btn-primary:focus, .btn-primary:active, .btn-link:focus, .btn-link:active, .btn-outline-primary:focus,
+.btn-outline-primary:active
+  border-color: $woodGreen !important
+  box-shadow: $boxShadow
+
+.btn-secondary
+  background-color: $lightGreen
+  color: $woodGreen
+
+  &:hover
+    background-color: $cadetblue
+    color: $textColor !important
+    border-color: $woodGreen
+
+.btn-link
+  background-color: $white
+  color: $woodGreen
+
+  &:hover
+    color: $textColor
+
+/* Popup dialogs */
+.dialog
+  background-color: $lightGreen
+  color: $textColor
+
+/* Voting buttons */
+.vote-cast
+  background-color: $woodGreen
+  color: $textColor
+
+.vote-not-cast
+  background-color: gray
+
+/* Form input fields focus */
+.form-check-input:checked
+  background-color: $woodGreen
+  border-color: $darkGreen
+
+select:focus
+  border-color: $woodGreen
+  box-shadow: $boxShadow
+
+.form-control:focus, .form-check-input:focus, .form-select:focus
+  border-color: $woodGreen
+  box-shadow: $boxShadow

@@ -19,19 +19,21 @@
                                              styleClass="btn btn-outline-primary" id="cb-search-large">
                         </h:commandButton>
                     </h:panelGroup>
-                    <h:panelGroup class="row" layout="block" id="p-switch-tabs">
-                        <h:link value="#{labels.topic}" outcome="pretty:search">
-                            <f:param name="t" value="TOPIC"/>
-                            <f:param name="q" value="#{searchBacker.query}"/>
-                        </h:link>
-                        <h:link value="#{labels.report}" outcome="pretty:search">
-                            <f:param name="t" value="REPORT"/>
-                            <f:param name="q" value="#{searchBacker.query}"/>
-                        </h:link>
-                        <h:link value="#{labels.user}" outcome="pretty:search">
-                            <f:param name="t" value="USER"/>
-                            <f:param name="q" value="#{searchBacker.query}"/>
-                        </h:link>
+                    <h:panelGroup layout="block" id="p-switch-tabs" styleClass="row">
+                        <h:panelGroup layout="block" styleClass="col-12">
+                            <h:link value="#{labels.topic}" outcome="pretty:search" styleClass="button btn btn-secondary">
+                                <f:param name="t" value="TOPIC"/>
+                                <f:param name="q" value="#{searchBacker.query}"/>
+                            </h:link>
+                            <h:link value="#{labels.report}" outcome="pretty:search" styleClass="button btn btn-secondary">
+                                <f:param name="t" value="REPORT"/>
+                                <f:param name="q" value="#{searchBacker.query}"/>
+                            </h:link>
+                            <h:link value="#{labels.user}" outcome="pretty:search" styleClass="button btn btn-secondary">
+                                <f:param name="t" value="USER"/>
+                                <f:param name="q" value="#{searchBacker.query}"/>
+                            </h:link>
+                        </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup class="row" layout="block" id="p-search-filter">
@@ -82,52 +84,75 @@
                                 </h:panelGroup>
                             </h:panelGroup>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-open-reports"
                                            value="#{labels.topic_show_open_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-open-reports" value="#{searchBacker.openReportShown}"/>
+                            <h:selectBooleanCheckbox id="s-show-open-reports"
+                                                     value="#{searchBacker.openReportShown}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-closed-reports"
                                            value="#{labels.topic_show_closed_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-closed-reports" value="#{searchBacker.closedReportShown}"/>
+                            <h:selectBooleanCheckbox id="s-show-closed-reports"
+                                                     value="#{searchBacker.closedReportShown}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-duplicate-reports"
                                            value="#{labels.show_duplicate}"/>
-                            <h:selectBooleanCheckbox id="s-show-duplicate-reports" value="#{searchBacker.duplicatesShown}"/>
+                            <h:selectBooleanCheckbox id="s-show-duplicate-reports"
+                                                     value="#{searchBacker.duplicatesShown}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-bug-reports"
                                            value="#{labels.show_bug_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-bug-reports" value="#{searchBacker.showBug}"/>
+                            <h:selectBooleanCheckbox id="s-show-bug-reports" value="#{searchBacker.showBug}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-hint-reports"
                                            value="#{labels.show_hint_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-hint-reports" value="#{searchBacker.showHint}"/>
+                            <h:selectBooleanCheckbox id="s-show-hint-reports" value="#{searchBacker.showHint}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-feature-reports"
                                            value="#{labels.show_feature_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-feature-reports" value="#{searchBacker.showFeature}"/>
+                            <h:selectBooleanCheckbox id="s-show-feature-reports" value="#{searchBacker.showFeature}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-minor-reports"
                                            value="#{labels.show_minor_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-minor-reports" value="#{searchBacker.showMinor}"/>
+                            <h:selectBooleanCheckbox id="s-show-minor-reports" value="#{searchBacker.showMinor}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-relevante-reports"
                                            value="#{labels.show_relevant_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-relevante-reports" value="#{searchBacker.showRelevant}"/>
+                            <h:selectBooleanCheckbox id="s-show-relevante-reports"
+                                                     value="#{searchBacker.showRelevant}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
+
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-severe-reports"
                                            value="#{labels.show_severe_reports}"/>
-                            <h:selectBooleanCheckbox id="s-show-severe-reports" value="#{searchBacker.showSevere}"/>
+                            <h:selectBooleanCheckbox id="s-show-severe-reports" value="#{searchBacker.showSevere}"
+                                                     styleClass="form-check-input"/>
                         </h:panelGroup>
                     </h:panelGroup>
+
                     <h:panelGroup id="p-topic-filter" layout="block" styleClass="mb-2" rendered="#{searchBacker.tab == 'TOPIC'}">
                         <h:outputLabel id="ol-topic-filter"
                                        for="s-topic-filter"

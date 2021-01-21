@@ -53,13 +53,11 @@
                                 styleClass=""/>
                     </h:panelGroup>
 
-                    <h:panelGroup id="p-login-buttons" styleClass="row justify-content-start" layout="block">
-                        <h:panelGroup styleClass="col" layout="block">
-                            <h:commandButton id="cb-login" value="#{labels['login.title']}"
-                                             action="#{loginBacker.login}" styleClass="button"/>
-                            <h:link id="l-register" value="#{labels['register.title']}" outcome="pretty:register"
-                                    styleClass="button style-button"/>
-                        </h:panelGroup>
+                    <h:panelGroup id="p-login-buttons" styleClass="d-flex justify-content-between" layout="block">
+                        <h:commandButton id="cb-login" value="#{labels['login.title']}" action="#{loginBacker.login}"
+                                         styleClass="btn btn-primary"/>
+                        <h:link id="l-register" value="#{labels['register.title']}" outcome="pretty:register"
+                                styleClass="btn btn-secondary"/>
                     </h:panelGroup>
                 </h:form>
             </h:panelGroup>

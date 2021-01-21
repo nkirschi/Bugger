@@ -17,7 +17,9 @@
                 <h:outputText value="#{var.read ? '&#x2713;' : ' '}"/>
             </b:column>
             <b:column title="#{labels.type}" paginator="#{homeBacker.inbox}" key="type">
-                <h:commandButton value="#{labels['notification_type.'.concat(var.type)]}" action="#{homeBacker.openNotification(var)}" styleClass="btn-link"/>
+                <h:commandButton value="#{labels['notification_type.'.concat(var.type)]}"
+                                 action="#{homeBacker.openNotification(var)}"
+                                 styleClass="btn btm-sm btn-link"/>
             </b:column>
             <b:column title="#{labels.report}" paginator="#{homeBacker.inbox}" key="report">
                 <h:outputText value="##{var.reportID}: #{var.reportTitle}"/>
@@ -26,7 +28,10 @@
                 <h:outputText value="#{var.actuatorUsername}"/>
             </b:column>
             <h:column>
-                <h:commandButton value="#{labels.delete}" action="#{homeBacker.deleteNotification(var)}"/>
+                <h:commandLink action="#{homeBacker.deleteNotification(var)}" styleClass="button">
+                    <h:graphicImage value="/resources/images/trash.png"
+                                    styleClass="trashcan-small"/>
+                </h:commandLink>
             </h:column>
         </b:pagitable>
 

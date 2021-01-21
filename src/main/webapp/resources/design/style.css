@@ -96,6 +96,13 @@ body {
     display: block;
 }
 
+.header-search-suggestions {
+    position: absolute;
+    top: 60px;
+    left: 20%;
+    right: 20%;
+}
+
 .alert {
     display: block;
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
@@ -138,14 +145,6 @@ body {
     display: block;
 }
 
-.title {
-    margin-top: 0;
-    display: inline-block;
-    float: left;
-    font-size: 2em;
-    font-weight: bold;
-}
-
 .align-right {
     display: flex;
     justify-content: end;
@@ -171,24 +170,6 @@ body {
 
 .button {
     margin: 1%;
-}
-
-.style-button {
-    text-decoration: none;
-    background-color: white;
-    color: black;
-    border: 1px solid #cccccc;
-    display: inline-block;
-    padding: 4px 24px;
-    line-height: 24px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-.style-button:hover {
-    text-decoration: none;
-    color: black;
 }
 
 .logo-preview {
@@ -217,10 +198,6 @@ body {
     display: block;
     margin: 0.3em 0 0;
     font-size: 1.3em;
-}
-
-.profile-h2 {
-    margin: 1em 0;
 }
 
 .hide {
@@ -264,4 +241,9 @@ body {
 
 .vote-not-cast {
     background-color: #157347;
+}
+
+.form-check-input {
+    margin-left: 1%;
+    margin-right: 1%;
 }
