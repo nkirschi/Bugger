@@ -235,7 +235,7 @@ public class SearchBacker implements Serializable {
         }
 
         if (tab == Tab.REPORT) {
-            reportResults = new Paginator<>("title", Selection.PageSize.NORMAL) {
+            reportResults = new Paginator<>("id", Selection.PageSize.NORMAL) {
                 @Override
                 protected Iterable<Report> fetch() {
                     Map<Report.Type, Boolean> typeHashMap = getTypeHashMap();
@@ -279,7 +279,7 @@ public class SearchBacker implements Serializable {
         }
 
         if (tab == Tab.TOPIC) {
-            topicResults = new Paginator<>("title", Selection.PageSize.NORMAL) {
+            topicResults = new Paginator<>("id", Selection.PageSize.NORMAL) {
                 @Override
                 protected Iterable<Topic> fetch() {
                     return searchService.getTopicResults(query, getSelection());

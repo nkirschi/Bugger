@@ -12,6 +12,7 @@ import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.NotificationService;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
@@ -161,6 +162,19 @@ public class HomeBacker implements Serializable {
      */
     public OffsetDateTime lastChange(final Topic topic) {
         return topicService.lastChange(topic);
+    }
+
+    /**
+     * Returns the parsed description of the given {@link Topic} in HTML.
+     *
+     * @param topic The {@link Topic} whose description should be parsed.
+     * @return The parsed description in HTML.
+     */
+    public String getDescription(final Topic topic) {
+        if (topic.getDescription() == null) {
+            return "";
+        }
+        return MarkdownHandler.toHtml(topic.getDescription());
     }
 
     /**

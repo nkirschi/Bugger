@@ -21,10 +21,10 @@
                         <h:outputLabel id="ot-title" for="it-title" value="#{labels.title}" styleClass="form-label"/>
                         <h:panelGroup layout="block" styleClass="input-group">
                             <h:inputText id="it-title" value="#{topicEditBacker.topic.title}"
-                                         a:maxlength="#{C.LARGE_FIELD}" required="true" styleClass="form-control
+                                         a:maxlength="#{C.SMALL_FIELD}" required="true" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
                                          : 'is-invalid'}" a:placeholder="#{labels.title}">
-                                <f:validateLength maximum="#{C.LARGE_FIELD}"/>
+                                <f:validateLength maximum="#{C.SMALL_FIELD}"/>
                             </h:inputText>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                 <h:message id="m-title" for="it-title"/>
@@ -37,10 +37,10 @@
                                        styleClass="form-label"/>
                         <h:panelGroup layout="block" styleClass="input-group">
                             <h:inputTextarea id="it-description" value="#{topicEditBacker.topic.description}"
-                                             a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
+                                             a:maxlength="#{C.LARGE_AREA}" styleClass="form-control
                                              #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
                                              : 'is-invalid'}" a:placeholder="#{labels.description}" rows="10">
-                                <f:validateLength maximum="#{C.SMALL_FIELD}"/>
+                                <f:validateLength maximum="#{C.LARGE_AREA}"/>
                             </h:inputTextarea>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                 <h:message id="m-description" for="it-description"/>

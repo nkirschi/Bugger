@@ -530,6 +530,7 @@ public class TopicBacker implements Serializable {
         } else {
             topicService.subscribeToTopic(user, topic);
         }
+        subscribed = topicService.isSubscribed(user, topic);
         return null;
     }
 

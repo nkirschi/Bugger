@@ -55,7 +55,7 @@
                 </h:link>
             </b:column>
             <b:column title="#{labels.description}" paginator="#{homeBacker.topics}" key="description">
-                <h:outputText value="#{var.description}" escape="false"/>
+                <h:outputText value="#{homeBacker.getDescription(var)}" escape="false"/>
             </b:column>
             <b:column title="#{labels.last_activity}" paginator="#{homeBacker.topics}" key="last_activity">
                 <h:outputText value="#{var.lastActivity}" styleClass="text-nowrap">
