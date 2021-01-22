@@ -533,9 +533,9 @@ public class SearchDBGateway implements SearchGateway {
         }
         filterSeverityBuilder.append(") ");
         String filterSeverity = filterSeverityBuilder.toString();
-        String sortBy = selection.getSortedBy();
-        if (sortBy.equals("relevance")) {
-            sortBy = "COALESCE(forced_relevance, relevance)";
+        String orderBy = selection.getSortedBy();
+        if (orderBy.equals("relevance")) {
+            orderBy = "COALESCE(forced_relevance, relevance)";
         }
         try (PreparedStatement stmt = conn.prepareStatement("SELECT r.*, t.title as t_title , a.last_activity, v.relevance "
                 + "FROM report AS r JOIN topic AS t ON r.topic = t.id JOIN report_last_activity AS a "
@@ -544,7 +544,7 @@ public class SearchDBGateway implements SearchGateway {
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) "
                 + filterClosedAt + filterDuplicate + filterType + filterSeverity
                 + "AND t.title = COALESCE(?, t.title) "
-                + "ORDER BY " + sortBy + (selection.isAscending() ? " ASC " : " DESC ")
+                + "ORDER BY " + orderBy + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
             System.out.println(new StatementParametrizer(stmt)
                     .string(query + "%")

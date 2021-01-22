@@ -221,13 +221,13 @@
                                     <f:param name="id" value="#{var.id}"/>
                                 </h:link>
                             </b:column>
-                            <b:column title="#{labels.last_activity}" paginator="#{searchBacker.userResults}" key="last_activity">
+                            <b:column title="#{labels.last_activity}" paginator="#{searchBacker.topicResults}" key="last_activity">
                                 <h:outputLabel value="#{var.lastActivity}"/>
                             </b:column>
-                            <b:column title="#{labels.num_sub}" paginator="#{searchBacker.userResults}" key="numSub">
+                            <b:column title="#{labels.num_sub}" paginator="#{searchBacker.topicResults}" key="numSub">
                                 <h:outputLabel value="#{var.numSub}"/>
                             </b:column>
-                            <b:column title="#{labels.num_posts}" paginator="#{searchBacker.userResults}" key="numPosts">
+                            <b:column title="#{labels.num_posts}" paginator="#{searchBacker.topicResults}" key="numPosts">
                                 <h:outputLabel value="#{var.numPosts}"/>
                             </b:column>
                         </b:pagitable>
