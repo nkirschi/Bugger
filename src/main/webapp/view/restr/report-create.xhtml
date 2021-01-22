@@ -18,6 +18,14 @@
             <h:panelGroup layout="block" styleClass="row vw-90">
                 <h:form id="f-create-report" enctype="multipart/form-data"
                         rendered="#{reportCreateBacker.session.user != null and !reportCreateBacker.isBanned()}">
+                    <p>
+                        <h:outputText value="#{labels.report_create_info} "/>
+                        <h:link value="#{reportCreateBacker.topic.title}" outcome="pretty:topic">
+                            <f:param name="id" value="#{reportCreateBacker.topic.id}"/>
+                        </h:link>
+                        <h:outputText value="#{labels.report_create_info2}"/>
+                    </p>
+
                     <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
                         <h:outputLabel id="ol-title" for="it-title" value="#{labels.title}" styleClass="form-label"/>
                         <h:panelGroup layout="block" styleClass="input-group has-validation">
@@ -73,7 +81,7 @@
                                        styleClass="form-label"/>
                         <h:panelGroup layout="block" styleClass="input-group has-validation">
                             <h:inputText id="it-version" value="#{reportCreateBacker.report.version}"
-                                         a:maxlength="#{C.SMALL_FIELD}" required="true" styleClass="form-control
+                                         a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
                                          : 'is-invalid'}" a:placeholder="#{labels.version}">
                                 <f:validateLength maximum="#{C.SMALL_FIELD}"/>
@@ -100,22 +108,21 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <!-- TODO Adding attachment when post content is empty will trigger a "value is required" message and will
-                         not add attachment. -->
-                    <ul>
-                        <ui:repeat var="attachment" value="#{reportCreateBacker.attachments}">
-                            <li><h:outputText value="#{attachment.name}"/></li>
-                        </ui:repeat>
-                    </ul>
-
                     <h:panelGroup>
                         <h:outputFormat id="first-post-attachments-info"
                                         value="#{labels.post_attachments_info}"
                                         styleClass="small form-text text-muted">
                             <f:param value="#{applicationSettings.configuration.maxAttachmentsPerPost}"/>
                             <f:param value="#{C.MAX_ATTACHMENT_FILESIZE}"/>
+                            <f:param value="#{applicationSettings.configuration.allowedFileExtensions}"/>
                         </h:outputFormat>
                     </h:panelGroup>
+
+                    <ul>
+                        <ui:repeat var="attachment" value="#{reportCreateBacker.attachments}">
+                            <li><h:outputText value="#{attachment.name}"/></li>
+                        </ui:repeat>
+                    </ul>
 
                     <h:panelGroup styleClass="row my-3"
                                   layout="block"

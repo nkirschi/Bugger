@@ -94,8 +94,11 @@ public class PostEditBacker implements Serializable {
      * @param fctx                The current {@link FacesContext} of the application.
      */
     @Inject
-    public PostEditBacker(final ApplicationSettings applicationSettings, final ReportService reportService,
-                          final PostService postService, final UserSession session, final FacesContext fctx) {
+    public PostEditBacker(final ApplicationSettings applicationSettings,
+                          final ReportService reportService,
+                          final PostService postService,
+                          final UserSession session,
+                          final FacesContext fctx) {
         this.applicationSettings = applicationSettings;
         this.reportService = reportService;
         this.postService = postService;
@@ -111,10 +114,6 @@ public class PostEditBacker implements Serializable {
     @PostConstruct
     void init() {
         User user = session.getUser();
-        if (user == null) {
-            throw new Error404Exception();
-        }
-
         create = fctx.getExternalContext().getRequestParameterMap().containsKey("c");
         if (create) {
             Integer reportID = parseRequestParameter("r");
@@ -137,15 +136,16 @@ public class PostEditBacker implements Serializable {
                 throw new Error404Exception();
             }
             report = reportService.getReportByID(post.getReport());
-            if (report == null) {
-                throw new Error404Exception();
-            }
-            if (!postService.isPrivileged(user, post, report)) {
+            if (report == null || !postService.isPrivileged(user, post, report)) {
                 throw new Error404Exception();
             }
 
             attachments = post.getAttachments();
             post.getAuthorship().setModifier(user);
+        }
+
+        if (report.getClosingDate() != null && !applicationSettings.getConfiguration().isClosedReportPosting()) {
+            throw new Error404Exception();
         }
     }
 

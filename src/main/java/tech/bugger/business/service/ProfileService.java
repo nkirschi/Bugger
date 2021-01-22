@@ -11,8 +11,8 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-import tech.bugger.business.exception.NotFoundException;
 import tech.bugger.persistence.exception.DuplicateException;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
@@ -88,9 +88,8 @@ public class ProfileService {
         try (Transaction transaction = transactionManager.begin()) {
             user = transaction.newUserGateway().getUserByID(id);
             transaction.commit();
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.error("The user with id " + id + " could not be found.", e);
-            throw new NotFoundException(messages.getString("not_found_error"), e);
         } catch (TransactionException e) {
             log.error("Error while loading the user with id " + id, e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
@@ -133,7 +132,7 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newUserGateway().deleteUser(user);
             tx.commit();
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.error("The user with id " + user.getId() + " could not be found.", e);
         } catch (TransactionException e) {
             log.error("The user with id " + user.getId() + " could not be deleted.", e);
@@ -155,9 +154,9 @@ public class ProfileService {
             tx.commit();
             feedback.fire(new Feedback(messages.getString("operation_successful"), Feedback.Type.INFO));
             return true;
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.error("The user with id " + user.getId() + "could not be found.", e);
-            throw new NotFoundException(messages.getString("not_found_error"), e);
+            return false;
         } catch (TransactionException e) {
             log.error("Error while updating the user with id " + user.getId(), e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
@@ -185,7 +184,7 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newSubscriptionGateway().unsubscribe(topic, subscriber);
             tx.commit();
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.error("User " + subscriber + " or topic " + topic + " not found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
@@ -214,7 +213,7 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newSubscriptionGateway().unsubscribe(report, subscriber);
             tx.commit();
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.error("User " + subscriber + " or report " + report + " not found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
@@ -243,7 +242,7 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newSubscriptionGateway().unsubscribe(user, subscriber);
             tx.commit();
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.error("User " + subscriber + " or user " + user + " not found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
@@ -278,7 +277,7 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newSubscriptionGateway().unsubscribeAllTopics(user);
             tx.commit();
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.error("Could not find user " + user + ".", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
@@ -298,7 +297,7 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newSubscriptionGateway().unsubscribeAllReports(user);
             tx.commit();
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.error("Could not find user " + user + ".", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
@@ -318,7 +317,7 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newSubscriptionGateway().unsubscribeAllUsers(user);
             tx.commit();
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.error("Could not find user " + user + ".", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
@@ -369,7 +368,7 @@ public class ProfileService {
         } catch (DuplicateException e) {
             log.error("User " + subscriber + " is already subscribed to user " + subscribedTo + ".", e);
             feedback.fire(new Feedback(messages.getString("already_subscribed"), Feedback.Type.ERROR));
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.error("User " + subscriber + " or user " + subscribedTo + " not found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
@@ -396,17 +395,17 @@ public class ProfileService {
             throw new IllegalArgumentException("User ID cannot be null.");
         } else if (subscribedTo == null) {
             log.error("Cannot determine subscription status to user null.");
-            throw new IllegalArgumentException("Report cannot be null.");
+            throw new IllegalArgumentException("User cannot be null.");
         } else if (subscribedTo.getId() == null) {
             log.error("Cannot determine subscription status to user with ID null.");
-            throw new IllegalArgumentException("Report ID cannot be null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
         }
 
         boolean status;
         try (Transaction tx = transactionManager.begin()) {
             status = tx.newSubscriptionGateway().isSubscribed(subscriber, subscribedTo);
             tx.commit();
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             status = false;
             log.error("Could not find user " + subscriber + " or user " + subscribedTo + ".", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
@@ -487,7 +486,7 @@ public class ProfileService {
         try (Transaction transaction = transactionManager.begin()) {
             numPosts = transaction.newUserGateway().getNumberOfPosts(user);
             transaction.commit();
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.error("The number of posts could not be calculated for the user with id " + user.getId());
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
@@ -552,7 +551,7 @@ public class ProfileService {
             transaction.newUserGateway().updateUser(user);
             transaction.commit();
             feedback.fire(new Feedback(messages.getString("operation_successful"), Feedback.Type.INFO));
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             user.setAdministrator(!admin);
             log.error("The user with id " + user.getId() + "could not be found.", e);
             feedback.fire(new Feedback(messages.getString("not_found_error"), Feedback.Type.ERROR));
@@ -591,7 +590,7 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             user = tx.newUserGateway().getUserByEmail(emailAddress);
             tx.commit();
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.debug("User in search for e-mail could not be found.");
         } catch (TransactionException e) {
             log.error("Error while searching for e-mail.", e);
@@ -613,7 +612,7 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             user = tx.newUserGateway().getUserByUsername(username);
             tx.commit();
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.debug("User in search for username could not be found.");
         } catch (TransactionException e) {
             log.error("Error while searching for username.", e);
@@ -635,7 +634,7 @@ public class ProfileService {
         try (Transaction tx = transactionManager.begin()) {
             avatar = tx.newUserGateway().getAvatarForUser(id);
             tx.commit();
-        } catch (tech.bugger.persistence.exception.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.debug("Avatar could not be found for user.");
         } catch (TransactionException e) {
             log.error("Error while searching for user avatar.", e);

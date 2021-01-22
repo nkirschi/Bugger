@@ -173,11 +173,7 @@ public class ProfileEditBacker implements Serializable {
             log.debug("Updating the user's email address with the given token.");
         }
 
-        if (session.getUser() == null) {
-            throw new Error404Exception();
-        }
         dialog = ProfileEditDialog.NONE;
-
         if (ectx.getRequestParameterMap().containsKey("c") && session.getUser().isAdministrator()) {
             create = true;
             user = new User();

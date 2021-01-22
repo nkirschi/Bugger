@@ -87,9 +87,14 @@
                 <b:pagitable paginator="#{topicBacker.moderators}" simple="true">
                     <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
                     <h:column>
-                        <h:link value="#{var.username}" outcome="pretty:profile">
-                            <f:param name="u" value="#{var.username}"/>
-                        </h:link>
+                        <h:panelGroup styleClass="text-nowrap">
+                            <h:outputLink value="/faces/view/auth/profile.xhtml">
+                                <h:graphicImage styleClass="img-size-mini me-2 rounded-circle"
+                                                value="/avatar?u=#{var.username}&amp;type=thumbnail"
+                                                alt="#{var.username}'s avatar"/>#{var.username}
+                                <f:param name="u" value="#{var.username}"/>
+                            </h:outputLink>
+                        </h:panelGroup>
                     </h:column>
                     <h:column>
                         <h:commandLink id="l-demote-user" action="#{topicBacker.unmodSingleUser(var.username)}"
@@ -123,9 +128,14 @@
                 <b:pagitable paginator="#{topicBacker.bannedUsers}" simple="true">
                     <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
                     <h:column>
-                        <h:link value="#{var.username}" outcome="pretty:profile">
-                            <f:param name="u" value="#{var.username}"/>
-                        </h:link>
+                        <h:panelGroup styleClass="text-nowrap">
+                            <h:outputLink value="/faces/view/auth/profile.xhtml">
+                                <h:graphicImage styleClass="img-size-mini me-2 rounded-circle"
+                                                value="/avatar?u=#{var.username}&amp;type=thumbnail"
+                                                alt="#{var.username}'s avatar"/>#{var.username}
+                                <f:param name="u" value="#{var.username}"/>
+                            </h:outputLink>
+                        </h:panelGroup>
                     </h:column>
                     <h:column>
                         <h:commandLink id="l-unban-user" action="#{topicBacker.unbanSingleUser(var.username)}"
@@ -180,7 +190,7 @@
                         <h:outputText value="#{var.relevance}"/>
                     </b:column>
                     <b:column title="#{labels.last_activity}" paginator="#{topicBacker.reports}" key="last_modified_at">
-                        <h:outputText value="#{var.authorship.creationDate}">
+                        <h:outputText value="#{var.authorship.creationDate}" styleClass="text-nowrap">
                             <f:convertDateTime type="offsetDateTime" pattern="#{labels.date_time_pattern}"/>
                         </h:outputText>
                     </b:column>

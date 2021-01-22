@@ -72,10 +72,27 @@ body {
     padding: 10px;
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
     right: 20px;
-    top: 65px;
+    top: 60px;
+    left: auto;
     z-index: 9999;
     background: #fff;
-    width: 200px;
+    width: 220px;
+    display: none;
+}
+
+#p-avatar-thumbnail img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    transition: opacity .15s ease-in-out;
+}
+
+#p-avatar-thumbnail:hover #p-profile-menu {
+    display: block;
+}
+
+#p-avatar-thumbnail:hover img {
+    opacity: 0.5;
 }
 
 .header-search-suggestions {
@@ -142,16 +159,18 @@ body {
     margin-bottom: auto;
 }
 
+.text-justify {
+    text-align: justify;
+}
+
 .img-size-small {
     max-height: 200px;
 }
 
 .img-size-mini {
-    max-height: 1em;
-}
-
-.button {
-    margin: 1%;
+    width: 24px;
+    height: 24px;
+    object-fit: cover;
 }
 
 .logo-preview {
