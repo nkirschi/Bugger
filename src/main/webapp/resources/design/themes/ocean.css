@@ -92,4 +92,17 @@ select:focus {
   box-shadow: 0 1px 1px #00008d inset, 0 0 8px #005eb8 !important;
 }
 
+pre {
+  background-color: #999999;
+}
+
+pre code {
+  color: #00008b;
+}
+
+code {
+  color: #00008b;
+  background-color: #999999;
+}
+
 /*# sourceMappingURL=ocean.css.map */

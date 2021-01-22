@@ -140,4 +140,17 @@ a.search:hover {
   color: #3c763d !important;
 }
 
+pre {
+  background-color: #999999;
+}
+
+pre code {
+  color: #740200;
+}
+
+code {
+  color: #740200;
+  background-color: #999999;
+}
+
 /*# sourceMappingURL=blaze.css.map */

@@ -131,4 +131,17 @@ td, th {
   border-color: #c62a25;
 }
 
+pre {
+  background-color: #666666;
+}
+
+pre code {
+  color: #a3d2e1;
+}
+
+code {
+  color: #a3d2e1;
+  background-color: #666666;
+}
+
 /*# sourceMappingURL=amoled.css.map */

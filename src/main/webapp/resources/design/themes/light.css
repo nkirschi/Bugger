@@ -49,4 +49,17 @@ body {
   background-color: gray;
 }
 
+pre {
+  background-color: #999999;
+}
+
+pre code {
+  color: #1565C0;
+}
+
+code {
+  color: #1565C0;
+  background-color: #999999;
+}
+
 /*# sourceMappingURL=light.css.map */

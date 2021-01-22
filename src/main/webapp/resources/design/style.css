@@ -248,3 +248,20 @@ body {
     margin-left: 1%;
     margin-right: 1%;
 }
+
+pre {
+    padding: 2px;
+    font-size: 105% !important;
+    border-radius: 6px;
+}
+
+pre code {
+    font-size: 100% !important;
+}
+
+code {
+    font-family: "Fira Code", Consolas, monospace;
+    padding: 2px;
+    font-size: 105% !important;
+    border-radius: 6px;
+}
