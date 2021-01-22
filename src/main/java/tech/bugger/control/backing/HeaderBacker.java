@@ -177,25 +177,9 @@ public class HeaderBacker implements Serializable {
      * @return The location to redirect to.
      */
     public String executeSearch() throws IOException {
-        try {
-            ExternalContext ectx = fctx.getExternalContext();
-            ectx.redirect(ectx.getRequestContextPath() + "/search?q=" + search);
-        } catch (IOException e) {
-            redirectTo404Page();
-        }
+        ExternalContext ectx = fctx.getExternalContext();
+        ectx.redirect(ectx.getRequestContextPath() + "/search?q=" + search);
         return null;
-    }
-
-    /**
-     * Redirects the user to a 404 page.
-     */
-    private void redirectTo404Page() {
-        try {
-            ExternalContext ectx = fctx.getExternalContext();
-            ectx.redirect(ectx.getRequestContextPath() + "/error");
-        } catch (IOException e) {
-            throw new InternalError("Redirection to error page failed.");
-        }
     }
 
     /**

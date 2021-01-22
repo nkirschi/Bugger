@@ -1,8 +1,6 @@
 package tech.bugger.control.backing;
 
 import com.sun.faces.context.RequestParameterMap;
-import org.checkerframework.checker.units.qual.A;
-import org.checkerframework.checker.units.qual.K;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,14 +21,23 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
@@ -244,7 +251,7 @@ public class TopicBackerTest {
                 () -> assertNull(topicBacker.makeModerator()),
                 () -> assertNull(topicBacker.getTopicDialog())
         );
-        verify(topicService, times(0)).makeModerator(USERNAME, topic);
+        verify(topicService, never()).makeModerator(USERNAME, topic);
     }
 
     @Test
@@ -286,7 +293,7 @@ public class TopicBackerTest {
                 () -> assertNull(topicBacker.removeModerator()),
                 () -> assertNull(topicBacker.getTopicDialog())
         );
-        verify(topicService, times(0)).removeModerator(USERNAME, topic);
+        verify(topicService, never()).removeModerator(USERNAME, topic);
     }
 
     @Test
@@ -348,7 +355,7 @@ public class TopicBackerTest {
                 () -> assertNull(topicBacker.banUser()),
                 () -> assertNull(topicBacker.getTopicDialog())
         );
-        verify(topicService, times(0)).ban(USERNAME, topic);
+        verify(topicService, never()).ban(USERNAME, topic);
     }
 
     @Test
@@ -390,7 +397,7 @@ public class TopicBackerTest {
                 () -> assertNull(topicBacker.unbanUser()),
                 () -> assertNull(topicBacker.getTopicDialog())
         );
-        verify(topicService, times(0)).unban(USERNAME, topic);
+        verify(topicService, never()).unban(USERNAME, topic);
     }
 
     @Test
@@ -421,14 +428,14 @@ public class TopicBackerTest {
     @Test
     public void testSearchBanUsersStringNull() {
         topicBacker.searchBanUsers();
-        verify(searchService, times(0)).getUserBanSuggestions(any(), any());
+        verify(searchService, never()).getUserBanSuggestions(any(), any());
     }
 
     @Test
     public void testSearchBanUsersStringBlank() {
         topicBacker.setUserBan("");
         topicBacker.searchBanUsers();
-        verify(searchService, times(0)).getUserBanSuggestions(any(), any());
+        verify(searchService, never()).getUserBanSuggestions(any(), any());
     }
 
     @Test
@@ -445,14 +452,14 @@ public class TopicBackerTest {
     @Test
     public void testSearchUnbanUsersStringNull() {
         topicBacker.searchUnbanUsers();
-        verify(searchService, times(0)).getUserUnbanSuggestions(any(), any());
+        verify(searchService, never()).getUserUnbanSuggestions(any(), any());
     }
 
     @Test
     public void testSearchUnbanUsersStringBlank() {
         topicBacker.setUserBan("");
         topicBacker.searchUnbanUsers();
-        verify(searchService, times(0)).getUserUnbanSuggestions(any(), any());
+        verify(searchService, never()).getUserUnbanSuggestions(any(), any());
     }
 
     @Test
@@ -469,14 +476,14 @@ public class TopicBackerTest {
     @Test
     public void testSearchModUsersStringNull() {
         topicBacker.searchModUsers();
-        verify(searchService, times(0)).getUserModSuggestions(any(), any());
+        verify(searchService, never()).getUserModSuggestions(any(), any());
     }
 
     @Test
     public void testSearchModUsersStringBlank() {
         topicBacker.setUserMod("");
         topicBacker.searchModUsers();
-        verify(searchService, times(0)).getUserModSuggestions(any(), any());
+        verify(searchService, never()).getUserModSuggestions(any(), any());
     }
 
     @Test
@@ -493,14 +500,14 @@ public class TopicBackerTest {
     @Test
     public void testSearchUnmodUsersStringNull() {
         topicBacker.searchUnmodUsers();
-        verify(searchService, times(0)).getUserUnmodSuggestions(any(), any());
+        verify(searchService, never()).getUserUnmodSuggestions(any(), any());
     }
 
     @Test
     public void testSearchUnmodUsersStringBlank() {
         topicBacker.setUserMod("");
         topicBacker.searchUnmodUsers();
-        verify(searchService, times(0)).getUserUnmodSuggestions(any(), any());
+        verify(searchService, never()).getUserUnmodSuggestions(any(), any());
     }
 
     @Test
