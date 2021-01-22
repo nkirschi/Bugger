@@ -175,9 +175,7 @@ public class ProfileServiceTest {
     @Test
     public void testUpdateWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(userGateway).updateUser(any());
-        assertThrows(tech.bugger.business.exception.NotFoundException.class,
-                     () -> service.updateUser(testUser)
-        );
+        assertFalse(service.updateUser(testUser));
     }
 
     @Test
@@ -198,9 +196,7 @@ public class ProfileServiceTest {
     @Test
     public void testGetUserWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(userGateway).getUserByID(1);
-        assertThrows(tech.bugger.business.exception.NotFoundException.class,
-                     () -> service.getUser(1)
-        );
+        assertNull(service.getUser(1));
     }
 
     @Test

@@ -1,6 +1,16 @@
 package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
+import tech.bugger.global.util.Pagitable;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,15 +21,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-import tech.bugger.global.util.Pagitable;
-import tech.bugger.persistence.exception.NotFoundException;
-import tech.bugger.persistence.exception.StoreException;
-import tech.bugger.persistence.util.StatementParametrizer;
 
 /**
  * User gateway that gives access to user stored in a database.
@@ -576,13 +577,13 @@ public class UserDBGateway implements UserGateway {
         // @formatter:off
         String query =
                 "DELETE FROM \"user\""
-                        + "WHERE password_hash IS NULL "
-                        + "AND NOT EXISTS("
-                        + "    SELECT * "
-                        + "    FROM   token "
-                        + "    WHERE  type = 'REGISTER' "
-                        + "    AND    verifies = id"
-                        + ");";
+              + "WHERE password_hash IS NULL "
+              + "AND NOT EXISTS("
+              + "    SELECT * "
+              + "    FROM   token "
+              + "    WHERE  type = 'REGISTER' "
+              + "    AND    verifies = id"
+              + ");";
         // @formatter:on
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.executeUpdate();

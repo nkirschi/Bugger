@@ -26,7 +26,7 @@
                     <f:param name="id" value="#{var.reportID}"/>
                 </h:link>
             </b:column>
-            <b:column title="#{labels.user}" paginator="#{homeBacker.inbox}" key="causer">
+            <b:column title="#{labels.causer}" paginator="#{homeBacker.inbox}" key="causer">
                 <h:link value="@#{var.actuatorUsername}" outcome="pretty:profile">
                     <f:param name="u" value="#{var.actuatorUsername}"/>
                 </h:link>
@@ -58,7 +58,7 @@
                 <h:outputText value="#{var.description}" escape="false"/>
             </b:column>
             <b:column title="#{labels.last_activity}" paginator="#{homeBacker.topics}" key="last_activity">
-                <h:outputText value="#{var.lastActivity}">
+                <h:outputText value="#{var.lastActivity}" styleClass="text-nowrap">
                     <f:convertDateTime type="offsetDateTime" pattern="#{labels.date_time_pattern}"/>
                 </h:outputText>
             </b:column>

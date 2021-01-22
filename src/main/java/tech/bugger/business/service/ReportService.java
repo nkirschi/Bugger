@@ -389,6 +389,7 @@ public class ReportService {
         boolean success = false;
         try (Transaction tx = transactionManager.begin()) {
             tx.newReportGateway().create(report);
+            firstPost.setReport(report.getId());
             boolean postCreated = postService.createPostWithTransaction(firstPost, tx);
             if (postCreated) {
                 tx.commit();
