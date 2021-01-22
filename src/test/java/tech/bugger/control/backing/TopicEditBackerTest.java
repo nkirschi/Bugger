@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
@@ -26,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -119,23 +121,21 @@ public class TopicEditBackerTest {
     @Test
     public void testInitNumberFormat() {
         doReturn(user).when(session).getUser();
-        doReturn(application).when(fctx).getApplication();
-        doReturn(navHandler).when(application).getNavigationHandler();
         doReturn(true).when(map).containsKey(KEY);
         doReturn(KEY).when(map).get(KEY);
-        topicEditBacker.init();
-        verify(navHandler).handleNavigation(any(), any(), any());
+        assertThrows(Error404Exception.class,
+                () -> topicEditBacker.init()
+        );
     }
 
     @Test
     public void testInitUserNotAdmin() {
+        doReturn(user).when(session).getUser();
         user.setAdministrator(false);
         topicEditBacker.setTopicID(topic.getId());
-        doReturn(application).when(fctx).getApplication();
-        doReturn(navHandler).when(application).getNavigationHandler();
-        doReturn(user).when(session).getUser();
-        topicEditBacker.init();
-        verify(navHandler).handleNavigation(any(), any(), any());
+        assertThrows(Error404Exception.class,
+                () -> topicEditBacker.init()
+        );
     }
 
     @Test
@@ -148,13 +148,11 @@ public class TopicEditBackerTest {
     }
 
     @Test
-    public void testSaveChangesFalse() throws IOException {
-        doReturn(application).when(fctx).getApplication();
-        doReturn(navHandler).when(application).getNavigationHandler();
+    public void testSaveChangesFalse() {
         topicEditBacker.setTopic(topic);
-        topicEditBacker.saveChanges();
-        verify(navHandler).handleNavigation(any(), any(), any());
-        verify(topicService).updateTopic(topic);
+        assertThrows(Error404Exception.class,
+                () -> topicEditBacker.saveChanges()
+        );
     }
 
     @Test
@@ -169,13 +167,11 @@ public class TopicEditBackerTest {
 
     @Test
     public void testSaveChangesCreateFalse() throws IOException, IllegalAccessException {
-        doReturn(application).when(fctx).getApplication();
-        doReturn(navHandler).when(application).getNavigationHandler();
         create.setBoolean(topicEditBacker, true);
         topicEditBacker.setTopic(topic);
-        topicEditBacker.saveChanges();
-        verify(navHandler).handleNavigation(any(), any(), any());
-        verify(topicService).createTopic(topic);
+        assertThrows(Error404Exception.class,
+                () -> topicEditBacker.saveChanges()
+        );
     }
 
 }

@@ -11,6 +11,7 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
@@ -19,8 +20,6 @@ import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -29,12 +28,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.doReturn;
 
@@ -109,8 +107,9 @@ public class TopicBackerTest {
     public void testInitTopicNull() {
         doReturn(true).when(map).containsKey(KEY);
         doReturn(ID).when(map).get(KEY);
-        topicBacker.init();
-        verify(navHandler).handleNavigation(any(), any(), any());
+        assertThrows(Error404Exception.class,
+                () -> topicBacker.init()
+        );
     }
 
     @Test
@@ -120,22 +119,25 @@ public class TopicBackerTest {
         doReturn(topic).when(topicService).getTopicByID(anyInt());
         doReturn(user).when(session).getUser();
         doReturn(true).when(topicService).isBanned(user, topic);
-        topicBacker.init();
-        verify(navHandler).handleNavigation(any(), any(), any());
+        assertThrows(Error404Exception.class,
+                () -> topicBacker.init()
+        );
     }
 
     @Test
     public void testInitNumberFormat() {
         doReturn(true).when(map).containsKey(KEY);
         doReturn(KEY).when(map).get(KEY);
-        topicBacker.init();
-        verify(navHandler).handleNavigation(any(), any(), any());
+        assertThrows(Error404Exception.class,
+                () -> topicBacker.init()
+        );
     }
 
     @Test
     public void testInitNoKey() {
-        topicBacker.init();
-        verify(navHandler).handleNavigation(any(), any(), any());
+        assertThrows(Error404Exception.class,
+                () -> topicBacker.init()
+        );
     }
 
     @Test
