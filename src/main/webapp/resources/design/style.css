@@ -201,6 +201,10 @@ body {
     font-size: 1.3em;
 }
 
+.button {
+    margin: 1%;
+}
+
 .hide {
     display: none !important;
 }

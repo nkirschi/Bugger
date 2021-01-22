@@ -14,8 +14,8 @@
     <ui:param name="title" value="#{labels['login.title']}"/>
 
     <ui:define name="content">
-        <h:panelGroup layout="block" styleClass="row">
-            <h:panelGroup layout="block" styleClass="col-md-8">
+        <h:panelGroup layout="block" styleClass="d-flex p-2 justify-content-center align-items-center container">
+            <h:panelGroup layout="block" styleClass="row vw-50">
                 <h:form id="f-login" rendered="#{userSession.user == null}">
                     <h:panelGroup id="p-username-row" layout="block"
                                   styleClass="mb-3 form-group has-validation position-relative">
@@ -53,9 +53,9 @@
                                 styleClass=""/>
                     </h:panelGroup>
 
-                    <h:panelGroup id="p-login-buttons" layout="block">
+                    <h:panelGroup id="p-login-buttons" styleClass="d-flex justify-content-between" layout="block">
                         <h:commandButton id="cb-login" value="#{labels['login.title']}" action="#{loginBacker.login}"
-                                         styleClass="btn btn-primary me-3"/>
+                                         styleClass="btn btn-primary"/>
                         <h:link id="l-register" value="#{labels['register.title']}" outcome="pretty:register"
                                 styleClass="btn btn-secondary"/>
                     </h:panelGroup>
