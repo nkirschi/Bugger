@@ -1,15 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
