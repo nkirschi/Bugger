@@ -47,47 +47,42 @@
                                  required="true" styleClass="form-control" rows="10">
                     <f:validateLength maximum="#{C.SMALL_AREA}"/>
                 </h:inputTextarea>
-                <h:panelGroup/>
-                <h:message for="it-content"/>
+                <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                    <h:message for="it-content"/>
+                </h:panelGroup>
+                <h:panelGroup>
+                    <h:outputFormat id="post-attachments-info"
+                                    value="#{labels.post_attachments_info}"
+                                    styleClass="small form-text text-muted">
+                        <f:param value="#{applicationSettings.configuration.maxAttachmentsPerPost}"/>
+                        <f:param value="#{C.MAX_ATTACHMENT_FILESIZE}"/>
+                        <f:param value="#{applicationSettings.configuration.allowedFileExtensions}"/>
+                    </h:outputFormat>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="my-3">
+                    <ui:repeat var="attachment" value="#{postEditBacker.attachments}">
+                        <h:outputText value="#{attachment.name}" styleClass="row search"/>
+                    </ui:repeat>
+                </h:panelGroup>
             </h:panelGroup>
 
-            <h:panelGroup>
-                <h:outputFormat id="post-attachments-info"
-                                value="#{labels.post_attachments_info}"
-                                styleClass="small form-text text-muted">
-                    <f:param value="#{applicationSettings.configuration.maxAttachmentsPerPost}"/>
-                    <f:param value="#{C.MAX_ATTACHMENT_FILESIZE}"/>
-                    <f:param value="#{applicationSettings.configuration.allowedFileExtensions}"/>
-                </h:outputFormat>
-            </h:panelGroup>
-
-            <ul>
-                <ui:repeat var="attachment" value="#{postEditBacker.attachments}">
-                    <li><h:outputText value="#{attachment.name}"/></li>
-                </ui:repeat>
-                </ul>
-
-            <h:panelGroup styleClass="row my-3"
-                          layout="block"
-                          rendered="#{postEditBacker.attachments.size()
-                                      lt applicationSettings.configuration.maxAttachmentsPerPost}">
-                <h:outputLabel id="o-attachment" for="it-attachment" value="#{labels.add_attachment}"/>
+            <h:panelGroup styleClass="row my-3" layout="block" rendered="#{postEditBacker.attachments.size()
+                          lt applicationSettings.configuration.maxAttachmentsPerPost}">
                 <h:inputFile id="it-attachment" value="#{postEditBacker.lastAttachmentUploaded}">
                     <f:validator validatorId="fileValidator"/>
                 </h:inputFile>
                 <h:panelGroup/>
                 <h:message for="it-attachment"/>
-                <h:commandButton id="cb-add-attachment"
-                                 value="#{labels.add_attachment}"
-                                 action="#{postEditBacker.uploadAttachment}"
-                                 styleClass="btn btn-primary"/>
             </h:panelGroup>
 
-            <h:panelGroup styleClass="row my-3" layout="block">
-                <h:commandButton id="cb-remove-attachments"
-                                 value="#{labels.remove_all_attachments}"
-                                 action="#{postEditBacker.deleteAllAttachments}"
-                                 styleClass="btn btn-primary"/>
+            <h:panelGroup layout="block" styleClass="d-flex justify-content-between my-3">
+                <h:commandButton id="cb-add-attachment" value="#{labels.add_attachment}"
+                                 action="#{postEditBacker.uploadAttachment}" styleClass="btn btn-outline-primary"
+                                 rendered="#{postEditBacker.attachments.size()
+                                 lt applicationSettings.configuration.maxAttachmentsPerPost}"/>
+                <h:commandButton id="cb-remove-attachments" value="#{labels.remove_all_attachments}"
+                                 action="#{postEditBacker.deleteAllAttachments}" styleClass="btn btn-outline-primary"
+                                 rendered="#{postEditBacker.attachments.size() gt 0}"/>
             </h:panelGroup>
 
             <h:commandButton value="#{postEditBacker.create ? labels.post_create : labels.post_save_changes}"

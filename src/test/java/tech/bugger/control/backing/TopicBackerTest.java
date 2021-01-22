@@ -1,11 +1,6 @@
 package tech.bugger.control.backing;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
+import com.sun.faces.context.RequestParameterMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,12 +11,30 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import javax.faces.application.Application;
+import javax.faces.application.NavigationHandler;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.lang.reflect.Field;
+import java.util.Locale;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
@@ -44,9 +57,20 @@ public class TopicBackerTest {
     @Mock
     private ExternalContext ectx;
 
+    @Mock
+    private RequestParameterMap map;
+
+    @Mock
+    private NavigationHandler navHandler;
+
+    @Mock
+    private Application application;
+
     private User user;
     private Topic topic;
     private static final String USERNAME = "Helgi";
+    private static final String KEY = "id";
+    private static final String ID = "1";
 
     @BeforeEach
     public void setUp() {
@@ -55,6 +79,65 @@ public class TopicBackerTest {
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic = new Topic(1, "Some title", "Some description");
         topicBacker = new TopicBacker(topicService, searchService, fctx, ectx, session);
+        lenient().doReturn(ectx).when(fctx).getExternalContext();
+        lenient().doReturn(map).when(ectx).getRequestParameterMap();
+        lenient().doReturn(application).when(fctx).getApplication();
+        lenient().doReturn(navHandler).when(application).getNavigationHandler();
+    }
+
+    @Test
+    public void testInit() {
+        doReturn(true).when(map).containsKey(KEY);
+        doReturn(ID).when(map).get(KEY);
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        topicBacker.init();
+        assertAll(
+                () -> assertEquals(topic, topicBacker.getTopic()),
+                () -> assertEquals(topic.getId(), topicBacker.getTopicID()),
+                () -> assertTrue(topicBacker.isOpenReportShown()),
+                () -> assertFalse(topicBacker.isClosedReportShown()),
+                () -> assertNotNull(topicBacker.getSanitizedDescription()),
+                () -> assertNotNull(topicBacker.getModerators()),
+                () -> assertNotNull(topicBacker.getReports()),
+                () -> assertNotNull(topicBacker.getBannedUsers())
+        );
+    }
+
+    @Test
+    public void testInitTopicNull() {
+        doReturn(true).when(map).containsKey(KEY);
+        doReturn(ID).when(map).get(KEY);
+        assertThrows(Error404Exception.class,
+                () -> topicBacker.init()
+        );
+    }
+
+    @Test
+    public void testInitUserBanned() {
+        doReturn(true).when(map).containsKey(KEY);
+        doReturn(ID).when(map).get(KEY);
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        doReturn(user).when(session).getUser();
+        doReturn(true).when(topicService).isBanned(user, topic);
+        assertThrows(Error404Exception.class,
+                () -> topicBacker.init()
+        );
+    }
+
+    @Test
+    public void testInitNumberFormat() {
+        doReturn(true).when(map).containsKey(KEY);
+        doReturn(KEY).when(map).get(KEY);
+        assertThrows(Error404Exception.class,
+                () -> topicBacker.init()
+        );
+    }
+
+    @Test
+    public void testInitNoKey() {
+        assertThrows(Error404Exception.class,
+                () -> topicBacker.init()
+        );
     }
 
     @Test
@@ -112,7 +195,8 @@ public class TopicBackerTest {
         );
     }
 
-    /*@Test
+    /*
+    @Test
     public void testIsModerator() {
         topicBacker.setTopic(topic);
         when(session.getUser()).thenReturn(user);
@@ -127,17 +211,10 @@ public class TopicBackerTest {
         when(session.getUser()).thenReturn(user);
         assertTrue(topicBacker.isModerator());
     }
+     */
 
     @Test
     public void testIsModeratorNoModerator() {
-        topicBacker.setTopic(topic);
-        when(session.getUser()).thenReturn(user);
-        assertFalse(topicBacker.isModerator());
-    }*/
-
-    @Test
-    public void testIsModeratorUserNull() {
-        topicBacker.setTopic(topic);
         assertFalse(topicBacker.isModerator());
     }
 
@@ -166,8 +243,8 @@ public class TopicBackerTest {
                 () -> assertNull(topicBacker.makeModerator()),
                 () -> assertNull(topicBacker.getTopicDialog())
         );
-        verify(topicService, times(0)).makeModerator(USERNAME, topic);
-    }*/
+        verify(topicService, never()).makeModerator(USERNAME, topic);
+    }
 
     @Test
     public void testMakeModeratorUnsuccessful() {
@@ -208,8 +285,8 @@ public class TopicBackerTest {
                 () -> assertNull(topicBacker.removeModerator()),
                 () -> assertNull(topicBacker.getTopicDialog())
         );
-        verify(topicService, times(0)).removeModerator(USERNAME, topic);
-    }*/
+        verify(topicService, never()).removeModerator(USERNAME, topic);
+    }
 
     @Test
     public void testRemoveModeratorUnsuccessful() {
@@ -270,8 +347,8 @@ public class TopicBackerTest {
                 () -> assertNull(topicBacker.banUser()),
                 () -> assertNull(topicBacker.getTopicDialog())
         );
-        verify(topicService, times(0)).ban(USERNAME, topic);
-    }*/
+        verify(topicService, never()).ban(USERNAME, topic);
+    }
 
     @Test
     public void testBanUserUnsuccessful() {
@@ -312,8 +389,8 @@ public class TopicBackerTest {
                 () -> assertNull(topicBacker.unbanUser()),
                 () -> assertNull(topicBacker.getTopicDialog())
         );
-        verify(topicService, times(0)).unban(USERNAME, topic);
-    }*/
+        verify(topicService, never()).unban(USERNAME, topic);
+    }
 
     @Test
     public void testUnbanUserUnsuccessful() {
@@ -343,14 +420,14 @@ public class TopicBackerTest {
     @Test
     public void testSearchBanUsersStringNull() {
         topicBacker.searchBanUsers();
-        verify(searchService, times(0)).getUserBanSuggestions(any(), any());
+        verify(searchService, never()).getUserBanSuggestions(any(), any());
     }
 
     @Test
     public void testSearchBanUsersStringBlank() {
         topicBacker.setUserBan("");
         topicBacker.searchBanUsers();
-        verify(searchService, times(0)).getUserBanSuggestions(any(), any());
+        verify(searchService, never()).getUserBanSuggestions(any(), any());
     }
 
     @Test
@@ -367,14 +444,14 @@ public class TopicBackerTest {
     @Test
     public void testSearchUnbanUsersStringNull() {
         topicBacker.searchUnbanUsers();
-        verify(searchService, times(0)).getUserUnbanSuggestions(any(), any());
+        verify(searchService, never()).getUserUnbanSuggestions(any(), any());
     }
 
     @Test
     public void testSearchUnbanUsersStringBlank() {
         topicBacker.setUserBan("");
         topicBacker.searchUnbanUsers();
-        verify(searchService, times(0)).getUserUnbanSuggestions(any(), any());
+        verify(searchService, never()).getUserUnbanSuggestions(any(), any());
     }
 
     @Test
@@ -391,14 +468,14 @@ public class TopicBackerTest {
     @Test
     public void testSearchModUsersStringNull() {
         topicBacker.searchModUsers();
-        verify(searchService, times(0)).getUserModSuggestions(any(), any());
+        verify(searchService, never()).getUserModSuggestions(any(), any());
     }
 
     @Test
     public void testSearchModUsersStringBlank() {
         topicBacker.setUserMod("");
         topicBacker.searchModUsers();
-        verify(searchService, times(0)).getUserModSuggestions(any(), any());
+        verify(searchService, never()).getUserModSuggestions(any(), any());
     }
 
     @Test
@@ -415,14 +492,70 @@ public class TopicBackerTest {
     @Test
     public void testSearchUnmodUsersStringNull() {
         topicBacker.searchUnmodUsers();
-        verify(searchService, times(0)).getUserUnmodSuggestions(any(), any());
+        verify(searchService, never()).getUserUnmodSuggestions(any(), any());
     }
 
     @Test
     public void testSearchUnmodUsersStringBlank() {
         topicBacker.setUserMod("");
         topicBacker.searchUnmodUsers();
-        verify(searchService, times(0)).getUserUnmodSuggestions(any(), any());
+        verify(searchService, never()).getUserUnmodSuggestions(any(), any());
     }
+
+    @Test
+    public void testToggleTopicSubscription() {
+        doReturn(user).when(session).getUser();
+        topicBacker.toggleTopicSubscription();
+        verify(topicService).subscribeToTopic(any(), any());
+    }
+
+    @Test
+    public void testToggleTopicSubscriptionSubscribed() {
+        doReturn(user).when(session).getUser();
+        doReturn(true).when(topicService).isSubscribed(any(), any());
+        topicBacker.toggleTopicSubscription();
+        verify(topicService).unsubscribeFromTopic(any(), any());
+    }
+
+    @Test
+    public void testToggleTopicSubscriptionUserNull() {
+        topicBacker.toggleTopicSubscription();
+        verify(topicService, never()).subscribeToTopic(any(), any());
+        verify(topicService, never()).unsubscribeFromTopic(any(), any());
+    }
+
+    @Test
+    public void testDelete() {
+        topicBacker.setTopic(topic);
+        topicBacker.delete();
+        verify(topicService).deleteTopic(topic);
+    }
+
+    @Test
+    public void testApplyFilters() throws NoSuchFieldException, IllegalAccessException {
+        Field field = topicBacker.getClass().getDeclaredField("reports");
+        field.setAccessible(true);
+        field.set(topicBacker, mock(Paginator.class));
+        topicBacker.applyFilters();
+        verify(topicBacker.getReports()).update();
+    }
+
+    @Test
+    public void testSettersForCoverage() {
+        topicBacker.setOpenReportShown(true);
+        topicBacker.setClosedReportShown(true);
+        topicBacker.setTopicID(topic.getId());
+        topicBacker.setUserBanSuggestions(new ArrayList<>());
+        topicBacker.setUserModSuggestions(new ArrayList<>());
+        assertAll(
+                () -> assertTrue(topicBacker.isOpenReportShown()),
+                () -> assertTrue(topicBacker.isClosedReportShown()),
+                () -> assertEquals(topic.getId(), topicBacker.getTopicID()),
+                () -> assertTrue(topicBacker.getUserBanSuggestions().isEmpty()),
+                () -> assertTrue(topicBacker.getUserModSuggestions().isEmpty())
+        );
+    }
+
+     */
 
 }

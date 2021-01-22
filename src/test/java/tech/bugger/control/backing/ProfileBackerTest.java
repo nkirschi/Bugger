@@ -27,9 +27,12 @@ import javax.faces.context.FacesContext;
 import java.lang.reflect.Field;
 import java.time.OffsetDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -92,12 +95,14 @@ public class ProfileBackerTest {
         when(application.getNavigationHandler()).thenReturn(navHandler);
     }
 
-    /*@Test
+    @Test
     public void testInit() {
         when(map.containsKey(PARAMETER)).thenReturn(true);
         when(map.get(PARAMETER)).thenReturn(user.getUsername());
         profileBacker.setUsername(user.getUsername());
         when(profileService.getUserByUsername(user.getUsername())).thenReturn(user);
+        when(profileService.getVotingWeightForUser(user)).thenReturn(THE_ANSWER);
+        when(profileService.getNumberOfPostsForUser(user)).thenReturn(THE_ANSWER);
         profileBacker.init();
         assertAll(
                 () -> assertEquals(user.getUsername(), profileBacker.getUsername()),
@@ -105,9 +110,11 @@ public class ProfileBackerTest {
                 () -> assertEquals(profileBacker.getProfileDialog(), ProfileBacker.ProfileDialog.NONE),
                 () -> assertEquals(Selection.PageSize.SMALL,
                         profileBacker.getModeratedTopics().getSelection().getPageSize()),
-                () -> assertEquals("title", profileBacker.getModeratedTopics().getSelection().getSortedBy())
+                () -> assertEquals("id", profileBacker.getModeratedTopics().getSelection().getSortedBy()),
+                () -> assertEquals(THE_ANSWER, profileBacker.getVotingWeight()),
+                () -> assertEquals(THE_ANSWER, profileBacker.getNumberOfPosts())
         );
-    }*/
+    }
 
     @Test
     public void testInitEqualUser() {
@@ -195,57 +202,6 @@ public class ProfileBackerTest {
         profileBacker.closeDialog();
         assertEquals(ProfileBacker.ProfileDialog.NONE, profileBacker.getProfileDialog());
     }
-
-    /*@Test
-    public void testGetVotingWeight() {
-        profileBacker.setUser(user);
-        when(profileService.getVotingWeightForUser(user)).thenReturn(THE_ANSWER);
-        int votingWeight = profileBacker.getVotingWeight();
-        assertEquals(THE_ANSWER, votingWeight);
-        verify(profileService, times(1)).getVotingWeightForUser(user);
-    }
-
-    @Test
-    public void testGetNumberOfPosts() {
-        profileBacker.setUser(user);
-        when(profileService.getNumberOfPostsForUser(user)).thenReturn(THE_ANSWER);
-        int posts = profileBacker.getNumberOfPosts();
-        assertEquals(THE_ANSWER, posts);
-        verify(profileService, times(1)).getNumberOfPostsForUser(user);
-    }
-
-    @Test
-    public void testIsPrivilegedEqualUser() {
-        profileBacker.setUser(user);
-        when(session.getUser()).thenReturn(profileBacker.getUser());
-        assertTrue(profileBacker.isPrivileged());
-        verify(session, times(3)).getUser();
-    }
-
-    @Test
-    public void testIsPrivilegedAdmin() {
-        user.setAdministrator(true);
-        when(session.getUser()).thenReturn(user);
-        assertTrue(profileBacker.isPrivileged());
-        verify(session, times(2)).getUser();
-    }
-
-    @Test
-    public void testIsPrivilegedFalse() {
-        profileBacker.setUser(user);
-        User owner = new User(user);
-        owner.setId(45678);
-        when(session.getUser()).thenReturn(owner);
-        assertFalse(profileBacker.isPrivileged());
-        verify(session, times(3)).getUser();
-    }
-
-    @Test
-    public void testIsPrivilegedNoSessionUser() {
-        profileBacker.setUser(user);
-        assertFalse(profileBacker.isPrivileged());
-        verify(session, times(1)).getUser();
-    }*/
 
     @Test
     public void testToggleAdmin() {
@@ -385,14 +341,16 @@ public class ProfileBackerTest {
         verify(profileService).subscribeToUser(user, otherUser);
     }
 
-    /*@Test
-    public void testToggleUserSubscriptionUnsub() {
+    @Test
+    public void testToggleUserSubscriptionUnsub() throws NoSuchFieldException, IllegalAccessException {
+        Field field = profileBacker.getClass().getDeclaredField("subscribed");
+        field.setAccessible(true);
+        field.set(profileBacker, true);
         when(session.getUser()).thenReturn(user);
-        when(profileService.isSubscribed(user, otherUser)).thenReturn(true);
         profileBacker.setUser(otherUser);
         profileBacker.toggleUserSubscription();
         verify(profileService).deleteUserSubscription(user, otherUser);
-    }*/
+    }
 
     @Test
     public void testToggleUserSubscriptionUserNull() {

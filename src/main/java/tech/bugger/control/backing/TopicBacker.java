@@ -535,9 +535,8 @@ public class TopicBacker implements Serializable {
         if (user == null) {
             return null;
         }
-
-        if (topicService.isSubscribed(user, topic)) {
-            topicService.unsubscribeFromTopic(user, topic);
+        if (isSubscribed()) {
+            topicService.unsubscribeFromTopic(session.getUser(), topic);
         } else {
             topicService.subscribeToTopic(user, topic);
         }
