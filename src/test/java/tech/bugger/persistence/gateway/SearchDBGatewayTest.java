@@ -232,11 +232,9 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetUserSuggestions() throws NotFoundException {
+    public void testGetUserSuggestions() {
         userGateway.createUser(user1);
         userGateway.createUser(user2);
-        userGateway.createUser(admin);
-        topicGateway.createTopic(topic);
         List<String> suggestions = searchGateway.getUserSuggestions(QUERY2, LIMIT);
         assertAll(
                 () -> assertFalse(suggestions.contains(user1.getUsername())),
