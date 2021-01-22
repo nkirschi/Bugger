@@ -112,6 +112,7 @@
                                             styleClass="small form-text text-muted">
                                 <f:param value="#{applicationSettings.configuration.maxAttachmentsPerPost}"/>
                                 <f:param value="#{C.MAX_ATTACHMENT_FILESIZE}"/>
+                                <f:param value="#{applicationSettings.configuration.allowedFileExtensions}"/>
                             </h:outputFormat>
                         </h:panelGroup>
                         <h:panelGroup layout="block" styleClass="my-3">
@@ -139,7 +140,8 @@
                         <h:commandButton id="cb-remove-attachments"
                                          value="#{labels.remove_all_attachments}"
                                          action="#{reportCreateBacker.deleteAllAttachments}"
-                                         styleClass="btn btn-outline-primary"/>
+                                         styleClass="btn btn-outline-primary"
+                                         rendered="#{reportCreateBacker.attachments.size() gt 0}"/>
                     </h:panelGroup>
 
                     <h:commandButton value="#{labels.create}" action="#{reportCreateBacker.create}"

@@ -56,6 +56,7 @@
                                     styleClass="small form-text text-muted">
                         <f:param value="#{applicationSettings.configuration.maxAttachmentsPerPost}"/>
                         <f:param value="#{C.MAX_ATTACHMENT_FILESIZE}"/>
+                        <f:param value="#{applicationSettings.configuration.allowedFileExtensions}"/>
                     </h:outputFormat>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="my-3">
@@ -80,7 +81,8 @@
                                  rendered="#{postEditBacker.attachments.size()
                                  lt applicationSettings.configuration.maxAttachmentsPerPost}"/>
                 <h:commandButton id="cb-remove-attachments" value="#{labels.remove_all_attachments}"
-                                 action="#{postEditBacker.deleteAllAttachments}" styleClass="btn btn-outline-primary"/>
+                                 action="#{postEditBacker.deleteAllAttachments}" styleClass="btn btn-outline-primary"
+                                 rendered="#{postEditBacker.attachments.size() gt 0}"/>
             </h:panelGroup>
 
             <h:commandButton value="#{postEditBacker.create ? labels.post_create : labels.post_save_changes}"
