@@ -5,6 +5,7 @@ import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
@@ -213,23 +214,20 @@ public class TopicBacker implements Serializable {
     @PostConstruct
     void init() {
         if (!ectx.getRequestParameterMap().containsKey("id")) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-            return;
+            throw new Error404Exception();
         }
 
         try {
             topicID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-            return;
+            throw new Error404Exception();
         }
 
         User user = session.getUser();
         topic = topicService.getTopicByID(topicID);
         banned = topicService.isBanned(user, topic);
         if (topic == null || banned) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-            return;
+            throw new Error404Exception();
         }
 
         administrator = user != null && user.isAdministrator();

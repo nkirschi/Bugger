@@ -198,7 +198,7 @@ public class HeaderBacker implements Serializable {
     public String determineAlertClass() {
         if (!fctx.getMessageList(null).isEmpty()) {
             FacesMessage.Severity maxSeverity = fctx.getMessageList().stream().map(FacesMessage::getSeverity)
-                                                    .max(FacesMessage.Severity::compareTo).orElseThrow();
+                    .max(FacesMessage.Severity::compareTo).orElseThrow();
             if (maxSeverity.equals(FacesMessage.SEVERITY_ERROR)) {
                 return " alert-danger";
             } else if (maxSeverity.equals(FacesMessage.SEVERITY_WARN)) {
