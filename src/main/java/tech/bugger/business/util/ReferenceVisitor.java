@@ -1,5 +1,6 @@
 package tech.bugger.business.util;
 
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.commonmark.node.AbstractVisitor;
@@ -44,6 +45,11 @@ public class ReferenceVisitor extends AbstractVisitor {
     private static final String USER_REFERENCE = "@";
 
     /**
+     * The intro sequence for a topic reference.
+     */
+    private static final String TOPIC_REFERENCE = "!";
+
+    /**
      * The intro sequence for a post reference.
      */
     private static final String POST_REFERENCE = "##";
@@ -57,6 +63,11 @@ public class ReferenceVisitor extends AbstractVisitor {
      * The endpoint URL for a user reference.
      */
     private static final String USER_ENDPOINT = "/profile?u=%1$s";
+
+    /**
+     * The endpoint URL for a topic reference.
+     */
+    private static final String TOPIC_ENDPOINT = "/topic?id=%1$s";
 
     /**
      * The endpoint URL for a post reference.
@@ -78,6 +89,8 @@ public class ReferenceVisitor extends AbstractVisitor {
         String str = text.getLiteral();
         if (str.contains(USER_REFERENCE)) {
             parseText(text, USER_REFERENCE, USER_ENDPOINT);
+        } else if (str.contains(TOPIC_REFERENCE)) {
+            parseText(text, TOPIC_REFERENCE, TOPIC_ENDPOINT);
         } else if (str.contains(POST_REFERENCE)) {
             parseText(text, POST_REFERENCE, POST_ENDPOINT);
         } else if (str.contains(REPORT_REFERENCE)) {
@@ -129,10 +142,16 @@ public class ReferenceVisitor extends AbstractVisitor {
      * @return A link node if the input is a valid reference, otherwise just a text node.
      */
     private Node parseLink(final String sequence, final String refId, final String dest) {
+        Optional<Integer> parsedInt = getInteger(refId);
         // Users can also contain other characters
-        if (isInteger(refId) || (sequence.equals(USER_REFERENCE) && PATTERN_USER.matcher(refId).matches())) {
+        if (sequence.equals(USER_REFERENCE) && PATTERN_USER.matcher(refId).matches()) {
             Link node = new Link(String.format(dest, refId), refId);
             node.appendChild(new Text(sequence + refId));
+            return node;
+        } else if (parsedInt.isPresent()) {
+            String ref = parsedInt.get() + "";
+            Link node = new Link(String.format(dest, ref), ref);
+            node.appendChild(new Text(sequence + ref));
             return node;
         } else {
             return new Text(sequence + refId);
@@ -162,12 +181,11 @@ public class ReferenceVisitor extends AbstractVisitor {
      * @param str The string to check.
      * @return {@code true} iff the given string represents an integer, {@code false} otherwise.
      */
-    private boolean isInteger(final String str) {
+    private Optional<Integer> getInteger(final String str) {
         try {
-            Integer.parseInt(str);
-            return true;
+            return Optional.of(Integer.parseInt(str));
         } catch (NumberFormatException e) {
-            return false;
+            return Optional.empty();
         }
     }
 

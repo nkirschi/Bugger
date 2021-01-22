@@ -26,6 +26,16 @@ public class AvatarServlet extends MediaServlet {
     private static final Log log = Log.forClass(AvatarServlet.class);
 
     /**
+     * The resource path to the default avatar.
+     */
+    private static final String DEFAULT_AVATAR_PATH = "/resources/images/avatar.jpg";
+
+    /**
+     * The resource path to the default avatar thumbnail.
+     */
+    private static final String DEFAULT_THUMBNAIL_PATH = "/resources/images/thumbnail.jpg";
+
+    /**
      * The current application settings.
      */
     @Inject
@@ -72,6 +82,9 @@ public class AvatarServlet extends MediaServlet {
 
         // Fetch the requested image.
         byte[] image = serveThumbnail ? user.getAvatarThumbnail() : profileService.getAvatarForUser(user.getId());
+        if (image == null || image.length == 0) {
+            image = loadDefaultAvatar(serveThumbnail);
+        }
         if (image == null) {
             log.debug("Avatar or thumbnail for user with ID " + user.getId() + " not found.");
             redirectToNotFoundPage(response);
@@ -86,13 +99,30 @@ public class AvatarServlet extends MediaServlet {
         try {
             response.getOutputStream().write(image);
         } catch (IOException e) {
-            log.error("Could not write servlet response.", e);
+            log.warning("Could not write servlet response.", e);
         }
     }
 
     /**
-     * Parses the request parameters and fetches the user identified by them. Users can be specified by their id (using
-     * request parameter {@code id}) or by their username (using request parameter {@code u}).
+     * Loads the default avatar or avatar thumbnail.
+     *
+     * @param serveThumbnail Whether to return the thumbnail or the entire avatar.
+     * @return The default avatar or thumbnail.
+     */
+    private byte[] loadDefaultAvatar(final boolean serveThumbnail) {
+        try {
+            String path = serveThumbnail ? DEFAULT_THUMBNAIL_PATH : DEFAULT_AVATAR_PATH;
+            return getServletContext().getResourceAsStream(path).readAllBytes();
+        } catch (IOException e) {
+            log.warning("Could not load default avatar or thumbnail.", e);
+            return null;
+        }
+    }
+
+    /**
+     * Parses the request parameters and fetches the user identified by them. Users can be specified by their ID (using
+     * request parameter {@code id}) or by their username (using request parameter {@code u}). The ID has precedence
+     * over the username.
      *
      * @param request The request object to parse the parameters from.
      * @return The user if they could be found, {@code null} otherwise.

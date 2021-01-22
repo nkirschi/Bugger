@@ -24,16 +24,6 @@ import java.util.ResourceBundle;
 public class ImageValidator implements Validator<Part> {
 
     /**
-     * The minimum width images are required to have.
-     */
-    private static final int MIN_WIDTH = 128;
-
-    /**
-     * The minimum height images are required to have.
-     */
-    private static final int MIN_HEIGHT = 128;
-
-    /**
      * Resource bundle for feedback messages.
      */
     private final ResourceBundle messagesBundle;
@@ -70,9 +60,9 @@ public class ImageValidator implements Validator<Part> {
                 throw new ValidatorException(new FacesMessage(
                         messagesBundle.getString("image_validator.image_corrupt")));
             }
-            if (img.getWidth() < MIN_WIDTH || img.getHeight() < MIN_HEIGHT) {
+            if (img.getWidth() < Constants.MIN_IMAGE_WIDTH || img.getHeight() < Constants.MIN_IMAGE_HEIGHT) {
                 String message = MessageFormat.format(messagesBundle.getString("image_validator.image_too_small"),
-                        MIN_WIDTH, MIN_HEIGHT);
+                        Constants.MIN_IMAGE_WIDTH, Constants.MIN_IMAGE_HEIGHT);
                 throw new ValidatorException(new FacesMessage(message));
             }
         } catch (IOException e) {

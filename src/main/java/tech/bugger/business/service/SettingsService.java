@@ -1,5 +1,17 @@
 package tech.bugger.business.service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Stream;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Configuration;
@@ -10,23 +22,10 @@ import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Stream;
-
 /**
  * Service for application settings.
  */
-@Dependent
+@ApplicationScoped
 public class SettingsService {
 
     /**
@@ -156,8 +155,8 @@ public class SettingsService {
         List<String> filenames = new ArrayList<>();
         try (Stream<Path> files = Files.list(Paths.get(path))) {
             files.filter(Files::isRegularFile)
-                 .map(p -> p.getFileName().toString())
-                 .forEach(filenames::add);
+                    .map(p -> p.getFileName().toString())
+                    .forEach(filenames::add);
         } catch (IOException e) {
             log.error("Could not discover available themes on file system.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("themes_discovery_error"), Feedback.Type.WARNING));

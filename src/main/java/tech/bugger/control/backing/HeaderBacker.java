@@ -51,11 +51,6 @@ public class HeaderBacker implements Serializable {
     private User user;
 
     /**
-     * {@code true} if the Menu should be displayed, {@code false} otherwise.
-     */
-    private boolean displayMenu;
-
-    /**
      * The current search query.
      */
     private String search;
@@ -148,7 +143,6 @@ public class HeaderBacker implements Serializable {
         userSearchSuggestion = new ArrayList<>();
         topicSearchSuggestion = new ArrayList<>();
         reportSearchSuggestion = new ArrayList<>();
-        displayMenu = Boolean.parseBoolean(ectx.getRequestParameterMap().get("d"));
     }
 
     /**
@@ -205,20 +199,6 @@ public class HeaderBacker implements Serializable {
     }
 
     /**
-     * Activates/Deactivates the menu.
-     *
-     * @return {@code null} to reload the page.
-     */
-    public String toggleMenu() {
-        if (displayMenu) {
-            closeMenu();
-        } else {
-            openMenu();
-        }
-        return null;
-    }
-
-    /**
      * Determine alert class for messages.
      *
      * @return The determined alert class.
@@ -265,21 +245,6 @@ public class HeaderBacker implements Serializable {
      */
     public int getCurrentYear() {
         return LocalDate.now().getYear();
-    }
-
-    /**
-     * @return {@code true} if the Menu should be displayed, {@code false} otherwise.
-     */
-    public boolean isDisplayMenu() {
-        return displayMenu;
-    }
-
-    private void closeMenu() {
-        displayMenu = false;
-    }
-
-    private void openMenu() {
-        displayMenu = true;
     }
 
     /**
