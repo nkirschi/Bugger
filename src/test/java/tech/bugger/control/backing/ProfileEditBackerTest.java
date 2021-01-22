@@ -11,6 +11,7 @@ import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
 
@@ -136,9 +137,7 @@ public class ProfileEditBackerTest {
         when(map.containsKey(TOKEN)).thenReturn(true);
         when(map.get(TOKEN)).thenReturn(TOKEN);
         when(session.getUser()).thenReturn(user);
-        profileEditBacker.init();
-        //Since navHandler is mocked, method execution continues after the first redirect in updateUserEmail().
-        verify(navHandler, times(2)).handleNavigation(any(), any(), any());
+        assertThrows(InternalError.class, () -> profileEditBacker.init());
     }
 
     @Test
@@ -148,9 +147,7 @@ public class ProfileEditBackerTest {
         when(map.get(TOKEN)).thenReturn(TOKEN);
         when(authenticationService.findToken(TOKEN)).thenReturn(emailToken);
         when(session.getUser()).thenReturn(user);
-        profileEditBacker.init();
-        //Since navHandler is mocked, method execution continues after the first redirect in updateUserEmail().
-        verify(navHandler, times(2)).handleNavigation(any(), any(), any());
+        assertThrows(InternalError.class, () -> profileEditBacker.init());
     }
 
     @Test
@@ -204,8 +201,7 @@ public class ProfileEditBackerTest {
     public void testInitWithEditNoAdmin() {
         when(session.getUser()).thenReturn(user);
         when(map.containsKey(EDIT)).thenReturn(true);
-        profileEditBacker.init();
-        verify(navHandler).handleNavigation(any(), any(), any());
+        assertThrows(Error404Exception.class, () -> profileEditBacker.init());
     }
 
     @Test
@@ -213,19 +209,17 @@ public class ProfileEditBackerTest {
         when(session.getUser()).thenReturn(user);
         when(map.containsKey(EDIT)).thenReturn(true);
         when(map.get(EDIT)).thenReturn("abc");
-        profileEditBacker.init();
+        assertThrows(Error404Exception.class, () -> profileEditBacker.init());
         assertAll(
                 () -> assertNull(profileEditBacker.getUser()),
                 () -> assertEquals(ProfileEditBacker.ProfileEditDialog.NONE, profileEditBacker.getDialog())
         );
-        verify(navHandler).handleNavigation(any(), any(), any());
     }
 
     @Test
     public void testInitGetUserNull() {
         when(session.getUser()).thenReturn(user);
-        profileEditBacker.init();
-        verify(navHandler).handleNavigation(any(), any(), any());
+        assertThrows(Error404Exception.class, () -> profileEditBacker.init());
     }
 
     @Test

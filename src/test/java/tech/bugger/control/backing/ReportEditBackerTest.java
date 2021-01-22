@@ -11,6 +11,7 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Registry;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Report;
@@ -113,16 +114,14 @@ public class ReportEditBackerTest {
     @Test
     public void testInitWhenNoParam() throws Exception {
         doReturn(null).when(requestParameterMap).get("id");
-        reportEditBacker.init();
-        verify(ectx).redirect(any());
+        assertThrows(Error404Exception.class, () -> reportEditBacker.init());
     }
 
     @Test
     public void testInitWhenNoReport() throws Exception {
         doReturn("1234").when(requestParameterMap).get("id");
         doReturn(null).when(reportService).getReportByID(1234);
-        reportEditBacker.init();
-        verify(ectx).redirect(any());
+        assertThrows(Error404Exception.class, () -> reportEditBacker.init());
     }
 
     @Test
@@ -131,8 +130,7 @@ public class ReportEditBackerTest {
         doReturn(testReport).when(reportService).getReportByID(1234);
         doReturn(user).when(session).getUser();
         testReport.getAuthorship().setCreator(mock(User.class));
-        reportEditBacker.init();
-        verify(ectx).redirect(any());
+        assertThrows(Error404Exception.class, () -> reportEditBacker.init());
     }
 
     @Test
@@ -143,8 +141,7 @@ public class ReportEditBackerTest {
         testReport.getAuthorship().setCreator(user);
         doReturn(false).when(configuration).isClosedReportPosting();
         testReport.setClosingDate(mock(OffsetDateTime.class));
-        reportEditBacker.init();
-        verify(ectx).redirect(any());
+        assertThrows(Error404Exception.class, () -> reportEditBacker.init());
     }
 
     @Test
