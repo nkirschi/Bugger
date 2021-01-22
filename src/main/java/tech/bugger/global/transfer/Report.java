@@ -121,17 +121,17 @@ public class Report implements Serializable {
     /**
      * Constructs a new report.
      *
-     * @param id                    The report ID.
-     * @param title                 The report title.
-     * @param type                  The report type.
-     * @param severity              The report severity.
-     * @param version               The version the report is associated with.
-     * @param authorship            The report authorship metadata.
-     * @param closingDate           The closing date of the report.
-     * @param duplicateOf           The report this report is a duplicate of.
-     * @param relevance             The relevance value for the Report.
-     * @param relevanceOverwritten  The state of the relevance overwrite.
-     * @param topicID               The ID of topic the report belongs to.
+     * @param id                   The report ID.
+     * @param title                The report title.
+     * @param type                 The report type.
+     * @param severity             The report severity.
+     * @param version              The version the report is associated with.
+     * @param authorship           The report authorship metadata.
+     * @param closingDate          The closing date of the report.
+     * @param duplicateOf          The report this report is a duplicate of.
+     * @param relevance            The relevance value for the Report.
+     * @param relevanceOverwritten The state of the relevance overwrite.
+     * @param topicID              The ID of topic the report belongs to.
      */
     public Report(final Integer id, final String title, final Type type, final Severity severity, final String version,
                   final Authorship authorship, final OffsetDateTime closingDate, final Integer duplicateOf,
@@ -164,6 +164,8 @@ public class Report implements Serializable {
     public Report(final Report report) {
         this(report.id, report.title, report.type, report.severity, report.version, report.authorship,
                 report.closingDate, report.duplicateOf, report.relevance, report.relevanceOverwritten, report.topicID);
+        this.lastActivity = report.lastActivity;
+        this.topic = report.topic;
     }
 
     /**

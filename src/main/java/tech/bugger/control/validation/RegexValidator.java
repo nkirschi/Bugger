@@ -1,7 +1,8 @@
 package tech.bugger.control.validation;
 
-import tech.bugger.business.util.RegistryKey;
-
+import java.util.ResourceBundle;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -9,9 +10,7 @@ import javax.faces.validator.FacesValidator;
 import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
-import java.util.ResourceBundle;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
+import tech.bugger.business.util.RegistryKey;
 
 /**
  * Validator for regular expression inputs.

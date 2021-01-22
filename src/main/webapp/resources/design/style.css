@@ -49,7 +49,7 @@ body {
 
 #l-logo {
     text-decoration: none;
-    border:none;
+    border: none;
     color: #000;
     transition: opacity .15s ease-in-out;
 }
@@ -207,10 +207,6 @@ body {
 
 .hide {
     display: none !important;
-}
-
-.vw-50 {
-    width: 50vw;
 }
 
 .vw-90 {

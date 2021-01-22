@@ -1,16 +1,15 @@
 package tech.bugger.persistence.gateway;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Organization;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * A settings gateway that gives access to settings stored in a database.

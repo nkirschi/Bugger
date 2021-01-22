@@ -227,6 +227,7 @@ public class NotificationService {
      * Queues sending of e-mails for notifications which have not yet been sent.
      */
     public void processUnsentNotifications() {
+        // TODO Ben: Call this method somewhere? Or is this not needed anymore?
         List<Notification> unsentNotifications;
         try (Transaction tx = transactionManager.begin()) {
             unsentNotifications = tx.newNotificationGateway().getUnsentNotifications();

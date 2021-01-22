@@ -19,12 +19,12 @@ public class DuplicateException extends Exception {
 
     /**
      * Constructs a {@link DuplicateException} with the specified detail message and cause.
-     *
+     * <p>
      * Note that the detail message associated with {@code cause} is <i>not</i> automatically incorporated in this
      * exception's detail message.
      *
      * @param message The detail message describing this particular exception.
-     * @param cause The cause for this particular exception.
+     * @param cause   The cause for this particular exception.
      */
     public DuplicateException(final String message, final Throwable cause) {
         super(message, cause);

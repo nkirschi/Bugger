@@ -1,5 +1,12 @@
 package tech.bugger.control.backing;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,26 +23,9 @@ import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -58,10 +48,10 @@ class HomeBackerTest {
     @Mock
     private ExternalContext ext;
 
-    private Topic testTopic1 = new Topic(1, "Hi", "senberg");
-    private Topic testTopic2 = new Topic(2, "Hi", "performance");
-    private Topic testTopic3 = new Topic(3, "Hi", "de and seek");
-    private Notification notification = new Notification();
+    private final Topic testTopic1 = new Topic(1, "Hi", "senberg");
+    private final Topic testTopic2 = new Topic(2, "Hi", "performance");
+    private final Topic testTopic3 = new Topic(3, "Hi", "de and seek");
+    private final Notification notification = new Notification();
     private static MockedStatic<FacesContext> facesMock;
 
     @BeforeEach

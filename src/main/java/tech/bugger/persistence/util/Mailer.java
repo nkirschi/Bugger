@@ -1,7 +1,11 @@
 package tech.bugger.persistence.util;
 
-import tech.bugger.global.util.Log;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Properties;
 import javax.mail.Address;
 import javax.mail.Authenticator;
 import javax.mail.Message;
@@ -12,16 +16,11 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Properties;
+import tech.bugger.global.util.Log;
 
 /**
  * Basic e-mail sender.
- *
+ * <p>
  * This is a facade for any mailing API (currently Jakarta Mail), adapted to our needs.
  */
 public final class Mailer {

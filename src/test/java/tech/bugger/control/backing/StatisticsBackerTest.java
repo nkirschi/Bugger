@@ -1,5 +1,11 @@
 package tech.bugger.control.backing;
 
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import javax.enterprise.event.Event;
+import javax.faces.context.ExternalContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,21 +21,11 @@ import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.ReportCriteria;
 import tech.bugger.global.transfer.Topic;
 
-import javax.enterprise.event.Event;
-import javax.faces.context.ExternalContext;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)

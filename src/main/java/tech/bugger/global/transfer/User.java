@@ -1,13 +1,12 @@
 package tech.bugger.global.transfer;
 
 
-import tech.bugger.global.util.Constants;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Locale;
 import java.util.Objects;
+import tech.bugger.global.util.Constants;
 
 /**
  * DTO representing a user.
@@ -16,6 +15,11 @@ public class User implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -5091686502934907535L;
+
+    /**
+     * All possible {@link ProfileVisibility}s.
+     */
+    public static final ProfileVisibility[] PROFILE_VISIBILITIES = ProfileVisibility.values();
 
     /**
      * Available profile visibility settings.
@@ -183,6 +187,8 @@ public class User implements Serializable {
                 user.emailAddress, user.firstName, user.lastName, user.avatar, user.avatarThumbnail.clone(),
                 user.biography, user.preferredLanguage, user.profileVisibility, user.registrationDate,
                 user.forcedVotingWeight, user.administrator);
+        votingWeight = user.votingWeight;
+        numPosts = user.numPosts;
     }
 
     /**
@@ -443,7 +449,7 @@ public class User implements Serializable {
      * @return All profile visibility values.
      */
     public ProfileVisibility[] getProfileVisibilities() {
-        return ProfileVisibility.values();
+        return PROFILE_VISIBILITIES;
     }
 
     /**
@@ -488,11 +494,7 @@ public class User implements Serializable {
      * @return This user's final voting weight.
      */
     public int getVotingWeight() {
-        if (forcedVotingWeight != null) {
-            return forcedVotingWeight;
-        } else {
-            return votingWeight;
-        }
+        return Objects.requireNonNullElseGet(forcedVotingWeight, () -> votingWeight);
     }
 
     /**

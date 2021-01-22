@@ -1,27 +1,26 @@
 package tech.bugger.business.service;
 
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
-import tech.bugger.global.transfer.User;
 import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Arrays;
 
 /**
  * Service providing methods related to searching for specific topics, reports and users. A {@code Feedback} event is
@@ -63,9 +62,9 @@ public class SearchService {
     /**
      * Constructs a new search service with the given dependencies.
      *
-     * @param transactionManager The transaction manager to use for creating transactions.
-     * @param feedback           The feedback event to be used for user feedback.
-     * @param messages           The resource bundle to look up feedback messages.
+     * @param transactionManager  The transaction manager to use for creating transactions.
+     * @param feedback            The feedback event to be used for user feedback.
+     * @param messages            The resource bundle to look up feedback messages.
      * @param applicationSettings The application settings for the service.
      */
     @Inject
@@ -231,7 +230,7 @@ public class SearchService {
      * @return A list of users containing the selected search results.
      */
     public List<User> getUserResults(final String query, final Selection selection, final boolean showAdmins,
-                                             final boolean showNonAdmins) {
+                                     final boolean showNonAdmins) {
         List<User> users = new ArrayList<>();
         String searchInput = query.trim().toLowerCase();
         try (Transaction tx = transactionManager.begin()) {
@@ -274,6 +273,7 @@ public class SearchService {
                 feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
             }
         }
+
         return votingWeight;
     }
 
@@ -342,8 +342,8 @@ public class SearchService {
                                          final OffsetDateTime earliestClosingDateTime,
                                          final boolean showOpenReports, final boolean showClosedReports,
                                          final boolean showDuplicates, final String topic,
-                                         final HashMap<Report.Type, Boolean> reportTypeFilter,
-                                         final HashMap<Report.Severity, Boolean> severityFilter) {
+                                         final Map<Report.Type, Boolean> reportTypeFilter,
+                                         final Map<Report.Severity, Boolean> severityFilter) {
         List<Report> reports = new ArrayList<>();
         String searchInput = query.trim().toLowerCase();
         try (Transaction tx = transactionManager.begin()) {
@@ -385,23 +385,24 @@ public class SearchService {
                                            final OffsetDateTime latestCreationDateTime,
                                            final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                            final boolean showClosedReports, final boolean showDuplicates,
-                                           final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
-                                           final HashMap<Report.Severity, Boolean> severityFilter) {
-            List<Report> reports = new ArrayList<>();
+                                           final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
+                                           final Map<Report.Severity, Boolean> severityFilter) {
+        // TODO Markus: Unused, remove or use?
+        List<Report> reports = new ArrayList<>();
         String searchInput = query.trim().toLowerCase();
-            try (Transaction tx = transactionManager.begin()) {
-                reports = tx.newSearchGateway().getFulltextResults(searchInput, selection, latestCreationDateTime,
-                        earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic,
-                        reportTypeFilter, severityFilter);
-                tx.commit();
-            } catch (NotFoundException e) {
-                log.error("Filter Topic with title " + topic + " not found while searching for reports", e);
-                feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
-            } catch (TransactionException e) {
-                log.error("Error while loading the report search results.", e);
-                feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
-            }
-            return reports;
+        try (Transaction tx = transactionManager.begin()) {
+            reports = tx.newSearchGateway().getFulltextResults(searchInput, selection, latestCreationDateTime,
+                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic,
+                    reportTypeFilter, severityFilter);
+            tx.commit();
+        } catch (NotFoundException e) {
+            log.error("Filter Topic with title " + topic + " not found while searching for reports", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        } catch (TransactionException e) {
+            log.error("Error while loading the report search results.", e);
+            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        return reports;
     }
 
     /**
@@ -465,8 +466,8 @@ public class SearchService {
     public int getNumberOfReportResults(final String query, final OffsetDateTime latestCreationDateTime,
                                         final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                         final boolean showClosedReports, final boolean showDuplicates,
-                                        final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
-                                        final HashMap<Report.Severity, Boolean> severityFilter) {
+                                        final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
+                                        final Map<Report.Severity, Boolean> severityFilter) {
         String searchInput = query.trim().toLowerCase();
         int results = 0;
         try (Transaction tx = transactionManager.begin()) {
@@ -505,8 +506,9 @@ public class SearchService {
     public int getNumberOfFulltextResults(final String query, final OffsetDateTime latestCreationDateTime,
                                           final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                           final boolean showClosedReports, final boolean showDuplicates,
-                                          final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
-                                          final HashMap<Report.Severity, Boolean> severityFilter) {
+                                          final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
+                                          final Map<Report.Severity, Boolean> severityFilter) {
+        // TODO Markus: Unused, remove or use?
         int results = 0;
         try (Transaction tx = transactionManager.begin()) {
             results = tx.newSearchGateway().getNumberOfFulltextResults(query, latestCreationDateTime,

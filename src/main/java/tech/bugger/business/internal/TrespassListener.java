@@ -1,9 +1,12 @@
 package tech.bugger.business.internal;
 
 import com.ocpsoft.pretty.PrettyContext;
-import tech.bugger.business.util.Registry;
-import tech.bugger.global.transfer.User;
-
+import java.io.IOException;
+import java.io.Serial;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import javax.enterprise.inject.spi.CDI;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIViewRoot;
@@ -12,12 +15,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
-import java.io.IOException;
-import java.io.Serial;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import tech.bugger.business.util.Registry;
+import tech.bugger.global.transfer.User;
 
 /**
  * Checks requests on user authentication.

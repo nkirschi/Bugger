@@ -1,5 +1,6 @@
 package tech.bugger.control.validation;
 
+import java.util.Map;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
 import javax.faces.context.FacesContext;
@@ -13,8 +14,6 @@ import tech.bugger.LogExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.global.transfer.User;
-
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

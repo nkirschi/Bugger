@@ -1,6 +1,13 @@
 package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
@@ -9,14 +16,6 @@ import tech.bugger.global.util.Pagitable;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Notification gateway that gives access to notifications stored in a database.

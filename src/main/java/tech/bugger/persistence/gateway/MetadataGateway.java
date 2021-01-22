@@ -1,8 +1,7 @@
 package tech.bugger.persistence.gateway;
 
-import tech.bugger.global.transfer.Metadata;
-
 import java.io.InputStream;
+import tech.bugger.global.transfer.Metadata;
 
 /**
  * Gateway to meta information about the system.

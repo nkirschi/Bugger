@@ -1,5 +1,14 @@
 package tech.bugger.control.backing;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+import java.util.stream.StreamSupport;
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
@@ -13,17 +22,6 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-import java.util.stream.StreamSupport;
 
 /**
  * Backing bean for the report page.
@@ -44,11 +42,6 @@ public class ReportBacker implements Serializable {
      * The report for this page.
      */
     private Report report;
-
-    /**
-     * The topic the {@code report} is in.
-     */
-    private Topic topic;
 
     /**
      * The paginated list of posts.
@@ -131,11 +124,6 @@ public class ReportBacker implements Serializable {
     private final UserSession session;
 
     /**
-     * The current {@link FacesContext} of the application.
-     */
-    private final FacesContext fctx;
-
-    /**
      * The current {@link ExternalContext} of the application.
      */
     private final ExternalContext ectx;
@@ -171,7 +159,6 @@ public class ReportBacker implements Serializable {
      * @param reportService       The report service to use.
      * @param postService         The post service to use.
      * @param session             The user session.
-     * @param fctx                The current {@link FacesContext} of the application.
      * @param ectx                The current {@link ExternalContext} of the application.
      */
     @Inject
@@ -180,14 +167,12 @@ public class ReportBacker implements Serializable {
                         final ReportService reportService,
                         final PostService postService,
                         final UserSession session,
-                        final FacesContext fctx,
                         final ExternalContext ectx) {
         this.applicationSettings = applicationSettings;
         this.topicService = topicService;
         this.reportService = reportService;
         this.postService = postService;
         this.session = session;
-        this.fctx = fctx;
         this.ectx = ectx;
     }
 
@@ -223,7 +208,8 @@ public class ReportBacker implements Serializable {
         if (report == null) { // no report with this ID
             throw new Error404Exception();
         }
-        topic = topicService.getTopicByID(report.getTopicID());
+
+        Topic topic = topicService.getTopicByID(report.getTopicID());
         if (topic == null) { // this should never happen!
             throw new InternalError("Report " + report + " without topic!");
         }
@@ -458,7 +444,7 @@ public class ReportBacker implements Serializable {
     /**
      * Checks if the user is allowed to edit the report.
      *
-     * @return  {@code true} iff the user is allowed to edit the report.
+     * @return {@code true} iff the user is allowed to edit the report.
      */
     public boolean isAllowedToEdit() {
         return session.getUser() != null

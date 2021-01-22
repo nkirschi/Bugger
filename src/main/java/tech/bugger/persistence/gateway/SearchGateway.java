@@ -1,13 +1,12 @@
 package tech.bugger.persistence.gateway;
 
 import java.time.OffsetDateTime;
-import java.util.HashMap;
 import java.util.List;
-
-import tech.bugger.global.transfer.User;
+import java.util.Map;
 import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
 
 /**
@@ -124,8 +123,8 @@ public interface SearchGateway {
     List<Report> getReportResults(String query, Selection selection, OffsetDateTime latestOpeningDateTime,
                                   OffsetDateTime earliestClosingDateTime, boolean showOpenReports,
                                   boolean showClosedReports, boolean showDuplicates, String topic,
-                                  HashMap<Report.Type, Boolean> reportTypeFilter,
-                                  HashMap<Report.Severity, Boolean> severityFilter) throws NotFoundException;
+                                  Map<Report.Type, Boolean> reportTypeFilter,
+                                  Map<Report.Severity, Boolean> severityFilter) throws NotFoundException;
 
     /**
      * Searches for reports by the contents of their posts and filters the results according to given selection
@@ -150,8 +149,8 @@ public interface SearchGateway {
     List<Report> getFulltextResults(String query, Selection selection, OffsetDateTime latestOpeningDateTime,
                                     OffsetDateTime earliestClosingDateTime, boolean showOpenReports,
                                     boolean showClosedReports, boolean showDuplicates, String topic,
-                                    HashMap<Report.Type, Boolean> reportTypeFilter,
-                                    HashMap<Report.Severity, Boolean> severityFilter) throws NotFoundException;
+                                    Map<Report.Type, Boolean> reportTypeFilter,
+                                    Map<Report.Severity, Boolean> severityFilter) throws NotFoundException;
 
     /**
      * Searches for users by their username, filters the results according to given selection criteria, and returns the
@@ -195,8 +194,8 @@ public interface SearchGateway {
                                  OffsetDateTime earliestClosingDateTime, boolean showOpenReports,
                                  boolean showClosedReports,
                                  boolean showDuplicates, String topic,
-                                 HashMap<Report.Type, Boolean> reportTypeFilter,
-                                 HashMap<Report.Severity, Boolean> severityFilter) throws NotFoundException;
+                                 Map<Report.Type, Boolean> reportTypeFilter,
+                                 Map<Report.Severity, Boolean> severityFilter) throws NotFoundException;
 
     /**
      * Searches for reports by the contents of their posts, filters the results according to given selection criteria
@@ -220,7 +219,7 @@ public interface SearchGateway {
     int getNumberOfFulltextResults(String query, OffsetDateTime latestOpeningDateTime,
                                    OffsetDateTime earliestClosingDateTime, boolean showOpenReports,
                                    boolean showClosedReports,
-                                   boolean showDuplicates, String topic, HashMap<Report.Type, Boolean> reportTypeFilter,
-                                   HashMap<Report.Severity, Boolean> severityFilter) throws NotFoundException;
+                                   boolean showDuplicates, String topic, Map<Report.Type, Boolean> reportTypeFilter,
+                                   Map<Report.Severity, Boolean> severityFilter) throws NotFoundException;
 
 }

@@ -16,10 +16,10 @@
     <ui:define name="content">
         <h:panelGroup id="p-profile-info" styleClass="d-flex p-2 justify-content-center align-items-center container">
             <h:panelGroup layout="block" styleClass="row vw-90">
-                <h:form id="f-topic-edit" enctype="multipart/form-data">
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                <h:form id="f-topic-edit">
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                         <h:outputLabel id="ot-title" for="it-title" value="#{labels.title}" styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                        <h:panelGroup layout="block" styleClass="input-group">
                             <h:inputText id="it-title" value="#{topicEditBacker.topic.title}"
                                          a:maxlength="#{C.LARGE_FIELD}" required="true" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -32,10 +32,10 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                         <h:outputLabel id="o-description" for="it-description" value="#{labels.description}"
                                        styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                        <h:panelGroup layout="block" styleClass="input-group">
                             <h:inputTextarea id="it-description" value="#{topicEditBacker.topic.description}"
                                              a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
                                              #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'

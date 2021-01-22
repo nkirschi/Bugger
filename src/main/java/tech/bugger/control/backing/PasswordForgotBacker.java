@@ -1,5 +1,12 @@
 package tech.bugger.control.backing;
 
+import java.util.ResourceBundle;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Event;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
@@ -8,14 +15,6 @@ import tech.bugger.business.util.RegistryKey;
 import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Event;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.ResourceBundle;
 
 /**
  * Backing Bean for the password forgot page.
@@ -111,7 +110,7 @@ public class PasswordForgotBacker {
 
         if (userByEmail != null && userByEmail.equals(userByUsername)) {
             if (authenticationService.forgotPassword(userByEmail,
-                                                     JFConfig.getApplicationPath(fctx.getExternalContext()))) {
+                    JFConfig.getApplicationPath(fctx.getExternalContext()))) {
 
                 log.debug("Password forgot action for user " + user + " successful.");
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("password_forgot_success"),

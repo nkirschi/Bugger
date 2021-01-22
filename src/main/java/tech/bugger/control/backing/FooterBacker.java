@@ -80,7 +80,7 @@ public class FooterBacker implements Serializable {
      */
     public String getHelp(final String helpKey) {
         String mainHelp = helpBundle.getString("main");
-        return MarkdownHandler.toHtml(mainHelp + "\n\n" + helpBundle.getString(helpKey));
+        return MarkdownHandler.toHtml(helpBundle.getString(helpKey) + "\n\n" + mainHelp);
     }
 
     /**

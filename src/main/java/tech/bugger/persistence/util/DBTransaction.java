@@ -1,5 +1,7 @@
 package tech.bugger.persistence.util;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.AttachmentDBGateway;
 import tech.bugger.persistence.gateway.AttachmentGateway;
@@ -26,12 +28,9 @@ import tech.bugger.persistence.gateway.TopicGateway;
 import tech.bugger.persistence.gateway.UserDBGateway;
 import tech.bugger.persistence.gateway.UserGateway;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 /**
  * Database Transaction implementation.
- *
+ * <p>
  * {@inheritDoc}
  */
 public class DBTransaction implements Transaction {
@@ -158,7 +157,7 @@ public class DBTransaction implements Transaction {
     @Override
     public SearchGateway newSearchGateway() {
         checkState();
-        return new SearchDBGateway(connection, newUserGateway());
+        return new SearchDBGateway(connection);
     }
 
     /**

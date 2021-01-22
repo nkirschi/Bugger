@@ -2,22 +2,6 @@ package tech.bugger.control.backing;
 
 import com.ocpsoft.pretty.PrettyContext;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.SearchService;
-import tech.bugger.business.util.Feedback;
-import tech.bugger.business.util.RegistryKey;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Event;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
@@ -27,6 +11,21 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Event;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.service.SearchService;
+import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
 
 
 /**
@@ -102,12 +101,12 @@ public class HeaderBacker implements Serializable {
     /**
      * Constructs a new header backing bean.
      *
-     * @param searchService       The SearchService for the backer.
-     * @param session             The currently active {@link UserSession}.
-     * @param fctx                The current {@link FacesContext} of the application.
-     * @param ectx                The current {@link ExternalContext} of the application.
-     * @param feedbackEvent       The feedback event to use for user feedback.
-     * @param messagesBundle      The resource bundle for feedback messages.
+     * @param searchService  The SearchService for the backer.
+     * @param session        The currently active {@link UserSession}.
+     * @param fctx           The current {@link FacesContext} of the application.
+     * @param ectx           The current {@link ExternalContext} of the application.
+     * @param feedbackEvent  The feedback event to use for user feedback.
+     * @param messagesBundle The resource bundle for feedback messages.
      */
     @Inject
     public HeaderBacker(final SearchService searchService,

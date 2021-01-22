@@ -70,8 +70,8 @@ public class Configuration implements Serializable {
      */
     public Configuration(final Configuration configuration) {
         this(configuration.guestReading, configuration.closedReportPosting,
-             configuration.userEmailFormat, configuration.allowedFileExtensions,
-             configuration.maxAttachmentsPerPost, configuration.votingWeightDefinition);
+                configuration.userEmailFormat, configuration.allowedFileExtensions,
+                configuration.maxAttachmentsPerPost, configuration.votingWeightDefinition);
     }
 
     /**
@@ -216,7 +216,7 @@ public class Configuration implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(guestReading, closedReportPosting, userEmailFormat, allowedFileExtensions,
-                            maxAttachmentsPerPost, votingWeightDefinition);
+                maxAttachmentsPerPost, votingWeightDefinition);
     }
 
     /**

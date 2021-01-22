@@ -1,6 +1,15 @@
 package tech.bugger.persistence.util;
 
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,19 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import tech.bugger.LogExtension;
 import tech.bugger.persistence.exception.OutOfConnectionsException;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class ConnectionPoolTest {
@@ -52,49 +50,49 @@ public class ConnectionPoolTest {
         @Test
         public void testConstructorWhenDvrNull() {
             assertThrows(IllegalArgumentException.class,
-                         () -> new ConnectionPool(null, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
+                    () -> new ConnectionPool(null, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
         }
 
         @Test
         public void testConstructorWhenUrlNull() {
             assertThrows(IllegalArgumentException.class,
-                         () -> new ConnectionPool(DVR, null, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
+                    () -> new ConnectionPool(DVR, null, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
         }
 
         @Test
         public void testConstructorWhenUrlInvalid() {
             assertThrows(InternalError.class,
-                         () -> new ConnectionPool(DVR, "invalid", PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
+                    () -> new ConnectionPool(DVR, "invalid", PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
         }
 
         @Test
         public void testConstructorWhenPropsNull() {
             assertThrows(IllegalArgumentException.class,
-                         () -> new ConnectionPool(DVR, URL, null, MIN_CONNS, MAX_CONNS, TIMEOUT));
+                    () -> new ConnectionPool(DVR, URL, null, MIN_CONNS, MAX_CONNS, TIMEOUT));
         }
 
         @Test
         public void testConstructorWhenMinConnsNotPositive() {
             assertThrows(IllegalArgumentException.class,
-                         () -> new ConnectionPool(DVR, URL, PROPS, 0, MAX_CONNS, TIMEOUT));
+                    () -> new ConnectionPool(DVR, URL, PROPS, 0, MAX_CONNS, TIMEOUT));
         }
 
         @Test
         public void testConstructorWhenMaxConnsNotPositive() {
             assertThrows(IllegalArgumentException.class,
-                         () -> new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, 0, TIMEOUT));
+                    () -> new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, 0, TIMEOUT));
         }
 
         @Test
         public void testConstructorWhenTimeoutNegative() {
             assertThrows(IllegalArgumentException.class,
-                         () -> new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, -42));
+                    () -> new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, -42));
         }
 
         @Test
         public void testConstructorWhenDriverNotExisting() {
             assertThrows(InternalError.class,
-                         () -> new ConnectionPool("nodriver", URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
+                    () -> new ConnectionPool("nodriver", URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT));
         }
 
         @Test
@@ -131,14 +129,14 @@ public class ConnectionPoolTest {
         public void testGetConnectionWhenAlreadyShutDown() {
             connectionPool.shutdown();
             assertThrows(IllegalStateException.class,
-                         () -> connectionPool.getConnection());
+                    () -> connectionPool.getConnection());
         }
 
         @Test
         public void testReleaseConnectionWhenAlreadyShutDown() {
             connectionPool.shutdown();
             assertThrows(IllegalStateException.class,
-                         () -> connectionPool.releaseConnection(null));
+                    () -> connectionPool.releaseConnection(null));
         }
 
         @Test

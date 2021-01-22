@@ -1,14 +1,6 @@
 package tech.bugger.persistence.util;
 
 import com.dumbster.smtp.SimpleSmtpServer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import tech.bugger.LogExtension;
-
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -16,6 +8,13 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.Socket;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 

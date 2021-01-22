@@ -1,14 +1,13 @@
 package tech.bugger.business.util;
 
-import tech.bugger.business.exception.CryptographyImpossibleException;
-import tech.bugger.global.util.Log;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
+import tech.bugger.business.exception.CryptographyImpossibleException;
+import tech.bugger.global.util.Log;
 
 /**
  * Utility class for cryptographic hashing.
@@ -49,7 +48,7 @@ public final class Hasher {
 
     /**
      * Hashes the given string with the given salt using the provided algorithm.
-     *
+     * <p>
      * The procedure can be described as {@code algo(input.salt)} where the dot (.) means concatenation.
      *
      * @param input The string to be hashed and salted.

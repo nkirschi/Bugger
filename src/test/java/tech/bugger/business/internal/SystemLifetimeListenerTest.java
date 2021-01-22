@@ -1,6 +1,12 @@
 package tech.bugger.business.internal;
 
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,24 +26,11 @@ import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class SystemLifetimeListenerTest {
@@ -70,7 +63,7 @@ public class SystemLifetimeListenerTest {
     }
 
     @BeforeEach
-    public void setUp()throws Exception {
+    public void setUp() throws Exception {
         logStaticMock = mockStatic(Log.class);
         Log log = mock(Log.class);
         doNothing().when(log).debug(any());
@@ -191,7 +184,7 @@ public class SystemLifetimeListenerTest {
     }
 
     @Test
-    public void testContextInitializedWhenSchemaTransactionError() throws Exception{
+    public void testContextInitializedWhenSchemaTransactionError() throws Exception {
         doThrow(TransactionException.class).when(transactionMock).commit();
         assertThrows(InternalError.class, () -> systemLifetimeListenerMock.contextInitialized(sceMock));
     }
@@ -230,7 +223,7 @@ public class SystemLifetimeListenerTest {
     }
 
     @Test
-    public void testContextDestroyedShutsDownPriorityExecutor()throws Exception {
+    public void testContextDestroyedShutsDownPriorityExecutor() throws Exception {
         systemLifetimeListenerMock.contextInitialized(sceMock);
         systemLifetimeListenerMock.contextDestroyed(sceMock);
         verify(priorityExecutorMock).shutdown(anyLong());

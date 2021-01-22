@@ -1,5 +1,8 @@
 package tech.bugger.control.backing;
 
+import java.time.OffsetDateTime;
+import java.util.Locale;
+import javax.faces.context.ExternalContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,13 +19,8 @@ import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import java.time.OffsetDateTime;
-import java.util.Locale;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
@@ -43,9 +41,6 @@ public class ReportBackerTest {
     private UserSession session;
 
     @Mock
-    private FacesContext fctx;
-
-    @Mock
     private ApplicationSettings settings;
 
     @Mock
@@ -59,13 +54,13 @@ public class ReportBackerTest {
 
     @BeforeEach
     public void setUp() {
-        reportBacker = new ReportBacker(settings, topicService, reportService, postService, session, fctx, ectx);
+        reportBacker = new ReportBacker(settings, topicService, reportService, postService, session, ectx);
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
-                        "User",
-                        new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
-                        Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+                "User",
+                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         report = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                            mock(OffsetDateTime.class), null, null, false, 1);
+                mock(OffsetDateTime.class), null, null, false, 1);
     }
 
     /*@Test
@@ -239,7 +234,6 @@ public class ReportBackerTest {
         doReturn(duplicates.size()).when(reportService).getNumberOfDuplicates(any());
         doReturn(duplicates).when(reportService).getDuplicatesFor(any(), any());
         doReturn(true).when(configuration).isGuestReading();
-        doReturn(ectx).when(fctx).getExternalContext();
         doReturn(Map.of("id", "100")).when(ectx).getRequestParameterMap();
         doReturn(configuration).when(settings).getConfiguration();
         doReturn(report).when(reportService).getReportByID(100);

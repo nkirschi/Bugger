@@ -1,5 +1,8 @@
 package tech.bugger.persistence.gateway;
 
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -7,10 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Notification;
-
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 

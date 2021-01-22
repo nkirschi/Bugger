@@ -1,5 +1,14 @@
 package tech.bugger.control.backing;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
@@ -11,17 +20,6 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Backing bean for the topic page.
@@ -176,11 +174,6 @@ public class TopicBacker implements Serializable {
     private final transient SearchService searchService;
 
     /**
-     * The current {@link FacesContext} of the application.
-     */
-    private final FacesContext fctx;
-
-    /**
      * The current {@link ExternalContext} of the application.
      */
     private final ExternalContext ectx;
@@ -190,19 +183,16 @@ public class TopicBacker implements Serializable {
      *
      * @param topicService  The topic service to use.
      * @param searchService The search service to use.
-     * @param fctx          The current {@link FacesContext} of the application.
      * @param ectx          The current {@link ExternalContext} of the application.
      * @param session       The current {@link UserSession}.
      */
     @Inject
     public TopicBacker(final TopicService topicService,
                        final SearchService searchService,
-                       final FacesContext fctx,
                        final ExternalContext ectx,
                        final UserSession session) {
         this.topicService = topicService;
         this.searchService = searchService;
-        this.fctx = fctx;
         this.ectx = ectx;
         this.session = session;
     }

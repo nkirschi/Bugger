@@ -1,5 +1,11 @@
 package tech.bugger.business.service;
 
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
+import javax.enterprise.event.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,20 +21,10 @@ import tech.bugger.persistence.gateway.StatisticsGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.event.Event;
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -66,7 +62,7 @@ public class StatisticsServiceTest {
     }
 
     @Test
-    public void testCountOpenReportsWhenCommitFails()throws Exception {
+    public void testCountOpenReportsWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(transaction).commit();
         assertEquals(0, statisticsService.countOpenReports(null));
         verify(statisticsGateway).getNumberOfOpenReports(any());
@@ -82,7 +78,7 @@ public class StatisticsServiceTest {
     }
 
     @Test
-    public void testAverageTimeOpenWhenCommitFails()throws Exception {
+    public void testAverageTimeOpenWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(transaction).commit();
         assertNull(statisticsService.averageTimeOpen(null));
         verify(statisticsGateway).getAverageTimeToClose(any());
@@ -98,7 +94,7 @@ public class StatisticsServiceTest {
     }
 
     @Test
-    public void testAveragePostsPerReportWhenCommitFails()throws Exception {
+    public void testAveragePostsPerReportWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(transaction).commit();
         assertNull(statisticsService.averagePostsPerReport(null));
         verify(statisticsGateway).getAveragePostsPerReport(any());
@@ -115,7 +111,7 @@ public class StatisticsServiceTest {
     }
 
     @Test
-    public void testDetermineTopTenReportsWhenCommitsFails()throws Exception {
+    public void testDetermineTopTenReportsWhenCommitsFails() throws Exception {
         doThrow(TransactionException.class).when(transaction).commit();
         assertTrue(statisticsService.determineTopReports(42).isEmpty());
         verify(statisticsGateway).getTopReports(anyInt());
@@ -132,7 +128,7 @@ public class StatisticsServiceTest {
     }
 
     @Test
-    public void testDetermineTopTenUsersWhenCommitFails()throws Exception {
+    public void testDetermineTopTenUsersWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(transaction).commit();
         assertTrue(statisticsService.determineTopUsers(42).isEmpty());
         verify(statisticsGateway).getTopUsers(anyInt());

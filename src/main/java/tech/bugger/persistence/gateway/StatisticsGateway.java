@@ -1,12 +1,11 @@
 package tech.bugger.persistence.gateway;
 
-import tech.bugger.global.transfer.ReportCriteria;
-import tech.bugger.global.transfer.TopReport;
-import tech.bugger.global.transfer.TopUser;
-
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.List;
+import tech.bugger.global.transfer.ReportCriteria;
+import tech.bugger.global.transfer.TopReport;
+import tech.bugger.global.transfer.TopUser;
 
 /**
  * A search gateway allows to retrieve statistics about application data stored in a persistent storage.

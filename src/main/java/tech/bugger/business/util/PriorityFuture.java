@@ -80,7 +80,7 @@ public class PriorityFuture<T> implements RunnableFuture<T> {
 
     /**
      * Returns {@code true} if this task completed.
-     *
+     * <p>
      * Completion may be due to normal termination, an exception, or cancellation -- in all of these cases, this method
      * will return {@code true}.
      *

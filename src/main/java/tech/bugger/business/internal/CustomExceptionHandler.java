@@ -1,7 +1,8 @@
 package tech.bugger.business.internal;
 
-import tech.bugger.control.exception.Error404Exception;
-
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 import javax.el.ELException;
 import javax.faces.FacesException;
 import javax.faces.application.Application;
@@ -16,9 +17,7 @@ import javax.faces.event.ExceptionQueuedEvent;
 import javax.faces.view.ViewDeclarationLanguage;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
+import tech.bugger.control.exception.Error404Exception;
 
 /**
  * Enables customized handling of exceptions.

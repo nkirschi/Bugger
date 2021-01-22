@@ -1,6 +1,9 @@
 package tech.bugger.control.backing;
 
 import com.sun.faces.context.RequestParameterMap;
+import java.lang.reflect.Field;
+import java.util.Locale;
+import javax.faces.context.ExternalContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,26 +18,9 @@ import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
-import javax.faces.application.Application;
-import javax.faces.application.NavigationHandler;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import java.lang.reflect.Field;
-import java.util.Locale;
-
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
@@ -52,19 +38,10 @@ public class TopicBackerTest {
     private SearchService searchService;
 
     @Mock
-    private FacesContext fctx;
-
-    @Mock
     private ExternalContext ectx;
 
     @Mock
     private RequestParameterMap map;
-
-    @Mock
-    private NavigationHandler navHandler;
-
-    @Mock
-    private Application application;
 
     private User user;
     private Topic topic;
@@ -78,11 +55,8 @@ public class TopicBackerTest {
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic = new Topic(1, "Some title", "Some description");
-        topicBacker = new TopicBacker(topicService, searchService, fctx, ectx, session);
-        lenient().doReturn(ectx).when(fctx).getExternalContext();
+        topicBacker = new TopicBacker(topicService, searchService, ectx, session);
         lenient().doReturn(map).when(ectx).getRequestParameterMap();
-        lenient().doReturn(application).when(fctx).getApplication();
-        lenient().doReturn(navHandler).when(application).getNavigationHandler();
     }
 
     @Test

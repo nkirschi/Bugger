@@ -1,10 +1,10 @@
 package tech.bugger.control.conversion;
 
+import java.time.Duration;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
-import java.time.Duration;
 
 /**
  * Simple one-way converter for displaying time durations in the format [hours]:[minutes in hour].

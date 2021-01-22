@@ -26,9 +26,9 @@
                         <h:outputText value="#{labels.report_create_info2}"/>
                     </p>
 
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                         <h:outputLabel id="ol-title" for="it-title" value="#{labels.title}" styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                        <h:panelGroup layout="block" styleClass="input-group">
                             <h:inputText id="it-title" value="#{reportCreateBacker.report.title}"
                                          a:maxlength="#{C.LARGE_FIELD}" required="true" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -41,12 +41,12 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                         <h:panelGroup layout="block" styleClass="row">
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="ol-type" for="s-type" value="#{labels.type}"
                                                styleClass="form-label"/>
-                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                <h:panelGroup layout="block" styleClass="input-group">
                                     <h:selectOneMenu id="s-type" value="#{reportCreateBacker.report.type}"
                                                      required="true" styleClass="form-select">
                                         <f:selectItems value="#{reportCreateBacker.reportTypes}" var="type"
@@ -61,7 +61,7 @@
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="ol-severity" for="s-severity" value="#{labels.severity}"
                                                styleClass="form-label"/>
-                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                <h:panelGroup layout="block" styleClass="input-group">
                                     <h:selectOneMenu id="s-severity" value="#{reportCreateBacker.report.severity}"
                                                      required="true" styleClass="form-select">
                                         <f:selectItems value="#{reportCreateBacker.reportSeverities}" var="severity"
@@ -76,10 +76,10 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                         <h:outputLabel id="ol-version" for="it-version" value="#{labels.version}"
                                        styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                        <h:panelGroup layout="block" styleClass="input-group">
                             <h:inputText id="it-version" value="#{reportCreateBacker.report.version}"
                                          a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -92,10 +92,10 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                         <h:outputLabel id="ol-post-content" for="it-post-content" value="#{labels.first_post_content}"
                                        styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                        <h:panelGroup layout="block" styleClass="input-group">
                             <h:inputTextarea id="it-post-content" value="#{reportCreateBacker.firstPost.content}"
                                              required="true" styleClass="form-control #{!facesContext.validationFailed
                                              ? '' : component.valid ? 'is-valid' : 'is-invalid'}" rows="10"
@@ -124,7 +124,8 @@
 
                     <h:panelGroup styleClass="row my-3" layout="block" rendered="#{reportCreateBacker.attachments.size()
                                   lt applicationSettings.configuration.maxAttachmentsPerPost}">
-                        <h:inputFile id="it-attachment" value="#{reportCreateBacker.uploadedAttachment}">
+                        <h:inputFile id="it-attachment" value="#{reportCreateBacker.uploadedAttachment}"
+                                     styleClass="form-control">
                             <f:validator validatorId="fileValidator"/>
                         </h:inputFile>
                         <h:panelGroup/>

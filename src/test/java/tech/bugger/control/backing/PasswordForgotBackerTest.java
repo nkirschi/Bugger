@@ -22,14 +22,8 @@ import tech.bugger.business.util.Feedback;
 import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.User;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mockStatic;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)

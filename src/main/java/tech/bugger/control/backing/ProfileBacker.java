@@ -1,5 +1,13 @@
 package tech.bugger.control.backing;
 
+import java.io.Serial;
+import java.io.Serializable;
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.service.TopicService;
@@ -11,15 +19,6 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * Backing bean for the profile page.
@@ -154,10 +153,10 @@ public class ProfileBacker implements Serializable {
     /**
      * Constructs a new profile page backing bean with the necessary dependencies.
      *
-     * @param topicService      The topic service to use.
-     * @param profileService    The profile service to use.
-     * @param session           The current {@link UserSession}.
-     * @param fctx              The current faces context.
+     * @param topicService   The topic service to use.
+     * @param profileService The profile service to use.
+     * @param session        The current {@link UserSession}.
+     * @param fctx           The current faces context.
      */
     @Inject
     public ProfileBacker(final TopicService topicService, final ProfileService profileService,

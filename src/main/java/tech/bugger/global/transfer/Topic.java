@@ -64,9 +64,9 @@ public class Topic implements Serializable {
     /**
      * Constructs a new topic from the specified parameters.
      *
-     * @param id The topic ID.
-     * @param title The topic title.
-     * @param description The topic description.
+     * @param id           The topic ID.
+     * @param title        The topic title.
+     * @param description  The topic description.
      * @param lastActivity The time of the last activity in the topic.
      */
     public Topic(final Integer id, final String title, final String description, final OffsetDateTime lastActivity) {

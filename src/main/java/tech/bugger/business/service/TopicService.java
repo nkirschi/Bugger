@@ -1,5 +1,12 @@
 package tech.bugger.business.service;
 
+import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Report;
@@ -14,14 +21,6 @@ import tech.bugger.persistence.gateway.TopicGateway;
 import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
 
 /**
  * Service providing methods related to topics. A {@code Feedback} event is fired, if unexpected circumstances occur.
@@ -594,6 +593,7 @@ public class TopicService {
      * @return The number of subscribers.
      */
     public int getNumberOfSubscribers(final Topic topic) {
+        // TODO Ben: Unused, use or remove?
         if (topic == null) {
             log.error("Cannot count subscribers of topic null.");
             throw new IllegalArgumentException("Topic cannot be null.");
@@ -623,6 +623,7 @@ public class TopicService {
      * @return The number of posts.
      */
     public int getNumberOfPosts(final Topic topic) {
+        // TODO Markus: Unused, remove or use?
         return 0;
     }
 

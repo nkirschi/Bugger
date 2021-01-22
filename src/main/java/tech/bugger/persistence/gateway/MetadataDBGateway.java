@@ -1,9 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import tech.bugger.global.transfer.Metadata;
-import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.StoreException;
-
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -12,6 +8,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
+import tech.bugger.global.transfer.Metadata;
+import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.StoreException;
 
 /**
  * {@inheritDoc}.

@@ -1,11 +1,11 @@
 package tech.bugger.business.internal;
 
+import java.io.Serial;
 import javax.faces.context.ExternalContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
 import javax.servlet.http.HttpServletRequest;
-import java.io.Serial;
 
 /**
  * Phase listener changing the current session ID on every request to prevent session hijacking.

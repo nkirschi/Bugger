@@ -1,18 +1,16 @@
 package tech.bugger.business.util;
 
+import java.util.concurrent.RunnableFuture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import tech.bugger.LogExtension;
 
-import java.util.concurrent.RunnableFuture;
-
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class PriorityFutureTest {
@@ -53,13 +51,13 @@ public class PriorityFutureTest {
     }
 
     @Test
-    public void testGet()throws Exception {
+    public void testGet() throws Exception {
         priorityFuture.get();
         verify(futureMock).get();
     }
 
     @Test
-    public void testGetWithParams()throws Exception {
+    public void testGetWithParams() throws Exception {
         priorityFuture.get(anyLong(), any());
         verify(futureMock).get(anyLong(), any());
     }

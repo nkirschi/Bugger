@@ -1,5 +1,16 @@
 package tech.bugger.business.internal;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Metadata;
@@ -11,18 +22,6 @@ import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
-
-import javax.inject.Inject;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Listener observing application startup and shutdown in order to initialize and clean up critical resources.
@@ -223,7 +222,7 @@ public class SystemLifetimeListener implements ServletContextListener {
     private void scheduleMaintenanceTasks() {
         maintenanceExecutor = new ScheduledThreadPoolExecutor(1);
         maintenanceExecutor.scheduleAtFixedRate(new PeriodicCleaner(transactionManager), 0,
-                                                MAINTENANCE_PERIODICITY_MINUTES, TimeUnit.MINUTES);
+                MAINTENANCE_PERIODICITY_MINUTES, TimeUnit.MINUTES);
     }
 
     private void registerPriorityExecutors() {

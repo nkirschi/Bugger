@@ -1,9 +1,8 @@
 package tech.bugger.control.validation;
 
-import tech.bugger.business.service.PostService;
-import tech.bugger.business.util.RegistryKey;
-import tech.bugger.global.util.Constants;
-
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -12,9 +11,9 @@ import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.servlet.http.Part;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
+import tech.bugger.business.service.PostService;
+import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.util.Constants;
 
 /**
  * Validator for file uploads.

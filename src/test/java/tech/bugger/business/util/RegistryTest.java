@@ -1,5 +1,9 @@
 package tech.bugger.business.util;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.InjectionPoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,17 +13,8 @@ import tech.bugger.persistence.util.ConnectionPool;
 import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.PropertiesReader;
 
-import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.InjectionPoint;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class RegistryTest {

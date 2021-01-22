@@ -1,43 +1,33 @@
 package tech.bugger.control.backing;
 
+import java.time.OffsetDateTime;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import javax.faces.context.ExternalContext;
+import javax.servlet.http.Part;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
-import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
-import javax.enterprise.event.Event;
-import javax.faces.context.ExternalContext;
-import javax.servlet.http.Part;
-import java.io.InputStream;
-import java.time.OffsetDateTime;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ReportCreateBackerTest {
@@ -76,8 +66,8 @@ public class ReportCreateBackerTest {
         List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         testFirstPost = new Post(100, "Some content", 42, mock(Authorship.class), attachments);
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
-                                mock(Authorship.class),
-                                mock(OffsetDateTime.class), null, null, false, 1);
+                mock(Authorship.class),
+                mock(OffsetDateTime.class), null, null, false, 1);
         reportCreateBacker.setReport(testReport);
         reportCreateBacker.setFirstPost(testFirstPost);
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();

@@ -12,7 +12,6 @@ import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.global.transfer.Organization;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)

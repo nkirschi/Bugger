@@ -1,11 +1,8 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.internal.ApplicationSettings;
-import tech.bugger.business.service.SettingsService;
-import tech.bugger.global.transfer.Configuration;
-import tech.bugger.global.transfer.Organization;
-import tech.bugger.global.util.Log;
-
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.ExternalContext;
@@ -13,9 +10,11 @@ import javax.faces.event.ValueChangeEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
+import tech.bugger.business.internal.ApplicationSettings;
+import tech.bugger.business.service.SettingsService;
+import tech.bugger.global.transfer.Configuration;
+import tech.bugger.global.transfer.Organization;
+import tech.bugger.global.util.Log;
 
 /**
  * Backing Bean for the admin page.
@@ -80,7 +79,7 @@ public class AdminBacker {
 
     /**
      * Converts the uploaded logo into a {@code byte[]} and puts it into the temporary configuration.
-     *
+     * <p>
      * This method is only called when the uploaded file actually changes.
      *
      * @param vce The event fired upon change in uploaded file.

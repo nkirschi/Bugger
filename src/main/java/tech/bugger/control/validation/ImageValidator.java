@@ -1,8 +1,9 @@
 package tech.bugger.control.validation;
 
-import tech.bugger.business.util.RegistryKey;
-import tech.bugger.global.util.Constants;
-
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -12,10 +13,8 @@ import javax.faces.validator.ValidatorException;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.servlet.http.Part;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
+import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.util.Constants;
 
 /**
  * Validator for input images.

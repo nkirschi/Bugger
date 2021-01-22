@@ -1,5 +1,17 @@
 package tech.bugger.control.backing;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.util.List;
+import java.util.ResourceBundle;
+import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.StatisticsService;
 import tech.bugger.business.service.TopicService;
@@ -10,19 +22,6 @@ import tech.bugger.global.transfer.TopReport;
 import tech.bugger.global.transfer.TopUser;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.event.Event;
-import javax.faces.context.ExternalContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.Serial;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.util.List;
-import java.util.ResourceBundle;
 
 /**
  * Backing bean for the statistics page.
@@ -139,7 +138,7 @@ public class StatisticsBacker implements Serializable {
 
     /**
      * Initializes the statistics page with the data to display.
-     *
+     * <p>
      * If a topic ID is given as request parameter, the criteria are restricted to that topic.
      */
     @PostConstruct

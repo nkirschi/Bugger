@@ -1,9 +1,8 @@
 package tech.bugger.persistence.util;
 
-import tech.bugger.business.util.Registry;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import tech.bugger.business.util.Registry;
 
 /**
  * Factory for transactions.

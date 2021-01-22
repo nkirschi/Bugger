@@ -1,21 +1,20 @@
 package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-
-import tech.bugger.global.transfer.User;
+import java.util.Map;
 import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+import tech.bugger.global.util.Pagitable;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
 
@@ -35,19 +34,12 @@ public class SearchDBGateway implements SearchGateway {
     private final Connection conn;
 
     /**
-     * User gateway used for finding users.
-     */
-    private final UserGateway userGateway;
-
-    /**
      * Constructs a new search gateway with the given database connection.
      *
-     * @param conn        The database connection to use for the gateway.
-     * @param userGateway The user gateway to use.
+     * @param conn The database connection to use for the gateway.
      */
-    public SearchDBGateway(final Connection conn, final UserGateway userGateway) {
+    public SearchDBGateway(final Connection conn) {
         this.conn = conn;
-        this.userGateway = userGateway;
     }
 
     /**
@@ -89,8 +81,8 @@ public class SearchDBGateway implements SearchGateway {
                 + "LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string("%" + query + "%")
-                    .integer(selection.getPageSize().getSize())
-                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
+                    .integer(Pagitable.getItemLimit(selection))
+                    .integer(Pagitable.getItemOffset(selection))
                     .toStatement().executeQuery();
 
             while (rs.next()) {
@@ -391,22 +383,10 @@ public class SearchDBGateway implements SearchGateway {
 
     static Report getSearchedReportFromResultSet(final ResultSet rs)
             throws SQLException {
-        Report report = new Report();
-        report.setId(rs.getInt("id"));
-        report.setTitle(rs.getString("title"));
-        report.setType(Report.Type.valueOf(rs.getString("type")));
-        report.setSeverity(Report.Severity.valueOf(rs.getString("severity")));
-        report.setVersion(rs.getString("version"));
-        report.setTopicID(rs.getInt("topic"));
-        report.setDuplicateOf(rs.getInt("duplicate_of"));
+        Report report = ReportDBGateway.getDefaultReportFromResultSet(rs);
         if (rs.getObject("last_activity", OffsetDateTime.class) != null) {
             report.setLastActivity(rs.getObject("last_activity", OffsetDateTime.class));
         }
-        OffsetDateTime closed = null;
-        if (rs.getObject("closed_at", OffsetDateTime.class) != null) {
-            closed = rs.getObject("closed_at", OffsetDateTime.class);
-        }
-        report.setClosingDate(closed);
         report.setTopic(rs.getString("t_title"));
         if (rs.getObject("forced_relevance", Integer.class) != null) {
             report.setRelevance(rs.getObject("forced_relevance", Integer.class));
@@ -438,8 +418,8 @@ public class SearchDBGateway implements SearchGateway {
                 + "LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string("%" + query + "%")
-                    .integer(selection.getPageSize().getSize())
-                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
+                    .integer(Pagitable.getItemLimit(selection))
+                    .integer(Pagitable.getItemOffset(selection))
                     .toStatement().executeQuery();
             while (rs.next()) {
                 topicResults.add(getSearchedTopicFromResultSet(rs));
@@ -460,8 +440,8 @@ public class SearchDBGateway implements SearchGateway {
                                          final OffsetDateTime latestOpeningDateTime,
                                          final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                          final boolean showClosedReports, final boolean showDuplicates,
-                                         final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
-                                         final HashMap<Report.Severity, Boolean> severityFilter) {
+                                         final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
+                                         final Map<Report.Severity, Boolean> severityFilter) {
         if (selection == null || query == null || severityFilter == null || reportTypeFilter == null) {
             log.error("The selection or query cannot be null!");
             throw new IllegalArgumentException("The selection or query cannot be null!");
@@ -484,60 +464,8 @@ public class SearchDBGateway implements SearchGateway {
             return reportResults;
         }
 
-        String filterClosedAt = "";
-        if (!showClosedReports) {
-            filterClosedAt = "AND closed_at IS NULL ";
-        } else if (!showOpenReports) {
-            filterClosedAt = "AND closed_at IS NOT NULL ";
-        }
-        String filterDuplicate = "";
-        if (!showDuplicates) {
-            filterDuplicate = "AND duplicate_of IS NULL ";
-        }
-        StringBuilder filterTypeBuilder = new StringBuilder();
-        filterTypeBuilder.append("AND (");
-        boolean filterTypeAdded = false;
-        if (reportTypeFilter.get(Report.Type.BUG)) {
-            filterTypeBuilder.append("type = 'BUG' ");
-            filterTypeAdded = true;
-        }
-        if (reportTypeFilter.get(Report.Type.FEATURE)) {
-            if (filterTypeAdded) {
-                filterTypeBuilder.append("OR ");
-            }
-            filterTypeBuilder.append("type = 'FEATURE' ");
-            filterTypeAdded = true;
-        }
-        if (reportTypeFilter.get(Report.Type.HINT)) {
-            if (filterTypeAdded) {
-                filterTypeBuilder.append("OR ");
-            }
-            filterTypeBuilder.append("type = 'HINT' ");
-        }
-        filterTypeBuilder.append(") ");
-        String filterType = filterTypeBuilder.toString();
-        StringBuilder filterSeverityBuilder = new StringBuilder();
-        filterSeverityBuilder.append("AND (");
-        boolean filterSeverityAdded = false;
-        if (severityFilter.get(Report.Severity.MINOR)) {
-            filterSeverityBuilder.append("severity = 'MINOR' ");
-            filterSeverityAdded = true;
-        }
-        if (severityFilter.get(Report.Severity.RELEVANT)) {
-            if (filterSeverityAdded) {
-                filterSeverityBuilder.append("OR ");
-            }
-            filterSeverityBuilder.append("severity = 'RELEVANT' ");
-            filterSeverityAdded = true;
-        }
-        if (severityFilter.get(Report.Severity.SEVERE)) {
-            if (filterSeverityAdded) {
-                filterSeverityBuilder.append("OR ");
-            }
-            filterSeverityBuilder.append("severity = 'SEVERE' ");
-        }
-        filterSeverityBuilder.append(") ");
-        String filterSeverity = filterSeverityBuilder.toString();
+        String filter = getFilter("", showOpenReports, showClosedReports, showDuplicates,
+                reportTypeFilter, severityFilter);
         String orderBy = selection.getSortedBy();
         if (orderBy.equals("relevance")) {
             orderBy = "COALESCE(forced_relevance, relevance)";
@@ -546,8 +474,7 @@ public class SearchDBGateway implements SearchGateway {
                 + "v.relevance FROM report AS r JOIN topic AS t ON r.topic = t.id JOIN report_last_activity AS a "
                 + "ON a.report = r.id JOIN report_relevance AS v ON r.id = v.report WHERE TRIM(LOWER(r.title)) LIKE ? "
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
-                + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) "
-                + filterClosedAt + filterDuplicate + filterType + filterSeverity
+                + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) " + filter
                 + "AND t.title = COALESCE(?, t.title) "
                 + "ORDER BY " + orderBy + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
@@ -556,8 +483,8 @@ public class SearchDBGateway implements SearchGateway {
                     .object(latestOpeningDateTime)
                     .object(earliestClosingDateTime)
                     .string(topic)
-                    .integer(selection.getPageSize().getSize())
-                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
+                    .integer(Pagitable.getItemLimit(selection))
+                    .integer(Pagitable.getItemOffset(selection))
                     .toStatement().executeQuery();
             while (rs.next()) {
                 reportResults.add(getSearchedReportFromResultSet(rs));
@@ -569,6 +496,70 @@ public class SearchDBGateway implements SearchGateway {
         return reportResults;
     }
 
+    private String getFilter(final String prefix, final boolean showOpenReports, final boolean showClosedReports,
+                             final boolean showDuplicates, final Map<Report.Type, Boolean> reportTypeFilter,
+                             final Map<Report.Severity, Boolean> severityFilter) {
+        String filterClosedAt = "";
+        if (!showClosedReports) {
+            filterClosedAt = "AND closed_at IS NULL ";
+        } else if (!showOpenReports) {
+            filterClosedAt = "AND closed_at IS NOT NULL ";
+        }
+
+        String filterDuplicate = "";
+        if (!showDuplicates) {
+            filterDuplicate = "AND duplicate_of IS NULL ";
+        }
+
+        StringBuilder filterTypeBuilder = new StringBuilder();
+        filterTypeBuilder.append("AND (");
+        boolean filterTypeAdded = false;
+        if (reportTypeFilter.get(Report.Type.BUG)) {
+            filterTypeBuilder.append(prefix).append("type = 'BUG' ");
+            filterTypeAdded = true;
+        }
+        if (reportTypeFilter.get(Report.Type.FEATURE)) {
+            if (filterTypeAdded) {
+                filterTypeBuilder.append("OR ");
+            }
+            filterTypeBuilder.append(prefix).append("type = 'FEATURE' ");
+            filterTypeAdded = true;
+        }
+        if (reportTypeFilter.get(Report.Type.HINT)) {
+            if (filterTypeAdded) {
+                filterTypeBuilder.append("OR ");
+            }
+            filterTypeBuilder.append(prefix).append("type = 'HINT' ");
+        }
+        filterTypeBuilder.append(") ");
+        String filterType = filterTypeBuilder.toString();
+
+        StringBuilder filterSeverityBuilder = new StringBuilder();
+        filterSeverityBuilder.append("AND (");
+        boolean filterSeverityAdded = false;
+        if (severityFilter.get(Report.Severity.MINOR)) {
+            filterSeverityBuilder.append(prefix).append("severity = 'MINOR' ");
+            filterSeverityAdded = true;
+        }
+        if (severityFilter.get(Report.Severity.RELEVANT)) {
+            if (filterSeverityAdded) {
+                filterSeverityBuilder.append("OR ");
+            }
+            filterSeverityBuilder.append(prefix).append("severity = 'RELEVANT' ");
+            filterSeverityAdded = true;
+        }
+        if (severityFilter.get(Report.Severity.SEVERE)) {
+            if (filterSeverityAdded) {
+                filterSeverityBuilder.append("OR ");
+            }
+            filterSeverityBuilder.append(prefix).append("severity = 'SEVERE' ");
+        }
+        filterSeverityBuilder.append(") ");
+        String filterSeverity = filterSeverityBuilder.toString();
+
+        return filterClosedAt + filterDuplicate + filterType + filterSeverity;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -577,113 +568,11 @@ public class SearchDBGateway implements SearchGateway {
                                            final OffsetDateTime latestOpeningDateTime,
                                            final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                            final boolean showClosedReports, final boolean showDuplicates,
-                                           final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
-                                           final HashMap<Report.Severity, Boolean> severityFilter) {
-        if (selection == null || query == null || severityFilter == null || reportTypeFilter == null) {
-            log.error("The selection or query cannot be null!");
-            throw new IllegalArgumentException("The selection or query cannot be null!");
-        } else if (StringUtils.isBlank(selection.getSortedBy())) {
-            log.error("Error when trying to get reports sorted by nothing.");
-            throw new IllegalArgumentException("The selection needs to have a column to sort by.");
-        }
-
-        List<Report> reportResults = new ArrayList<>(Math.max(0, selection.getTotalSize()));
-
-        if (!reportTypeFilter.get(Report.Type.BUG) && !reportTypeFilter.get(Report.Type.HINT)
-                && !reportTypeFilter.get(Report.Type.FEATURE)) {
-            return reportResults;
-        }
-        if (!severityFilter.get(Report.Severity.RELEVANT) && !severityFilter.get(Report.Severity.MINOR)
-                && !severityFilter.get(Report.Severity.SEVERE)) {
-            return reportResults;
-        }
-        if (!showClosedReports && !showOpenReports) {
-            return reportResults;
-        }
-
-        String filterClosedAt = "";
-        if (!showClosedReports) {
-            filterClosedAt = "AND closed_at IS NULL ";
-        } else if (!showOpenReports) {
-            filterClosedAt = "AND closed_at IS NOT NULL ";
-        }
-        String filterDuplicate = "";
-        if (!showDuplicates) {
-            filterDuplicate = "AND duplicate_of IS NULL ";
-        }
-        StringBuilder filterTypeBuilder = new StringBuilder();
-        filterTypeBuilder.append("AND (");
-        boolean filterTypeAdded = false;
-        if (reportTypeFilter.get(Report.Type.BUG)) {
-            filterTypeBuilder.append("type = 'BUG' ");
-            filterTypeAdded = true;
-        }
-        if (reportTypeFilter.get(Report.Type.FEATURE)) {
-            if (filterTypeAdded) {
-                filterTypeBuilder.append("OR ");
-            }
-            filterTypeBuilder.append("type = 'FEATURE' ");
-            filterTypeAdded = true;
-        }
-        if (reportTypeFilter.get(Report.Type.HINT)) {
-            if (filterTypeAdded) {
-                filterTypeBuilder.append("OR ");
-            }
-            filterTypeBuilder.append("type = 'HINT' ");
-        }
-        filterTypeBuilder.append(") ");
-        String filterType = filterTypeBuilder.toString();
-        StringBuilder filterSeverityBuilder = new StringBuilder();
-        filterSeverityBuilder.append("AND (");
-        boolean filterSeverityAdded = false;
-        if (severityFilter.get(Report.Severity.MINOR)) {
-            filterSeverityBuilder.append("severity = 'MINOR' ");
-            filterSeverityAdded = true;
-        }
-        if (severityFilter.get(Report.Severity.RELEVANT)) {
-            if (filterSeverityAdded) {
-                filterSeverityBuilder.append("OR ");
-            }
-            filterSeverityBuilder.append("severity = 'RELEVANT' ");
-            filterSeverityAdded = true;
-        }
-        if (severityFilter.get(Report.Severity.SEVERE)) {
-            if (filterSeverityAdded) {
-                filterSeverityBuilder.append("OR ");
-            }
-            filterSeverityBuilder.append("severity = 'SEVERE' ");
-        }
-        filterSeverityBuilder.append(") ");
-        String filterSeverity = filterSeverityBuilder.toString();
-        String orderBy = selection.getSortedBy();
-        if (orderBy.equals("relevance")) {
-            orderBy = "COALESCE(forced_relevance, relevance)";
-        }
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT r.*, t.title as t_title , a.last_activity, "
-                + "v.relevance FROM report AS r JOIN topic AS t ON r.topic = t.id JOIN report_last_activity AS a "
-                + "ON a.report = r.id JOIN report_relevance AS v ON r.id = v.report WHERE TRIM(LOWER(r.title)) LIKE ? "
-                + "AND r.created_at <= COALESCE(?, r.created_at) "
-                + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) "
-                + filterClosedAt + filterDuplicate + filterType + filterSeverity
-                + "AND t.title = COALESCE(?, t.title) "
-                + "ORDER BY " + orderBy + (selection.isAscending() ? " ASC " : " DESC ")
-                + "LIMIT ? OFFSET ?;")) {
-            ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + query + "%")
-                    .object(latestOpeningDateTime)
-                    .object(earliestClosingDateTime)
-                    .string(topic)
-                    .integer(selection.getPageSize().getSize())
-                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
-                    .toStatement().executeQuery();
-            while (rs.next()) {
-                reportResults.add(getSearchedReportFromResultSet(rs));
-            }
-        } catch (SQLException e) {
-            log.error("Error while loading the topic search suggestions for the query " + query, e);
-            throw new StoreException("Error while loading the topic search suggestions for the query " + query, e);
-        }
-        return reportResults;
+                                           final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
+                                           final Map<Report.Severity, Boolean> severityFilter) {
+        // TODO Markus: For now, I removed this duplicated code :)
+        return getReportResults(query, selection, latestOpeningDateTime, earliestClosingDateTime, showOpenReports,
+                showClosedReports, showDuplicates, topic, reportTypeFilter, severityFilter);
     }
 
     /**
@@ -764,8 +653,8 @@ public class SearchDBGateway implements SearchGateway {
     public int getNumberOfReportResults(final String query, final OffsetDateTime latestOpeningDateTime,
                                         final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                         final boolean showClosedReports, final boolean showDuplicates,
-                                        final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
-                                        final HashMap<Report.Severity, Boolean> severityFilter) {
+                                        final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
+                                        final Map<Report.Severity, Boolean> severityFilter) {
         if (query == null || severityFilter == null || reportTypeFilter == null) {
             log.error("The query cannot be null!");
             throw new IllegalArgumentException("The query cannot be null!");
@@ -784,67 +673,14 @@ public class SearchDBGateway implements SearchGateway {
         }
 
         int reports = 0;
+        String filter = getFilter("r.", showOpenReports, showClosedReports, showDuplicates,
+                reportTypeFilter, severityFilter);
 
-        String filterClosedAt = "";
-        if (!showClosedReports) {
-            filterClosedAt = "AND closed_at IS NULL ";
-        } else if (!showOpenReports) {
-            filterClosedAt = "AND closed_at IS NOT NULL ";
-        }
-        String filterDuplicate = "";
-        if (!showDuplicates) {
-            filterDuplicate = "AND duplicate_of IS NULL ";
-        }
-        StringBuilder filterTypeBuilder = new StringBuilder();
-        filterTypeBuilder.append("AND (");
-        boolean filterTypeAdded = false;
-        if (reportTypeFilter.get(Report.Type.BUG)) {
-            filterTypeBuilder.append("r.type = 'BUG' ");
-            filterTypeAdded = true;
-        }
-        if (reportTypeFilter.get(Report.Type.FEATURE)) {
-            if (filterTypeAdded) {
-                filterTypeBuilder.append("OR ");
-            }
-            filterTypeBuilder.append("r.type = 'FEATURE' ");
-            filterTypeAdded = true;
-        }
-        if (reportTypeFilter.get(Report.Type.HINT)) {
-            if (filterTypeAdded) {
-                filterTypeBuilder.append("OR ");
-            }
-            filterTypeBuilder.append("r.type = 'HINT' ");
-        }
-        filterTypeBuilder.append(") ");
-        String filterType = filterTypeBuilder.toString();
-        StringBuilder filterSeverityBuilder = new StringBuilder();
-        filterSeverityBuilder.append("AND (");
-        boolean filterSeverityAdded = false;
-        if (severityFilter.get(Report.Severity.MINOR)) {
-            filterSeverityBuilder.append("r.severity = 'MINOR' ");
-            filterSeverityAdded = true;
-        }
-        if (severityFilter.get(Report.Severity.RELEVANT)) {
-            if (filterSeverityAdded) {
-                filterSeverityBuilder.append("OR ");
-            }
-            filterSeverityBuilder.append("r.severity = 'RELEVANT' ");
-            filterSeverityAdded = true;
-        }
-        if (severityFilter.get(Report.Severity.SEVERE)) {
-            if (filterSeverityAdded) {
-                filterSeverityBuilder.append("OR ");
-            }
-            filterSeverityBuilder.append("r.severity = 'SEVERE' ");
-        }
-        filterSeverityBuilder.append(") ");
-        String filterSeverity = filterSeverityBuilder.toString();
         try (PreparedStatement stmt = conn.prepareStatement("SELECT Count(*) AS num_reports FROM \"report\" AS r "
                 + "JOIN topic AS t "
                 + "ON r.topic = t.id WHERE TRIM(LOWER(r.title)) LIKE ? "
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
-                + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL)"
-                + filterClosedAt + filterDuplicate + filterType + filterSeverity
+                + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL)" + filter
                 + "AND t.title = COALESCE(?, t.title);")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string("%" + query + "%")
@@ -870,8 +706,9 @@ public class SearchDBGateway implements SearchGateway {
     public int getNumberOfFulltextResults(final String query, final OffsetDateTime latestOpeningDateTime,
                                           final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                           final boolean showClosedReports, final boolean showDuplicates,
-                                          final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
-                                          final HashMap<Report.Severity, Boolean> severityFilter) {
+                                          final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
+                                          final Map<Report.Severity, Boolean> severityFilter) {
+        // TODO Markus: is that still needed? It's being used somewhere at least...
         return 0;
     }
 

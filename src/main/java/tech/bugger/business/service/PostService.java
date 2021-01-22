@@ -1,5 +1,15 @@
 package tech.bugger.business.service;
 
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.servlet.http.Part;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
@@ -17,19 +27,8 @@ import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.servlet.http.Part;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
-
 /**
- * Service providing methods related to posts and attachments. A {@code Feedback} event is fired, if unexpected
+ * Service providing methods related to posts and attachments. A {@link Feedback} event is fired, if unexpected
  * circumstances occur.
  */
 @ApplicationScoped
@@ -44,11 +43,6 @@ public class PostService {
      * Notification service used for sending notifications.
      */
     private final NotificationService notificationService;
-
-    /**
-     * Topic service used for checking editing rights.
-     */
-    private final TopicService topicService;
 
     /**
      * The current application settings.
@@ -74,19 +68,18 @@ public class PostService {
      * Constructs a new post service with the given dependencies.
      *
      * @param notificationService The notification service to use for sending notifications.
-     * @param topicService        The topic service used for checking editing rights.
      * @param applicationSettings The application settings to use.
      * @param transactionManager  The transaction manager to use for creating transactions.
      * @param feedbackEvent       The feedback event to use for user feedback.
      * @param messagesBundle      The resource bundle for feedback messages.
      */
     @Inject
-    public PostService(final NotificationService notificationService, final TopicService topicService,
-                       final ApplicationSettings applicationSettings, final TransactionManager transactionManager,
+    public PostService(final NotificationService notificationService,
+                       final ApplicationSettings applicationSettings,
+                       final TransactionManager transactionManager,
                        final Event<Feedback> feedbackEvent,
                        final @RegistryKey("messages") ResourceBundle messagesBundle) {
         this.notificationService = notificationService;
-        this.topicService = topicService;
         this.applicationSettings = applicationSettings;
         this.transactionManager = transactionManager;
         this.feedbackEvent = feedbackEvent;
@@ -94,10 +87,10 @@ public class PostService {
     }
 
     /**
-     * Updates an existing post and notifies users about the change. Notifications are handled by the {@code
+     * Updates an existing post and notifies users about the change. Notifications are handled by the {@link
      * NotificationService}.
      *
-     * @param post The post to update.
+     * @param post   The post to update.
      * @param report The report the {@code post} is in.
      * @return {@code true} iff updating the post succeeded.
      */
@@ -152,7 +145,7 @@ public class PostService {
      */
     public boolean isAttachmentNameValid(final String name) {
         return Arrays.stream(applicationSettings.getConfiguration().getAllowedFileExtensions().split(","))
-                     .anyMatch(suffix -> name.endsWith(suffix.trim()));
+                .anyMatch(suffix -> name.endsWith(suffix.trim()));
     }
 
     /**
@@ -166,7 +159,7 @@ public class PostService {
         if (attachments.size() > maxAttachments) {
             log.info("Trying to create post with too many attachments.");
             String message = MessageFormat.format(messagesBundle.getString("too_many_attachments"),
-                                                  maxAttachments);
+                    maxAttachments);
             feedbackEvent.fire(new Feedback(message, Feedback.Type.ERROR));
             return false;
         }
@@ -174,14 +167,14 @@ public class PostService {
         if (attachments.size() != attachments.stream().map(Attachment::getName).distinct().count()) {
             log.info("Trying to create post where attachment names are not unique.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("attachment_names_not_unique"),
-                                            Feedback.Type.ERROR));
+                    Feedback.Type.ERROR));
             return false;
         }
 
         if (!attachments.stream().map(Attachment::getName).allMatch(this::isAttachmentNameValid)) {
             log.info("Trying to create post with invalid attachment name.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("attachment_names_invalid"),
-                                            Feedback.Type.ERROR));
+                    Feedback.Type.ERROR));
             return false;
         }
 
@@ -194,9 +187,8 @@ public class PostService {
      * @param post The post to be created.
      * @param tx   The transaction to use when creating the post.
      * @return {@code true} iff creating the post succeeded.
-     * @throws TransactionException The transaction could not be committed successfully.
      */
-    boolean createPostWithTransaction(final Post post, final Transaction tx) throws TransactionException {
+    boolean createPostWithTransaction(final Post post, final Transaction tx) {
         boolean valid = isAttachmentListValid(post.getAttachments());
         if (valid) {
             tx.newPostGateway().create(post);
@@ -283,7 +275,7 @@ public class PostService {
      * Irreversibly deletes a post and its attachments. If {@code post} happens to be the last in its {@code report},
      * then the latter will be deleted as well.
      *
-     * @param post The post to be deleted.
+     * @param post   The post to be deleted.
      * @param report The report the {@code post} is in.
      */
     public void deletePost(final Post post, final Report report) {
@@ -372,40 +364,12 @@ public class PostService {
     }
 
     /**
-     * Returns the attachments of one particular post.
-     *
-     * @param post The post in question.
-     * @return A list of attachments that may be empty.
-     */
-    public List<Attachment> getAttachmentsForPost(final Post post) {
-        return null;
-    }
-
-    /**
-     * Creates a new attachment in the data storage.
-     *
-     * @param attachment The attachment to be created.
-     */
-    public void createAttachment(final Attachment attachment) {
-
-    }
-
-    /**
-     * Create several new attachments at once.
-     *
-     * @param attachments The list of attachments to be created.
-     */
-    public void createMultipleAttachments(final List<Attachment> attachments) {
-
-    }
-
-    /**
      * Checks if a user is allowed to modify (edit or delete) a certain post. Administrators can modify any post,
      * moderators can modify all posts within their moderated topic, regular users can modify their own posts as long as
      * they have not been banned from the topic the post belongs to. Anonymous users cannot modify any posts.
      *
-     * @param user The user in question.
-     * @param post The post in question.
+     * @param user   The user in question.
+     * @param post   The post in question.
      * @param report The report of the post in question.
      * @return {@code true} iff the user is allowed to modify the post.
      */
@@ -433,11 +397,11 @@ public class PostService {
             tx.commit();
         } catch (NotFoundException e) {
             log.error("Unable to find an answer, if the user with id " + user.getId() + " is privileged for the "
-                              + "post with id " + post.getId(), e);
+                    + "post with id " + post.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while trying to determine if the user with id " + user.getId() + " is privileged for "
-                              + "the post with id " + post.getId(), e);
+                    + "the post with id " + post.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
         }
         return false;

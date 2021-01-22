@@ -1,5 +1,13 @@
 package tech.bugger.persistence.gateway;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
@@ -11,15 +19,6 @@ import tech.bugger.global.util.Pagitable;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Post gateway that gives access to posts stored in a database.
@@ -169,7 +168,7 @@ public class PostDBGateway implements PostGateway {
             if (rs.next()) {
                 if (rs.getInt("id") != post.getId()) {
                     throw new InternalError("Wrong post deleted! Please investigate! Expected: " + post + ", actual: "
-                                                    + rs.getInt("id"));
+                            + rs.getInt("id"));
                 }
             } else {
                 log.error("Post to delete " + post + " not found.");
@@ -291,14 +290,14 @@ public class PostDBGateway implements PostGateway {
                 }
                 Authorship authorship = new Authorship(author, creationDate, modifier, modificationDate);
                 Post post = new Post(rs.getInt("p_id"), rs.getString("p_content"), report.getId(), authorship,
-                                     new ArrayList<>());
+                        new ArrayList<>());
                 post.setAttachments(attachmentGateway.getAttachmentsForPost(post));
                 selectedPosts.add(post);
             }
         } catch (SQLException e) {
             log.error("Error when selecting posts of report " + report + " with selection " + selection + ".", e);
             throw new StoreException("Error when selecting posts of report " + report + " with selection " + selection
-                                             + ".", e);
+                    + ".", e);
         }
 
         return selectedPosts;

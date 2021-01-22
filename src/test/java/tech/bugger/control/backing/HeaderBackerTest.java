@@ -3,6 +3,17 @@ package tech.bugger.control.backing;
 import com.ocpsoft.pretty.PrettyContext;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import com.sun.faces.context.RequestParameterMap;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+import javax.enterprise.event.Event;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,26 +29,8 @@ import tech.bugger.business.service.SearchService;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.User;
 
-import javax.enterprise.event.Event;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -82,8 +75,8 @@ public class HeaderBackerTest {
     private User user;
     private static final String KEY = "url";
     private static MockedStatic<PrettyContext> config;
-    private List<FacesMessage> facesMessages = new ArrayList<>();
-    private FacesMessage facesMessage = new FacesMessage("Danger!");
+    private final List<FacesMessage> facesMessages = new ArrayList<>();
+    private final FacesMessage facesMessage = new FacesMessage("Danger!");
 
     @BeforeEach
     public void setup() throws NoSuchFieldException {

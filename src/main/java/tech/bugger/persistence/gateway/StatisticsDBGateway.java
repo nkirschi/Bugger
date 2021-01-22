@@ -1,12 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import tech.bugger.global.transfer.ReportCriteria;
-import tech.bugger.global.transfer.TopReport;
-import tech.bugger.global.transfer.TopUser;
-import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.StoreException;
-import tech.bugger.persistence.util.StatementParametrizer;
-
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,6 +8,12 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import tech.bugger.global.transfer.ReportCriteria;
+import tech.bugger.global.transfer.TopReport;
+import tech.bugger.global.transfer.TopUser;
+import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
 
 /**
  * Statistics gateway that searches application data stored in a database.

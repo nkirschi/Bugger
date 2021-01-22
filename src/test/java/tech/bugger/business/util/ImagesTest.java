@@ -11,8 +11,6 @@ import org.mockito.MockedStatic;
 import tech.bugger.LogExtension;
 import tech.bugger.business.exception.CorruptImageException;
 
-import javax.imageio.ImageIO;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 

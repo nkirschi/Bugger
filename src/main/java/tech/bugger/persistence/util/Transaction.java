@@ -16,7 +16,7 @@ import tech.bugger.persistence.gateway.UserGateway;
 
 /**
  * Transaction to combine multiple data access operations into a single work unit.
- *
+ * <p>
  * Once created, a transaction object provides factory methods for all available data gateways that can be used to add
  * actions to the current transaction.
  */
