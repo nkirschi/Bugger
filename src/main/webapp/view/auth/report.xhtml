@@ -130,7 +130,6 @@
                 </h:panelGroup>
             </h:panelGroup>
         </h:form>
-
         <h:form rendered="#{userSession.user != null}">
             <h:panelGroup layout="block" styleClass="row my-3">
                 <h:panelGroup layout="block" styleClass="col-3">
@@ -150,8 +149,6 @@
                 <h:panelGroup layout="block" styleClass="col 9">
                     <h:outputLabel value="#{labels.relevance_overwritten}"
                                    rendered="#{reportBacker.report.relevanceOverwritten}"/>
-                    <h:outputLabel value="#{labels.current_relevance}:&#xA0;"/>
-                    <h:outputLabel value="#{reportBacker.report.relevance}"/>
                 </h:panelGroup>
             </h:panelGroup>
             <h:panelGroup layout="block" styleClass="row my-3">
@@ -164,6 +161,15 @@
                 </h:panelGroup>
             </h:panelGroup>
         </h:form>
+
+        <h:panelGroup layout="block" styleClass="row mb3">
+            <h:panelGroup styleClass="col-3">
+                <h:outputLabel value="#{labels.current_relevance}" for="ot-relevance" styleClass="form-label"/>
+            </h:panelGroup>
+            <h:panelGroup styleClass="col-9">
+                <h:outputText id="ot-relevance" value="#{reportBacker.report.relevance}"/>
+            </h:panelGroup>
+        </h:panelGroup>
 
         <h:panelGroup layout="block" styleClass="row mb3">
             <h:panelGroup styleClass="col-3">

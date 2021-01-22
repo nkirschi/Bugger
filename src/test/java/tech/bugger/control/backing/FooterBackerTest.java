@@ -62,4 +62,11 @@ public class FooterBackerTest {
         }
     }
 
+    @Test
+    public void testChangeLanguage() {
+        backer.setLanguage(Locale.GERMAN);
+        backer.changeLanguage();
+        assertEquals(Locale.GERMAN, backer.getLanguage());
+    }
+
 }

@@ -202,7 +202,9 @@
                                 <h:outputText value="#{var.relevance}"/>
                             </b:column>
                             <b:column title="#{labels.last_activity}" paginator="#{searchBacker.reportResults}" key="last_activity">
-                                <h:outputText value="#{var.lastActivity}"/>
+                                <h:outputText value="#{var.lastActivity}">
+                                    <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                                </h:outputText>
                             </b:column>
                         </b:pagitable>
                     </h:panelGroup>
@@ -222,7 +224,9 @@
                                 </h:link>
                             </b:column>
                             <b:column title="#{labels.last_activity}" paginator="#{searchBacker.topicResults}" key="last_activity">
-                                <h:outputLabel value="#{var.lastActivity}"/>
+                                <h:outputLabel value="#{var.lastActivity}">
+                                    <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                                </h:outputLabel>
                             </b:column>
                             <b:column title="#{labels.num_sub}" paginator="#{searchBacker.topicResults}" key="numSub">
                                 <h:outputLabel value="#{var.numSub}"/>
@@ -236,7 +240,7 @@
                 <h:panelGroup class="row" layout="block" id="p-tab-user-content" rendered="#{searchBacker.tab == 'USER'}">
                     <h:panelGroup class="col-sm-12" layout="block">
                         <b:pagitable paginator="#{searchBacker.userResults}">
-                            <!--@elvariable id="var" type="tech.bugger.global.transfer.SearchedUser"-->
+                            <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
                             <b:column title="#{labels.username}" paginator="#{searchBacker.userResults}" key="id">
                                 <h:link outcome="pretty:profile" value="##{var.username}">
                                     <f:param name="u" value="#{var.username}"/>
@@ -249,7 +253,7 @@
                                 <h:outputLabel value="#{var.lastName}"/>
                             </b:column>
                             <b:column title="#{labels.administrator}" paginator="#{searchBacker.userResults}" key="is_admin">
-                                <h:outputLabel value="#{labels.administrator}"/>
+                                <h:outputLabel value="#{var.administrator ? labels.administrator : ''}"/>
                             </b:column>
                             <h:column>
                                 <f:facet name="header">

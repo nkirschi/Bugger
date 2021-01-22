@@ -78,8 +78,9 @@ public class SearchService {
      */
     public List<String> getUserSuggestions(final String query) {
         List<String> users = new ArrayList<>();
+        String searchInput = query.trim().toLowerCase();
         try (Transaction tx = transactionManager.begin()) {
-            users = tx.newSearchGateway().getUserSuggestions(query, MAX_SUGGESTIONS);
+            users = tx.newSearchGateway().getUserSuggestions(searchInput, MAX_SUGGESTIONS);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error while loading the user search suggestions.", e);
@@ -96,8 +97,9 @@ public class SearchService {
      */
     public List<String> getReportSuggestions(final String query) {
         List<String> reports = new ArrayList<>();
+        String searchInput = query.trim().toLowerCase();
         try (Transaction tx = transactionManager.begin()) {
-            reports = tx.newSearchGateway().getReportSuggestions(query, MAX_SUGGESTIONS);
+            reports = tx.newSearchGateway().getReportSuggestions(searchInput, MAX_SUGGESTIONS);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error while loading the report search suggestions.", e);
@@ -114,8 +116,9 @@ public class SearchService {
      */
     public List<String> getTopicSuggestions(final String query) {
         List<String> topics = new ArrayList<>();
+        String searchInput = query.trim().toLowerCase();
         try (Transaction tx = transactionManager.begin()) {
-            topics = tx.newSearchGateway().getTopicSuggestions(query, MAX_SUGGESTIONS);
+            topics = tx.newSearchGateway().getTopicSuggestions(searchInput, MAX_SUGGESTIONS);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error while loading the user search suggestions.", e);
@@ -200,7 +203,6 @@ public class SearchService {
      */
     public List<String> getUserUnmodSuggestions(final String query, final Topic topic) {
         List<String> users = null;
-
         try (Transaction tx = transactionManager.begin()) {
             users = tx.newSearchGateway().getUserUnmodSuggestions(query, MAX_SUGGESTIONS, topic);
             tx.commit();
@@ -224,8 +226,9 @@ public class SearchService {
     public List<User> getUserResults(final String query, final Selection selection, final boolean showAdmins,
                                              final boolean showNonAdmins) {
         List<User> users = new ArrayList<>();
+        String searchInput = query.trim().toLowerCase();
         try (Transaction tx = transactionManager.begin()) {
-            users = tx.newSearchGateway().getUserResults(query, selection, showAdmins, showNonAdmins);
+            users = tx.newSearchGateway().getUserResults(searchInput, selection, showAdmins, showNonAdmins);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error while loading the user search results.", e);
@@ -297,8 +300,9 @@ public class SearchService {
      */
     public List<Topic> getTopicResults(final String query, final Selection selection) {
         List<Topic> topics = new ArrayList<>();
+        String searchInput = query.trim().toLowerCase();
         try (Transaction tx = transactionManager.begin()) {
-            topics = tx.newSearchGateway().getTopicResults(query, selection);
+            topics = tx.newSearchGateway().getTopicResults(searchInput, selection);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error while loading the topic search results.", e);
@@ -334,8 +338,9 @@ public class SearchService {
                                          final HashMap<Report.Type, Boolean> reportTypeFilter,
                                          final HashMap<Report.Severity, Boolean> severityFilter) {
         List<Report> reports = new ArrayList<>();
+        String searchInput = query.trim().toLowerCase();
         try (Transaction tx = transactionManager.begin()) {
-            reports = tx.newSearchGateway().getReportResults(query, selection, latestCreationDateTime,
+            reports = tx.newSearchGateway().getReportResults(searchInput, selection, latestCreationDateTime,
                     earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic,
                     reportTypeFilter, severityFilter);
             tx.commit();
@@ -373,16 +378,17 @@ public class SearchService {
                                            final OffsetDateTime latestCreationDateTime,
                                            final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                            final boolean showClosedReports, final boolean showDuplicates,
-                                           final Topic topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
+                                           final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                            final HashMap<Report.Severity, Boolean> severityFilter) {
             List<Report> reports = new ArrayList<>();
+        String searchInput = query.trim().toLowerCase();
             try (Transaction tx = transactionManager.begin()) {
-                reports = tx.newSearchGateway().getFulltextResults(query, selection, latestCreationDateTime,
+                reports = tx.newSearchGateway().getFulltextResults(searchInput, selection, latestCreationDateTime,
                         earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic,
                         reportTypeFilter, severityFilter);
                 tx.commit();
             } catch (NotFoundException e) {
-                log.error("Filter Topic with id " + topic.getId() + " not found while searching for reports", e);
+                log.error("Filter Topic with title " + topic + " not found while searching for reports", e);
                 feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
             } catch (TransactionException e) {
                 log.error("Error while loading the report search results.", e);
@@ -401,8 +407,9 @@ public class SearchService {
      */
     public int getNumberOfUserResults(final String query, final boolean showAdmins, final boolean showNonAdmins) {
         int results = 0;
+        String searchInput = query.trim().toLowerCase();
         try (Transaction tx = transactionManager.begin()) {
-            results = tx.newSearchGateway().getNumberOfUserResults(query, showAdmins, showNonAdmins);
+            results = tx.newSearchGateway().getNumberOfUserResults(searchInput, showAdmins, showNonAdmins);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error while loading the user search results.", e);
@@ -419,8 +426,9 @@ public class SearchService {
      */
     public int getNumberOfTopicResults(final String query) {
         int results = 0;
+        String searchInput = query.trim().toLowerCase();
         try (Transaction tx = transactionManager.begin()) {
-            results = tx.newSearchGateway().getNumberOfTopicResults(query);
+            results = tx.newSearchGateway().getNumberOfTopicResults(searchInput);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error while loading the topic search results.", e);
@@ -452,9 +460,10 @@ public class SearchService {
                                         final boolean showClosedReports, final boolean showDuplicates,
                                         final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                         final HashMap<Report.Severity, Boolean> severityFilter) {
+        String searchInput = query.trim().toLowerCase();
         int results = 0;
         try (Transaction tx = transactionManager.begin()) {
-            results = tx.newSearchGateway().getNumberOfReportResults(query, latestCreationDateTime,
+            results = tx.newSearchGateway().getNumberOfReportResults(searchInput, latestCreationDateTime,
                     earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic,
                     reportTypeFilter, severityFilter);
             tx.commit();
@@ -489,7 +498,7 @@ public class SearchService {
     public int getNumberOfFulltextResults(final String query, final OffsetDateTime latestCreationDateTime,
                                           final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                           final boolean showClosedReports, final boolean showDuplicates,
-                                          final Topic topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
+                                          final String topic, final HashMap<Report.Type, Boolean> reportTypeFilter,
                                           final HashMap<Report.Severity, Boolean> severityFilter) {
         int results = 0;
         try (Transaction tx = transactionManager.begin()) {
@@ -498,7 +507,7 @@ public class SearchService {
                     reportTypeFilter, severityFilter);
             tx.commit();
         } catch (NotFoundException e) {
-            log.error("Filter Topic with id " + topic.getId() + " not found while searching for reports", e);
+            log.error("Filter Topic with title " + topic + " not found while searching for reports", e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while loading the report search results.", e);
