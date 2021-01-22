@@ -221,9 +221,9 @@ public class SearchService {
      * @param showNonAdmins Whether or not to include non-administrators.
      * @return A list of users containing the selected search results.
      */
-    public List<SearchedUser> getUserResults(final String query, final Selection selection, final boolean showAdmins,
+    public List<User> getUserResults(final String query, final Selection selection, final boolean showAdmins,
                                              final boolean showNonAdmins) {
-        List<SearchedUser> users = new ArrayList<>();
+        List<User> users = new ArrayList<>();
         try (Transaction tx = transactionManager.begin()) {
             users = tx.newSearchGateway().getUserResults(query, selection, showAdmins, showNonAdmins);
             tx.commit();
@@ -231,8 +231,8 @@ public class SearchService {
             log.error("Error while loading the user search results.", e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         }
-        for (SearchedUser u : users) {
-            u.setCalculatedVotingWeight(getVotingWeightFromPosts(u.getNumPosts()));
+        for (User u : users) {
+            u.setVotingWeight(getVotingWeightFromPosts(u.getNumPosts()));
         }
         return users;
     }

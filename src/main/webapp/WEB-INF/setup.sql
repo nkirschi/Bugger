@@ -295,3 +295,19 @@ CREATE VIEW top_users ("user", earned_relevance) AS
     ON r.id = s.report
     GROUP BY u.id
     ORDER BY COALESCE(SUM(s.relevance), 0) DESC, u.id ASC;
+
+CREATE VIEW topic_num_subscribers (topic, num_subscribers) AS
+    SELECT t.id, COUNT(s.topic)
+    FROM topic AS t
+    LEFT OUTER JOIN topic_subscription AS s
+    ON t.id = s.topic
+    GROUP BY t.id;
+
+CREATE VIEW topic_num_posts (topic, num_posts) AS
+    SELECT t.id, COUNT(p.id)
+    FROM topic AS t
+    LEFT OUTER JOIN report AS r
+    ON t.id = r.topic
+    LEFT OUTER JOIN post AS p
+    ON r.id = p.report
+    GROUP BY t.id;

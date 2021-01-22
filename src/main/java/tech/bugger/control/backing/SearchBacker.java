@@ -11,6 +11,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
@@ -80,7 +81,7 @@ public class SearchBacker implements Serializable {
     /**
      * The paginator for user results.
      */
-    private Paginator<SearchedUser> userResults;
+    private Paginator<User> userResults;
 
     /**
      * The latest creation date to search for.
@@ -226,7 +227,7 @@ public class SearchBacker implements Serializable {
         if (tab == Tab.USER) {
             userResults = new Paginator<>("username", Selection.PageSize.NORMAL) {
                 @Override
-                protected Iterable<SearchedUser> fetch() {
+                protected Iterable<User> fetch() {
                     return searchService.getUserResults(query, getSelection(), adminShown, nonAdminShown);
                 }
 
@@ -592,7 +593,7 @@ public class SearchBacker implements Serializable {
     /**
      * @return The userResults.
      */
-    public Paginator<SearchedUser> getUserResults() {
+    public Paginator<User> getUserResults() {
         return userResults;
     }
 

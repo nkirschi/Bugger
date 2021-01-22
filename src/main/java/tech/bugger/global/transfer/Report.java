@@ -99,6 +99,11 @@ public class Report implements Serializable {
     private Integer relevance;
 
     /**
+     * The relevance value of the report.
+     */
+    private OffsetDateTime lastActivity;
+
+    /**
      * {@code true} if the relevance is overwritten.
      */
     private boolean relevanceOverwritten;
@@ -107,6 +112,11 @@ public class Report implements Serializable {
      * The ID of the topic this report is in.
      */
     private int topicID;
+
+    /**
+     * The name of the topic this report is in.
+     */
+    private String topic;
 
     /**
      * Constructs a new report.
@@ -334,6 +344,34 @@ public class Report implements Serializable {
      */
     public void setTopicID(final int topicID) {
         this.topicID = topicID;
+    }
+
+    /**
+     * @return The title of the associated topic
+     */
+    public String getTopic() {
+        return topic;
+    }
+
+    /**
+     * @param topic The new title of the associated topic.
+     */
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    /**
+     * @return The last activity in this report.
+     */
+    public OffsetDateTime getLastActivity() {
+        return lastActivity;
+    }
+
+    /**
+     * @param lastActivity The new last activity in this report.
+     */
+    public void setLastActivity(OffsetDateTime lastActivity) {
+        this.lastActivity = lastActivity;
     }
 
     /**

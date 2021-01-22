@@ -31,6 +31,7 @@ public class User implements Serializable {
          */
         MINIMAL
     }
+
     /**
      * This user's unique ID.
      */
@@ -107,9 +108,19 @@ public class User implements Serializable {
     private Integer forcedVotingWeight;
 
     /**
+     * This user's calculated voting weight
+     */
+    private int votingWeight;
+
+    /**
      * Whether this user is administrator or not.
      */
     private boolean administrator;
+
+    /**
+     * This user's number of posts
+     */
+    private int numPosts;
 
     /**
      * Constructs an empty user.
@@ -472,6 +483,26 @@ public class User implements Serializable {
     }
 
     /**
+     * Returns the users voting Weight, based on calculated and forced voting weight.
+     *
+     * @return This user's final voting weight.
+     */
+    public int getVotingWeight() {
+        if (forcedVotingWeight != null) {
+            return forcedVotingWeight;
+        } else {
+            return votingWeight;
+        }
+    }
+
+    /**
+     * @param votingWeight The new calculated voting weight for this user.
+     */
+    public void setVotingWeight(int votingWeight) {
+        this.votingWeight = votingWeight;
+    }
+
+    /**
      * Returns whether this user is an administrator.
      *
      * @return This user's administrator status.
@@ -487,6 +518,20 @@ public class User implements Serializable {
      */
     public void setAdministrator(final boolean administrator) {
         this.administrator = administrator;
+    }
+
+    /**
+     * @param numPosts The new number of posts made by this user.
+     */
+    public void setNumPosts(int numPosts) {
+        this.numPosts = numPosts;
+    }
+
+    /**
+     * @return The number of posts made by this user.
+     */
+    public int getNumPosts() {
+        return numPosts;
     }
 
     /**

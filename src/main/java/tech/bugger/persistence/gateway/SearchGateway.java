@@ -21,7 +21,7 @@ public interface SearchGateway {
      * @param showNonAdmins Whether to include non-administrators.
      * @return The list of users that match the search criteria.
      */
-    List<SearchedUser> getUserResults(String query, Selection selection, boolean showAdmins, boolean showNonAdmins);
+    List<User> getUserResults(String query, Selection selection, boolean showAdmins, boolean showNonAdmins);
 
     /**
      * Searches for users by their username and filters the results according to given selection criteria.

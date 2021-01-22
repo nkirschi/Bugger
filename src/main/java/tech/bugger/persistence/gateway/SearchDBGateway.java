@@ -1,15 +1,12 @@
 package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
+import java.sql.*;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 import tech.bugger.global.transfer.*;
 import tech.bugger.global.util.Log;
@@ -52,16 +49,20 @@ public class SearchDBGateway implements SearchGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<SearchedUser> getUserResults(final String query, final Selection selection, final boolean showAdmins,
-                                             final boolean showNonAdmins) {
+    public List<User> getUserResults(final String query, final Selection selection, final boolean showAdmins,
+                                     final boolean showNonAdmins) {
         if (selection == null || query == null) {
             log.error("The selection or query cannot be null!");
             throw new IllegalArgumentException("The selection or query cannot be null!");
+
         } else if (StringUtils.isBlank(selection.getSortedBy())) {
             log.error("Error when trying to get users sorted by nothing.");
             throw new IllegalArgumentException("The selection needs to have a column to sort by.");
+        } else if (selection.getSortedBy().equals("relevance")) {
+            log.error("The selection can not be sorted by relevance.");
+            throw new IllegalArgumentException("The selection can not be sorted by relevance.");
         }
-        List<SearchedUser> userResults = new ArrayList<>(Math.max(0, selection.getTotalSize()));
+        List<User> userResults = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         if (!showAdmins && !showNonAdmins) {
             return userResults;
         }
@@ -76,10 +77,16 @@ public class SearchDBGateway implements SearchGateway {
                 adminFilter = "AND is_admin = false ";
             }
         }
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" as u JOIN user_num_posts as p on u.id = p.author WHERE username LIKE ? "
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" as u JOIN user_num_posts as p "
+                + "on u.id = p.author WHERE username LIKE ? "
                 + adminFilter
                 + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
+            System.out.println(new StatementParametrizer(stmt)
+                    .string(query + "%")
+                    .integer(selection.getPageSize().getSize())
+                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
+                    .toStatement().toString());
             ResultSet rs = new StatementParametrizer(stmt)
                     .string(query + "%")
                     .integer(selection.getPageSize().getSize())
@@ -97,16 +104,22 @@ public class SearchDBGateway implements SearchGateway {
     }
 
     /**
-     * Parses the given {@link ResultSet} and returns the corresponding {@link SearchedUser}.
+     * Parses the given {@link ResultSet} and returns the corresponding {@link User}.
      *
-     * @param rs     The {@link ResultSet} to parse.
+     * @param rs The {@link ResultSet} to parse.
      * @return The parsed {@link User}.
      * @throws SQLException Some parsing error occurred.
      */
-    static SearchedUser getSearchedUserFromResultSet(final ResultSet rs) throws SQLException {
-        return new SearchedUser(rs.getString("username"), rs.getString("first_name"), rs.getString("last_name"),
-                rs.getBoolean("is_admin"), User.ProfileVisibility.valueOf(rs.getString("profile_visibility").toUpperCase()),
-                rs.getObject("forced_voting_weight", Integer.class), rs.getInt("num_posts"));
+    static User getSearchedUserFromResultSet(final ResultSet rs) throws SQLException {
+        User user = new User();
+        user.setUsername(rs.getString("username"));
+        user.setFirstName(rs.getString("first_name"));
+        user.setLastName(rs.getString("last_name"));
+        user.setAdministrator(rs.getBoolean("is_admin"));
+        user.setProfileVisibility(User.ProfileVisibility.valueOf(rs.getString("profile_visibility").toUpperCase()));
+        user.setForcedVotingWeight(rs.getObject("forced_voting_weight", Integer.class));
+        user.setNumPosts(rs.getInt("num_posts"));
+        return user;
     }
 
     /**
@@ -354,6 +367,51 @@ public class SearchDBGateway implements SearchGateway {
     }
 
     /**
+     * Parses the given {@link ResultSet} and returns the corresponding {@link Topic}.
+     *
+     * @param rs The {@link ResultSet} to parse.
+     * @return The parsed {@link Topic}.
+     * @throws SQLException Some parsing error occurred.
+     */
+    static Topic getSearchedTopicFromResultSet(final ResultSet rs) throws SQLException {
+        Topic topic = new Topic(rs.getInt("id"), rs.getString("title"),
+                rs.getString("description"));
+        topic.setNumSub(rs.getInt("num_subscribers"));
+        topic.setNumPosts(rs.getInt("num_posts"));
+        if (rs.getObject("last_activity", OffsetDateTime.class) != null) {
+            topic.setLastActivity(rs.getObject("last_activity", OffsetDateTime.class));
+        }
+        return topic;
+    }
+
+    static Report getSearchedReportFromResultSet(final ResultSet rs)
+            throws SQLException {
+        Report report = new Report();
+        report.setId(rs.getInt("id"));
+        report.setTitle(rs.getString("title"));
+        report.setType(Report.Type.valueOf(rs.getString("type")));
+        report.setSeverity(Report.Severity.valueOf(rs.getString("severity")));
+        report.setVersion(rs.getString("version"));
+        report.setTopicID(rs.getInt("topic"));
+        report.setDuplicateOf(rs.getInt("duplicate_of"));
+        if (rs.getObject("last_activity", OffsetDateTime.class) != null) {
+            report.setLastActivity(rs.getObject("last_activity", OffsetDateTime.class));
+        }
+        OffsetDateTime closed = null;
+        if (rs.getObject("closed_at", OffsetDateTime.class) != null) {
+            closed = rs.getObject("closed_at", OffsetDateTime.class);
+        }
+        report.setClosingDate(closed);
+        report.setTopic(rs.getString("t_title"));
+        if (rs.getObject("forced_relevance", Integer.class) != null) {
+            report.setRelevance(rs.getObject("forced_relevance", Integer.class));
+        } else {
+            report.setRelevance(rs.getInt("relevance"));
+        }
+        return report;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -367,7 +425,9 @@ public class SearchDBGateway implements SearchGateway {
         }
 
         List<Topic> topicResults = new ArrayList<>(Math.max(0, selection.getTotalSize()));
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"topic\" as t JOIN WHERE title LIKE ?"
+        try (PreparedStatement stmt = conn.prepareStatement("Select * FROM \"topic\" as t JOIN topic_num_subscribers as s "
+                + "on s.topic = t.id JOIN topic_last_activity as a on t.id = a.topic join topic_num_posts as p "
+                + "on t.id = p.topic WHERE title LIKE ? "
                 + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
@@ -376,7 +436,7 @@ public class SearchDBGateway implements SearchGateway {
                     .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
                     .toStatement().executeQuery();
             while (rs.next()) {
-                topicResults.add(TopicDBGateway.getTopicFromResultSet(rs));
+                topicResults.add(getSearchedTopicFromResultSet(rs));
             }
         } catch (SQLException e) {
             log.error("Error while loading the topic search suggestions for the query " + query, e);
@@ -473,15 +533,27 @@ public class SearchDBGateway implements SearchGateway {
         }
         filterSeverityBuilder.append(") ");
         String filterSeverity = filterSeverityBuilder.toString();
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT r.*, t.title AS t_title FROM \"report\" AS r "
-                + "JOIN topic AS t "
-                + "ON r.topic = t.id WHERE r.title LIKE ?"
+        String sortBy = selection.getSortedBy();
+        if (sortBy.equals("relevance")) {
+            sortBy = "COALESCE(forced_relevance, relevance)";
+        }
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT r.*, t.title as t_title , a.last_activity, v.relevance "
+                + "FROM report AS r JOIN topic AS t ON r.topic = t.id JOIN report_last_activity AS a "
+                + "ON a.report = r.id JOIN report_relevance AS v ON r.id = v.report WHERE r.title LIKE ? "
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) "
                 + filterClosedAt + filterDuplicate + filterType + filterSeverity
                 + "AND t.title = COALESCE(?, t.title) "
-                + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
+                + "ORDER BY " + sortBy + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
+            System.out.println(new StatementParametrizer(stmt)
+                    .string(query + "%")
+                    .object(latestOpeningDateTime)
+                    .object(earliestClosingDateTime)
+                    .string(topic)
+                    .integer(selection.getPageSize().getSize())
+                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
+                    .toStatement().toString());
             ResultSet rs = new StatementParametrizer(stmt)
                     .string(query + "%")
                     .object(latestOpeningDateTime)
@@ -491,13 +563,12 @@ public class SearchDBGateway implements SearchGateway {
                     .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
                     .toStatement().executeQuery();
             while (rs.next()) {
-                reportResults.add(ReportDBGateway.getReportFromResultSet(rs, userGateway));
+                reportResults.add(getSearchedReportFromResultSet(rs));
             }
         } catch (SQLException e) {
             log.error("Error while loading the topic search suggestions for the query " + query, e);
             throw new StoreException("Error while loading the topic search suggestions for the query " + query, e);
         }
-
         return reportResults;
     }
 
