@@ -4,7 +4,10 @@ import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 
-import tech.bugger.global.transfer.*;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.persistence.exception.NotFoundException;
 
 /**

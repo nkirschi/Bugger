@@ -108,7 +108,7 @@ public class User implements Serializable {
     private Integer forcedVotingWeight;
 
     /**
-     * This user's calculated voting weight
+     * This user's calculated voting weight.
      */
     private int votingWeight;
 
@@ -118,7 +118,7 @@ public class User implements Serializable {
     private boolean administrator;
 
     /**
-     * This user's number of posts
+     * This user's number of posts.
      */
     private int numPosts;
 
@@ -498,7 +498,7 @@ public class User implements Serializable {
     /**
      * @param votingWeight The new calculated voting weight for this user.
      */
-    public void setVotingWeight(int votingWeight) {
+    public void setVotingWeight(final int votingWeight) {
         this.votingWeight = votingWeight;
     }
 
@@ -523,7 +523,7 @@ public class User implements Serializable {
     /**
      * @param numPosts The new number of posts made by this user.
      */
-    public void setNumPosts(int numPosts) {
+    public void setNumPosts(final int numPosts) {
         this.numPosts = numPosts;
     }
 

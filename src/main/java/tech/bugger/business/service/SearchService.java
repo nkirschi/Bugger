@@ -3,7 +3,10 @@ package tech.bugger.business.service;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
-import tech.bugger.global.transfer.*;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
@@ -14,7 +17,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.ResourceBundle;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Arrays;
 
 /**
  * Service providing methods related to searching for specific topics, reports and users. A {@code Feedback} event is

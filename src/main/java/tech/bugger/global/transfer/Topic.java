@@ -24,12 +24,12 @@ public class Topic implements Serializable {
     private String title;
 
     /**
-     * Number of Posts in this topic
+     * Number of Posts in this topic.
      */
     private int numPosts;
 
     /**
-     * Number of Subscriptions for this topic;
+     * Number of Subscriptions for this topic.
      */
     private int numSub;
 
@@ -140,7 +140,7 @@ public class Topic implements Serializable {
     /**
      * @param numPosts The new number of Posts.
      */
-    public void setNumPosts(int numPosts) {
+    public void setNumPosts(final int numPosts) {
         this.numPosts = numPosts;
     }
 
@@ -172,7 +172,7 @@ public class Topic implements Serializable {
     /**
      * @param numSub the new number of subscriptions.
      */
-    public void setNumSub(int numSub) {
+    public void setNumSub(final int numSub) {
         this.numSub = numSub;
     }
 

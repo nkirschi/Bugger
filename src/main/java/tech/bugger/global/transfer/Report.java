@@ -356,7 +356,7 @@ public class Report implements Serializable {
     /**
      * @param topic The new title of the associated topic.
      */
-    public void setTopic(String topic) {
+    public void setTopic(final String topic) {
         this.topic = topic;
     }
 
@@ -370,7 +370,7 @@ public class Report implements Serializable {
     /**
      * @param lastActivity The new last activity in this report.
      */
-    public void setLastActivity(OffsetDateTime lastActivity) {
+    public void setLastActivity(final OffsetDateTime lastActivity) {
         this.lastActivity = lastActivity;
     }
 

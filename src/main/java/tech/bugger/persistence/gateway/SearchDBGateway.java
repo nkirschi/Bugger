@@ -2,13 +2,19 @@ package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import tech.bugger.global.transfer.*;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
@@ -424,7 +430,8 @@ public class SearchDBGateway implements SearchGateway {
         }
 
         List<Topic> topicResults = new ArrayList<>(Math.max(0, selection.getTotalSize()));
-        try (PreparedStatement stmt = conn.prepareStatement("Select * FROM \"topic\" as t JOIN topic_num_subscribers as s "
+        try (PreparedStatement stmt = conn.prepareStatement("Select * FROM \"topic\" as t JOIN topic_num_subscribers "
+                + "as s "
                 + "on s.topic = t.id JOIN topic_last_activity as a on t.id = a.topic join topic_num_posts as p "
                 + "on t.id = p.topic WHERE TRIM(LOWER(title)) LIKE ? "
                 + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
@@ -535,8 +542,8 @@ public class SearchDBGateway implements SearchGateway {
         if (orderBy.equals("relevance")) {
             orderBy = "COALESCE(forced_relevance, relevance)";
         }
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT r.*, t.title as t_title , a.last_activity, v.relevance "
-                + "FROM report AS r JOIN topic AS t ON r.topic = t.id JOIN report_last_activity AS a "
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT r.*, t.title as t_title , a.last_activity, "
+                + "v.relevance FROM report AS r JOIN topic AS t ON r.topic = t.id JOIN report_last_activity AS a "
                 + "ON a.report = r.id JOIN report_relevance AS v ON r.id = v.report WHERE TRIM(LOWER(r.title)) LIKE ? "
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) "
@@ -652,8 +659,8 @@ public class SearchDBGateway implements SearchGateway {
         if (orderBy.equals("relevance")) {
             orderBy = "COALESCE(forced_relevance, relevance)";
         }
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT r.*, t.title as t_title , a.last_activity, v.relevance "
-                + "FROM report AS r JOIN topic AS t ON r.topic = t.id JOIN report_last_activity AS a "
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT r.*, t.title as t_title , a.last_activity, "
+                + "v.relevance FROM report AS r JOIN topic AS t ON r.topic = t.id JOIN report_last_activity AS a "
                 + "ON a.report = r.id JOIN report_relevance AS v ON r.id = v.report WHERE TRIM(LOWER(r.title)) LIKE ? "
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) "
