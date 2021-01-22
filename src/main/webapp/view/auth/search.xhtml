@@ -181,6 +181,11 @@
                                     <f:param name="id" value="#{var.id}"/>
                                 </h:link>
                             </b:column>
+                            <b:column title="#{labels.topic}" paginator="#{searchBacker.reportResults}" key="topic">
+                                <h:link outcome="pretty:topic" value="#{var.topic}">
+                                    <f:param name="id" value="#{var.topicID}"/>
+                                </h:link>
+                            </b:column>
                             <b:column title="#{labels.col_type}" paginator="#{searchBacker.reportResults}" key="type">
                                 <h:outputText value="#{labels['report_type.' += var.type]}"/>
                             </b:column>
@@ -193,8 +198,13 @@
                             <b:column title="#{labels.col_duplicate}" paginator="#{searchBacker.reportResults}" key="duplicate_of">
                                 <h:outputText value="#{var.duplicateOf}"/>
                             </b:column>
-                            <b:column title="#{labels.last_activity}" paginator="#{searchBacker.reportResults}" key="last_modified_at">
-                                <h:outputText value="#{var.authorship.creationDate}"/>
+                            <b:column title="#{labels.col_relevance}" paginator="#{searchBacker.reportResults}" key="relevance">
+                                <h:outputText value="#{var.relevance}"/>
+                            </b:column>
+                            <b:column title="#{labels.last_activity}" paginator="#{searchBacker.reportResults}" key="last_activity">
+                                <h:outputText value="#{var.lastActivity}">
+                                    <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                                </h:outputText>
                             </b:column>
                         </b:pagitable>
                     </h:panelGroup>
@@ -213,6 +223,17 @@
                                     <f:param name="id" value="#{var.id}"/>
                                 </h:link>
                             </b:column>
+                            <b:column title="#{labels.last_activity}" paginator="#{searchBacker.topicResults}" key="last_activity">
+                                <h:outputLabel value="#{var.lastActivity}">
+                                    <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                                </h:outputLabel>
+                            </b:column>
+                            <b:column title="#{labels.num_sub}" paginator="#{searchBacker.topicResults}" key="numSub">
+                                <h:outputLabel value="#{var.numSub}"/>
+                            </b:column>
+                            <b:column title="#{labels.num_posts}" paginator="#{searchBacker.topicResults}" key="numPosts">
+                                <h:outputLabel value="#{var.numPosts}"/>
+                            </b:column>
                         </b:pagitable>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -225,6 +246,21 @@
                                     <f:param name="u" value="#{var.username}"/>
                                 </h:link>
                             </b:column>
+                            <b:column title="#{labels.first_name}" paginator="#{searchBacker.userResults}" key="first_name">
+                                <h:outputLabel value="#{var.firstName}"/>
+                            </b:column>
+                            <b:column title="#{labels.last_name}" paginator="#{searchBacker.userResults}" key="last_name">
+                                <h:outputLabel value="#{var.lastName}"/>
+                            </b:column>
+                            <b:column title="#{labels.administrator}" paginator="#{searchBacker.userResults}" key="is_admin">
+                                <h:outputLabel value="#{var.administrator ? labels.administrator : ''}"/>
+                            </b:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:outputLabel value="#{labels.col_relevance}" styleClass="btn btm-sm btn-link fw-bold no-ul"/>
+                                </f:facet>
+                                <h:outputLabel value="#{var.votingWeight}"/>
+                            </h:column>
                         </b:pagitable>
                     </h:panelGroup>
                 </h:panelGroup>

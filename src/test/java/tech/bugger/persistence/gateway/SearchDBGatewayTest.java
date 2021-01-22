@@ -36,6 +36,7 @@ public class SearchDBGatewayTest {
     private User admin;
     private Topic topic;
     private static final String QUERY = "test";
+    private static final String QUERY2 = "2";
     private static final int LIMIT = 5;
 
     @BeforeEach
@@ -227,6 +228,17 @@ public class SearchDBGatewayTest {
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
                      () -> new SearchDBGateway(connectionSpy, userGateway).getUserUnmodSuggestions(QUERY, LIMIT, topic)
+        );
+    }
+
+    @Test
+    public void testGetUserSuggestions() {
+        userGateway.createUser(user1);
+        userGateway.createUser(user2);
+        List<String> suggestions = searchGateway.getUserSuggestions(QUERY2, LIMIT);
+        assertAll(
+                () -> assertFalse(suggestions.contains(user1.getUsername())),
+                () -> assertTrue(suggestions.contains(user2.getUsername()))
         );
     }
 

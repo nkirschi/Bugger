@@ -3,10 +3,11 @@ package tech.bugger.persistence.gateway;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
+
 import tech.bugger.global.transfer.User;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.persistence.exception.NotFoundException;
 
 /**
@@ -148,7 +149,7 @@ public interface SearchGateway {
      */
     List<Report> getFulltextResults(String query, Selection selection, OffsetDateTime latestOpeningDateTime,
                                     OffsetDateTime earliestClosingDateTime, boolean showOpenReports,
-                                    boolean showClosedReports, boolean showDuplicates, Topic topic,
+                                    boolean showClosedReports, boolean showDuplicates, String topic,
                                     HashMap<Report.Type, Boolean> reportTypeFilter,
                                     HashMap<Report.Severity, Boolean> severityFilter) throws NotFoundException;
 
@@ -219,7 +220,7 @@ public interface SearchGateway {
     int getNumberOfFulltextResults(String query, OffsetDateTime latestOpeningDateTime,
                                    OffsetDateTime earliestClosingDateTime, boolean showOpenReports,
                                    boolean showClosedReports,
-                                   boolean showDuplicates, Topic topic, HashMap<Report.Type, Boolean> reportTypeFilter,
+                                   boolean showDuplicates, String topic, HashMap<Report.Type, Boolean> reportTypeFilter,
                                    HashMap<Report.Severity, Boolean> severityFilter) throws NotFoundException;
 
 }

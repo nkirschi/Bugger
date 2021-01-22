@@ -11,6 +11,8 @@ DROP VIEW IF EXISTS user_num_posts;
 DROP VIEW IF EXISTS report_relevance;
 DROP VIEW IF EXISTS topic_last_activity;
 DROP VIEW IF EXISTS report_last_activity;
+DROP VIEW IF EXISTS topic_num_subscribers;
+DROP VIEW IF EXISTS topic_num_posts;
 
 DROP TABLE IF EXISTS user_subscription;
 DROP TABLE IF EXISTS topic_subscription;

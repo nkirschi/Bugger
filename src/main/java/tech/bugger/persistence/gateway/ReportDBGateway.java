@@ -86,6 +86,11 @@ public class ReportDBGateway implements ReportGateway {
         return report;
     }
 
+    private Report extractLastActivityFromResultSet(final Report report, final ResultSet rs) throws SQLException {
+        report.setLastActivity(rs.getObject("last_activity", OffsetDateTime.class));
+        return report;
+    }
+
     /**
      * Parses the given {@link ResultSet} and returns the corresponding {@link Authorship}.
      *
@@ -196,11 +201,14 @@ public class ReportDBGateway implements ReportGateway {
         } else if (!showOpenReports) {
             filter = " AND closed_at IS NOT NULL";
         }
-
+        String orderBy = selection.getSortedBy();
+        if (orderBy.equals("relevance")) {
+            orderBy = "COALESCE(forced_relevance, relevance)";
+        }
         String sql = "SELECT * FROM report AS r"
-                + " LEFT OUTER JOIN report_relevance AS v ON r.id = v.report"
-                + " WHERE topic = ? " + filter
-                + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
+                + " LEFT OUTER JOIN report_relevance AS v ON r.id = v.report JOIN report_last_activity"
+                + " as a on a.report = r.id WHERE topic = ? " + filter
+                + " ORDER BY " + orderBy + (selection.isAscending() ? " ASC" : " DESC")
                 + " LIMIT ? OFFSET ?;";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = new StatementParametrizer(stmt)
@@ -210,7 +218,9 @@ public class ReportDBGateway implements ReportGateway {
                     .toStatement().executeQuery();
 
             while (rs.next()) {
-                selectedReports.add(extractRelevanceFromResultSet(getReportFromResultSet(rs, userGateway), rs));
+                Report report = extractRelevanceFromResultSet(getReportFromResultSet(rs, userGateway), rs);
+                report = extractLastActivityFromResultSet(report, rs);
+                selectedReports.add(report);
             }
             log.debug("Found " + selectedReports.size() + " reports!");
         } catch (SQLException | NotFoundException e) {

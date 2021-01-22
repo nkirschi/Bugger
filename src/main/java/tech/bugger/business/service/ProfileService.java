@@ -450,7 +450,6 @@ public class ProfileService {
                 feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
             }
         }
-
         return votingWeight;
     }
 

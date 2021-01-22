@@ -2,7 +2,6 @@ package tech.bugger.control.backing;
 
 import com.ocpsoft.pretty.PrettyContext;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
-import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.util.Feedback;
@@ -71,11 +70,6 @@ public class HeaderBacker implements Serializable {
     private List<String> reportSearchSuggestion;
 
     /**
-     * The current application settings.
-     */
-    private final ApplicationSettings applicationSettings;
-
-    /**
      * The current user session.
      */
     private final UserSession session;
@@ -108,7 +102,6 @@ public class HeaderBacker implements Serializable {
     /**
      * Constructs a new header backing bean.
      *
-     * @param applicationSettings The current application settings.
      * @param searchService       The SearchService for the backer.
      * @param session             The currently active {@link UserSession}.
      * @param fctx                The current {@link FacesContext} of the application.
@@ -117,14 +110,12 @@ public class HeaderBacker implements Serializable {
      * @param messagesBundle      The resource bundle for feedback messages.
      */
     @Inject
-    public HeaderBacker(final ApplicationSettings applicationSettings,
-                        final SearchService searchService,
+    public HeaderBacker(final SearchService searchService,
                         final UserSession session,
                         final FacesContext fctx,
                         final ExternalContext ectx,
                         final Event<Feedback> feedbackEvent,
                         @RegistryKey("messages") final ResourceBundle messagesBundle) {
-        this.applicationSettings = applicationSettings;
         this.searchService = searchService;
         this.session = session;
         this.fctx = fctx;

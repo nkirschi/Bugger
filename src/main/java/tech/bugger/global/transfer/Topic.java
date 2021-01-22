@@ -24,6 +24,16 @@ public class Topic implements Serializable {
     private String title;
 
     /**
+     * Number of Posts in this topic.
+     */
+    private int numPosts;
+
+    /**
+     * Number of Subscriptions for this topic.
+     */
+    private int numSub;
+
+    /**
      * The description.
      */
     private String description;
@@ -121,6 +131,20 @@ public class Topic implements Serializable {
     }
 
     /**
+     * @return The number of Posts.
+     */
+    public int getNumPosts() {
+        return numPosts;
+    }
+
+    /**
+     * @param numPosts The new number of Posts.
+     */
+    public void setNumPosts(final int numPosts) {
+        this.numPosts = numPosts;
+    }
+
+    /**
      * Returns the last activity of this topic.
      *
      * @return The last activity.
@@ -136,6 +160,20 @@ public class Topic implements Serializable {
      */
     public void setLastActivity(final OffsetDateTime lastActivity) {
         this.lastActivity = lastActivity;
+    }
+
+    /**
+     * @return the number of subscriptions.
+     */
+    public int getNumSub() {
+        return numSub;
+    }
+
+    /**
+     * @param numSub the new number of subscriptions.
+     */
+    public void setNumSub(final int numSub) {
+        this.numSub = numSub;
     }
 
     /**

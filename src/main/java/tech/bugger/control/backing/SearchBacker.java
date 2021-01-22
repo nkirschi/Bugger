@@ -11,13 +11,14 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
-import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
 
 /**
@@ -310,58 +311,6 @@ public class SearchBacker implements Serializable {
             topicResults.updateReset();
         }
         return null;
-    }
-
-    /**
-     * Returns the current relevance of a specific report.
-     *
-     * @param report The report whose relevance is to be returned.
-     * @return The relevance as an {@code int}.
-     */
-    public int getRelevance(final Report report) {
-        return 0;
-    }
-
-    /**
-     * Returns the current voting weight of a specific user.
-     *
-     * @param user The user whose voting weight is to be returned.
-     * @return The voting weight as an {@code int}.
-     */
-    public int getVotingWeightForUser(final User user) {
-        return 0;
-    }
-
-    /**
-     * Returns the time stamp of the last action in one particular topic. Creating, editing and moving a report as well
-     * as creating and editing posts count as actions. Moving a report is an action in the destination topic only.
-     *
-     * @param topic The topic in question.
-     * @return The time stamp of the last action as a {@link OffsetDateTime}.
-     */
-    public OffsetDateTime lastChange(final Topic topic) {
-        return null;
-    }
-
-    /**
-     * Returns the time stamp of the last action in one particular report. Creating, editing and moving a report as well
-     * as creating and editing posts count as actions.
-     *
-     * @param report The report in question.
-     * @return The time stamp of the last action as a {@link OffsetDateTime}.
-     */
-    public OffsetDateTime lastChange(final Report report) {
-        return null;
-    }
-
-    /**
-     * Returns the number of subscribers of one particular topic.
-     *
-     * @param topic The topic in question.
-     * @return The number of subscribers as an {@code int}.
-     */
-    public int getNumberOfSubscribers(final Topic topic) {
-        return 0;
     }
 
     /**

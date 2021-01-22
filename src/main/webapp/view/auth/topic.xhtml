@@ -189,8 +189,8 @@
                     <b:column title="#{labels.col_relevance}" paginator="#{topicBacker.reports}" key="relevance">
                         <h:outputText value="#{var.relevance}"/>
                     </b:column>
-                    <b:column title="#{labels.last_activity}" paginator="#{topicBacker.reports}" key="last_modified_at">
-                        <h:outputText value="#{var.authorship.creationDate}" styleClass="text-nowrap">
+                    <b:column title="#{labels.last_activity}" paginator="#{topicBacker.reports}" key="last_activity">
+                        <h:outputText value="#{var.lastActivity}" styleClass="text-nowrap">
                             <f:convertDateTime type="offsetDateTime" pattern="#{labels.date_time_pattern}"/>
                         </h:outputText>
                     </b:column>
