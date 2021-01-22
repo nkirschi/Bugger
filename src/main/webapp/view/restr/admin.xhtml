@@ -15,7 +15,9 @@
     <ui:define name="content">
 
         <!-- useful links for managing the users in the system -->
-        <h:outputText value="#{labels.user_management}" styleClass="h2"/>
+        <h:outputText value="#{labels.user_management}" styleClass="d-block h2"/>
+        <h:outputText value="#{labels.user_management_description}"
+                      styleClass="text-justify text-muted d-block mb-3" />
         <h:panelGroup layout="block" styleClass="mb-3">
             <h:link value="#{labels.browse}"
                     outcome="pretty:search"
@@ -33,7 +35,9 @@
         <!-- organization settings form -->
         <h:panelGroup layout="block" styleClass="row">
             <h:panelGroup layout="block" styleClass="col-6">
-                <h:outputText value="#{labels.organization_settings}" styleClass="h2"/>
+                <h:outputText value="#{labels.organization_settings}" styleClass="d-block h2"/>
+                <h:outputText value="#{labels.organization_settings_description}"
+                              styleClass="text-justify text-muted d-block mb-3" />
                 <h:form id="f-organisation" enctype="multipart/form-data">
                     <!-- organization name -->
                     <h:panelGroup layout="block" styleClass="mb-3">
@@ -43,6 +47,7 @@
                                        styleClass="form-label"/>
                         <h:panelGroup layout="block" styleClass="form-group position-relative">
                             <h:inputText id="it-name"
+                                         required="true"
                                          value="#{adminBacker.organization.name}"
                                          a:maxlength="#{Constants.SMALL_FIELD}"
                                          a:placeholder="#{labels.organization_name_placeholder}"
@@ -85,6 +90,16 @@
                                     <h:message for="i-logo"/>
                                 </h:panelGroup>
                             </h:panelGroup>
+
+                            <h:panelGroup layout="block" id="p-attachments" styleClass="mb-3 form-group position-relative">
+                                <h:outputFormat id="ot-attachments-info" value="#{labels.organization_logo_hint}"
+                                                styleClass="small form-text text-muted">
+                                    <f:param value="#{Constants.MAX_AVATAR_FILESIZE}"/>
+                                    <f:param value="#{Constants.MIN_IMAGE_WIDTH}"/>
+                                    <f:param value="#{Constants.MIN_IMAGE_HEIGHT}"/>
+                                </h:outputFormat>
+                            </h:panelGroup>
+
                             <h:panelGroup styleClass="form-check">
                                 <h:selectBooleanCheckbox id="s-remove-logo"
                                                          valueChangeListener="#{adminBacker.removeLogo}"
@@ -136,9 +151,7 @@
                                 <h:message for="it-imprint"/>
                             </h:panelGroup>
                         </h:panelGroup>
-
                     </h:panelGroup>
-
 
                     <!-- organization privacy policy (Markdown) -->
                     <h:panelGroup layout="block" styleClass="mb-3">
@@ -189,9 +202,11 @@
 
             <!-- application configuration form -->
             <h:panelGroup layout="block" styleClass="col-6">
-                <h:outputText value="#{labels.configuration_settings}" styleClass="h2"/>
+                <h:outputText value="#{labels.configuration_settings}" styleClass="d-block h2"/>
+                <h:outputText value="#{labels.configuration_settings_description}"
+                              styleClass="text-justify text-muted d-block mb-3" />
                 <h:form id="f-configuration">
-                    <h:outputLabel value="Permissions" styleClass="form-label"/>
+                    <h:outputLabel value="#{labels.permissions}" styleClass="form-label"/>
                     <!-- guest reading policy -->
                     <h:panelGroup layout="block" styleClass="form-check mb-3">
                         <h:panelGroup layout="block" styleClass="form-group position-relative">
@@ -210,7 +225,6 @@
                             <h:outputLabel value="#{labels.guest_reading_detail}"/>
                         </h:panelGroup>
                     </h:panelGroup>
-
 
                     <!-- closed report policy -->
                     <h:panelGroup layout="block" styleClass="form-check mb-3">
@@ -232,7 +246,6 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-
                     <!-- user e-mail address format -->
                     <h:panelGroup layout="block" styleClass="mb-3">
                         <h:outputLabel id="o-user-email-format"
@@ -244,6 +257,7 @@
                                          value="#{adminBacker.configuration.userEmailFormat}"
                                          validator="regexValidator"
                                          a:maxlength="#{Constants.LARGE_FIELD}"
+                                         a:placeholder="#{labels.exempli_gratia} .+@.+"
                                          styleClass="form-control #{!facesContext.validationFailed ? ''
                                                  : component.valid ? 'is-valid' : 'is-invalid'}">
                                 <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>
@@ -265,6 +279,7 @@
                                        styleClass="form-label"/>
                         <h:panelGroup layout="block" styleClass="form-group position-relative">
                             <h:inputText id="it-voting-weight-definition"
+                                         required="true"
                                          value="#{adminBacker.configuration.votingWeightDefinition}"
                                          a:maxlength="#{Constants.LARGE_FIELD}"
                                          styleClass="form-control #{!facesContext.validationFailed ? ''
@@ -289,6 +304,7 @@
                                        styleClass="form-label"/>
                         <h:panelGroup layout="block" styleClass="form-group position-relative">
                             <h:inputTextarea id="it-allowed-file-extensions"
+                                             required="true"
                                              value="#{adminBacker.configuration.allowedFileExtensions}"
                                              a:maxlength="#{Constants.SMALL_AREA}"
                                              styleClass="form-control #{!facesContext.validationFailed ? ''
@@ -313,6 +329,7 @@
                                        styleClass="form-label"/>
                         <h:panelGroup layout="block" styleClass="form-group position-relative">
                             <h:inputText id="it-max-attachments-per-post"
+                                         required="true"
                                          value="#{adminBacker.configuration.maxAttachmentsPerPost}"
                                          styleClass="form-control #{!facesContext.validationFailed ? ''
                                                  : component.valid ? 'is-valid' : 'is-invalid'}"

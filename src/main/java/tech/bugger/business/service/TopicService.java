@@ -337,8 +337,8 @@ public class TopicService {
             topic = transaction.newTopicGateway().findTopic(topicID);
             transaction.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
-            log.error("The topic with id " + topicID + " could not be found.", e);
-            throw new tech.bugger.business.exception.NotFoundException(messagesBundle.getString("not_found_error"), e);
+            log.debug("The topic with id " + topicID + " could not be found.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while loading the topic with id " + topicID, e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));

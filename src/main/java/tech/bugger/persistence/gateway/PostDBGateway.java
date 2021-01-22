@@ -72,9 +72,6 @@ public class PostDBGateway implements PostGateway {
                     .integer(id)
                     .toStatement().executeQuery();
             if (rs.next()) {
-
-                int reportID = rs.getInt("report");
-
                 Post post = new Post(
                         id,
                         rs.getString("content"),
@@ -203,8 +200,14 @@ public class PostDBGateway implements PostGateway {
                     .integer(report.getId()).toStatement();
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
-                // TODO authorship, attachments
-                return new Post(rs.getInt("id"), rs.getString("content"), report.getId(), null, null);
+                Post post = new Post(
+                        rs.getInt("id"),
+                        rs.getString("content"),
+                        report.getId(),
+                        ReportDBGateway.getAuthorshipFromResultSet(rs, userGateway),
+                        null);
+                post.setAttachments(attachmentGateway.getAttachmentsForPost(post));
+                return post;
             } else {
                 log.error("Could not find first post of report " + report + ".");
                 throw new NotFoundException("Could not find first post of report " + report + ".");

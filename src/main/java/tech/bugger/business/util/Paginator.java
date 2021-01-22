@@ -33,7 +33,18 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      * @param itemsPerPage Number of items per page to display.
      */
     public Paginator(final String sortedBy, final Selection.PageSize itemsPerPage) {
-        this.selection = new Selection(0, 0, itemsPerPage, sortedBy, true);
+        this(sortedBy, itemsPerPage, true);
+    }
+
+    /**
+     * Constructs a paginator with the given parameters.
+     *
+     * @param sortedBy     Key of the column to initially sort by.
+     * @param itemsPerPage Number of items per page to display.
+     * @param ascending    Whether to sort in ascending order.
+     */
+    public Paginator(final String sortedBy, final Selection.PageSize itemsPerPage, final boolean ascending) {
+        this.selection = new Selection(0, 0, itemsPerPage, sortedBy, ascending);
         update();
     }
 

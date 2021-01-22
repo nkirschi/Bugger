@@ -113,8 +113,7 @@ public class HeaderBackerTest {
     public void testInit() throws IllegalAccessException, NoSuchFieldException {
         headerBacker.init();
         assertAll(
-                () -> assertEquals(user, headerBacker.getUser()),
-                () -> assertFalse(headerBacker.isDisplayMenu())
+                () -> assertEquals(user, headerBacker.getUser())
         );
     }
 

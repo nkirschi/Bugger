@@ -15,6 +15,32 @@
     <ui:define name="content">
         <h:form id="f-edit-post"
                 enctype="multipart/form-data">
+
+            <h:panelGroup rendered="#{postEditBacker.create}">
+                <p>
+                    <h:outputText value="#{labels.post_create_info} "/>
+                    <h:link value="###{postEditBacker.report.id} (#{postEditBacker.report.title})" outcome="pretty:report">
+                        <f:param name="id" value="#{postEditBacker.report.id}"/>
+                    </h:link>
+                    <h:outputText value="#{labels.post_create_info2}"/>
+                </p>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{not postEditBacker.create}">
+                <p>
+                    <h:outputText value="#{labels.post_edit_info} "/>
+                    <h:link value="###{postEditBacker.post.id}" outcome="pretty:report">
+                        <f:param name="id" value="#{postEditBacker.report.id}"/>
+                        <f:param name="p" value="#{postEditBacker.post.id}"/>
+                    </h:link>
+                    <h:outputText value=" #{labels.post_edit_info2} "/>
+                    <h:link value="###{postEditBacker.report.id} (#{postEditBacker.report.title})" outcome="pretty:report">
+                        <f:param name="id" value="#{postEditBacker.report.id}"/>
+                    </h:link>
+                    <h:outputText value="#{labels.post_edit_info3}"/>
+                </p>
+            </h:panelGroup>
+
             <h:panelGroup styleClass="row" layout="block">
                 <h:outputLabel id="o-post-content" for="it-content" value="#{labels.post_content}"/>
                 <h:inputTextarea id="it-content" value="#{postEditBacker.post.content}"

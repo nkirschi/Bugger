@@ -1,11 +1,9 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
@@ -15,7 +13,6 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
@@ -34,18 +31,18 @@ import java.util.List;
 @Named
 public class ReportCreateBacker implements Serializable {
 
+    @Serial
+    private static final long serialVersionUID = 6375834226080077144L;
+
     /**
      * The {@link Log} instance associated with this class for logging purposes.
      */
     private static final Log log = Log.forClass(ReportCreateBacker.class);
 
-    @Serial
-    private static final long serialVersionUID = 6375834226080077144L;
-
     /**
-     * The ID of the topic to create the report in.
+     * The topic to create the report in.
      */
-    private int topicID;
+    private Topic topic;
 
     /**
      * The report to create.
@@ -73,11 +70,6 @@ public class ReportCreateBacker implements Serializable {
     private boolean banned;
 
     /**
-     * The current application settings.
-     */
-    private final ApplicationSettings applicationSettings;
-
-    /**
      * The topic service giving access to topics.
      */
     private final TopicService topicService;
@@ -95,7 +87,7 @@ public class ReportCreateBacker implements Serializable {
     /**
      * The current user session.
      */
-    private UserSession session;
+    private final UserSession session;
 
     /**
      * The current {@link ExternalContext}.
@@ -103,33 +95,25 @@ public class ReportCreateBacker implements Serializable {
     private final ExternalContext ectx;
 
     /**
-     * Feedback event for user feedback.
-     */
-    private final Event<Feedback> feedbackEvent;
-
-    /**
      * Constructs a new report creation page backing bean with the necessary dependencies.
      *
-     * @param applicationSettings The current application settings.
      * @param topicService        The topic service to use.
      * @param reportService       The report service to use.
      * @param postService         The post service to use.
      * @param session             The current user session.
      * @param ectx                The current {@link ExternalContext} of the application.
-     * @param feedbackEvent       The feedback event to use for user feedback.
      */
     @Inject
-    public ReportCreateBacker(final ApplicationSettings applicationSettings, final TopicService topicService,
-                              final ReportService reportService, final PostService postService,
-                              final UserSession session, final ExternalContext ectx,
-                              final Event<Feedback> feedbackEvent) {
-        this.applicationSettings = applicationSettings;
+    public ReportCreateBacker(final TopicService topicService,
+                              final ReportService reportService,
+                              final PostService postService,
+                              final UserSession session,
+                              final ExternalContext ectx) {
         this.topicService = topicService;
         this.reportService = reportService;
         this.postService = postService;
         this.session = session;
         this.ectx = ectx;
-        this.feedbackEvent = feedbackEvent;
         this.banned = true;
     }
 
@@ -140,6 +124,7 @@ public class ReportCreateBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        int topicID;
         try {
             topicID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
@@ -149,8 +134,8 @@ public class ReportCreateBacker implements Serializable {
         }
 
         User user = session.getUser();
-        Topic topic = topicService.getTopicByID(topicID);
-        if (user == null || topic == null || !topicService.canCreateReportIn(user, topic)) {
+        topic = topicService.getTopicByID(topicID);
+        if (topic == null || !topicService.canCreateReportIn(user, topic)) {
             redirectTo404Page();
             return;
         }
@@ -203,7 +188,7 @@ public class ReportCreateBacker implements Serializable {
         try {
             ectx.redirect(ectx.getRequestContextPath() + "/error");
         } catch (IOException e) {
-            throw new InternalError("Redirection to error page failed.");
+            log.debug("Redirection to error page failed.");
         }
     }
 
@@ -217,21 +202,21 @@ public class ReportCreateBacker implements Serializable {
     }
 
     /**
-     * Returns the ID of the topic the report is to be created in.
+     * Returns the topic the report is to be created in.
      *
-     * @return The ID of the topic the report is to be created in.
+     * @return The topic the report is to be created in.
      */
-    public int getTopicID() {
-        return topicID;
+    public Topic getTopic() {
+        return topic;
     }
 
     /**
-     * Sets the ID of the topic the report is to be created in.
+     * Sets the topic the report is to be created in.
      *
-     * @param topicID The ID of the topic the report is to be created in.
+     * @param topic The topic the report is to be created in.
      */
-    public void setTopicID(final int topicID) {
-        this.topicID = topicID;
+    public void setTopic(final Topic topic) {
+        this.topic = topic;
     }
 
     /**

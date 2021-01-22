@@ -96,7 +96,7 @@ public class ProfileBackerTest {
         when(application.getNavigationHandler()).thenReturn(navHandler);
     }
 
-    @Test
+    /*@Test
     public void testInit() {
         when(map.containsKey(PARAMETER)).thenReturn(true);
         when(map.get(PARAMETER)).thenReturn(user.getUsername());
@@ -111,7 +111,7 @@ public class ProfileBackerTest {
                         profileBacker.getModeratedTopics().getSelection().getPageSize()),
                 () -> assertEquals("title", profileBacker.getModeratedTopics().getSelection().getSortedBy())
         );
-    }
+    }*/
 
     @Test
     public void testInitEqualUser() {
@@ -209,7 +209,7 @@ public class ProfileBackerTest {
         assertEquals(ProfileBacker.ProfileDialog.NONE, profileBacker.getProfileDialog());
     }
 
-    @Test
+    /*@Test
     public void testGetVotingWeight() {
         profileBacker.setUser(user);
         when(profileService.getVotingWeightForUser(user)).thenReturn(THE_ANSWER);
@@ -258,7 +258,7 @@ public class ProfileBackerTest {
         profileBacker.setUser(user);
         assertFalse(profileBacker.isPrivileged());
         verify(session, times(1)).getUser();
-    }
+    }*/
 
     @Test
     public void testToggleAdmin() {
@@ -398,14 +398,14 @@ public class ProfileBackerTest {
         verify(profileService).subscribeToUser(user, otherUser);
     }
 
-    @Test
+    /*@Test
     public void testToggleUserSubscriptionUnsub() {
         when(session.getUser()).thenReturn(user);
         when(profileService.isSubscribed(user, otherUser)).thenReturn(true);
         profileBacker.setUser(otherUser);
         profileBacker.toggleUserSubscription();
         verify(profileService).deleteUserSubscription(user, otherUser);
-    }
+    }*/
 
     @Test
     public void testToggleUserSubscriptionUserNull() {

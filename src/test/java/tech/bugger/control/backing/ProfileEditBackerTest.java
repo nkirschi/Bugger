@@ -222,12 +222,6 @@ public class ProfileEditBackerTest {
     }
 
     @Test
-    public void testInitSessionUserNull() {
-        profileEditBacker.init();
-        verify(navHandler).handleNavigation(any(), any(), any());
-    }
-
-    @Test
     public void testInitGetUserNull() {
         when(session.getUser()).thenReturn(user);
         profileEditBacker.init();

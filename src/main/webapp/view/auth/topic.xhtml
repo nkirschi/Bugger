@@ -50,22 +50,27 @@
                     <h:panelGroup layout="block" styleClass="row">
                         <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
                     </h:panelGroup>
-                    <!-- statistik link -->
-                    <h:panelGroup class="row" layout="block">
+                    <h:panelGroup styleClass="row" layout="block">
+                        <h:panelGroup layout="block" styleClass="col-12">
+                            <h:outputLabel value="#{labels.id}:&#xA0;" for="ot-id"/>
+                            <h:outputText id="ot-id" value="!#{topicBacker.topicID}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup styleClass="row" layout="block">
                         <h:panelGroup layout="block" styleClass="col-12">
                             <h:outputLabel value="#{labels.topic_show_open_reports}:"/>
                             <h:selectBooleanCheckbox id="s-showOpen" value="#{topicBacker.openReportShown}"
                                                      styleClass="form-check-input"/>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup class="row" layout="block">
+                    <h:panelGroup styleClass="row" layout="block">
                         <h:panelGroup layout="block" styleClass="col-12">
                             <h:outputLabel value="#{labels.topic_show_closed_reports}:"/>
                             <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"
                                                      styleClass="form-check-input"/>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup class="row" layout="block">
+                    <h:panelGroup styleClass="row" layout="block">
                         <h:panelGroup layout="block" styleClass="col-sm-12">
                             <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}"
                                              styleClass="btn btn-primary" value="#{labels.apply_filter}"/>
@@ -82,9 +87,14 @@
                 <b:pagitable paginator="#{topicBacker.moderators}" simple="true">
                     <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
                     <h:column>
-                        <h:link value="#{var.username}" outcome="pretty:profile">
-                            <f:param name="u" value="#{var.username}"/>
-                        </h:link>
+                        <h:panelGroup styleClass="text-nowrap">
+                            <h:outputLink value="/faces/view/auth/profile.xhtml">
+                                <h:graphicImage styleClass="img-size-mini me-2 rounded-circle"
+                                                value="/avatar?u=#{var.username}&amp;type=thumbnail"
+                                                alt="#{var.username}'s avatar"/>#{var.username}
+                                <f:param name="u" value="#{var.username}"/>
+                            </h:outputLink>
+                        </h:panelGroup>
                     </h:column>
                     <h:column>
                         <h:commandLink id="l-demote-user" action="#{topicBacker.unmodSingleUser(var.username)}"
@@ -99,11 +109,13 @@
                 <h:form id="f-moderator-status">
                     <h:commandLink id="l-promote" action="#{topicBacker.openModDialog}" styleClass="button"
                                    rendered="#{topicBacker.moderator}">
-                        <h:graphicImage id="g-promote" value="/resources/images/add.png" alt="Button to promote moderators"/>
+                        <h:graphicImage id="g-promote" value="/resources/images/add.png"
+                                        alt="Button to promote moderators"/>
                     </h:commandLink>
                     <h:commandLink id="l-demote" action="#{topicBacker.openUnmodDialog}" styleClass="button"
                                    rendered="#{topicBacker.moderator and topicBacker.moderators.selection.totalSize gt 0}">
-                        <h:graphicImage id="g-demote" value="/resources/images/delete.png" alt="Button to demote moderators"/>
+                        <h:graphicImage id="g-demote" value="/resources/images/delete.png"
+                                        alt="Button to demote moderators"/>
                     </h:commandLink>
                 </h:form>
             </h:panelGroup>
@@ -116,9 +128,14 @@
                 <b:pagitable paginator="#{topicBacker.bannedUsers}" simple="true">
                     <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
                     <h:column>
-                        <h:link value="#{var.username}" outcome="pretty:profile">
-                            <f:param name="u" value="#{var.username}"/>
-                        </h:link>
+                        <h:panelGroup styleClass="text-nowrap">
+                            <h:outputLink value="/faces/view/auth/profile.xhtml">
+                                <h:graphicImage styleClass="img-size-mini me-2 rounded-circle"
+                                                value="/avatar?u=#{var.username}&amp;type=thumbnail"
+                                                alt="#{var.username}'s avatar"/>#{var.username}
+                                <f:param name="u" value="#{var.username}"/>
+                            </h:outputLink>
+                        </h:panelGroup>
                     </h:column>
                     <h:column>
                         <h:commandLink id="l-unban-user" action="#{topicBacker.unbanSingleUser(var.username)}"
@@ -169,11 +186,13 @@
                     <b:column title="#{labels.col_duplicate}" paginator="#{topicBacker.reports}" key="duplicate_of">
                         <h:outputText value="#{var.duplicateOf}"/>
                     </b:column>
-                    <b:column title="#{labels.col_relevance}" paginator="#{topicBacker.reports}" key="relevance" >
+                    <b:column title="#{labels.col_relevance}" paginator="#{topicBacker.reports}" key="relevance">
                         <h:outputText value="#{var.relevance}"/>
                     </b:column>
                     <b:column title="#{labels.last_activity}" paginator="#{topicBacker.reports}" key="last_modified_at">
-                        <h:outputText value="#{var.authorship.creationDate}"/>
+                        <h:outputText value="#{var.authorship.creationDate}" styleClass="text-nowrap">
+                            <f:convertDateTime type="offsetDateTime" pattern="#{labels.date_time_pattern}"/>
+                        </h:outputText>
                     </b:column>
                 </b:pagitable>
             </h:panelGroup>
