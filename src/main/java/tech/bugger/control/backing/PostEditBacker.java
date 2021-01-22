@@ -4,6 +4,7 @@ import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
@@ -111,43 +112,36 @@ public class PostEditBacker implements Serializable {
     void init() {
         User user = session.getUser();
         if (user == null) {
-            redirectToErrorPage();
-            return;
+            throw new Error404Exception();
         }
 
         create = fctx.getExternalContext().getRequestParameterMap().containsKey("c");
         if (create) {
             Integer reportID = parseRequestParameter("r");
             if (reportID == null) {
-                redirectToErrorPage();
-                return;
+                throw new Error404Exception();
             }
             report = reportService.getReportByID(reportID);
             if (report == null || !reportService.canPostInReport(user, report)) {
-                redirectToErrorPage();
-                return;
+                throw new Error404Exception();
             }
             Authorship authorship = new Authorship(user, null, user, null);
             post = new Post(0, "", report.getId(), authorship, attachments);
         } else {
             Integer postID = parseRequestParameter("p");
             if (postID == null) {
-                redirectToErrorPage();
-                return;
+                throw new Error404Exception();
             }
             post = postService.getPostByID(postID);
             if (post == null) {
-                redirectToErrorPage();
-                return;
+                throw new Error404Exception();
             }
             report = reportService.getReportByID(post.getReport());
             if (report == null) {
-                redirectToErrorPage();
-                return;
+                throw new Error404Exception();
             }
             if (!postService.isPrivileged(user, post, report)) {
-                redirectToErrorPage();
-                return;
+                throw new Error404Exception();
             }
 
             attachments = post.getAttachments();
@@ -166,7 +160,7 @@ public class PostEditBacker implements Serializable {
             try {
                 ectx.redirect(ectx.getRequestContextPath() + "/report?p=" + post.getId() + "#post-" + post.getId());
             } catch (IOException e) {
-                redirectToErrorPage();
+                throw new InternalError("Redirection failed.", e);
             }
         }
     }
@@ -201,13 +195,6 @@ public class PostEditBacker implements Serializable {
         } catch (NumberFormatException e) {
             return null;
         }
-    }
-
-    /**
-     * Redirects the user to the error page.
-     */
-    private void redirectToErrorPage() {
-        fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
     }
 
     /**

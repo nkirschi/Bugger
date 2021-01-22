@@ -6,6 +6,7 @@ import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
@@ -144,15 +145,13 @@ public class ReportCreateBacker implements Serializable {
             topicID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
             // Topic ID parameter not given or invalid.
-            redirectTo404Page();
-            return;
+            throw new Error404Exception();
         }
 
         User user = session.getUser();
         Topic topic = topicService.getTopicByID(topicID);
         if (user == null || topic == null || !topicService.canCreateReportIn(user, topic)) {
-            redirectTo404Page();
-            return;
+            throw new Error404Exception();
         }
 
         banned = false;
@@ -173,7 +172,7 @@ public class ReportCreateBacker implements Serializable {
             try {
                 ectx.redirect(ectx.getRequestContextPath() + "/report?id=" + report.getId());
             } catch (IOException e) {
-                redirectTo404Page();
+                throw new InternalError("Redirect failed.", e);
             }
         }
     }
@@ -193,18 +192,6 @@ public class ReportCreateBacker implements Serializable {
      */
     public void deleteAllAttachments() {
         attachments.clear();
-    }
-
-    /**
-     * Redirects the user to a 404 page.
-     */
-    private void redirectTo404Page() {
-        // This will be subject to change when the error page is implemented.
-        try {
-            ectx.redirect(ectx.getRequestContextPath() + "/error");
-        } catch (IOException e) {
-            throw new InternalError("Redirection to error page failed.");
-        }
     }
 
     /**

@@ -4,6 +4,7 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.util.MarkdownHandler;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
@@ -173,8 +174,7 @@ public class ProfileEditBacker implements Serializable {
         }
 
         if (session.getUser() == null) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
-            return;
+            throw new Error404Exception();
         }
         dialog = ProfileEditDialog.NONE;
 
@@ -196,7 +196,7 @@ public class ProfileEditBacker implements Serializable {
         }
 
         if (user == null) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            throw new Error404Exception();
         } else {
             emailNew = user.getEmailAddress();
             usernameNew = user.getUsername();
@@ -219,7 +219,7 @@ public class ProfileEditBacker implements Serializable {
             profileService.updateUser(updateUser);
         } else {
             log.error("The token " + token + " was invalid for updating the email address.");
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
+            throw new InternalError("The token " + token + " was invalid for updating the email address.");
         }
     }
 

@@ -17,6 +17,7 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Registry;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
@@ -110,8 +111,7 @@ public class ReportEditBacker implements Serializable {
             reportID = Integer.parseInt(fctx.getExternalContext().getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
             // Report ID parameter not given or invalid.
-            redirectTo404Page();
-            return;
+            throw new Error404Exception();
         }
 
         report = reportService.getReportByID(reportID);
@@ -120,13 +120,11 @@ public class ReportEditBacker implements Serializable {
             destinationID = report.getTopicID();
             currentTopic = topicService.getTopicByID(destinationID);
         } else {
-            redirectTo404Page();
-            return;
+            throw new Error404Exception();
         }
 
         if (!isPrivileged()) {
-            redirectTo404Page();
-            return;
+            throw new Error404Exception();
         }
 
         report.getAuthorship().setModifier(user);
@@ -184,7 +182,7 @@ public class ReportEditBacker implements Serializable {
             try {
                 ectx.redirect(ectx.getRequestContextPath() + "/report?id=" + report.getId());
             } catch (IOException e) {
-                redirectTo404Page();
+                throw new InternalError("Redirect failed.", e);
             }
         }
     }
@@ -224,19 +222,6 @@ public class ReportEditBacker implements Serializable {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Redirects the user to a 404 page.
-     */
-    private void redirectTo404Page() {
-        // This will be subject to change when the error page is implemented.
-        try {
-            ExternalContext ectx = fctx.getExternalContext();
-            ectx.redirect(ectx.getRequestContextPath() + "/error");
-        } catch (IOException e) {
-            throw new InternalError("Redirection to error page failed.");
-        }
     }
 
     /**
