@@ -2,6 +2,7 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
 
@@ -11,12 +12,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.TopicService;
-import tech.bugger.control.exception.Error404Exception;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
 import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
