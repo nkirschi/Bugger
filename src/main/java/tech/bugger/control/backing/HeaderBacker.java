@@ -162,26 +162,10 @@ public class HeaderBacker implements Serializable {
      *
      * @return The location to redirect to.
      */
-    public String executeSearch() {
-        try {
-            ExternalContext ectx = fctx.getExternalContext();
-            ectx.redirect(ectx.getRequestContextPath() + "/search?q=" + search);
-        } catch (IOException e) {
-            redirectTo404Page();
-        }
+    public String executeSearch() throws IOException {
+        ExternalContext ectx = fctx.getExternalContext();
+        ectx.redirect(ectx.getRequestContextPath() + "/search?q=" + search);
         return null;
-    }
-
-    /**
-     * Redirects the user to a 404 page.
-     */
-    private void redirectTo404Page() {
-        try {
-            ExternalContext ectx = fctx.getExternalContext();
-            ectx.redirect(ectx.getRequestContextPath() + "/error");
-        } catch (IOException e) {
-            throw new InternalError("Redirection to error page failed.");
-        }
     }
 
     /**
@@ -206,7 +190,7 @@ public class HeaderBacker implements Serializable {
     public String determineAlertClass() {
         if (!fctx.getMessageList(null).isEmpty()) {
             FacesMessage.Severity maxSeverity = fctx.getMessageList().stream().map(FacesMessage::getSeverity)
-                                                    .max(FacesMessage.Severity::compareTo).orElseThrow();
+                    .max(FacesMessage.Severity::compareTo).orElseThrow();
             if (maxSeverity.equals(FacesMessage.SEVERITY_ERROR)) {
                 return " alert-danger";
             } else if (maxSeverity.equals(FacesMessage.SEVERITY_WARN)) {

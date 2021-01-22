@@ -7,6 +7,7 @@ import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
@@ -204,27 +205,23 @@ public class ReportBacker implements Serializable {
             try {
                 postID = Integer.parseInt(ectx.getRequestParameterMap().get("p"));
             } catch (NumberFormatException e) {
-                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-                return;
+                throw new Error404Exception();
             }
             reportID = reportService.findReportOfPost(postID);
         } else {
             if (!ectx.getRequestParameterMap().containsKey("id")) {
-                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-                return;
+                throw new Error404Exception();
             }
             try {
                 reportID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
             } catch (NumberFormatException e) {
-                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-                return;
+                throw new Error404Exception();
             }
         }
 
         report = reportService.getReportByID(reportID);
         if (report == null) { // no report with this ID
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-            return;
+            throw new Error404Exception();
         }
         topic = topicService.getTopicByID(report.getTopicID());
         if (topic == null) { // this should never happen!
@@ -242,8 +239,7 @@ public class ReportBacker implements Serializable {
 
         // disallow access for banned users if guest mode is inactive
         if (!applicationSettings.getConfiguration().isGuestReading() && session.getUser() != null && banned) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-            return;
+            throw new Error404Exception();
         }
 
         posts = new Paginator<>("created_at", Selection.PageSize.NORMAL) {
@@ -279,8 +275,8 @@ public class ReportBacker implements Serializable {
                     posts.nextPage();
                 } catch (IllegalStateException e) {
                     log.error("Could not find post with ID " + postID + " when displaying report page.");
-                    fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-                    return;
+                    throw new Error404Exception("Could not find post with ID " + postID
+                            + " when displaying report page.", e);
                 }
             }
         }
@@ -295,8 +291,7 @@ public class ReportBacker implements Serializable {
 
         report = reportService.getReportByID(report.getId());
         if (report == null) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-            return;
+            throw new Error404Exception();
         }
         if (session.getUser() != null) {
             upvoted = reportService.hasUpvoted(report, session.getUser());
@@ -448,7 +443,7 @@ public class ReportBacker implements Serializable {
             updateRelevance();
             return null;
         }
-        return "pretty:error";
+        throw new Error404Exception();
     }
 
     /**

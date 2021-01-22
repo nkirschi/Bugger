@@ -1,12 +1,17 @@
 package tech.bugger.control.backing;
 
+import tech.bugger.control.exception.Error404Exception;
+import tech.bugger.control.util.JFConfig;
+import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.StoreException;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
-import javax.inject.Inject;
 import javax.inject.Named;
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.global.util.Log;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Backing Bean for the error page.
@@ -21,98 +26,70 @@ public class ErrorBacker {
     private static final Log log = Log.forClass(ErrorBacker.class);
 
     /**
-     * The current admin email.
-     */
-    private String adminMail;
-
-    /**
-     * The current title.
-     */
-    private String title;
-
-    /**
-     * The current description.
-     */
-    private String description;
-
-    /**
-     * The current stack trace.
-     */
-    private String stackTrace;
-
-    /**
-     * The current user session.
-     */
-    @Inject
-    private UserSession session;
-
-    /**
-     * The current faces context.
-     */
-    @Inject
-    private FacesContext fctx;
-
-    /**
      * Initializes the error page.
      */
     @PostConstruct
-    public void init() {
+    void init() {
+        log.debug("init called on error backer.");
     }
 
     /**
-     * @return The adminMail.
+     * Throws a StoreException for testing purposes.
+     *
+     * @return Never returns.
      */
-    public String getAdminMail() {
-        return adminMail;
+    public String throwStoreException() {
+        throw new StoreException("Test exception thrown from error backer.");
     }
 
     /**
-     * @param adminMail The adminMail to set.
+     * Throws an InternalError for testing purposes.
+     *
+     * @return Never returns.
      */
-    public void setAdminMail(final String adminMail) {
-        this.adminMail = adminMail;
+    public String throwInternalError() {
+        throw new InternalError("Test internal error thrown from error backer.");
     }
 
     /**
-     * @return The title.
+     * Throws an IOException for testing purposes.
+     *
+     * @return Never returns.
      */
-    public String getTitle() {
-        return title;
+    public String throwIOException() throws IOException {
+        throw new IOException("Test exception thrown from error backer.");
     }
 
     /**
-     * @param title The title to set.
+     * Throws an Error404Exception for testing purposes.
+     *
+     * @return Never returns.
      */
-    public void setTitle(final String title) {
-        this.title = title;
+    public String throw404Exception() {
+        throw new Error404Exception("Test exception thrown from error backer.");
     }
 
     /**
-     * @return The description.
+     * Returns the stack trace of the given exception as a String.
+     *
+     * @param exception The given exception.
+     * @return The stack trace as a String.
      */
-    public String getDescription() {
-        return description;
+    public static String stackTrace(final Throwable exception) {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+        exception.printStackTrace(printWriter);
+        return stringWriter.toString();
     }
 
     /**
-     * @param description The description to set.
+     * Returns a link leading to the home page.
+     *
+     * @return The link leading to the home page.
      */
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-
-    /**
-     * @return The stackTrace.
-     */
-    public String getStackTrace() {
-        return stackTrace;
-    }
-
-    /**
-     * @param stackTrace The stackTrace to set.
-     */
-    public void setStackTrace(final String stackTrace) {
-        this.stackTrace = stackTrace;
+    public static String goHome() {
+        log.debug("go home called in error backer");
+        return JFConfig.getApplicationPath(FacesContext.getCurrentInstance().getExternalContext()) + "/";
     }
 
 }

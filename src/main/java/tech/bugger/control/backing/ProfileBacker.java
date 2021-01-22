@@ -5,6 +5,7 @@ import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
@@ -178,8 +179,7 @@ public class ProfileBacker implements Serializable {
             if (session.getUser() != null) {
                 username = session.getUser().getUsername();
             } else {
-                fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
-                return;
+                throw new Error404Exception();
             }
         }
 
@@ -189,8 +189,7 @@ public class ProfileBacker implements Serializable {
         user = profileService.getUserByUsername(username);
 
         if (user == null) {
-            fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
-            return;
+            throw new Error404Exception();
         }
 
         User sessionUser = session.getUser();
