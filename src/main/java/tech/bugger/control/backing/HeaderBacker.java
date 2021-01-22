@@ -161,7 +161,6 @@ public class HeaderBacker implements Serializable {
      * @return The location to redirect to.
      */
     public String executeSearch() throws IOException {
-        ExternalContext ectx = fctx.getExternalContext();
         ectx.redirect(ectx.getRequestContextPath() + "/search?q=" + search);
         return null;
     }

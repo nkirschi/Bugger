@@ -65,9 +65,8 @@ public class PasswordForgotBackerTest {
     @BeforeEach
     public void setUp() throws Exception {
         lenient().doReturn(request).when(ectx).getRequest();
-        lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(Locale.GERMAN).when(userSession).getLocale();
-        backer = new PasswordForgotBacker(authenticationService, profileService, userSession, fctx, feedbackEvent,
+        backer = new PasswordForgotBacker(authenticationService, profileService, userSession, fctx, ectx, feedbackEvent,
                 ResourceBundleMocker.mock(""));
         testUser1 = new User();
         testUser2 = new User();

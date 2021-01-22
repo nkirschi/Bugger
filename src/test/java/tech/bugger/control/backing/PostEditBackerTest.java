@@ -6,10 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javax.faces.application.Application;
-import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.servlet.http.Part;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,19 +47,10 @@ public class PostEditBackerTest {
     private UserSession session;
 
     @Mock
-    private FacesContext fctx;
-
-    @Mock
     private ExternalContext ectx;
 
     @Mock
     private Map<String, String> requestParameterMap;
-
-    @Mock
-    private Application app;
-
-    @Mock
-    private NavigationHandler navigationHandler;
 
     @Mock
     private Configuration configuration;
@@ -75,7 +63,7 @@ public class PostEditBackerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        postEditBacker = new PostEditBacker(applicationSettings, reportService, postService, session, fctx);
+        postEditBacker = new PostEditBacker(applicationSettings, reportService, postService, session, ectx);
 
         List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         report = new Report(1234, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
@@ -86,10 +74,7 @@ public class PostEditBackerTest {
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
 
-        lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
-        lenient().doReturn(app).when(fctx).getApplication();
-        lenient().doReturn(navigationHandler).when(app).getNavigationHandler();
         lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
     }
 
@@ -234,13 +219,13 @@ public class PostEditBackerTest {
     }
 
     @Test
-    public void testSaveChangesNoSuccess() {
+    public void testSaveChangesNoSuccess() throws Exception {
         postEditBacker.setPost(post);
         postEditBacker.setReport(report);
         postEditBacker.setCreate(false);
         doReturn(false).when(postService).updatePost(post, report);
         postEditBacker.saveChanges();
-        verify(fctx, times(0)).getApplication();
+        verify(ectx, times(0)).redirect(any());
     }
 
     @Test

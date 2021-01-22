@@ -61,7 +61,8 @@ public class AdminBacker {
      * @param ectx                The current {@link ExternalContext} of the application.
      */
     @Inject
-    public AdminBacker(final ApplicationSettings applicationSettings, final SettingsService settingsService,
+    public AdminBacker(final ApplicationSettings applicationSettings,
+                       final SettingsService settingsService,
                        final ExternalContext ectx) {
         this.applicationSettings = applicationSettings;
         this.settingsService = settingsService;

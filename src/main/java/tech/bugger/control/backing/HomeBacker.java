@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.time.OffsetDateTime;
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -54,18 +53,27 @@ public class HomeBacker implements Serializable {
     private final TopicService topicService;
 
     /**
+     * The current external context.
+     */
+    private final ExternalContext ectx;
+
+    /**
      * Constructs a new home page backing bean.
      *
      * @param session             The current user session.
      * @param notificationService The notification service to use.
      * @param topicService        The topic service to use.
+     * @param ectx                The current external context.
      */
     @Inject
-    public HomeBacker(final UserSession session, final NotificationService notificationService,
-                      final TopicService topicService) {
+    public HomeBacker(final UserSession session,
+                      final NotificationService notificationService,
+                      final TopicService topicService,
+                      final ExternalContext ectx) {
         this.session = session;
         this.notificationService = notificationService;
         this.topicService = topicService;
+        this.ectx = ectx;
     }
 
     /**
@@ -119,7 +127,6 @@ public class HomeBacker implements Serializable {
      */
     public String openNotification(final Notification notification) {
         notificationService.markAsRead(notification);
-        ExternalContext ext = FacesContext.getCurrentInstance().getExternalContext();
         String query = "/report?";
         if (notification.getPostID() != null) {
             query += "p=" + notification.getPostID() + "#post-" + notification.getPostID();
@@ -128,7 +135,7 @@ public class HomeBacker implements Serializable {
         }
 
         try {
-            ext.redirect(ext.getApplicationContextPath() + query);
+            ectx.redirect(ectx.getApplicationContextPath() + query);
         } catch (IOException e) {
             return "pretty:error";
         }

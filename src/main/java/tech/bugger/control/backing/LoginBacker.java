@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -56,18 +57,27 @@ public class LoginBacker {
     private final FacesContext fctx;
 
     /**
+     * The current external context.
+     */
+    private final ExternalContext ectx;
+
+    /**
      * Constructs a new login page backing bean with the necessary dependencies.
      *
      * @param authenticationService The authentication service to use.
      * @param session               The current {@link UserSession}.
      * @param fctx                  The current faces context.
+     * @param ectx                  The current external context.
      */
     @Inject
-    public LoginBacker(final AuthenticationService authenticationService, final UserSession session,
-                       final FacesContext fctx) {
+    public LoginBacker(final AuthenticationService authenticationService,
+                       final UserSession session,
+                       final FacesContext fctx,
+                       final ExternalContext ectx) {
         this.authenticationService = authenticationService;
         this.session = session;
         this.fctx = fctx;
+        this.ectx = ectx;
     }
 
     /**
@@ -79,7 +89,7 @@ public class LoginBacker {
             fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:home");
         }
 
-        redirectURL = fctx.getExternalContext().getRequestParameterMap().get("url");
+        redirectURL = ectx.getRequestParameterMap().get("url");
         log.debug("Will try to redirect to " + redirectURL);
     }
 
@@ -101,7 +111,7 @@ public class LoginBacker {
             try {
                 String url = URLDecoder.decode(redirectURL, StandardCharsets.UTF_8);
                 log.debug("Redirecting user to " + url);
-                fctx.getExternalContext().redirect(url);
+                ectx.redirect(url);
                 return null;
             } catch (IOException e) {
                 // Ignore the exception and just go to the home page

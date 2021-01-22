@@ -6,13 +6,10 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
@@ -43,28 +40,16 @@ class HomeBackerTest {
     private TopicService topicService;
 
     @Mock
-    private FacesContext fctx;
-
-    @Mock
-    private ExternalContext ext;
+    private ExternalContext ectx;
 
     private final Topic testTopic1 = new Topic(1, "Hi", "senberg");
     private final Topic testTopic2 = new Topic(2, "Hi", "performance");
     private final Topic testTopic3 = new Topic(3, "Hi", "de and seek");
     private final Notification notification = new Notification();
-    private static MockedStatic<FacesContext> facesMock;
 
     @BeforeEach
     public void setUp() {
-        this.homeBacker = new HomeBacker(session, notificationService, topicService);
-        facesMock = mockStatic(FacesContext.class);
-        facesMock.when(FacesContext::getCurrentInstance).thenReturn(fctx);
-        lenient().doReturn(ext).when(fctx).getExternalContext();
-    }
-
-    @AfterEach
-    public void tearDown() {
-        facesMock.close();
+        this.homeBacker = new HomeBacker(session, notificationService, topicService, ectx);
     }
 
     @Test
@@ -106,19 +91,19 @@ class HomeBackerTest {
     public void testOpenNotification() throws IOException {
         notification.setPostID(100);
         assertNull(homeBacker.openNotification(notification));
-        verify(ext).redirect(any());
+        verify(ectx).redirect(any());
     }
 
     @Test
     public void testOpenNotificationPostIdNull() throws IOException {
         notification.setTopicID(100);
         assertNull(homeBacker.openNotification(notification));
-        verify(ext).redirect(any());
+        verify(ectx).redirect(any());
     }
 
     @Test
     public void testOpenNotificationIOException() throws IOException {
-        doThrow(IOException.class).when(ext).redirect(any());
+        doThrow(IOException.class).when(ectx).redirect(any());
         notification.setPostID(100);
         assertEquals("pretty:error", homeBacker.openNotification(notification));
     }

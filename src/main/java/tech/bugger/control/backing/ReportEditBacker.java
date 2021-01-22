@@ -64,9 +64,14 @@ public class ReportEditBacker implements Serializable {
     private final UserSession session;
 
     /**
-     * The current {@link ExternalContext}.
+     * The current {@link FacesContext}.
      */
     private final FacesContext fctx;
+
+    /**
+     * The current {@link ExternalContext}.
+     */
+    private final ExternalContext ectx;
 
     /**
      * Resource bundle for feedback message.
@@ -106,6 +111,7 @@ public class ReportEditBacker implements Serializable {
      * @param reportService       The report service to use.
      * @param session             The current user session.
      * @param fctx                The current {@link FacesContext} of the application.
+     * @param ectx                The current {@link ExternalContext} of the application.
      * @param registry            The dependency registry to use.
      */
     @Inject
@@ -114,12 +120,14 @@ public class ReportEditBacker implements Serializable {
                             final ReportService reportService,
                             final UserSession session,
                             final FacesContext fctx,
+                            final ExternalContext ectx,
                             final Registry registry) {
         this.applicationSettings = applicationSettings;
         this.topicService = topicService;
         this.reportService = reportService;
         this.session = session;
         this.fctx = fctx;
+        this.ectx = ectx;
         this.messagesBundle = registry.getBundle("messages", session.getLocale());
     }
 
@@ -130,7 +138,7 @@ public class ReportEditBacker implements Serializable {
     @PostConstruct
     void init() {
         try {
-            reportID = Integer.parseInt(fctx.getExternalContext().getRequestParameterMap().get("id"));
+            reportID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
             // Report ID parameter not given or invalid.
             throw new Error404Exception();
@@ -195,7 +203,6 @@ public class ReportEditBacker implements Serializable {
         }
 
         if (success && reportService.updateReport(report)) {
-            ExternalContext ectx = fctx.getExternalContext();
             try {
                 ectx.redirect(ectx.getRequestContextPath() + "/report?id=" + report.getId());
             } catch (IOException e) {

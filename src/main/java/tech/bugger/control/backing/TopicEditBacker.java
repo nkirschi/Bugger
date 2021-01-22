@@ -5,7 +5,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -51,19 +50,28 @@ public class TopicEditBacker implements Serializable {
     private final transient TopicService topicService;
 
     /**
-     * The current faces context.
+     * The current external context.
      */
-    private final FacesContext fctx;
+    private final ExternalContext ectx;
 
     /**
      * The current user session.
      */
     private final UserSession session;
 
+    /**
+     * Constructs a new topic page backing bean with the necessary dependencies.
+     *
+     * @param topicService The topic service to use.
+     * @param ectx         The current {@link ExternalContext} of the application.
+     * @param session      The current {@link UserSession}.
+     */
     @Inject
-    TopicEditBacker(final TopicService topicService, final FacesContext fctx, final UserSession session) {
+    public TopicEditBacker(final TopicService topicService,
+                           final ExternalContext ectx,
+                           final UserSession session) {
         this.topicService = topicService;
-        this.fctx = fctx;
+        this.ectx = ectx;
         this.session = session;
     }
 
@@ -72,14 +80,13 @@ public class TopicEditBacker implements Serializable {
      * page did not exist.
      */
     @PostConstruct
-    public void init() {
-        ExternalContext ext = fctx.getExternalContext();
-        if (session.getUser() == null || !session.getUser().isAdministrator()) {
+    void init() {
+        if (!session.getUser().isAdministrator()) {
             throw new Error404Exception();
         }
-        if (ext.getRequestParameterMap().containsKey("id") && ext.getRequestParameterMap().get("id") != null) {
+        if (ectx.getRequestParameterMap().containsKey("id") && ectx.getRequestParameterMap().get("id") != null) {
             try {
-                topicID = Integer.parseInt(fctx.getExternalContext().getRequestParameterMap().get("id"));
+                topicID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
             } catch (NumberFormatException e) {
                 // Report ID parameter not valid.
                 throw new Error404Exception();
@@ -106,7 +113,6 @@ public class TopicEditBacker implements Serializable {
         }
         if (success) {
             log.debug(topic.toString());
-            ExternalContext ectx = fctx.getExternalContext();
             ectx.redirect(ectx.getRequestContextPath() + "/topic?id=" + topic.getId());
         } else {
             throw new Error404Exception();

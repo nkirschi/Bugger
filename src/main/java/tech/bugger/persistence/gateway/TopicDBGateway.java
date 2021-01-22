@@ -420,14 +420,12 @@ public class TopicDBGateway implements TopicGateway {
             throw new IllegalArgumentException("Topic ID must not be null!");
         }
 
-        OffsetDateTime lastActivity = null;
+        OffsetDateTime lastActivity;
         String sql = "SELECT * FROM topic_last_activity WHERE topic =" + topic.getId();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                if (rs.getObject("last_activity", OffsetDateTime.class) != null) {
-                    lastActivity = rs.getObject("last_activity", OffsetDateTime.class);
-                }
+                lastActivity = rs.getObject("last_activity", OffsetDateTime.class);
             } else {
                 log.error("Topic " + topic + " could not be found when trying to determine last activity.");
                 throw new NotFoundException("Topic " + topic
@@ -568,12 +566,8 @@ public class TopicDBGateway implements TopicGateway {
 
     private void readTopicsFromResultSet(final ResultSet rs, final List<Topic> topics) throws SQLException {
         while (rs.next()) {
-            OffsetDateTime lastActivity = null;
-            if (rs.getObject("last_activity", OffsetDateTime.class) != null) {
-                lastActivity = rs.getObject("last_activity", OffsetDateTime.class);
-            }
             topics.add(new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description"),
-                    lastActivity));
+                    rs.getObject("last_activity", OffsetDateTime.class)));
         }
     }
 

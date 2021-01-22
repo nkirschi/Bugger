@@ -69,7 +69,7 @@ public class ReportEditBackerTest {
     @BeforeEach
     public void setUp() throws Exception {
         doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(anyString(), any());
-        reportEditBacker = new ReportEditBacker(applicationSettings, topicService, reportService, session, fctx,
+        reportEditBacker = new ReportEditBacker(applicationSettings, topicService, reportService, session, fctx, ectx,
                 registry);
 
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",

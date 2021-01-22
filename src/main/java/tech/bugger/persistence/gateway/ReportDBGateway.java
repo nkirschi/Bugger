@@ -64,12 +64,7 @@ public class ReportDBGateway implements ReportGateway {
         report.setVersion(rs.getString("version"));
         report.setTopicID(rs.getInt("topic"));
         report.setDuplicateOf(rs.getInt("duplicate_of"));
-
-        OffsetDateTime closed = null;
-        if (rs.getObject("closed_at", OffsetDateTime.class) != null) {
-            closed = rs.getObject("closed_at", OffsetDateTime.class);
-        }
-        report.setClosingDate(closed);
+        report.setClosingDate(rs.getObject("closed_at", OffsetDateTime.class));
 
         return report;
     }

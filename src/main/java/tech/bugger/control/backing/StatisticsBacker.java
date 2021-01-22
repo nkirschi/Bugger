@@ -142,7 +142,7 @@ public class StatisticsBacker implements Serializable {
      * If a topic ID is given as request parameter, the criteria are restricted to that topic.
      */
     @PostConstruct
-    public void init() {
+    void init() {
         reportCriteria.setTopic(parseTopicParameter());
         topicTitles = topicService.discoverTopics();
         loadStatistics();

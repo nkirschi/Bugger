@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -79,9 +78,9 @@ public class PostEditBacker implements Serializable {
     private final UserSession session;
 
     /**
-     * The current {@link FacesContext}.
+     * The current {@link ExternalContext}.
      */
-    private final FacesContext fctx;
+    private final ExternalContext ectx;
 
     /**
      * Constructs a new post editing backing bean with the necessary dependencies.
@@ -90,19 +89,19 @@ public class PostEditBacker implements Serializable {
      * @param reportService       The report service to use.
      * @param postService         The post service to use.
      * @param session             The current user session.
-     * @param fctx                The current {@link FacesContext} of the application.
+     * @param ectx                The current {@link ExternalContext} of the application.
      */
     @Inject
     public PostEditBacker(final ApplicationSettings applicationSettings,
                           final ReportService reportService,
                           final PostService postService,
                           final UserSession session,
-                          final FacesContext fctx) {
+                          final ExternalContext ectx) {
         this.applicationSettings = applicationSettings;
         this.reportService = reportService;
         this.postService = postService;
         this.session = session;
-        this.fctx = fctx;
+        this.ectx = ectx;
         attachments = new ArrayList<>();
     }
 
@@ -113,7 +112,7 @@ public class PostEditBacker implements Serializable {
     @PostConstruct
     void init() {
         User user = session.getUser();
-        create = fctx.getExternalContext().getRequestParameterMap().containsKey("c");
+        create = ectx.getRequestParameterMap().containsKey("c");
         if (create) {
             Integer reportID = parseRequestParameter("r");
             if (reportID == null) {
@@ -155,7 +154,6 @@ public class PostEditBacker implements Serializable {
     public void saveChanges() {
         boolean success = create ? postService.createPost(post, report) : postService.updatePost(post, report);
         if (success) {
-            ExternalContext ectx = fctx.getExternalContext();
             try {
                 ectx.redirect(ectx.getRequestContextPath() + "/report?p=" + post.getId() + "#post-" + post.getId());
             } catch (IOException e) {
@@ -188,7 +186,6 @@ public class PostEditBacker implements Serializable {
      * @return The integer value of the request parameter, {@code null} if the parameter could not be parsed.
      */
     private Integer parseRequestParameter(final String param) {
-        ExternalContext ectx = fctx.getExternalContext();
         try {
             return Integer.parseInt(ectx.getRequestParameterMap().get(param));
         } catch (NumberFormatException e) {

@@ -59,9 +59,8 @@ public class PasswordSetBackerTest {
     public void setUp() throws Exception {
         lenient().doReturn(navHandler).when(application).getNavigationHandler();
         lenient().doReturn(application).when(fctx).getApplication();
-        lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(Locale.GERMAN).when(userSession).getLocale();
-        passwordSetBacker = new PasswordSetBacker(authenticationService, userSession, fctx, feedbackEvent,
+        passwordSetBacker = new PasswordSetBacker(authenticationService, userSession, fctx, ectx, feedbackEvent,
                 ResourceBundleMocker.mock(""));
         testUser = new User();
         testToken = new Token("0123456789abcdef", Token.Type.REGISTER,

@@ -280,14 +280,8 @@ public class PostDBGateway implements PostGateway {
                 if (rs.getInt("p_last_modified_by") != 0) {
                     modifier = UserDBGateway.getUserFromResultSet("modifier_", rs);
                 }
-                OffsetDateTime creationDate = null;
-                if (rs.getObject("p_created_at", OffsetDateTime.class) != null) {
-                    creationDate = rs.getObject("p_created_at", OffsetDateTime.class);
-                }
-                OffsetDateTime modificationDate = null;
-                if (rs.getObject("p_last_modified_at", OffsetDateTime.class) != null) {
-                    modificationDate = rs.getObject("p_last_modified_at", OffsetDateTime.class);
-                }
+                OffsetDateTime creationDate = rs.getObject("p_created_at", OffsetDateTime.class);
+                OffsetDateTime modificationDate = rs.getObject("p_last_modified_at", OffsetDateTime.class);
                 Authorship authorship = new Authorship(author, creationDate, modifier, modificationDate);
                 Post post = new Post(rs.getInt("p_id"), rs.getString("p_content"), report.getId(), authorship,
                         new ArrayList<>());

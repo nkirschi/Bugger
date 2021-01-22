@@ -375,24 +375,22 @@ public class SearchDBGateway implements SearchGateway {
                 rs.getString("description"));
         topic.setNumSub(rs.getInt("num_subscribers"));
         topic.setNumPosts(rs.getInt("num_posts"));
-        if (rs.getObject("last_activity", OffsetDateTime.class) != null) {
-            topic.setLastActivity(rs.getObject("last_activity", OffsetDateTime.class));
-        }
+        topic.setLastActivity(rs.getObject("last_activity", OffsetDateTime.class));
         return topic;
     }
 
     static Report getSearchedReportFromResultSet(final ResultSet rs)
             throws SQLException {
         Report report = ReportDBGateway.getDefaultReportFromResultSet(rs);
-        if (rs.getObject("last_activity", OffsetDateTime.class) != null) {
-            report.setLastActivity(rs.getObject("last_activity", OffsetDateTime.class));
-        }
+
+        report.setLastActivity(rs.getObject("last_activity", OffsetDateTime.class));
         report.setTopic(rs.getString("t_title"));
         if (rs.getObject("forced_relevance", Integer.class) != null) {
             report.setRelevance(rs.getObject("forced_relevance", Integer.class));
         } else {
             report.setRelevance(rs.getInt("relevance"));
         }
+
         return report;
     }
 

@@ -133,24 +133,18 @@ public class NotificationDBGateway implements NotificationGateway {
     }
 
     private Notification getNotificationFromResultSet(final ResultSet rs) throws SQLException {
-        Notification notification;
-        OffsetDateTime date = null;
-        if (rs.getObject("created_at", OffsetDateTime.class) != null) {
-            date = rs.getObject("created_at", OffsetDateTime.class);
-        }
-        notification = new Notification(
+        return new Notification(
                 rs.getObject("id", Integer.class),
                 rs.getObject("causer", Integer.class),
                 rs.getObject("recipient", Integer.class),
                 Notification.Type.valueOf(rs.getString("type")),
-                date,
+                rs.getObject("created_at", OffsetDateTime.class),
                 rs.getBoolean("read"),
                 rs.getBoolean("sent"),
                 rs.getObject("topic", Integer.class),
                 rs.getObject("report", Integer.class),
                 rs.getObject("post", Integer.class),
                 null, null, null);
-        return notification;
     }
 
     /**

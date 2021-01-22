@@ -4,10 +4,7 @@ import com.sun.faces.context.RequestParameterMap;
 import java.lang.reflect.Field;
 import java.time.OffsetDateTime;
 import java.util.Locale;
-import javax.faces.application.Application;
-import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,19 +42,10 @@ public class ProfileBackerTest {
     private UserSession session;
 
     @Mock
-    private FacesContext fctx;
-
-    @Mock
-    private ExternalContext context;
+    private ExternalContext ectx;
 
     @Mock
     private RequestParameterMap map;
-
-    @Mock
-    private NavigationHandler navHandler;
-
-    @Mock
-    private Application application;
 
     private User user;
     private User otherUser;
@@ -78,11 +66,8 @@ public class ProfileBackerTest {
         report = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
                 mock(OffsetDateTime.class), null, null, false, 1);
         MockitoAnnotations.openMocks(this);
-        profileBacker = new ProfileBacker(topicService, profileService, session, fctx);
-        when(fctx.getExternalContext()).thenReturn(context);
-        when(context.getRequestParameterMap()).thenReturn(map);
-        when(fctx.getApplication()).thenReturn(application);
-        when(application.getNavigationHandler()).thenReturn(navHandler);
+        profileBacker = new ProfileBacker(topicService, profileService, session, ectx);
+        when(ectx.getRequestParameterMap()).thenReturn(map);
     }
 
     @Test

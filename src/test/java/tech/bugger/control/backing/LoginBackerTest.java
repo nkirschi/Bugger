@@ -40,7 +40,7 @@ public class LoginBackerTest {
     private FacesContext fctx;
 
     @Mock
-    private ExternalContext context;
+    private ExternalContext ectx;
 
     @Mock
     private RequestParameterMap map;
@@ -63,11 +63,10 @@ public class LoginBackerTest {
                 + "endorsement", Locale.GERMAN, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(),
                 null, false);
         MockitoAnnotations.openMocks(this);
-        loginBacker = new LoginBacker(authenticationService, session, fctx);
+        loginBacker = new LoginBacker(authenticationService, session, fctx, ectx);
         loginBacker.setUsername(user.getUsername());
         loginBacker.setPassword(user.getPasswordHash());
-        when(fctx.getExternalContext()).thenReturn(context);
-        when(context.getRequestParameterMap()).thenReturn(map);
+        when(ectx.getRequestParameterMap()).thenReturn(map);
     }
 
     @Test
@@ -98,13 +97,13 @@ public class LoginBackerTest {
         when(authenticationService.authenticate(loginBacker.getUsername(), loginBacker.getPassword())).thenReturn(user);
         assertNull(loginBacker.login());
         verify(authenticationService).authenticate(any(), anyString());
-        verify(context).redirect(profile);
+        verify(ectx).redirect(profile);
     }
 
     @Test
     public void testLoginIOException() throws Exception {
         loginBacker.setRedirectURL(profile);
-        doThrow(IOException.class).when(context).redirect(any());
+        doThrow(IOException.class).when(ectx).redirect(any());
         when(authenticationService.authenticate(loginBacker.getUsername(), loginBacker.getPassword())).thenReturn(user);
         assertEquals("pretty:home", loginBacker.login());
         verify(authenticationService).authenticate(any(), anyString());
@@ -116,7 +115,7 @@ public class LoginBackerTest {
         when(authenticationService.authenticate(loginBacker.getUsername(), loginBacker.getPassword())).thenReturn(user);
         assertEquals("pretty:home", loginBacker.login());
         verify(authenticationService).authenticate(any(), anyString());
-        verify(context, never()).redirect(profile);
+        verify(ectx, never()).redirect(profile);
     }
 
     @Test

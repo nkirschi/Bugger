@@ -84,7 +84,7 @@ public class TrespassListenerTest {
         lenient().doReturn(fctx).when(event).getFacesContext();
         lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(mock(Flash.class)).when(ectx).getFlash();
-        lenient().doReturn(mock(HttpSession.class)).when(ectx).getSession(false);
+        lenient().doReturn(mock(HttpSession.class)).when(ectx).getSession(anyBoolean());
         lenient().doReturn(mock(ResourceBundle.class)).when(registry).getBundle(anyString(), any());
         lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
     }

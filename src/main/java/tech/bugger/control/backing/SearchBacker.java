@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -176,37 +175,38 @@ public class SearchBacker implements Serializable {
     private final TopicService topicService;
 
     /**
-     * The current faces context.
+     * The current external context.
      */
-    private final FacesContext fctx;
+    private final ExternalContext ectx;
 
     /**
      * Constructs a new search page backing bean with the necessary dependencies.
      *
      * @param searchService The search service to use.
      * @param topicService  The topic service to use.
-     * @param fctx          The current {@link FacesContext} of the application.
+     * @param ectx          The current {@link ExternalContext} of the application.
      */
     @Inject
-    public SearchBacker(final SearchService searchService, final TopicService topicService, final FacesContext fctx) {
+    public SearchBacker(final SearchService searchService,
+                        final TopicService topicService,
+                        final ExternalContext ectx) {
         this.searchService = searchService;
         this.topicService = topicService;
-        this.fctx = fctx;
+        this.ectx = ectx;
     }
 
     /**
      * Initializes the search page. The default tab is {@code Tab.REPORT}.
      */
     @PostConstruct
-    public void init() {
+    void init() {
         tab = Tab.REPORT;
         query = "";
-        ExternalContext ext = fctx.getExternalContext();
-        if (ext.getRequestParameterMap().containsKey("q")) {
-            query = ext.getRequestParameterMap().get("q");
+        if (ectx.getRequestParameterMap().containsKey("q")) {
+            query = ectx.getRequestParameterMap().get("q");
         }
-        if (ext.getRequestParameterMap().containsKey("t")) {
-            tab = Tab.valueOf(ext.getRequestParameterMap().get("t"));
+        if (ectx.getRequestParameterMap().containsKey("t")) {
+            tab = Tab.valueOf(ectx.getRequestParameterMap().get("t"));
         }
         openReportShown = true;
         closedReportShown = true;
