@@ -33,7 +33,6 @@ import tech.bugger.global.transfer.User;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
@@ -100,8 +99,6 @@ public class HeaderBackerTest {
         config = mockStatic(PrettyContext.class);
         config.when(PrettyContext::getCurrentInstance).thenReturn(prettyContext);
         headerBacker = new HeaderBacker(settings, searchService, session, fctx, ectx, feedback, messages);
-        field = headerBacker.getClass().getDeclaredField("displayMenu");
-        field.setAccessible(true);
     }
 
     @AfterEach
@@ -115,20 +112,6 @@ public class HeaderBackerTest {
         assertAll(
                 () -> assertEquals(user, headerBacker.getUser())
         );
-    }
-
-    @Test
-    public void testToggleMenuActivate() throws IllegalAccessException {
-        field.setBoolean(headerBacker, false);
-        headerBacker.toggleMenu();
-        assertTrue(headerBacker.isDisplayMenu());
-    }
-
-    @Test
-    public void testToggleMenuDeactivate() throws IllegalAccessException {
-        field.setBoolean(headerBacker, true);
-        headerBacker.toggleMenu();
-        assertFalse(headerBacker.isDisplayMenu());
     }
 
     @Test

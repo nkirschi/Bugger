@@ -60,9 +60,6 @@ public class TopicBackerTest {
     private ExternalContext ectx;
 
     @Mock
-    private ApplicationSettings settings;
-
-    @Mock
     private RequestParameterMap map;
 
     @Mock
@@ -83,7 +80,7 @@ public class TopicBackerTest {
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic = new Topic(1, "Some title", "Some description");
-        topicBacker = new TopicBacker(topicService, searchService, fctx, ectx, session, settings);
+        topicBacker = new TopicBacker(topicService, searchService, fctx, ectx, session);
         lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(map).when(ectx).getRequestParameterMap();
         lenient().doReturn(application).when(fctx).getApplication();
@@ -196,7 +193,8 @@ public class TopicBackerTest {
         );
     }
 
-    /*@Test
+    /*
+    @Test
     public void testIsModerator() {
         topicBacker.setTopic(topic);
         when(session.getUser()).thenReturn(user);
@@ -211,17 +209,10 @@ public class TopicBackerTest {
         when(session.getUser()).thenReturn(user);
         assertTrue(topicBacker.isModerator());
     }
+     */
 
     @Test
     public void testIsModeratorNoModerator() {
-        topicBacker.setTopic(topic);
-        when(session.getUser()).thenReturn(user);
-        assertFalse(topicBacker.isModerator());
-    }*/
-
-    @Test
-    public void testIsModeratorUserNull() {
-        topicBacker.setTopic(topic);
         assertFalse(topicBacker.isModerator());
     }
 
@@ -562,5 +553,7 @@ public class TopicBackerTest {
                 () -> assertTrue(topicBacker.getUserModSuggestions().isEmpty())
         );
     }
+
+     */
 
 }

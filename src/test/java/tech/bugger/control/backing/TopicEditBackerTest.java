@@ -128,14 +128,6 @@ public class TopicEditBackerTest {
     }
 
     @Test
-    public void testInitUserNull() {
-        doReturn(application).when(fctx).getApplication();
-        doReturn(navHandler).when(application).getNavigationHandler();
-        topicEditBacker.init();
-        verify(navHandler).handleNavigation(any(), any(), any());
-    }
-
-    @Test
     public void testInitUserNotAdmin() {
         user.setAdministrator(false);
         topicEditBacker.setTopicID(topic.getId());
