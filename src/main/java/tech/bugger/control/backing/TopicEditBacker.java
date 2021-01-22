@@ -2,6 +2,7 @@ package tech.bugger.control.backing;
 
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
 
@@ -75,16 +76,14 @@ public class TopicEditBacker implements Serializable {
     public void init() {
         ExternalContext ext = fctx.getExternalContext();
         if (!session.getUser().isAdministrator()) {
-            redirectTo404Page();
-            return;
+            throw new Error404Exception();
         }
         if ((ext.getRequestParameterMap().containsKey("id")) && ext.getRequestParameterMap().get("id") != null) {
             try {
                 topicID = Integer.parseInt(fctx.getExternalContext().getRequestParameterMap().get("id"));
             } catch (NumberFormatException e) {
                 // Report ID parameter not valid.
-                redirectTo404Page();
-                return;
+                throw new Error404Exception();
             }
             topic = topicService.getTopicByID(topicID);
             create = false;
@@ -111,16 +110,9 @@ public class TopicEditBacker implements Serializable {
             ExternalContext ectx = fctx.getExternalContext();
             ectx.redirect(ectx.getRequestContextPath() + "/topic?id=" + topic.getId());
         } else {
-            redirectTo404Page();
+            throw new Error404Exception();
         }
         return "";
-    }
-
-    /**
-     * Redirects the user to a 404 page.
-     */
-    private void redirectTo404Page() {
-        fctx.getApplication().getNavigationHandler().handleNavigation(fctx, null, "pretty:error");
     }
 
     /**

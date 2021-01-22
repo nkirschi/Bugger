@@ -11,6 +11,7 @@ import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
@@ -99,8 +100,7 @@ public class ReportCreateBackerTest {
     @Test
     public void testInitWhenNoParam() throws Exception {
         doReturn(null).when(requestParameterMap).get("id");
-        reportCreateBacker.init();
-        verify(ectx).redirect(any());
+        assertThrows(Error404Exception.class, () -> reportCreateBacker.init());
         assertTrue(reportCreateBacker.isBanned());
     }
 
@@ -108,8 +108,7 @@ public class ReportCreateBackerTest {
     public void testInitWhenNoUser() throws Exception {
         doReturn("1").when(requestParameterMap).get("id");
         doReturn(null).when(session).getUser();
-        reportCreateBacker.init();
-        verify(ectx).redirect(any());
+        assertThrows(Error404Exception.class, () -> reportCreateBacker.init());
         assertTrue(reportCreateBacker.isBanned());
     }
 
@@ -118,8 +117,7 @@ public class ReportCreateBackerTest {
         doReturn("1").when(requestParameterMap).get("id");
         doReturn(mock(User.class)).when(session).getUser();
         doReturn(null).when(topicService).getTopicByID(anyInt());
-        reportCreateBacker.init();
-        verify(ectx).redirect(any());
+        assertThrows(Error404Exception.class, () -> reportCreateBacker.init());
         assertTrue(reportCreateBacker.isBanned());
     }
 
@@ -129,8 +127,7 @@ public class ReportCreateBackerTest {
         doReturn(mock(User.class)).when(session).getUser();
         doReturn(mock(Topic.class)).when(topicService).getTopicByID(anyInt());
         doReturn(false).when(topicService).canCreateReportIn(any(), any());
-        reportCreateBacker.init();
-        verify(ectx).redirect(any());
+        assertThrows(Error404Exception.class, () -> reportCreateBacker.init());
         assertTrue(reportCreateBacker.isBanned());
     }
 

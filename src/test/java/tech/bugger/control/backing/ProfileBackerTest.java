@@ -13,6 +13,7 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
@@ -26,12 +27,7 @@ import javax.faces.context.FacesContext;
 import java.lang.reflect.Field;
 import java.time.OffsetDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -145,8 +141,7 @@ public class ProfileBackerTest {
 
     @Test
     public void testInitKeyNotPresent() {
-        profileBacker.init();
-        verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
+        assertThrows(Error404Exception.class, () -> profileBacker.init());
     }
 
     @Test
@@ -158,14 +153,6 @@ public class ProfileBackerTest {
                 () -> assertEquals(user, profileBacker.getUser()),
                 () -> assertEquals(session.getUser(), profileBacker.getUser())
         );
-    }
-
-    @Test
-    public void testInitUserNull() {
-        when(map.containsKey(PARAMETER)).thenReturn(true);
-        when(map.get(PARAMETER)).thenReturn(user.getUsername());
-        profileBacker.init();
-        verify(navHandler, times(1)).handleNavigation(any(), any(), anyString());
     }
 
     @Test

@@ -9,6 +9,7 @@ import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
@@ -100,17 +101,6 @@ public class PostEditBackerTest {
         lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
     }
 
-    private void verify404Redirect() {
-        verify(navigationHandler).handleNavigation(any(), any(), eq("pretty:error"));
-    }
-
-    @Test
-    public void testInitNoUser()  {
-        doReturn(null).when(session).getUser();
-        postEditBacker.init();
-        verify404Redirect();
-    }
-
     @Test
     public void testInitCreate() {
         doReturn("1234").when(requestParameterMap).get("r");
@@ -118,6 +108,7 @@ public class PostEditBackerTest {
         doReturn(user).when(session).getUser();
         doReturn(report).when(reportService).getReportByID(1234);
         doReturn(true).when(reportService).canPostInReport(user, report);
+        doReturn(true).when(configuration).isClosedReportPosting();
         postEditBacker.init();
         assertTrue(postEditBacker.isCreate());
         assertEquals(report.getId(), postEditBacker.getPost().getReport());
@@ -129,8 +120,7 @@ public class PostEditBackerTest {
         doReturn(null).when(requestParameterMap).get("r");
         doReturn(true).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
-        postEditBacker.init();
-        verify404Redirect();
+        assertThrows(Error404Exception.class, () -> postEditBacker.init());
     }
 
     @Test
@@ -139,8 +129,7 @@ public class PostEditBackerTest {
         doReturn(true).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
         doReturn(null).when(reportService).getReportByID(1234);
-        postEditBacker.init();
-        verify404Redirect();
+        assertThrows(Error404Exception.class, () -> postEditBacker.init());
     }
 
     @Test
@@ -150,8 +139,7 @@ public class PostEditBackerTest {
         doReturn(user).when(session).getUser();
         doReturn(report).when(reportService).getReportByID(1234);
         doReturn(false).when(reportService).canPostInReport(user, report);
-        postEditBacker.init();
-        verify404Redirect();
+        assertThrows(Error404Exception.class, () -> postEditBacker.init());
     }
 
     @Test
@@ -162,6 +150,7 @@ public class PostEditBackerTest {
         doReturn(user).when(session).getUser();
         doReturn(post).when(postService).getPostByID(5678);
         doReturn(true).when(postService).isPrivileged(user, post, report);
+        doReturn(true).when(configuration).isClosedReportPosting();
         postEditBacker.init();
         assertFalse(postEditBacker.isCreate());
         assertEquals(post.getAttachments(), postEditBacker.getAttachments());
@@ -173,8 +162,7 @@ public class PostEditBackerTest {
         doReturn(null).when(requestParameterMap).get("p");
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
-        postEditBacker.init();
-        verify404Redirect();
+        assertThrows(Error404Exception.class, () -> postEditBacker.init());
     }
 
     @Test
@@ -183,8 +171,7 @@ public class PostEditBackerTest {
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
         doReturn(null).when(postService).getPostByID(5678);
-        postEditBacker.init();
-        verify404Redirect();
+        assertThrows(Error404Exception.class, () -> postEditBacker.init());
     }
 
     @Test
@@ -194,8 +181,7 @@ public class PostEditBackerTest {
         doReturn(user).when(session).getUser();
         doReturn(post).when(postService).getPostByID(5678);
         lenient().doReturn(false).when(postService).isPrivileged(user, post, report);
-        postEditBacker.init();
-        verify404Redirect();
+        assertThrows(Error404Exception.class, () -> postEditBacker.init());
     }
 
     @Test
@@ -206,8 +192,7 @@ public class PostEditBackerTest {
         doReturn(post).when(postService).getPostByID(5678);
         post.setReport(4321);
         doReturn(null).when(reportService).getReportByID(4321);
-        postEditBacker.init();
-        verify404Redirect();
+        assertThrows(Error404Exception.class, () -> postEditBacker.init());
     }
 
     @Test
@@ -219,8 +204,7 @@ public class PostEditBackerTest {
         post.setReport(4321);
         doReturn(report).when(reportService).getReportByID(4321);
         doReturn(false).when(postService).isPrivileged(user, post, report);
-        postEditBacker.init();
-        verify404Redirect();
+        assertThrows(Error404Exception.class, () -> postEditBacker.init());
     }
 
     @Test
@@ -232,8 +216,7 @@ public class PostEditBackerTest {
         doReturn(true).when(reportService).canPostInReport(user, report);
         doReturn(false).when(configuration).isClosedReportPosting();
         report.setClosingDate(mock(OffsetDateTime.class));
-        postEditBacker.init();
-        verify404Redirect();
+        assertThrows(Error404Exception.class, () -> postEditBacker.init());
     }
 
     @Test
@@ -275,7 +258,7 @@ public class PostEditBackerTest {
         postEditBacker.setCreate(false);
         doReturn(true).when(postService).updatePost(post, report);
         doThrow(IOException.class).when(ectx).redirect(anyString());
-        assertDoesNotThrow(() -> postEditBacker.saveChanges());
+        assertThrows(InternalError.class, () -> postEditBacker.saveChanges());
         verify(postService).updatePost(post, report);
     }
 
