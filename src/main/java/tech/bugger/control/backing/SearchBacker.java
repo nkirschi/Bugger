@@ -15,7 +15,10 @@ import javax.inject.Named;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
-import tech.bugger.global.transfer.*;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
 
 /**

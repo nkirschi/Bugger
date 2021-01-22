@@ -2,7 +2,6 @@ package tech.bugger.control.backing;
 
 import com.ocpsoft.pretty.PrettyContext;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
-import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.util.Feedback;

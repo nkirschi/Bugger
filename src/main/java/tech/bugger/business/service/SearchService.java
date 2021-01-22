@@ -70,7 +70,7 @@ public class SearchService {
      */
     @Inject
     public SearchService(final Event<Feedback> feedback, final @RegistryKey("messages") ResourceBundle messages,
-                         final TransactionManager transactionManager, ApplicationSettings applicationSettings) {
+                         final TransactionManager transactionManager, final ApplicationSettings applicationSettings) {
         this.applicationSettings = applicationSettings;
         this.feedback = feedback;
         this.messages = messages;
