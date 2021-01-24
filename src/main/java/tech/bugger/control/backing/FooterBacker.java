@@ -28,9 +28,9 @@ public class FooterBacker implements Serializable {
     private final UserSession session;
 
     /**
-     * The current help bundle containing all the texts for help.
+     * The current registry which to retrieve resource bundles from.
      */
-    private final ResourceBundle helpBundle;
+    private final Registry registry;
 
     /**
      * The currently selected language.
@@ -52,7 +52,7 @@ public class FooterBacker implements Serializable {
     public FooterBacker(final UserSession session,
                         final Registry registry) {
         this.session = session;
-        this.helpBundle = registry.getBundle("help", session.getLocale());
+        this.registry = registry;
         language = session.getLocale();
     }
 
@@ -80,6 +80,7 @@ public class FooterBacker implements Serializable {
      * @return The current help key.
      */
     public String getHelp(final String helpKey) {
+        ResourceBundle helpBundle = registry.getBundle("help", session.getLocale());
         String mainHelp = helpBundle.getString("main");
         return MarkdownHandler.toHtml(helpBundle.getString(helpKey) + "\n\n" + mainHelp);
     }
