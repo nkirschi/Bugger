@@ -16,7 +16,6 @@ import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
 import tech.bugger.business.util.Registry;
-import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.User;
 
 /**
@@ -137,7 +136,7 @@ public class TrespassListener implements PhaseListener {
         try {
             ectx.redirect(ectx.getRequestContextPath() + "/login?url=" + getRedirectUrl(ectx));
         } catch (IOException e) {
-            throw new InternalError("Could not redirect to error page.", e);
+            throw new InternalError("Could not redirect to login page.", e);
         }
     }
 
@@ -147,7 +146,11 @@ public class TrespassListener implements PhaseListener {
      * @param ectx The {@link ExternalContext} to use for redirection.
      */
     private void redirectToErrorPage(final ExternalContext ectx) {
-        throw new Error404Exception();
+        try {
+            ectx.redirect(ectx.getRequestContextPath() + "/error");
+        } catch (IOException e) {
+            throw new InternalError("Could not redirect to error page.", e);
+        }
     }
 
 }
