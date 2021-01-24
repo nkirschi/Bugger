@@ -1,6 +1,7 @@
 package tech.bugger.business.internal;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import javax.el.ELException;
@@ -45,13 +46,13 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
     /**
      * Handles exceptions.
      *
-     * @param context The {@link FacesContext}.
+     * @param fctx The {@link FacesContext}.
      */
-    protected void handleException(final FacesContext context) {
+    protected void handleException(final FacesContext fctx) {
         Iterator<ExceptionQueuedEvent> unhandledEvents = getUnhandledExceptionQueuedEvents().iterator();
 
-        if (context == null
-                || context.getExternalContext().isResponseCommitted()
+        if (fctx == null
+                || fctx.getExternalContext().isResponseCommitted()
                 || !unhandledEvents.hasNext()) {
             return;
         }
@@ -63,9 +64,9 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
             exception = exception.getCause();
         }
 
-        ExternalContext external = context.getExternalContext();
-        String uri = external.getRequestContextPath() + external.getRequestServletPath();
-        Map<String, Object> requestScope = external.getRequestMap();
+        ExternalContext ectx = fctx.getExternalContext();
+        String uri = ectx.getRequestContextPath() + ectx.getRequestServletPath();
+        Map<String, Object> requestScope = ectx.getRequestMap();
         requestScope.put(RequestDispatcher.ERROR_REQUEST_URI, uri);
         requestScope.put(RequestDispatcher.ERROR_EXCEPTION, exception);
 
@@ -75,22 +76,40 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
         } else {
             viewID = "/WEB-INF/errorpages/500.xhtml";
         }
-        Application application = context.getApplication();
+        Application application = fctx.getApplication();
         ViewHandler viewHandler = application.getViewHandler();
-        UIViewRoot viewRoot = viewHandler.createView(context, viewID);
-        context.setViewRoot(viewRoot);
+        UIViewRoot viewRoot = viewHandler.createView(fctx, viewID);
+        fctx.setViewRoot(viewRoot);
 
         try {
-            if (!context.getPartialViewContext().isAjaxRequest()) {
-                external.setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            // Backup headers
+            HttpServletResponse response = ((HttpServletResponse) ectx.getResponse());
+            Map<String, String> headers = new HashMap<>();
+            for (String header : response.getHeaderNames()) {
+                headers.put(header, response.getHeader(header));
             }
-            ViewDeclarationLanguage viewDeclarationLanguage = viewHandler.getViewDeclarationLanguage(context, viewID);
-            viewDeclarationLanguage.buildView(context, viewRoot);
-            context.getPartialViewContext().setRenderAll(true);
-            viewDeclarationLanguage.renderView(context, viewRoot);
-            context.responseComplete();
+
+            // Reset the response
+            ectx.responseReset();
+
+            // Add back old headers
+            for (Map.Entry<String, String> header : headers.entrySet()) {
+                ectx.addResponseHeader(header.getKey(), header.getValue());
+            }
+
+            // Overwrite rest of data
+            if (!fctx.getPartialViewContext().isAjaxRequest()) {
+                ectx.setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+            ViewDeclarationLanguage viewDeclarationLanguage = viewHandler.getViewDeclarationLanguage(fctx, viewID);
+            viewDeclarationLanguage.buildView(fctx, viewRoot);
+            fctx.getPartialViewContext().setRenderAll(true);
+            viewDeclarationLanguage.renderView(fctx, viewRoot);
+            fctx.responseComplete();
         } catch (IOException e) {
             throw new FacesException(e);
+        } catch (Throwable t) {
+            t.printStackTrace();
         } finally {
             requestScope.remove(RequestDispatcher.ERROR_EXCEPTION);
         }
