@@ -5,8 +5,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.faces.context.FacesContext;
 import javax.inject.Named;
 import tech.bugger.control.exception.Error404Exception;
+import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.StoreException;
 
@@ -77,6 +79,15 @@ public class ErrorBacker {
         PrintWriter printWriter = new PrintWriter(stringWriter);
         exception.printStackTrace(printWriter);
         return stringWriter.toString();
+    }
+
+    /**
+     * Returns a link leading to the home page.
+     *
+     * @return The link leading to the home page.
+     */
+    public static String getHomeUrl() {
+        return JFConfig.getApplicationPath(FacesContext.getCurrentInstance().getExternalContext()) + "/";
     }
 
 }
