@@ -86,8 +86,7 @@ public class TrespassListener implements PhaseListener {
         }
 
         // sometimes there strangely is no HTTP session and everything breaks
-        if (ectx.getSession(true) == null) {
-            // This should never happen
+        if (ectx.getSession(false) == null) {
             return;
         }
 

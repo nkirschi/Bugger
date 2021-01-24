@@ -9,7 +9,7 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:f="http://xmlns.jcp.org/jsf/core">
 <!--@elvariable id="title" type="java.lang.String"-->
-<!--@elvariable id="helpKey" type="java.lang.String"-->
+<!--@elvariable id="error_description" type="java.lang.String"-->
 <f:event listener="#{headerBacker.validateForm}" type="postValidate"/>
 <f:view locale="#{userSession.locale}">
     <h:head>
@@ -37,6 +37,15 @@
             </h:panelGroup>
             <h:panelGroup layout="block" id="p-content">
                 <h:outputText value="#{title}" styleClass="h1" id="title"/>
+
+                <h:panelGrid id="pg-error-general" columns="1">
+                    <h:outputText
+                            value="#{error_description}"/>
+                    <h:outputText value="#{labels.contact_info}" styleClass="h2"/>
+                    <h:outputText value="#{applicationSettings.organization.supportInfo}"/>
+                    <h:link value="#{labels.go_home}" outcome="pretty:home"/>
+                </h:panelGrid>
+
                 <ui:insert name="content"/>
             </h:panelGroup>
         </h:panelGroup>

@@ -33,7 +33,7 @@ public class UserSession implements Serializable {
      * Initializes this user session by setting a preferred locale.
      */
     @PostConstruct
-    public void init() {
+    void init() {
         FacesContext fctx = FacesContext.getCurrentInstance();
         if (fctx != null) {
             locale = fctx.getExternalContext().getRequestLocale();

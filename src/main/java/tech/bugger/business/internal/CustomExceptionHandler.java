@@ -81,7 +81,6 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
         context.setViewRoot(viewRoot);
 
         try {
-            external.responseReset();
             if (!context.getPartialViewContext().isAjaxRequest()) {
                 external.setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
