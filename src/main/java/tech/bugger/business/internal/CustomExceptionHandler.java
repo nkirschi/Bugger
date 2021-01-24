@@ -108,8 +108,6 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
             fctx.responseComplete();
         } catch (IOException e) {
             throw new FacesException(e);
-        } catch (Throwable t) {
-            t.printStackTrace();
         } finally {
             requestScope.remove(RequestDispatcher.ERROR_EXCEPTION);
         }
