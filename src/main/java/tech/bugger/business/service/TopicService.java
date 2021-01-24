@@ -184,7 +184,11 @@ public class TopicService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
             return false;
         }
-        subscribeToTopic(user, topic);
+
+        // TODO Ben: Can this be done more beautiful?
+        if (!isSubscribed(user, topic)) {
+            subscribeToTopic(user, topic);
+        }
 
         return true;
     }
