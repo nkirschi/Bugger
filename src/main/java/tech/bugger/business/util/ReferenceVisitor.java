@@ -7,6 +7,7 @@ import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.Link;
 import org.commonmark.node.Node;
 import org.commonmark.node.Text;
+import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.util.Log;
 
 /**
@@ -145,12 +146,12 @@ public class ReferenceVisitor extends AbstractVisitor {
         Optional<Integer> parsedInt = getInteger(refId);
         // Users can also contain other characters
         if (sequence.equals(USER_REFERENCE) && PATTERN_USER.matcher(refId).matches()) {
-            Link node = new Link(String.format(dest, refId), refId);
+            Link node = new Link(JFConfig.getApplicationPath() + String.format(dest, refId), refId);
             node.appendChild(new Text(sequence + refId));
             return node;
         } else if (parsedInt.isPresent()) {
             String ref = parsedInt.get() + "";
-            Link node = new Link(String.format(dest, ref), ref);
+            Link node = new Link(JFConfig.getApplicationPath() + String.format(dest, ref), ref);
             node.appendChild(new Text(sequence + ref));
             return node;
         } else {

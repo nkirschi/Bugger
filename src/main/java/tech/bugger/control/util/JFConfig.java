@@ -5,6 +5,7 @@ import java.net.URL;
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.annotation.FacesConfig;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -19,6 +20,15 @@ public final class JFConfig {
      */
     private JFConfig() {
         throw new UnsupportedOperationException(); // for reflection abusers
+    }
+
+    /**
+     * Retrieves the current application path using the current {@link ExternalContext}.
+     *
+     * @return The current application path.
+     */
+    public static String getApplicationPath() {
+        return getApplicationPath(FacesContext.getCurrentInstance().getExternalContext());
     }
 
     /**
