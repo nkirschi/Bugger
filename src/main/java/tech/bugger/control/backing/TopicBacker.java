@@ -413,7 +413,7 @@ public class TopicBacker implements Serializable {
     /**
      * Irreversibly deletes the topic.
      *
-     * @return {@code pretty:home} to redirect to home.
+     * @return The site to redirect to.
      */
     public String delete() {
         topicService.deleteTopic(topic);
@@ -518,7 +518,7 @@ public class TopicBacker implements Serializable {
     /**
      * Subscribes the user to the topic or unsubscribes them, whichever is applicable.
      *
-     * @return {@code null}
+     * @return The site to redirect to or {@code null} to reload the page.
      */
     public String toggleTopicSubscription() {
         User user = session.getUser();

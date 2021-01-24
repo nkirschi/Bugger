@@ -27,22 +27,9 @@ import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(DBExtension.class)
 @ExtendWith(LogExtension.class)

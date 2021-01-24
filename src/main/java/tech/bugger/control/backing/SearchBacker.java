@@ -196,7 +196,7 @@ public class SearchBacker implements Serializable {
     }
 
     /**
-     * Initializes the search page. The default tab is {@code Tab.REPORT}.
+     * Initializes the search page. The default tab is {@link Tab#REPORT}.
      */
     @PostConstruct
     void init() {

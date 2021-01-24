@@ -25,7 +25,7 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 /**
- * Service providing methods related to users and user profiles. A {@code Feedback} event is fired, if unexpected
+ * Service providing methods related to users and user profiles. A {@link Feedback} event is fired, if unexpected
  * circumstances occur.
  */
 @ApplicationScoped

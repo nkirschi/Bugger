@@ -166,7 +166,7 @@ public class ReportCreateBacker implements Serializable {
     }
 
     /**
-     * Converts the uploaded attachment from a {@code Part} to a {@code byte[]}. The attachment is then associated with
+     * Converts the uploaded attachment from a {@link Part} to a {@code byte[]}. The attachment is then associated with
      * the post.
      */
     public void saveAttachment() {

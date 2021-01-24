@@ -144,7 +144,7 @@ public class HomeBacker implements Serializable {
     }
 
     /**
-     * Checks if the user of the current {@code UserSession} is subscribed to the specified topic.
+     * Checks if the user of the current {@link UserSession} is subscribed to the specified topic.
      *
      * @param topic The topic in question.
      * @return {@code true} if the user is subscribed to the topic, {@code false} otherwise.

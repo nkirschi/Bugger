@@ -316,7 +316,7 @@ public class ReportBacker implements Serializable {
     /**
      * Adds or removes a subscription to the report for the user, whichever is applicable.
      *
-     * @return {@code null}
+     * @return The site to redirect to or {@code null} to reload the page.
      */
     public String toggleReportSubscription() {
         log.debug(">>>>>> toggleReportSubscription");

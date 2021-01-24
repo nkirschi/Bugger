@@ -23,7 +23,7 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 /**
- * Service providing methods related to searching for specific topics, reports and users. A {@code Feedback} event is
+ * Service providing methods related to searching for specific topics, reports and users. A {@link Feedback} event is
  * fired, if unexpected circumstances occur.
  */
 @ApplicationScoped

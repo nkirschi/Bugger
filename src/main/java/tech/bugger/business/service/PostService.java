@@ -182,7 +182,7 @@ public class PostService {
     }
 
     /**
-     * Creates a post using a given {@code Transaction}.
+     * Creates a post using a given {@link Transaction}.
      *
      * @param post The post to be created.
      * @param tx   The transaction to use when creating the post.
@@ -200,7 +200,7 @@ public class PostService {
 
     /**
      * Creates a new post for an existing report and notifies users about the creation. Notifications are handled by the
-     * {@code NotificationService}.
+     * {@link NotificationService}.
      *
      * @param post   The post to be created.
      * @param report The report the {@code post} shall be in.

@@ -19,7 +19,7 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 /**
- * Service for content statistics. A {@code Feedback} event is fired if unexpected circumstances occur.
+ * Service for content statistics. A {@link Feedback} event is fired if unexpected circumstances occur.
  */
 @ApplicationScoped
 public class StatisticsService {

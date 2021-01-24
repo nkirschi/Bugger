@@ -26,9 +26,9 @@ import tech.bugger.control.exception.Error404Exception;
 public class CustomExceptionHandler extends ExceptionHandlerWrapper {
 
     /**
-     * Constructs a new {@link CustomExceptionHandler} wrapping an {@code ExceptionHandler}.
+     * Constructs a new {@link CustomExceptionHandler} wrapping an {@link ExceptionHandler}.
      *
-     * @param wrapped The exceptionHandler being wrapped.
+     * @param wrapped The {@link ExceptionHandler} being wrapped.
      */
     public CustomExceptionHandler(final ExceptionHandler wrapped) {
         super(wrapped);
@@ -44,9 +44,9 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
     }
 
     /**
-     * Handles exceptions.
+     * Handles all exceptions in the given {@link FacesContext}.
      *
-     * @param fctx The {@link FacesContext}.
+     * @param fctx The current {@link FacesContext}.
      */
     protected void handleException(final FacesContext fctx) {
         Iterator<ExceptionQueuedEvent> unhandledEvents = getUnhandledExceptionQueuedEvents().iterator();
@@ -126,9 +126,9 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
     public static class Factory extends ExceptionHandlerFactory {
 
         /**
-         * Constructs a new custom exception handler factory wrapping an {@link ExceptionHandlerFactory}.
+         * Constructs a new {@link CustomExceptionHandler} factory wrapping an {@link ExceptionHandlerFactory}.
          *
-         * @param wrapped The exceptionHandlerFactory to wrap.
+         * @param wrapped The {@link ExceptionHandlerFactory} to wrap.
          */
         public Factory(final ExceptionHandlerFactory wrapped) {
             super(wrapped);
@@ -141,6 +141,7 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
         public ExceptionHandler getExceptionHandler() {
             return new CustomExceptionHandler(getWrapped().getExceptionHandler());
         }
+
     }
 
 }

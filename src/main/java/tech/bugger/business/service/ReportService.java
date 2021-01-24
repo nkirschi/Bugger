@@ -378,7 +378,7 @@ public class ReportService {
 
     /**
      * Creates a new report along with its first post and notifies users about the creation. Notifications are handled
-     * by the {@code NotificationService}.
+     * by the {@link NotificationService}.
      *
      * @param report    The report to be created.
      * @param firstPost The first post of the report.

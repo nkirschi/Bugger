@@ -49,14 +49,14 @@ public final class Hasher {
     /**
      * Hashes the given string with the given salt using the provided algorithm.
      * <p>
-     * The procedure can be described as {@code algo(input.salt)} where the dot (.) means concatenation.
+     * The procedure can be described as {@code algo(input|salt)} where the | character means concatenation.
      *
      * @param input The string to be hashed and salted.
      * @param salt  The salt to be appended before hashing as hexadecimal string of format {@code ([0-9a-f]{2})*}.
      * @param algo  The hashing algorithm to use. Available algorithms are described in the
      *              <a href="https://docs.oracle.com/en/java/javase/14/docs/specs/security/standard-names.html">
      *              Standard Algorithm Names Section</a> of the Java Security API documentation in the subsection
-     *              "{@code MessageDigest} algorithms".
+     *              "{@link MessageDigest} algorithms".
      * @return The hash value of {@code input} as hexadecimal string of format {@code ([0-9a-f]{2})*}.
      */
     public static String hash(final String input, final String salt, final String algo) {

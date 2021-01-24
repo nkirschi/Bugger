@@ -23,7 +23,7 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 /**
- * Service providing methods related to topics. A {@code Feedback} event is fired, if unexpected circumstances occur.
+ * Service providing methods related to topics. A {@link Feedback} event is fired, if unexpected circumstances occur.
  */
 @ApplicationScoped
 public class TopicService {

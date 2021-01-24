@@ -30,7 +30,7 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 /**
- * Service providing methods related to notifications. A {@code Feedback} event is fired, if unexpected circumstances
+ * Service providing methods related to notifications. A {@link Feedback} event is fired, if unexpected circumstances
  * occur.
  */
 @ApplicationScoped
@@ -101,7 +101,7 @@ public class NotificationService {
     }
 
     /**
-     * Irreversibly deletes a notification. Fires a {@code Feedback}-Event if something goes wrong.
+     * Irreversibly deletes a notification. Fires a {@link Feedback}-Event if something goes wrong.
      *
      * @param notification The notification to be deleted.
      */

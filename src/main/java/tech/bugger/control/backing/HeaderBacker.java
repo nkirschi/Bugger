@@ -146,7 +146,7 @@ public class HeaderBacker implements Serializable {
     /**
      * Logs out the user and redirects to the homepage.
      *
-     * @return {@code pretty:home}
+     * @return The site to redirect to.
      */
     public String logout() {
         log.debug("Logout called for user " + session.getUser() + ".");
