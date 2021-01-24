@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
+import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
@@ -24,10 +25,10 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
-import tech.bugger.persistence.util.StatementParametrizer;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
@@ -71,21 +72,6 @@ public class PostDBGatewayTest {
         connection.close();
     }
 
-    private Post find(int id) throws Exception {
-        // necessary until PostDBGateway#find is implemented
-        PreparedStatement stmt = connection.prepareStatement("SELECT * FROM post WHERE id = ?;");
-        ResultSet rs = new StatementParametrizer(stmt).integer(id).toStatement().executeQuery();
-
-        if (rs.next()) {
-            return new Post(
-                    rs.getInt("id"), rs.getString("content"),
-                    0, null, null
-            );
-        } else {
-            return null;
-        }
-    }
-
     @Test
     public void testFind() throws Exception {
         Post post = gateway.find(100);
@@ -113,7 +99,24 @@ public class PostDBGatewayTest {
     @Test
     public void testCreate() throws Exception {
         gateway.create(post);
-        assertEquals(post, find(post.getId()));
+        assertEquals(post, gateway.find(post.getId()));
+    }
+
+    @Test
+    public void testCreateNoCreatorAndModifier() throws NotFoundException {
+        Authorship authorship = new Authorship(null, OffsetDateTime.now(), null, OffsetDateTime.now());
+        post.setAuthorship(authorship);
+        List<Attachment> attachments = new ArrayList<>();
+        Attachment attachment = new Attachment(102, "text.txt", new byte[]{1}, "text/plain", 0);
+        attachments.add(attachment);
+        post.setAttachments(attachments);
+        gateway.create(post);
+        Post findPost = gateway.find(post.getId());
+        assertAll(
+                () -> assertEquals(post.getId(), findPost.getId()),
+                () -> assertEquals(post.getContent(), findPost.getContent()),
+                () -> assertEquals(attachment.getPost(), post.getId())
+        );
     }
 
     @Test
@@ -134,6 +137,41 @@ public class PostDBGatewayTest {
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any(), anyInt());
         assertThrows(StoreException.class,
                 () -> new PostDBGateway(connectionSpy, userGateway, attachmentGateway).create(post));
+    }
+
+    @Test
+    public void testUpdate() throws NotFoundException {
+        post.setId(100);
+        gateway.update(post);
+        Post findPost = gateway.find(post.getId());
+        assertAll(
+                () -> assertEquals(post.getContent(), findPost.getContent()),
+                () -> assertEquals(post.getReport(), findPost.getReport())
+        );
+    }
+
+    @Test
+    public void testUpdateNoModifier() {
+        Authorship authorship = new Authorship(new User(), OffsetDateTime.now(), null, OffsetDateTime.now());
+        post.setAuthorship(authorship);
+        post.setId(100);
+        assertDoesNotThrow(() -> gateway.update(post));
+    }
+
+    @Test
+    public void testUpdateNotFound() {
+        assertThrows(NotFoundException.class,
+                () -> gateway.update(post)
+        );
+    }
+
+    @Test
+    public void testUpdateSQLException() throws SQLException {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new PostDBGateway(connectionSpy, userGateway, attachmentGateway).update(post)
+        );
     }
 
     public void validSelection() {
@@ -263,6 +301,25 @@ public class PostDBGatewayTest {
     }
 
     @Test
+    public void testSelectPostsCreatorAndModifier() throws NotFoundException {
+        Selection selection = new Selection(1, 0, Selection.PageSize.SMALL, "id", true);
+        gateway.create(post);
+        List<Post> posts = gateway.selectPostsOfReport(report, selection);
+        assertEquals(2, posts.size());
+    }
+
+    @Test
+    public void testSelectPostsStoreException() throws SQLException {
+        Selection selection = new Selection(1, 0, Selection.PageSize.SMALL, "id", true);
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new PostDBGateway(connectionSpy, userGateway, attachmentGateway).selectPostsOfReport(report,
+                        selection)
+        );
+    }
+
+    @Test
     public void testDeletePost() throws Exception {
         insertReport();
         numberOfPosts = 1;
@@ -281,6 +338,30 @@ public class PostDBGatewayTest {
     }
 
     @Test
+    public void testDeletePostInternalError() throws SQLException {
+        post.setId(100);
+        PreparedStatement stmt = mock(PreparedStatement.class);
+        ResultSet rs = mock(ResultSet.class);
+        Connection connectionSpy = spy(connection);
+        doReturn(stmt).when(connectionSpy).prepareStatement(any());
+        doReturn(rs).when(stmt).executeQuery();
+        doReturn(true).when(rs).next();
+        doReturn(1000).when(rs).getInt("id");
+        assertThrows(InternalError.class,
+                () -> new PostDBGateway(connectionSpy, userGateway, attachmentGateway).delete(post)
+        );
+    }
+
+    @Test
+    public void testDeletePostStoreException() throws SQLException {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new PostDBGateway(connectionSpy, userGateway, attachmentGateway).delete(post)
+        );
+    }
+
+    @Test
     public void testDeletePostWhenPostDoesNotExist() {
         assertThrows(NotFoundException.class, () -> gateway.delete(makeTestPost(4)));
     }
@@ -288,6 +369,43 @@ public class PostDBGatewayTest {
     @Test
     public void testDeletePostWhenPostIsNull() {
         assertThrows(IllegalArgumentException.class, () -> gateway.delete(null));
+    }
+
+    @Test
+    public void testGetFirstPost() throws NotFoundException {
+        assertEquals("testpost", gateway.getFirstPost(report).getContent());
+    }
+
+    @Test
+    public void testGetFirstPostNotFound() {
+        report.setId(1000);
+        assertThrows(NotFoundException.class,
+                () -> gateway.getFirstPost(report)
+        );
+    }
+
+    @Test
+    public void testGetFirstPostStoreException() throws SQLException {
+        Connection connectionSpy = spy(connection);
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        assertThrows(StoreException.class,
+                () -> new PostDBGateway(connectionSpy, userGateway, attachmentGateway).getFirstPost(report)
+        );
+    }
+
+    @Test
+    public void testGetFirstPostReportNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> gateway.getFirstPost(null)
+        );
+    }
+
+    @Test
+    public void testGetFirstPostReportIdNull() {
+        report.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> gateway.getFirstPost(report)
+        );
     }
 
 }
