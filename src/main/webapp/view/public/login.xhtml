@@ -11,7 +11,7 @@
 
     <ui:param name="helpKey" value="login"/>
 
-    <ui:param name="title" value="#{labels['login.title']}"/>
+    <ui:param name="title" value="#{labels.login_title}"/>
 
     <ui:define name="content">
         <h:form id="f-login" rendered="#{userSession.user == null}">
@@ -53,9 +53,9 @@
                 </h:panelGroup>
 
                 <h:panelGroup id="p-login-buttons" styleClass="d-flex justify-content-between" layout="block">
-                    <h:commandButton id="cb-login" value="#{labels['login.title']}" action="#{loginBacker.login}"
+                    <h:commandButton id="cb-login" value="#{labels.login_title}" action="#{loginBacker.login}"
                                      styleClass="btn btn-primary"/>
-                    <h:link id="l-register" value="#{labels['register.title']}" outcome="pretty:register"
+                    <h:link id="l-register" value="#{labels.register_title}" outcome="pretty:register"
                             styleClass="btn btn-secondary"/>
                 </h:panelGroup>
             </h:panelGroup>

@@ -270,11 +270,11 @@
                             </b:column>
                             <b:column title="#{labels.col_type}" paginator="#{profileBacker.reportSubscriptions}"
                                       key="type">
-                                <h:outputText value="#{labels['report_type.' += var.type]}"/>
+                                <h:outputText value="#{labels['report_type_' += var.type]}"/>
                             </b:column>
                             <b:column title="#{labels.col_severity}" paginator="#{profileBacker.reportSubscriptions}"
                                       key="severity">
-                                <h:outputText value="#{labels['report_severity.' += var.severity]}"/>
+                                <h:outputText value="#{labels['report_severity_' += var.severity]}"/>
                             </b:column>
                             <h:column>
                                 <h:commandLink id="l-unsub-report"

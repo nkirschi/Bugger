@@ -12,7 +12,7 @@
 
     <ui:param name="helpKey" value="profile_edit"/>
 
-    <ui:param name="title" value="#{labels['profile_edit.title']}"/>
+    <ui:param name="title" value="#{labels.profile_edit_title}"/>
 
     <ui:define name="content">
 
@@ -32,7 +32,7 @@
                     </h:panelGroup>
 
                     <h:panelGroup layout="block" id="p-upload" styleClass="mb-3 form-group position-relative">
-                        <h:outputLabel id="o-upload" for="i-upload" value="#{labels['profile_edit.change_avatar']}"/>
+                        <h:outputLabel id="o-upload" for="i-upload" value="#{labels.profile_edit_change_avatar}"/>
                         <h:panelGroup layout="block" styleClass="input-group">
                             <h:inputFile id="i-upload" validator="imageValidator" styleClass="form-control"
                                          value="#{profileEditBacker.uploadedAvatar}"/>
@@ -40,7 +40,7 @@
                     </h:panelGroup>
 
                     <h:panelGroup layout="block" id="p-attachments" styleClass="mb-3 form-group position-relative">
-                        <h:outputFormat id="ot-attachments-info" value="#{labels['profile_edit.avatar_info']}"
+                        <h:outputFormat id="ot-attachments-info" value="#{labels.profile_edit_avatar_info}"
                                         styleClass="small form-text text-muted">
                             <f:param value="#{C.MAX_AVATAR_FILESIZE}"/>
                             <f:param value="#{C.MIN_IMAGE_WIDTH}"/>
@@ -50,7 +50,7 @@
 
                     <h:panelGroup layout="block" id="p-delete-avatar" styleClass="mb-3 form-group position-relative">
                         <h:outputLabel id="o-delete-avatar" for="s-delete-avatar"
-                                       value="#{labels['profile_edit.del_avatar']}"/>
+                                       value="#{labels.profile_edit_del_avatar}"/>
                         <h:selectBooleanCheckbox id="s-delete-avatar" value="#{profileEditBacker.deleteAvatar}"
                                                  styleClass="form-check-input"/>
                     </h:panelGroup>
@@ -60,7 +60,7 @@
                         <h:panelGroup layout="block" styleClass="row">
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-visibility" for="s-visibility"
-                                               value="#{labels['profile_edit.visibility']}" styleClass="form-label"/>
+                                               value="#{labels.profile_edit_visibility}" styleClass="form-label"/>
                                 <h:panelGroup layout="block" styleClass="input-group">
                                     <h:selectOneMenu id="s-visibility"
                                                      value="#{profileEditBacker.user.profileVisibility}"
@@ -68,7 +68,7 @@
                                         <f:selectItems id="s-visibility-values"
                                                        value="#{profileEditBacker.user.profileVisibilities}"
                                                        var="visibility" itemValue="#{visibility}"
-                                                       itemLabel="#{labels['visibility.'.concat(visibility)]}"/>
+                                                       itemLabel="#{labels['visibility_'.concat(visibility)]}"/>
                                     </h:selectOneMenu>
                                     <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                         <h:message id="m-visibility" for="s-visibility"/>
@@ -84,7 +84,7 @@
                                         <f:selectItems id="s-language-values"
                                                        value="#{profileEditBacker.user.preferredLanguages}"
                                                        var="lang" itemValue="#{lang}"
-                                                       itemLabel="#{labels['lang.'.concat(lang)]}"/>
+                                                       itemLabel="#{labels['lang_'.concat(lang)]}"/>
                                         <f:converter converterId="localeConverter"/>
                                     </h:selectOneMenu>
                                     <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
@@ -179,7 +179,7 @@
                         <h:panelGroup layout="block" styleClass="row">
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-password-new" for="i-password-new" styleClass="form-label"
-                                               value="#{labels['profile_edit.password_new']}"/>
+                                               value="#{labels.profile_edit_password_new}"/>
                                 <h:panelGroup layout="block" styleClass="input-group">
                                     <h:inputSecret id="i-password-new" value="#{profileEditBacker.passwordNew}"
                                                    binding="#{password1}" required="#{profileEditBacker.create}"
@@ -196,7 +196,7 @@
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-password-new-repeat" for="i-password-new-repeat"
                                                styleClass="form-label"
-                                               value="#{labels['profile_edit.repeat']}"/>
+                                               value="#{labels.profile_edit_repeat}"/>
                                 <h:panelGroup layout="block" styleClass="input-group">
                                     <h:inputSecret id="i-password-new-repeat"
                                                    value="#{profileEditBacker.passwordNewConfirm}"
@@ -231,7 +231,7 @@
                                 <h:message id="m-bio" for="ia-bio"/>
                             </h:panelGroup>
                         </h:panelGroup>
-                        <h:outputLabel id="ol-bio-hint" value="#{labels['profile_edit.bio_info']}"
+                        <h:outputLabel id="ol-bio-hint" value="#{labels.profile_edit_bio_info}"
                                        styleClass="form-text"/>
                     </h:panelGroup>
 
@@ -245,10 +245,10 @@
                     </h:panelGroup>
 
                     <h:panelGroup layout="block" styleClass="d-flex justify-content-center">
-                        <h:commandButton id="cb-preview" value="#{labels['profile_edit.preview']}"
+                        <h:commandButton id="cb-preview" value="#{labels.profile_edit_preview}"
                                          action="#{profileEditBacker.openPreviewDialog}" styleClass="btn btn-primary"
                                          rendered="#{profileEditBacker.dialog != E.PREVIEW}"/>
-                        <h:commandButton id="cb-stop-preview" value="#{labels['profile_edit.stop_preview']}"
+                        <h:commandButton id="cb-stop-preview" value="#{labels.profile_edit_stop_preview}"
                                          action="#{profileEditBacker.closeDialog}" styleClass="btn btn-primary"
                                          rendered="#{profileEditBacker.dialog == E.PREVIEW}"/>
                     </h:panelGroup>
@@ -256,7 +256,7 @@
                     <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative"
                                   rendered="#{userSession.user.administrator}">
                         <h:outputLabel id="o-overwrite-vote" for="it-overwrite-vote"
-                                       value="#{labels['profile_edit.overwrite']}" styleClass="form-label"/>
+                                       value="#{labels.profile_edit_overwrite}" styleClass="form-label"/>
                         <h:panelGroup layout="block" styleClass="input-group">
                             <h:inputText id="it-overwrite-vote" value="#{profileEditBacker.user.forcedVotingWeight}"
                                          a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
@@ -272,9 +272,9 @@
                     </h:panelGroup>
 
                     <h:panelGroup id="p-buttons" layout="block" styleClass="d-flex justify-content-between">
-                        <h:commandButton id="cb-apply" value="#{labels['profile_edit.apply_changes']}"
+                        <h:commandButton id="cb-apply" value="#{labels.profile_edit_apply_changes}"
                                          action="#{profileEditBacker.openChangeDialog}" styleClass="btn btn-primary"/>
-                        <h:commandButton id="cb-delete" value="#{labels['profile_edit.delete']}"
+                        <h:commandButton id="cb-delete" value="#{labels.profile_edit_delete}"
                                          action="#{profileEditBacker.openDeleteDialog}" styleClass="btn btn-primary"/>
                     </h:panelGroup>
                 </h:form>
@@ -286,9 +286,9 @@
         <!-- Renders the popup dialog to delete the profile owner's profile. -->
         <h:panelGroup layout="block" styleClass="dialog" rendered="#{profileEditBacker.dialog == E.DELETE}">
             <h:form id="f-del-user">
-                <h:outputText id="ot-really-del" styleClass="h2" value="#{labels['profile_edit.delete']}"/>
+                <h:outputText id="ot-really-del" styleClass="h2" value="#{labels.profile_edit_delete}"/>
                 <h:panelGroup layout="block" styleClass="mb-3">
-                    <h:outputText id="ot-really-del-warn" value="#{labels['profile_edit.delete_warn']}"/>
+                    <h:outputText id="ot-really-del-warn" value="#{labels.profile_edit_delete_warn}"/>
                 </h:panelGroup>
                 <h:panelGroup id="p-delete-password" styleClass="mb-3 form-group position-relative">
                     <h:panelGroup id="p-username-ban" layout="block" styleClass="row align-center">
@@ -308,7 +308,7 @@
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="d-flex justify-content-between my-3">
-                    <h:commandButton id="cb-really-del" value="#{labels['profile_edit.really_del']}"
+                    <h:commandButton id="cb-really-del" value="#{labels.profile_edit_really_del}"
                                      action="#{profileEditBacker.delete}" styleClass="btn btn-primary"/>
                     <h:commandButton id="cb-cancel-del" value="#{labels.abort}" styleClass="btn btn-secondary"
                                      action="#{profileEditBacker.closeDialog}" immediate="true"/>
@@ -319,9 +319,9 @@
         <!-- Renders the popup dialog to update the changes made to the profile information. -->
         <h:panelGroup layout="block" styleClass="dialog" rendered="#{profileEditBacker.dialog == E.UPDATE}">
             <h:form id="f-change-user">
-                <h:outputText id="ot-really-change" value="#{labels['profile_edit.apply_changes']}" styleClass="h2"/>
+                <h:outputText id="ot-really-change" value="#{labels.profile_edit_apply_changes}" styleClass="h2"/>
                 <h:panelGroup layout="block" styleClass="mb-3">
-                    <h:outputText id="ot-really-change-info" value="#{labels['profile_edit.apply_info']}"/>
+                    <h:outputText id="ot-really-change-info" value="#{labels.profile_edit_apply_info}"/>
                 </h:panelGroup>
                 <h:panelGroup id="p-update-password" styleClass="mb-3 form-group position-relative">
                     <h:panelGroup layout="block" styleClass="row align-center">
@@ -341,7 +341,7 @@
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="d-flex justify-content-between my-3">
-                    <h:commandButton id="cb-really-change" value="#{labels['profile_edit.really_change']}"
+                    <h:commandButton id="cb-really-change" value="#{labels.profile_edit_really_change}"
                                      action="#{profileEditBacker.saveChanges}" styleClass="btn btn-primary">
                         <f:param name="u" value="#{profileEditBacker.user.username}"/>
                     </h:commandButton>

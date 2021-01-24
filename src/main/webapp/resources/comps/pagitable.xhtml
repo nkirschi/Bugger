@@ -49,7 +49,7 @@
                         <h:inputText id="i-curr-page" value="#{cc.attrs.paginator.currentPage}"
                                      rendered="#{not cc.attrs.simple}"
                                      styleClass="form-control form-control-sm text-center"
-                                     validatorMessage="#{messages['paginator.not_in_range']}">
+                                     validatorMessage="#{messages.paginator_not_in_range}">
                             <f:validateLongRange minimum="1" maximum="#{cc.attrs.paginator.determineLastPageIndex()}"/>
                         </h:inputText>
                         <h:message for="i-curr-page" styleClass="text-danger"/>

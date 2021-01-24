@@ -54,20 +54,20 @@ public class FileValidator implements Validator<Part> {
     @Override
     public void validate(final FacesContext fctx, final UIComponent component, final Part part) {
         if (part.getSize() > Constants.MAX_ATTACHMENT_FILESIZE * Constants.MB_TO_BYTES) {
-            String message = MessageFormat.format(messagesBundle.getString("image_validator.file_size_too_large"),
+            String message = MessageFormat.format(messagesBundle.getString("image_validator_file_size_too_large"),
                     Constants.MAX_ATTACHMENT_FILESIZE);
             throw new ValidatorException(new FacesMessage(message));
         }
         if (!postService.isAttachmentNameValid(part.getSubmittedFileName())) {
             throw new ValidatorException(new FacesMessage(
-                    messagesBundle.getString("file_validator.invalid_extension")));
+                    messagesBundle.getString("file_validator_invalid_extension")));
         }
 
         try {
             part.getInputStream();
         } catch (IOException e) {
             throw new ValidatorException(new FacesMessage(
-                    messagesBundle.getString("file_validator.file_corrupt")));
+                    messagesBundle.getString("file_validator_file_corrupt")));
         }
     }
 

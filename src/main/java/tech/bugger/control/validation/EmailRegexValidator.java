@@ -53,7 +53,7 @@ public class EmailRegexValidator implements Validator<String> {
     public void validate(final FacesContext fctx, final UIComponent component, final String email) {
         Pattern pattern = Pattern.compile(applicationSettings.getConfiguration().getUserEmailFormat());
         if (!pattern.matcher(email).matches()) {
-            FacesMessage message = new FacesMessage(messagesBundle.getString("email_validator.format_wrong"));
+            FacesMessage message = new FacesMessage(messagesBundle.getString("email_validator_format_wrong"));
             throw new ValidatorException(message);
         }
     }

@@ -23,7 +23,7 @@
                         <h:link value="#{reportCreateBacker.topic.title}" outcome="pretty:topic">
                             <f:param name="id" value="#{reportCreateBacker.topic.id}"/>
                         </h:link>
-                        <h:outputText value="#{labels.report_create_info2}"/>
+                        <h:outputText value="."/>
                     </p>
 
                     <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
@@ -51,7 +51,7 @@
                                                      required="true" styleClass="form-select">
                                         <f:selectItems value="#{reportCreateBacker.reportTypes}" var="type"
                                                        itemValue="#{type}"
-                                                       itemLabel="#{labels['report_type.'.concat(type)]}"/>
+                                                       itemLabel="#{labels['report_type_'.concat(type)]}"/>
                                     </h:selectOneMenu>
                                     <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                         <h:message id="m-type" for="s-type"/>

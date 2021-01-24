@@ -254,8 +254,8 @@ public class NotificationService {
 
             Mail mail = new Mail.Builder()
                     .to(n.getRecipientMail())
-                    .subject(interactionsBundle.getString("email_notification_subject." + n.getType()))
-                    .content(new MessageFormat(interactionsBundle.getString("email_notification_content."
+                    .subject(interactionsBundle.getString("email_notification_subject_" + n.getType()))
+                    .content(new MessageFormat(interactionsBundle.getString("email_notification_content_"
                             + n.getType()))
                             .format(new String[]{n.getReportTitle(), link}))
                     .envelop();

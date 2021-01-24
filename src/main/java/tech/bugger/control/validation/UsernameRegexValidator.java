@@ -50,7 +50,7 @@ public class UsernameRegexValidator implements Validator<String> {
     @Override
     public void validate(final FacesContext fctx, final UIComponent component, final String username) {
         if (!REGEX.matcher(username).matches()) {
-            FacesMessage message = new FacesMessage(messagesBundle.getString("username_validator.format_wrong"));
+            FacesMessage message = new FacesMessage(messagesBundle.getString("username_validator_format_wrong"));
             throw new ValidatorException(message);
         }
     }

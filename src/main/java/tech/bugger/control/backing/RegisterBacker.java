@@ -121,7 +121,7 @@ public class RegisterBacker {
                 JFConfig.getApplicationPath(ectx))) {
 
             log.debug("Registration for user " + user + " successful.");
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("register.success"), Feedback.Type.INFO));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("register_success"), Feedback.Type.INFO));
             return "pretty:home";
         }
         return null;

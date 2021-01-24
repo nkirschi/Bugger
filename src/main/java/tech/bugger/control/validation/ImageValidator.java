@@ -48,7 +48,7 @@ public class ImageValidator implements Validator<Part> {
     @Override
     public void validate(final FacesContext fctx, final UIComponent component, final Part part) {
         if (part.getSize() > Constants.MAX_AVATAR_FILESIZE * Constants.MB_TO_BYTES) {
-            String message = MessageFormat.format(messagesBundle.getString("file_validator.file_size_too_large"),
+            String message = MessageFormat.format(messagesBundle.getString("file_validator_file_size_too_large"),
                     Constants.MAX_AVATAR_FILESIZE);
             throw new ValidatorException(new FacesMessage(message));
         }
@@ -57,16 +57,16 @@ public class ImageValidator implements Validator<Part> {
             BufferedImage img = ImageIO.read(part.getInputStream());
             if (img == null) {
                 throw new ValidatorException(new FacesMessage(
-                        messagesBundle.getString("image_validator.image_corrupt")));
+                        messagesBundle.getString("image_validator_image_corrupt")));
             }
             if (img.getWidth() < Constants.MIN_IMAGE_WIDTH || img.getHeight() < Constants.MIN_IMAGE_HEIGHT) {
-                String message = MessageFormat.format(messagesBundle.getString("image_validator.image_too_small"),
+                String message = MessageFormat.format(messagesBundle.getString("image_validator_image_too_small"),
                         Constants.MIN_IMAGE_WIDTH, Constants.MIN_IMAGE_HEIGHT);
                 throw new ValidatorException(new FacesMessage(message));
             }
         } catch (IOException e) {
             throw new ValidatorException(new FacesMessage(
-                    messagesBundle.getString("image_validator.image_corrupt")));
+                    messagesBundle.getString("image_validator_image_corrupt")));
         }
     }
 

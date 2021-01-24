@@ -125,7 +125,7 @@ public class PasswordSetBacker {
     public String setUserPassword() {
         User user = token.getUser();
         if (authenticationService.setPassword(user, password, token.getValue())) {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("password_set.success"), Feedback.Type.INFO));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("password_set_success"), Feedback.Type.INFO));
             session.setUser(user);
             return "pretty:home";
         }

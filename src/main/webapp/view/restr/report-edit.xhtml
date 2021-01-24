@@ -46,7 +46,7 @@
                     <h:link value="##{reportEditBacker.reportID}" outcome="pretty:report">
                         <f:param name="id" value="#{reportEditBacker.reportID}"/>
                     </h:link>
-                    <h:outputText value="#{labels.report_edit_info2}"/>
+                    <h:outputText value="."/>
                 </p>
 
                 <h:form id="f-report-edit" enctype="multipart/form-data" rendered="#{reportEditBacker.privileged}">
@@ -76,7 +76,7 @@
                                                      styleClass="form-select">
                                         <f:selectItems value="#{reportEditBacker.reportTypes}" var="type"
                                                        itemValue="#{type}"
-                                                       itemLabel="#{labels['report_type.'.concat(type)]}"/>
+                                                       itemLabel="#{labels['report_type_'.concat(type)]}"/>
                                     </h:selectOneMenu>
                                     <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                         <h:message id="m-type" for="s-type"/>
@@ -91,7 +91,7 @@
                                                      required="true" styleClass="form-select">
                                         <f:selectItems value="#{reportEditBacker.reportSeverities}" var="severity"
                                                        itemValue="#{severity}"
-                                                       itemLabel="#{labels['report_severity.'.concat(severity)]}"/>
+                                                       itemLabel="#{labels['report_severity_'.concat(severity)]}"/>
                                     </h:selectOneMenu>
                                     <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                         <h:message id="m-severity" for="s-severity"/>

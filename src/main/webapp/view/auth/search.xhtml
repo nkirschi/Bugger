@@ -195,11 +195,11 @@
                                 </h:link>
                             </b:column>
                             <b:column title="#{labels.col_type}" paginator="#{searchBacker.reportResults}" key="type">
-                                <h:outputText value="#{labels['report_type.' += var.type]}"/>
+                                <h:outputText value="#{labels['report_type_' += var.type]}"/>
                             </b:column>
                             <b:column title="#{labels.col_severity}" paginator="#{searchBacker.reportResults}"
                                       key="severity">
-                                <h:outputText value="#{labels['report_severity.' += var.severity]}"/>
+                                <h:outputText value="#{labels['report_severity_' += var.severity]}"/>
                             </b:column>
                             <b:column title="#{labels.col_version}" paginator="#{searchBacker.reportResults}"
                                       key="version">

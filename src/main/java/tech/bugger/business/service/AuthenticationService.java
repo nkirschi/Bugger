@@ -115,7 +115,7 @@ public class AuthenticationService {
 
             return user;
         } else {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("authentication_service.wrong_credentials"),
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("authentication_service_wrong_credentials"),
                     Feedback.Type.ERROR));
         }
 

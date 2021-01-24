@@ -65,7 +65,7 @@ public class MatchingFieldValidator implements Validator<String> {
         // Check if the initial and other text are equal.
         if (!Objects.equals(other, value)) {
             FacesMessage message = new FacesMessage(
-                    messagesBundle.getString("matching_field_validator.passwords_must_match"));
+                    messagesBundle.getString("matching_field_validator_passwords_must_match"));
             throw new ValidatorException(message);
         }
     }
