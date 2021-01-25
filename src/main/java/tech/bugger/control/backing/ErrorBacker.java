@@ -77,7 +77,11 @@ public class ErrorBacker {
     public static String stackTrace(final Throwable exception) {
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
-        exception.printStackTrace(printWriter);
+
+        if (exception != null) {
+            exception.printStackTrace(printWriter);
+        }
+
         return stringWriter.toString();
     }
 

@@ -73,7 +73,7 @@ public class TrespassListener implements PhaseListener {
         FacesContext fctx = event.getFacesContext();
         ExternalContext ectx = fctx.getExternalContext();
 
-        // Disallow unknown views.
+        // Disallow unknown and error views.
         UIViewRoot viewRoot = fctx.getViewRoot();
         if (viewRoot == null) {
             redirectToErrorPage(ectx);
@@ -82,6 +82,8 @@ public class TrespassListener implements PhaseListener {
         String viewId = viewRoot.getViewId();
         if (viewId == null) {
             redirectToErrorPage(ectx);
+            return;
+        } else if (viewId.contains("error")) {
             return;
         }
 

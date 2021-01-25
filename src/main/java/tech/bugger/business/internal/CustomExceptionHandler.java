@@ -18,6 +18,7 @@ import javax.faces.event.ExceptionQueuedEvent;
 import javax.faces.view.ViewDeclarationLanguage;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletResponse;
+import org.jboss.weld.exceptions.WeldException;
 import tech.bugger.control.exception.Error404Exception;
 
 /**
@@ -60,7 +61,8 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
         Throwable exception = unhandledEvents.next().getContext().getException();
 
         while (exception.getCause() != null
-                && (exception instanceof FacesException || exception instanceof ELException)) {
+                && (exception instanceof FacesException || exception instanceof ELException
+                || exception instanceof WeldException)) {
             exception = exception.getCause();
         }
 
@@ -71,7 +73,8 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
         requestScope.put(RequestDispatcher.ERROR_EXCEPTION, exception);
 
         String viewID;
-        if (exception instanceof Error404Exception) {
+        if (exception instanceof Error404Exception
+                || (exception.getCause() != null && exception.getCause() instanceof Error404Exception)) {
             viewID = "/WEB-INF/errorpages/404.xhtml";
         } else {
             viewID = "/WEB-INF/errorpages/500.xhtml";
@@ -83,7 +86,7 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
 
         try {
             // Backup headers
-            HttpServletResponse response = ((HttpServletResponse) ectx.getResponse());
+            HttpServletResponse response = (HttpServletResponse) ectx.getResponse();
             Map<String, String> headers = new HashMap<>();
             for (String header : response.getHeaderNames()) {
                 headers.put(header, response.getHeader(header));

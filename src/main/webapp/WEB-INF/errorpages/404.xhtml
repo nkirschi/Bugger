@@ -10,7 +10,8 @@
     <ui:define name="content">
 
         <h:panelGrid id="pg-error-details" columns="1"
-                     rendered="#{(facesContext.application.projectStage eq 'Development') and requestScope['javax.servlet.error.exception'] != null}">
+                     rendered="#{(facesContext.application.projectStage eq 'Development')
+                     and requestScope['javax.servlet.error.exception'] != null}">
             <h:outputText value="Request URI"/>
             <h:outputText value="#{requestScope['javax.servlet.error.request_uri']}"/>
             <h:outputText value="Exception type"/>
@@ -18,7 +19,7 @@
             <h:outputText value="Exception message"/>
             <h:outputText value="#{requestScope['javax.servlet.error.exception'].message}"/>
             <h:outputText value="Stack trace"/>
-            <h:outputText value="#{errorBacker.stackTrace(requestScope['javax.servlet.error.exception'])}"/>
+            <pre>#{errorBacker.stackTrace(requestScope['javax.servlet.error.exception'])}</pre>
         </h:panelGrid>
 
     </ui:define>
