@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import javax.enterprise.event.Event;
 import javax.servlet.http.Part;
@@ -448,7 +449,7 @@ public class ProfileServiceTest {
 
     @Test
     public void testGenerateThumbnail() throws IOException {
-        byte[] bytes = ClassLoader.getSystemResourceAsStream("images/bugger.png").readAllBytes();
+        byte[] bytes = Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("images/bugger.png")).readAllBytes();
         assertNotNull(service.generateThumbnail(bytes));
     }
 

@@ -116,6 +116,7 @@ public class PriorityFuture<T> implements RunnableFuture<T> {
      * @throws InterruptedException  if the current thread was interrupted while waiting
      * @throws TimeoutException      if the wait timed out
      */
+    @SuppressWarnings("NullableProblems")
     @Override
     public T get(final long timeout, final TimeUnit unit)
             throws InterruptedException, ExecutionException, TimeoutException, CancellationException {

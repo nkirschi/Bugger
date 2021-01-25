@@ -20,6 +20,7 @@ public class PriorityFutureTest {
     private RunnableFuture<Runnable> futureMock;
 
     @BeforeEach
+    @SuppressWarnings("unchecked")
     public void setUp() {
         taskMock = mock(PriorityTask.class);
         futureMock = (RunnableFuture<Runnable>) mock(RunnableFuture.class);

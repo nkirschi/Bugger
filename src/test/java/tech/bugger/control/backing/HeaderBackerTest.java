@@ -4,7 +4,6 @@ import com.ocpsoft.pretty.PrettyContext;
 import com.ocpsoft.pretty.faces.config.mapping.UrlMapping;
 import com.sun.faces.context.RequestParameterMap;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,6 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
-import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.util.Feedback;
@@ -37,9 +35,6 @@ import static org.mockito.Mockito.*;
 public class HeaderBackerTest {
 
     private HeaderBacker headerBacker;
-
-    @Mock
-    private ApplicationSettings settings;
 
     @Mock
     private SearchService searchService;
@@ -71,7 +66,6 @@ public class HeaderBackerTest {
     @Mock
     private UrlMapping mapping;
 
-    private Field field;
     private User user;
     private static final String KEY = "url";
     private static MockedStatic<PrettyContext> config;

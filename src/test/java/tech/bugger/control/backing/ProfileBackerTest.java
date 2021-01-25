@@ -231,6 +231,7 @@ public class ProfileBackerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testDeleteTopicSubscription() throws NoSuchFieldException, IllegalAccessException {
         Field topics = profileBacker.getClass().getDeclaredField("topicSubscriptions");
         topics.setAccessible(true);
@@ -244,10 +245,11 @@ public class ProfileBackerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testDeleteReportSubscription() throws NoSuchFieldException, IllegalAccessException {
         Field reports = profileBacker.getClass().getDeclaredField("reportSubscriptions");
         reports.setAccessible(true);
-        Paginator<Topic> mockReports = mock(Paginator.class);
+        Paginator<Report> mockReports = mock(Paginator.class);
         reports.set(profileBacker, mockReports);
         profileBacker.setUser(user);
         profileBacker.deleteReportSubscription(report);
@@ -257,10 +259,11 @@ public class ProfileBackerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testDeleteUserSubscription() throws NoSuchFieldException, IllegalAccessException {
         Field users = profileBacker.getClass().getDeclaredField("userSubscriptions");
         users.setAccessible(true);
-        Paginator<Topic> mockUsers = mock(Paginator.class);
+        Paginator<User> mockUsers = mock(Paginator.class);
         users.set(profileBacker, mockUsers);
         profileBacker.setUser(user);
         profileBacker.deleteUserSubscription(user);
@@ -270,6 +273,7 @@ public class ProfileBackerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testDeleteAllTopicSubscription() throws NoSuchFieldException, IllegalAccessException {
         Field topics = profileBacker.getClass().getDeclaredField("topicSubscriptions");
         topics.setAccessible(true);
@@ -283,6 +287,7 @@ public class ProfileBackerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testDeleteAllReportSubscription() throws NoSuchFieldException, IllegalAccessException {
         Field reports = profileBacker.getClass().getDeclaredField("reportSubscriptions");
         reports.setAccessible(true);
@@ -296,6 +301,7 @@ public class ProfileBackerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testDeleteAllUserSubscription() throws NoSuchFieldException, IllegalAccessException {
         Field users = profileBacker.getClass().getDeclaredField("userSubscriptions");
         users.setAccessible(true);

@@ -1,6 +1,7 @@
 package tech.bugger.control.servlet;
 
 import java.io.IOException;
+import java.io.Serial;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,9 @@ public class MediaServletTest {
     @BeforeEach
     public void setUp() {
         servlet = spy(new MediaServlet() {
+            @Serial
+            private static final long serialVersionUID = 6640097133536637613L;
+
             @Override
             protected void handleRequest(HttpServletRequest request, HttpServletResponse response) {
             }

@@ -55,8 +55,6 @@ public class ReportCreateBackerTest {
     @Mock
     private Map<String, String> requestParameterMap;
 
-    private Report testReport;
-
     private Post testFirstPost;
 
     @BeforeEach
@@ -65,7 +63,7 @@ public class ReportCreateBackerTest {
 
         List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         testFirstPost = new Post(100, "Some content", 42, mock(Authorship.class), attachments);
-        testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
+        Report testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
                 mock(Authorship.class),
                 mock(OffsetDateTime.class), null, null, false, 1);
         reportCreateBacker.setReport(testReport);
@@ -88,14 +86,14 @@ public class ReportCreateBackerTest {
     }
 
     @Test
-    public void testInitWhenNoParam() throws Exception {
+    public void testInitWhenNoParam() {
         doReturn(null).when(requestParameterMap).get("id");
         assertThrows(Error404Exception.class, () -> reportCreateBacker.init());
         assertTrue(reportCreateBacker.isBanned());
     }
 
     @Test
-    public void testInitWhenNoUser() throws Exception {
+    public void testInitWhenNoUser() {
         doReturn("1").when(requestParameterMap).get("id");
         doReturn(null).when(session).getUser();
         assertThrows(Error404Exception.class, () -> reportCreateBacker.init());
@@ -103,7 +101,7 @@ public class ReportCreateBackerTest {
     }
 
     @Test
-    public void testInitWhenNoTopic() throws Exception {
+    public void testInitWhenNoTopic() {
         doReturn("1").when(requestParameterMap).get("id");
         doReturn(mock(User.class)).when(session).getUser();
         doReturn(null).when(topicService).getTopicByID(anyInt());
@@ -112,7 +110,7 @@ public class ReportCreateBackerTest {
     }
 
     @Test
-    public void testInitWhenNotAllowed() throws Exception {
+    public void testInitWhenNotAllowed() {
         doReturn("1").when(requestParameterMap).get("id");
         doReturn(mock(User.class)).when(session).getUser();
         doReturn(mock(Topic.class)).when(topicService).getTopicByID(anyInt());

@@ -34,6 +34,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class TrespassListenerTest {
 
+    @SuppressWarnings("rawtypes")
     private MockedStatic<CDI> cdiStaticMock;
     private MockedStatic<PrettyContext> prettyContextStaticMock;
 
@@ -59,6 +60,7 @@ public class TrespassListenerTest {
 
     private TrespassListener trespassListener;
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @BeforeEach
     public void setUp() throws Exception {
         prettyContextStaticMock = Mockito.mockStatic(PrettyContext.class);

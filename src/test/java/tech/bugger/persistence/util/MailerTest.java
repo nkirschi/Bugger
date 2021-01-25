@@ -37,7 +37,7 @@ public class MailerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        while (isPortBlocked(SMTP_PORT)) ;
+        while (isPortBlocked()) ;
         smtpServer = SimpleSmtpServer.start(SMTP_PORT);
         mailer = new Mailer(ClassLoader.getSystemResourceAsStream("mailing.properties"));
     }
@@ -47,8 +47,8 @@ public class MailerTest {
         smtpServer.stop();
     }
 
-    private static boolean isPortBlocked(int port) {
-        try (Socket ignored = new Socket("localhost", port)) {
+    private static boolean isPortBlocked() {
+        try (Socket ignored = new Socket("localhost", MailerTest.SMTP_PORT)) {
             return true;
         } catch (IOException ignored) {
             return false;

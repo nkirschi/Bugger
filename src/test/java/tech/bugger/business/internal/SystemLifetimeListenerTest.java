@@ -40,7 +40,6 @@ public class SystemLifetimeListenerTest {
     private MockedStatic<Runtime> runtimeStaticMock;
 
     private Registry registry;
-    private TransactionManager transactionManagerMock;
     private ConnectionPool connectionPoolMock;
     private PriorityExecutor priorityExecutorMock;
     private Transaction transactionMock;
@@ -77,7 +76,7 @@ public class SystemLifetimeListenerTest {
         logStaticMock.when(() -> Log.forClass(any())).thenReturn(log);
 
         registry = mock(Registry.class);
-        transactionManagerMock = mock(TransactionManager.class);
+        TransactionManager transactionManagerMock = mock(TransactionManager.class);
 
         systemLifetimeListenerMock = new SystemLifetimeListener();
         systemLifetimeListenerMock.setRegistry(registry);

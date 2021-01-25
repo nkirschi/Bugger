@@ -25,6 +25,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class ConnectionPoolTest {
+
     private static final String DVR = "org.postgresql.Driver";
     private static final String URL = "jdbc:postgresql://localhost:42424/postgres";
     private static final Properties PROPS = new Properties();
@@ -96,6 +97,7 @@ public class ConnectionPoolTest {
         }
 
         @Test
+        @SuppressWarnings("unchecked")
         public void testConstructorSetsUpConnections() throws IllegalAccessException, NoSuchFieldException {
             ConnectionPool connectionPool = new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT);
             Field field = ConnectionPool.class.getDeclaredField("availableConnections");
@@ -113,6 +115,7 @@ public class ConnectionPoolTest {
         private Collection<Connection> usedConnections;
 
         @BeforeEach
+        @SuppressWarnings("unchecked")
         public void setUp() throws Exception {
             connectionPool = new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT);
 
@@ -167,6 +170,7 @@ public class ConnectionPoolTest {
         private Collection<Connection> usedConnections;
 
         @BeforeEach
+        @SuppressWarnings("unchecked")
         public void setUp() throws Exception {
             connectionPool = new ConnectionPool(DVR, URL, PROPS, MIN_CONNS, MAX_CONNS, TIMEOUT);
 
@@ -332,4 +336,5 @@ public class ConnectionPoolTest {
             assertEquals(IllegalArgumentException.class, e.getCause().getClass());
         }
     }
+
 }

@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
-import java.util.ResourceBundle;
 import javax.enterprise.event.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,9 +40,6 @@ public class StatisticsServiceTest {
 
     @Mock
     private Event<Feedback> feedbackEvent;
-
-    @Mock
-    private ResourceBundle resourceBundle;
 
     @InjectMocks
     private StatisticsService statisticsService;

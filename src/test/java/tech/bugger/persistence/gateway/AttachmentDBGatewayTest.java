@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,7 +94,7 @@ public class AttachmentDBGatewayTest {
     @Test
     public void testUpdate() throws Exception {
         Attachment attachment = find(1);
-        attachment.setPost(post.getId());
+        Objects.requireNonNull(attachment).setPost(post.getId());
         attachment.setName("a-different-file-name.txt");
         gateway.update(attachment);
         assertEquals(attachment, find(attachment.getId()));
@@ -116,8 +117,8 @@ public class AttachmentDBGatewayTest {
     @Test
     public void testDelete() throws Exception {
         Attachment attachment = find(1);
-        gateway.delete(attachment);
-        assertEquals(null, find(1));
+        gateway.delete(Objects.requireNonNull(attachment));
+        assertNull(find(1));
     }
 
     @Test

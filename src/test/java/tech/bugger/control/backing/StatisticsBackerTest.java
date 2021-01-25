@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.StatisticsService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Registry;
@@ -30,9 +29,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
 public class StatisticsBackerTest {
-
-    @Mock
-    private StatisticsService statisticsService;
 
     @Mock
     private TopicService topicService;

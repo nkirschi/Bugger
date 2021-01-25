@@ -37,12 +37,12 @@ public class PriorityExecutorTest {
         lowPriorityTask = new PriorityTask(PriorityTask.Priority.LOW, () -> {
             awaitStart();
             finishedTasks.add("low");
-            sleep(TASK_SLEEP_DURATION_MILLIS);
+            sleep();
         });
         highPriorityTask = new PriorityTask(PriorityTask.Priority.HIGH, () -> {
             awaitStart();
             finishedTasks.add("high");
-            sleep(TASK_SLEEP_DURATION_MILLIS);
+            sleep();
         });
     }
 
@@ -54,9 +54,9 @@ public class PriorityExecutorTest {
         }
     }
 
-    private void sleep(int millis) {
+    private void sleep() {
         try {
-            Thread.sleep(millis);
+            Thread.sleep(PriorityExecutorTest.TASK_SLEEP_DURATION_MILLIS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -118,6 +118,7 @@ public class PriorityExecutorTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testForeignTaskComparison() throws Exception {
         Field field = priorityExecutor.getClass().getDeclaredField("executorService");
         field.setAccessible(true);

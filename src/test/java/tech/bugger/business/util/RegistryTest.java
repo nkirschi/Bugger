@@ -18,6 +18,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class RegistryTest {
+
     private Registry registry;
     private InjectionPoint injectionPoint;
     private UserSession userSession;

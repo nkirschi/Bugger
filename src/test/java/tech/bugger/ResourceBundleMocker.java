@@ -9,11 +9,13 @@ public class ResourceBundleMocker {
     public static ResourceBundle mock(String valueToAlwaysReturn) {
         return new ResourceBundle() {
             @Override
+            @SuppressWarnings("NullableProblems")
             protected Object handleGetObject(String key) {
                 return valueToAlwaysReturn;
             }
 
             @Override
+            @SuppressWarnings("NullableProblems")
             public Enumeration<String> getKeys() {
                 return Collections.emptyEnumeration();
             }

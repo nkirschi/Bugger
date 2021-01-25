@@ -106,20 +106,20 @@ public class ReportEditBackerTest {
     }
 
     @Test
-    public void testInitWhenNoParam() throws Exception {
+    public void testInitWhenNoParam() {
         doReturn(null).when(requestParameterMap).get("id");
         assertThrows(Error404Exception.class, () -> reportEditBacker.init());
     }
 
     @Test
-    public void testInitWhenNoReport() throws Exception {
+    public void testInitWhenNoReport() {
         doReturn("1234").when(requestParameterMap).get("id");
         doReturn(null).when(reportService).getReportByID(1234);
         assertThrows(Error404Exception.class, () -> reportEditBacker.init());
     }
 
     @Test
-    public void testInitWhenNotPrivileged() throws Exception {
+    public void testInitWhenNotPrivileged() {
         doReturn("1234").when(requestParameterMap).get("id");
         doReturn(testReport).when(reportService).getReportByID(1234);
         doReturn(user).when(session).getUser();
@@ -128,7 +128,7 @@ public class ReportEditBackerTest {
     }
 
     @Test
-    public void testInitWhenReportClosed() throws Exception {
+    public void testInitWhenReportClosed() {
         doReturn("1234").when(requestParameterMap).get("id");
         doReturn(testReport).when(reportService).getReportByID(1234);
         doReturn(user).when(session).getUser();

@@ -188,12 +188,6 @@ public class StatisticsDBGatewayTest {
         @InjectMocks
         private StatisticsDBGateway gateway;
 
-        @Mock
-        private Connection connectionMock;
-
-        @Mock
-        private ReportCriteria criteriaMock;
-
         @Test
         public void testGetNumberOfOpenReportsWhenCriteriaNull() {
             assertThrows(IllegalArgumentException.class, () -> gateway.getNumberOfOpenReports(null));
