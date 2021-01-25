@@ -6,13 +6,13 @@ import java.io.Serializable;
 import java.time.OffsetDateTime;
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.NotificationService;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
@@ -54,18 +54,27 @@ public class HomeBacker implements Serializable {
     private final TopicService topicService;
 
     /**
+     * The current external context.
+     */
+    private final ExternalContext ectx;
+
+    /**
      * Constructs a new home page backing bean.
      *
      * @param session             The current user session.
      * @param notificationService The notification service to use.
      * @param topicService        The topic service to use.
+     * @param ectx                The current external context.
      */
     @Inject
-    public HomeBacker(final UserSession session, final NotificationService notificationService,
-                      final TopicService topicService) {
+    public HomeBacker(final UserSession session,
+                      final NotificationService notificationService,
+                      final TopicService topicService,
+                      final ExternalContext ectx) {
         this.session = session;
         this.notificationService = notificationService;
         this.topicService = topicService;
+        this.ectx = ectx;
     }
 
     /**
@@ -119,7 +128,6 @@ public class HomeBacker implements Serializable {
      */
     public String openNotification(final Notification notification) {
         notificationService.markAsRead(notification);
-        ExternalContext ext = FacesContext.getCurrentInstance().getExternalContext();
         String query = "/report?";
         if (notification.getPostID() != null) {
             query += "p=" + notification.getPostID() + "#post-" + notification.getPostID();
@@ -128,7 +136,7 @@ public class HomeBacker implements Serializable {
         }
 
         try {
-            ext.redirect(ext.getApplicationContextPath() + query);
+            ectx.redirect(ectx.getApplicationContextPath() + query);
         } catch (IOException e) {
             return "pretty:error";
         }
@@ -136,7 +144,7 @@ public class HomeBacker implements Serializable {
     }
 
     /**
-     * Checks if the user of the current {@code UserSession} is subscribed to the specified topic.
+     * Checks if the user of the current {@link UserSession} is subscribed to the specified topic.
      *
      * @param topic The topic in question.
      * @return {@code true} if the user is subscribed to the topic, {@code false} otherwise.
@@ -154,6 +162,19 @@ public class HomeBacker implements Serializable {
      */
     public OffsetDateTime lastChange(final Topic topic) {
         return topicService.lastChange(topic);
+    }
+
+    /**
+     * Returns the parsed description of the given {@link Topic} in HTML.
+     *
+     * @param topic The {@link Topic} whose description should be parsed.
+     * @return The parsed description in HTML.
+     */
+    public String getDescription(final Topic topic) {
+        if (topic.getDescription() == null) {
+            return "";
+        }
+        return MarkdownHandler.toHtml(topic.getDescription());
     }
 
     /**

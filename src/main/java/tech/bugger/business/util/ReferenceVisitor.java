@@ -7,6 +7,7 @@ import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.Link;
 import org.commonmark.node.Node;
 import org.commonmark.node.Text;
+import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.util.Log;
 
 /**
@@ -119,7 +120,7 @@ public class ReferenceVisitor extends AbstractVisitor {
         String refAndRest = split[1];
 
         // Reference end index
-        int indexEnd = indexOf(refAndRest, PATTERN_NON_REFERENCE);
+        int indexEnd = getRefEndIndex(refAndRest);
 
         // Parse Link if needed
         Node refNode = parseLink(sequence, refAndRest.substring(0, indexEnd), dest);
@@ -145,12 +146,12 @@ public class ReferenceVisitor extends AbstractVisitor {
         Optional<Integer> parsedInt = getInteger(refId);
         // Users can also contain other characters
         if (sequence.equals(USER_REFERENCE) && PATTERN_USER.matcher(refId).matches()) {
-            Link node = new Link(String.format(dest, refId), refId);
+            Link node = new Link(JFConfig.getApplicationPath() + String.format(dest, refId), refId);
             node.appendChild(new Text(sequence + refId));
             return node;
         } else if (parsedInt.isPresent()) {
             String ref = parsedInt.get() + "";
-            Link node = new Link(String.format(dest, ref), ref);
+            Link node = new Link(JFConfig.getApplicationPath() + String.format(dest, ref), ref);
             node.appendChild(new Text(sequence + ref));
             return node;
         } else {
@@ -190,14 +191,13 @@ public class ReferenceVisitor extends AbstractVisitor {
     }
 
     /**
-     * Returns the occurrence index of the given regular expression.
+     * Returns the occurrence index of the first non-reference character.
      *
-     * @param str     The string to search in.
-     * @param pattern The {@link Pattern} to search for.
-     * @return The index of the given regular expression in the string or the string's size if it couldn't be found.
+     * @param str The string to search in.
+     * @return The index of the first non-reference character in the string or its size if none could be found.
      */
-    private int indexOf(final String str, final Pattern pattern) {
-        Matcher matcher = pattern.matcher(str);
+    private int getRefEndIndex(final String str) {
+        Matcher matcher = ReferenceVisitor.PATTERN_NON_REFERENCE.matcher(str);
         return matcher.find() ? matcher.start() : str.length();
     }
 

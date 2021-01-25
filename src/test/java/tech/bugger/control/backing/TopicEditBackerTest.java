@@ -1,6 +1,11 @@
 package tech.bugger.control.backing;
 
 import com.sun.faces.context.RequestParameterMap;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.time.OffsetDateTime;
+import java.util.Locale;
+import javax.faces.context.ExternalContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,25 +18,8 @@ import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
-import javax.faces.application.Application;
-import javax.faces.application.NavigationHandler;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.time.OffsetDateTime;
-import java.util.Locale;
-
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.doReturn;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -43,9 +31,6 @@ public class TopicEditBackerTest {
     private TopicService topicService;
 
     @Mock
-    private FacesContext fctx;
-
-    @Mock
     private UserSession session;
 
     @Mock
@@ -53,12 +38,6 @@ public class TopicEditBackerTest {
 
     @Mock
     private RequestParameterMap map;
-
-    @Mock
-    private NavigationHandler navHandler;
-
-    @Mock
-    private Application application;
 
     private Field create;
     private User user;
@@ -72,10 +51,9 @@ public class TopicEditBackerTest {
                 new byte[]{1}, "Hallo, ich bin die Helgi | Perfect | He/They/Her | vergeben | Abo =|= endorsement",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, true);
         topic = new Topic(1, "Some title", "Some description");
-        topicEditBacker = new TopicEditBacker(topicService, fctx, session);
+        topicEditBacker = new TopicEditBacker(topicService, ext, session);
         create = topicEditBacker.getClass().getDeclaredField("create");
         create.setAccessible(true);
-        lenient().doReturn(ext).when(fctx).getExternalContext();
         lenient().doReturn(map).when(ext).getRequestParameterMap();
     }
 
@@ -166,7 +144,7 @@ public class TopicEditBackerTest {
     }
 
     @Test
-    public void testSaveChangesCreateFalse() throws IOException, IllegalAccessException {
+    public void testSaveChangesCreateFalse() throws IllegalAccessException {
         create.setBoolean(topicEditBacker, true);
         topicEditBacker.setTopic(topic);
         assertThrows(Error404Exception.class,

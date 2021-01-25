@@ -175,10 +175,10 @@
                         </h:link>
                     </b:column>
                     <b:column title="#{labels.col_type}" paginator="#{topicBacker.reports}" key="type">
-                        <h:outputText value="#{labels['report_type.' += var.type]}"/>
+                        <h:outputText value="#{labels['report_type_' += var.type]}"/>
                     </b:column>
                     <b:column title="#{labels.col_severity}" paginator="#{topicBacker.reports}" key="severity">
-                        <h:outputText value="#{labels['report_severity.' += var.severity]}"/>
+                        <h:outputText value="#{labels['report_severity_' += var.severity]}"/>
                     </b:column>
                     <b:column title="#{labels.col_version}" paginator="#{topicBacker.reports}" key="version">
                         <h:outputText value="#{var.version}"/>
@@ -207,10 +207,10 @@
                 <h:panelGroup layout="block" styleClass="mb-3">
                     <h:outputText id="ot-promote-mod-info" value="#{labels.topic_promote_mod_info}"/>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                     <h:outputLabel id="ol-username" value="#{labels.username}" for="it-username"
                                    styleClass="form-label"/>
-                    <h:panelGroup id="p-username-input" layout="block" styleClass="input-group has-validation">
+                    <h:panelGroup id="p-username-input" layout="block" styleClass="input-group">
                         <h:inputText id="it-username" value="#{topicBacker.userMod}" required="true"
                                      a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
                                      #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -247,11 +247,11 @@
                 <h:panelGroup layout="block" styleClass="mb-3">
                     <h:outputText id="ot-deomote-mod-info" value="#{labels.topic_demote_mod_info}"/>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                     <h:panelGroup id="p-username-mod" layout="block" styleClass="row align-center">
                         <h:outputLabel id="ol-username-mod" value="#{labels.username}" for="it-username-mod"
                                        styleClass="form-label"/>
-                        <h:panelGroup id="p-username-mod-input" layout="block" styleClass="input-group has-validation">
+                        <h:panelGroup id="p-username-mod-input" layout="block" styleClass="input-group">
                             <h:inputText id="it-username-mod" value="#{topicBacker.userMod}" required="true"
                                          a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -289,11 +289,11 @@
                 <h:panelGroup layout="block" styleClass="mb-3">
                     <h:outputText id="ot-ban-info" value="#{labels.topic_ban_info}"/>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                     <h:panelGroup id="p-username-ban" layout="block" styleClass="row align-center">
                         <h:outputLabel id="ol-username-ban" value="#{labels.username}" for="it-username-ban"
                                        styleClass="form-label"/>
-                        <h:panelGroup id="p-username-ban-input" layout="block" styleClass="input-group has-validation">
+                        <h:panelGroup id="p-username-ban-input" layout="block" styleClass="input-group">
                             <h:inputText id="it-username-ban" value="#{topicBacker.userBan}" required="true"
                                          a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -331,12 +331,12 @@
                 <h:panelGroup layout="block" styleClass="mb-3">
                     <h:outputText id="ot-unban-info" value="#{labels.topic_unban_info}"/>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                     <h:panelGroup id="p-username-unban" layout="block" styleClass="row align-center">
                         <h:outputLabel id="ol-username-unban" value="#{labels.username}" for="it-username-unban"
                                        styleClass="form-label"/>
                         <h:panelGroup id="p-username-unban-input" layout="block"
-                                      styleClass="input-group has-validation">
+                                      styleClass="input-group">
                             <h:inputText id="it-username-unban" value="#{topicBacker.userBan}" required="true"
                                          a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'

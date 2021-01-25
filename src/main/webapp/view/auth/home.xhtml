@@ -17,7 +17,7 @@
                 <h:outputText value="#{var.read ? '&#x2713;' : ' '}"/>
             </b:column>
             <b:column title="#{labels.type}" paginator="#{homeBacker.inbox}" key="type">
-                <h:commandButton value="#{labels['notification_type.'.concat(var.type)]}"
+                <h:commandButton value="#{labels['notification_type_'.concat(var.type)]}"
                                  action="#{homeBacker.openNotification(var)}"
                                  styleClass="btn btm-sm btn-link"/>
             </b:column>
@@ -55,7 +55,7 @@
                 </h:link>
             </b:column>
             <b:column title="#{labels.description}" paginator="#{homeBacker.topics}" key="description">
-                <h:outputText value="#{var.description}" escape="false"/>
+                <h:outputText value="#{homeBacker.getDescription(var)}" escape="false"/>
             </b:column>
             <b:column title="#{labels.last_activity}" paginator="#{homeBacker.topics}" key="last_activity">
                 <h:outputText value="#{var.lastActivity}" styleClass="text-nowrap">

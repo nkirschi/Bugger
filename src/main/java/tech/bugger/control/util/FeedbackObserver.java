@@ -1,12 +1,11 @@
 package tech.bugger.control.util;
 
-import tech.bugger.business.util.Feedback;
-
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
+import tech.bugger.business.util.Feedback;
 
 /**
  * Observer for service feedback messages.

@@ -204,20 +204,12 @@ public class TopicDBGateway implements TopicGateway {
         String sql = "SELECT t.*, l.last_activity FROM topic AS t"
                 + " LEFT OUTER JOIN topic_last_activity AS l ON t.id = l.topic"
                 + " ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC" : " DESC")
-                + " LIMIT " + selection.getPageSize().getSize()
-                + " OFFSET " + selection.getCurrentPage() * selection.getPageSize().getSize() + ";";
+                + " LIMIT " + Pagitable.getItemLimit(selection)
+                + " OFFSET " + Pagitable.getItemOffset(selection) + ";";
 
         List<Topic> selectedTopics = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                OffsetDateTime lastActivity = null;
-                if (rs.getObject("last_activity", OffsetDateTime.class) != null) {
-                    lastActivity = rs.getObject("last_activity", OffsetDateTime.class);
-                }
-                selectedTopics.add(new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description"),
-                        lastActivity));
-            }
+            readTopicsFromResultSet(stmt.executeQuery(), selectedTopics);
         } catch (SQLException e) {
             log.error("Error while retrieving topics with " + selection + ".", e);
             throw new StoreException("Error while retrieving topics with " + selection + ".", e);
@@ -428,14 +420,12 @@ public class TopicDBGateway implements TopicGateway {
             throw new IllegalArgumentException("Topic ID must not be null!");
         }
 
-        OffsetDateTime lastActivity = null;
+        OffsetDateTime lastActivity;
         String sql = "SELECT * FROM topic_last_activity WHERE topic =" + topic.getId();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                if (rs.getObject("last_activity", OffsetDateTime.class) != null) {
-                    lastActivity = rs.getObject("last_activity", OffsetDateTime.class);
-                }
+                lastActivity = rs.getObject("last_activity", OffsetDateTime.class);
             } else {
                 log.error("Topic " + topic + " could not be found when trying to determine last activity.");
                 throw new NotFoundException("Topic " + topic
@@ -455,10 +445,10 @@ public class TopicDBGateway implements TopicGateway {
     @Override
     public int countSubscribers(final Topic topic) {
         if (topic == null) {
-            log.error("Cannot count subscribers of topic null.");
+            log.error("Cannot determine number of subscribers of topic null.");
             throw new IllegalArgumentException("Topic cannot be null.");
         } else if (topic.getId() == null) {
-            log.error("Cannot count subscribers of topic with ID null.");
+            log.error("Cannot determine number of subscribers of topic with ID null.");
             throw new IllegalArgumentException("Topic ID cannot be null.");
         }
 
@@ -476,14 +466,6 @@ public class TopicDBGateway implements TopicGateway {
             throw new StoreException("Error when counting subscribers of topic " + topic + ".", e);
         }
         return count;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int countPosts(final Topic topic) {
-        return 0;
     }
 
     /**
@@ -522,8 +504,8 @@ public class TopicDBGateway implements TopicGateway {
                 + "WHERE t.id = m.topic AND m.moderator = ? ORDER BY t.title ASC LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(user.getId())
-                    .integer(selection.getPageSize().getSize())
-                    .integer(selection.getCurrentPage() * selection.getPageSize().getSize())
+                    .integer(Pagitable.getItemLimit(selection))
+                    .integer(Pagitable.getItemOffset(selection))
                     .toStatement().executeQuery();
 
             while (rs.next()) {
@@ -568,25 +550,25 @@ public class TopicDBGateway implements TopicGateway {
         List<Topic> selectedTopics =
                 new ArrayList<>(Math.min(Pagitable.getItemLimit(selection), Math.max(0, selection.getTotalSize())));
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            PreparedStatement statement = new StatementParametrizer(stmt)
+            ResultSet rs = new StatementParametrizer(stmt)
                     .integer(user.getId())
                     .integer(Pagitable.getItemLimit(selection))
-                    .integer(Pagitable.getItemOffset(selection)).toStatement();
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                OffsetDateTime lastActivity = null;
-                if (rs.getObject("last_activity", OffsetDateTime.class) != null) {
-                    lastActivity = rs.getObject("last_activity", OffsetDateTime.class);
-                }
-                selectedTopics.add(new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description"),
-                        lastActivity));
-            }
+                    .integer(Pagitable.getItemOffset(selection))
+                    .toStatement().executeQuery();
+            readTopicsFromResultSet(rs, selectedTopics);
         } catch (SQLException e) {
             log.error("Error while selecting subscribed topics for user " + user + " with " + selection + ".", e);
             throw new StoreException("Error while selecting subscribed topics for user " + user + " with " + selection
                     + ".", e);
         }
         return selectedTopics;
+    }
+
+    private void readTopicsFromResultSet(final ResultSet rs, final List<Topic> topics) throws SQLException {
+        while (rs.next()) {
+            topics.add(new Topic(rs.getInt("id"), rs.getString("title"), rs.getString("description"),
+                    rs.getObject("last_activity", OffsetDateTime.class)));
+        }
     }
 
     /**

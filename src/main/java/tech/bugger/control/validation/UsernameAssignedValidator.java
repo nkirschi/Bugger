@@ -61,7 +61,7 @@ public class UsernameAssignedValidator implements Validator<String> {
         }
 
         if (profileService.getUserByUsername(username) != null) {
-            FacesMessage message = new FacesMessage(messagesBundle.getString("username_validator.already_exists"));
+            FacesMessage message = new FacesMessage(messagesBundle.getString("username_validator_already_exists"));
             throw new ValidatorException(message);
         }
     }

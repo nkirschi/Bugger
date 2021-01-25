@@ -1,5 +1,14 @@
 package tech.bugger.control.backing;
 
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.Part;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
@@ -9,17 +18,6 @@ import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.Part;
-import java.io.IOException;
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * Backing bean for the profile edit page.
@@ -122,11 +120,6 @@ public class ProfileEditBacker implements Serializable {
     private final UserSession session;
 
     /**
-     * The current {@link FacesContext} of the application.
-     */
-    private final FacesContext fctx;
-
-    /**
      * The current {@link ExternalContext} of the application.
      */
     private final ExternalContext ectx;
@@ -147,19 +140,16 @@ public class ProfileEditBacker implements Serializable {
      * @param authenticationService The authentication service to use.
      * @param profileService        The profile service to use.
      * @param session               The current {@link UserSession}.
-     * @param fctx                The current {@link FacesContext} of the application.
-     * @param ectx                The current {@link ExternalContext} of the application.
+     * @param ectx                  The current {@link ExternalContext} of the application.
      */
     @Inject
     public ProfileEditBacker(final AuthenticationService authenticationService,
                              final ProfileService profileService,
                              final UserSession session,
-                             final FacesContext fctx,
                              final ExternalContext ectx) {
         this.authenticationService = authenticationService;
         this.profileService = profileService;
         this.session = session;
-        this.fctx = fctx;
         this.ectx = ectx;
     }
 

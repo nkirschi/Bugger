@@ -12,24 +12,28 @@
         <h:panelGroup class="row" layout="block">
             <h:form id="f-search">
                 <h:panelGroup class="row" layout="block" id="p-search-head">
-                    <h:panelGroup class ="row" layout="block"  id="p-search-bar-large"
+                    <h:panelGroup class="row" layout="block" id="p-search-bar-large"
                                   styleClass="d-flex justify-content-center align-items-center mx-5 px-5 col">
-                        <h:inputText styleClass="form-control form-text mt-0 me-3" id="it-search-large" value="#{searchBacker.query}"/>
+                        <h:inputText styleClass="form-control form-text mt-0 me-3" id="it-search-large"
+                                     value="#{searchBacker.query}"/>
                         <h:commandButton value="#{labels.search}" action="#{searchBacker.search}"
-                                             styleClass="btn btn-outline-primary" id="cb-search-large">
+                                         styleClass="btn btn-outline-primary" id="cb-search-large">
                         </h:commandButton>
                     </h:panelGroup>
                     <h:panelGroup layout="block" id="p-switch-tabs" styleClass="row">
                         <h:panelGroup layout="block" styleClass="col-12">
-                            <h:link value="#{labels.topic}" outcome="pretty:search" styleClass="button btn btn-secondary">
+                            <h:link value="#{labels.topic}" outcome="pretty:search"
+                                    styleClass="button btn btn-secondary">
                                 <f:param name="t" value="TOPIC"/>
                                 <f:param name="q" value="#{searchBacker.query}"/>
                             </h:link>
-                            <h:link value="#{labels.report}" outcome="pretty:search" styleClass="button btn btn-secondary">
+                            <h:link value="#{labels.report}" outcome="pretty:search"
+                                    styleClass="button btn btn-secondary">
                                 <f:param name="t" value="REPORT"/>
                                 <f:param name="q" value="#{searchBacker.query}"/>
                             </h:link>
-                            <h:link value="#{labels.user}" outcome="pretty:search" styleClass="button btn btn-secondary">
+                            <h:link value="#{labels.user}" outcome="pretty:search"
+                                    styleClass="button btn btn-secondary">
                                 <f:param name="t" value="USER"/>
                                 <f:param name="q" value="#{searchBacker.query}"/>
                             </h:link>
@@ -37,7 +41,8 @@
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup class="row" layout="block" id="p-search-filter">
-                    <h:panelGroup class="row" layout="block" id="p-tab-user-filter" rendered="#{searchBacker.tab == 'USER'}">
+                    <h:panelGroup class="row" layout="block" id="p-tab-user-filter"
+                                  rendered="#{searchBacker.tab == 'USER'}">
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:outputLabel for="s-show-admin-user"
                                            value="#{labels.show_admin_user}"/>
@@ -49,7 +54,8 @@
                             <h:selectBooleanCheckbox id="s-show-non-admin-user" value="#{searchBacker.nonAdminShown}"/>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup class="row" layout="block" id="p-tab-report-filter" rendered="#{searchBacker.tab == 'REPORT'}">
+                    <h:panelGroup class="row" layout="block" id="p-tab-report-filter"
+                                  rendered="#{searchBacker.tab == 'REPORT'}">
                         <h:panelGroup id="p-latest-opening-date" layout="block" styleClass="mb-2">
                             <h:outputLabel id="ol-latest-opening-date"
                                            for="it-latest-opening-date"
@@ -153,21 +159,23 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <h:panelGroup id="p-topic-filter" layout="block" styleClass="mb-2" rendered="#{searchBacker.tab == 'TOPIC'}">
+                    <h:panelGroup id="p-topic-filter" layout="block" styleClass="mb-2"
+                                  rendered="#{searchBacker.tab == 'TOPIC'}">
                         <h:outputLabel id="ol-topic-filter"
                                        for="s-topic-filter"
                                        value="#{labels.topic}"/>
                         <h:selectOneMenu id="s-topic-filter"
                                          value="#{searchBacker.topic}"
                                          styleClass="form-select">
-                            <f:selectItem itemLabel="#{labels.none}" itemValue="" />
+                            <f:selectItem itemLabel="#{labels.none}" itemValue=""/>
                             <f:selectItems value="#{searchBacker.topicTitles}"/>
                         </h:selectOneMenu>
                     </h:panelGroup>
                 </h:panelGroup>
             </h:form>
             <h:panelGroup>
-                <h:panelGroup class="row" layout="block" id="p-tab-report-content" rendered="#{searchBacker.tab == 'REPORT'}">
+                <h:panelGroup class="row" layout="block" id="p-tab-report-content"
+                              rendered="#{searchBacker.tab == 'REPORT'}">
                     <h:panelGroup class="col-sm-12" layout="block">
                         <b:pagitable paginator="#{searchBacker.reportResults}">
                             <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
@@ -187,21 +195,26 @@
                                 </h:link>
                             </b:column>
                             <b:column title="#{labels.col_type}" paginator="#{searchBacker.reportResults}" key="type">
-                                <h:outputText value="#{labels['report_type.' += var.type]}"/>
+                                <h:outputText value="#{labels['report_type_' += var.type]}"/>
                             </b:column>
-                            <b:column title="#{labels.col_severity}" paginator="#{searchBacker.reportResults}" key="severity">
-                                <h:outputText value="#{labels['report_severity.' += var.severity]}"/>
+                            <b:column title="#{labels.col_severity}" paginator="#{searchBacker.reportResults}"
+                                      key="severity">
+                                <h:outputText value="#{labels['report_severity_' += var.severity]}"/>
                             </b:column>
-                            <b:column title="#{labels.col_version}" paginator="#{searchBacker.reportResults}" key="version">
+                            <b:column title="#{labels.col_version}" paginator="#{searchBacker.reportResults}"
+                                      key="version">
                                 <h:outputText value="#{var.version}"/>
                             </b:column>
-                            <b:column title="#{labels.col_duplicate}" paginator="#{searchBacker.reportResults}" key="duplicate_of">
+                            <b:column title="#{labels.col_duplicate}" paginator="#{searchBacker.reportResults}"
+                                      key="duplicate_of">
                                 <h:outputText value="#{var.duplicateOf}"/>
                             </b:column>
-                            <b:column title="#{labels.col_relevance}" paginator="#{searchBacker.reportResults}" key="relevance">
+                            <b:column title="#{labels.col_relevance}" paginator="#{searchBacker.reportResults}"
+                                      key="relevance">
                                 <h:outputText value="#{var.relevance}"/>
                             </b:column>
-                            <b:column title="#{labels.last_activity}" paginator="#{searchBacker.reportResults}" key="last_activity">
+                            <b:column title="#{labels.last_activity}" paginator="#{searchBacker.reportResults}"
+                                      key="last_activity">
                                 <h:outputText value="#{var.lastActivity}">
                                     <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
                                 </h:outputText>
@@ -209,12 +222,13 @@
                         </b:pagitable>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:panelGroup class="row" layout="block" id="p-tab-topic-content" rendered="#{searchBacker.tab == 'TOPIC'}">
+                <h:panelGroup class="row" layout="block" id="p-tab-topic-content"
+                              rendered="#{searchBacker.tab == 'TOPIC'}">
                     <h:panelGroup class="col-sm-12" layout="block">
                         <b:pagitable paginator="#{searchBacker.topicResults}">
                             <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                             <b:column title="#{labels.col_id}" paginator="#{searchBacker.topicResults}" key="id">
-                                <h:link outcome="pretty:topic" value="##{var.id}">
+                                <h:link outcome="pretty:topic" value="!#{var.id}">
                                     <f:param name="id" value="#{var.id}"/>
                                 </h:link>
                             </b:column>
@@ -223,7 +237,8 @@
                                     <f:param name="id" value="#{var.id}"/>
                                 </h:link>
                             </b:column>
-                            <b:column title="#{labels.last_activity}" paginator="#{searchBacker.topicResults}" key="last_activity">
+                            <b:column title="#{labels.last_activity}" paginator="#{searchBacker.topicResults}"
+                                      key="last_activity">
                                 <h:outputLabel value="#{var.lastActivity}">
                                     <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
                                 </h:outputLabel>
@@ -231,33 +246,39 @@
                             <b:column title="#{labels.num_sub}" paginator="#{searchBacker.topicResults}" key="numSub">
                                 <h:outputLabel value="#{var.numSub}"/>
                             </b:column>
-                            <b:column title="#{labels.num_posts}" paginator="#{searchBacker.topicResults}" key="numPosts">
+                            <b:column title="#{labels.num_posts}" paginator="#{searchBacker.topicResults}"
+                                      key="numPosts">
                                 <h:outputLabel value="#{var.numPosts}"/>
                             </b:column>
                         </b:pagitable>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:panelGroup class="row" layout="block" id="p-tab-user-content" rendered="#{searchBacker.tab == 'USER'}">
+                <h:panelGroup class="row" layout="block" id="p-tab-user-content"
+                              rendered="#{searchBacker.tab == 'USER'}">
                     <h:panelGroup class="col-sm-12" layout="block">
                         <b:pagitable paginator="#{searchBacker.userResults}">
                             <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
-                            <b:column title="#{labels.username}" paginator="#{searchBacker.userResults}" key="id">
-                                <h:link outcome="pretty:profile" value="##{var.username}">
+                            <b:column title="#{labels.username}" paginator="#{searchBacker.userResults}" key="username">
+                                <h:link outcome="pretty:profile" value="@#{var.username}">
                                     <f:param name="u" value="#{var.username}"/>
                                 </h:link>
                             </b:column>
-                            <b:column title="#{labels.first_name}" paginator="#{searchBacker.userResults}" key="first_name">
+                            <b:column title="#{labels.first_name}" paginator="#{searchBacker.userResults}"
+                                      key="first_name">
                                 <h:outputLabel value="#{var.firstName}"/>
                             </b:column>
-                            <b:column title="#{labels.last_name}" paginator="#{searchBacker.userResults}" key="last_name">
+                            <b:column title="#{labels.last_name}" paginator="#{searchBacker.userResults}"
+                                      key="last_name">
                                 <h:outputLabel value="#{var.lastName}"/>
                             </b:column>
-                            <b:column title="#{labels.administrator}" paginator="#{searchBacker.userResults}" key="is_admin">
+                            <b:column title="#{labels.administrator}" paginator="#{searchBacker.userResults}"
+                                      key="is_admin">
                                 <h:outputLabel value="#{var.administrator ? labels.administrator : ''}"/>
                             </b:column>
                             <h:column>
                                 <f:facet name="header">
-                                    <h:outputLabel value="#{labels.col_relevance}" styleClass="btn btm-sm btn-link fw-bold no-ul"/>
+                                    <h:outputLabel value="#{labels.col_relevance}"
+                                                   styleClass="btn btm-sm btn-link fw-bold no-ul"/>
                                 </f:facet>
                                 <h:outputLabel value="#{var.votingWeight}"/>
                             </h:column>

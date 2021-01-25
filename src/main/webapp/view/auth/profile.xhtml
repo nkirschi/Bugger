@@ -270,11 +270,11 @@
                             </b:column>
                             <b:column title="#{labels.col_type}" paginator="#{profileBacker.reportSubscriptions}"
                                       key="type">
-                                <h:outputText value="#{labels['report_type.' += var.type]}"/>
+                                <h:outputText value="#{labels['report_type_' += var.type]}"/>
                             </b:column>
                             <b:column title="#{labels.col_severity}" paginator="#{profileBacker.reportSubscriptions}"
                                       key="severity">
-                                <h:outputText value="#{labels['report_severity.' += var.severity]}"/>
+                                <h:outputText value="#{labels['report_severity_' += var.severity]}"/>
                             </b:column>
                             <h:column>
                                 <h:commandLink id="l-unsub-report"
@@ -336,12 +336,12 @@
                     <h:outputText id="ot-change-status-info" value="#{labels.really_change_admin_status}"/>
                 </h:panelGroup>
                 <h:panelGroup id="p-user-password" layout="block"
-                              styleClass="mb-3 form-group has-validation position-relative">
+                              styleClass="mb-3 form-group position-relative">
                     <h:panelGroup id="p-user-password-label" styleClass="row align-center">
                         <h:outputLabel id="ol-user-password" value="#{labels.password}" for="i-user-password"
                                        styleClass="form-label"/>
                     </h:panelGroup>
-                    <h:panelGroup id="p-user-password-input" layout="block" styleClass="input-group has-validation">
+                    <h:panelGroup id="p-user-password-input" layout="block" styleClass="input-group">
                         <h:inputSecret id="i-user-password" value="#{profileBacker.password}" required="true"
                                        a:maxlength="#{C.PASSWORD_MAX}" styleClass="form-control
                                        #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'

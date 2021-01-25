@@ -35,7 +35,7 @@ public class PriorityFuture<T> implements RunnableFuture<T> {
     }
 
     /**
-     * When an object implementing interface {@code Runnable} is used to create a thread, starting the thread causes the
+     * When an object implementing interface {@link Runnable} is used to create a thread, starting the thread causes the
      * object's {@code run} method to be called in that separately executing thread.
      * <p>
      * The general contract of the method {@code run} is that it may take any action whatsoever.
@@ -80,7 +80,7 @@ public class PriorityFuture<T> implements RunnableFuture<T> {
 
     /**
      * Returns {@code true} if this task completed.
-     *
+     * <p>
      * Completion may be due to normal termination, an exception, or cancellation -- in all of these cases, this method
      * will return {@code true}.
      *
@@ -116,6 +116,7 @@ public class PriorityFuture<T> implements RunnableFuture<T> {
      * @throws InterruptedException  if the current thread was interrupted while waiting
      * @throws TimeoutException      if the wait timed out
      */
+    @SuppressWarnings("NullableProblems")
     @Override
     public T get(final long timeout, final TimeUnit unit)
             throws InterruptedException, ExecutionException, TimeoutException, CancellationException {

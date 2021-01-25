@@ -1,5 +1,16 @@
 package tech.bugger.control.backing;
 
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.Part;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
@@ -11,19 +22,6 @@ import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.Part;
-import java.io.IOException;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Backing Bean for the report create page.
@@ -36,9 +34,14 @@ public class ReportCreateBacker implements Serializable {
     private static final long serialVersionUID = 6375834226080077144L;
 
     /**
-     * The {@link Log} instance associated with this class for logging purposes.
+     * All possible {@link Report.Type}s.
      */
-    private static final Log log = Log.forClass(ReportCreateBacker.class);
+    public static final Report.Type[] REPORT_TYPES = Report.Type.values();
+
+    /**
+     * All possible {@link Report.Severity}s.
+     */
+    public static final Report.Severity[] REPORT_SEVERITIES = Report.Severity.values();
 
     /**
      * The topic to create the report in.
@@ -98,11 +101,11 @@ public class ReportCreateBacker implements Serializable {
     /**
      * Constructs a new report creation page backing bean with the necessary dependencies.
      *
-     * @param topicService        The topic service to use.
-     * @param reportService       The report service to use.
-     * @param postService         The post service to use.
-     * @param session             The current user session.
-     * @param ectx                The current {@link ExternalContext} of the application.
+     * @param topicService  The topic service to use.
+     * @param reportService The report service to use.
+     * @param postService   The post service to use.
+     * @param session       The current user session.
+     * @param ectx          The current {@link ExternalContext} of the application.
      */
     @Inject
     public ReportCreateBacker(final TopicService topicService,
@@ -149,7 +152,7 @@ public class ReportCreateBacker implements Serializable {
 
     /**
      * Saves the new report and its first post to the database.
-     *
+     * <p>
      * On success, the user is redirected to the report page of the newly created report.
      */
     public void create() {
@@ -163,7 +166,7 @@ public class ReportCreateBacker implements Serializable {
     }
 
     /**
-     * Converts the uploaded attachment from a {@code Part} to a {@code byte[]}. The attachment is then associated with
+     * Converts the uploaded attachment from a {@link Part} to a {@code byte[]}. The attachment is then associated with
      * the post.
      */
     public void saveAttachment() {
@@ -293,7 +296,7 @@ public class ReportCreateBacker implements Serializable {
      * @return The list of available report types.
      */
     public Report.Type[] getReportTypes() {
-        return Report.Type.values();
+        return REPORT_TYPES;
     }
 
     /**
@@ -302,7 +305,7 @@ public class ReportCreateBacker implements Serializable {
      * @return The list of available report severities.
      */
     public Report.Severity[] getReportSeverities() {
-        return Report.Severity.values();
+        return REPORT_SEVERITIES;
     }
 
 }

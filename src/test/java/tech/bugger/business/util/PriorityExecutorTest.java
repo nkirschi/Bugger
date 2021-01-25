@@ -1,11 +1,5 @@
 package tech.bugger.business.util;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import tech.bugger.LogExtension;
-
 import java.lang.reflect.Field;
 import java.util.Comparator;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -13,11 +7,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(LogExtension.class)
 public class PriorityExecutorTest {
@@ -41,12 +37,12 @@ public class PriorityExecutorTest {
         lowPriorityTask = new PriorityTask(PriorityTask.Priority.LOW, () -> {
             awaitStart();
             finishedTasks.add("low");
-            sleep(TASK_SLEEP_DURATION_MILLIS);
+            sleep();
         });
         highPriorityTask = new PriorityTask(PriorityTask.Priority.HIGH, () -> {
             awaitStart();
             finishedTasks.add("high");
-            sleep(TASK_SLEEP_DURATION_MILLIS);
+            sleep();
         });
     }
 
@@ -58,9 +54,9 @@ public class PriorityExecutorTest {
         }
     }
 
-    private void sleep(int millis) {
+    private void sleep() {
         try {
-            Thread.sleep(millis);
+            Thread.sleep(PriorityExecutorTest.TASK_SLEEP_DURATION_MILLIS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -122,7 +118,8 @@ public class PriorityExecutorTest {
     }
 
     @Test
-    public void testForeignTaskComparison()throws Exception {
+    @SuppressWarnings("unchecked")
+    public void testForeignTaskComparison() throws Exception {
         Field field = priorityExecutor.getClass().getDeclaredField("executorService");
         field.setAccessible(true);
         var executor = (ThreadPoolExecutor) field.get(priorityExecutor);

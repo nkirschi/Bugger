@@ -181,7 +181,7 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
     }
 
     /**
-     * Updates the paginated data model using the current parameters in {@code pagination}.
+     * Updates the paginated data model using the current parameters in {@link #selection}.
      */
     public void update() {
         int size = totalSize();

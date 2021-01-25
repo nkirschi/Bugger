@@ -1,6 +1,13 @@
 package tech.bugger.control.backing;
 
 import com.sun.faces.context.RequestParameterMap;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.time.OffsetDateTime;
+import java.util.Locale;
+import javax.faces.context.ExternalContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,28 +22,9 @@ import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
 
-import javax.faces.application.Application;
-import javax.faces.application.NavigationHandler;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.time.OffsetDateTime;
-import java.util.Locale;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class ProfileEditBackerTest {
@@ -46,9 +34,6 @@ public class ProfileEditBackerTest {
 
     @Mock
     private UserSession session;
-
-    @Mock
-    private FacesContext fctx;
 
     @Mock
     private ExternalContext ext;
@@ -64,12 +49,6 @@ public class ProfileEditBackerTest {
 
     @Mock
     private HttpServletRequest request;
-
-    @Mock
-    private NavigationHandler navHandler;
-
-    @Mock
-    private Application application;
 
     private User user;
     private static final String TOKEN = "token";
@@ -87,14 +66,12 @@ public class ProfileEditBackerTest {
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, false);
         emailToken = new Token(TOKEN, Token.Type.CHANGE_EMAIL, OffsetDateTime.now(), EMAIL, user);
         MockitoAnnotations.openMocks(this);
-        profileEditBacker = new ProfileEditBacker(authenticationService, profileService, session, fctx, ext);
+        profileEditBacker = new ProfileEditBacker(authenticationService, profileService, session, ext);
         createUser = profileEditBacker.getClass().getDeclaredField("create");
         createUser.setAccessible(true);
         profileEditBacker.setPasswordNew("");
         profileEditBacker.setPasswordNewConfirm("");
         profileEditBacker.setUsernameNew(user.getUsername());
-        when(fctx.getApplication()).thenReturn(application);
-        when(application.getNavigationHandler()).thenReturn(navHandler);
         when(ext.getRequestParameterMap()).thenReturn(map);
         when(ext.getRequest()).thenReturn(request);
     }

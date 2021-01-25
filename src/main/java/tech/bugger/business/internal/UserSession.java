@@ -1,14 +1,13 @@
 package tech.bugger.business.internal;
 
-import tech.bugger.global.transfer.User;
-
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Locale;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Locale;
+import tech.bugger.global.transfer.User;
 
 /**
  * Internal bean holding details of the session of a user.
@@ -34,7 +33,7 @@ public class UserSession implements Serializable {
      * Initializes this user session by setting a preferred locale.
      */
     @PostConstruct
-    public void init() {
+    void init() {
         FacesContext fctx = FacesContext.getCurrentInstance();
         if (fctx != null) {
             locale = fctx.getExternalContext().getRequestLocale();

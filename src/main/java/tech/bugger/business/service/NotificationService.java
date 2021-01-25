@@ -30,7 +30,7 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 /**
- * Service providing methods related to notifications. A {@code Feedback} event is fired, if unexpected circumstances
+ * Service providing methods related to notifications. A {@link Feedback} event is fired, if unexpected circumstances
  * occur.
  */
 @ApplicationScoped
@@ -101,7 +101,7 @@ public class NotificationService {
     }
 
     /**
-     * Irreversibly deletes a notification. Fires a {@code Feedback}-Event if something goes wrong.
+     * Irreversibly deletes a notification. Fires a {@link Feedback}-Event if something goes wrong.
      *
      * @param notification The notification to be deleted.
      */
@@ -227,6 +227,7 @@ public class NotificationService {
      * Queues sending of e-mails for notifications which have not yet been sent.
      */
     public void processUnsentNotifications() {
+        // TODO Ben: Call this method somewhere? Or is this not needed anymore?
         List<Notification> unsentNotifications;
         try (Transaction tx = transactionManager.begin()) {
             unsentNotifications = tx.newNotificationGateway().getUnsentNotifications();
@@ -253,8 +254,8 @@ public class NotificationService {
 
             Mail mail = new Mail.Builder()
                     .to(n.getRecipientMail())
-                    .subject(interactionsBundle.getString("email_notification_subject." + n.getType()))
-                    .content(new MessageFormat(interactionsBundle.getString("email_notification_content."
+                    .subject(interactionsBundle.getString("email_notification_subject_" + n.getType()))
+                    .content(new MessageFormat(interactionsBundle.getString("email_notification_content_"
                             + n.getType()))
                             .format(new String[]{n.getReportTitle(), link}))
                     .envelop();

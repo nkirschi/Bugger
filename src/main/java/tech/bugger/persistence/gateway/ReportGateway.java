@@ -1,5 +1,6 @@
 package tech.bugger.persistence.gateway;
 
+import java.util.List;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
@@ -7,8 +8,6 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.SelfReferenceException;
-
-import java.util.List;
 
 /**
  * A report gateway allows to query and modify a persistent storage of reports.

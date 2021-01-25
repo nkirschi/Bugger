@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 /**
  * Builder for conveniently parametrizing {@link PreparedStatement}s.
- *
+ * <p>
  * This is done by incrementing a counter for every parameter substitution.
  */
 public class StatementParametrizer {

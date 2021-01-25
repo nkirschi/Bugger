@@ -59,15 +59,6 @@ public interface TopicGateway {
     int countSubscribers(Topic topic) throws NotFoundException;
 
     /**
-     * Retrieves the total number of posts of all reports that belong to a given topic.
-     *
-     * @param topic The topic whose posts to count.
-     * @return The total number of posts of {@code topic}.
-     * @throws NotFoundException The topic could not be found.
-     */
-    int countPosts(Topic topic) throws NotFoundException;
-
-    /**
      * Retrieves date and time of the last activity on a report of a given topic.
      *
      * @param topic The topic whose last activity to look up.

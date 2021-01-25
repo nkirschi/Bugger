@@ -1,18 +1,17 @@
 package tech.bugger.persistence.gateway;
 
-import tech.bugger.global.transfer.Attachment;
-import tech.bugger.global.transfer.Post;
-import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.NotFoundException;
-import tech.bugger.persistence.exception.StoreException;
-import tech.bugger.persistence.util.StatementParametrizer;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import tech.bugger.global.transfer.Attachment;
+import tech.bugger.global.transfer.Post;
+import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
 
 /**
  * Attachment gateway that gives access to post attachments stored in a database.

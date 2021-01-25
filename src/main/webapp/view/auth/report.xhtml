@@ -207,7 +207,7 @@
                 <h:outputLabel value="#{labels.report_type}" for="ot-type" styleClass="form-label"/>
             </h:panelGroup>
             <h:panelGroup styleClass="col-9">
-                <h:outputText id="ot-type" value="#{labels['report_type.'.concat(reportBacker.report.type)]}"/>
+                <h:outputText id="ot-type" value="#{labels['report_type_'.concat(reportBacker.report.type)]}"/>
             </h:panelGroup>
         </h:panelGroup>
 
@@ -229,7 +229,7 @@
             </h:panelGroup>
             <h:panelGroup styleClass="col-9">
                 <h:outputText id="ot-severity"
-                              value="#{labels['report_severity.'.concat(reportBacker.report.severity)]}"/>
+                              value="#{labels['report_severity_'.concat(reportBacker.report.severity)]}"/>
             </h:panelGroup>
         </h:panelGroup>
 

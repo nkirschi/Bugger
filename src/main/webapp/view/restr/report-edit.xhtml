@@ -46,14 +46,14 @@
                     <h:link value="##{reportEditBacker.reportID}" outcome="pretty:report">
                         <f:param name="id" value="#{reportEditBacker.reportID}"/>
                     </h:link>
-                    <h:outputText value="#{labels.report_edit_info2}"/>
+                    <h:outputText value="."/>
                 </p>
 
                 <h:form id="f-report-edit" enctype="multipart/form-data" rendered="#{reportEditBacker.privileged}">
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                         <h:outputLabel id="ol-title" for="it-title" value="#{labels.report_title}"
                                        styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                        <h:panelGroup layout="block" styleClass="input-group">
                             <h:inputText id="it-title" value="#{reportEditBacker.report.title}"
                                          a:maxlength="#{C.LARGE_FIELD}" required="true" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -66,17 +66,17 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                         <h:panelGroup layout="block" styleClass="row">
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="ol-type" for="s-type" value="#{labels.report_type}"
                                                styleClass="form-label"/>
-                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                <h:panelGroup layout="block" styleClass="input-group">
                                     <h:selectOneMenu id="s-type" value="#{reportEditBacker.report.type}" required="true"
                                                      styleClass="form-select">
                                         <f:selectItems value="#{reportEditBacker.reportTypes}" var="type"
                                                        itemValue="#{type}"
-                                                       itemLabel="#{labels['report_type.'.concat(type)]}"/>
+                                                       itemLabel="#{labels['report_type_'.concat(type)]}"/>
                                     </h:selectOneMenu>
                                     <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                         <h:message id="m-type" for="s-type"/>
@@ -86,12 +86,12 @@
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="ol-severity" for="s-severity" value="#{labels.report_severity}"
                                                styleClass="form-label"/>
-                                <h:panelGroup layout="block" styleClass="input-group has-validation">
+                                <h:panelGroup layout="block" styleClass="input-group">
                                     <h:selectOneMenu id="s-severity" value="#{reportEditBacker.report.severity}"
                                                      required="true" styleClass="form-select">
                                         <f:selectItems value="#{reportEditBacker.reportSeverities}" var="severity"
                                                        itemValue="#{severity}"
-                                                       itemLabel="#{labels['report_severity.'.concat(severity)]}"/>
+                                                       itemLabel="#{labels['report_severity_'.concat(severity)]}"/>
                                     </h:selectOneMenu>
                                     <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                         <h:message id="m-severity" for="s-severity"/>
@@ -101,10 +101,10 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                         <h:outputLabel id="ol-version" for="it-version" value="#{labels.report_version}"
                                        styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                        <h:panelGroup layout="block" styleClass="input-group">
                             <h:inputText id="it-version" a:maxlength="#{C.SMALL_FIELD}"
                                          value="#{reportEditBacker.report.version}"
                                          styleClass="form-control #{!facesContext.validationFailed ? ''
@@ -117,10 +117,10 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group has-validation position-relative">
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                         <h:outputLabel id="ol-topic" for="it-topic" value="#{labels.report_topic}"
                                        styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group has-validation">
+                        <h:panelGroup layout="block" styleClass="input-group">
                             <h:inputText id="it-topic" value="#{reportEditBacker.destinationID}"
                                          a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'

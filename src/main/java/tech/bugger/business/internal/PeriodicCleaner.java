@@ -1,11 +1,10 @@
 package tech.bugger.business.internal;
 
+import java.time.Duration;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
-
-import java.time.Duration;
 
 /**
  * Periodically running task for maintenance purposes.
@@ -38,7 +37,7 @@ public class PeriodicCleaner implements Runnable {
 
     /**
      * Clean up data not needed any more.
-     *
+     * <p>
      * {@inheritDoc}
      */
     @Override

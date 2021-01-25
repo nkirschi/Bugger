@@ -62,10 +62,9 @@ public class RegisterBackerTest {
     @BeforeEach
     public void setUp() throws Exception {
         lenient().doReturn(request).when(ectx).getRequest();
-        lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(Locale.GERMAN).when(userSession).getLocale();
-        registerBacker = new RegisterBacker(authenticationService, profileService, userSession, fctx, feedbackEvent,
-                ResourceBundleMocker.mock(""));
+        registerBacker = new RegisterBacker(authenticationService, profileService, userSession, fctx, ectx,
+                feedbackEvent, ResourceBundleMocker.mock(""));
         testUser = new User();
     }
 

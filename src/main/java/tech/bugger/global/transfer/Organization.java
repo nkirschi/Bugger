@@ -70,7 +70,7 @@ public class Organization implements Serializable {
      */
     public Organization(final Organization organization) {
         this(organization.name, organization.logo.clone(), organization.theme,
-             organization.imprint, organization.privacyPolicy, organization.supportInfo);
+                organization.imprint, organization.privacyPolicy, organization.supportInfo);
     }
 
     /**

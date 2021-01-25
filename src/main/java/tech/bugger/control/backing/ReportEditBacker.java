@@ -13,7 +13,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
@@ -23,7 +22,6 @@ import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
 
 /**
  * Backing Bean for the report edit page.
@@ -36,9 +34,14 @@ public class ReportEditBacker implements Serializable {
     private static final long serialVersionUID = -1310546265441099227L;
 
     /**
-     * The {@link Log} instance associated with this class for logging purposes.
+     * All possible {@link Report.Type}s.
      */
-    private static final Log log = Log.forClass(ReportEditBacker.class);
+    public static final Report.Type[] REPORT_TYPES = Report.Type.values();
+
+    /**
+     * All possible {@link Report.Severity}s.
+     */
+    public static final Report.Severity[] REPORT_SEVERITIES = Report.Severity.values();
 
     /**
      * The current application settings.
@@ -61,9 +64,14 @@ public class ReportEditBacker implements Serializable {
     private final UserSession session;
 
     /**
-     * The current {@link ExternalContext}.
+     * The current {@link FacesContext}.
      */
     private final FacesContext fctx;
+
+    /**
+     * The current {@link ExternalContext}.
+     */
+    private final ExternalContext ectx;
 
     /**
      * Resource bundle for feedback message.
@@ -99,11 +107,12 @@ public class ReportEditBacker implements Serializable {
      * Constructs a new report editing page backing bean with the necessary dependencies.
      *
      * @param applicationSettings The current application settings.
-     * @param topicService  The topic service to use.
-     * @param reportService The report service to use.
-     * @param session       The current user session.
-     * @param fctx          The current {@link FacesContext} of the application.
-     * @param registry      The dependency registry to use.
+     * @param topicService        The topic service to use.
+     * @param reportService       The report service to use.
+     * @param session             The current user session.
+     * @param fctx                The current {@link FacesContext} of the application.
+     * @param ectx                The current {@link ExternalContext} of the application.
+     * @param registry            The dependency registry to use.
      */
     @Inject
     public ReportEditBacker(final ApplicationSettings applicationSettings,
@@ -111,12 +120,14 @@ public class ReportEditBacker implements Serializable {
                             final ReportService reportService,
                             final UserSession session,
                             final FacesContext fctx,
+                            final ExternalContext ectx,
                             final Registry registry) {
         this.applicationSettings = applicationSettings;
         this.topicService = topicService;
         this.reportService = reportService;
         this.session = session;
         this.fctx = fctx;
+        this.ectx = ectx;
         this.messagesBundle = registry.getBundle("messages", session.getLocale());
     }
 
@@ -127,7 +138,7 @@ public class ReportEditBacker implements Serializable {
     @PostConstruct
     void init() {
         try {
-            reportID = Integer.parseInt(fctx.getExternalContext().getRequestParameterMap().get("id"));
+            reportID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
             // Report ID parameter not given or invalid.
             throw new Error404Exception();
@@ -192,7 +203,6 @@ public class ReportEditBacker implements Serializable {
         }
 
         if (success && reportService.updateReport(report)) {
-            ExternalContext ectx = fctx.getExternalContext();
             try {
                 ectx.redirect(ectx.getRequestContextPath() + "/report?id=" + report.getId());
             } catch (IOException e) {
@@ -341,7 +351,7 @@ public class ReportEditBacker implements Serializable {
      * @return The list of available report types.
      */
     public Report.Type[] getReportTypes() {
-        return Report.Type.values();
+        return REPORT_TYPES;
     }
 
     /**
@@ -350,7 +360,7 @@ public class ReportEditBacker implements Serializable {
      * @return The list of available report severities.
      */
     public Report.Severity[] getReportSeverities() {
-        return Report.Severity.values();
+        return REPORT_SEVERITIES;
     }
 
 }

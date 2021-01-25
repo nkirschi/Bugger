@@ -10,6 +10,7 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
 
@@ -125,7 +126,8 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
      * {@inheritDoc}
      */
     @Override
-    public void subscribe(final User subscribeTo, final User subscriber) throws NotFoundException, DuplicateException {
+    public void subscribe(final User subscribeTo, final User subscriber) throws NotFoundException, DuplicateException,
+            SelfReferenceException {
         if (subscribeTo == null) {
             log.error("Cannot subscribe to user null.");
             throw new IllegalArgumentException("User to subscribe to cannot be null.");
@@ -138,6 +140,9 @@ public class SubscriptionDBGateway implements SubscriptionGateway {
         } else if (subscriber.getId() == null) {
             log.error("Cannot subscribe user with ID null to user " + subscribeTo + ".");
             throw new IllegalArgumentException("Subscriber ID cannot be null.");
+        } else if (subscriber.equals(subscribeTo)) {
+            log.error("User " + subscriber + " cannot subscribe to himself.");
+            throw new SelfReferenceException("Subscriber cannot subscribe to himself.");
         }
 
         String sql = "INSERT INTO user_subscription (subscriber, subscribee) VALUES (?, ?);";

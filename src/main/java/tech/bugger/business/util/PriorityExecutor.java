@@ -56,7 +56,7 @@ public final class PriorityExecutor {
 
     /**
      * Shuts down the executor gracefully by not accepting any new tasks and finishing the remaining ones.
-     *
+     * <p>
      * Calling this method blocks until either all tasks have been terminated or the given timeout has been reached.
      *
      * @param timeoutMillis The maximum time in milliseconds to wait for remaining task execution completion.
@@ -70,7 +70,7 @@ public final class PriorityExecutor {
 
     /**
      * Shuts down the executor immediately by discarding any waiting tasks and only finishing the running ones.
-     *
+     * <p>
      * Calling this method blocks until either all tasks have been terminated or the given timeout has been reached.
      *
      * @param timeoutMillis The maximum time in milliseconds to wait for remaining task execution completion.

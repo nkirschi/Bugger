@@ -1,18 +1,17 @@
 package tech.bugger.business.util;
 
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.persistence.util.ConnectionPool;
-import tech.bugger.persistence.util.Mailer;
-import tech.bugger.persistence.util.PropertiesReader;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.InjectionPoint;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.InjectionPoint;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.persistence.util.ConnectionPool;
+import tech.bugger.persistence.util.Mailer;
+import tech.bugger.persistence.util.PropertiesReader;
 
 /**
  * Registry for application-wide access to shared dependencies.
@@ -206,8 +205,8 @@ public class Registry {
     /**
      * Returns the {@link ResourceBundle} registered for the given key.
      *
-     * @param key         The key of the desired resource bundle.
-     * @param locale      The locale of the desired resource bundle.
+     * @param key    The key of the desired resource bundle.
+     * @param locale The locale of the desired resource bundle.
      * @return The resource bundle associated with {@code key}.
      */
     public ResourceBundle getBundle(final String key, final Locale locale) {

@@ -1,11 +1,10 @@
 package tech.bugger.persistence.gateway;
 
+import java.util.List;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
-
-import java.util.List;
 
 /**
  * A notification gateway allows to query and modify a persistent storage of notifications.

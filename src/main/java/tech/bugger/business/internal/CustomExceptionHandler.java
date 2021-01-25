@@ -1,7 +1,9 @@
 package tech.bugger.business.internal;
 
-import tech.bugger.control.exception.Error404Exception;
-
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import javax.el.ELException;
 import javax.faces.FacesException;
 import javax.faces.application.Application;
@@ -16,9 +18,8 @@ import javax.faces.event.ExceptionQueuedEvent;
 import javax.faces.view.ViewDeclarationLanguage;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
+import org.jboss.weld.exceptions.WeldException;
+import tech.bugger.control.exception.Error404Exception;
 
 /**
  * Enables customized handling of exceptions.
@@ -26,9 +27,9 @@ import java.util.Map;
 public class CustomExceptionHandler extends ExceptionHandlerWrapper {
 
     /**
-     * Constructs a new {@link CustomExceptionHandler} wrapping an {@code ExceptionHandler}.
+     * Constructs a new {@link CustomExceptionHandler} wrapping an {@link ExceptionHandler}.
      *
-     * @param wrapped The exceptionHandler being wrapped.
+     * @param wrapped The {@link ExceptionHandler} being wrapped.
      */
     public CustomExceptionHandler(final ExceptionHandler wrapped) {
         super(wrapped);
@@ -44,15 +45,15 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
     }
 
     /**
-     * Handles exceptions.
+     * Handles all exceptions in the given {@link FacesContext}.
      *
-     * @param context The {@link FacesContext}.
+     * @param fctx The current {@link FacesContext}.
      */
-    protected void handleException(final FacesContext context) {
+    protected void handleException(final FacesContext fctx) {
         Iterator<ExceptionQueuedEvent> unhandledEvents = getUnhandledExceptionQueuedEvents().iterator();
 
-        if (context == null
-                || context.getExternalContext().isResponseCommitted()
+        if (fctx == null
+                || fctx.getExternalContext().isResponseCommitted()
                 || !unhandledEvents.hasNext()) {
             return;
         }
@@ -60,37 +61,54 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
         Throwable exception = unhandledEvents.next().getContext().getException();
 
         while (exception.getCause() != null
-                && (exception instanceof FacesException || exception instanceof ELException)) {
+                && (exception instanceof FacesException || exception instanceof ELException
+                || exception instanceof WeldException)) {
             exception = exception.getCause();
         }
 
-        ExternalContext external = context.getExternalContext();
-        String uri = external.getRequestContextPath() + external.getRequestServletPath();
-        Map<String, Object> requestScope = external.getRequestMap();
+        ExternalContext ectx = fctx.getExternalContext();
+        String uri = ectx.getRequestContextPath() + ectx.getRequestServletPath();
+        Map<String, Object> requestScope = ectx.getRequestMap();
         requestScope.put(RequestDispatcher.ERROR_REQUEST_URI, uri);
         requestScope.put(RequestDispatcher.ERROR_EXCEPTION, exception);
 
         String viewID;
-        if (exception instanceof Error404Exception) {
+        if (exception instanceof Error404Exception
+                || (exception.getCause() != null && exception.getCause() instanceof Error404Exception)) {
             viewID = "/WEB-INF/errorpages/404.xhtml";
         } else {
             viewID = "/WEB-INF/errorpages/500.xhtml";
         }
-        Application application = context.getApplication();
+        Application application = fctx.getApplication();
         ViewHandler viewHandler = application.getViewHandler();
-        UIViewRoot viewRoot = viewHandler.createView(context, viewID);
-        context.setViewRoot(viewRoot);
+        UIViewRoot viewRoot = viewHandler.createView(fctx, viewID);
+        fctx.setViewRoot(viewRoot);
 
         try {
-            external.responseReset();
-            if (!context.getPartialViewContext().isAjaxRequest()) {
-                external.setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            // Backup headers
+            HttpServletResponse response = (HttpServletResponse) ectx.getResponse();
+            Map<String, String> headers = new HashMap<>();
+            for (String header : response.getHeaderNames()) {
+                headers.put(header, response.getHeader(header));
             }
-            ViewDeclarationLanguage viewDeclarationLanguage = viewHandler.getViewDeclarationLanguage(context, viewID);
-            viewDeclarationLanguage.buildView(context, viewRoot);
-            context.getPartialViewContext().setRenderAll(true);
-            viewDeclarationLanguage.renderView(context, viewRoot);
-            context.responseComplete();
+
+            // Reset the response
+            ectx.responseReset();
+
+            // Add back old headers
+            for (Map.Entry<String, String> header : headers.entrySet()) {
+                ectx.addResponseHeader(header.getKey(), header.getValue());
+            }
+
+            // Overwrite rest of data
+            if (!fctx.getPartialViewContext().isAjaxRequest()) {
+                ectx.setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+            ViewDeclarationLanguage viewDeclarationLanguage = viewHandler.getViewDeclarationLanguage(fctx, viewID);
+            viewDeclarationLanguage.buildView(fctx, viewRoot);
+            fctx.getPartialViewContext().setRenderAll(true);
+            viewDeclarationLanguage.renderView(fctx, viewRoot);
+            fctx.responseComplete();
         } catch (IOException e) {
             throw new FacesException(e);
         } finally {
@@ -111,9 +129,9 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
     public static class Factory extends ExceptionHandlerFactory {
 
         /**
-         * Constructs a new custom exception handler factory wrapping an {@link ExceptionHandlerFactory}.
+         * Constructs a new {@link CustomExceptionHandler} factory wrapping an {@link ExceptionHandlerFactory}.
          *
-         * @param wrapped The exceptionHandlerFactory to wrap.
+         * @param wrapped The {@link ExceptionHandlerFactory} to wrap.
          */
         public Factory(final ExceptionHandlerFactory wrapped) {
             super(wrapped);
@@ -126,6 +144,7 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
         public ExceptionHandler getExceptionHandler() {
             return new CustomExceptionHandler(getWrapped().getExceptionHandler());
         }
+
     }
 
 }

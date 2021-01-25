@@ -1,9 +1,8 @@
 package tech.bugger.control.validation;
 
-import tech.bugger.business.service.PostService;
-import tech.bugger.business.util.RegistryKey;
-import tech.bugger.global.util.Constants;
-
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -12,9 +11,9 @@ import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.servlet.http.Part;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
+import tech.bugger.business.service.PostService;
+import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.util.Constants;
 
 /**
  * Validator for file uploads.
@@ -55,20 +54,20 @@ public class FileValidator implements Validator<Part> {
     @Override
     public void validate(final FacesContext fctx, final UIComponent component, final Part part) {
         if (part.getSize() > Constants.MAX_ATTACHMENT_FILESIZE * Constants.MB_TO_BYTES) {
-            String message = MessageFormat.format(messagesBundle.getString("image_validator.file_size_too_large"),
+            String message = MessageFormat.format(messagesBundle.getString("image_validator_file_size_too_large"),
                     Constants.MAX_ATTACHMENT_FILESIZE);
             throw new ValidatorException(new FacesMessage(message));
         }
         if (!postService.isAttachmentNameValid(part.getSubmittedFileName())) {
             throw new ValidatorException(new FacesMessage(
-                    messagesBundle.getString("file_validator.invalid_extension")));
+                    messagesBundle.getString("file_validator_invalid_extension")));
         }
 
         try {
             part.getInputStream();
         } catch (IOException e) {
             throw new ValidatorException(new FacesMessage(
-                    messagesBundle.getString("file_validator.file_corrupt")));
+                    messagesBundle.getString("file_validator_file_corrupt")));
         }
     }
 

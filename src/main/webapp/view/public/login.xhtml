@@ -11,57 +11,55 @@
 
     <ui:param name="helpKey" value="login"/>
 
-    <ui:param name="title" value="#{labels['login.title']}"/>
+    <ui:param name="title" value="#{labels.login_title}"/>
 
     <ui:define name="content">
-        <h:panelGroup layout="block" styleClass="d-flex p-2 justify-content-center align-items-center container">
-            <h:panelGroup layout="block" styleClass="row vw-50">
-                <h:form id="f-login" rendered="#{userSession.user == null}">
-                    <h:panelGroup id="p-username-row" layout="block"
-                                  styleClass="mb-3 form-group has-validation position-relative">
-                        <h:outputLabel id="o-username" value="#{labels.username}" for="it-username"
-                                       styleClass="form-label"/>
-                        <h:panelGroup id="p-username-input" layout="block" styleClass="input-group">
-                            <h:inputText id="it-username" value="#{loginBacker.username}" required="true"
-                                         a:maxlength="#{C.USERNAME_MAX}" a:placeholder="#{labels.username}"
-                                         styleClass="form-control #{!facesContext.validationFailed ? ''
+        <h:form id="f-login" rendered="#{userSession.user == null}">
+            <h:panelGroup layout="block" styleClass="row">
+                <h:panelGroup id="p-username-row" layout="block"
+                              styleClass="col-12 mb-3 form-group position-relative">
+                    <h:outputLabel id="o-username" value="#{labels.username}" for="it-username"
+                                   styleClass="form-label"/>
+                    <h:panelGroup id="p-username-input" layout="block" styleClass="input-group">
+                        <h:inputText id="it-username" value="#{loginBacker.username}" required="true"
+                                     a:maxlength="#{C.USERNAME_MAX}" a:placeholder="#{labels.username}"
+                                     styleClass="form-control #{!facesContext.validationFailed ? ''
                                          : component.valid ? 'is-valid' : 'is-invalid'}">
-                                <f:validateLength maximum="#{C.USERNAME_MAX}"/>
-                            </h:inputText>
-                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="it-username"/>
-                            </h:panelGroup>
+                            <f:validateLength maximum="#{C.USERNAME_MAX}"/>
+                        </h:inputText>
+                        <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                            <h:message for="it-username"/>
                         </h:panelGroup>
                     </h:panelGroup>
+                </h:panelGroup>
 
-                    <h:panelGroup id="p-password-row" layout="block"
-                                  styleClass="mb-3 form-group has-validation position-relative">
-                        <h:outputLabel id="o-password" value="#{labels.password}" for="it-password"
-                                       styleClass="form-label"/>
-                        <h:panelGroup id="p-password-input" layout="block" styleClass="input-group">
-                            <h:inputSecret id="it-password" value="#{loginBacker.password}" required="true"
-                                           a:maxlength="#{C.PASSWORD_MAX}" a:placeholder="#{labels.password}"
-                                           styleClass="form-control #{!facesContext.validationFailed ? ''
+                <h:panelGroup id="p-password-row" layout="block"
+                              styleClass="col-12 mb-3 form-group position-relative">
+                    <h:outputLabel id="o-password" value="#{labels.password}" for="it-password"
+                                   styleClass="form-label"/>
+                    <h:panelGroup id="p-password-input" layout="block" styleClass="input-group">
+                        <h:inputSecret id="it-password" value="#{loginBacker.password}" required="true"
+                                       a:maxlength="#{C.PASSWORD_MAX}" a:placeholder="#{labels.password}"
+                                       styleClass="form-control #{!facesContext.validationFailed ? ''
                                            : component.valid ? 'is-valid' : 'is-invalid'}">
-                                <f:validateLength maximum="#{C.PASSWORD_MAX}"/>
-                            </h:inputSecret>
-                            <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="it-password"/>
-                            </h:panelGroup>
+                            <f:validateLength maximum="#{C.PASSWORD_MAX}"/>
+                        </h:inputSecret>
+                        <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                            <h:message for="it-password"/>
                         </h:panelGroup>
-                        <h:link id="l-forgot" value="#{labels.password_forgot_title}" outcome="pretty:password-forgot"
-                                styleClass=""/>
                     </h:panelGroup>
+                    <h:link id="l-forgot" value="#{labels.password_forgot_title}" outcome="pretty:password-forgot"
+                            styleClass=""/>
+                </h:panelGroup>
 
-                    <h:panelGroup id="p-login-buttons" styleClass="d-flex justify-content-between" layout="block">
-                        <h:commandButton id="cb-login" value="#{labels['login.title']}" action="#{loginBacker.login}"
-                                         styleClass="btn btn-primary"/>
-                        <h:link id="l-register" value="#{labels['register.title']}" outcome="pretty:register"
-                                styleClass="btn btn-secondary"/>
-                    </h:panelGroup>
-                </h:form>
+                <h:panelGroup id="p-login-buttons" styleClass="d-flex justify-content-between" layout="block">
+                    <h:commandButton id="cb-login" value="#{labels.login_title}" action="#{loginBacker.login}"
+                                     styleClass="btn btn-primary"/>
+                    <h:link id="l-register" value="#{labels.register_title}" outcome="pretty:register"
+                            styleClass="btn btn-secondary"/>
+                </h:panelGroup>
             </h:panelGroup>
-        </h:panelGroup>
+        </h:form>
     </ui:define>
 
 </ui:composition>

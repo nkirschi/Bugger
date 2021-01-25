@@ -1,6 +1,17 @@
 package tech.bugger.business.internal;
 
 import com.ocpsoft.pretty.PrettyContext;
+import java.io.IOException;
+import java.util.ResourceBundle;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.CDI;
+import javax.faces.component.UIViewRoot;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.context.Flash;
+import javax.faces.event.PhaseEvent;
+import javax.faces.event.PhaseId;
+import javax.servlet.http.HttpSession;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,32 +25,16 @@ import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.User;
 
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.CDI;
-import javax.faces.component.UIViewRoot;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.context.Flash;
-import javax.faces.event.PhaseEvent;
-import javax.faces.event.PhaseId;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.util.ResourceBundle;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
 public class TrespassListenerTest {
 
+    @SuppressWarnings("rawtypes")
     private MockedStatic<CDI> cdiStaticMock;
     private MockedStatic<PrettyContext> prettyContextStaticMock;
 
@@ -65,6 +60,7 @@ public class TrespassListenerTest {
 
     private TrespassListener trespassListener;
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @BeforeEach
     public void setUp() throws Exception {
         prettyContextStaticMock = Mockito.mockStatic(PrettyContext.class);
@@ -90,7 +86,7 @@ public class TrespassListenerTest {
         lenient().doReturn(fctx).when(event).getFacesContext();
         lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(mock(Flash.class)).when(ectx).getFlash();
-        lenient().doReturn(mock(HttpSession.class)).when(ectx).getSession(false);
+        lenient().doReturn(mock(HttpSession.class)).when(ectx).getSession(anyBoolean());
         lenient().doReturn(mock(ResourceBundle.class)).when(registry).getBundle(anyString(), any());
         lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
     }

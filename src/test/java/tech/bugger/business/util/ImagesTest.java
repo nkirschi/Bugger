@@ -4,14 +4,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import tech.bugger.LogExtension;
 import tech.bugger.business.exception.CorruptImageException;
-
-import javax.imageio.ImageIO;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -29,7 +28,7 @@ public class ImagesTest {
 
     @Test
     public void testGenerateThumbnail() throws IOException, CorruptImageException {
-        byte[] bytes = ClassLoader.getSystemResourceAsStream("images/bugger.png").readAllBytes();
+        byte[] bytes = Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("images/bugger.png")).readAllBytes();
         assertNotNull(Images.generateThumbnail(bytes));
     }
 

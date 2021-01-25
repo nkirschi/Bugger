@@ -1,13 +1,12 @@
 package tech.bugger.control.servlet;
 
-import tech.bugger.global.util.Log;
-
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Serial;
 import java.util.Date;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import tech.bugger.global.util.Log;
 
 /**
  * Custom servlet that serves avatars and avatar thumbnails.

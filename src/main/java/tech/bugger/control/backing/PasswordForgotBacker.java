@@ -1,5 +1,13 @@
 package tech.bugger.control.backing;
 
+import java.util.ResourceBundle;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Event;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
@@ -8,14 +16,6 @@ import tech.bugger.business.util.RegistryKey;
 import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Event;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.ResourceBundle;
 
 /**
  * Backing Bean for the password forgot page.
@@ -50,6 +50,11 @@ public class PasswordForgotBacker {
     private final FacesContext fctx;
 
     /**
+     * The current external context.
+     */
+    private final ExternalContext ectx;
+
+    /**
      * Feedback Event for user feedback.
      */
     private final Event<Feedback> feedbackEvent;
@@ -71,17 +76,23 @@ public class PasswordForgotBacker {
      * @param profileService        The profile service to use.
      * @param session               The current {@link UserSession}.
      * @param fctx                  The current faces context.
+     * @param ectx                  The current external context.
      * @param feedbackEvent         The feedback event to use for user feedback.
      * @param messagesBundle        The resource bundle for feedback messages.
      */
     @Inject
-    public PasswordForgotBacker(final AuthenticationService authenticationService, final ProfileService profileService,
-                                final UserSession session, final FacesContext fctx, final Event<Feedback> feedbackEvent,
+    public PasswordForgotBacker(final AuthenticationService authenticationService,
+                                final ProfileService profileService,
+                                final UserSession session,
+                                final FacesContext fctx,
+                                final ExternalContext ectx,
+                                final Event<Feedback> feedbackEvent,
                                 @RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.authenticationService = authenticationService;
         this.profileService = profileService;
         this.session = session;
         this.fctx = fctx;
+        this.ectx = ectx;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;
     }
@@ -111,7 +122,7 @@ public class PasswordForgotBacker {
 
         if (userByEmail != null && userByEmail.equals(userByUsername)) {
             if (authenticationService.forgotPassword(userByEmail,
-                                                     JFConfig.getApplicationPath(fctx.getExternalContext()))) {
+                    JFConfig.getApplicationPath(ectx))) {
 
                 log.debug("Password forgot action for user " + user + " successful.");
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("password_forgot_success"),

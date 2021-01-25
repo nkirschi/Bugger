@@ -4,6 +4,7 @@ import java.util.ResourceBundle;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -43,6 +44,11 @@ public class PasswordSetBacker {
     private final FacesContext fctx;
 
     /**
+     * The current external context.
+     */
+    private final ExternalContext ectx;
+
+    /**
      * Feedback Event for user feedback.
      */
     private final Event<Feedback> feedbackEvent;
@@ -73,16 +79,21 @@ public class PasswordSetBacker {
      * @param authenticationService The authentication service to use.
      * @param session               The current {@link UserSession}.
      * @param fctx                  The current faces context.
+     * @param ectx                  The current external context.
      * @param feedbackEvent         The feedback event to use for user feedback.
      * @param messagesBundle        The resource bundle for feedback messages.
      */
     @Inject
-    public PasswordSetBacker(final AuthenticationService authenticationService, final UserSession session,
-                             final FacesContext fctx, final Event<Feedback> feedbackEvent,
+    public PasswordSetBacker(final AuthenticationService authenticationService,
+                             final UserSession session,
+                             final FacesContext fctx,
+                             final ExternalContext ectx,
+                             final Event<Feedback> feedbackEvent,
                              @RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.authenticationService = authenticationService;
         this.session = session;
         this.fctx = fctx;
+        this.ectx = ectx;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;
     }
@@ -98,7 +109,7 @@ public class PasswordSetBacker {
             return;
         }
 
-        token = authenticationService.findToken(fctx.getExternalContext().getRequestParameterMap().get("token"));
+        token = authenticationService.findToken(ectx.getRequestParameterMap().get("token"));
         log.debug("Showing Password-Set page with token " + token + '.');
 
         if (!isValidToken()) {
@@ -114,7 +125,7 @@ public class PasswordSetBacker {
     public String setUserPassword() {
         User user = token.getUser();
         if (authenticationService.setPassword(user, password, token.getValue())) {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("password_set.success"), Feedback.Type.INFO));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("password_set_success"), Feedback.Type.INFO));
             session.setUser(user);
             return "pretty:home";
         }

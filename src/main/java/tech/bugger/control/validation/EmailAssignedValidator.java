@@ -60,7 +60,7 @@ public class EmailAssignedValidator implements Validator<String> {
         }
 
         if (profileService.getUserByEmail(email) != null) {
-            FacesMessage message = new FacesMessage(messagesBundle.getString("email_validator.already_exists"));
+            FacesMessage message = new FacesMessage(messagesBundle.getString("email_validator_already_exists"));
             throw new ValidatorException(message);
         }
     }

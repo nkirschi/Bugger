@@ -166,15 +166,16 @@ public final class Mail {
 
     /**
      * Constructs a new e-mail from the given parameters.
-     * @param to The direct recipients of the e-mail.
-     * @param cc The carbon copy recipients of the e-mail.
-     * @param bcc The blind carbon copy recipients of the e-mail.
+     *
+     * @param to      The direct recipients of the e-mail.
+     * @param cc      The carbon copy recipients of the e-mail.
+     * @param bcc     The blind carbon copy recipients of the e-mail.
      * @param replyto The reply recipients of the e-mail.
      * @param subject The subject of the e-mail.
      * @param content The content fo the e-mail.
      */
     private Mail(final Collection<String> to, final Collection<String> cc, final Collection<String> bcc,
-                final Collection<String> replyto, final String subject, final String content) {
+                 final Collection<String> replyto, final String subject, final String content) {
         this.to = to;
         this.cc = cc;
         this.bcc = bcc;

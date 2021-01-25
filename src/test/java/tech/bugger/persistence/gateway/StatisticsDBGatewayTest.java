@@ -1,5 +1,13 @@
 package tech.bugger.persistence.gateway;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.OffsetDateTime;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -15,20 +23,9 @@ import tech.bugger.global.transfer.TopReport;
 import tech.bugger.global.transfer.TopUser;
 import tech.bugger.persistence.exception.StoreException;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.OffsetDateTime;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -116,7 +113,7 @@ public class StatisticsDBGatewayTest {
         private ReportCriteria criteriaMock;
 
         @BeforeEach
-        public void setUp()throws Exception {
+        public void setUp() throws Exception {
             doThrow(SQLException.class).when(connectionMock).prepareStatement(any());
         }
 
@@ -160,7 +157,7 @@ public class StatisticsDBGatewayTest {
         private ReportCriteria criteriaMock;
 
         @BeforeEach
-        public void setUp()throws Exception {
+        public void setUp() throws Exception {
             PreparedStatement preparedStatementMock = mock(PreparedStatement.class);
             ResultSet resultSetMock = mock(ResultSet.class);
             doReturn(false).when(resultSetMock).next();
@@ -190,12 +187,6 @@ public class StatisticsDBGatewayTest {
 
         @InjectMocks
         private StatisticsDBGateway gateway;
-
-        @Mock
-        private Connection connectionMock;
-
-        @Mock
-        private ReportCriteria criteriaMock;
 
         @Test
         public void testGetNumberOfOpenReportsWhenCriteriaNull() {

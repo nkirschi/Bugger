@@ -1,16 +1,15 @@
 package tech.bugger.control.servlet;
 
+import java.io.IOException;
+import java.io.Serial;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.Serial;
 
 /**
  * Custom servlet that serves avatars and avatar thumbnails.

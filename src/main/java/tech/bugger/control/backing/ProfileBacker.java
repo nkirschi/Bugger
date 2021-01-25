@@ -1,5 +1,12 @@
 package tech.bugger.control.backing;
 
+import java.io.Serial;
+import java.io.Serializable;
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
 import tech.bugger.business.service.TopicService;
@@ -11,15 +18,6 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * Backing bean for the profile page.
@@ -139,7 +137,7 @@ public class ProfileBacker implements Serializable {
     /**
      * The current external context.
      */
-    private final FacesContext fctx;
+    private final ExternalContext ectx;
 
     /**
      * The profile service providing the business logic for user functionality.
@@ -154,18 +152,20 @@ public class ProfileBacker implements Serializable {
     /**
      * Constructs a new profile page backing bean with the necessary dependencies.
      *
-     * @param topicService      The topic service to use.
-     * @param profileService    The profile service to use.
-     * @param session           The current {@link UserSession}.
-     * @param fctx              The current faces context.
+     * @param topicService   The topic service to use.
+     * @param profileService The profile service to use.
+     * @param session        The current {@link UserSession}.
+     * @param ectx           The current external context.
      */
     @Inject
-    public ProfileBacker(final TopicService topicService, final ProfileService profileService,
-                         final UserSession session, final FacesContext fctx) {
+    public ProfileBacker(final TopicService topicService,
+                         final ProfileService profileService,
+                         final UserSession session,
+                         final ExternalContext ectx) {
         this.topicService = topicService;
         this.profileService = profileService;
         this.session = session;
-        this.fctx = fctx;
+        this.ectx = ectx;
     }
 
     /**
@@ -173,9 +173,8 @@ public class ProfileBacker implements Serializable {
      */
     @PostConstruct
     void init() {
-        ExternalContext ext = fctx.getExternalContext();
         // The initialization of the subscriptions will be implemented in the subscriptions feature.
-        if (!ext.getRequestParameterMap().containsKey("u")) {
+        if (!ectx.getRequestParameterMap().containsKey("u")) {
             if (session.getUser() != null) {
                 username = session.getUser().getUsername();
             } else {
@@ -184,7 +183,7 @@ public class ProfileBacker implements Serializable {
         }
 
         if (username == null) {
-            username = ext.getRequestParameterMap().get("u");
+            username = ectx.getRequestParameterMap().get("u");
         }
         user = profileService.getUserByUsername(username);
 

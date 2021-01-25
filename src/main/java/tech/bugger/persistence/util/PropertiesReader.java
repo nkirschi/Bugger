@@ -1,21 +1,14 @@
 package tech.bugger.persistence.util;
 
-import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.ConfigException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import tech.bugger.persistence.exception.ConfigException;
 
 /**
  * Reader for contents of a configuration source held in <code>key = value</code> format.
  */
 public final class PropertiesReader {
-
-    /**
-     * Log instance for logging in this class.
-     */
-    private static final Log log = Log.forClass(PropertiesReader.class);
 
     /**
      * The configuration properties managed by this configuration reader.

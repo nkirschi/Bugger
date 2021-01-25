@@ -1,5 +1,13 @@
 package tech.bugger.persistence.gateway;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Locale;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,23 +24,9 @@ import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.StoreException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Locale;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(DBExtension.class)
 @ExtendWith(LogExtension.class)
@@ -60,14 +54,14 @@ public class UserDBGatewayTest {
         reportGateway = new ReportDBGateway(connection, userGateway);
 
         user = new User(2, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
-                        "User", new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
-                        Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+                "User", new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
+                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         admin = new User(3, "Helgo", "v3ry_s3cur3", "salt", "algorithm", "helgo@admin.de", "Helgo", "Brötchen",
-                         new byte[]{1, 2, 3, 4}, new byte[]{1}, "Ich bin der Administrator hier!", Locale.ENGLISH,
-                         User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, true);
+                new byte[]{1, 2, 3, 4}, new byte[]{1}, "Ich bin der Administrator hier!", Locale.ENGLISH,
+                User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, true);
         topic = new Topic(null, "title", "description");
         report = new Report(null, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                            mock(OffsetDateTime.class), null, null, false, 0);
+                mock(OffsetDateTime.class), null, null, false, 0);
         selection = new Selection(2, 0, Selection.PageSize.NORMAL, "id", true);
     }
 
@@ -88,20 +82,20 @@ public class UserDBGatewayTest {
 
         User copyFromDatabase = userGateway.getUserByID(user.getId());
         assertAll(() -> assertNotNull(user.getId()),
-                  () -> assertEquals(user.getId(), copyFromDatabase.getId()),
-                  () -> assertEquals(user.getUsername(), copyFromDatabase.getUsername()),
-                  () -> assertEquals(user.getPasswordHash(), copyFromDatabase.getPasswordHash()),
-                  () -> assertEquals(user.getPasswordSalt(), copyFromDatabase.getPasswordSalt()),
-                  () -> assertEquals(user.getHashingAlgorithm(), copyFromDatabase.getHashingAlgorithm()),
-                  () -> assertEquals(user.getEmailAddress(), copyFromDatabase.getEmailAddress()),
-                  () -> assertEquals(user.getFirstName(), copyFromDatabase.getFirstName()),
-                  () -> assertEquals(user.getLastName(), copyFromDatabase.getLastName()),
-                  () -> assertArrayEquals(user.getAvatarThumbnail(), copyFromDatabase.getAvatarThumbnail()),
-                  () -> assertEquals(user.getBiography(), copyFromDatabase.getBiography()),
-                  () -> assertEquals(user.getPreferredLanguage(), copyFromDatabase.getPreferredLanguage()),
-                  () -> assertEquals(user.getProfileVisibility(), copyFromDatabase.getProfileVisibility()),
-                  () -> assertEquals(user.getForcedVotingWeight(), copyFromDatabase.getForcedVotingWeight()),
-                  () -> assertEquals(user.isAdministrator(), copyFromDatabase.isAdministrator()));
+                () -> assertEquals(user.getId(), copyFromDatabase.getId()),
+                () -> assertEquals(user.getUsername(), copyFromDatabase.getUsername()),
+                () -> assertEquals(user.getPasswordHash(), copyFromDatabase.getPasswordHash()),
+                () -> assertEquals(user.getPasswordSalt(), copyFromDatabase.getPasswordSalt()),
+                () -> assertEquals(user.getHashingAlgorithm(), copyFromDatabase.getHashingAlgorithm()),
+                () -> assertEquals(user.getEmailAddress(), copyFromDatabase.getEmailAddress()),
+                () -> assertEquals(user.getFirstName(), copyFromDatabase.getFirstName()),
+                () -> assertEquals(user.getLastName(), copyFromDatabase.getLastName()),
+                () -> assertArrayEquals(user.getAvatarThumbnail(), copyFromDatabase.getAvatarThumbnail()),
+                () -> assertEquals(user.getBiography(), copyFromDatabase.getBiography()),
+                () -> assertEquals(user.getPreferredLanguage(), copyFromDatabase.getPreferredLanguage()),
+                () -> assertEquals(user.getProfileVisibility(), copyFromDatabase.getProfileVisibility()),
+                () -> assertEquals(user.getForcedVotingWeight(), copyFromDatabase.getForcedVotingWeight()),
+                () -> assertEquals(user.isAdministrator(), copyFromDatabase.isAdministrator()));
     }
 
     @Test
@@ -143,20 +137,20 @@ public class UserDBGatewayTest {
 
         User copyFromDatabase = userGateway.getUserByID(user.getId());
         assertAll(() -> assertEquals(user.getId(), copyFromDatabase.getId()),
-                  () -> assertEquals(user.getUsername(), copyFromDatabase.getUsername()),
-                  () -> assertEquals(user.getPasswordHash(), copyFromDatabase.getPasswordHash()),
-                  () -> assertEquals(user.getPasswordSalt(), copyFromDatabase.getPasswordSalt()),
-                  () -> assertEquals(user.getHashingAlgorithm(), copyFromDatabase.getHashingAlgorithm()),
-                  () -> assertEquals(user.getEmailAddress(), copyFromDatabase.getEmailAddress()),
-                  () -> assertEquals(user.getFirstName(), copyFromDatabase.getFirstName()),
-                  () -> assertEquals(user.getLastName(), copyFromDatabase.getLastName()),
-                  () -> assertArrayEquals(user.getAvatarThumbnail(), copyFromDatabase.getAvatarThumbnail()),
-                  () -> assertEquals(user.getBiography(), copyFromDatabase.getBiography()),
-                  () -> assertEquals(user.getRegistrationDate(), copyFromDatabase.getRegistrationDate()),
-                  () -> assertEquals(user.getPreferredLanguage(), copyFromDatabase.getPreferredLanguage()),
-                  () -> assertEquals(user.getProfileVisibility(), copyFromDatabase.getProfileVisibility()),
-                  () -> assertEquals(user.getForcedVotingWeight(), copyFromDatabase.getForcedVotingWeight()),
-                  () -> assertEquals(user.isAdministrator(), copyFromDatabase.isAdministrator()));
+                () -> assertEquals(user.getUsername(), copyFromDatabase.getUsername()),
+                () -> assertEquals(user.getPasswordHash(), copyFromDatabase.getPasswordHash()),
+                () -> assertEquals(user.getPasswordSalt(), copyFromDatabase.getPasswordSalt()),
+                () -> assertEquals(user.getHashingAlgorithm(), copyFromDatabase.getHashingAlgorithm()),
+                () -> assertEquals(user.getEmailAddress(), copyFromDatabase.getEmailAddress()),
+                () -> assertEquals(user.getFirstName(), copyFromDatabase.getFirstName()),
+                () -> assertEquals(user.getLastName(), copyFromDatabase.getLastName()),
+                () -> assertArrayEquals(user.getAvatarThumbnail(), copyFromDatabase.getAvatarThumbnail()),
+                () -> assertEquals(user.getBiography(), copyFromDatabase.getBiography()),
+                () -> assertEquals(user.getRegistrationDate(), copyFromDatabase.getRegistrationDate()),
+                () -> assertEquals(user.getPreferredLanguage(), copyFromDatabase.getPreferredLanguage()),
+                () -> assertEquals(user.getProfileVisibility(), copyFromDatabase.getProfileVisibility()),
+                () -> assertEquals(user.getForcedVotingWeight(), copyFromDatabase.getForcedVotingWeight()),
+                () -> assertEquals(user.isAdministrator(), copyFromDatabase.isAdministrator()));
     }
 
     @Test
@@ -264,7 +258,7 @@ public class UserDBGatewayTest {
         Connection connSpy = spy(connection);
         doThrow(SQLException.class).when(connSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                     () -> new UserDBGateway(connSpy).getNumberOfAdmins()
+                () -> new UserDBGateway(connSpy).getNumberOfAdmins()
         );
     }
 
@@ -278,7 +272,7 @@ public class UserDBGatewayTest {
     @Test
     public void testGetUserByIDNotFound() {
         assertThrows(NotFoundException.class,
-                     () -> userGateway.getUserByID(2222)
+                () -> userGateway.getUserByID(2222)
         );
     }
 
@@ -287,7 +281,7 @@ public class UserDBGatewayTest {
         Connection connSpy = spy(connection);
         doThrow(SQLException.class).when(connSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                     () -> new UserDBGateway(connSpy).getUserByID(user.getId())
+                () -> new UserDBGateway(connSpy).getUserByID(user.getId())
         );
     }
 
@@ -300,7 +294,7 @@ public class UserDBGatewayTest {
     @Test
     public void testGetNumberOfPostNoEntries() {
         assertThrows(NotFoundException.class,
-                     () -> userGateway.getNumberOfPosts(user)
+                () -> userGateway.getNumberOfPosts(user)
         );
     }
 
@@ -309,7 +303,7 @@ public class UserDBGatewayTest {
         Connection connSpy = spy(connection);
         doThrow(SQLException.class).when(connSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                     () -> new UserDBGateway(connSpy).getNumberOfPosts(user)
+                () -> new UserDBGateway(connSpy).getNumberOfPosts(user)
         );
     }
 
@@ -318,14 +312,14 @@ public class UserDBGatewayTest {
         userGateway.createUser(user);
         userGateway.deleteUser(user);
         assertThrows(NotFoundException.class,
-                     () -> userGateway.getUserByID(user.getId())
+                () -> userGateway.getUserByID(user.getId())
         );
     }
 
     @Test
     public void testDeleteUserNotFound() {
         assertThrows(NotFoundException.class,
-                     () -> userGateway.deleteUser(user)
+                () -> userGateway.deleteUser(user)
         );
     }
 
@@ -334,7 +328,7 @@ public class UserDBGatewayTest {
         Connection connSpy = spy(connection);
         doThrow(SQLException.class).when(connSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                     () -> new UserDBGateway(connSpy).deleteUser(user)
+                () -> new UserDBGateway(connSpy).deleteUser(user)
         );
     }
 
@@ -349,7 +343,7 @@ public class UserDBGatewayTest {
     @Test
     public void testIsModeratorTopicIdNull() {
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.isModerator(user, topic)
+                () -> userGateway.isModerator(user, topic)
         );
     }
 
@@ -358,7 +352,7 @@ public class UserDBGatewayTest {
         user.setId(null);
         topic.setId(1);
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.isModerator(user, topic)
+                () -> userGateway.isModerator(user, topic)
         );
     }
 
@@ -369,7 +363,7 @@ public class UserDBGatewayTest {
         Connection connSpy = spy(connection);
         doThrow(SQLException.class).when(connSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                     () -> new UserDBGateway(connSpy).isModerator(user, topic)
+                () -> new UserDBGateway(connSpy).isModerator(user, topic)
         );
     }
 
@@ -396,7 +390,7 @@ public class UserDBGatewayTest {
     @Test
     public void testGetSelectedModeratorsTopicIdNull() {
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.getSelectedModerators(topic, selection)
+                () -> userGateway.getSelectedModerators(topic, selection)
         );
     }
 
@@ -404,7 +398,7 @@ public class UserDBGatewayTest {
     public void testGetSelectedModeratorsSelectionNull() {
         topic.setId(1);
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.getSelectedModerators(topic, null)
+                () -> userGateway.getSelectedModerators(topic, null)
         );
     }
 
@@ -413,7 +407,7 @@ public class UserDBGatewayTest {
         selection.setSortedBy("");
         topic.setId(1);
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.getSelectedModerators(topic, selection)
+                () -> userGateway.getSelectedModerators(topic, selection)
         );
     }
 
@@ -423,7 +417,7 @@ public class UserDBGatewayTest {
         Connection connSpy = spy(connection);
         doThrow(SQLException.class).when(connSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                     () -> new UserDBGateway(connSpy).getSelectedModerators(topic, selection)
+                () -> new UserDBGateway(connSpy).getSelectedModerators(topic, selection)
         );
     }
 
@@ -445,7 +439,7 @@ public class UserDBGatewayTest {
     public void testGetNumberOfModeratorsUserIdNull() {
         user.setId(null);
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.getNumberOfModeratedTopics(user)
+                () -> userGateway.getNumberOfModeratedTopics(user)
         );
     }
 
@@ -454,7 +448,7 @@ public class UserDBGatewayTest {
         Connection connSpy = spy(connection);
         doThrow(SQLException.class).when(connSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                     () -> new UserDBGateway(connSpy).getNumberOfModeratedTopics(user)
+                () -> new UserDBGateway(connSpy).getNumberOfModeratedTopics(user)
         );
     }
 
@@ -496,7 +490,7 @@ public class UserDBGatewayTest {
         Connection connSpy = spy(connection);
         doThrow(SQLException.class).when(connSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                     () -> new UserDBGateway(connSpy).getSelectedBannedUsers(topic, selection)
+                () -> new UserDBGateway(connSpy).getSelectedBannedUsers(topic, selection)
         );
     }
 
@@ -520,14 +514,14 @@ public class UserDBGatewayTest {
         user.setId(null);
         topic.setId(1);
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.isBanned(user, topic)
+                () -> userGateway.isBanned(user, topic)
         );
     }
 
     @Test
     public void testIsBannedTopicIdNull() {
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.isBanned(user, topic)
+                () -> userGateway.isBanned(user, topic)
         );
     }
 
@@ -537,7 +531,7 @@ public class UserDBGatewayTest {
         Connection connSpy = spy(connection);
         doThrow(SQLException.class).when(connSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                     () -> new UserDBGateway(connSpy).isBanned(user, topic)
+                () -> new UserDBGateway(connSpy).isBanned(user, topic)
         );
     }
 
@@ -573,7 +567,7 @@ public class UserDBGatewayTest {
     @Test
     public void testGetSubscribersOfUserUserNull() {
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.getSubscribersOf((User) null)
+                () -> userGateway.getSubscribersOf((User) null)
         );
     }
 
@@ -581,7 +575,7 @@ public class UserDBGatewayTest {
     public void testGetSubscribersOfUserIdNull() {
         user.setId(null);
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.getSubscribersOf(user)
+                () -> userGateway.getSubscribersOf(user)
         );
     }
 
@@ -618,14 +612,14 @@ public class UserDBGatewayTest {
     @Test
     public void testGetSubscribersOfReportReportNull() {
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.getSubscribersOf((Report) null)
+                () -> userGateway.getSubscribersOf((Report) null)
         );
     }
 
     @Test
     public void testGetSubscribersOfReportIdNull() {
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.getSubscribersOf(report)
+                () -> userGateway.getSubscribersOf(report)
         );
     }
 
@@ -665,14 +659,14 @@ public class UserDBGatewayTest {
     @Test
     public void testGetSubscribersOfTopicTopicNull() {
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.getSubscribersOf((Topic) null)
+                () -> userGateway.getSubscribersOf((Topic) null)
         );
     }
 
     @Test
     public void testGetSubscribersOfTopicIdNull() {
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.getSubscribersOf(topic)
+                () -> userGateway.getSubscribersOf(topic)
         );
     }
 
@@ -720,7 +714,7 @@ public class UserDBGatewayTest {
     @Test
     public void testSelectSubscribedUsersSelectionNull() {
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.selectSubscribedUsers(user, null)
+                () -> userGateway.selectSubscribedUsers(user, null)
         );
     }
 
@@ -728,14 +722,14 @@ public class UserDBGatewayTest {
     public void testSelectSubscribedUsersSelectionBlank() {
         selection.setSortedBy("");
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.selectSubscribedUsers(user, selection)
+                () -> userGateway.selectSubscribedUsers(user, selection)
         );
     }
 
     @Test
     public void testSelectSubscribedUsersUserNull() {
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.selectSubscribedUsers(null, selection)
+                () -> userGateway.selectSubscribedUsers(null, selection)
         );
     }
 
@@ -743,7 +737,7 @@ public class UserDBGatewayTest {
     public void testSelectSubscribedUsersUserIdNull() {
         user.setId(null);
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.selectSubscribedUsers(user, selection)
+                () -> userGateway.selectSubscribedUsers(user, selection)
         );
     }
 
@@ -752,7 +746,7 @@ public class UserDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                     () -> new UserDBGateway(connectionSpy).selectSubscribedUsers(user, selection)
+                () -> new UserDBGateway(connectionSpy).selectSubscribedUsers(user, selection)
         );
     }
 
@@ -773,7 +767,7 @@ public class UserDBGatewayTest {
     @Test
     public void testCountSubscribedUsersUserNull() {
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.countSubscribedUsers(null)
+                () -> userGateway.countSubscribedUsers(null)
         );
     }
 
@@ -781,7 +775,7 @@ public class UserDBGatewayTest {
     public void testCountSubscribedUsersUserIdNull() {
         user.setId(null);
         assertThrows(IllegalArgumentException.class,
-                     () -> userGateway.countSubscribedUsers(user)
+                () -> userGateway.countSubscribedUsers(user)
         );
     }
 
@@ -790,7 +784,7 @@ public class UserDBGatewayTest {
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
-                     () -> new UserDBGateway(connectionSpy).countSubscribedUsers(user)
+                () -> new UserDBGateway(connectionSpy).countSubscribedUsers(user)
         );
     }
 
@@ -804,7 +798,7 @@ public class UserDBGatewayTest {
         doReturn(resultSetMock).when(stmtMock).executeQuery();
         doReturn(stmtMock).when(connectionSpy).prepareStatement(any());
         assertThrows(InternalError.class,
-                     () -> new UserDBGateway(connectionSpy).countSubscribedUsers(user)
+                () -> new UserDBGateway(connectionSpy).countSubscribedUsers(user)
         );
     }
 

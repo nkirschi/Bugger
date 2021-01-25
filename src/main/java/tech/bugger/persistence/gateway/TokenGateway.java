@@ -1,9 +1,8 @@
 package tech.bugger.persistence.gateway;
 
+import java.time.Duration;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.persistence.exception.NotFoundException;
-
-import java.time.Duration;
 
 /**
  * A token gateway allows to query and modify a persistent storage of verification tokens.

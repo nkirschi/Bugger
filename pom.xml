@@ -40,27 +40,23 @@
             <groupId>org.glassfish</groupId>
             <artifactId>jakarta.faces</artifactId>
             <version>${jakartafaces.version}</version>
-            <scope>compile</scope>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>org.glassfish.web</groupId>
-            <artifactId>javax.servlet.jsp.jstl</artifactId>
-            <version>${jstl.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        -->
         <dependency>
             <groupId>org.jboss.weld.servlet</groupId>
             <artifactId>weld-servlet-shaded</artifactId>
             <version>${weldservlet.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
             <version>${jakartamail.version}</version>
-            <scope>compile</scope>
+        </dependency>
+
+        <!-- Expression language API as the Exception Handler needs this -->
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+            <version>${el.version}</version>
         </dependency>
 
         <!-- URL Rewriter -->
@@ -80,7 +76,6 @@
             <groupId>org.jboss</groupId>
             <artifactId>jandex</artifactId>
             <version>${jandex.version}</version>
-            <scope>compile</scope>
         </dependency>
 
         <!-- Markdown -->
@@ -88,7 +83,6 @@
             <groupId>com.atlassian.commonmark</groupId>
             <artifactId>commonmark</artifactId>
             <version>${commonmark.version}</version>
-            <scope>compile</scope>
         </dependency>
 
         <!-- PostgreSQL driver -->
@@ -96,7 +90,6 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
-            <scope>compile</scope>
         </dependency>
 
         <!-- JUnit 5 -->
@@ -127,7 +120,6 @@
             <scope>test</scope>
         </dependency>
 
-
         <!-- Dumbster Fake SMTP Server -->
         <dependency>
             <groupId>com.github.kirviq</groupId>
@@ -142,13 +134,6 @@
             <artifactId>embedded-postgres</artifactId>
             <version>${embeddedpostgres.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.el</groupId>
-            <artifactId>javax.el-api</artifactId>
-            <version>${el.version}</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

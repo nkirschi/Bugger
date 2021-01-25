@@ -51,7 +51,7 @@ public class PasswordRegexValidator implements Validator<String> {
     @Override
     public void validate(final FacesContext fctx, final UIComponent component, final String password) {
         if (!REGEX.matcher(password).matches()) {
-            FacesMessage message = new FacesMessage(messagesBundle.getString("password_validator.password_too_weak"));
+            FacesMessage message = new FacesMessage(messagesBundle.getString("password_validator_password_too_weak"));
             throw new ValidatorException(message);
         }
     }

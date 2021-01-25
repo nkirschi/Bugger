@@ -1,7 +1,10 @@
 package tech.bugger.control.backing;
 
 import com.sun.faces.context.RequestParameterMap;
+import java.lang.reflect.Field;
+import java.time.OffsetDateTime;
 import java.util.Locale;
+import javax.faces.context.ExternalContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,24 +23,8 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
-import javax.faces.application.Application;
-import javax.faces.application.NavigationHandler;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import java.lang.reflect.Field;
-import java.time.OffsetDateTime;
-
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.never;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class ProfileBackerTest {
@@ -55,19 +42,10 @@ public class ProfileBackerTest {
     private UserSession session;
 
     @Mock
-    private FacesContext fctx;
-
-    @Mock
-    private ExternalContext context;
+    private ExternalContext ectx;
 
     @Mock
     private RequestParameterMap map;
-
-    @Mock
-    private NavigationHandler navHandler;
-
-    @Mock
-    private Application application;
 
     private User user;
     private User otherUser;
@@ -88,11 +66,8 @@ public class ProfileBackerTest {
         report = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
                 mock(OffsetDateTime.class), null, null, false, 1);
         MockitoAnnotations.openMocks(this);
-        profileBacker = new ProfileBacker(topicService, profileService, session, fctx);
-        when(fctx.getExternalContext()).thenReturn(context);
-        when(context.getRequestParameterMap()).thenReturn(map);
-        when(fctx.getApplication()).thenReturn(application);
-        when(application.getNavigationHandler()).thenReturn(navHandler);
+        profileBacker = new ProfileBacker(topicService, profileService, session, ectx);
+        when(ectx.getRequestParameterMap()).thenReturn(map);
     }
 
     @Test
@@ -256,6 +231,7 @@ public class ProfileBackerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testDeleteTopicSubscription() throws NoSuchFieldException, IllegalAccessException {
         Field topics = profileBacker.getClass().getDeclaredField("topicSubscriptions");
         topics.setAccessible(true);
@@ -269,10 +245,11 @@ public class ProfileBackerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testDeleteReportSubscription() throws NoSuchFieldException, IllegalAccessException {
         Field reports = profileBacker.getClass().getDeclaredField("reportSubscriptions");
         reports.setAccessible(true);
-        Paginator<Topic> mockReports = mock(Paginator.class);
+        Paginator<Report> mockReports = mock(Paginator.class);
         reports.set(profileBacker, mockReports);
         profileBacker.setUser(user);
         profileBacker.deleteReportSubscription(report);
@@ -282,10 +259,11 @@ public class ProfileBackerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testDeleteUserSubscription() throws NoSuchFieldException, IllegalAccessException {
         Field users = profileBacker.getClass().getDeclaredField("userSubscriptions");
         users.setAccessible(true);
-        Paginator<Topic> mockUsers = mock(Paginator.class);
+        Paginator<User> mockUsers = mock(Paginator.class);
         users.set(profileBacker, mockUsers);
         profileBacker.setUser(user);
         profileBacker.deleteUserSubscription(user);
@@ -295,6 +273,7 @@ public class ProfileBackerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testDeleteAllTopicSubscription() throws NoSuchFieldException, IllegalAccessException {
         Field topics = profileBacker.getClass().getDeclaredField("topicSubscriptions");
         topics.setAccessible(true);
@@ -308,6 +287,7 @@ public class ProfileBackerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testDeleteAllReportSubscription() throws NoSuchFieldException, IllegalAccessException {
         Field reports = profileBacker.getClass().getDeclaredField("reportSubscriptions");
         reports.setAccessible(true);
@@ -321,6 +301,7 @@ public class ProfileBackerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testDeleteAllUserSubscription() throws NoSuchFieldException, IllegalAccessException {
         Field users = profileBacker.getClass().getDeclaredField("userSubscriptions");
         users.setAccessible(true);

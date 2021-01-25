@@ -30,7 +30,7 @@ public class FooterBackerTest {
 
     @BeforeEach
     public void setUp() {
-        doReturn(ResourceBundleMocker.mock("help")).when(registry)
+        lenient().doReturn(ResourceBundleMocker.mock("help")).when(registry)
                 .getBundle(anyString(), any());
         doReturn(Locale.GERMAN).when(session).getLocale();
         backer = new FooterBacker(session, registry);

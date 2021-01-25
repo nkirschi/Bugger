@@ -3,14 +3,32 @@ package tech.bugger.business.util;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import org.commonmark.node.Text;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
 import tech.bugger.LogExtension;
+import tech.bugger.control.util.JFConfig;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class MarkdownTest {
+
+    private MockedStatic<JFConfig> configMockedStatic;
+
+    @BeforeEach
+    public void setUp() {
+        configMockedStatic = mockStatic(JFConfig.class);
+        configMockedStatic.when(JFConfig::getApplicationPath).thenReturn("");
+    }
+
+    @AfterEach
+    public void tearDown() {
+        configMockedStatic.close();
+    }
 
     @Test
     public void testHandlerConstructorAccess() throws NoSuchMethodException {

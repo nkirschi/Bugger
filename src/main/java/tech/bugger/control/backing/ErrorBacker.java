@@ -1,17 +1,16 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.control.exception.Error404Exception;
-import tech.bugger.control.util.JFConfig;
-import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.StoreException;
-
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import tech.bugger.control.exception.Error404Exception;
+import tech.bugger.control.util.JFConfig;
+import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.StoreException;
 
 /**
  * Backing Bean for the error page.
@@ -78,7 +77,11 @@ public class ErrorBacker {
     public static String stackTrace(final Throwable exception) {
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
-        exception.printStackTrace(printWriter);
+
+        if (exception != null) {
+            exception.printStackTrace(printWriter);
+        }
+
         return stringWriter.toString();
     }
 
@@ -87,8 +90,7 @@ public class ErrorBacker {
      *
      * @return The link leading to the home page.
      */
-    public static String goHome() {
-        log.debug("go home called in error backer");
+    public static String getHomeUrl() {
         return JFConfig.getApplicationPath(FacesContext.getCurrentInstance().getExternalContext()) + "/";
     }
 

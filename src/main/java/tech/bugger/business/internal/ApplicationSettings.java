@@ -1,13 +1,12 @@
 package tech.bugger.business.internal;
 
-import tech.bugger.business.service.SettingsService;
-import tech.bugger.global.transfer.Configuration;
-import tech.bugger.global.transfer.Organization;
-
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import tech.bugger.business.service.SettingsService;
+import tech.bugger.global.transfer.Configuration;
+import tech.bugger.global.transfer.Organization;
 
 /**
  * Cache of application-wide settings.

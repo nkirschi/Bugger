@@ -1,8 +1,5 @@
 package tech.bugger.persistence.util;
 
-import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.OutOfConnectionsException;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -11,10 +8,12 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.OutOfConnectionsException;
 
 /**
  * Thread-safe object pool of database connections.
- *
+ * <p>
  * The pool dynamically manages a set of database connections that can be borrowed and returned by callers. Before being
  * used, the pool must be initialized with technical parameters for the database connection and performance aspects.
  */
@@ -72,7 +71,7 @@ public final class ConnectionPool {
 
     /**
      * Constructs a connection pool with the given technical parameters and sets up the initial connections.
-     *
+     * <p>
      * This initialization has to occur before any other method calls and can only be executed exactly once.
      *
      * @param jdbcDriver     The fully qualified class name of the JDBC database driver to use.
@@ -123,7 +122,7 @@ public final class ConnectionPool {
 
     /**
      * Requests a database connection for use.
-     *
+     * <p>
      * If no connections are currently available, the calling thread will wait until this is the case. Therefore any
      * received connections should be returned soon
      *
@@ -170,7 +169,7 @@ public final class ConnectionPool {
 
     /**
      * Passes a database connection that is no longer needed back to the pool.
-     *
+     * <p>
      * This enables a potential thread waiting for free connections to proceed.
      *
      * @param connection The connection to be reintegrated.

@@ -4,6 +4,7 @@ import java.util.ResourceBundle;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -49,6 +50,11 @@ public class RegisterBacker {
     private final FacesContext fctx;
 
     /**
+     * The current external context.
+     */
+    private final ExternalContext ectx;
+
+    /**
      * Feedback Event for user feedback.
      */
     private final Event<Feedback> feedbackEvent;
@@ -70,17 +76,23 @@ public class RegisterBacker {
      * @param profileService        The profile service to use.
      * @param session               The current {@link UserSession}.
      * @param fctx                  The current faces context.
+     * @param ectx                  The current external context.
      * @param feedbackEvent         The feedback event to use for user feedback.
      * @param messagesBundle        The resource bundle for feedback messages.
      */
     @Inject
-    public RegisterBacker(final AuthenticationService authenticationService, final ProfileService profileService,
-                          final UserSession session, final FacesContext fctx, final Event<Feedback> feedbackEvent,
+    public RegisterBacker(final AuthenticationService authenticationService,
+                          final ProfileService profileService,
+                          final UserSession session,
+                          final FacesContext fctx,
+                          final ExternalContext ectx,
+                          final Event<Feedback> feedbackEvent,
                           @RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.authenticationService = authenticationService;
         this.profileService = profileService;
         this.session = session;
         this.fctx = fctx;
+        this.ectx = ectx;
         this.feedbackEvent = feedbackEvent;
         this.messagesBundle = messagesBundle;
     }
@@ -106,10 +118,10 @@ public class RegisterBacker {
      */
     public String register() {
         if (profileService.createUser(user) && authenticationService.register(user,
-                JFConfig.getApplicationPath(fctx.getExternalContext()))) {
+                JFConfig.getApplicationPath(ectx))) {
 
             log.debug("Registration for user " + user + " successful.");
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("register.success"), Feedback.Type.INFO));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("register_success"), Feedback.Type.INFO));
             return "pretty:home";
         }
         return null;

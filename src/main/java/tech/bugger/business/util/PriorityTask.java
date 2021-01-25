@@ -43,7 +43,7 @@ public class PriorityTask implements Runnable {
 
     /**
      * Execute the assigned action.
-     *
+     * <p>
      * {@inheritDoc}
      */
     @Override

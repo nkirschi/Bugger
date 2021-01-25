@@ -1,7 +1,13 @@
 package tech.bugger.business.service;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.ResourceBundle;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.servlet.http.Part;
 import tech.bugger.business.exception.CorruptImageException;
-import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Hasher;
 import tech.bugger.business.util.Images;
@@ -18,17 +24,8 @@ import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.servlet.http.Part;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
-
 /**
- * Service providing methods related to users and user profiles. A {@code Feedback} event is fired, if unexpected
+ * Service providing methods related to users and user profiles. A {@link Feedback} event is fired, if unexpected
  * circumstances occur.
  */
 @ApplicationScoped
@@ -50,9 +47,9 @@ public class ProfileService {
     private final TransactionManager transactionManager;
 
     /**
-     * The application settings holding the current settings information.
+     * The service providing methods for searching.
      */
-    private final ApplicationSettings applicationSettings;
+    private final SearchService searchService;
 
     /**
      * The resource bundle for feedback messages.
@@ -62,18 +59,19 @@ public class ProfileService {
     /**
      * Constructs a new profile service with the given dependencies.
      *
-     * @param feedback            The feedback event to be used for user feedback.
-     * @param transactionManager  The transaction manager to be used for creating transactions.
-     * @param applicationSettings The current application settings.
-     * @param messages            The resource bundle to look up feedback messages.
+     * @param feedback           The feedback event to be used for user feedback.
+     * @param transactionManager The transaction manager to be used for creating transactions.
+     * @param searchService      The service providing methods for searching.
+     * @param messages           The resource bundle to look up feedback messages.
      */
     @Inject
-    public ProfileService(final Event<Feedback> feedback, final TransactionManager transactionManager,
-                          final ApplicationSettings applicationSettings,
+    public ProfileService(final Event<Feedback> feedback,
+                          final TransactionManager transactionManager,
+                          final SearchService searchService,
                           final @RegistryKey("messages") ResourceBundle messages) {
         this.feedback = feedback;
         this.transactionManager = transactionManager;
-        this.applicationSettings = applicationSettings;
+        this.searchService = searchService;
         this.messages = messages;
     }
 
@@ -425,53 +423,11 @@ public class ProfileService {
      * @return The voting weight as an {@code int}.
      */
     public int getVotingWeightForUser(final User user) {
-        int votingWeight = 0;
-
         if (user.getForcedVotingWeight() != null) {
             return user.getForcedVotingWeight();
         }
 
-        int numPosts = getNumberOfPostsForUser(user);
-        if (numPosts == 0) {
-            votingWeight = 1;
-        } else {
-            String[] votingDef = applicationSettings.getConfiguration().getVotingWeightDefinition().split(",");
-            if (votingDef.length == 0) {
-                log.error("The voting weight definition is empty");
-                feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
-                return votingWeight;
-            }
-
-            try {
-                int[] votingWeightDef = Arrays.stream(votingDef).mapToInt(Integer::parseInt).sorted().toArray();
-                votingWeight = calculateVotingWeight(numPosts, votingWeightDef);
-            } catch (NumberFormatException e) {
-                log.error("The voting weight definition could not be parsed to a number");
-                feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
-            }
-        }
-        return votingWeight;
-    }
-
-    /**
-     * Calculates the voting weight from the given number of posts and the voting weight definition.
-     *
-     * @param numPosts        The number of posts.
-     * @param votingWeightDef The voting weight definition.
-     * @return The calculated voting weight.
-     */
-    private int calculateVotingWeight(final int numPosts, final int[] votingWeightDef) {
-        if (votingWeightDef[0] != 0) {
-            log.error("The voting weight definition needs to contain a 0.");
-            feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
-            return 0;
-        }
-        for (int i = 1; i < votingWeightDef.length; i++) {
-            if (numPosts < votingWeightDef[i]) {
-                return i;
-            }
-        }
-        return votingWeightDef.length;
+        return searchService.getVotingWeightFromPosts(getNumberOfPostsForUser(user));
     }
 
     /**

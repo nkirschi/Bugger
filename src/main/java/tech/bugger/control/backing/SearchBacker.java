@@ -5,21 +5,19 @@ import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
-import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.User;
+import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.util.Log;
+import tech.bugger.global.transfer.User;
 
 /**
  * Backing bean for the search page.
@@ -47,11 +45,6 @@ public class SearchBacker implements Serializable {
          */
         USER
     }
-
-    /**
-     * The {@link Log} instance associated with this class for logging purposes.
-     */
-    private static final Log log = Log.forClass(SearchBacker.class);
 
     @Serial
     private static final long serialVersionUID = -1264737473650782156L;
@@ -149,12 +142,12 @@ public class SearchBacker implements Serializable {
     /**
      * A hash map containing information for which report type to filter.
      */
-    private HashMap<Report.Type, Boolean> reportTypeFilter; // selectManyCheckbox
+    private Map<Report.Type, Boolean> reportTypeFilter; // selectManyCheckbox
 
     /**
      * A hash map containing information for which report severity to filter.
      */
-    private HashMap<Report.Severity, Boolean> severityFilter;
+    private Map<Report.Severity, Boolean> severityFilter;
 
     /**
      * The title of a filtered topic.
@@ -182,38 +175,38 @@ public class SearchBacker implements Serializable {
     private final TopicService topicService;
 
     /**
-     * The current faces context.
+     * The current external context.
      */
-    private final FacesContext fctx;
+    private final ExternalContext ectx;
 
     /**
      * Constructs a new search page backing bean with the necessary dependencies.
      *
      * @param searchService The search service to use.
      * @param topicService  The topic service to use.
-     * @param fctx          The current {@link FacesContext} of the application.
+     * @param ectx          The current {@link ExternalContext} of the application.
      */
     @Inject
-    public SearchBacker(final SearchService searchService, final TopicService topicService, final FacesContext fctx) {
+    public SearchBacker(final SearchService searchService,
+                        final TopicService topicService,
+                        final ExternalContext ectx) {
         this.searchService = searchService;
         this.topicService = topicService;
-        this.fctx = fctx;
+        this.ectx = ectx;
     }
 
     /**
-     * Initializes the search page. The default tab is {@code Tab.REPORT}.
+     * Initializes the search page. The default tab is {@link Tab#REPORT}.
      */
     @PostConstruct
-    public void init() {
-        System.out.println("Running Search Init()");
+    void init() {
         tab = Tab.REPORT;
         query = "";
-        ExternalContext ext = fctx.getExternalContext();
-        if (ext.getRequestParameterMap().containsKey("q")) {
-            query = ext.getRequestParameterMap().get("q");
+        if (ectx.getRequestParameterMap().containsKey("q")) {
+            query = ectx.getRequestParameterMap().get("q");
         }
-        if (ext.getRequestParameterMap().containsKey("t")) {
-            tab = Tab.valueOf(ext.getRequestParameterMap().get("t"));
+        if (ectx.getRequestParameterMap().containsKey("t")) {
+            tab = Tab.valueOf(ectx.getRequestParameterMap().get("t"));
         }
         openReportShown = true;
         closedReportShown = true;
@@ -242,17 +235,11 @@ public class SearchBacker implements Serializable {
         }
 
         if (tab == Tab.REPORT) {
-            reportResults = new Paginator<>("title", Selection.PageSize.NORMAL) {
+            reportResults = new Paginator<>("id", Selection.PageSize.NORMAL) {
                 @Override
                 protected Iterable<Report> fetch() {
-                    HashMap<Report.Type, Boolean> typeHashMap = new HashMap<>();
-                    typeHashMap.put(Report.Type.BUG, showBug);
-                    typeHashMap.put(Report.Type.FEATURE, showFeature);
-                    typeHashMap.put(Report.Type.HINT, showHint);
-                    HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<>();
-                    severityHashMap.put(Report.Severity.MINOR, showMinor);
-                    severityHashMap.put(Report.Severity.RELEVANT, showRelevant);
-                    severityHashMap.put(Report.Severity.SEVERE, showSevere);
+                    Map<Report.Type, Boolean> typeHashMap = getTypeHashMap();
+                    Map<Report.Severity, Boolean> severityHashMap = getSeverityHashMap();
                     if (topic != null && topic.isBlank()) {
                         topic = null;
                     }
@@ -263,14 +250,8 @@ public class SearchBacker implements Serializable {
 
                 @Override
                 protected int totalSize() {
-                    HashMap<Report.Type, Boolean> typeHashMap = new HashMap<>();
-                    typeHashMap.put(Report.Type.BUG, showBug);
-                    typeHashMap.put(Report.Type.FEATURE, showFeature);
-                    typeHashMap.put(Report.Type.HINT, showHint);
-                    HashMap<Report.Severity, Boolean> severityHashMap = new HashMap<>();
-                    severityHashMap.put(Report.Severity.MINOR, showMinor);
-                    severityHashMap.put(Report.Severity.RELEVANT, showRelevant);
-                    severityHashMap.put(Report.Severity.SEVERE, showSevere);
+                    Map<Report.Type, Boolean> typeHashMap = getTypeHashMap();
+                    Map<Report.Severity, Boolean> severityHashMap = getSeverityHashMap();
                     if (topic != null && topic.isBlank()) {
                         topic = null;
                     }
@@ -278,11 +259,27 @@ public class SearchBacker implements Serializable {
                             earliestClosingDateTime, openReportShown, closedReportShown, duplicatesShown, topic,
                             typeHashMap, severityHashMap);
                 }
+
+                private Map<Report.Type, Boolean> getTypeHashMap() {
+                    Map<Report.Type, Boolean> typeHashMap = new HashMap<>();
+                    typeHashMap.put(Report.Type.BUG, showBug);
+                    typeHashMap.put(Report.Type.FEATURE, showFeature);
+                    typeHashMap.put(Report.Type.HINT, showHint);
+                    return typeHashMap;
+                }
+
+                private Map<Report.Severity, Boolean> getSeverityHashMap() {
+                    Map<Report.Severity, Boolean> severityHashMap = new HashMap<>();
+                    severityHashMap.put(Report.Severity.MINOR, showMinor);
+                    severityHashMap.put(Report.Severity.RELEVANT, showRelevant);
+                    severityHashMap.put(Report.Severity.SEVERE, showSevere);
+                    return severityHashMap;
+                }
             };
         }
 
         if (tab == Tab.TOPIC) {
-            topicResults = new Paginator<>("title", Selection.PageSize.NORMAL) {
+            topicResults = new Paginator<>("id", Selection.PageSize.NORMAL) {
                 @Override
                 protected Iterable<Topic> fetch() {
                     return searchService.getTopicResults(query, getSelection());
@@ -320,6 +317,7 @@ public class SearchBacker implements Serializable {
      * @return The number of posts as an {@code int}.
      */
     public int getNumberOfPosts(final Topic topic) {
+        // TODO Markus: Needed?
         return 0;
     }
 
@@ -428,6 +426,7 @@ public class SearchBacker implements Serializable {
      * @return {@code true} if the search is conducted in the full text of posts shown, {@code false} otherwise.
      */
     public boolean isSearchInFullText() {
+        // TODO Markus: Many setters and getters in here are unused. Remove them or use them?
         return searchInFullText;
     }
 
@@ -441,28 +440,28 @@ public class SearchBacker implements Serializable {
     /**
      * @return The reportTypeFilter.
      */
-    public HashMap<Report.Type, Boolean> getReportTypeFilter() {
+    public Map<Report.Type, Boolean> getReportTypeFilter() {
         return reportTypeFilter;
     }
 
     /**
      * @param reportTypeFilter The reportTypeFilter to set.
      */
-    public void setReportTypeFilter(final HashMap<Report.Type, Boolean> reportTypeFilter) {
+    public void setReportTypeFilter(final Map<Report.Type, Boolean> reportTypeFilter) {
         this.reportTypeFilter = reportTypeFilter;
     }
 
     /**
      * @return The severityFilter.
      */
-    public HashMap<Report.Severity, Boolean> getSeverityFilter() {
+    public Map<Report.Severity, Boolean> getSeverityFilter() {
         return severityFilter;
     }
 
     /**
      * @param severityFilter The severityFilter to set.
      */
-    public void setSeverityFilter(final HashMap<Report.Severity, Boolean> severityFilter) {
+    public void setSeverityFilter(final Map<Report.Severity, Boolean> severityFilter) {
         this.severityFilter = severityFilter;
     }
 

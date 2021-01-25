@@ -1,13 +1,12 @@
 package tech.bugger.control.servlet;
 
-import tech.bugger.business.internal.ApplicationSettings;
-import tech.bugger.global.util.Log;
-
+import java.io.IOException;
+import java.io.Serial;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.Serial;
+import tech.bugger.business.internal.ApplicationSettings;
+import tech.bugger.global.util.Log;
 
 /**
  * Custom servlet that serves the organization logo.

@@ -5,18 +5,13 @@
 
     <ui:param name="title" value="#{labels.content_not_found}"/>
 
+    <ui:param name="error_description" value="#{labels.not_found_message}"/>
+
     <ui:define name="content">
 
-        <h:panelGrid id="pg-error-general" columns="1">
-            <h:outputText
-                    value="#{labels.not_found_message}"/>
-            <h:outputText value="#{labels.contact_info}" styleClass="h2"/>
-            <h:outputText value="#{applicationSettings.organization.supportInfo}"/>
-            <a href="#{errorBacker.goHome()}">#{labels.go_home}</a>
-        </h:panelGrid>
-
         <h:panelGrid id="pg-error-details" columns="1"
-                     rendered="#{(facesContext.application.projectStage eq 'Development') and requestScope['javax.servlet.error.exception'] != null}">
+                     rendered="#{(facesContext.application.projectStage eq 'Development')
+                     and requestScope['javax.servlet.error.exception'] != null}">
             <h:outputText value="Request URI"/>
             <h:outputText value="#{requestScope['javax.servlet.error.request_uri']}"/>
             <h:outputText value="Exception type"/>
@@ -24,7 +19,8 @@
             <h:outputText value="Exception message"/>
             <h:outputText value="#{requestScope['javax.servlet.error.exception'].message}"/>
             <h:outputText value="Stack trace"/>
-            <h:outputText value="#{errorBacker.stackTrace(requestScope['javax.servlet.error.exception'])}"/>
+            <pre>#{errorBacker.stackTrace(requestScope['javax.servlet.error.exception'])}</pre>
         </h:panelGrid>
+
     </ui:define>
 </ui:composition>

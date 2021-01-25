@@ -1,14 +1,6 @@
 package tech.bugger.persistence.util;
 
 import com.dumbster.smtp.SimpleSmtpServer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import tech.bugger.LogExtension;
-
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -16,6 +8,13 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.Socket;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,7 +37,7 @@ public class MailerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        while (isPortBlocked(SMTP_PORT)) ;
+        while (isPortBlocked()) ;
         smtpServer = SimpleSmtpServer.start(SMTP_PORT);
         mailer = new Mailer(ClassLoader.getSystemResourceAsStream("mailing.properties"));
     }
@@ -48,8 +47,8 @@ public class MailerTest {
         smtpServer.stop();
     }
 
-    private static boolean isPortBlocked(int port) {
-        try (Socket ignored = new Socket("localhost", port)) {
+    private static boolean isPortBlocked() {
+        try (Socket ignored = new Socket("localhost", MailerTest.SMTP_PORT)) {
             return true;
         } catch (IOException ignored) {
             return false;

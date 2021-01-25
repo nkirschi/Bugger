@@ -133,4 +133,17 @@ td, th {
   box-shadow: 0 1px 1px darkred inset, 0 0 8px red !important;
 }
 
+pre {
+  background-color: #2b2b2b;
+}
+
+pre code {
+  color: #a3d2e1;
+}
+
+code {
+  color: #a3d2e1;
+  background-color: #2b2b2b;
+}
+
 /*# sourceMappingURL=darcula.css.map */

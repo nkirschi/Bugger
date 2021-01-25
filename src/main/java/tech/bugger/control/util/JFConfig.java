@@ -1,11 +1,12 @@
 package tech.bugger.control.util;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.annotation.FacesConfig;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * Configuration Utility Class.
@@ -19,6 +20,15 @@ public final class JFConfig {
      */
     private JFConfig() {
         throw new UnsupportedOperationException(); // for reflection abusers
+    }
+
+    /**
+     * Retrieves the current application path using the current {@link ExternalContext}.
+     *
+     * @return The current application path.
+     */
+    public static String getApplicationPath() {
+        return getApplicationPath(FacesContext.getCurrentInstance().getExternalContext());
     }
 
     /**
@@ -36,7 +46,7 @@ public final class JFConfig {
         }
 
         return String.format("%s://%s%s", currentUrl.getProtocol(), currentUrl.getAuthority(),
-                             ectx.getApplicationContextPath());
+                ectx.getApplicationContextPath());
     }
 
 }

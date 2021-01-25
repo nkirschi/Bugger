@@ -1,5 +1,13 @@
 package tech.bugger.business.service;
 
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.ReportCriteria;
@@ -10,17 +18,8 @@ import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
-
 /**
- * Service for content statistics. A {@code Feedback} event is fired if unexpected circumstances occur.
+ * Service for content statistics. A {@link Feedback} event is fired if unexpected circumstances occur.
  */
 @ApplicationScoped
 public class StatisticsService {

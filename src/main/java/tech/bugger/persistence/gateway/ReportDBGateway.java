@@ -1,6 +1,15 @@
 package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
@@ -13,16 +22,6 @@ import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Report gateway that gives access to reports stored in a database.
@@ -55,9 +54,9 @@ public class ReportDBGateway implements ReportGateway {
         this.userGateway = userGateway;
     }
 
-    static Report getReportFromResultSet(final ResultSet rs, final UserGateway userGateway)
-            throws SQLException, NotFoundException {
+    static Report getDefaultReportFromResultSet(final ResultSet rs) throws SQLException {
         Report report = new Report();
+
         report.setId(rs.getInt("id"));
         report.setTitle(rs.getString("title"));
         report.setType(Report.Type.valueOf(rs.getString("type")));
@@ -65,11 +64,14 @@ public class ReportDBGateway implements ReportGateway {
         report.setVersion(rs.getString("version"));
         report.setTopicID(rs.getInt("topic"));
         report.setDuplicateOf(rs.getInt("duplicate_of"));
-        OffsetDateTime closed = null;
-        if (rs.getObject("closed_at", OffsetDateTime.class) != null) {
-            closed = rs.getObject("closed_at", OffsetDateTime.class);
-        }
-        report.setClosingDate(closed);
+        report.setClosingDate(rs.getObject("closed_at", OffsetDateTime.class));
+
+        return report;
+    }
+
+    static Report getReportFromResultSet(final ResultSet rs, final UserGateway userGateway)
+            throws SQLException, NotFoundException {
+        Report report = getDefaultReportFromResultSet(rs);
         report.setAuthorship(getAuthorshipFromResultSet(rs, userGateway));
         return report;
     }
@@ -219,8 +221,7 @@ public class ReportDBGateway implements ReportGateway {
 
             while (rs.next()) {
                 Report report = extractRelevanceFromResultSet(getReportFromResultSet(rs, userGateway), rs);
-                report = extractLastActivityFromResultSet(report, rs);
-                selectedReports.add(report);
+                selectedReports.add(extractLastActivityFromResultSet(report, rs));
             }
             log.debug("Found " + selectedReports.size() + " reports!");
         } catch (SQLException | NotFoundException e) {
@@ -485,6 +486,7 @@ public class ReportDBGateway implements ReportGateway {
 
     /**
      * {@inheritDoc}
+     *
      * @return
      */
     @Override

@@ -19,10 +19,11 @@
             <h:panelGroup rendered="#{postEditBacker.create}">
                 <p>
                     <h:outputText value="#{labels.post_create_info} "/>
-                    <h:link value="###{postEditBacker.report.id} (#{postEditBacker.report.title})" outcome="pretty:report">
+                    <h:link value="###{postEditBacker.report.id} (#{postEditBacker.report.title})"
+                            outcome="pretty:report">
                         <f:param name="id" value="#{postEditBacker.report.id}"/>
                     </h:link>
-                    <h:outputText value="#{labels.post_create_info2}"/>
+                    <h:outputText value="."/>
                 </p>
             </h:panelGroup>
 
@@ -34,10 +35,11 @@
                         <f:param name="p" value="#{postEditBacker.post.id}"/>
                     </h:link>
                     <h:outputText value=" #{labels.post_edit_info2} "/>
-                    <h:link value="###{postEditBacker.report.id} (#{postEditBacker.report.title})" outcome="pretty:report">
+                    <h:link value="###{postEditBacker.report.id} (#{postEditBacker.report.title})"
+                            outcome="pretty:report">
                         <f:param name="id" value="#{postEditBacker.report.id}"/>
                     </h:link>
-                    <h:outputText value="#{labels.post_edit_info3}"/>
+                    <h:outputText value="."/>
                 </p>
             </h:panelGroup>
 
@@ -68,7 +70,8 @@
 
             <h:panelGroup styleClass="row my-3" layout="block" rendered="#{postEditBacker.attachments.size()
                           lt applicationSettings.configuration.maxAttachmentsPerPost}">
-                <h:inputFile id="it-attachment" value="#{postEditBacker.lastAttachmentUploaded}">
+                <h:inputFile id="it-attachment" value="#{postEditBacker.lastAttachmentUploaded}"
+                             styleClass="form-control">
                     <f:validator validatorId="fileValidator"/>
                 </h:inputFile>
                 <h:panelGroup/>

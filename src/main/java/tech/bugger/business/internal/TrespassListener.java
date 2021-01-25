@@ -1,9 +1,12 @@
 package tech.bugger.business.internal;
 
 import com.ocpsoft.pretty.PrettyContext;
-import tech.bugger.business.util.Registry;
-import tech.bugger.global.transfer.User;
-
+import java.io.IOException;
+import java.io.Serial;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import javax.enterprise.inject.spi.CDI;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIViewRoot;
@@ -12,12 +15,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
-import java.io.IOException;
-import java.io.Serial;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import tech.bugger.business.util.Registry;
+import tech.bugger.global.transfer.User;
 
 /**
  * Checks requests on user authentication.
@@ -74,7 +73,7 @@ public class TrespassListener implements PhaseListener {
         FacesContext fctx = event.getFacesContext();
         ExternalContext ectx = fctx.getExternalContext();
 
-        // Disallow unknown views.
+        // Disallow unknown and error views.
         UIViewRoot viewRoot = fctx.getViewRoot();
         if (viewRoot == null) {
             redirectToErrorPage(ectx);
@@ -84,10 +83,13 @@ public class TrespassListener implements PhaseListener {
         if (viewId == null) {
             redirectToErrorPage(ectx);
             return;
+        } else if (viewId.contains("error")) {
+            return;
         }
 
         // sometimes there strangely is no HTTP session and everything breaks
-        if (ectx.getSession(false) == null) {
+        if (ectx.getSession(true) == null) {
+            // Should never happen...
             return;
         }
 
@@ -136,7 +138,7 @@ public class TrespassListener implements PhaseListener {
         try {
             ectx.redirect(ectx.getRequestContextPath() + "/login?url=" + getRedirectUrl(ectx));
         } catch (IOException e) {
-            throw new InternalError("Could not redirect to error page.", e);
+            throw new InternalError("Could not redirect to login page.", e);
         }
     }
 

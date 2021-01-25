@@ -1,5 +1,12 @@
 package tech.bugger.business.service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import javax.enterprise.event.Event;
+import javax.servlet.http.Part;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,25 +33,9 @@ import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.event.Event;
-import javax.servlet.http.Part;
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -54,9 +45,6 @@ public class PostServiceTest {
 
     @Mock
     private NotificationService notificationService;
-
-    @Mock
-    private TopicService topicService;
 
     @Mock
     private ApplicationSettings applicationSettings;
@@ -87,16 +75,16 @@ public class PostServiceTest {
     @Mock
     private Event<Feedback> feedbackEvent;
 
-    private User testUser = new User();
-    private Report testReport = new Report(100, "Hi", Report.Type.BUG, Report.Severity.MINOR, "1", null, null, null,
-                                           null, false, 100);
-    private Post testPost = new Post(300, "Hi", testReport.getId(), null, null);
-    private Topic testTopic = new Topic(100, "Hi", "I am a topic");
+    private final User testUser = new User();
+    private final Report testReport = new Report(100, "Hi", Report.Type.BUG, Report.Severity.MINOR, "1", null, null, null,
+            null, false, 100);
+    private final Post testPost = new Post(300, "Hi", testReport.getId(), null, null);
+    private final Topic testTopic = new Topic(100, "Hi", "I am a topic");
 
     @BeforeEach
     public void setUp() {
-        service = new PostService(notificationService, topicService, applicationSettings, transactionManager,
-                                  feedbackEvent, ResourceBundleMocker.mock(""));
+        service = new PostService(notificationService, applicationSettings, transactionManager,
+                feedbackEvent, ResourceBundleMocker.mock(""));
         List<Attachment> attachments = List.of(
                 new Attachment(1, "test1.txt", new byte[0], "", testPost.getId()),
                 new Attachment(2, "test2.txt", new byte[0], "", testPost.getId()),
@@ -178,7 +166,7 @@ public class PostServiceTest {
     }
 
     @Test
-    public void testCreatePostWithTransactionWhenFine() throws Exception {
+    public void testCreatePostWithTransactionWhenFine() {
         PostService serviceSpy = spy(service);
         lenient().doReturn(true).when(serviceSpy).isAttachmentListValid(any());
         assertTrue(serviceSpy.createPostWithTransaction(testPost, tx));
@@ -187,7 +175,7 @@ public class PostServiceTest {
     }
 
     @Test
-    public void testCreatePostWithTransactionWhenInvalid() throws Exception {
+    public void testCreatePostWithTransactionWhenInvalid() {
         PostService serviceSpy = spy(service);
         lenient().doReturn(false).when(serviceSpy).isAttachmentListValid(any());
         assertFalse(serviceSpy.createPostWithTransaction(testPost, tx));
@@ -203,7 +191,7 @@ public class PostServiceTest {
     }
 
     @Test
-    public void testCreatePostWhenNoSuccess() throws Exception {
+    public void testCreatePostWhenNoSuccess() {
         PostService serviceSpy = spy(service);
         lenient().doReturn(false).when(serviceSpy).createPostWithTransaction(any(), any());
         assertFalse(serviceSpy.createPost(testPost, testReport));
