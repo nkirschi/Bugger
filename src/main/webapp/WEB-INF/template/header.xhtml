@@ -45,6 +45,7 @@
                             <h:link value="#{user}" outcome="pretty:search" styleClass="row search">
                                 <f:param name="t" value="USER"/>
                                 <f:param name="q" value="#{user}"/>
+                                <f:ajax/>
                             </h:link>
                         </ui:repeat>
                         <ui:repeat value="#{empty headerBacker.topicSearchSuggestion ? null
@@ -52,6 +53,7 @@
                             <h:link value="#{topic}" outcome="pretty:search" styleClass="row search">
                                 <f:param name="t" value="TOPIC"/>
                                 <f:param name="q" value="#{topic}"/>
+                                <f:ajax/>
                             </h:link>
                         </ui:repeat>
                         <ui:repeat value="#{empty headerBacker.reportSearchSuggestion ? null
@@ -59,6 +61,7 @@
                             <h:link value="#{report}" outcome="pretty:search" styleClass="row search">
                                 <f:param name="t" value="REPORT"/>
                                 <f:param name="q" value="#{report}"/>
+                                <f:ajax/>
                             </h:link>
                         </ui:repeat>
                     </h:panelGroup>
@@ -67,6 +70,7 @@
                                  action="#{headerBacker.executeSearch}"
                                  styleClass="button btn btn-outline-primary"
                                  id="cb-search">
+                    <f:ajax/>
                 </h:commandButton>
             </h:form>
         </h:panelGroup>
