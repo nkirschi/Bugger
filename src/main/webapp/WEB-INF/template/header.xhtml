@@ -45,6 +45,7 @@
                             <h:link value="#{user}" outcome="pretty:search" styleClass="row search">
                                 <f:param name="t" value="USER"/>
                                 <f:param name="q" value="#{user}"/>
+                                <!-- This is to avoid mixed requests, ajax and full requests -->
                                 <f:ajax/>
                             </h:link>
                         </ui:repeat>
@@ -53,6 +54,7 @@
                             <h:link value="#{topic}" outcome="pretty:search" styleClass="row search">
                                 <f:param name="t" value="TOPIC"/>
                                 <f:param name="q" value="#{topic}"/>
+                                <!-- This is to avoid mixed requests, ajax and full requests -->
                                 <f:ajax/>
                             </h:link>
                         </ui:repeat>
@@ -61,6 +63,7 @@
                             <h:link value="#{report}" outcome="pretty:search" styleClass="row search">
                                 <f:param name="t" value="REPORT"/>
                                 <f:param name="q" value="#{report}"/>
+                                <!-- This is to avoid mixed requests, ajax and full requests -->
                                 <f:ajax/>
                             </h:link>
                         </ui:repeat>
@@ -70,7 +73,8 @@
                                  action="#{headerBacker.executeSearch}"
                                  styleClass="button btn btn-outline-primary"
                                  id="cb-search">
-                    <f:ajax/>
+                    <!-- This is to avoid mixed requests, ajax and full requests -->
+                    <f:ajax execute="@form"/>
                 </h:commandButton>
             </h:form>
         </h:panelGroup>

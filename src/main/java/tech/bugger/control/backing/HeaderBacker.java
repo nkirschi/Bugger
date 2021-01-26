@@ -165,7 +165,8 @@ public class HeaderBacker implements Serializable {
         if (search == null) {
             search = "";
         }
-        ectx.redirect(ectx.getRequestContextPath() + "/search?q=" + search);
+        String converted = URLEncoder.encode(search, StandardCharsets.UTF_8);
+        ectx.redirect(ectx.getRequestContextPath() + "/search?q=" + converted);
         return null;
     }
 
