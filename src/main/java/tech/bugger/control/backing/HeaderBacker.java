@@ -161,7 +161,6 @@ public class HeaderBacker implements Serializable {
      * @return The location to redirect to.
      */
     public String executeSearch() throws IOException {
-        System.out.println("Executing search now.");
         if (search == null) {
             search = "";
         }

@@ -140,16 +140,6 @@ public class SearchBacker implements Serializable {
     private boolean showSevere;
 
     /**
-     * A hash map containing information for which report type to filter.
-     */
-    private Map<Report.Type, Boolean> reportTypeFilter; // selectManyCheckbox
-
-    /**
-     * A hash map containing information for which report severity to filter.
-     */
-    private Map<Report.Severity, Boolean> severityFilter;
-
-    /**
      * The title of a filtered topic.
      */
     private String topic;
@@ -420,49 +410,6 @@ public class SearchBacker implements Serializable {
      */
     public void setDuplicatesShown(final boolean showDuplicates) {
         this.duplicatesShown = showDuplicates;
-    }
-
-    /**
-     * @return {@code true} if the search is conducted in the full text of posts shown, {@code false} otherwise.
-     */
-    public boolean isSearchInFullText() {
-        // TODO Markus: Many setters and getters in here are unused. Remove them or use them?
-        return searchInFullText;
-    }
-
-    /**
-     * @param searchInFullText The searchInFullText to set.
-     */
-    public void setSearchInFullText(final boolean searchInFullText) {
-        this.searchInFullText = searchInFullText;
-    }
-
-    /**
-     * @return The reportTypeFilter.
-     */
-    public Map<Report.Type, Boolean> getReportTypeFilter() {
-        return reportTypeFilter;
-    }
-
-    /**
-     * @param reportTypeFilter The reportTypeFilter to set.
-     */
-    public void setReportTypeFilter(final Map<Report.Type, Boolean> reportTypeFilter) {
-        this.reportTypeFilter = reportTypeFilter;
-    }
-
-    /**
-     * @return The severityFilter.
-     */
-    public Map<Report.Severity, Boolean> getSeverityFilter() {
-        return severityFilter;
-    }
-
-    /**
-     * @param severityFilter The severityFilter to set.
-     */
-    public void setSeverityFilter(final Map<Report.Severity, Boolean> severityFilter) {
-        this.severityFilter = severityFilter;
     }
 
     /**
