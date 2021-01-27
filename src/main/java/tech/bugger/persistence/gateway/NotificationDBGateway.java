@@ -297,8 +297,10 @@ public class NotificationDBGateway implements NotificationGateway {
      */
     @Override
     public List<Notification> getUnsentNotifications() {
-        String sql = "SELECT n.*, u.email_address FROM notification n"
-                + " JOIN \"user\" u ON u.id = n.recipient WHERE sent = false;";
+        String sql = "SELECT n.*, u.email_address, u.preferred_language, r.title FROM notification n"
+                + " JOIN \"user\" u ON u.id = n.recipient"
+                + " JOIN report r ON n.report = r.id"
+                + " WHERE sent = false;";
         List<Notification> notifications;
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
@@ -306,6 +308,8 @@ public class NotificationDBGateway implements NotificationGateway {
             while (rs.next()) {
                 Notification n = getNotificationFromResultSet(rs);
                 n.setRecipientMail(rs.getString("email_address"));
+                n.setEmailLanguage(rs.getString("preferred_language"));
+                n.setReportTitle(rs.getString("title"));
                 notifications.add(n);
             }
         } catch (SQLException e) {
