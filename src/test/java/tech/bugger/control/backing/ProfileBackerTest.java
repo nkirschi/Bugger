@@ -101,7 +101,8 @@ public class ProfileBackerTest {
         profileBacker.init();
         assertAll(
                 () -> assertEquals(user, profileBacker.getUser()),
-                () -> assertEquals(session.getUser(), profileBacker.getUser())
+                () -> assertEquals(session.getUser(), profileBacker.getUser()),
+                () -> assertTrue(profileBacker.isPrivileged())
         );
     }
 
@@ -117,7 +118,8 @@ public class ProfileBackerTest {
         profileBacker.init();
         assertAll(
                 () -> assertEquals(user, profileBacker.getUser()),
-                () -> assertNotEquals(session.getUser(), profileBacker.getUser())
+                () -> assertNotEquals(session.getUser(), profileBacker.getUser()),
+                () -> assertFalse(profileBacker.isPrivileged())
         );
     }
 
@@ -139,12 +141,22 @@ public class ProfileBackerTest {
 
     @Test
     public void testInitUserBioNull() {
+        user.setAdministrator(true);
         when(map.containsKey(PARAMETER)).thenReturn(true);
         when(map.get(PARAMETER)).thenReturn(user.getUsername());
         when(profileService.getUserByUsername(user.getUsername())).thenReturn(user);
         user.setBiography(null);
         profileBacker.init();
         assertNull(profileBacker.getSanitizedBiography());
+    }
+
+    @Test
+    public void testInitUserNull() {
+        when(map.containsKey(PARAMETER)).thenReturn(true);
+        when(map.get(PARAMETER)).thenReturn(user.getUsername());
+        assertThrows(Error404Exception.class,
+                () -> profileBacker.init()
+        );
     }
 
     @Test
