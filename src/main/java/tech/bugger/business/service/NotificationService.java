@@ -1,15 +1,5 @@
 package tech.bugger.business.service;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
@@ -26,8 +16,20 @@ import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Mail;
 import tech.bugger.persistence.util.Mailer;
+import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Service providing methods related to notifications. A {@link Feedback} event is fired, if unexpected circumstances
@@ -42,11 +44,6 @@ public class NotificationService {
     private static final Log log = Log.forClass(NotificationService.class);
 
     /**
-     * The maximum number of tries before sending an e-mail is aborted.
-     */
-    private static final int MAX_EMAIL_TRIES = 3;
-
-    /**
      * Transaction manager used for creating transactions.
      */
     private final TransactionManager transactionManager;
@@ -55,6 +52,11 @@ public class NotificationService {
      * Feedback Event for user feedback.
      */
     private final Event<Feedback> feedbackEvent;
+
+    /**
+     * The properties reader for the application configuration.
+     */
+    private final PropertiesReader configReader;
 
     /**
      * Resource bundle for feedback messages.
@@ -81,19 +83,23 @@ public class NotificationService {
      *
      * @param transactionManager The transaction manager to use for creating transactions.
      * @param feedbackEvent      The feedback event to use for user feedback.
+     * @param configReader       The properties reader for the application configuration.
      * @param messagesBundle     The resource bundle for feedback messages.
      * @param interactionsBundle The resource bundle for interaction messages.
      * @param priorityExecutor   The priority executor to use when sending e-mails.
      * @param mailer             The mailer to use.
      */
     @Inject
-    public NotificationService(final TransactionManager transactionManager, final Event<Feedback> feedbackEvent,
+    public NotificationService(final TransactionManager transactionManager,
+                               final Event<Feedback> feedbackEvent,
+                               @RegistryKey("config") final PropertiesReader configReader,
                                final @RegistryKey("messages") ResourceBundle messagesBundle,
                                @RegistryKey("interactions") final ResourceBundle interactionsBundle,
                                @RegistryKey("mails") final PriorityExecutor priorityExecutor,
                                @RegistryKey("main") final Mailer mailer) {
         this.transactionManager = transactionManager;
         this.feedbackEvent = feedbackEvent;
+        this.configReader = configReader;
         this.messagesBundle = messagesBundle;
         this.interactionsBundle = interactionsBundle;
         this.priorityExecutor = priorityExecutor;
@@ -291,14 +297,15 @@ public class NotificationService {
      * @param priority The priority for this mail.
      */
     public void sendMail(final Mail mail, final PriorityTask.Priority priority) {
+        int maxEmailTries = configReader.getInt("MAX_EMAIL_TRIES");
         priorityExecutor.enqueue(new PriorityTask(priority, () -> {
             int tries = 1;
             log.debug("Sending e-mail " + mail + ".");
-            while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
+            while (!mailer.send(mail) && tries++ <= maxEmailTries) {
                 log.warning("Trying to send e-mail again. Try #" + tries + '.');
             }
-            if (tries > MAX_EMAIL_TRIES) {
-                log.error("Couldn't send e-mail for more than " + MAX_EMAIL_TRIES + " times! Please investigate!");
+            if (tries > maxEmailTries) {
+                log.error("Couldn't send e-mail for more than " + maxEmailTries + " times! Please investigate!");
             }
         }));
     }
