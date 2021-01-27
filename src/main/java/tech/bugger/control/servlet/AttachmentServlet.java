@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.util.Log;
 
@@ -56,8 +57,7 @@ public class AttachmentServlet extends MediaServlet {
     protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response) {
         if (!applicationSettings.getConfiguration().isGuestReading() && session.getUser() == null) {
             log.debug("Refusing to serve attachment to anonymous user.");
-            redirectToNotFoundPage(response);
-            return;
+            throw new Error404Exception("Attachment could not be found.");
         }
 
         // Retrieve the attachment ID from the request.
@@ -66,22 +66,19 @@ public class AttachmentServlet extends MediaServlet {
             attachmentID = Integer.parseInt(request.getParameter("id"));
         } catch (NumberFormatException e) {
             log.debug("Invalid attachment ID given.");
-            redirectToNotFoundPage(response);
-            return;
+            throw new Error404Exception("Attachment could not be found.");
         }
 
         // Fetch the requested attachment.
         Attachment attachment = postService.getAttachmentByID(attachmentID);
         if (attachment == null) {
             log.debug("Attachment with ID " + attachmentID + " not found.");
-            redirectToNotFoundPage(response);
-            return;
+            throw new Error404Exception("Attachment could not be found.");
         }
         byte[] content = postService.getAttachmentContent(attachmentID);
         if (content == null) {
             log.debug("Content of attachment with ID " + attachmentID + " not found.");
-            redirectToNotFoundPage(response);
-            return;
+            throw new Error404Exception("Attachment could not be found.");
         }
 
         // Initialize servlet response.

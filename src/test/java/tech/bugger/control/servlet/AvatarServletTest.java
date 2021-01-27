@@ -16,6 +16,7 @@ import tech.bugger.LogExtension;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.User;
 
@@ -58,16 +59,14 @@ public class AvatarServletTest {
     public void testHandleRequestNoGuestReading() {
         doReturn(false).when(configuration).isGuestReading();
         doReturn(mock(User.class)).when(session).getUser();
-        servlet.handleRequest(request, response);
-        verify(servlet).redirectToNotFoundPage(response);
+        assertThrows(Error404Exception.class, () -> servlet.handleRequest(request, response));
     }
 
     @Test
     public void testHandleRequestNoUser() {
         doReturn(false).when(configuration).isGuestReading();
         doReturn(null).when(session).getUser();
-        servlet.handleRequest(request, response);
-        verify(servlet).redirectToNotFoundPage(response);
+        assertThrows(Error404Exception.class, () -> servlet.handleRequest(request, response));
     }
 
     @Test
@@ -75,8 +74,7 @@ public class AvatarServletTest {
         doReturn(true).when(configuration).isGuestReading();
         doReturn(null).when(request).getParameter("id");
         doReturn(null).when(request).getParameter("u");
-        servlet.handleRequest(request, response);
-        verify(servlet).redirectToNotFoundPage(response);
+        assertThrows(Error404Exception.class, () -> servlet.handleRequest(request, response));
     }
 
     @Test
@@ -96,8 +94,7 @@ public class AvatarServletTest {
         user.setAvatarThumbnail(new byte[0]);
         doReturn(user).when(profileService).getUser(1234);
 
-        assertDoesNotThrow(() -> servlet.handleRequest(request, response));
-        verify(servlet).redirectToNotFoundPage(response);
+        assertThrows(Error404Exception.class, () -> servlet.handleRequest(request, response));
     }
 
     @Test

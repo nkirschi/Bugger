@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ProfileService;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
@@ -66,16 +67,14 @@ public class AvatarServlet extends MediaServlet {
     protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response) {
         if (!applicationSettings.getConfiguration().isGuestReading() && session.getUser() == null) {
             log.debug("Refusing to serve avatar picture to anonymous user.");
-            redirectToNotFoundPage(response);
-            return;
+            throw new Error404Exception("Avatar could not be found.");
         }
 
         // Retrieve user and image type.
         User user = fetchUser(request);
         if (user == null) {
             log.debug("Invalid user ID or username given.");
-            redirectToNotFoundPage(response);
-            return;
+            throw new Error404Exception("Avatar could not be found.");
         }
         boolean serveThumbnail = "thumbnail".equals(request.getParameter("type"));
 
@@ -86,8 +85,7 @@ public class AvatarServlet extends MediaServlet {
         }
         if (image == null) {
             log.debug("Avatar or thumbnail for user with ID " + user.getId() + " not found.");
-            redirectToNotFoundPage(response);
-            return;
+            throw new Error404Exception("Avatar could not be found.");
         }
 
         // Initialize servlet response.

@@ -54,18 +54,6 @@ public class MediaServletTest {
     }
 
     @Test
-    public void testRedirectToNotFoundPage() throws Exception {
-        servlet.redirectToNotFoundPage(response);
-        verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
-    }
-
-    @Test
-    public void testRedirectToNotFoundPageError() throws Exception {
-        doThrow(IOException.class).when(response).sendError(anyInt());
-        assertDoesNotThrow(() -> servlet.redirectToNotFoundPage(response));
-    }
-
-    @Test
     public void testConfigureClientCaching() {
         servlet.configureClientCaching(response);
         verify(response).setDateHeader(eq("Expires"), anyLong());

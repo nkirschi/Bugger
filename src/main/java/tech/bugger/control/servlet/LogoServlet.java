@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import tech.bugger.business.internal.ApplicationSettings;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.util.Log;
 
 /**
@@ -38,8 +39,7 @@ public class LogoServlet extends MediaServlet {
         byte[] logo = applicationSettings.getOrganization().getLogo();
         if (logo == null) {
             log.debug("Organization logo does not exist.");
-            redirectToNotFoundPage(response);
-            return;
+            throw new Error404Exception("Organization logo does not exist.");
         }
 
         // Initialize servlet response.

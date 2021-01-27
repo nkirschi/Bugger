@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.ApplicationSettings;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Organization;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,8 +47,7 @@ public class LogoServletTest {
     @Test
     public void testHandleRequestNoLogo() {
         doReturn(null).when(organization).getLogo();
-        servlet.handleRequest(request, response);
-        verify(servlet).redirectToNotFoundPage(response);
+        assertThrows(Error404Exception.class, () -> servlet.handleRequest(request, response));
     }
 
     @Test
