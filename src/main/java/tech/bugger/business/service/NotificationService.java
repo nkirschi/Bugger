@@ -160,11 +160,20 @@ public class NotificationService {
      * @return The number of notifications as an {@code int}.
      */
     public int countNotifications(final User user) {
+        if (user == null) {
+            log.error("Cannot count notifications for user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot count notifications for user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
         int numberOfNotifications = 0;
         try (Transaction tx = transactionManager.begin()) {
             numberOfNotifications = tx.newNotificationGateway().countNotifications(user);
             tx.commit();
         } catch (TransactionException e) {
+            numberOfNotifications = 0;
             log.error("Error when counting notifications for user " + user + ".", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }

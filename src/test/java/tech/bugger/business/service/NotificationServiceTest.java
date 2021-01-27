@@ -12,6 +12,7 @@ import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
 import tech.bugger.global.transfer.Notification;
+import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.NotificationGateway;
@@ -54,6 +55,8 @@ class NotificationServiceTest {
 
     private Notification notification;
 
+    private User user;
+
     @BeforeEach
     public void setUp() {
         // Instantly run tasks.
@@ -70,6 +73,8 @@ class NotificationServiceTest {
 
         notification = new Notification();
         notification.setId(42);
+        user = new User();
+        user.setId(666);
     }
 
     @Test
@@ -127,5 +132,28 @@ class NotificationServiceTest {
         assertDoesNotThrow(() -> service.markAsRead(notification));
         verify(notificationGateway).update(notification);
         assertTrue(notification.isRead());
+    }
+
+    @Test
+    public void testCountNotificationsWhenUserIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> service.countNotifications(null));
+    }
+
+    @Test
+    public void testCountNotificationsWhenUserIDIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> service.countNotifications(new User()));
+    }
+
+    @Test
+    public void testCountNotificationsWhenDatabaseError() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        doReturn(42).when(notificationGateway).countNotifications(user);
+        assertEquals(0, service.countNotifications(user));
+    }
+
+    @Test
+    public void testCountNotificationsSuccess() {
+        doReturn(42).when(notificationGateway).countNotifications(user);
+        assertEquals(42, service.countNotifications(user));
     }
 }
