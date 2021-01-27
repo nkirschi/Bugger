@@ -7,13 +7,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
-import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.platform.launcher.TestExecutionListener;
+import org.junit.platform.launcher.TestPlan;
 
-public class DBExtension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback {
+public class DBExtension implements TestExecutionListener, BeforeEachCallback, AfterEachCallback {
 
     private static EmbeddedPostgres pg;
     private static String setupSQL;
@@ -21,11 +21,15 @@ public class DBExtension implements BeforeAllCallback, AfterAllCallback, BeforeE
     private static String minimalSQL;
 
     @Override
-    public void beforeAll(ExtensionContext extensionContext) throws Exception {
-        pg = EmbeddedPostgres.builder().start();
-        setupSQL = Files.readString(Paths.get("src/main/webapp/WEB-INF/setup.sql"));
-        eraseSQL = Files.readString(Paths.get("src/main/webapp/WEB-INF/erase.sql"));
-        minimalSQL = Files.readString(Paths.get("testdata/minimal.sql"));
+    public void testPlanExecutionStarted(TestPlan testPlan) {
+        try {
+            pg = EmbeddedPostgres.builder().start();
+            setupSQL = Files.readString(Paths.get("src/main/webapp/WEB-INF/setup.sql"));
+            eraseSQL = Files.readString(Paths.get("src/main/webapp/WEB-INF/erase.sql"));
+            minimalSQL = Files.readString(Paths.get("testdata/minimal.sql"));
+        } catch (Exception e) {
+            throw new InternalError("Couldn't initialize in-memory database.", e);
+        }
     }
 
     @Override
@@ -39,8 +43,12 @@ public class DBExtension implements BeforeAllCallback, AfterAllCallback, BeforeE
     }
 
     @Override
-    public void afterAll(ExtensionContext extensionContext) throws Exception {
-        pg.close();
+    public void testPlanExecutionFinished(TestPlan testPlan) {
+        try {
+            pg.close();
+        } catch (Exception e) {
+            throw new InternalError("Couldn't shut down in-memory database.", e);
+        }
     }
 
     public static Connection getConnection() throws Exception {
@@ -70,4 +78,5 @@ public class DBExtension implements BeforeAllCallback, AfterAllCallback, BeforeE
             throw new InternalError("Applying SQL script failed.", e);
         }
     }
+
 }

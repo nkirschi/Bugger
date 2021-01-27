@@ -18,12 +18,14 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PaginatorTest {
 
     private List<Integer> testData;
+    private List<Integer> emptyData;
     private Paginator<Integer> paginator;
     private Paginator<Integer> paginatorEmpty;
 
     @BeforeEach
     public void init() {
         testData = IntStream.range(1, 50).boxed().collect(Collectors.toList());
+        emptyData = new ArrayList<>();
 
         paginator = new Paginator<>("id", Selection.PageSize.NORMAL) {
             @Override
@@ -46,16 +48,15 @@ public class PaginatorTest {
         };
 
         paginatorEmpty = new Paginator<>("id", Selection.PageSize.NORMAL) {
-            private final List<Integer> EMPTY_LIST = new ArrayList<>();
 
             @Override
             protected Iterable<Integer> fetch() {
-                return EMPTY_LIST;
+                return emptyData;
             }
 
             @Override
             protected int totalSize() {
-                return 0;
+                return emptyData.size();
             }
         };
     }
@@ -160,6 +161,13 @@ public class PaginatorTest {
         paginator.setCurrentPage(2);
         paginator.updateReset();
         assertEquals(1, paginator.iterator().next());
+    }
+
+    @Test
+    public void testUpdateEmptyRaceCondition() {
+        paginatorEmpty.getSelection().setTotalSize(1);
+        paginatorEmpty.update();
+        assertFalse(paginatorEmpty.iterator().hasNext());
     }
 
     @Test

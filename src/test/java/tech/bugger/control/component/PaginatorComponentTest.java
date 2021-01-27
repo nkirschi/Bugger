@@ -30,7 +30,8 @@ public class PaginatorComponentTest {
     public void testGetRefreshBtnID() {
         String id = "cb-refresh";
         doReturn(id).when(refreshBtn).getClientId();
-        assertEquals(id, component.getRefreshBtnID());
+        assertAll(() -> assertEquals(id, component.getRefreshBtnID()),
+                () -> assertEquals(refreshBtn, component.getRefreshBtn()));
     }
 
 }

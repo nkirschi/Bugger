@@ -1,9 +1,11 @@
 package tech.bugger.persistence.util;
 
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.Socket;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -26,8 +28,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(LogExtension.class)
 public class ConnectionPoolTest {
 
+    private static final int PORT = 42424;
     private static final String DVR = "org.postgresql.Driver";
-    private static final String URL = "jdbc:postgresql://localhost:42424/postgres";
+    private static final String URL = "jdbc:postgresql://localhost:" + PORT + "/postgres";
     private static final Properties PROPS = new Properties();
     private static final int MIN_CONNS = 2;
     private static final int MAX_CONNS = 5;
@@ -36,13 +39,22 @@ public class ConnectionPoolTest {
 
     @BeforeAll
     public static void setUp() throws Exception {
-        pg = EmbeddedPostgres.builder().setPort(42424).start();
+        while (isPortBlocked()) ;
+        pg = EmbeddedPostgres.builder().setPort(PORT).start();
         PROPS.load(ClassLoader.getSystemResourceAsStream("jdbc.properties"));
     }
 
     @AfterAll
     public static void tearDown() throws Exception {
         pg.close();
+    }
+
+    private static boolean isPortBlocked() {
+        try (Socket ignored = new Socket("localhost", PORT)) {
+            return true;
+        } catch (IOException ignored) {
+            return false;
+        }
     }
 
     @Nested

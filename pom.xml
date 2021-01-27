@@ -28,6 +28,7 @@
         <postgresql.version>42.2.18</postgresql.version>
         <checkstyle.version>8.37</checkstyle.version>
         <junit.version>5.7.0</junit.version>
+        <junitplatform.version>1.7.0</junitplatform.version>
         <mockito.version>3.6.28</mockito.version>
         <el.version>3.0.0</el.version>
         <dumbster.version>1.7.1</dumbster.version>
@@ -103,6 +104,12 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>${junitplatform.version}</version>
             <scope>test</scope>
         </dependency>
 
