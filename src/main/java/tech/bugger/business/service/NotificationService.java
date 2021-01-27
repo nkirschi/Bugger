@@ -132,6 +132,14 @@ public class NotificationService {
      * @param notification The notification to be marked as read.
      */
     public void markAsRead(final Notification notification) {
+        if (notification == null) {
+            log.error("Cannot mark notification null as read.");
+            throw new IllegalArgumentException("Notification cannot be null.");
+        } else if (notification.getId() == null) {
+            log.error("Cannot mark notification with ID null as read.");
+            throw new IllegalArgumentException("Notification ID cannot be null.");
+        }
+
         notification.setRead(true);
         try (Transaction tx = transactionManager.begin()) {
             tx.newNotificationGateway().update(notification);

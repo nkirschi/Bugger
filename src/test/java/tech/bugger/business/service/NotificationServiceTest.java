@@ -99,4 +99,33 @@ class NotificationServiceTest {
         assertDoesNotThrow(() -> service.deleteNotification(notification));
         verify(notificationGateway).delete(notification);
     }
+
+    @Test
+    public void testMarkAsReadWhenNotificationIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> service.markAsRead(null));
+    }
+
+    @Test
+    public void testMarkAsReadWhenNotificationIDIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> service.markAsRead(new Notification()));
+    }
+
+    @Test
+    public void testMarkAsReadWhenNotFound() throws Exception {
+        doThrow(NotFoundException.class).when(notificationGateway).update(any());
+        assertDoesNotThrow(() -> service.markAsRead(notification));
+    }
+
+    @Test
+    public void testMarkAsReadWhenDatabaseError() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertDoesNotThrow(() -> service.markAsRead(notification));
+    }
+
+    @Test
+    public void testMarkAsReadSuccess() throws Exception {
+        assertDoesNotThrow(() -> service.markAsRead(notification));
+        verify(notificationGateway).update(notification);
+        assertTrue(notification.isRead());
+    }
 }
