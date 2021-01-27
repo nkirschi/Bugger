@@ -16,6 +16,7 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.NotificationGateway;
+import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
@@ -52,10 +53,13 @@ class NotificationServiceTest {
     private PriorityExecutor priorityExecutor;
 
     @Mock
+    private PropertiesReader configReader;
+
+    @Mock
     private NotificationGateway notificationGateway;
 
     @Mock
-    private PropertiesReader configReader;
+    private UserGateway userGateway;
 
     private Notification notification;
 
@@ -76,6 +80,7 @@ class NotificationServiceTest {
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(notificationGateway).when(tx).newNotificationGateway();
+        lenient().doReturn(userGateway).when(tx).newUserGateway();
 
         notification = new Notification();
         notification.setId(42);
@@ -195,4 +200,36 @@ class NotificationServiceTest {
         assertEquals(expected, service.selectNotifications(user, selection));
         verify(notificationGateway).selectNotifications(user, selection);
     }
+
+    @Test
+    public void testCreateNotificationWhenNotificationIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> service.createNotification(null));
+    }
+
+    @Test
+    public void testCreateNotificationWhenReportIDIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> service.createNotification(new Notification()));
+    }
+
+    @Test
+    public void testCreateNotificationWhenTopicIDIsNull() {
+        notification.setReportID(420);
+        assertThrows(IllegalArgumentException.class, () -> service.createNotification(notification));
+    }
+
+    @Test
+    public void testCreateNotificationWhenDatabaseError() throws Exception {
+        notification.setReportID(420);
+        notification.setTopicID(69);
+        doThrow(TransactionException.class).when(tx).commit();
+        assertDoesNotThrow(() -> service.createNotification(notification));
+    }
+
+    @Test
+    public void testCreateNotificationSuccess() {
+        notification.setReportID(420);
+        notification.setTopicID(69);
+        assertDoesNotThrow(() -> service.createNotification(notification));
+    }
+
 }
