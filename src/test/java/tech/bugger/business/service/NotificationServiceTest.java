@@ -4,12 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
+import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.User;
@@ -23,6 +25,7 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.event.Event;
+import javax.faces.context.FacesContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -229,7 +232,16 @@ class NotificationServiceTest {
     public void testCreateNotificationSuccess() {
         notification.setReportID(420);
         notification.setTopicID(69);
-        assertDoesNotThrow(() -> service.createNotification(notification));
+        try (MockedStatic<JFConfig> jfConfigMock = mockStatic(JFConfig.class)) {
+            try (MockedStatic<FacesContext> fctxMock = mockStatic(FacesContext.class)) {
+                jfConfigMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("Hi");
+                FacesContext fctx = mock(FacesContext.class);
+                fctxMock.when(() -> FacesContext.getCurrentInstance()).thenReturn(fctx);
+                assertDoesNotThrow(() -> service.createNotification(notification));
+            }
+        }
+
+
     }
 
 }

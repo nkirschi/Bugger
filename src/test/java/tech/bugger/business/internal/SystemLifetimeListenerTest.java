@@ -22,6 +22,7 @@ import tech.bugger.global.transfer.Metadata;
 import tech.bugger.global.util.Log;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.MetadataGateway;
+import tech.bugger.persistence.gateway.NotificationGateway;
 import tech.bugger.persistence.util.ConnectionPool;
 import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
@@ -54,6 +55,8 @@ public class SystemLifetimeListenerTest {
     private ServletContext sctxMock;
 
     private static EmbeddedPostgres pg;
+
+    private NotificationGateway notificationGatewayMock;
 
     @BeforeAll
     public static void setUpAll() throws Exception {
@@ -113,8 +116,11 @@ public class SystemLifetimeListenerTest {
 
         transactionMock = mock(Transaction.class);
         metadataGatewayMock = mock(MetadataGateway.class);
+        notificationGatewayMock = mock(NotificationGateway.class);
         when(metadataGatewayMock.retrieveMetadata()).thenReturn(null);
         when(transactionMock.newMetadataGateway()).thenReturn(metadataGatewayMock);
+        when(transactionMock.newNotificationGateway()).thenReturn(notificationGatewayMock);
+        // doReturn(notificationGateway).when(transactionMock).newNotificationGateway();
         when(transactionManagerMock.begin()).thenReturn(transactionMock);
 
         runtimeMock = mock(Runtime.class);
