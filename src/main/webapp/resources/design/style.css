@@ -6,6 +6,10 @@ body {
     background: #fafafa;
 }
 
+p {
+    text-align: justify;
+}
+
 #p-header {
     position: fixed;
     height: 80px;
@@ -45,6 +49,12 @@ body {
     transform: translateX(-50%);
     max-width: 400px;
     z-index: 99999;
+}
+
+#p-help {
+    max-height: 80%;
+    overflow-y: auto;
+    max-width: 800px;
 }
 
 #l-logo {

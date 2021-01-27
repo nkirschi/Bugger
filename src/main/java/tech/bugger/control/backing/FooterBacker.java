@@ -1,21 +1,21 @@
 package tech.bugger.control.backing;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Registry;
 import tech.bugger.global.util.Constants;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Locale;
+
 /**
  * Backing Bean for the footer.
  */
-@SessionScoped
+@RequestScoped
 @Named
 public class FooterBacker implements Serializable {
 
@@ -80,9 +80,7 @@ public class FooterBacker implements Serializable {
      * @return The current help key.
      */
     public String getHelp(final String helpKey) {
-        ResourceBundle helpBundle = registry.getBundle("help", session.getLocale());
-        String mainHelp = helpBundle.getString("main");
-        return MarkdownHandler.toHtml(helpBundle.getString(helpKey) + "\n\n" + mainHelp);
+        return MarkdownHandler.toHtml(registry.getBundle("help", session.getLocale()).getString(helpKey));
     }
 
     /**

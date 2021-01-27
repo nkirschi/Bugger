@@ -1,6 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +12,15 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Registry;
 
+import java.util.Locale;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -58,7 +64,7 @@ public class FooterBackerTest {
             String html = "nananananana batman";
             handlerMock.when(() -> MarkdownHandler.toHtml(any())).thenReturn(html);
             assertEquals(html, backer.getHelp("helpKey"));
-            handlerMock.verify(() -> MarkdownHandler.toHtml(eq("help\n\nhelp")));
+            handlerMock.verify(() -> MarkdownHandler.toHtml(eq("help")));
         }
     }
 
