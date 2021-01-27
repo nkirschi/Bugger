@@ -83,6 +83,7 @@ public class NotificationService {
      *
      * @param transactionManager The transaction manager to use for creating transactions.
      * @param feedbackEvent      The feedback event to use for user feedback.
+     * @param configReader       The properties reader for the application configuration.
      * @param messagesBundle     The resource bundle for feedback messages.
      * @param interactionsBundle The resource bundle for interaction messages.
      * @param priorityExecutor   The priority executor to use when sending e-mails.
