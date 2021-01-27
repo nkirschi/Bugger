@@ -16,6 +16,7 @@ import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
 import tech.bugger.business.util.Registry;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.User;
 
 /**
@@ -76,13 +77,11 @@ public class TrespassListener implements PhaseListener {
         // Disallow unknown and error views.
         UIViewRoot viewRoot = fctx.getViewRoot();
         if (viewRoot == null) {
-            redirectToErrorPage(ectx);
-            return;
+            throw new Error404Exception();
         }
         String viewId = viewRoot.getViewId();
         if (viewId == null) {
-            redirectToErrorPage(ectx);
-            return;
+            throw new Error404Exception();
         } else if (viewId.contains("error")) {
             return;
         }
@@ -98,8 +97,7 @@ public class TrespassListener implements PhaseListener {
         Locale locale = session != null ? session.getLocale() : ectx.getRequestLocale();
 
         if (viewId.endsWith("admin.xhtml") && (user == null || !user.isAdministrator())) {
-            redirectToErrorPage(ectx);
-            return;
+            throw new Error404Exception();
         }
 
         boolean guestReading = applicationSettings.getConfiguration().isGuestReading();
@@ -139,19 +137,6 @@ public class TrespassListener implements PhaseListener {
             ectx.redirect(ectx.getRequestContextPath() + "/login?url=" + getRedirectUrl(ectx));
         } catch (IOException e) {
             throw new InternalError("Could not redirect to login page.", e);
-        }
-    }
-
-    /**
-     * Redirects the user to a "not found" page.
-     *
-     * @param ectx The {@link ExternalContext} to use for redirection.
-     */
-    private void redirectToErrorPage(final ExternalContext ectx) {
-        try {
-            ectx.redirect(ectx.getRequestContextPath() + "/error");
-        } catch (IOException e) {
-            throw new InternalError("Could not redirect to error page.", e);
         }
     }
 
