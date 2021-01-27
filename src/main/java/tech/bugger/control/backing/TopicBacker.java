@@ -13,8 +13,8 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
 import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serial;
@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Backing bean for the topic page.
  */
-@RequestScoped
+@ViewScoped
 @Named
 public class TopicBacker implements Serializable {
 
