@@ -155,5 +155,6 @@ class NotificationServiceTest {
     public void testCountNotificationsSuccess() {
         doReturn(42).when(notificationGateway).countNotifications(user);
         assertEquals(42, service.countNotifications(user));
+        verify(notificationGateway).countNotifications(user);
     }
 }
