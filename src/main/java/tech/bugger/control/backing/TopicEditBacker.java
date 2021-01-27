@@ -30,22 +30,22 @@ public class TopicEditBacker implements Serializable {
     private static final Log log = Log.forClass(TopicEditBacker.class);
 
     /**
-     * The ID of the Topic to edit.
+     * The ID of the topic to edit.
      */
     private int topicID;
 
     /**
-     * The Topic to edit.
+     * The topic to edit.
      */
     private Topic topic;
 
     /**
-     * Whether the user is being created by an administrator or not.
+     * Whether to create a new topic or edit an existing one.
      */
     private boolean create;
 
     /**
-     * The Topic Service user to edit topics.
+     * The topic service user to edit topics.
      */
     private final transient TopicService topicService;
 
@@ -88,7 +88,7 @@ public class TopicEditBacker implements Serializable {
             try {
                 topicID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
             } catch (NumberFormatException e) {
-                // Report ID parameter not valid.
+                // Topic ID parameter not valid.
                 throw new Error404Exception();
             }
             topic = topicService.getTopicByID(topicID);
@@ -118,6 +118,23 @@ public class TopicEditBacker implements Serializable {
             throw new Error404Exception();
         }
         return null;
+    }
+
+    /**
+     * Returns whether to create a new topic or edit an existing one.
+     *
+     * @return Whether to create a new topic or edit an existing one.
+     */
+    public boolean isCreate() {
+        return create;
+    }
+
+    /**
+     * Sets whether to create a new topic or edit an existing one.
+     * @param create Whether to create a new topic or edit an existing one.
+     */
+    public void setCreate(final boolean create) {
+        this.create = create;
     }
 
     /**

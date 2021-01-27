@@ -202,6 +202,9 @@ public class TopicBackerTest {
         Field moderators = topicBacker.getClass().getDeclaredField("moderators");
         moderators.setAccessible(true);
         moderators.set(topicBacker, mock(Paginator.class));
+        Field bannedUsers = topicBacker.getClass().getDeclaredField("bannedUsers");
+        bannedUsers.setAccessible(true);
+        bannedUsers.set(topicBacker, mock(Paginator.class));
         assertAll(
                 () -> assertEquals("", topicBacker.makeModerator()),
                 () -> assertNull(topicBacker.getTopicDialog())
