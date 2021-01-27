@@ -289,15 +289,15 @@ public class SystemLifetimeListener implements ServletContextListener {
                             .format(new String[]{n.getReportTitle(), link}))
                     .envelop();
             Mailer mailer = registry.getMailer("main");
-            int MAX_EMAIL_TRIES = 3;
+            int maxEmailTries = configReader.getInt("MAX_EMAIL_TRIES");
             mailPriorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.LOW, () -> {
                 int tries = 1;
                 log.debug("Sending e-mail " + mail + ".");
-                while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
+                while (!mailer.send(mail) && tries++ <= maxEmailTries) {
                     log.warning("Trying to send e-mail again. Try #" + tries + '.');
                 }
-                if (tries > MAX_EMAIL_TRIES) {
-                    log.error("Couldn't send e-mail for more than " + MAX_EMAIL_TRIES + " times! Please investigate!");
+                if (tries > maxEmailTries) {
+                    log.error("Couldn't send e-mail for more than " + maxEmailTries + " times! Please investigate!");
                 } else {
                     try (Transaction tx = transactionManager.begin()) {
                         n.setSent(true);
