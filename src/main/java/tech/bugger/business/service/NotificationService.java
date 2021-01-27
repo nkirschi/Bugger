@@ -223,21 +223,6 @@ public class NotificationService {
         sendMails(notifications);
     }
 
-    /**
-     * Queues sending of e-mails for notifications which have not yet been sent.
-     */
-    public void processUnsentNotifications() {
-        // TODO Ben: Call this method somewhere? Or is this not needed anymore?
-        List<Notification> unsentNotifications;
-        try (Transaction tx = transactionManager.begin()) {
-            unsentNotifications = tx.newNotificationGateway().getUnsentNotifications();
-            tx.commit();
-        } catch (TransactionException e) {
-            return;
-        }
-        sendMails(unsentNotifications);
-    }
-
     private void sendMails(final List<Notification> notifications) {
         String domain = JFConfig.getApplicationPath(FacesContext.getCurrentInstance().getExternalContext());
         for (Notification n : notifications) {
@@ -259,7 +244,7 @@ public class NotificationService {
                             + n.getType()))
                             .format(new String[]{n.getReportTitle(), link}))
                     .envelop();
-            sendMail(mail, PriorityTask.Priority.LOW);
+            sendNotification(mail, n);
         }
     }
 
@@ -278,6 +263,29 @@ public class NotificationService {
             }
             if (tries > MAX_EMAIL_TRIES) {
                 log.error("Couldn't send e-mail for more than " + MAX_EMAIL_TRIES + " times! Please investigate!");
+            }
+        }));
+    }
+
+    private void sendNotification(final Mail mail, final Notification notification) {
+        priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.LOW, () -> {
+            int tries = 1;
+            log.debug("Sending e-mail " + mail + ".");
+            while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
+                log.warning("Trying to send e-mail again. Try #" + tries + '.');
+            }
+            if (tries > MAX_EMAIL_TRIES) {
+                log.error("Couldn't send e-mail for more than " + MAX_EMAIL_TRIES + " times! Please investigate!");
+            } else {
+                notification.setSent(true);
+                try (Transaction tx = transactionManager.begin()) {
+                    tx.newNotificationGateway().update(notification);
+                    tx.commit();
+                } catch (NotFoundException e) {
+                    log.error("Could not find notification " + notification + " when trying to mark it as sent.", e);
+                } catch (TransactionException e) {
+                    log.error("Error when marking notification " + notification + " as sent.", e);
+                }
             }
         }));
     }
