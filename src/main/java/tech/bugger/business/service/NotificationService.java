@@ -168,7 +168,7 @@ public class NotificationService {
             throw new IllegalArgumentException("User ID cannot be null.");
         }
 
-        int numberOfNotifications = 0;
+        int numberOfNotifications;
         try (Transaction tx = transactionManager.begin()) {
             numberOfNotifications = tx.newNotificationGateway().countNotifications(user);
             tx.commit();
@@ -188,6 +188,17 @@ public class NotificationService {
      * @return A list containing the requested notifications.
      */
     public List<Notification> selectNotifications(final User user, final Selection selection) {
+        if (user == null) {
+            log.error("Cannot select notifications for user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot select notifications for user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (selection == null) {
+            log.error("Cannot select notifications for user " + user + " when selection is null.");
+            throw new IllegalArgumentException("Selection cannot be null.");
+        }
+
         List<Notification> selectedNotifications;
         try (Transaction tx = transactionManager.begin()) {
             selectedNotifications = tx.newNotificationGateway().selectNotifications(user, selection);
