@@ -485,6 +485,7 @@ public class TopicBacker implements Serializable {
         if (topicService.makeModerator(userMod, topic)) {
             displayDialog = null;
             moderators.update();
+            bannedUsers.update();
             return "";
         }
 
