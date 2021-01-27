@@ -311,14 +311,15 @@ public class NotificationService {
     }
 
     private void sendNotification(final Mail mail, final Notification notification) {
+        int maxEmailTries = configReader.getInt("MAX_EMAIL_TRIES");
         priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.LOW, () -> {
             int tries = 1;
             log.debug("Sending e-mail " + mail + ".");
-            while (!mailer.send(mail) && tries++ <= MAX_EMAIL_TRIES) {
+            while (!mailer.send(mail) && tries++ <= maxEmailTries) {
                 log.warning("Trying to send e-mail again. Try #" + tries + '.');
             }
-            if (tries > MAX_EMAIL_TRIES) {
-                log.error("Couldn't send e-mail for more than " + MAX_EMAIL_TRIES + " times! Please investigate!");
+            if (tries > maxEmailTries) {
+                log.error("Couldn't send e-mail for more than " + maxEmailTries + " times! Please investigate!");
             } else {
                 notification.setSent(true);
                 try (Transaction tx = transactionManager.begin()) {

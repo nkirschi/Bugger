@@ -1,6 +1,5 @@
 package tech.bugger.business.service;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,15 +16,12 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.NotificationGateway;
-import tech.bugger.persistence.gateway.TokenDBGateway;
-import tech.bugger.persistence.gateway.UserDBGateway;
 import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.event.Event;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -58,6 +54,9 @@ class NotificationServiceTest {
     @Mock
     private NotificationGateway notificationGateway;
 
+    @Mock
+    private PropertiesReader configReader;
+
     private Notification notification;
 
     private User user;
@@ -72,8 +71,8 @@ class NotificationServiceTest {
             return null;
         }).when(priorityExecutor).enqueue(any());
 
-        service = new NotificationService(transactionManager, feedbackEvent, ResourceBundleMocker.mock(""),
-                ResourceBundleMocker.mock(""), priorityExecutor, mailer);
+        service = new NotificationService(transactionManager, feedbackEvent, configReader,
+                ResourceBundleMocker.mock(""), ResourceBundleMocker.mock(""), priorityExecutor, mailer);
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(notificationGateway).when(tx).newNotificationGateway();
