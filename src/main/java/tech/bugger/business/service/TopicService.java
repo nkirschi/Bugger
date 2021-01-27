@@ -529,10 +529,10 @@ public class TopicService {
      * @return The number of reports.
      */
     public int getNumberOfReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
-        int numberOfTopics = 0;
+        int numberOfReports = 0;
 
         try (Transaction tx = transactionManager.begin()) {
-            numberOfTopics = tx.newTopicGateway().countReports(topic, showOpenReports, showClosedReports);
+            numberOfReports = tx.newTopicGateway().countReports(topic, showOpenReports, showClosedReports);
             tx.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The topic could not be found.", e);
@@ -542,7 +542,7 @@ public class TopicService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
 
-        return numberOfTopics;
+        return numberOfReports;
     }
 
     /**
