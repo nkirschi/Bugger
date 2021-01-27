@@ -106,6 +106,14 @@ public class NotificationService {
      * @param notification The notification to be deleted.
      */
     public void deleteNotification(final Notification notification) {
+        if (notification == null) {
+            log.error("Cannot delete notification null.");
+            throw new IllegalArgumentException("Notification cannot be null.");
+        } else if (notification.getId() == null) {
+            log.error("Cannot delete notification with ID null.");
+            throw new IllegalArgumentException("Notification ID cannot be null.");
+        }
+
         try (Transaction tx = transactionManager.begin()) {
             tx.newNotificationGateway().delete(notification);
             tx.commit();
