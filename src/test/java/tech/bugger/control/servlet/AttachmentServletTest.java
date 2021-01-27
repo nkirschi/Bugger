@@ -14,7 +14,6 @@ import tech.bugger.LogExtension;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
-import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.User;
@@ -58,21 +57,24 @@ public class AttachmentServletTest {
     public void testHandleRequestNoGuestReading() {
         doReturn(false).when(configuration).isGuestReading();
         doReturn(mock(User.class)).when(session).getUser();
-        assertThrows(Error404Exception.class, () -> servlet.handleRequest(request, response));
+        servlet.handleRequest(request, response);
+        verify(servlet).redirectToNotFoundPage(response);
     }
 
     @Test
     public void testHandleRequestNoUser() {
         doReturn(false).when(configuration).isGuestReading();
         doReturn(null).when(session).getUser();
-        assertThrows(Error404Exception.class, () -> servlet.handleRequest(request, response));
+        servlet.handleRequest(request, response);
+        verify(servlet).redirectToNotFoundPage(response);
     }
 
     @Test
     public void testHandleRequestInvalidParam() {
         doReturn(true).when(configuration).isGuestReading();
         doReturn("weißwurscht").when(request).getParameter("id");
-        assertThrows(Error404Exception.class, () -> servlet.handleRequest(request, response));
+        servlet.handleRequest(request, response);
+        verify(servlet).redirectToNotFoundPage(response);
     }
 
     @Test
@@ -80,7 +82,8 @@ public class AttachmentServletTest {
         doReturn(true).when(configuration).isGuestReading();
         doReturn("1234").when(request).getParameter("id");
         doReturn(null).when(postService).getAttachmentByID(1234);
-        assertThrows(Error404Exception.class, () -> servlet.handleRequest(request, response));
+        servlet.handleRequest(request, response);
+        verify(servlet).redirectToNotFoundPage(response);
     }
 
     @Test
@@ -89,7 +92,8 @@ public class AttachmentServletTest {
         doReturn("1234").when(request).getParameter("id");
         doReturn(mock(Attachment.class)).when(postService).getAttachmentByID(1234);
         doReturn(null).when(postService).getAttachmentContent(1234);
-        assertThrows(Error404Exception.class, () -> servlet.handleRequest(request, response));
+        servlet.handleRequest(request, response);
+        verify(servlet).redirectToNotFoundPage(response);
     }
 
     @Test

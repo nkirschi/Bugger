@@ -1,10 +1,12 @@
 package tech.bugger.control.servlet;
 
+import java.io.IOException;
+import java.io.Serial;
+import java.util.Date;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.Serial;
-import java.util.Date;
+import tech.bugger.global.util.Log;
 
 /**
  * Custom servlet that serves avatars and avatar thumbnails.
@@ -13,6 +15,11 @@ public abstract class MediaServlet extends HttpServlet {
 
     @Serial
     private static final long serialVersionUID = -4981163493957399645L;
+
+    /**
+     * The {@link Log} instance associated with this class for logging purposes.
+     */
+    private static final Log log = Log.forClass(AvatarServlet.class);
 
     /**
      * The time in milliseconds clients should cache content.
@@ -47,6 +54,19 @@ public abstract class MediaServlet extends HttpServlet {
     @Override
     protected void doPost(final HttpServletRequest request, final HttpServletResponse response) {
         handleRequest(request, response);
+    }
+
+    /**
+     * Redirects the user to a page that indicates the requested content could not be found.
+     *
+     * @param response The response to perform the redirect.
+     */
+    protected void redirectToNotFoundPage(final HttpServletResponse response) {
+        try {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND); // 404.
+        } catch (IOException e) {
+            log.warning("Could not redirect to 404 page.");
+        }
     }
 
     /**
