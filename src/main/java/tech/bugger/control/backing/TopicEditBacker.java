@@ -133,7 +133,7 @@ public class TopicEditBacker implements Serializable {
      * Sets whether to create a new topic or edit an existing one.
      * @param create Whether to create a new topic or edit an existing one.
      */
-    public void setCreate(boolean create) {
+    public void setCreate(final boolean create) {
         this.create = create;
     }
 
