@@ -145,4 +145,29 @@ public class AvatarServletTest {
         assertDoesNotThrow(() -> servlet.handleRequest(request, response));
     }
 
+    @Test
+    public void testHandleRequestWriteUnsuccessfulReturnsNull() throws Exception {
+        doReturn(true).when(configuration).isGuestReading();
+        lenient().doReturn("admin").when(request).getParameter("u");
+        lenient().doReturn(null).when(request).getParameter("type");
+
+        User user = new User();
+        user.setId(1234);
+        lenient().doReturn(user).when(profileService).getUserByUsername("admin");
+
+        ServletContext sctx = mock(ServletContext.class);
+        doReturn(sctx).when(servlet).getServletContext();
+        InputStream is = mock(InputStream.class);
+        doReturn(is).when(sctx).getResourceAsStream(any());
+        byte[] defaultAvatar = new byte[]{1, 2, 3, 4};
+        doReturn(defaultAvatar).when(is).readAllBytes();
+
+        doReturn(null).when(profileService).getAvatarForUser(1234);
+        ServletOutputStream os = mock(ServletOutputStream.class);
+        doReturn(os).when(response).getOutputStream();
+        doThrow(IOException.class).when(os).write(defaultAvatar);
+
+        assertDoesNotThrow(() -> servlet.handleRequest(request, response));
+    }
+
 }
