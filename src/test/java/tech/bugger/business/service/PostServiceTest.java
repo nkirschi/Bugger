@@ -362,6 +362,11 @@ public class PostServiceTest {
     }
 
     @Test
+    public void testIsPrivilegedReportNull() {
+        assertFalse(service.isPrivileged(testUser, testPost, null));
+    }
+
+    @Test
     public void testIsPrivilegedWhenUserIsAdmin() {
         testUser.setAdministrator(true);
         assertTrue(service.isPrivileged(testUser, testPost, testReport));
