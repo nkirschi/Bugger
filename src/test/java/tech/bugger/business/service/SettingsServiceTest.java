@@ -1,16 +1,11 @@
 package tech.bugger.business.service;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import javax.enterprise.event.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
-import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Organization;
@@ -20,9 +15,17 @@ import tech.bugger.persistence.gateway.SettingsGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.event.Event;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -48,7 +51,7 @@ public class SettingsServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new SettingsService(transactionManager, feedbackEvent, ResourceBundleMocker.mock(""));
+        service = new SettingsService(transactionManager);
         testConfiguration = new Configuration(true, false, "abc", ".x,.y,.z", 42, "0,1,2");
         testOrganization = new Organization("orga", new byte[0], "???", "jura", "gaudi", "supp");
         lenient().doReturn(tx).when(transactionManager).begin();
@@ -64,15 +67,13 @@ public class SettingsServiceTest {
     @Test
     public void testLoadConfigurationWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(settingsGateway).getConfiguration();
-        assertNull(service.loadConfiguration());
-        verify(feedbackEvent).fire(any());
+        assertThrows(InternalError.class, () -> service.loadConfiguration());
     }
 
     @Test
     public void testLoadConfigurationWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertNull(service.loadConfiguration());
-        verify(feedbackEvent).fire(any());
+        assertThrows(InternalError.class, () -> service.loadConfiguration());
     }
 
 
@@ -85,15 +86,13 @@ public class SettingsServiceTest {
     @Test
     public void testLoadOrganizationWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(settingsGateway).getOrganization();
-        assertNull(service.loadOrganization());
-        verify(feedbackEvent).fire(any());
+        assertThrows(InternalError.class, () -> service.loadOrganization());
     }
 
     @Test
     public void testLoadOrganizationWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertNull(service.loadOrganization());
-        verify(feedbackEvent).fire(any());
+        assertThrows(InternalError.class, () -> service.loadOrganization());
     }
 
     @Test
@@ -106,7 +105,6 @@ public class SettingsServiceTest {
     public void testUpdateConfigurationWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
         assertFalse(service.updateConfiguration(testConfiguration));
-        verify(feedbackEvent).fire(any());
     }
 
     @Test
@@ -119,7 +117,6 @@ public class SettingsServiceTest {
     public void testUpdateOrganizationWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
         assertFalse(service.updateOrganization(testOrganization));
-        verify(feedbackEvent).fire(any());
     }
 
     @Test
@@ -131,8 +128,7 @@ public class SettingsServiceTest {
     public void testReadFileOnInvalidInputStream() throws Exception {
         InputStream is = new BufferedInputStream(new ByteArrayInputStream(new byte[0]));
         is.close();
-        service.readFile(is);
-        verify(feedbackEvent).fire(any());
+        assertNull(service.readFile(is));
     }
 
     @Test
@@ -142,7 +138,6 @@ public class SettingsServiceTest {
 
     @Test
     public void testDiscoverFilesOnNonexistingDirectory() {
-        assertTrue(service.discoverFiles("src/test/resources/nodir").isEmpty());
-        verify(feedbackEvent).fire(any());
+        assertNull(service.discoverFiles("src/test/resources/nodir"));
     }
 }
