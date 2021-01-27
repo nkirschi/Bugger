@@ -185,9 +185,8 @@ public abstract class Paginator<T> extends IterableDataModel<T> {
      */
     public void update() {
         int size = totalSize();
-        selection.setTotalSize(size);
-
         if (size != 0 || !isEmpty()) {
+            selection.setTotalSize(size);
             setWrappedData(fetch());
         }
     }

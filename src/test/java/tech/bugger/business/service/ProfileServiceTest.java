@@ -946,4 +946,24 @@ public class ProfileServiceTest {
         verify(feedbackEvent).fire(any());
     }
 
+    @Test
+    public void testGetAvatarForUser() throws NotFoundException {
+        byte[] avatar = new byte[]{1, 2, 3};
+        doReturn(avatar).when(userGateway).getAvatarForUser(testUser.getId());
+        assertEquals(avatar, service.getAvatarForUser(testUser.getId()));
+    }
+
+    @Test
+    public void testGetAvatarForUserNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(userGateway).getAvatarForUser(testUser.getId());
+        assertNull(service.getAvatarForUser(testUser.getId()));
+    }
+
+    @Test
+    public void testGetAvatarForUserTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertNull(service.getAvatarForUser(testUser.getId()));
+        verify(feedbackEvent).fire(any());
+    }
+
 }
