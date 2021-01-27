@@ -53,12 +53,12 @@ body {
 }
 
 .btn-primary {
-  background-color: #e0fde0;
-  color: black !important;
-}
-.btn-primary:hover {
   background-color: #004600;
   color: white !important;
+}
+.btn-primary:hover {
+  background-color: #e0fde0;
+  color: #228b22 !important;
   border-color: #228b22;
 }
 

@@ -42,18 +42,25 @@ body {
 }
 
 /* Bootstrap buttons */
-.btn {
-  background-color: #f4f1e8;
-  color: #00008b;
+.btn-outline-primary {
+  border-color: white;
+  color: white;
 }
 
-.btn-primary:hover {
+.btn-primary {
   background-color: #00008b;
+  border-color: #00008b;
   color: white !important;
 }
 
-.btn-secondary:hover {
+.btn-primary:hover {
+  background-color: #f4f1e8;
+  color: #00008b !important;
+}
+
+.btn-secondary {
   background-color: #0aa3cf;
+  border-color: #0aa3cf;
   color: white !important;
 }
 
