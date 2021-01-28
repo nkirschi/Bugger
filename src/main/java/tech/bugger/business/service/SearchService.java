@@ -387,7 +387,6 @@ public class SearchService {
                                            final boolean showClosedReports, final boolean showDuplicates,
                                            final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
                                            final Map<Report.Severity, Boolean> severityFilter) {
-        // TODO Markus: Unused, remove or use?
         List<Report> reports = new ArrayList<>();
         String searchInput = query.trim().toLowerCase();
         try (Transaction tx = transactionManager.begin()) {
@@ -508,7 +507,6 @@ public class SearchService {
                                           final boolean showClosedReports, final boolean showDuplicates,
                                           final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
                                           final Map<Report.Severity, Boolean> severityFilter) {
-        // TODO Markus: Unused, remove or use?
         int results = 0;
         try (Transaction tx = transactionManager.begin()) {
             results = tx.newSearchGateway().getNumberOfFulltextResults(query, latestCreationDateTime,
