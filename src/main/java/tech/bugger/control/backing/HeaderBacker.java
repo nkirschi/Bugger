@@ -161,7 +161,11 @@ public class HeaderBacker implements Serializable {
      * @return The location to redirect to.
      */
     public String executeSearch() throws IOException {
-        ectx.redirect(ectx.getRequestContextPath() + "/search?q=" + search);
+        if (search == null) {
+            search = "";
+        }
+        String converted = URLEncoder.encode(search, StandardCharsets.UTF_8);
+        ectx.redirect(ectx.getRequestContextPath() + "/search?q=" + converted);
         return null;
     }
 

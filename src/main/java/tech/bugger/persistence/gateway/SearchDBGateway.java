@@ -75,12 +75,12 @@ public class SearchDBGateway implements SearchGateway {
             }
         }
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" as u JOIN user_num_posts as p "
-                + "on u.id = p.author WHERE TRIM(LOWER(username)) LIKE ? "
+                + "on u.id = p.author WHERE TRIM(LOWER(username)) LIKE CONCAT('%',?,'%') "
                 + adminFilter
                 + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + query + "%")
+                    .string(query)
                     .integer(Pagitable.getItemLimit(selection))
                     .integer(Pagitable.getItemOffset(selection))
                     .toStatement().executeQuery();
@@ -239,16 +239,10 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getUserSuggestions(final String query, final int limit) {
         validateSuggestionParams(query, limit);
         List<String> userResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
-
         try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct u.username FROM \"user\" AS u "
-                + "WHERE TRIM(LOWER(u.username)) LIKE ? LIMIT ?;")) {
+                + "WHERE TRIM(LOWER(u.username)) LIKE CONCAT('%',?,'%') LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + newQuery + "%")
+                    .string(query)
                     .integer(limit)
                     .toStatement().executeQuery();
 
@@ -270,16 +264,10 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getTopicSuggestions(final String query, final int limit) {
         validateSuggestionParams(query, limit);
         List<String> topicResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
-
         try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct t.title FROM \"topic\" AS t "
-                + "WHERE TRIM(LOWER(t.title)) LIKE ? LIMIT ?;")) {
+                + "WHERE TRIM(LOWER(t.title)) LIKE CONCAT('%',?,'%') LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + newQuery + "%")
+                    .string(query)
                     .integer(limit)
                     .toStatement().executeQuery();
 
@@ -301,16 +289,10 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getReportSuggestions(final String query, final int limit) {
         validateSuggestionParams(query, limit);
         List<String> reportResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
-
         try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct t.title FROM \"report\" AS t "
-                + "WHERE TRIM(LOWER(t.title)) LIKE ? LIMIT ?;")) {
+                + "WHERE TRIM(LOWER(t.title)) LIKE CONCAT('%',?,'%') LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + newQuery + "%")
+                    .string(query)
                     .integer(limit)
                     .toStatement().executeQuery();
 
@@ -411,11 +393,11 @@ public class SearchDBGateway implements SearchGateway {
         try (PreparedStatement stmt = conn.prepareStatement("Select * FROM \"topic\" as t JOIN topic_num_subscribers "
                 + "as s "
                 + "on s.topic = t.id JOIN topic_last_activity as a on t.id = a.topic join topic_num_posts as p "
-                + "on t.id = p.topic WHERE TRIM(LOWER(title)) LIKE ? "
+                + "on t.id = p.topic WHERE TRIM(LOWER(title)) LIKE CONCAT('%',?,'%') "
                 + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + query + "%")
+                    .string(query)
                     .integer(Pagitable.getItemLimit(selection))
                     .integer(Pagitable.getItemOffset(selection))
                     .toStatement().executeQuery();
@@ -470,14 +452,15 @@ public class SearchDBGateway implements SearchGateway {
         }
         try (PreparedStatement stmt = conn.prepareStatement("SELECT r.*, t.title as t_title , a.last_activity, "
                 + "v.relevance FROM report AS r JOIN topic AS t ON r.topic = t.id JOIN report_last_activity AS a "
-                + "ON a.report = r.id JOIN report_relevance AS v ON r.id = v.report WHERE TRIM(LOWER(r.title)) LIKE ? "
+                + "ON a.report = r.id JOIN report_relevance AS v ON r.id = v.report WHERE TRIM(LOWER(r.title)) LIKE "
+                + "CONCAT('%',?,'%') "
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) " + filter
                 + "AND t.title = COALESCE(?, t.title) "
                 + "ORDER BY " + orderBy + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + query + "%")
+                    .string(query)
                     .object(latestOpeningDateTime)
                     .object(earliestClosingDateTime)
                     .string(topic)
@@ -568,7 +551,6 @@ public class SearchDBGateway implements SearchGateway {
                                            final boolean showClosedReports, final boolean showDuplicates,
                                            final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
                                            final Map<Report.Severity, Boolean> severityFilter) {
-        // TODO Markus: For now, I removed this duplicated code :)
         return getReportResults(query, selection, latestOpeningDateTime, earliestClosingDateTime, showOpenReports,
                 showClosedReports, showDuplicates, topic, reportTypeFilter, severityFilter);
     }
@@ -600,9 +582,9 @@ public class SearchDBGateway implements SearchGateway {
             }
         }
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) AS num_users FROM \"user\" "
-                + "WHERE TRIM(LOWER(username)) LIKE ? " + adminFilter)) {
+                + "WHERE TRIM(LOWER(username)) LIKE CONCAT('%',?,'%') " + adminFilter)) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + query + "%")
+                    .string(query)
                     .toStatement().executeQuery();
 
             while (rs.next()) {
@@ -629,9 +611,9 @@ public class SearchDBGateway implements SearchGateway {
         int topics = 0;
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) AS num_topics FROM topic "
-                + "WHERE TRIM(LOWER(title)) LIKE ?;")) {
+                + "WHERE TRIM(LOWER(title)) LIKE CONCAT('%',?,'%');")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + query + "%")
+                    .string(query)
                     .toStatement().executeQuery();
             while (rs.next()) {
                 topics = rs.getInt("num_topics");
@@ -676,12 +658,12 @@ public class SearchDBGateway implements SearchGateway {
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT Count(*) AS num_reports FROM \"report\" AS r "
                 + "JOIN topic AS t "
-                + "ON r.topic = t.id WHERE TRIM(LOWER(r.title)) LIKE ? "
+                + "ON r.topic = t.id WHERE TRIM(LOWER(r.title)) LIKE CONCAT('%',?,'%') "
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL)" + filter
                 + "AND t.title = COALESCE(?, t.title);")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string("%" + query + "%")
+                    .string(query)
                     .object(latestOpeningDateTime)
                     .object(earliestClosingDateTime)
                     .string(topic)
@@ -706,7 +688,6 @@ public class SearchDBGateway implements SearchGateway {
                                           final boolean showClosedReports, final boolean showDuplicates,
                                           final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
                                           final Map<Report.Severity, Boolean> severityFilter) {
-        // TODO Markus: is that still needed? It's being used somewhere at least...
         return 0;
     }
 
