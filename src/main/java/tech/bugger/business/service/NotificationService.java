@@ -253,6 +253,7 @@ public class NotificationService {
                 Notification n = new Notification(notification);
                 n.setRecipientID(user.getId());
                 n.setRecipientMail(user.getEmailAddress());
+                n.setEmailLanguage(user.getPreferredLanguage().getLanguage());
                 notifications.add(n);
             }
             tx.newNotificationGateway().createNotificationBulk(notifications);
