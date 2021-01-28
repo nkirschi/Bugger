@@ -1,8 +1,5 @@
 package tech.bugger.business.service;
 
-import java.lang.reflect.Field;
-import java.util.Locale;
-import javax.enterprise.event.Event;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,9 +24,25 @@ import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.event.Event;
+import java.lang.reflect.Field;
+import java.util.Locale;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -81,8 +94,7 @@ public class AuthenticationServiceTest {
         }).when(priorityExecutor).enqueue(any());
 
         NotificationService notificationService = new NotificationService(transactionManager, feedbackEvent,
-                ResourceBundleMocker.mock(""), ResourceBundleMocker.mock(""),
-                priorityExecutor, mailer);
+                   configReader, ResourceBundleMocker.mock(""), ResourceBundleMocker.mock(""),priorityExecutor, mailer);
 
         service = new AuthenticationService(transactionManager, feedbackEvent, notificationService,
                 ResourceBundleMocker.mock(""), ResourceBundleMocker.mock(""), configReader);
@@ -91,6 +103,7 @@ public class AuthenticationServiceTest {
         lenient().doReturn(tokenGateway).when(tx).newTokenGateway();
         lenient().doReturn(userGateway).when(tx).newUserGateway();
         lenient().doReturn("SHA3-512").when(configReader).getString("HASH_ALGO");
+        lenient().doReturn(3).when(configReader).getInt("MAX_EMAIL_TRIES");
         lenient().doReturn(16).when(configReader).getInt("SALT_LENGTH");
 
         String passwordHash = Hasher.hash(password, salt, hashingAlgo);
