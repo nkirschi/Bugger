@@ -98,7 +98,7 @@ public class ProfileServiceTest {
                 Locale.ENGLISH, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, true);
         testTopic = new Topic(1, "title", "description");
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
-                mock(Authorship.class), mock(OffsetDateTime.class), null, null, false, 0);
+                mock(Authorship.class), mock(OffsetDateTime.class), null, null, false, 0, null);
         selection = new Selection(1, 0, Selection.PageSize.SMALL, "id", true);
     }
 
@@ -943,6 +943,26 @@ public class ProfileServiceTest {
     public void testCountSubscribedReportsTransaction() throws TransactionException {
         doThrow(TransactionException.class).when(tx).commit();
         assertEquals(ZERO, service.countSubscribedReports(testUser));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetAvatarForUser() throws NotFoundException {
+        byte[] avatar = new byte[]{1, 2, 3};
+        doReturn(avatar).when(userGateway).getAvatarForUser(testUser.getId());
+        assertEquals(avatar, service.getAvatarForUser(testUser.getId()));
+    }
+
+    @Test
+    public void testGetAvatarForUserNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(userGateway).getAvatarForUser(testUser.getId());
+        assertNull(service.getAvatarForUser(testUser.getId()));
+    }
+
+    @Test
+    public void testGetAvatarForUserTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertNull(service.getAvatarForUser(testUser.getId()));
         verify(feedbackEvent).fire(any());
     }
 

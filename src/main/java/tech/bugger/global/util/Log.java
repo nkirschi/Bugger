@@ -157,7 +157,7 @@ public final class Log {
     private void log(final Level level, final String msg, final Throwable cause) {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         if (stackTrace.length > CALL_DEPTH) {
-            StackTraceElement e = Thread.currentThread().getStackTrace()[CALL_DEPTH]; // caller
+            StackTraceElement e = stackTrace[CALL_DEPTH]; // caller
             logger.logp(level, e.getClassName(), e.getMethodName(), msg, cause);
         } else { // should never happen
             logger.log(level, msg, cause);

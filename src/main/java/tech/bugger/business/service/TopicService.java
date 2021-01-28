@@ -529,10 +529,10 @@ public class TopicService {
      * @return The number of reports.
      */
     public int getNumberOfReports(final Topic topic, final boolean showOpenReports, final boolean showClosedReports) {
-        int numberOfTopics = 0;
+        int numberOfReports = 0;
 
         try (Transaction tx = transactionManager.begin()) {
-            numberOfTopics = tx.newTopicGateway().countReports(topic, showOpenReports, showClosedReports);
+            numberOfReports = tx.newTopicGateway().countReports(topic, showOpenReports, showClosedReports);
             tx.commit();
         } catch (tech.bugger.persistence.exception.NotFoundException e) {
             log.error("The topic could not be found.", e);
@@ -542,7 +542,7 @@ public class TopicService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
 
-        return numberOfTopics;
+        return numberOfReports;
     }
 
     /**
@@ -756,18 +756,18 @@ public class TopicService {
     /**
      * Discover all topics in the system.
      *
-     * @return A list of all topic titles.
+     * @return A list of all topics.
      */
-    public List<String> discoverTopics() {
-        List<String> topicTitles = Collections.emptyList();
+    public List<Topic> discoverTopics() {
+        List<Topic> topics = Collections.emptyList();
         try (Transaction tx = transactionManager.begin()) {
-            topicTitles = tx.newTopicGateway().discoverTopics();
+            topics = tx.newTopicGateway().discoverTopics();
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error when discovering all topics.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
-        return topicTitles;
+        return topics;
     }
 
     /**

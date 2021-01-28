@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 import javax.enterprise.event.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,11 +14,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.util.Feedback;
+import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
+import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
+import tech.bugger.persistence.gateway.ReportGateway;
 import tech.bugger.persistence.gateway.SubscriptionGateway;
 import tech.bugger.persistence.gateway.TopicGateway;
 import tech.bugger.persistence.gateway.UserGateway;
@@ -47,6 +51,9 @@ class TopicServiceTest {
     private UserGateway userGateway;
 
     @Mock
+    private ReportGateway reportGateway;
+
+    @Mock
     private SubscriptionGateway subscriptionGateway;
 
     @Mock
@@ -61,6 +68,10 @@ class TopicServiceTest {
     private final Topic testTopic1 = new Topic(1, "Hi", "senberg");
     private final Topic testTopic2 = new Topic(2, "Hi", "performance");
     private final Topic testTopic3 = new Topic(3, "Hi", "de and seek");
+    private final Report testReport1 = new Report(200, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", null,
+            mock(OffsetDateTime.class), null, null, false, 1, null);
+    private final Report testReport2 = new Report(201, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", null,
+            mock(OffsetDateTime.class), null, null, false, 1, null);
 
     private User user;
 
@@ -79,6 +90,7 @@ class TopicServiceTest {
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(topicGateway).when(tx).newTopicGateway();
         lenient().doReturn(userGateway).when(tx).newUserGateway();
+        lenient().doReturn(reportGateway).when(tx).newReportGateway();
         lenient().doReturn(subscriptionGateway).when(tx).newSubscriptionGateway();
     }
 
@@ -151,7 +163,16 @@ class TopicServiceTest {
     }
 
     @Test
-    public void testMakeModerator() throws NotFoundException {
+    public void testMakeModerator() throws NotFoundException, DuplicateException {
+        when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
+        topicService.makeModerator(user.getUsername(), testTopic1);
+        verify(topicGateway).promoteModerator(testTopic1, user);
+        verify(subscriptionGateway).subscribe(testTopic1, user);
+    }
+
+    @Test
+    public void testMakeModeratorAlreadySubscribed() throws NotFoundException {
+        doReturn(true).when(subscriptionGateway).isSubscribed(user, testTopic1);
         when(userGateway.getUserByUsername(user.getUsername())).thenReturn(user);
         topicService.makeModerator(user.getUsername(), testTopic1);
         verify(topicGateway).promoteModerator(testTopic1, user);
@@ -308,6 +329,11 @@ class TopicServiceTest {
     }
 
     @Test
+    public void testIsModeratorUserNull() {
+        assertFalse(topicService.isModerator(null, testTopic1));
+    }
+
+    @Test
     public void testIsModeratorTransactionException() throws TransactionException {
         doThrow(TransactionException.class).when(tx).commit();
         assertFalse(topicService.isModerator(user, testTopic1));
@@ -424,6 +450,13 @@ class TopicServiceTest {
     }
 
     @Test
+    public void testUnbanUserUserNullTransactionException() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertFalse(topicService.unban(user.getUsername(), testTopic1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
     public void testGetSelectedBannedUsers() throws NotFoundException {
         List<User> users = new ArrayList<>();
         users.add(user);
@@ -477,6 +510,404 @@ class TopicServiceTest {
         doThrow(TransactionException.class).when(tx).commit();
         assertFalse(topicService.isBanned(user, testTopic1));
         verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testIsBannedUserNull() {
+        assertFalse(topicService.isBanned(null, testTopic1));
+    }
+
+    @Test
+    public void testSubscribeToTopic() throws NotFoundException, DuplicateException {
+        topicService.subscribeToTopic(user, testTopic1);
+        verify(subscriptionGateway).subscribe(testTopic1, user);
+    }
+
+    @Test
+    public void testSubscribeToTopicDuplicate() throws NotFoundException, DuplicateException {
+        doThrow(DuplicateException.class).when(subscriptionGateway).subscribe(testTopic1, user);
+        topicService.subscribeToTopic(user, testTopic1);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSubscribeToTopicNotFound() throws NotFoundException, DuplicateException {
+        doThrow(NotFoundException.class).when(subscriptionGateway).subscribe(testTopic1, user);
+        topicService.subscribeToTopic(user, testTopic1);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSubscribeToTopicTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        topicService.subscribeToTopic(user, testTopic1);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSubscribeToTopicUserNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.subscribeToTopic(null, testTopic1)
+        );
+    }
+
+    @Test
+    public void testSubscribeToTopicUserIdNull() {
+        user.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.subscribeToTopic(user, testTopic1)
+        );
+    }
+
+    @Test
+    public void testSubscribeToTopicTopicNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.subscribeToTopic(user, null)
+        );
+    }
+
+    @Test
+    public void testSubscribeToTopicTopicIdNull() {
+        testTopic1.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.subscribeToTopic(user, testTopic1)
+        );
+    }
+
+    @Test
+    public void testUnsubscribeFromTopic() throws NotFoundException {
+        topicService.unsubscribeFromTopic(user, testTopic1);
+        verify(subscriptionGateway).unsubscribe(testTopic1, user);
+    }
+
+    @Test
+    public void testUnsubscribeFromTopicNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(subscriptionGateway).unsubscribe(testTopic1, user);
+        topicService.unsubscribeFromTopic(user, testTopic1);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testUnsubscribeFromTopicTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        topicService.unsubscribeFromTopic(user, testTopic1);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testUnsubscribeFromTopicUserNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.unsubscribeFromTopic(null, testTopic1)
+        );
+    }
+
+    @Test
+    public void testUnsubscribeFromTopicUserIdNull() {
+        user.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.unsubscribeFromTopic(user, testTopic1)
+        );
+    }
+
+    @Test
+    public void testUnsubscribeFromTopicTopicNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.unsubscribeFromTopic(user, null)
+        );
+    }
+
+    @Test
+    public void testUnsubscribeFromTopicTopicIdNull() {
+        testTopic1.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.unsubscribeFromTopic(user, testTopic1)
+        );
+    }
+
+    @Test
+    public void testGetTopicByID() throws NotFoundException {
+        doReturn(testTopic1).when(topicGateway).findTopic(testTopic1.getId());
+        assertEquals(testTopic1, topicService.getTopicByID(testTopic1.getId()));
+    }
+
+    @Test
+    public void testGetTopicByIDNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(topicGateway).findTopic(testTopic1.getId());
+        assertNull(topicService.getTopicByID(testTopic1.getId()));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetTopicByIDTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertNull(topicService.getTopicByID(testTopic1.getId()));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testCreateTopic() {
+        assertTrue(topicService.createTopic(testTopic1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testCreateTopicNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(topicGateway).createTopic(testTopic1);
+        assertFalse(topicService.createTopic(testTopic1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testCreateTopicTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertFalse(topicService.createTopic(testTopic1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testUpdateTopic() throws NotFoundException {
+        assertTrue(topicService.updateTopic(testTopic1));
+        verify(topicGateway).updateTopic(testTopic1);
+    }
+
+    @Test
+    public void testUpdateTopicNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(topicGateway).updateTopic(testTopic1);
+        assertTrue(topicService.updateTopic(testTopic1));
+        verify(topicGateway).createTopic(testTopic1);
+    }
+
+    @Test
+    public void testUpdateTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertFalse(topicService.updateTopic(testTopic1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testDeleteTopic() throws NotFoundException {
+        topicService.deleteTopic(testTopic1);
+        verify(topicGateway).deleteTopic(testTopic1);
+        verify(feedbackEvent, never()).fire(any());
+    }
+
+    @Test
+    public void testDeleteTopicNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(topicGateway).deleteTopic(testTopic1);
+        topicService.deleteTopic(testTopic1);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testDeleteTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        topicService.deleteTopic(testTopic1);
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetSelectedReports() throws NotFoundException {
+        List<Report> reports = new ArrayList<>();
+        reports.add(testReport1);
+        reports.add(testReport2);
+        doReturn(reports).when(reportGateway).getSelectedReports(testTopic1, testSelection, true, true);
+        List<Report> findReports = topicService.getSelectedReports(testTopic1, testSelection, true, true);
+        assertAll(
+                () -> assertEquals(2, reports.size()),
+                () -> assertTrue(findReports.contains(testReport1)),
+                () -> assertTrue(findReports.contains(testReport2))
+        );
+    }
+
+    @Test
+    public void testGetSelectedReportsNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(reportGateway).getSelectedReports(testTopic1, testSelection, true, true);
+        assertNull(topicService.getSelectedReports(testTopic1, testSelection, true, true));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetSelectedReportsTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertTrue(topicService.getSelectedReports(testTopic1, testSelection, true, true).isEmpty());
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testCanCreateReportIn() {
+        assertTrue(topicService.canCreateReportIn(user, testTopic1));
+    }
+
+    @Test
+    public void testCanCreateReportInAdmin() {
+        user.setAdministrator(true);
+        assertTrue(topicService.canCreateReportIn(user, testTopic1));
+    }
+
+    @Test
+    public void testCanCreateReportInBanned() {
+        doReturn(true).when(userGateway).isBanned(user, testTopic1);
+        assertFalse(topicService.canCreateReportIn(user, testTopic1));
+    }
+
+    @Test
+    public void testCanCreateReportInTopicNull() {
+        assertFalse(topicService.canCreateReportIn(user, null));
+    }
+
+    @Test
+    public void testCanCreateReportInUserNull() {
+        assertFalse(topicService.canCreateReportIn(null, testTopic1));
+    }
+
+    @Test
+    public void testGetNumberOfReports() throws NotFoundException {
+        doReturn(2).when(topicGateway).countReports(testTopic1, true, true);
+        assertEquals(2, topicService.getNumberOfReports(testTopic1, true, true));
+        verify(topicGateway).countReports(testTopic1, true, true);
+    }
+
+    @Test
+    public void testGetNumberOfReportsNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(topicGateway).countReports(testTopic1, true, true);
+        assertEquals(0, topicService.getNumberOfReports(testTopic1, true, true));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetNumberOfReportsTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertEquals(0, topicService.getNumberOfReports(testTopic1, true, true));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testIsSubscribed() throws NotFoundException {
+        doReturn(true).when(subscriptionGateway).isSubscribed(user, testTopic1);
+        assertTrue(topicService.isSubscribed(user, testTopic1));
+    }
+
+    @Test
+    public void testIsSubscribedFalse() {
+        assertFalse(topicService.isSubscribed(user, testTopic1));
+    }
+
+    @Test
+    public void testIsSubscribedNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(subscriptionGateway).isSubscribed(user, testTopic1);
+        assertFalse(topicService.isSubscribed(user, testTopic1));
+    }
+
+    @Test
+    public void testIsSubscribedTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertFalse(topicService.isSubscribed(user, testTopic1));
+    }
+
+    @Test
+    public void testIsSubscribedUserNull() {
+        assertFalse(topicService.isSubscribed(null, testTopic1));
+    }
+
+    @Test
+    public void testIsSubscribedUserIdNull() {
+        user.setId(null);
+        assertThrows(IllegalArgumentException.class, () -> topicService.isSubscribed(user, testTopic1));
+    }
+
+    @Test
+    public void testIsSubscribedTopicNull() {
+        assertThrows(IllegalArgumentException.class, () -> topicService.isSubscribed(user, null));
+    }
+
+    @Test
+    public void testIsSubscribedTopicIdNull() {
+        testTopic1.setId(null);
+        assertThrows(IllegalArgumentException.class, () -> topicService.isSubscribed(user, testTopic1));
+    }
+
+    @Test
+    public void testDiscoverTopics() {
+        doReturn(List.of(testTopic1, testTopic2)).when(topicGateway).discoverTopics();
+        List<String> titles = topicService.discoverTopics().stream().map(Topic::getTitle).collect(Collectors.toList());
+        assertAll(
+                () -> assertEquals(2, titles.size()),
+                () -> assertTrue(titles.contains(testTopic1.getTitle())),
+                () -> assertTrue(titles.contains(testTopic2.getTitle()))
+        );
+    }
+
+    @Test
+    public void testDiscoverTopicsTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertTrue(topicService.discoverTopics().isEmpty());
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSelectSubscribedTopics() {
+        doReturn(List.of(testTopic1, testTopic2)).when(topicGateway).selectSubscribedTopics(user, testSelection);
+        List<Topic> selectedTopics = topicService.selectSubscribedTopics(user, testSelection);
+        assertAll(
+                () -> assertEquals(2, selectedTopics.size()),
+                () -> assertTrue(selectedTopics.contains(testTopic1)),
+                () -> assertTrue(selectedTopics.contains(testTopic2))
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedTopicsTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertNull(topicService.selectSubscribedTopics(user, testSelection));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testSelectSubscribedTopicsSelectionNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.selectSubscribedTopics(user, null)
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedTopicsUserNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.selectSubscribedTopics(null, testSelection)
+        );
+    }
+
+    @Test
+    public void testSelectSubscribedTopicsUserIdNull() {
+        user.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.selectSubscribedTopics(user, testSelection)
+        );
+    }
+
+    @Test
+    public void testCountSubscribedTopics() {
+        doReturn(5).when(topicGateway).countSubscribedTopics(user);
+        assertEquals(5, topicService.countSubscribedTopics(user));
+    }
+
+    @Test
+    public void testCountSubscribedTopicsTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertEquals(0, topicService.countSubscribedTopics(user));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testCountSubscribedTopicsUserNull() {
+        assertEquals(0, topicService.countSubscribedTopics(null));
+    }
+
+    @Test
+    public void testCountSubscribedTopicsUserIdNull() {
+        user.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.countSubscribedTopics(user)
+        );
     }
 
 }

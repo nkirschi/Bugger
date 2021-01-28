@@ -59,7 +59,7 @@
             </b:column>
             <b:column title="#{labels.last_activity}" paginator="#{homeBacker.topics}" key="last_activity">
                 <h:outputText value="#{var.lastActivity}" styleClass="text-nowrap">
-                    <f:convertDateTime type="offsetDateTime" pattern="#{labels.date_time_pattern}"/>
+                    <f:converter converterId="offsetDateTimeConverter" />
                 </h:outputText>
             </b:column>
         </b:pagitable>

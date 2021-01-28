@@ -5,6 +5,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Socket;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import org.junit.jupiter.api.AfterAll;
@@ -34,6 +35,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 public class SystemLifetimeListenerTest {
+
+    private static final int PORT = 42424;
+
     private SystemLifetimeListener systemLifetimeListenerMock;
 
     private MockedStatic<Log> logStaticMock;
@@ -53,12 +57,21 @@ public class SystemLifetimeListenerTest {
 
     @BeforeAll
     public static void setUpAll() throws Exception {
-        pg = EmbeddedPostgres.builder().setPort(42424).start();
+        while (isPortBlocked()) ;
+        pg = EmbeddedPostgres.builder().setPort(PORT).start();
     }
 
     @AfterAll
     public static void tearDownAll() throws Exception {
         pg.close();
+    }
+
+    private static boolean isPortBlocked() {
+        try (Socket ignored = new Socket("localhost", PORT)) {
+            return true;
+        } catch (IOException ignored) {
+            return false;
+        }
     }
 
     @BeforeEach
@@ -85,7 +98,7 @@ public class SystemLifetimeListenerTest {
         PropertiesReader propertiesReader = mock(PropertiesReader.class);
         when(propertiesReader.getString(any())).thenReturn("");
         when(propertiesReader.getString("DB_DRIVER")).thenReturn("org.postgresql.Driver");
-        when(propertiesReader.getString("DB_URL")).thenReturn("jdbc:postgresql://localhost:42424/postgres");
+        when(propertiesReader.getString("DB_URL")).thenReturn("jdbc:postgresql://localhost:" + PORT + "/postgres");
         when(propertiesReader.getInt(any())).thenReturn(1);
         when(propertiesReader.getBoolean(any())).thenReturn(false);
         when(registry.getPropertiesReader(anyString())).thenReturn(propertiesReader);
@@ -234,4 +247,5 @@ public class SystemLifetimeListenerTest {
         systemLifetimeListenerMock.contextDestroyed(sceMock);
         verify(runtimeMock, times(3)).removeShutdownHook(any());
     }
+
 }

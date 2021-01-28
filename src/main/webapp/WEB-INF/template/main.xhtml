@@ -17,6 +17,13 @@
         <h:outputStylesheet library="design" name="bootstrap.min.css"/>
         <h:outputStylesheet library="design" name="style.css"/>
         <h:outputStylesheet library="design" name="themes/#{applicationSettings.organization.theme}"/>
+
+        <ui:fragment rendered="#{applicationSettings.organization.existsLogo}">
+            <link rel="icon" href="#{request.contextPath}/logo"/>
+        </ui:fragment>
+        <ui:fragment rendered="#{not applicationSettings.organization.existsLogo}">
+            <link rel="icon" href="#{resource['images/thumbnail.jpg']}"/>
+        </ui:fragment>
     </h:head>
 
     <h:body>
@@ -40,8 +47,10 @@
             <h:panelGroup layout="block" id="p-help" styleClass="dialog" rendered="#{footerBacker.helpDisplayed}">
                 <h:outputText id="ot-help" value="#{footerBacker.getHelp(helpKey)}" escape="false"/>
                 <h:form id="f-toggle-help" styleClass="mb-3">
-                    <h:commandButton id="cb-toggle-help" styleClass="btn btn-primary form-control"
-                                     value="#{labels.close_help}" action="#{footerBacker.toggleHelp}"/>
+                    <h:commandButton id="cb-toggle-help"
+                                     styleClass="btn btn-lg btn-close form-control position-absolute top-0 end-0
+                                     bg-danger mt-2 me-2"
+                                     action="#{footerBacker.toggleHelp}"/>
                 </h:form>
             </h:panelGroup>
             <h:panelGroup layout="block" id="p-content">

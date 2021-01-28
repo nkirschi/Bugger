@@ -26,7 +26,7 @@
                             <h:commandButton id="cb-subscribe" action="#{topicBacker.toggleTopicSubscription}"
                                              styleClass="button btn btn-primary" value="#{topicBacker.subscribed
                                              ? labels.unsubscribe : labels.subscribe}"
-                                             rendered="#{userSession != null}"/>
+                                             rendered="#{userSession.user != null}"/>
                             <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}"
                                              styleClass="button btn btn-primary"
                                              value="#{labels.delete_topic}"
@@ -185,14 +185,18 @@
                         <h:outputText value="#{var.version}"/>
                     </b:column>
                     <b:column title="#{labels.col_duplicate}" paginator="#{topicBacker.reports}" key="duplicate_of">
-                        <h:outputText value="#{var.duplicateOf}"/>
+                        <h:link outcome="pretty:report"
+                                value="##{var.duplicateOf}"
+                                rendered="#{not empty var.duplicateOf}">
+                            <f:param name="id" value="#{var.duplicateOf}"/>
+                        </h:link>
                     </b:column>
                     <b:column title="#{labels.col_relevance}" paginator="#{topicBacker.reports}" key="relevance">
                         <h:outputText value="#{var.relevance}"/>
                     </b:column>
                     <b:column title="#{labels.last_activity}" paginator="#{topicBacker.reports}" key="last_activity">
                         <h:outputText value="#{var.lastActivity}" styleClass="text-nowrap">
-                            <f:convertDateTime type="offsetDateTime" pattern="#{labels.date_time_pattern}"/>
+                            <f:converter converterId="offsetDateTimeConverter" />
                         </h:outputText>
                     </b:column>
                 </b:pagitable>

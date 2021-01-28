@@ -6,6 +6,7 @@ import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
 import javax.faces.view.ViewScoped;
@@ -280,7 +281,7 @@ public class SearchBacker implements Serializable {
                     return searchService.getNumberOfTopicResults(query);
                 }
             };
-            topicTitles = topicService.discoverTopics();
+            topicTitles = topicService.discoverTopics().stream().map(Topic::getTitle).collect(Collectors.toList());
         }
     }
 
@@ -327,7 +328,7 @@ public class SearchBacker implements Serializable {
     public void setTab(final Tab tab) {
         this.tab = tab;
         if (tab == Tab.REPORT) {
-            topicTitles = topicService.discoverTopics();
+            topicTitles = topicService.discoverTopics().stream().map(Topic::getTitle).collect(Collectors.toList());
         }
     }
 

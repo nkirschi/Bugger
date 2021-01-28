@@ -1,14 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
@@ -20,6 +11,16 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Backing bean for the topic page.
@@ -215,8 +216,11 @@ public class TopicBacker implements Serializable {
 
         User user = session.getUser();
         topic = topicService.getTopicByID(topicID);
+        if (topic == null) {
+            throw new Error404Exception();
+        }
         banned = topicService.isBanned(user, topic);
-        if (topic == null || banned) {
+        if (banned) {
             throw new Error404Exception();
         }
 
@@ -485,6 +489,7 @@ public class TopicBacker implements Serializable {
         if (topicService.makeModerator(userMod, topic)) {
             displayDialog = null;
             moderators.update();
+            bannedUsers.update();
             return "";
         }
 

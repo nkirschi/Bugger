@@ -1,25 +1,32 @@
 package tech.bugger.control.backing;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.faces.context.ExternalContext;
-import javax.faces.event.ValueChangeEvent;
-import javax.servlet.http.Part;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
+import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.service.SettingsService;
+import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Organization;
 
+import javax.enterprise.event.Event;
+import javax.faces.context.ExternalContext;
+import javax.faces.event.ValueChangeEvent;
+import javax.servlet.http.Part;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -42,9 +49,13 @@ public class AdminBackerTest {
     @Mock
     private Part part;
 
+    @Mock
+    private Event<Feedback> feedbackEvent;
+
     @BeforeEach
     public void setUp() {
-        this.adminBacker = new AdminBacker(applicationSettings, settingsService, ectx);
+        this.adminBacker = new AdminBacker(applicationSettings, settingsService, ectx, feedbackEvent,
+                                           ResourceBundleMocker.mock(""));
         adminBacker.setOrganization(new Organization("", new byte[1], "theme.css", "", "", ""));
         adminBacker.setConfiguration(new Configuration(true, false, "abc", ".x,.y,.z", 42, "0,1,2"));
     }
@@ -79,6 +90,7 @@ public class AdminBackerTest {
         doReturn(part).when(vce).getNewValue();
         doReturn(null).when(settingsService).readFile(any());
         adminBacker.uploadLogo(vce);
+        verify(feedbackEvent).fire(new Feedback(any(), Feedback.Type.ERROR));
         assertEquals(oldLogo, adminBacker.getOrganization().getLogo());
     }
 
@@ -88,6 +100,7 @@ public class AdminBackerTest {
         doThrow(IOException.class).when(part).getInputStream();
         doReturn(part).when(vce).getNewValue();
         adminBacker.uploadLogo(vce);
+        verify(feedbackEvent).fire(new Feedback(any(), Feedback.Type.ERROR));
         assertEquals(oldLogo, adminBacker.getOrganization().getLogo());
     }
 
@@ -115,8 +128,15 @@ public class AdminBackerTest {
 
     @Test
     public void testGetAvailableThemesWhenThereAreNone() {
-        doReturn(new ArrayList<>()).when(settingsService).discoverFiles(any());
+        doReturn(Collections.emptyList()).when(settingsService).discoverFiles(any());
         assertEquals(List.of(adminBacker.getOrganization().getTheme()), adminBacker.getAvailableThemes());
+    }
+
+    @Test
+    public void testGetAvailableThemesWhenError() {
+        doReturn(null).when(settingsService).discoverFiles(any());
+        assertEquals(List.of(adminBacker.getOrganization().getTheme()), adminBacker.getAvailableThemes());
+        verify(feedbackEvent).fire(new Feedback(any(), Feedback.Type.ERROR));
     }
 
     @Test
@@ -124,6 +144,7 @@ public class AdminBackerTest {
         doReturn(true).when(settingsService).updateOrganization(any());
         adminBacker.saveOrganization();
         verify(applicationSettings).setOrganization(adminBacker.getOrganization());
+        verify(feedbackEvent).fire(new Feedback(any(), Feedback.Type.INFO));
     }
 
     @Test
@@ -131,14 +152,15 @@ public class AdminBackerTest {
         doReturn(false).when(settingsService).updateOrganization(any());
         adminBacker.saveOrganization();
         verify(applicationSettings, never()).setOrganization(any());
+        verify(feedbackEvent).fire(new Feedback(any(), Feedback.Type.ERROR));
     }
 
     @Test
     public void testUpdateConfigurationWhenSuccess() {
         doReturn(true).when(settingsService).updateConfiguration(any());
-
         adminBacker.saveConfiguration();
         verify(applicationSettings).setConfiguration(adminBacker.getConfiguration());
+        verify(feedbackEvent).fire(new Feedback(any(), Feedback.Type.INFO));
     }
 
     @Test
@@ -146,5 +168,6 @@ public class AdminBackerTest {
         doReturn(false).when(settingsService).updateConfiguration(any());
         adminBacker.saveConfiguration();
         verify(applicationSettings, never()).setConfiguration(any());
+        verify(feedbackEvent).fire(new Feedback(any(), Feedback.Type.ERROR));
     }
 }

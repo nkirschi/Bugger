@@ -1,8 +1,9 @@
 package tech.bugger.control.conversion;
 
-import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,8 +22,13 @@ public class DurationConverterTest {
     }
 
     @Test
-    public void testGetAsString() {
+    public void testGetAsStringWhenLessThanADay() {
         assertEquals("1h:42m", durationConverter.getAsString(null, null, Duration.ofMinutes(102)));
+    }
+
+    @Test
+    public void testGetAsStringWhenMoreThanADay() {
+        assertEquals("4d:02h", durationConverter.getAsString(null, null, Duration.ofHours(98)));
     }
 
 }

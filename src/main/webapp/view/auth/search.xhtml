@@ -7,6 +7,7 @@
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
+    <ui:param name="helpKey" value="search"/>
     <ui:param name="title" value="#{labels.search}"/>
     <ui:define name="content">
         <h:panelGroup class="row" layout="block">
@@ -221,7 +222,7 @@
                             <b:column title="#{labels.last_activity}" paginator="#{searchBacker.reportResults}"
                                       key="last_activity">
                                 <h:outputText value="#{var.lastActivity}">
-                                    <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                                    <f:converter converterId="offsetDateTimeConverter" />
                                 </h:outputText>
                             </b:column>
                         </b:pagitable>
@@ -245,7 +246,7 @@
                             <b:column title="#{labels.last_activity}" paginator="#{searchBacker.topicResults}"
                                       key="last_activity">
                                 <h:outputLabel value="#{var.lastActivity}">
-                                    <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                                    <f:converter converterId="offsetDateTimeConverter" />
                                 </h:outputLabel>
                             </b:column>
                             <b:column title="#{labels.num_sub}" paginator="#{searchBacker.topicResults}" key="numSub">
