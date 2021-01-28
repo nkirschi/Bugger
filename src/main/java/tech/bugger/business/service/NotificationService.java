@@ -243,7 +243,6 @@ public class NotificationService {
         } catch (TransactionException e) {
             log.error("Error when creating notification " + notification + ".", e);
             return;
-            // feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         sendMails(notifications);
     }
