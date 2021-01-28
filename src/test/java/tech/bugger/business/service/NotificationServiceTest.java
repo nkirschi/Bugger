@@ -170,7 +170,7 @@ class NotificationServiceTest {
     }
 
     @Test
-    public void testCountNotificationsSuccess() {
+    public void testCountNotificationsSuccess() throws Exception {
         doReturn(42).when(notificationGateway).countNotifications(user);
         assertEquals(42, service.countNotifications(user));
         verify(notificationGateway).countNotifications(user);

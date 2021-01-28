@@ -147,7 +147,7 @@ public class NotificationService {
      * @param user The user in question.
      * @return The number of notifications as an {@code int}.
      */
-    public int countNotifications(final User user) {
+    public int countNotifications(final User user) throws DataAccessException {
         if (user == null) {
             log.error("Cannot count notifications for user null.");
             throw new IllegalArgumentException("User cannot be null.");
@@ -161,9 +161,8 @@ public class NotificationService {
             numberOfNotifications = tx.newNotificationGateway().countNotifications(user);
             tx.commit();
         } catch (TransactionException e) {
-            numberOfNotifications = 0;
             log.error("Error when counting notifications for user " + user + ".", e);
-            // feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            throw new DataAccessException("Error when counting notifications for user " + user + ".", e);
         }
         return numberOfNotifications;
     }

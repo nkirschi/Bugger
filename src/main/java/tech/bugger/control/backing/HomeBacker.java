@@ -120,7 +120,16 @@ public class HomeBacker implements Serializable {
 
                 @Override
                 protected int totalSize() {
-                    return notificationService.countNotifications(session.getUser());
+                    int size;
+                    try {
+                        size = notificationService.countNotifications(session.getUser());
+                    } catch (DataAccessException e) {
+                        size = 0;
+                        changeMessageBundle();
+                        feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"),
+                                Feedback.Type.ERROR));
+                    }
+                    return size;
                 }
             };
         }
