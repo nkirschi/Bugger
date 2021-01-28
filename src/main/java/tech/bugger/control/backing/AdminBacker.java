@@ -1,20 +1,26 @@
 package tech.bugger.control.backing;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
+import tech.bugger.business.internal.ApplicationSettings;
+import tech.bugger.business.service.SettingsService;
+import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.RegistryKey;
+import tech.bugger.global.transfer.Configuration;
+import tech.bugger.global.transfer.Organization;
+import tech.bugger.global.util.Log;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.faces.event.ValueChangeEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
-import tech.bugger.business.internal.ApplicationSettings;
-import tech.bugger.business.service.SettingsService;
-import tech.bugger.global.transfer.Configuration;
-import tech.bugger.global.transfer.Organization;
-import tech.bugger.global.util.Log;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 /**
  * Backing Bean for the admin page.
@@ -54,19 +60,33 @@ public class AdminBacker {
     private final ExternalContext ectx;
 
     /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Resource bundle for feedback messages.
+     */
+    private final ResourceBundle messagesBundle;
+
+    /**
      * Constructs a new admin page backing bean with the necessary dependencies.
-     *
      * @param applicationSettings The application settings cache.
      * @param settingsService     The settings service to use.
      * @param ectx                The current {@link ExternalContext} of the application.
+     * @param feedbackEvent      The feedback event to use for user feedback.
+     * @param messagesBundle     The resource bundle for feedback messages.
      */
     @Inject
     public AdminBacker(final ApplicationSettings applicationSettings,
                        final SettingsService settingsService,
-                       final ExternalContext ectx) {
+                       final ExternalContext ectx, final Event<Feedback> feedbackEvent,
+                       @RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.applicationSettings = applicationSettings;
         this.settingsService = settingsService;
         this.ectx = ectx;
+        this.feedbackEvent = feedbackEvent;
+        this.messagesBundle = messagesBundle;
     }
 
     /**
@@ -91,9 +111,12 @@ public class AdminBacker {
             byte[] logo = settingsService.readFile(upload.getInputStream());
             if (logo != null) {
                 organization.setLogo(logo);
+            } else {
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("logo_upload_error"), Feedback.Type.ERROR));
             }
         } catch (IOException e) {
             log.error("Could not fetch input stream from uploaded logo.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("logo_upload_error"), Feedback.Type.ERROR));
         }
     }
 
@@ -114,12 +137,17 @@ public class AdminBacker {
      * @return The filenames of the available themes.
      */
     public List<String> getAvailableThemes() {
-        List<String> themes = settingsService.discoverFiles(ectx.getRealPath("/resources/design/themes"))
-                .stream().filter(f -> f.endsWith("css")).collect(Collectors.toList());
-        if (themes.isEmpty()) {
-            themes.add(organization.getTheme()); // at least current theme for displaying
+        List<String> files = settingsService.discoverFiles(ectx.getRealPath("/resources/design/themes"));
+        if (files != null) {
+            List<String> themes = files.stream().filter(f -> f.endsWith(".css")).collect(Collectors.toList());
+            if (themes.isEmpty()) {
+                themes.add(organization.getTheme()); // defensive: at least current theme for displaying
+            }
+            return themes;
+        } else {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("themes_discovery_error"), Feedback.Type.WARNING));
+            return Collections.singletonList(organization.getTheme());
         }
-        return themes;
     }
 
     /**
@@ -128,6 +156,10 @@ public class AdminBacker {
     public void saveConfiguration() {
         if (settingsService.updateConfiguration(configuration)) {
             applicationSettings.setConfiguration(configuration);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("changes_successfully_saved"),
+                                            Feedback.Type.INFO));
+        } else {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
         }
     }
 
@@ -137,6 +169,10 @@ public class AdminBacker {
     public void saveOrganization() {
         if (settingsService.updateOrganization(organization)) {
             applicationSettings.setOrganization(organization);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("changes_successfully_saved"),
+                                            Feedback.Type.INFO));
+        } else {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
         }
     }
 

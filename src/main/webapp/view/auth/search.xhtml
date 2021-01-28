@@ -217,7 +217,7 @@
                             <b:column title="#{labels.last_activity}" paginator="#{searchBacker.reportResults}"
                                       key="last_activity">
                                 <h:outputText value="#{var.lastActivity}">
-                                    <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                                    <f:converter converterId="offsetDateTimeConverter" />
                                 </h:outputText>
                             </b:column>
                         </b:pagitable>
@@ -241,7 +241,7 @@
                             <b:column title="#{labels.last_activity}" paginator="#{searchBacker.topicResults}"
                                       key="last_activity">
                                 <h:outputLabel value="#{var.lastActivity}">
-                                    <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                                    <f:converter converterId="offsetDateTimeConverter" />
                                 </h:outputLabel>
                             </b:column>
                             <b:column title="#{labels.num_sub}" paginator="#{searchBacker.topicResults}" key="numSub">
