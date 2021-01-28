@@ -115,7 +115,14 @@ public class HomeBacker implements Serializable {
             inbox = new Paginator<>("created_at", Selection.PageSize.SMALL, false) {
                 @Override
                 protected Iterable<Notification> fetch() {
-                    return notificationService.selectNotifications(session.getUser(), getSelection());
+                    try {
+                        return notificationService.selectNotifications(session.getUser(), getSelection());
+                    } catch (DataAccessException e) {
+                        changeMessageBundle();
+                        feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"),
+                                Feedback.Type.ERROR));
+                    }
+                    return null;
                 }
 
                 @Override

@@ -8,6 +8,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.ResourceBundleMocker;
+import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
@@ -114,7 +115,7 @@ class NotificationServiceTest {
     @Test
     public void testDeleteNotificationWhenDatabaseError() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertDoesNotThrow(() -> service.deleteNotification(notification));
+        assertThrows(DataAccessException.class, () -> service.deleteNotification(notification));
     }
 
     @Test
@@ -142,7 +143,7 @@ class NotificationServiceTest {
     @Test
     public void testMarkAsReadWhenDatabaseError() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertDoesNotThrow(() -> service.markAsRead(notification));
+        assertThrows(DataAccessException.class, () -> service.markAsRead(notification));
     }
 
     @Test
@@ -166,7 +167,7 @@ class NotificationServiceTest {
     public void testCountNotificationsWhenDatabaseError() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
         doReturn(42).when(notificationGateway).countNotifications(user);
-        assertEquals(0, service.countNotifications(user));
+        assertThrows(DataAccessException.class, () -> service.countNotifications(user));
     }
 
     @Test
@@ -195,11 +196,11 @@ class NotificationServiceTest {
     public void testSelectNotificationsWhenDatabaseError() throws Exception {
         doReturn(Collections.EMPTY_LIST).when(notificationGateway).selectNotifications(user, selection);
         doThrow(TransactionException.class).when(tx).commit();
-        assertNull(service.selectNotifications(user, selection));
+        assertThrows(DataAccessException.class, () -> service.selectNotifications(user, selection));
     }
 
     @Test
-    public void testSelectNotificationsSuccess() {
+    public void testSelectNotificationsSuccess() throws Exception {
         List<Notification> expected = new ArrayList<>();
         expected.add(notification);
         doReturn(expected).when(notificationGateway).selectNotifications(user, selection);

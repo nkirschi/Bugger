@@ -174,7 +174,8 @@ public class NotificationService {
      * @param selection Information on which notifications to return.
      * @return A list containing the requested notifications.
      */
-    public List<Notification> selectNotifications(final User user, final Selection selection) {
+    public List<Notification> selectNotifications(final User user, final Selection selection)
+            throws DataAccessException {
         if (user == null) {
             log.error("Cannot select notifications for user null.");
             throw new IllegalArgumentException("User cannot be null.");
@@ -192,8 +193,8 @@ public class NotificationService {
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error when selecting notifications for user " + user + "with selection " + selection + ".", e);
-            // feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
-            selectedNotifications = null;
+            throw new DataAccessException("Error when selecting notifications for user " + user + "with selection "
+                    + selection + ".", e);
         }
         return selectedNotifications;
     }
