@@ -1,9 +1,9 @@
 package tech.bugger.business.service;
 
-import tech.bugger.business.util.Feedback;
+// import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
-import tech.bugger.business.util.RegistryKey;
+import tech.bugger.business.util.Registry;
 import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Report;
@@ -21,19 +21,18 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
 
 /**
- * Service providing methods related to notifications. A {@link Feedback} event is fired, if unexpected circumstances
- * occur.
+ * Service providing methods related to notifications.
  */
 @ApplicationScoped
 public class NotificationService {
@@ -49,24 +48,9 @@ public class NotificationService {
     private final TransactionManager transactionManager;
 
     /**
-     * Feedback Event for user feedback.
-     */
-    private final Event<Feedback> feedbackEvent;
-
-    /**
      * The properties reader for the application configuration.
      */
     private final PropertiesReader configReader;
-
-    /**
-     * Resource bundle for feedback messages.
-     */
-    private final ResourceBundle messagesBundle;
-
-    /**
-     * Resource bundle for interaction messages.
-     */
-    private final ResourceBundle interactionsBundle;
 
     /**
      * The {@link PriorityExecutor} instance to use when sending e-mails.
@@ -79,35 +63,28 @@ public class NotificationService {
     private final Mailer mailer;
 
     /**
+     * The current registry which to retrieve resource bundles from.
+     */
+    private final Registry registry;
+
+    /**
      * Constructs a new notification service with the given dependencies.
      *
      * @param transactionManager The transaction manager to use for creating transactions.
-     * @param feedbackEvent      The feedback event to use for user feedback.
-     * @param configReader       The properties reader for the application configuration.
-     * @param messagesBundle     The resource bundle for feedback messages.
-     * @param interactionsBundle The resource bundle for interaction messages.
-     * @param priorityExecutor   The priority executor to use when sending e-mails.
-     * @param mailer             The mailer to use.
+     * @param registry           The current registry.
      */
     @Inject
     public NotificationService(final TransactionManager transactionManager,
-                               final Event<Feedback> feedbackEvent,
-                               @RegistryKey("config") final PropertiesReader configReader,
-                               final @RegistryKey("messages") ResourceBundle messagesBundle,
-                               @RegistryKey("interactions") final ResourceBundle interactionsBundle,
-                               @RegistryKey("mails") final PriorityExecutor priorityExecutor,
-                               @RegistryKey("main") final Mailer mailer) {
+                               final Registry registry) {
         this.transactionManager = transactionManager;
-        this.feedbackEvent = feedbackEvent;
-        this.configReader = configReader;
-        this.messagesBundle = messagesBundle;
-        this.interactionsBundle = interactionsBundle;
-        this.priorityExecutor = priorityExecutor;
-        this.mailer = mailer;
+        this.registry = registry;
+        configReader = registry.getPropertiesReader("config");
+        priorityExecutor = registry.getPriorityExecutor("mails");
+        mailer = registry.getMailer("main");
     }
 
     /**
-     * Irreversibly deletes a notification. Fires a {@link Feedback}-Event if something goes wrong.
+     * Irreversibly deletes a notification.
      *
      * @param notification The notification to be deleted.
      */
@@ -125,10 +102,10 @@ public class NotificationService {
             tx.commit();
         } catch (NotFoundException e) {
             log.error("Could not find notification to delete " + notification + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            // feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error when deleting notification " + notification + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            // feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
     }
 
@@ -152,10 +129,10 @@ public class NotificationService {
             tx.commit();
         } catch (NotFoundException e) {
             log.error("Could not find notification to mark as read " + notification + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            // feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error when marking notification " + notification + " as sent.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            // feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
     }
 
@@ -181,7 +158,7 @@ public class NotificationService {
         } catch (TransactionException e) {
             numberOfNotifications = 0;
             log.error("Error when counting notifications for user " + user + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            // feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return numberOfNotifications;
     }
@@ -211,7 +188,7 @@ public class NotificationService {
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error when selecting notifications for user " + user + "with selection " + selection + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            // feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
             selectedNotifications = null;
         }
         return selectedNotifications;
@@ -279,7 +256,8 @@ public class NotificationService {
             } else {
                 link += "id=" + n.getReportID();
             }
-
+            ResourceBundle interactionsBundle = registry.getBundle("interactions",
+                    Locale.forLanguageTag(n.getEmailLanguage()));
             Mail mail = new Mail.Builder()
                     .to(n.getRecipientMail())
                     .subject(interactionsBundle.getString("email_notification_subject_" + n.getType()))

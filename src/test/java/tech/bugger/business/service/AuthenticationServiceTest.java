@@ -13,6 +13,7 @@ import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Hasher;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
+import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
@@ -85,16 +86,18 @@ public class AuthenticationServiceTest {
     @Mock
     private PropertiesReader configReader;
 
+    @Mock
+    private Registry registry;
+
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws Exception {
         // Instantly run tasks.
         lenient().doAnswer(invocation -> {
             invocation.getArgument(0, PriorityTask.class).run();
             return null;
         }).when(priorityExecutor).enqueue(any());
 
-        NotificationService notificationService = new NotificationService(transactionManager, feedbackEvent,
-                   configReader, ResourceBundleMocker.mock(""), ResourceBundleMocker.mock(""),priorityExecutor, mailer);
+        NotificationService notificationService = new NotificationService(transactionManager, registry);
 
         service = new AuthenticationService(transactionManager, feedbackEvent, notificationService,
                 ResourceBundleMocker.mock(""), ResourceBundleMocker.mock(""), configReader);
@@ -105,6 +108,15 @@ public class AuthenticationServiceTest {
         lenient().doReturn("SHA3-512").when(configReader).getString("HASH_ALGO");
         lenient().doReturn(3).when(configReader).getInt("MAX_EMAIL_TRIES");
         lenient().doReturn(16).when(configReader).getInt("SALT_LENGTH");
+        Field field = notificationService.getClass().getDeclaredField("configReader");
+        field.setAccessible(true);
+        field.set(notificationService, configReader);
+        field = notificationService.getClass().getDeclaredField("priorityExecutor");
+        field.setAccessible(true);
+        field.set(notificationService, priorityExecutor);
+        field = notificationService.getClass().getDeclaredField("mailer");
+        field.setAccessible(true);
+        field.set(notificationService, mailer);
 
         String passwordHash = Hasher.hash(password, salt, hashingAlgo);
         testUser = new User(1, "testuser", passwordHash, salt, hashingAlgo, "test@test.de", "Test", "User",

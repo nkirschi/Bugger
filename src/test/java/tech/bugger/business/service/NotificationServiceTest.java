@@ -11,6 +11,7 @@ import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
+import tech.bugger.business.util.Registry;
 import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
@@ -64,6 +65,9 @@ class NotificationServiceTest {
     @Mock
     private UserGateway userGateway;
 
+    @Mock
+    private Registry registry;
+
     private Notification notification;
 
     private User user;
@@ -78,8 +82,7 @@ class NotificationServiceTest {
             return null;
         }).when(priorityExecutor).enqueue(any());
 
-        service = new NotificationService(transactionManager, feedbackEvent, configReader,
-                ResourceBundleMocker.mock(""), ResourceBundleMocker.mock(""), priorityExecutor, mailer);
+        service = new NotificationService(transactionManager, registry);
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(notificationGateway).when(tx).newNotificationGateway();
