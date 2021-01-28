@@ -29,9 +29,13 @@ body {
 }
 
 /* Bootstrap buttons */
-.btn {
+.btn-link, .btn-outline-primary {
   background-color: white;
   color: #1e88e5;
+}
+
+.btn-primary {
+  background-color: #1565C0;
 }
 
 /* Popup dialogs */

@@ -17,6 +17,13 @@
         <h:outputStylesheet library="design" name="bootstrap.min.css"/>
         <h:outputStylesheet library="design" name="style.css"/>
         <h:outputStylesheet library="design" name="themes/#{applicationSettings.organization.theme}"/>
+
+        <ui:fragment rendered="#{applicationSettings.organization.existsLogo}">
+            <link rel="icon" href="#{request.contextPath}/logo"/>
+        </ui:fragment>
+        <ui:fragment rendered="#{not applicationSettings.organization.existsLogo}">
+            <link rel="icon" href="#{resource['images/thumbnail.jpg']}"/>
+        </ui:fragment>
     </h:head>
 
     <h:body>
