@@ -185,7 +185,6 @@ public class TopicService {
             return false;
         }
 
-        // TODO Ben: Can this be done more beautiful?
         if (!isSubscribed(user, topic)) {
             subscribeToTopic(user, topic);
         }
@@ -599,7 +598,6 @@ public class TopicService {
      * @return The number of subscribers.
      */
     public int getNumberOfSubscribers(final Topic topic) {
-        // TODO Ben: Unused, use or remove?
         if (topic == null) {
             log.error("Cannot count subscribers of topic null.");
             throw new IllegalArgumentException("Topic cannot be null.");
