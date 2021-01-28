@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,10 +13,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
+import tech.bugger.ResourceBundleMocker;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.NotificationService;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Paginator;
+import tech.bugger.business.util.Registry;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
@@ -42,6 +47,12 @@ class HomeBackerTest {
     @Mock
     private ExternalContext ectx;
 
+    @Mock
+    private Event<Feedback> feedbackEvent;
+
+    @Mock
+    private Registry registry;
+
     private final Topic testTopic1 = new Topic(1, "Hi", "senberg");
     private final Topic testTopic2 = new Topic(2, "Hi", "performance");
     private final Topic testTopic3 = new Topic(3, "Hi", "de and seek");
@@ -49,7 +60,8 @@ class HomeBackerTest {
 
     @BeforeEach
     public void setUp() {
-        this.homeBacker = new HomeBacker(session, notificationService, topicService, ectx);
+        doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(eq("messages"), any());
+        this.homeBacker = new HomeBacker(session, notificationService, topicService, ectx, feedbackEvent, registry);
     }
 
     @Test
@@ -79,7 +91,7 @@ class HomeBackerTest {
     }
 
     @Test
-    public void testDeleteNotification() throws NoSuchFieldException, IllegalAccessException {
+    public void testDeleteNotification() throws Exception {
         Field inbox = homeBacker.getClass().getDeclaredField("inbox");
         inbox.setAccessible(true);
         inbox.set(homeBacker, mock(Paginator.class));
@@ -88,24 +100,27 @@ class HomeBackerTest {
     }
 
     @Test
-    public void testOpenNotification() throws IOException {
+    public void testOpenNotification() throws Exception {
         notification.setPostID(100);
+        doReturn(true).when(notificationService).markAsRead(any());
         assertNull(homeBacker.openNotification(notification));
         verify(ectx).redirect(any());
     }
 
     @Test
-    public void testOpenNotificationPostIdNull() throws IOException {
+    public void testOpenNotificationPostIdNull() throws Exception {
         notification.setTopicID(100);
+        doReturn(true).when(notificationService).markAsRead(any());
         assertNull(homeBacker.openNotification(notification));
         verify(ectx).redirect(any());
     }
 
     @Test
-    public void testOpenNotificationIOException() throws IOException {
+    public void testOpenNotificationIOException() throws Exception {
         doThrow(IOException.class).when(ectx).redirect(any());
+        doReturn(true).when(notificationService).markAsRead(any());
         notification.setPostID(100);
-        assertEquals("pretty:error", homeBacker.openNotification(notification));
+        assertThrows(Error404Exception.class, () -> homeBacker.openNotification(notification));
     }
 
     @Test

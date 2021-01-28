@@ -127,14 +127,16 @@ public class PostService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
             return false;
         }
-        Notification notification = new Notification();
-        notification.setType(Notification.Type.EDITED_POST);
-        notification.setActuatorID(post.getAuthorship().getModifier().getId());
-        notification.setTopicID(report.getTopicID());
-        notification.setReportID(report.getId());
-        notification.setPostID(post.getId());
-        notification.setReportTitle(report.getTitle());
-        notificationService.createNotification(notification);
+        if (report.getClosingDate() == null) {
+            Notification notification = new Notification();
+            notification.setType(Notification.Type.EDITED_POST);
+            notification.setActuatorID(post.getAuthorship().getModifier().getId());
+            notification.setTopicID(report.getTopicID());
+            notification.setReportID(report.getId());
+            notification.setPostID(post.getId());
+            notification.setReportTitle(report.getTitle());
+            notificationService.createNotification(notification);
+        }
         return true;
     }
 
@@ -221,7 +223,7 @@ public class PostService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
             return false;
         }
-        if (success) {
+        if (success && report.getClosingDate() == null) {
             Notification notification = new Notification();
             notification.setType(Notification.Type.NEW_POST);
             notification.setActuatorID(post.getAuthorship().getCreator().getId());

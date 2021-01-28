@@ -109,6 +109,11 @@ public class Notification implements Serializable {
     private String recipientMail;
 
     /**
+     * The language used for the e-mail.
+     */
+    private String emailLanguage;
+
+    /**
      * Constructs a new notification from the specified parameters.
      *
      * @param id               The notification ID.
@@ -145,6 +150,44 @@ public class Notification implements Serializable {
     }
 
     /**
+     * Constructs a new notification from the specified parameters.
+     *
+     * @param id               The notification ID.
+     * @param actuatorID       The notification actuator.
+     * @param recipientID      The notification recipient.
+     * @param type             The notification type.
+     * @param date             The notification creation date.
+     * @param read             Whether the notification is marked as read.
+     * @param sent             Whether the notification is marked as send.
+     * @param topicID          The associated topic.
+     * @param reportID         The associated report.
+     * @param postID           The associated post.
+     * @param actuatorUsername The actuator's username.
+     * @param reportTitle      The title of the associated report.
+     * @param recipientMail    The recipient's e-mail address.
+     * @param emailLanguage    The language for the e-mail.
+     */
+    public Notification(final Integer id, final int actuatorID, final int recipientID, final Type type,
+                        final OffsetDateTime date, final boolean read, final boolean sent, final Integer topicID,
+                        final Integer reportID, final Integer postID, final String actuatorUsername,
+                        final String reportTitle, final String recipientMail, final String emailLanguage) {
+        this.id = id;
+        this.actuatorID = actuatorID;
+        this.recipientID = recipientID;
+        this.type = type;
+        this.date = date;
+        this.read = read;
+        this.sent = sent;
+        this.topicID = topicID;
+        this.reportID = reportID;
+        this.postID = postID;
+        this.actuatorUsername = actuatorUsername;
+        this.reportTitle = reportTitle;
+        this.recipientMail = recipientMail;
+        this.emailLanguage = emailLanguage;
+    }
+
+    /**
      * Constructs an empty notification.
      */
     public Notification() {
@@ -159,7 +202,8 @@ public class Notification implements Serializable {
     public Notification(final Notification notification) {
         this(notification.id, notification.actuatorID, notification.recipientID, notification.type, notification.date,
                 notification.read, notification.sent, notification.topicID, notification.reportID, notification.postID,
-                notification.actuatorUsername, notification.reportTitle, notification.recipientMail);
+                notification.actuatorUsername, notification.reportTitle, notification.recipientMail,
+                notification.emailLanguage);
     }
 
     /**
@@ -395,6 +439,24 @@ public class Notification implements Serializable {
      */
     public void setRecipientMail(final String recipientMail) {
         this.recipientMail = recipientMail;
+    }
+
+    /**
+     * Returns the e-mail language.
+     *
+     * @return The e-mail language.
+     */
+    public String getEmailLanguage() {
+        return emailLanguage;
+    }
+
+    /**
+     * Sets the e-mail language.
+     *
+     * @param emailLanguage The e-mail language to set.
+     */
+    public void setEmailLanguage(final String emailLanguage) {
+        this.emailLanguage = emailLanguage;
     }
 
     /**

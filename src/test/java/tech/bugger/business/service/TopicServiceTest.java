@@ -665,21 +665,21 @@ class TopicServiceTest {
 
     @Test
     public void testCreateTopic() {
-        assertTrue(topicService.createTopic(testTopic1));
+        assertTrue(topicService.createTopic(testTopic1, user));
         verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void testCreateTopicNotFound() throws NotFoundException {
         doThrow(NotFoundException.class).when(topicGateway).createTopic(testTopic1);
-        assertFalse(topicService.createTopic(testTopic1));
+        assertFalse(topicService.createTopic(testTopic1, user));
         verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void testCreateTopicTransaction() throws TransactionException {
         doThrow(TransactionException.class).when(tx).commit();
-        assertFalse(topicService.createTopic(testTopic1));
+        assertFalse(topicService.createTopic(testTopic1, user));
         verify(feedbackEvent).fire(any());
     }
 
@@ -692,8 +692,7 @@ class TopicServiceTest {
     @Test
     public void testUpdateTopicNotFound() throws NotFoundException {
         doThrow(NotFoundException.class).when(topicGateway).updateTopic(testTopic1);
-        assertTrue(topicService.updateTopic(testTopic1));
-        verify(topicGateway).createTopic(testTopic1);
+        assertFalse(topicService.updateTopic(testTopic1));
     }
 
     @Test

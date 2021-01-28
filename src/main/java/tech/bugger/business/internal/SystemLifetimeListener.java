@@ -2,7 +2,11 @@ package tech.bugger.business.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -12,12 +16,16 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import tech.bugger.business.util.PriorityExecutor;
+import tech.bugger.business.util.PriorityTask;
 import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.Metadata;
+import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.gateway.MetadataGateway;
 import tech.bugger.persistence.util.ConnectionPool;
+import tech.bugger.persistence.util.Mail;
 import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
@@ -124,6 +132,7 @@ public class SystemLifetimeListener implements ServletContextListener {
         registerPriorityExecutors();
         registerShutdownHooks();
         scheduleMaintenanceTasks();
+        processUnsentNotifications();
 
         log.info("Application startup completed.");
     }
@@ -245,6 +254,63 @@ public class SystemLifetimeListener implements ServletContextListener {
 
         maintenanceShutdownHook = new Thread(() -> terminateMaintenanceTasks(true));
         Runtime.getRuntime().addShutdownHook(maintenanceShutdownHook);
+    }
+
+    private void processUnsentNotifications() {
+        List<Notification> notifications;
+        try (Transaction tx = transactionManager.begin()) {
+            notifications = tx.newNotificationGateway().getUnsentNotifications();
+            tx.commit();
+        } catch (TransactionException e) {
+            log.error("Could not send out notifications at startup.", e);
+            return;
+        }
+        PropertiesReader configReader = registry.getPropertiesReader("config");
+        String domain = configReader.getString("SERVER_URL");
+        for (Notification n : notifications) {
+            if (n.getRecipientMail() == null || n.getRecipientMail().isBlank()) {
+                continue;
+            }
+
+            String link = domain + "/report?";
+            if (n.getPostID() != null) {
+                link += "p=" + n.getPostID() + "#post-" + n.getPostID();
+            } else {
+                link += "id=" + n.getReportID();
+            }
+
+            Locale locale = Locale.forLanguageTag(n.getEmailLanguage());
+            ResourceBundle interactionsBundle = registry.getBundle("interactions", locale);
+            Mail mail = new Mail.Builder()
+                    .to(n.getRecipientMail())
+                    .subject(interactionsBundle.getString("email_notification_subject_" + n.getType()))
+                    .content(new MessageFormat(interactionsBundle.getString("email_notification_content_"
+                            + n.getType()))
+                            .format(new String[]{n.getReportTitle(), link}))
+                    .envelop();
+            Mailer mailer = registry.getMailer("main");
+            int maxEmailTries = configReader.getInt("MAX_EMAIL_TRIES");
+            mailPriorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.LOW, () -> {
+                int tries = 1;
+                log.debug("Sending e-mail " + mail + ".");
+                while (!mailer.send(mail) && tries++ <= maxEmailTries) {
+                    log.warning("Trying to send e-mail again. Try #" + tries + '.');
+                }
+                if (tries > maxEmailTries) {
+                    log.error("Couldn't send e-mail for more than " + maxEmailTries + " times! Please investigate!");
+                } else {
+                    try (Transaction tx = transactionManager.begin()) {
+                        n.setSent(true);
+                        tx.newNotificationGateway().update(n);
+                        tx.commit();
+                    } catch (NotFoundException e) {
+                        log.error("Could not find notification " + n + " when trying to mark it as sent.", e);
+                    } catch (TransactionException e) {
+                        log.error("Error when marking notification " + n + " as sent.", e);
+                    }
+                }
+            }));
+        }
     }
 
     private void deregisterShutdownHooks() {

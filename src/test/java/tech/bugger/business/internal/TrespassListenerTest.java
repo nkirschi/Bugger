@@ -22,6 +22,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.business.util.Registry;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.User;
 
@@ -105,8 +106,7 @@ public class TrespassListenerTest {
     @Test
     public void testAfterPhaseViewRootNull() throws Exception {
         doReturn(null).when(fctx).getViewRoot();
-        trespassListener.afterPhase(event);
-        verify(ectx).redirect(anyString());
+        assertThrows(Error404Exception.class, () -> trespassListener.afterPhase(event));
     }
 
     @Test
@@ -114,8 +114,7 @@ public class TrespassListenerTest {
         UIViewRoot viewRoot = mock(UIViewRoot.class);
         doReturn(viewRoot).when(fctx).getViewRoot();
         doReturn(null).when(viewRoot).getViewId();
-        trespassListener.afterPhase(event);
-        verify(ectx).redirect(anyString());
+        assertThrows(Error404Exception.class, () -> trespassListener.afterPhase(event));
     }
 
     @Test
@@ -134,8 +133,7 @@ public class TrespassListenerTest {
         doReturn(viewRoot).when(fctx).getViewRoot();
         doReturn("/test/admin.xhtml").when(viewRoot).getViewId();
         doReturn(null).when(sessionInstance).get();
-        trespassListener.afterPhase(event);
-        verify(ectx).redirect(anyString());
+        assertThrows(Error404Exception.class, () -> trespassListener.afterPhase(event));
     }
 
     @Test
@@ -150,8 +148,7 @@ public class TrespassListenerTest {
         doReturn(user).when(session).getUser();
         doReturn(session).when(sessionInstance).get();
 
-        doThrow(IOException.class).when(ectx).redirect(anyString());
-        assertThrows(InternalError.class, () -> trespassListener.afterPhase(event));
+        assertThrows(Error404Exception.class, () -> trespassListener.afterPhase(event));
     }
 
     @Test

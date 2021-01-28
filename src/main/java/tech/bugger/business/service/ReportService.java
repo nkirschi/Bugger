@@ -442,7 +442,7 @@ public class ReportService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
         }
 
-        if (success) {
+        if (success && report.getClosingDate() == null) {
             Notification notification = new Notification();
             notification.setType(Notification.Type.MOVED_REPORT);
             notification.setActuatorID(report.getAuthorship().getModifier().getId());
@@ -475,13 +475,15 @@ public class ReportService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
             return false;
         }
-        Notification notification = new Notification();
-        notification.setType(Notification.Type.EDITED_REPORT);
-        notification.setActuatorID(report.getAuthorship().getModifier().getId());
-        notification.setTopicID(report.getTopicID());
-        notification.setReportID(report.getId());
-        notification.setReportTitle(report.getTitle());
-        notificationService.createNotification(notification);
+        if (report.getClosingDate() == null) {
+            Notification notification = new Notification();
+            notification.setType(Notification.Type.EDITED_REPORT);
+            notification.setActuatorID(report.getAuthorship().getModifier().getId());
+            notification.setTopicID(report.getTopicID());
+            notification.setReportID(report.getId());
+            notification.setReportTitle(report.getTitle());
+            notificationService.createNotification(notification);
+        }
         return true;
     }
 

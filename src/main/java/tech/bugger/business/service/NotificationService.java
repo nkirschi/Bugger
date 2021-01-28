@@ -1,9 +1,9 @@
 package tech.bugger.business.service;
 
-import tech.bugger.business.util.Feedback;
+import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
-import tech.bugger.business.util.RegistryKey;
+import tech.bugger.business.util.Registry;
 import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Report;
@@ -21,19 +21,18 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
 
 /**
- * Service providing methods related to notifications. A {@link Feedback} event is fired, if unexpected circumstances
- * occur.
+ * Service providing methods related to notifications.
  */
 @ApplicationScoped
 public class NotificationService {
@@ -49,24 +48,9 @@ public class NotificationService {
     private final TransactionManager transactionManager;
 
     /**
-     * Feedback Event for user feedback.
-     */
-    private final Event<Feedback> feedbackEvent;
-
-    /**
      * The properties reader for the application configuration.
      */
     private final PropertiesReader configReader;
-
-    /**
-     * Resource bundle for feedback messages.
-     */
-    private final ResourceBundle messagesBundle;
-
-    /**
-     * Resource bundle for interaction messages.
-     */
-    private final ResourceBundle interactionsBundle;
 
     /**
      * The {@link PriorityExecutor} instance to use when sending e-mails.
@@ -79,48 +63,51 @@ public class NotificationService {
     private final Mailer mailer;
 
     /**
+     * The current registry which to retrieve resource bundles from.
+     */
+    private final Registry registry;
+
+    /**
      * Constructs a new notification service with the given dependencies.
      *
      * @param transactionManager The transaction manager to use for creating transactions.
-     * @param feedbackEvent      The feedback event to use for user feedback.
-     * @param configReader       The properties reader for the application configuration.
-     * @param messagesBundle     The resource bundle for feedback messages.
-     * @param interactionsBundle The resource bundle for interaction messages.
-     * @param priorityExecutor   The priority executor to use when sending e-mails.
-     * @param mailer             The mailer to use.
+     * @param registry           The current registry.
      */
     @Inject
     public NotificationService(final TransactionManager transactionManager,
-                               final Event<Feedback> feedbackEvent,
-                               @RegistryKey("config") final PropertiesReader configReader,
-                               final @RegistryKey("messages") ResourceBundle messagesBundle,
-                               @RegistryKey("interactions") final ResourceBundle interactionsBundle,
-                               @RegistryKey("mails") final PriorityExecutor priorityExecutor,
-                               @RegistryKey("main") final Mailer mailer) {
+                               final Registry registry) {
         this.transactionManager = transactionManager;
-        this.feedbackEvent = feedbackEvent;
-        this.configReader = configReader;
-        this.messagesBundle = messagesBundle;
-        this.interactionsBundle = interactionsBundle;
-        this.priorityExecutor = priorityExecutor;
-        this.mailer = mailer;
+        this.registry = registry;
+        configReader = registry.getPropertiesReader("config");
+        priorityExecutor = registry.getPriorityExecutor("mails");
+        mailer = registry.getMailer("main");
     }
 
     /**
-     * Irreversibly deletes a notification. Fires a {@link Feedback}-Event if something goes wrong.
+     * Irreversibly deletes a notification.
      *
      * @param notification The notification to be deleted.
+     * @return {@code true} iff deleting the notification was successful.
      */
-    public void deleteNotification(final Notification notification) {
+    public boolean deleteNotification(final Notification notification) throws DataAccessException {
+        if (notification == null) {
+            log.error("Cannot delete notification null.");
+            throw new IllegalArgumentException("Notification cannot be null.");
+        } else if (notification.getId() == null) {
+            log.error("Cannot delete notification with ID null.");
+            throw new IllegalArgumentException("Notification ID cannot be null.");
+        }
+
         try (Transaction tx = transactionManager.begin()) {
             tx.newNotificationGateway().delete(notification);
             tx.commit();
+            return true;
         } catch (NotFoundException e) {
             log.error("Could not find notification to delete " + notification + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            return false;
         } catch (TransactionException e) {
             log.error("Error when deleting notification " + notification + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            throw new DataAccessException("Error when deleting notification " + notification + ".", e);
         }
     }
 
@@ -128,18 +115,28 @@ public class NotificationService {
      * Marks a notification as read.
      *
      * @param notification The notification to be marked as read.
+     * @return {@code true} iff marking the notification as read was successful.
      */
-    public void markAsRead(final Notification notification) {
+    public boolean markAsRead(final Notification notification) throws DataAccessException {
+        if (notification == null) {
+            log.error("Cannot mark notification null as read.");
+            throw new IllegalArgumentException("Notification cannot be null.");
+        } else if (notification.getId() == null) {
+            log.error("Cannot mark notification with ID null as read.");
+            throw new IllegalArgumentException("Notification ID cannot be null.");
+        }
+
         notification.setRead(true);
         try (Transaction tx = transactionManager.begin()) {
             tx.newNotificationGateway().update(notification);
             tx.commit();
+            return true;
         } catch (NotFoundException e) {
             log.error("Could not find notification to mark as read " + notification + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            return false;
         } catch (TransactionException e) {
             log.error("Error when marking notification " + notification + " as sent.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            throw new DataAccessException("Error when marking notification " + notification + " as sent.", e);
         }
     }
 
@@ -149,14 +146,22 @@ public class NotificationService {
      * @param user The user in question.
      * @return The number of notifications as an {@code int}.
      */
-    public int countNotifications(final User user) {
-        int numberOfNotifications = 0;
+    public int countNotifications(final User user) throws DataAccessException {
+        if (user == null) {
+            log.error("Cannot count notifications for user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot count notifications for user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        int numberOfNotifications;
         try (Transaction tx = transactionManager.begin()) {
             numberOfNotifications = tx.newNotificationGateway().countNotifications(user);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error when counting notifications for user " + user + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            throw new DataAccessException("Error when counting notifications for user " + user + ".", e);
         }
         return numberOfNotifications;
     }
@@ -168,15 +173,27 @@ public class NotificationService {
      * @param selection Information on which notifications to return.
      * @return A list containing the requested notifications.
      */
-    public List<Notification> selectNotifications(final User user, final Selection selection) {
+    public List<Notification> selectNotifications(final User user, final Selection selection)
+            throws DataAccessException {
+        if (user == null) {
+            log.error("Cannot select notifications for user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot select notifications for user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        } else if (selection == null) {
+            log.error("Cannot select notifications for user " + user + " when selection is null.");
+            throw new IllegalArgumentException("Selection cannot be null.");
+        }
+
         List<Notification> selectedNotifications;
         try (Transaction tx = transactionManager.begin()) {
             selectedNotifications = tx.newNotificationGateway().selectNotifications(user, selection);
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error when selecting notifications for user " + user + "with selection " + selection + ".", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
-            selectedNotifications = null;
+            throw new DataAccessException("Error when selecting notifications for user " + user + "with selection "
+                    + selection + ".", e);
         }
         return selectedNotifications;
     }
@@ -217,6 +234,7 @@ public class NotificationService {
                 Notification n = new Notification(notification);
                 n.setRecipientID(user.getId());
                 n.setRecipientMail(user.getEmailAddress());
+                n.setEmailLanguage(user.getPreferredLanguage().getLanguage());
                 notifications.add(n);
             }
             tx.newNotificationGateway().createNotificationBulk(notifications);
@@ -224,24 +242,8 @@ public class NotificationService {
         } catch (TransactionException e) {
             log.error("Error when creating notification " + notification + ".", e);
             return;
-            // feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         sendMails(notifications);
-    }
-
-    /**
-     * Queues sending of e-mails for notifications which have not yet been sent.
-     */
-    public void processUnsentNotifications() {
-        // TODO Ben: Call this method somewhere? Or is this not needed anymore?
-        List<Notification> unsentNotifications;
-        try (Transaction tx = transactionManager.begin()) {
-            unsentNotifications = tx.newNotificationGateway().getUnsentNotifications();
-            tx.commit();
-        } catch (TransactionException e) {
-            return;
-        }
-        sendMails(unsentNotifications);
     }
 
     private void sendMails(final List<Notification> notifications) {
@@ -257,7 +259,8 @@ public class NotificationService {
             } else {
                 link += "id=" + n.getReportID();
             }
-
+            ResourceBundle interactionsBundle = registry.getBundle("interactions",
+                    Locale.forLanguageTag(n.getEmailLanguage()));
             Mail mail = new Mail.Builder()
                     .to(n.getRecipientMail())
                     .subject(interactionsBundle.getString("email_notification_subject_" + n.getType()))
@@ -265,7 +268,7 @@ public class NotificationService {
                             + n.getType()))
                             .format(new String[]{n.getReportTitle(), link}))
                     .envelop();
-            sendMail(mail, PriorityTask.Priority.LOW);
+            sendNotification(mail, n);
         }
     }
 
@@ -285,6 +288,30 @@ public class NotificationService {
             }
             if (tries > maxEmailTries) {
                 log.error("Couldn't send e-mail for more than " + maxEmailTries + " times! Please investigate!");
+            }
+        }));
+    }
+
+    private void sendNotification(final Mail mail, final Notification notification) {
+        int maxEmailTries = configReader.getInt("MAX_EMAIL_TRIES");
+        priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.LOW, () -> {
+            int tries = 1;
+            log.debug("Sending e-mail " + mail + ".");
+            while (!mailer.send(mail) && tries++ <= maxEmailTries) {
+                log.warning("Trying to send e-mail again. Try #" + tries + '.');
+            }
+            if (tries > maxEmailTries) {
+                log.error("Couldn't send e-mail for more than " + maxEmailTries + " times! Please investigate!");
+            } else {
+                notification.setSent(true);
+                try (Transaction tx = transactionManager.begin()) {
+                    tx.newNotificationGateway().update(notification);
+                    tx.commit();
+                } catch (NotFoundException e) {
+                    log.error("Could not find notification " + notification + " when trying to mark it as sent.", e);
+                } catch (TransactionException e) {
+                    log.error("Error when marking notification " + notification + " as sent.", e);
+                }
             }
         }));
     }

@@ -186,7 +186,6 @@ public class TopicService {
             return false;
         }
 
-        // TODO Ben: Can this be done more beautiful?
         if (!isSubscribed(user, topic)) {
             subscribeToTopic(user, topic);
         }
@@ -355,20 +354,22 @@ public class TopicService {
      * Creates a new topic. Only administrators can do that.
      *
      * @param topic The topic to be created.
+     * @param creator The administrator who is creating the topic.
      * @return {@code true} iff creating the topic succeeded.
      */
-    public boolean createTopic(final Topic topic) {
+    public boolean createTopic(final Topic topic, final User creator) {
         try (Transaction tx = transactionManager.begin()) {
             tx.newTopicGateway().createTopic(topic);
             tx.commit();
             log.info("Topic created successfully.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("topic_created"), Feedback.Type.INFO));
-            return true;
         } catch (TransactionException | NotFoundException e) {
             log.error("Error while creating a new Topic.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
+            return false;
         }
-        return false;
+        subscribeToTopic(creator, topic);
+        return true;
     }
 
     /**
@@ -384,8 +385,8 @@ public class TopicService {
             tx.commit();
             return true;
         } catch (NotFoundException e) {
-            createTopic(topic);
-            return true;
+            log.error("Topic to update " + topic + " not found.", e);
+            return false;
         } catch (TransactionException e) {
             log.error("Error while updating a report.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
@@ -598,7 +599,6 @@ public class TopicService {
      * @return The number of subscribers.
      */
     public int getNumberOfSubscribers(final Topic topic) {
-        // TODO Ben: Unused, use or remove?
         if (topic == null) {
             log.error("Cannot count subscribers of topic null.");
             throw new IllegalArgumentException("Topic cannot be null.");
