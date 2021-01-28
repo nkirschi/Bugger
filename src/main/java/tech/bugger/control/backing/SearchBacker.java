@@ -301,17 +301,6 @@ public class SearchBacker implements Serializable {
     }
 
     /**
-     * Returns the total number of posts of reports in one particular topic.
-     *
-     * @param topic The topic in question.
-     * @return The number of posts as an {@code int}.
-     */
-    public int getNumberOfPosts(final Topic topic) {
-        // TODO Markus: Needed?
-        return 0;
-    }
-
-    /**
      * @return The searchQuery.
      */
     public String getQuery() {
