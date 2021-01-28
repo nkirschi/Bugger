@@ -88,6 +88,7 @@ public class NotificationService {
      * Irreversibly deletes a notification.
      *
      * @param notification The notification to be deleted.
+     * @return {@code true} iff deleting the notification was successful.
      */
     public boolean deleteNotification(final Notification notification) throws DataAccessException {
         if (notification == null) {
