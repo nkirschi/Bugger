@@ -63,7 +63,7 @@ public class ReportDBGateway implements ReportGateway {
         report.setSeverity(Report.Severity.valueOf(rs.getString("severity")));
         report.setVersion(rs.getString("version"));
         report.setTopicID(rs.getInt("topic"));
-        report.setDuplicateOf(rs.getInt("duplicate_of"));
+        report.setDuplicateOf(rs.getObject("duplicate_of", Integer.class));
         report.setClosingDate(rs.getObject("closed_at", OffsetDateTime.class));
 
         return report;

@@ -11,7 +11,9 @@
 
     <ui:param name="helpKey" value="topic_edit"/>
 
-    <ui:param name="title" value="#{labels.topic_edit_title}: #{topicEditBacker.topic.title}"/>
+    <ui:param name="title" value="#{topicEditBacker.create
+                                    ? labels.topic_create_title
+                                    : labels.topic_edit_title.concat(': ').concat(topicEditBacker.topic.title)}"/>
 
     <ui:define name="content">
         <h:panelGroup id="p-profile-info" styleClass="d-flex p-2 justify-content-center align-items-center container">

@@ -225,8 +225,11 @@ public class TopicBacker implements Serializable {
 
         User user = session.getUser();
         topic = topicService.getTopicByID(topicID);
+        if (topic == null) {
+            throw new Error404Exception();
+        }
         banned = topicService.isBanned(user, topic);
-        if (topic == null || (!applicationSettings.getConfiguration().isGuestReading() && banned)) {
+        if (!applicationSettings.getConfiguration().isGuestReading() && banned) {
             throw new Error404Exception();
         }
 
