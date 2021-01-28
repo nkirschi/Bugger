@@ -363,13 +363,13 @@ public class TopicService {
             tx.commit();
             log.info("Topic created successfully.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("topic_created"), Feedback.Type.INFO));
-            tx.newSubscriptionGateway().subscribe(topic, creator);
-            return true;
-        } catch (TransactionException | NotFoundException | DuplicateException e) {
+        } catch (TransactionException | NotFoundException e) {
             log.error("Error while creating a new Topic.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
+            return false;
         }
-        return false;
+        subscribeToTopic(creator, topic);
+        return true;
     }
 
     /**
