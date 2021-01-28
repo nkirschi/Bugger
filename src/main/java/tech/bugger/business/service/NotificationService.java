@@ -106,11 +106,9 @@ public class NotificationService {
         } catch (NotFoundException e) {
             log.error("Could not find notification to delete " + notification + ".", e);
             return false;
-            // feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error when deleting notification " + notification + ".", e);
             throw new DataAccessException("Error when deleting notification " + notification + ".", e);
-            // feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
     }
 
@@ -118,8 +116,9 @@ public class NotificationService {
      * Marks a notification as read.
      *
      * @param notification The notification to be marked as read.
+     * @return {@code true} iff marking the notification as read was successful.
      */
-    public void markAsRead(final Notification notification) {
+    public boolean markAsRead(final Notification notification) throws DataAccessException {
         if (notification == null) {
             log.error("Cannot mark notification null as read.");
             throw new IllegalArgumentException("Notification cannot be null.");
@@ -132,12 +131,13 @@ public class NotificationService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newNotificationGateway().update(notification);
             tx.commit();
+            return true;
         } catch (NotFoundException e) {
             log.error("Could not find notification to mark as read " + notification + ".", e);
-            // feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            return false;
         } catch (TransactionException e) {
             log.error("Error when marking notification " + notification + " as sent.", e);
-            // feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            throw new DataAccessException("Error when marking notification " + notification + " as sent.", e);
         }
     }
 

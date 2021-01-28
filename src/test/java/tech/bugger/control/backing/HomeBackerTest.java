@@ -20,6 +20,7 @@ import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.business.util.Registry;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
@@ -99,24 +100,27 @@ class HomeBackerTest {
     }
 
     @Test
-    public void testOpenNotification() throws IOException {
+    public void testOpenNotification() throws Exception {
         notification.setPostID(100);
+        doReturn(true).when(notificationService).markAsRead(any());
         assertNull(homeBacker.openNotification(notification));
         verify(ectx).redirect(any());
     }
 
     @Test
-    public void testOpenNotificationPostIdNull() throws IOException {
+    public void testOpenNotificationPostIdNull() throws Exception {
         notification.setTopicID(100);
+        doReturn(true).when(notificationService).markAsRead(any());
         assertNull(homeBacker.openNotification(notification));
         verify(ectx).redirect(any());
     }
 
     @Test
-    public void testOpenNotificationIOException() throws IOException {
+    public void testOpenNotificationIOException() throws Exception {
         doThrow(IOException.class).when(ectx).redirect(any());
+        doReturn(true).when(notificationService).markAsRead(any());
         notification.setPostID(100);
-        assertEquals("pretty:error", homeBacker.openNotification(notification));
+        assertThrows(Error404Exception.class, () -> homeBacker.openNotification(notification));
     }
 
     @Test

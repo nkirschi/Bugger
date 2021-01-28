@@ -8,6 +8,7 @@ import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.business.util.Registry;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
@@ -166,7 +167,16 @@ public class HomeBacker implements Serializable {
      * @return A String that is used to redirect a user to the post of the opened notification.
      */
     public String openNotification(final Notification notification) {
-        notificationService.markAsRead(notification);
+        changeMessageBundle();
+        try {
+            if (!notificationService.markAsRead(notification)) {
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+                return null;
+            }
+        } catch (DataAccessException e) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+            return null;
+        }
         String query = "/report?";
         if (notification.getPostID() != null) {
             query += "p=" + notification.getPostID() + "#post-" + notification.getPostID();
@@ -177,7 +187,7 @@ public class HomeBacker implements Serializable {
         try {
             ectx.redirect(ectx.getApplicationContextPath() + query);
         } catch (IOException e) {
-            return "pretty:error";
+            throw new Error404Exception("Error when redirecting.", e);
         }
         return null;
     }
