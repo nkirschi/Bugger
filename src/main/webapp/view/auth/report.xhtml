@@ -412,7 +412,7 @@
                                 <h:outputText value="#{labels.id}"/>
                             </h:panelGroup>
                             <h:panelGroup styleClass="col-9">
-                                <h:link value="###{var.id}" outcome="pretty:report">
+                                <h:link value="###{var.id}" outcome="pretty:report" fragment="post-#{var.id}">
                                     <f:param name="id" value="#{reportBacker.report.id}"/>
                                     <f:param name="p" value="#{var.id}"/>
                                 </h:link>
