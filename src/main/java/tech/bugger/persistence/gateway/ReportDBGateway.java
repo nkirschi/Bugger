@@ -147,9 +147,10 @@ public class ReportDBGateway implements ReportGateway {
     @Override
     public Report find(final int id) throws NotFoundException {
         try (PreparedStatement stmt = conn.prepareStatement(
-                "SELECT * FROM report AS r"
+                "SELECT r.*, v.*, t.title AS topic_title FROM report AS r"
                         + " LEFT OUTER JOIN report_relevance AS v ON r.id = v.report"
-                        + " WHERE id = ?;"
+                        + " JOIN topic AS t ON r.topic = t.id"
+                        + " WHERE r.id = ?;"
         )) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .integer(id)
@@ -176,7 +177,8 @@ public class ReportDBGateway implements ReportGateway {
                         duplicateOf,
                         relevance,
                         relevanceOverwritten,
-                        rs.getInt("topic")
+                        rs.getInt("topic"),
+                        rs.getString("topic_title")
                 );
             } else {
                 throw new NotFoundException("Report could not be found.");

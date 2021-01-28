@@ -92,7 +92,7 @@ public class ReportServiceTest {
         testUser.setId(1);
         Authorship authorship = new Authorship(testUser, OffsetDateTime.now(), testUser, OffsetDateTime.now());
         testReport = new Report(200, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", authorship,
-                mock(OffsetDateTime.class), null, null, false, 1);
+                mock(OffsetDateTime.class), null, null, false, 1, null);
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(reportGateway).when(tx).newReportGateway();

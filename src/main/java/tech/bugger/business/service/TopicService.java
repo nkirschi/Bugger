@@ -767,18 +767,18 @@ public class TopicService {
     /**
      * Discover all topics in the system.
      *
-     * @return A list of all topic titles.
+     * @return A list of all topics.
      */
-    public List<String> discoverTopics() {
-        List<String> topicTitles = Collections.emptyList();
+    public List<Topic> discoverTopics() {
+        List<Topic> topics = Collections.emptyList();
         try (Transaction tx = transactionManager.begin()) {
-            topicTitles = tx.newTopicGateway().discoverTopics();
+            topics = tx.newTopicGateway().discoverTopics();
             tx.commit();
         } catch (TransactionException e) {
             log.error("Error when discovering all topics.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
-        return topicTitles;
+        return topics;
     }
 
     /**

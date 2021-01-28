@@ -60,7 +60,7 @@ public class ReportBackerTest {
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         report = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(OffsetDateTime.class), null, null, false, 1);
+                mock(OffsetDateTime.class), null, null, false, 1, null);
     }
 
     /*@Test

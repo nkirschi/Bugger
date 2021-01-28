@@ -102,34 +102,31 @@
                     </h:panelGroup>
 
                     <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
-                        <h:outputLabel id="ol-version" for="it-version" value="#{labels.report_version}"
-                                       styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group">
-                            <h:inputText id="it-version" a:maxlength="#{C.SMALL_FIELD}"
-                                         value="#{reportEditBacker.report.version}"
-                                         styleClass="form-control #{!facesContext.validationFailed ? ''
+                        <h:panelGroup layout="block" styleClass="row">
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="ol-version" for="it-version" value="#{labels.report_version}"
+                                               styleClass="form-label"/>
+                                <h:panelGroup layout="block" styleClass="input-group">
+                                    <h:inputText id="it-version" a:maxlength="#{C.SMALL_FIELD}"
+                                                 value="#{reportEditBacker.report.version}"
+                                                 styleClass="form-control #{!facesContext.validationFailed ? ''
                                          : component.valid ? 'is-valid' : 'is-invalid'}">
-                                <f:validateLength maximum="#{C.SMALL_FIELD}"/>
-                            </h:inputText>
-                        </h:panelGroup>
-                        <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                            <h:message id="m-version" for="it-version"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
+                                        <f:validateLength maximum="#{C.SMALL_FIELD}"/>
+                                    </h:inputText>
+                                </h:panelGroup>
+                                <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
+                                    <h:message id="m-version" for="it-version"/>
+                                </h:panelGroup>
+                            </h:panelGroup>
 
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
-                        <h:outputLabel id="ol-topic" for="it-topic" value="#{labels.report_topic}"
-                                       styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group">
-                            <h:inputText id="it-topic" value="#{reportEditBacker.destinationID}"
-                                         a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
-                                         #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
-                                         : 'is-invalid'}">
-                                <f:validateLength maximum="#{C.SMALL_FIELD}"/>
-                            </h:inputText>
-                        </h:panelGroup>
-                        <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                            <h:message id="m-topic" for="it-topic"/>
+                            <h:panelGroup layout="block" styleClass="col-6">
+                                <h:outputLabel id="ol-topic" for="s-topic" value="#{labels.report_topic}"
+                                               styleClass="form-label"/>
+                                <h:selectOneMenu id="s-topic" styleClass="form-select"
+                                                 value="#{reportEditBacker.destination}">
+                                    <f:selectItems value="#{reportEditBacker.topicTitles}"/>
+                                </h:selectOneMenu>
+                            </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
 

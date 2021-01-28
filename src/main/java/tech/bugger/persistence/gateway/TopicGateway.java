@@ -147,9 +147,9 @@ public interface TopicGateway {
     /**
      * Discovers all topics in the system.
      *
-     * @return The list of all topic titles.
+     * @return The list of all topics.
      */
-    List<String> discoverTopics();
+    List<Topic> discoverTopics();
 
     /**
      * Retrieves the the topics where a user has moderator status.

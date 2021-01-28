@@ -5,7 +5,9 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
@@ -94,14 +96,24 @@ public class ReportEditBacker implements Serializable {
     private Topic currentTopic;
 
     /**
-     * The ID of the topic to move the report to.
+     * The name of the topic to move the report to.
      */
-    private int destinationID;
+    private String destination;
 
     /**
      * Whether to display the confirmation dialog.
      */
     private boolean displayConfirmDialog;
+
+    /**
+     * The available topics.
+     */
+    private List<Topic> topics;
+
+    /**
+     * The available topic titles cached.
+     */
+    private List<String> topicTitles;
 
     /**
      * Constructs a new report editing page backing bean with the necessary dependencies.
@@ -146,11 +158,13 @@ public class ReportEditBacker implements Serializable {
 
         User user = session.getUser();
         report = reportService.getReportByID(reportID);
-        if (report != null) {
-            destinationID = report.getTopicID();
-            currentTopic = topicService.getTopicByID(destinationID);
-        } else {
+        if (report == null) {
             throw new Error404Exception();
+        } else {
+            destination = report.getTopic();
+            currentTopic = topicService.getTopicByID(report.getTopicID());
+            topics = topicService.discoverTopics();
+            topicTitles = topics.stream().map(Topic::getTitle).collect(Collectors.toList());
         }
 
         boolean closedReportPosting = applicationSettings.getConfiguration().isClosedReportPosting();
@@ -179,7 +193,7 @@ public class ReportEditBacker implements Serializable {
      * Saves the changes made into the database or opens the confirmation dialog if the report's topic changed.
      */
     public void saveChangesWithConfirm() {
-        if (report.getTopicID() == destinationID) {
+        if (report.getTopic().equals(destination)) {
             saveChanges();
             return;
         }
@@ -197,9 +211,13 @@ public class ReportEditBacker implements Serializable {
 
         report.getAuthorship().setModifiedDate(OffsetDateTime.now());
         report.getAuthorship().setModifier(session.getUser());
-        if (destinationID != report.getTopicID()) {
-            report.setTopicID(destinationID);
-            success = reportService.move(report);
+        if (!report.getTopic().equals(destination)) {
+            Topic topic = getTopicByTitle(destination);
+            if (topic != null) {
+                report.setTopic(destination);
+                report.setTopicID(topic.getId());
+                success = reportService.move(report);
+            }
         }
 
         if (success && reportService.updateReport(report)) {
@@ -217,8 +235,8 @@ public class ReportEditBacker implements Serializable {
      * @return Whether to display the warning.
      */
     public boolean isDisplayNoModerationWarning() {
-        if (destinationID != currentTopic.getId()) {
-            Topic destination = topicService.getTopicByID(destinationID);
+        if (!currentTopic.getTitle().equals(destination)) {
+            Topic destination = getTopicByTitle(getDestination());
             User user = session.getUser();
             return destination != null
                     && topicService.isModerator(user, currentTopic)
@@ -228,20 +246,20 @@ public class ReportEditBacker implements Serializable {
     }
 
     /**
-     * Checks whether the topic with ID {@code destinationID} exists and the user is allowed to move the report to it.
+     * Checks whether the topic with name {@code destination} exists and the user is allowed to move the report to it.
      * Displays an error message if not.
      *
      * @return Whether the report can be moved to the destination topic.
      */
     private boolean canMoveToTopic() {
-        Topic destination = topicService.getTopicByID(destinationID);
+        Topic toTopic = getTopicByTitle(destination);
         User user = session.getUser();
 
-        if (destination == null || topicService.isBanned(user, destination)) {
+        if (toTopic == null || topicService.isBanned(user, toTopic)) {
             String message = MessageFormat.format(messagesBundle.getString("report_edit_topic_not_found"),
-                    destinationID);
-            fctx.addMessage("f-report-edit:it-topic", new FacesMessage(message));
-            destinationID = currentTopic.getId();
+                    destination);
+            fctx.addMessage("f-report-edit:s-topic", new FacesMessage(message));
+            destination = currentTopic.getTitle();
             return false;
         }
         return true;
@@ -262,6 +280,25 @@ public class ReportEditBacker implements Serializable {
             return true;
         }
         return user.equals(report.getAuthorship().getCreator()) && !topicService.isBanned(user, currentTopic);
+    }
+
+    /**
+     * Retrieves a topic by title from the cache.
+     *
+     * @param title The title to search for.
+     * @return The topic corresponding to the title or {@code null} if there is none.
+     */
+    private Topic getTopicByTitle(final String title) {
+        return topics.stream().filter(t -> t.getTitle().equals(title)).findFirst().orElse(null);
+    }
+
+    /**
+     * Retrieves the titles of all topics in the system.
+     *
+     * @return A list of all topic titles.
+     */
+    public List<String> getTopicTitles() {
+        return topicTitles;
     }
 
     /**
@@ -301,21 +338,21 @@ public class ReportEditBacker implements Serializable {
     }
 
     /**
-     * Returns the ID of the topic the report is supposed to be moved to.
+     * Returns the name of the topic the report is supposed to be moved to.
      *
-     * @return The ID of the destination topic,
+     * @return The name of the destination topic.
      */
-    public int getDestinationID() {
-        return destinationID;
+    public String getDestination() {
+        return destination;
     }
 
     /**
      * Sets the ID of the topic the report is to be moved to.
      *
-     * @param destinationID The ID of topic to move the report to.
+     * @param destination The name of the topic to move the report to.
      */
-    public void setDestinationID(final int destinationID) {
-        this.destinationID = destinationID;
+    public void setDestination(final String destination) {
+        this.destination = destination;
     }
 
     /**
