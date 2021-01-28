@@ -64,7 +64,7 @@ public class ProfileBackerTest {
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, false);
         topic = new Topic(1, "Some title", "Some description");
         report = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(OffsetDateTime.class), null, null, false, 1);
+                mock(OffsetDateTime.class), null, null, false, 1, null);
         MockitoAnnotations.openMocks(this);
         profileBacker = new ProfileBacker(topicService, profileService, session, ectx);
         when(ectx.getRequestParameterMap()).thenReturn(map);

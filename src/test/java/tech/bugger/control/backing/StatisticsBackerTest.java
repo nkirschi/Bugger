@@ -1,11 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import javax.enterprise.event.Event;
-import javax.faces.context.ExternalContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
+import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.StatisticsService;
 import tech.bugger.business.service.TopicService;
@@ -21,11 +16,22 @@ import tech.bugger.business.util.Registry;
 import tech.bugger.global.transfer.ReportCriteria;
 import tech.bugger.global.transfer.Topic;
 
+import javax.enterprise.event.Event;
+import javax.faces.context.ExternalContext;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -59,6 +65,7 @@ public class StatisticsBackerTest {
     @BeforeEach
     public void setUp() {
         lenient().doReturn(Locale.ENGLISH).when(userSession).getLocale();
+        lenient().doReturn(resourceBundle).when(registry).getBundle(anyString(), any());
     }
 
     @Test
@@ -94,10 +101,23 @@ public class StatisticsBackerTest {
     }
 
     @Test
-    public void testApplyFilters() {
-        doReturn(resourceBundle).when(registry).getBundle(anyString(), any());
+    public void testInitWhenDataLoadError() throws Exception {
+        doThrow(DataAccessException.class).when(statisticsService).averageTimeOpen(any());
+        statisticsBacker.init();
+        verify(feedbackEvent).fire(new Feedback(any(), Feedback.Type.ERROR));
+    }
+
+    @Test
+    public void testApplyFiltersWhenSuccess() {
         assertNull(statisticsBacker.applyFilters());
-        verify(feedbackEvent).fire(any());
+        verify(feedbackEvent).fire(new Feedback(any(), Feedback.Type.INFO));
+    }
+
+    @Test
+    public void testApplyFiltersWhenError() throws Exception {
+        doThrow(DataAccessException.class).when(statisticsService).averageTimeOpen(any());
+        statisticsBacker.applyFilters();
+        verify(feedbackEvent).fire(new Feedback(any(), Feedback.Type.ERROR));
     }
 
     @Test

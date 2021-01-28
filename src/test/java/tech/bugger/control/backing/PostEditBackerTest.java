@@ -68,7 +68,7 @@ public class PostEditBackerTest {
         List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         report = new Report(1234, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
                 new Authorship(null, null, null, null), mock(OffsetDateTime.class),
-                null, null, false, 1);
+                null, null, false, 1, null);
         post = new Post(5678, "Some content", report.getId(), new Authorship(null, null, null, null), attachments);
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",

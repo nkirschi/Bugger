@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 import javax.enterprise.event.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,9 +69,9 @@ class TopicServiceTest {
     private final Topic testTopic2 = new Topic(2, "Hi", "performance");
     private final Topic testTopic3 = new Topic(3, "Hi", "de and seek");
     private final Report testReport1 = new Report(200, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", null,
-            mock(OffsetDateTime.class), null, null, false, 1);
+            mock(OffsetDateTime.class), null, null, false, 1, null);
     private final Report testReport2 = new Report(201, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", null,
-            mock(OffsetDateTime.class), null, null, false, 1);
+            mock(OffsetDateTime.class), null, null, false, 1, null);
 
     private User user;
 
@@ -826,11 +827,8 @@ class TopicServiceTest {
 
     @Test
     public void testDiscoverTopics() {
-        List<String> topicTitles = new ArrayList<>();
-        topicTitles.add(testTopic1.getTitle());
-        topicTitles.add(testTopic2.getTitle());
-        doReturn(topicTitles).when(topicGateway).discoverTopics();
-        List<String> titles = topicService.discoverTopics();
+        doReturn(List.of(testTopic1, testTopic2)).when(topicGateway).discoverTopics();
+        List<String> titles = topicService.discoverTopics().stream().map(Topic::getTitle).collect(Collectors.toList());
         assertAll(
                 () -> assertEquals(2, titles.size()),
                 () -> assertTrue(titles.contains(testTopic1.getTitle())),
@@ -847,13 +845,10 @@ class TopicServiceTest {
 
     @Test
     public void testSelectSubscribedTopics() {
-        List<Topic> topics = new ArrayList<>();
-        topics.add(testTopic1);
-        topics.add(testTopic2);
-        doReturn(topics).when(topicGateway).selectSubscribedTopics(user, testSelection);
+        doReturn(List.of(testTopic1, testTopic2)).when(topicGateway).selectSubscribedTopics(user, testSelection);
         List<Topic> selectedTopics = topicService.selectSubscribedTopics(user, testSelection);
         assertAll(
-                () -> assertEquals(2, topics.size()),
+                () -> assertEquals(2, selectedTopics.size()),
                 () -> assertTrue(selectedTopics.contains(testTopic1)),
                 () -> assertTrue(selectedTopics.contains(testTopic2))
         );
