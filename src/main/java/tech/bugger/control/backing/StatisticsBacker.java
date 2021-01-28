@@ -1,17 +1,6 @@
 package tech.bugger.control.backing;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.util.List;
-import java.util.ResourceBundle;
-import javax.annotation.PostConstruct;
-import javax.enterprise.event.Event;
-import javax.faces.context.ExternalContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.StatisticsService;
 import tech.bugger.business.service.TopicService;
@@ -22,6 +11,19 @@ import tech.bugger.global.transfer.TopReport;
 import tech.bugger.global.transfer.TopUser;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serial;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Backing bean for the statistics page.
@@ -145,14 +147,18 @@ public class StatisticsBacker implements Serializable {
     void init() {
         reportCriteria.setTopic(parseTopicParameter());
         topicTitles = topicService.discoverTopics();
-        loadStatistics();
+        try {
+            loadStatistics();
+        } catch (DataAccessException e) {
+            ResourceBundle messagesBundle = registry.getBundle("messages", userSession.getLocale());
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
     }
 
-    private void loadStatistics() {
+    private void loadStatistics() throws DataAccessException {
         openReportCount = statisticsService.countOpenReports(reportCriteria);
         averageTimeOpen = statisticsService.averageTimeOpen(reportCriteria);
         averagePostsPerReport = statisticsService.averagePostsPerReport(reportCriteria);
-
         topReports = statisticsService.determineTopReports(LEADERBOARDS_LIMIT);
         topUsers = statisticsService.determineTopUsers(LEADERBOARDS_LIMIT);
     }
@@ -181,8 +187,12 @@ public class StatisticsBacker implements Serializable {
      */
     public String applyFilters() {
         ResourceBundle messagesBundle = registry.getBundle("messages", userSession.getLocale());
-        feedbackEvent.fire(new Feedback(messagesBundle.getString("filters_applied"), Feedback.Type.INFO));
-        loadStatistics();
+        try {
+            loadStatistics();
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("filters_applied"), Feedback.Type.INFO));
+        } catch (DataAccessException e) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
         return null;
     }
 
