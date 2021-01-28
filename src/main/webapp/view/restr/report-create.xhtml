@@ -66,7 +66,7 @@
                                                      required="true" styleClass="form-select">
                                         <f:selectItems value="#{reportCreateBacker.reportSeverities}" var="severity"
                                                        itemValue="#{severity}"
-                                                       itemLabel="#{labels['report_severity.'.concat(severity)]}"/>
+                                                       itemLabel="#{labels['report_severity_'.concat(severity)]}"/>
                                     </h:selectOneMenu>
                                     <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                         <h:message id="m-severity" for="s-severity"/>

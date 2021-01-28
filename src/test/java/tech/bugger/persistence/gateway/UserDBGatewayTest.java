@@ -74,7 +74,7 @@ public class UserDBGatewayTest {
                 User.ProfileVisibility.MINIMAL, OffsetDateTime.now(), null, true);
         topic = new Topic(null, "title", "description");
         report = new Report(null, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "", mock(Authorship.class),
-                mock(OffsetDateTime.class), null, null, false, 0);
+                mock(OffsetDateTime.class), null, null, false, 0, null);
         selection = new Selection(2, 0, Selection.PageSize.NORMAL, "id", true);
     }
 

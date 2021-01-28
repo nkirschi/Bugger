@@ -65,7 +65,7 @@ public class ReportCreateBackerTest {
         testFirstPost = new Post(100, "Some content", 42, mock(Authorship.class), attachments);
         Report testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
                 mock(Authorship.class),
-                mock(OffsetDateTime.class), null, null, false, 1);
+                mock(OffsetDateTime.class), null, null, false, 1, null);
         reportCreateBacker.setReport(testReport);
         reportCreateBacker.setFirstPost(testFirstPost);
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();

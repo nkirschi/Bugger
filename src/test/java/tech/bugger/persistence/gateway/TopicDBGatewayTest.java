@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -750,7 +751,8 @@ class TopicDBGatewayTest {
     public void testDiscoverTopics() {
         topicGateway.createTopic(topic1);
         topicGateway.createTopic(topic2);
-        List<String> topicTitles = topicGateway.discoverTopics();
+        List<String> topicTitles = topicGateway.discoverTopics().stream().map(Topic::getTitle)
+                .collect(Collectors.toList());
         assertAll(
                 () -> assertEquals(2, topicTitles.size()),
                 () -> assertTrue(topicTitles.contains(topic1.getTitle())),
