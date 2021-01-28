@@ -199,7 +199,7 @@
                 <h:outputText id="ot-status1" value="#{reportBacker.report.closingDate == null
                               ? labels.report_status_open : labels.report_status_closed.concat(' ')}"/>
                 <h:outputText id="ot-status3" value="#{reportBacker.report.closingDate}">
-                    <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                    <f:converter converterId="offsetDateTimeConverter"/>
                 </h:outputText>
             </h:panelGroup>
         </h:panelGroup>
@@ -291,7 +291,7 @@
                     <h:panelGroup styleClass="col-12">
                         <h:outputText id="ot-created-at" value="#{labels.report_at.concat(' ')}"/>
                         <h:outputText id="ot-created-date" value="#{reportBacker.report.authorship.creationDate}">
-                            <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                            <f:converter converterId="offsetDateTimeConverter"/>
                         </h:outputText>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -335,7 +335,7 @@
                     <h:panelGroup styleClass="col-12">
                         <h:outputText id="ot-modified-at" value="#{labels.report_at.concat(' ')}"/>
                         <h:outputText id="ot-modified-date" value="#{reportBacker.report.authorship.modifiedDate}">
-                            <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                            <f:converter converterId="offsetDateTimeConverter"/>
                         </h:outputText>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -382,8 +382,7 @@
                                     <h:panelGroup styleClass="col-12">
                                         <h:outputText id="ot-post-created-at" value="#{labels.report_at.concat(' ')}"/>
                                         <h:outputText id="ot-post-created-date" value="#{var.authorship.creationDate}">
-                                            <f:convertDateTime pattern="#{labels.date_time_pattern}"
-                                                               type="offsetDateTime"/>
+                                            <f:converter converterId="offsetDateTimeConverter"/>
                                         </h:outputText>
                                     </h:panelGroup>
                                 </h:panelGroup>
@@ -413,7 +412,10 @@
                                 <h:outputText value="#{labels.id}"/>
                             </h:panelGroup>
                             <h:panelGroup styleClass="col-9">
-                                <h:outputText value="#{var.id}"/>
+                                <h:link value="###{var.id}" outcome="pretty:report">
+                                    <f:param name="id" value="#{reportBacker.report.id}"/>
+                                    <f:param name="p" value="#{var.id}"/>
+                                </h:link>
                             </h:panelGroup>
                         </h:panelGroup>
 
@@ -451,7 +453,7 @@
                                     <h:outputText id="ot-post-modified-at"
                                                   value="#{labels.report_modified_at.concat(' ')}"/>
                                     <h:outputText id="ot-post-modified-date" value="#{var.authorship.modifiedDate}">
-                                        <f:convertDateTime pattern="#{labels.date_time_pattern}" type="offsetDateTime"/>
+                                        <f:converter converterId="offsetDateTimeConverter"/>
                                     </h:outputText>
                                 </h:panelGroup>
                             </h:panelGroup>
