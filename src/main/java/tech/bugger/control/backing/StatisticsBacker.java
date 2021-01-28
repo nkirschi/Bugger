@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 /**
  * Backing bean for the statistics page.
@@ -146,7 +147,7 @@ public class StatisticsBacker implements Serializable {
     @PostConstruct
     void init() {
         reportCriteria.setTopic(parseTopicParameter());
-        topicTitles = topicService.discoverTopics();
+        topicTitles = topicService.discoverTopics().stream().map(Topic::getTitle).collect(Collectors.toList());
         try {
             loadStatistics();
         } catch (DataAccessException e) {

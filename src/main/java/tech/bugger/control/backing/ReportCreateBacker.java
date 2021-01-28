@@ -144,7 +144,8 @@ public class ReportCreateBacker implements Serializable {
 
         banned = false;
         Authorship authorship = new Authorship(user, null, user, null);
-        report = new Report(0, "", Report.Type.BUG, Report.Severity.MINOR, "", authorship, null, null, null, false, 0);
+        report = new Report(0, "", Report.Type.BUG, Report.Severity.MINOR, "", authorship, null, null, null, false, 0,
+                null);
         report.setTopicID(topicID);
         attachments = new ArrayList<>();
         firstPost = new Post(0, "", report.getId(), authorship, attachments);

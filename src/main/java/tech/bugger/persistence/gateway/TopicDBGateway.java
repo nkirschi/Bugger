@@ -472,18 +472,18 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public List<String> discoverTopics() {
-        List<String> topicTitles = new ArrayList<>();
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT title FROM topic ORDER BY title;")) {
+    public List<Topic> discoverTopics() {
+        List<Topic> topics = new ArrayList<>();
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM topic ORDER BY title;")) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                topicTitles.add(rs.getString("title"));
+                topics.add(getTopicFromResultSet(rs));
             }
         } catch (SQLException e) {
             log.error("Error while discovering all topics.", e);
             throw new StoreException("Error while discovering all topics.", e);
         }
-        return topicTitles;
+        return topics;
     }
 
     /**

@@ -77,7 +77,7 @@ public class PostServiceTest {
 
     private final User testUser = new User();
     private final Report testReport = new Report(100, "Hi", Report.Type.BUG, Report.Severity.MINOR, "1", null, null, null,
-            null, false, 100);
+            null, false, 100, null);
     private final Post testPost = new Post(300, "Hi", testReport.getId(), null, null);
     private final Topic testTopic = new Topic(100, "Hi", "I am a topic");
 

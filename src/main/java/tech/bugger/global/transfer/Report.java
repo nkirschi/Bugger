@@ -132,10 +132,11 @@ public class Report implements Serializable {
      * @param relevance            The relevance value for the Report.
      * @param relevanceOverwritten The state of the relevance overwrite.
      * @param topicID              The ID of topic the report belongs to.
+     * @param topic                The title of topic the report belongs to.
      */
     public Report(final Integer id, final String title, final Type type, final Severity severity, final String version,
                   final Authorship authorship, final OffsetDateTime closingDate, final Integer duplicateOf,
-                  final Integer relevance, final boolean relevanceOverwritten, final int topicID) {
+                  final Integer relevance, final boolean relevanceOverwritten, final int topicID, final String topic) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -147,13 +148,15 @@ public class Report implements Serializable {
         this.relevance = relevance;
         this.relevanceOverwritten = relevanceOverwritten;
         this.topicID = topicID;
+        this.topic = topic;
     }
 
     /**
      * Constructs an empty report.
      */
     public Report() {
-        this(0, "", Type.BUG, Severity.MINOR, "", new Authorship(null, null, null, null), null, null, null, false, 0);
+        this(0, "", Type.BUG, Severity.MINOR, "", new Authorship(null, null, null, null), null, null, null, false, 0,
+                null);
     }
 
     /**
@@ -163,7 +166,8 @@ public class Report implements Serializable {
      */
     public Report(final Report report) {
         this(report.id, report.title, report.type, report.severity, report.version, report.authorship,
-                report.closingDate, report.duplicateOf, report.relevance, report.relevanceOverwritten, report.topicID);
+                report.closingDate, report.duplicateOf, report.relevance, report.relevanceOverwritten, report.topicID,
+                report.topic);
         this.lastActivity = report.lastActivity;
         this.topic = report.topic;
     }
