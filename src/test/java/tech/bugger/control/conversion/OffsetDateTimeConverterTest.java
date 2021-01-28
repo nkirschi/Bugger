@@ -4,16 +4,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ResourceBundle;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(MockitoExtension.class)
 public class OffsetDateTimeConverterTest {
@@ -35,11 +38,13 @@ public class OffsetDateTimeConverterTest {
 
     @Test
     public void testGetAsString() {
-        doReturn("yyyy-MM-dd HH:mm Z").when(labelsBundle).getString("date_time_pattern");
-        OffsetDateTime dateTime = OffsetDateTime.of(LocalDate.of(2020, 12, 31),
-                                                    LocalTime.of(14, 42, 7),
-                                                    ZoneOffset.ofHours(1));
-        assertEquals("2020-12-31 14:42 +0100", offsetDateTimeConverter.getAsString(null, null, dateTime));
+        ZoneId mezZone = ZoneId.ofOffset("", ZoneOffset.ofHours(1));
+        try (MockedStatic<ZoneId> zoneId = mockStatic(ZoneId.class)) {
+            zoneId.when(ZoneId::systemDefault).thenReturn(mezZone);
+            doReturn("yyyy-MM-dd HH:mm Z").when(labelsBundle).getString("date_time_pattern");
+            OffsetDateTime odt = OffsetDateTime.of(LocalDate.of(2020, 12, 31), LocalTime.of(14, 42, 7), ZoneOffset.UTC);
+            assertEquals("2020-12-31 15:42 +0100", offsetDateTimeConverter.getAsString(null, null, odt));
+        }
     }
 
 }
