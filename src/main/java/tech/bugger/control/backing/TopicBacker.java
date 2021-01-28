@@ -1,14 +1,6 @@
 package tech.bugger.control.backing;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
@@ -20,6 +12,16 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Backing bean for the topic page.
@@ -179,22 +181,30 @@ public class TopicBacker implements Serializable {
     private final ExternalContext ectx;
 
     /**
+     * The application settings cache.
+     */
+    private final ApplicationSettings applicationSettings;
+
+    /**
      * Constructs a new topic page backing bean with the necessary dependencies.
      *
-     * @param topicService  The topic service to use.
-     * @param searchService The search service to use.
-     * @param ectx          The current {@link ExternalContext} of the application.
-     * @param session       The current {@link UserSession}.
+     * @param topicService        The topic service to use.
+     * @param searchService       The search service to use.
+     * @param ectx                The current {@link ExternalContext} of the application.
+     * @param session             The current {@link UserSession}.
+     * @param applicationSettings The application settings cache.
      */
     @Inject
     public TopicBacker(final TopicService topicService,
                        final SearchService searchService,
                        final ExternalContext ectx,
-                       final UserSession session) {
+                       final UserSession session,
+                       final ApplicationSettings applicationSettings) {
         this.topicService = topicService;
         this.searchService = searchService;
         this.ectx = ectx;
         this.session = session;
+        this.applicationSettings = applicationSettings;
     }
 
     /**
@@ -216,7 +226,7 @@ public class TopicBacker implements Serializable {
         User user = session.getUser();
         topic = topicService.getTopicByID(topicID);
         banned = topicService.isBanned(user, topic);
-        if (topic == null || banned) {
+        if (topic == null || (!applicationSettings.getConfiguration().isGuestReading() && banned)) {
             throw new Error404Exception();
         }
 
