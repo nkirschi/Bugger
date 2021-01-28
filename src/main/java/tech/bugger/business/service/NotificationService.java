@@ -1,6 +1,7 @@
 package tech.bugger.business.service;
 
 // import tech.bugger.business.util.Feedback;
+import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
 import tech.bugger.business.util.Registry;
@@ -88,7 +89,7 @@ public class NotificationService {
      *
      * @param notification The notification to be deleted.
      */
-    public void deleteNotification(final Notification notification) {
+    public boolean deleteNotification(final Notification notification) throws DataAccessException {
         if (notification == null) {
             log.error("Cannot delete notification null.");
             throw new IllegalArgumentException("Notification cannot be null.");
@@ -100,11 +101,14 @@ public class NotificationService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newNotificationGateway().delete(notification);
             tx.commit();
+            return true;
         } catch (NotFoundException e) {
             log.error("Could not find notification to delete " + notification + ".", e);
+            return false;
             // feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error when deleting notification " + notification + ".", e);
+            throw new DataAccessException("Error when deleting notification " + notification + ".", e);
             // feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
     }

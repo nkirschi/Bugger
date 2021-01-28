@@ -1,22 +1,28 @@
 package tech.bugger.control.backing;
 
-import java.io.IOException;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.OffsetDateTime;
+import tech.bugger.business.exception.DataAccessException;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.service.NotificationService;
+import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.MarkdownHandler;
+import tech.bugger.business.util.Paginator;
+import tech.bugger.business.util.Registry;
+import tech.bugger.global.transfer.Notification;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+
 import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.NotificationService;
-import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.MarkdownHandler;
-import tech.bugger.business.util.Paginator;
-import tech.bugger.global.transfer.Notification;
-import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.OffsetDateTime;
+import java.util.ResourceBundle;
 
 /**
  * Backing Bean for the home page.
@@ -59,22 +65,44 @@ public class HomeBacker implements Serializable {
     private final ExternalContext ectx;
 
     /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Resource bundle for feedback messages.
+     */
+    private ResourceBundle messagesBundle;
+
+    /**
+     * The current registry which to retrieve resource bundles from.
+     */
+    private final Registry registry;
+
+    /**
      * Constructs a new home page backing bean.
      *
      * @param session             The current user session.
      * @param notificationService The notification service to use.
      * @param topicService        The topic service to use.
      * @param ectx                The current external context.
+     * @param feedbackEvent       The feedback event to use for user feedback.
+     * @param registry            The current registry.
      */
     @Inject
     public HomeBacker(final UserSession session,
                       final NotificationService notificationService,
                       final TopicService topicService,
-                      final ExternalContext ectx) {
+                      final ExternalContext ectx,
+                      final Event<Feedback> feedbackEvent,
+                      final Registry registry) {
         this.session = session;
         this.notificationService = notificationService;
         this.topicService = topicService;
         this.ectx = ectx;
+        this.feedbackEvent = feedbackEvent;
+        this.registry = registry;
+        messagesBundle = registry.getBundle("messages", session.getLocale());
     }
 
     /**
@@ -108,6 +136,10 @@ public class HomeBacker implements Serializable {
         };
     }
 
+    private void changeMessageBundle() {
+        messagesBundle = registry.getBundle("messages", session.getLocale());
+    }
+
     /**
      * Irreversibly deletes the notification.
      *
@@ -115,7 +147,14 @@ public class HomeBacker implements Serializable {
      * @return {@code null}
      */
     public String deleteNotification(final Notification notification) {
-        notificationService.deleteNotification(notification);
+        changeMessageBundle();
+        try {
+            if (!notificationService.deleteNotification(notification)) {
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            }
+        } catch (DataAccessException e) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
         inbox.updateReset();
         return null;
     }
