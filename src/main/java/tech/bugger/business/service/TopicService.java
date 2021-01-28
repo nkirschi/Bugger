@@ -354,16 +354,18 @@ public class TopicService {
      * Creates a new topic. Only administrators can do that.
      *
      * @param topic The topic to be created.
+     * @param creator The administrator who is creating the topic.
      * @return {@code true} iff creating the topic succeeded.
      */
-    public boolean createTopic(final Topic topic) {
+    public boolean createTopic(final Topic topic, final User creator) {
         try (Transaction tx = transactionManager.begin()) {
             tx.newTopicGateway().createTopic(topic);
             tx.commit();
             log.info("Topic created successfully.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("topic_created"), Feedback.Type.INFO));
+            tx.newSubscriptionGateway().subscribe(topic, creator);
             return true;
-        } catch (TransactionException | NotFoundException e) {
+        } catch (TransactionException | NotFoundException | DuplicateException e) {
             log.error("Error while creating a new Topic.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
         }
@@ -383,8 +385,8 @@ public class TopicService {
             tx.commit();
             return true;
         } catch (NotFoundException e) {
-            createTopic(topic);
-            return true;
+            log.error("Topic to update " + topic + " not found.", e);
+            return false;
         } catch (TransactionException e) {
             log.error("Error while updating a report.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));

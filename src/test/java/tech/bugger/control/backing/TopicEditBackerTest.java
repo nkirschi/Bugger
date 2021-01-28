@@ -136,11 +136,11 @@ public class TopicEditBackerTest {
     @Test
     public void testSaveChangesCreate() throws IOException, IllegalAccessException {
         create.setBoolean(topicEditBacker, true);
-        doReturn(true).when(topicService).createTopic(topic);
+        doReturn(true).when(topicService).createTopic(eq(topic), any());
         topicEditBacker.setTopic(topic);
         topicEditBacker.saveChanges();
         verify(ext).redirect(any());
-        verify(topicService).createTopic(topic);
+        verify(topicService).createTopic(eq(topic), any());
     }
 
     @Test

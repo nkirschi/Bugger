@@ -107,7 +107,7 @@ public class TopicEditBacker implements Serializable {
     public String saveChanges() throws IOException {
         boolean success;
         if (create) {
-            success = topicService.createTopic(topic);
+            success = topicService.createTopic(topic, session.getUser());
         } else {
             success = topicService.updateTopic(topic);
         }
