@@ -1,15 +1,5 @@
 package tech.bugger.business.service;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.servlet.http.Part;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
@@ -26,6 +16,17 @@ import tech.bugger.persistence.gateway.AttachmentGateway;
 import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.servlet.http.Part;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Service providing methods related to posts and attachments. A {@link Feedback} event is fired, if unexpected
@@ -390,6 +391,7 @@ public class PostService {
             Topic topic = tx.newTopicGateway().findTopic(report.getTopicID());
             UserGateway userGateway = tx.newUserGateway();
             if (userGateway.isBanned(user, topic)) {
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("user_banned"), Feedback.Type.ERROR));
                 tx.commit();
                 return false;
             } else if (userGateway.isModerator(user, topic) || user.equals(post.getAuthorship().getCreator())) {

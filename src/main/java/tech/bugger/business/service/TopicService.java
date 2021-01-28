@@ -1,12 +1,5 @@
 package tech.bugger.business.service;
 
-import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Report;
@@ -21,6 +14,14 @@ import tech.bugger.persistence.gateway.TopicGateway;
 import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Service providing methods related to topics. A {@link Feedback} event is fired, if unexpected circumstances occur.
@@ -692,6 +693,11 @@ public class TopicService {
                     + "with id " + topic.getId(), e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+
+        if (isBanned) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("user_banned"), Feedback.Type.ERROR));
+        }
+
         return isBanned;
     }
 

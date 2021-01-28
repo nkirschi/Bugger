@@ -1,5 +1,6 @@
 package tech.bugger.control.backing;
 
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
@@ -180,22 +181,30 @@ public class TopicBacker implements Serializable {
     private final ExternalContext ectx;
 
     /**
+     * The application settings cache.
+     */
+    private final ApplicationSettings applicationSettings;
+
+    /**
      * Constructs a new topic page backing bean with the necessary dependencies.
      *
-     * @param topicService  The topic service to use.
-     * @param searchService The search service to use.
-     * @param ectx          The current {@link ExternalContext} of the application.
-     * @param session       The current {@link UserSession}.
+     * @param topicService        The topic service to use.
+     * @param searchService       The search service to use.
+     * @param ectx                The current {@link ExternalContext} of the application.
+     * @param session             The current {@link UserSession}.
+     * @param applicationSettings The application settings cache.
      */
     @Inject
     public TopicBacker(final TopicService topicService,
                        final SearchService searchService,
                        final ExternalContext ectx,
-                       final UserSession session) {
+                       final UserSession session,
+                       final ApplicationSettings applicationSettings) {
         this.topicService = topicService;
         this.searchService = searchService;
         this.ectx = ectx;
         this.session = session;
+        this.applicationSettings = applicationSettings;
     }
 
     /**
@@ -220,7 +229,7 @@ public class TopicBacker implements Serializable {
             throw new Error404Exception();
         }
         banned = topicService.isBanned(user, topic);
-        if (banned) {
+        if (!applicationSettings.getConfiguration().isGuestReading() && banned) {
             throw new Error404Exception();
         }
 
