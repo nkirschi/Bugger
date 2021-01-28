@@ -118,19 +118,12 @@
                     </h:panelGroup>
 
                     <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
-                        <h:outputLabel id="ol-topic" for="it-topic" value="#{labels.report_topic}"
+                        <h:outputLabel id="ol-topic" for="s-topic" value="#{labels.report_topic}"
                                        styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group">
-                            <h:inputText id="it-topic" value="#{reportEditBacker.destinationID}"
-                                         a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
-                                         #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
-                                         : 'is-invalid'}">
-                                <f:validateLength maximum="#{C.SMALL_FIELD}"/>
-                            </h:inputText>
-                        </h:panelGroup>
-                        <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                            <h:message id="m-topic" for="it-topic"/>
-                        </h:panelGroup>
+                        <h:selectOneMenu id="s-topic" styleClass="form-select"
+                                         value="#{reportEditBacker.destination}">
+                            <f:selectItems value="#{reportEditBacker.topicTitles}"/>
+                        </h:selectOneMenu>
                     </h:panelGroup>
 
                     <h:commandButton value="#{labels.report_edit_submit}"

@@ -67,7 +67,7 @@ public class ReportDBGatewayTest {
         authorship.getModifier().setId(1);
         report = new Report(0, "App crashes", Report.Type.HINT, Report.Severity.SEVERE, "1.4.1",
                 new Authorship(null, OffsetDateTime.now(), null, OffsetDateTime.now()), null,
-                null, null, false, 1);
+                null, null, false, 1, null);
         selection = new Selection(3, 0, Selection.PageSize.LARGE, "ID", true);
     }
 
@@ -185,7 +185,7 @@ public class ReportDBGatewayTest {
         if (rs.next()) {
             return new Report(
                     rs.getInt("id"), rs.getString("title"),
-                    null, null, null, null, null, null, null, false, 0
+                    null, null, null, null, null, null, null, false, 0, null
             );
         } else {
             return null;

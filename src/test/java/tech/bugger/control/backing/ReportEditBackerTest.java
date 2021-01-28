@@ -1,6 +1,8 @@
 package tech.bugger.control.backing;
 
+import java.lang.reflect.Field;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.faces.context.ExternalContext;
@@ -25,7 +27,6 @@ import tech.bugger.global.transfer.User;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -63,6 +64,7 @@ public class ReportEditBackerTest {
     private Configuration configuration;
 
     private Topic testTopic;
+    private Topic testTopic2;
     private Report testReport;
     private User user;
 
@@ -74,10 +76,11 @@ public class ReportEditBackerTest {
 
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
                 new Authorship(null, null, null, null), mock(OffsetDateTime.class),
-                null, null, false, 1);
+                null, null, false, 1, "Some title");
         reportEditBacker.setReport(testReport);
         reportEditBacker.setReportID(testReport.getId());
         testTopic = new Topic(1, "Some title", "Some description");
+        testTopic2 = new Topic(2, "Some title2", "Some description 2");
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
                 "User",
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
@@ -88,6 +91,12 @@ public class ReportEditBackerTest {
         lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
         lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
+    }
+
+    private void setTopicsInBacker(List<Topic> topics) throws Exception {
+        Field field = ReportEditBacker.class.getDeclaredField("topics");
+        field.setAccessible(true);
+        field.set(reportEditBacker, topics);
     }
 
     @Test
@@ -101,7 +110,7 @@ public class ReportEditBackerTest {
         reportEditBacker.init();
         assertEquals(testReport, reportEditBacker.getReport());
         assertEquals(testTopic, reportEditBacker.getCurrentTopic());
-        assertEquals(testTopic.getId(), reportEditBacker.getDestinationID());
+        assertEquals(testTopic.getTitle(), reportEditBacker.getDestination());
         assertEquals(user, reportEditBacker.getReport().getAuthorship().getModifier());
     }
 
@@ -140,37 +149,37 @@ public class ReportEditBackerTest {
 
     @Test
     public void testSaveChangesWithConfirm() {
-        reportEditBacker.setDestinationID(testReport.getTopicID());
+        reportEditBacker.setDestination(testReport.getTopic());
         doReturn(true).when(reportService).updateReport(any());
         reportEditBacker.saveChangesWithConfirm();
         assertFalse(reportEditBacker.isDisplayConfirmDialog());
     }
 
     @Test
-    public void testSaveChangesWithConfirmWhenCanMove() {
-        reportEditBacker.setDestinationID(42);
+    public void testSaveChangesWithConfirmWhenCanMove() throws Exception {
+        setTopicsInBacker(List.of(testTopic, testTopic2));
+        reportEditBacker.setDestination("Some title2");
         doReturn(mock(User.class)).when(session).getUser();
-        doReturn(testTopic).when(topicService).getTopicByID(anyInt());
         doReturn(false).when(topicService).isBanned(any(), any());
         reportEditBacker.saveChangesWithConfirm();
         assertTrue(reportEditBacker.isDisplayConfirmDialog());
     }
 
     @Test
-    public void testSaveChangesWithConfirmWhenCannotMove() {
-        reportEditBacker.setDestinationID(42);
+    public void testSaveChangesWithConfirmWhenCannotMove() throws Exception {
+        setTopicsInBacker(List.of(testTopic, testTopic2));
+        reportEditBacker.setDestination("Does not exist for some reason");
         doReturn(mock(User.class)).when(session).getUser();
-        doReturn(null).when(topicService).getTopicByID(42);
         assertFalse(reportEditBacker.isDisplayConfirmDialog());
         reportEditBacker.saveChangesWithConfirm();
         verify(fctx).addMessage(any(), any());
     }
 
     @Test
-    public void testSaveChangesWithConfirmWhenBanned() {
-        reportEditBacker.setDestinationID(42);
+    public void testSaveChangesWithConfirmWhenBanned() throws Exception {
+        setTopicsInBacker(List.of(testTopic, testTopic2));
+        reportEditBacker.setDestination("Some title2");
         doReturn(mock(User.class)).when(session).getUser();
-        doReturn(testTopic).when(topicService).getTopicByID(anyInt());
         doReturn(true).when(topicService).isBanned(any(), any());
         reportEditBacker.saveChangesWithConfirm();
         assertFalse(reportEditBacker.isDisplayConfirmDialog());
@@ -179,16 +188,17 @@ public class ReportEditBackerTest {
     @Test
     public void testSaveChanges() throws Exception {
         doReturn(true).when(reportService).updateReport(any());
-        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopicID());
+        reportEditBacker.setDestination(reportEditBacker.getReport().getTopic());
         reportEditBacker.saveChanges();
         verify(ectx).redirect(any());
     }
 
     @Test
     public void testSaveChangesMove() throws Exception {
+        setTopicsInBacker(List.of(testTopic, testTopic2));
         doReturn(true).when(reportService).move(any());
         doReturn(true).when(reportService).updateReport(any());
-        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopicID() + 1);
+        reportEditBacker.setDestination(reportEditBacker.getReport().getTopic() + "2");
         reportEditBacker.saveChanges();
         verify(ectx).redirect(any());
     }
@@ -196,15 +206,16 @@ public class ReportEditBackerTest {
     @Test
     public void testSaveChangesWhenError() throws Exception {
         doReturn(false).when(reportService).updateReport(any());
-        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopicID());
+        reportEditBacker.setDestination(reportEditBacker.getReport().getTopic());
         reportEditBacker.saveChanges();
         verify(ectx, times(0)).redirect(any());
     }
 
     @Test
     public void testSaveChangesWhenMoveError() throws Exception {
+        setTopicsInBacker(List.of(testTopic, testTopic2));
         doReturn(false).when(reportService).move(any());
-        reportEditBacker.setDestinationID(reportEditBacker.getReport().getTopicID() + 1);
+        reportEditBacker.setDestination(reportEditBacker.getReport().getTopic() + "2");
         reportEditBacker.saveChanges();
         verify(ectx, times(0)).redirect(any());
     }
@@ -212,52 +223,50 @@ public class ReportEditBackerTest {
     @Test
     public void testIsDisplayNoModerationWarningWhenNotChanged() {
         reportEditBacker.setCurrentTopic(testTopic);
-        reportEditBacker.setDestinationID(testTopic.getId());
+        reportEditBacker.setDestination(testTopic.getTitle());
         assertFalse(reportEditBacker.isDisplayNoModerationWarning());
     }
 
     @Test
-    public void testIsDisplayNoModerationWarningWhenNotLoggedIn() {
+    public void testIsDisplayNoModerationWarningWhenNotLoggedIn() throws Exception {
+        setTopicsInBacker(List.of(testTopic, testTopic2));
         doReturn(null).when(session).getUser();
         assertFalse(reportEditBacker.isDisplayNoModerationWarning());
     }
 
     @Test
-    public void testIsDisplayNoModerationWarningWhenInvalidDestination() {
-        reportEditBacker.setDestinationID(42);
+    public void testIsDisplayNoModerationWarningWhenInvalidDestination() throws Exception {
+        setTopicsInBacker(List.of(testTopic, testTopic2));
+        reportEditBacker.setDestination("Some title2");
         doReturn(mock(User.class)).when(session).getUser();
-        doReturn(null).when(topicService).getTopicByID(42);
         assertFalse(reportEditBacker.isDisplayNoModerationWarning());
     }
 
     @Test
-    public void testIsDisplayNoModerationWarningWhenCurrentTopicNotMod() {
-        reportEditBacker.setDestinationID(42);
-        Topic destination = mock(Topic.class);
-        doReturn(destination).when(topicService).getTopicByID(42);
+    public void testIsDisplayNoModerationWarningWhenCurrentTopicNotMod() throws Exception {
+        setTopicsInBacker(List.of(testTopic, testTopic2));
+        reportEditBacker.setDestination("Some title2");
         doReturn(false).when(topicService).isModerator(any(), eq(testTopic));
         doReturn(mock(User.class)).when(session).getUser();
         assertFalse(reportEditBacker.isDisplayNoModerationWarning());
     }
 
     @Test
-    public void testIsDisplayNoModerationWarningWhenNewTopicMod() {
-        reportEditBacker.setDestinationID(42);
-        Topic destination = mock(Topic.class);
-        doReturn(destination).when(topicService).getTopicByID(42);
+    public void testIsDisplayNoModerationWarningWhenNewTopicMod() throws Exception {
+        setTopicsInBacker(List.of(testTopic, testTopic2));
+        reportEditBacker.setDestination("Some title2");
         doReturn(true).when(topicService).isModerator(any(), eq(testTopic));
-        doReturn(true).when(topicService).isModerator(any(), eq(destination));
+        doReturn(true).when(topicService).isModerator(any(), eq(testTopic2));
         doReturn(mock(User.class)).when(session).getUser();
         assertFalse(reportEditBacker.isDisplayNoModerationWarning());
     }
 
     @Test
-    public void testIsDisplayNoModerationWarningWhenTrue() {
-        reportEditBacker.setDestinationID(42);
-        Topic destination = mock(Topic.class);
-        doReturn(destination).when(topicService).getTopicByID(42);
+    public void testIsDisplayNoModerationWarningWhenTrue() throws Exception {
+        setTopicsInBacker(List.of(testTopic, testTopic2));
+        reportEditBacker.setDestination("Some title2");
         doReturn(true).when(topicService).isModerator(any(), eq(testTopic));
-        doReturn(false).when(topicService).isModerator(any(), eq(destination));
+        doReturn(false).when(topicService).isModerator(any(), eq(testTopic2));
         doReturn(mock(User.class)).when(session).getUser();
         assertTrue(reportEditBacker.isDisplayNoModerationWarning());
     }
