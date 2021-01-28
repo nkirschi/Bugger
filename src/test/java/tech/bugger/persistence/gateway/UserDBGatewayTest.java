@@ -1,13 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Locale;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,9 +16,30 @@ import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.StoreException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Locale;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 
 @ExtendWith(DBExtension.class)
 @ExtendWith(LogExtension.class)
@@ -510,11 +523,25 @@ public class UserDBGatewayTest {
     }
 
     @Test
+    public void testIsBannedUserNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.isBanned(null, topic)
+        );
+    }
+
+    @Test
     public void testIsBannedUserIdNull() {
         user.setId(null);
         topic.setId(1);
         assertThrows(IllegalArgumentException.class,
                 () -> userGateway.isBanned(user, topic)
+        );
+    }
+
+    @Test
+    public void testIsBannedTopicNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userGateway.isBanned(user, null)
         );
     }
 

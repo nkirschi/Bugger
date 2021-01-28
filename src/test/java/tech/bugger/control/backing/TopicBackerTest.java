@@ -1,26 +1,39 @@
 package tech.bugger.control.backing;
 
 import com.sun.faces.context.RequestParameterMap;
-import java.lang.reflect.Field;
-import java.util.Locale;
-import javax.faces.context.ExternalContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
+import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
 import tech.bugger.control.exception.Error404Exception;
+import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
-import static org.junit.jupiter.api.Assertions.*;
+import javax.faces.context.ExternalContext;
+import java.lang.reflect.Field;
+import java.util.Locale;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
@@ -36,6 +49,12 @@ public class TopicBackerTest {
 
     @Mock
     private SearchService searchService;
+
+    @Mock
+    private ApplicationSettings applicationSettings;
+
+    @Mock
+    private Configuration configuration;
 
     @Mock
     private ExternalContext ectx;
@@ -55,8 +74,9 @@ public class TopicBackerTest {
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
                 Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic = new Topic(1, "Some title", "Some description");
-        topicBacker = new TopicBacker(topicService, searchService, ectx, session);
+        topicBacker = new TopicBacker(topicService, searchService, ectx, session, applicationSettings);
         lenient().doReturn(map).when(ectx).getRequestParameterMap();
+        lenient().doReturn(configuration).when(applicationSettings).getConfiguration();
     }
 
     @Test
@@ -200,11 +220,11 @@ public class TopicBackerTest {
         when(session.getUser()).thenReturn(user);
         when(topicService.makeModerator(USERNAME, topic)).thenReturn(true);
         Field moderators = topicBacker.getClass().getDeclaredField("moderators");
+        Field banned = topicBacker.getClass().getDeclaredField("bannedUsers");
         moderators.setAccessible(true);
         moderators.set(topicBacker, mock(Paginator.class));
-        Field bannedUsers = topicBacker.getClass().getDeclaredField("bannedUsers");
-        bannedUsers.setAccessible(true);
-        bannedUsers.set(topicBacker, mock(Paginator.class));
+        banned.setAccessible(true);
+        banned.set(topicBacker, mock(Paginator.class));
         assertAll(
                 () -> assertEquals("", topicBacker.makeModerator()),
                 () -> assertNull(topicBacker.getTopicDialog())

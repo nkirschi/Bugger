@@ -22,6 +22,13 @@
                 <h:form id="f-profile-edit" rendered="#{userSession.user != null and userSession.user.administrator
                         or userSession.user.id == profileEditBacker.user.id}" enctype="multipart/form-data">
 
+                    <h:panelGroup layout="block" styleClass="align-right">
+                        <h:link id="l-profile" outcome="pretty:profile" value="@#{profileEditBacker.user.username}"
+                                styleClass="profile-info">
+                            <f:param name="u" value="#{profileEditBacker.user.username}"/>
+                        </h:link>
+                    </h:panelGroup>
+
                     <h:panelGroup layout="block" id="p-avatar" styleClass="mb-3 form-group position-relative">
                         <h:graphicImage id="g-avatar" value="avatar?id=#{profileEditBacker.user.id}"
                                         styleClass="img-thumbnail" alt="The user's avatar"
