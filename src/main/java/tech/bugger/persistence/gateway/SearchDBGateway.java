@@ -239,16 +239,10 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getUserSuggestions(final String query, final int limit) {
         validateSuggestionParams(query, limit);
         List<String> userResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
-
         try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct u.username FROM \"user\" AS u "
                 + "WHERE TRIM(LOWER(u.username)) LIKE CONCAT('%',?,'%') LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string(newQuery)
+                    .string(query)
                     .integer(limit)
                     .toStatement().executeQuery();
 
@@ -270,16 +264,10 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getTopicSuggestions(final String query, final int limit) {
         validateSuggestionParams(query, limit);
         List<String> topicResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
-
         try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct t.title FROM \"topic\" AS t "
                 + "WHERE TRIM(LOWER(t.title)) LIKE CONCAT('%',?,'%') LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string(newQuery)
+                    .string(query)
                     .integer(limit)
                     .toStatement().executeQuery();
 
@@ -301,16 +289,10 @@ public class SearchDBGateway implements SearchGateway {
     public List<String> getReportSuggestions(final String query, final int limit) {
         validateSuggestionParams(query, limit);
         List<String> reportResults = new ArrayList<>(limit);
-        String newQuery = query
-                .replace("!", "!!")
-                .replace("%", "!%")
-                .replace("_", "!_")
-                .replace("[", "![");
-
         try (PreparedStatement stmt = conn.prepareStatement("SELECT distinct t.title FROM \"report\" AS t "
                 + "WHERE TRIM(LOWER(t.title)) LIKE CONCAT('%',?,'%') LIMIT ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
-                    .string(newQuery)
+                    .string(query)
                     .integer(limit)
                     .toStatement().executeQuery();
 
@@ -569,7 +551,6 @@ public class SearchDBGateway implements SearchGateway {
                                            final boolean showClosedReports, final boolean showDuplicates,
                                            final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
                                            final Map<Report.Severity, Boolean> severityFilter) {
-        // TODO Markus: For now, I removed this duplicated code :)
         return getReportResults(query, selection, latestOpeningDateTime, earliestClosingDateTime, showOpenReports,
                 showClosedReports, showDuplicates, topic, reportTypeFilter, severityFilter);
     }
@@ -707,7 +688,6 @@ public class SearchDBGateway implements SearchGateway {
                                           final boolean showClosedReports, final boolean showDuplicates,
                                           final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
                                           final Map<Report.Severity, Boolean> severityFilter) {
-        // TODO Markus: is that still needed? It's being used somewhere at least...
         return 0;
     }
 

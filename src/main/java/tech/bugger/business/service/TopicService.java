@@ -621,17 +621,6 @@ public class TopicService {
     }
 
     /**
-     * Gets the number of posts in a certain topic.
-     *
-     * @param topic The topic which the posts belong to.
-     * @return The number of posts.
-     */
-    public int getNumberOfPosts(final Topic topic) {
-        // TODO Markus: Unused, remove or use?
-        return 0;
-    }
-
-    /**
      * Gets the number of existing topics.
      *
      * @return The number of topics.
