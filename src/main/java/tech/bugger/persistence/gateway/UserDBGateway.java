@@ -549,8 +549,14 @@ public class UserDBGateway implements UserGateway {
      */
     @Override
     public boolean isBanned(final User user, final Topic topic) {
-        if (user == null || user.getId() == null || topic == null || topic.getId() == null) {
-            throw new IllegalArgumentException("The user or topic ID cannot be null!");
+        if (user == null) {
+            throw new IllegalArgumentException("Cannot ban user null!");
+        } else if (user.getId() == null) {
+            throw new IllegalArgumentException("Cannot ban user with ID null!");
+        } else if (topic == null) {
+            throw new IllegalArgumentException("Cannot ban user from topic null!");
+        } else if (topic.getId() == null) {
+            throw new IllegalArgumentException("Cannot ban user from topic with ID null!");
         }
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM topic_ban WHERE outcast = ? "
