@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tech.bugger.LogExtension;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mockStatic;
 
+@ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
 public class OffsetDateTimeConverterTest {
 

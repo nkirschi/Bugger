@@ -2,11 +2,14 @@ package tech.bugger.control.conversion;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import tech.bugger.LogExtension;
 
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(LogExtension.class)
 public class LocaleConverterTest {
 
     private LocaleConverter localeConverter;

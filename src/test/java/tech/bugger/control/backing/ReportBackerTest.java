@@ -1,8 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.time.OffsetDateTime;
-import java.util.Locale;
-import javax.faces.context.ExternalContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,8 +16,12 @@ import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
 
+import javax.faces.context.ExternalContext;
+import java.time.OffsetDateTime;
+import java.util.Locale;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
@@ -63,189 +64,16 @@ public class ReportBackerTest {
                 mock(OffsetDateTime.class), null, null, false, 1, null);
     }
 
-    /*@Test
-    public void testIsPrivileged() {
-        Authorship authorship = new Authorship(user, OffsetDateTime.now(), null, null);
-        report.setAuthorship(authorship);
-        reportBacker.setReport(report);
-        when(session.getUser()).thenReturn(user);
-        assertTrue(reportBacker.isPrivileged());
-    }
-
-    @Test
-    public void testIsPrivilegedUserModerator() {
-        reportBacker.setReport(report);
-        when(session.getUser()).thenReturn(user);
-        when(topicService.isModerator(any(), any())).thenReturn(true);
-        assertTrue(reportBacker.isPrivileged());
-    }
-
-    @Test
-    public void testIsPrivilegedUserAdmin() {
-        reportBacker.setReport(report);
-        user.setAdministrator(true);
-        when(session.getUser()).thenReturn(user);
-        assertTrue(reportBacker.isPrivileged());
-    }
-
-    @Test
-    public void testIsPrivilegedNot() {
-        Authorship authorship = new Authorship(new User(user), OffsetDateTime.now(), null, null);
-        user.setId(2);
-        report.setAuthorship(authorship);
-        reportBacker.setReport(report);
-        when(session.getUser()).thenReturn(user);
-        assertFalse(reportBacker.isPrivileged());
-    }*/
-
     @Test
     public void testIsPrivilegedUserNull() {
         reportBacker.setReport(report);
         assertFalse(reportBacker.isPrivileged());
     }
 
-   /* @Test
-    public void testIsPrivilegedReportNull() {
-        when(session.getUser()).thenReturn(user);
-        assertFalse(reportBacker.isPrivileged());
-    }
-
-    @Test
-    public void testIsPrivilegedUserBanned() {
-        reportBacker.setReport(report);
-        when(session.getUser()).thenReturn(user);
-        when(topicService.isBanned(any(), any())).thenReturn(true);
-        assertFalse(reportBacker.isPrivileged());
-    }
-
-    @Test
-    public void testIsBanned() {
-        reportBacker.setReport(report);
-        when(session.getUser()).thenReturn(user);
-        when(topicService.isBanned(any(), any())).thenReturn(true);
-        assertTrue(reportBacker.isBanned());
-    }
-
-    @Test
-    public void testIsBannedFalse() {
-        reportBacker.setReport(report);
-        when(session.getUser()).thenReturn(user);
-        assertFalse(reportBacker.isBanned());
-    }*/
-
     @Test
     public void testIsBannedUserNull() {
         reportBacker.setReport(report);
         assertFalse(reportBacker.isBanned());
     }
-
-    /*@Test
-    public void testIsBannedReportNull() {
-        when(session.getUser()).thenReturn(user);
-        assertFalse(reportBacker.isBanned());
-    }*/
-
-    /*@Test
-    public void testMarkDuplicateNoneSelected() {
-        reportBacker.setDuplicateOfID(null);
-        reportBacker.markDuplicate();
-        assertAll(() -> verify(reportService, never()).markDuplicate(any(), anyInt()),
-                  () -> verify(reportService, never()).close(any()));
-    }
-
-    @Test
-    public void testMarkDuplicateInvalidIsSelected() {
-        reportBacker.setDuplicateOfID(42);
-        reportBacker.markDuplicate();
-        verify(reportService, never()).close(any());
-    }
-
-    @Test
-    public void testMarkDuplicateValidIsSelectedAndUnprivileged() {
-        reportBacker.setReport(report);
-        reportBacker.setDuplicateOfID(100);
-        reportBacker.markDuplicate();
-        verify(reportService, never()).markDuplicate(any(), anyInt());
-        verify(reportService, never()).close(any());
-    }
-
-    @Test
-    public void testMarkDuplicateErrorInService() {
-        user.setAdministrator(true);
-        when(session.getUser()).thenReturn(user);
-        reportBacker.setReport(report);
-        reportBacker.setDuplicateOfID(100);
-        reportBacker.markDuplicate();
-        verify(reportService).markDuplicate(any(), anyInt());
-        verify(reportService, never()).close(any());
-    }
-
-    @Test
-    public void testMarkDuplicateValidIsSelectedAndPrivileged() throws Exception {
-        reportBacker.setReport(report);
-        reportBacker.setDuplicateOfID(100);
-        user.setAdministrator(true);
-        when(session.getUser()).thenReturn(user);
-        doReturn(true).when(reportService).markDuplicate(any(), eq(100));
-        Paginator<?> duplicates = mock(Paginator.class);
-
-        Field f = ReportBacker.class.getDeclaredField("duplicates");
-        f.setAccessible(true);
-        f.set(reportBacker, duplicates);
-
-        reportBacker.markDuplicate();
-        verify(reportService).close(any());
-        verify(duplicates).update();
-    }
-
-    @Test
-    public void testUnmarkDuplicateUnprivileged() {
-        reportBacker.setDuplicateOfID(100);
-        reportBacker.unmarkDuplicate();
-        assertAll(() -> assertNotNull(reportBacker.getDuplicateOfID()),
-                  () -> verify(reportService, never()).unmarkDuplicate(any()));
-    }*/
-
-    /*@Test
-    public void testUnmarkDuplicateErrorInService() {
-        user.setAdministrator(true);
-        when(session.getUser()).thenReturn(user);
-        reportBacker.setReport(report);
-        reportBacker.unmarkDuplicate();
-        verify(reportService).unmarkDuplicate(any());
-    }
-*/
-    /*@Test
-    public void testUnmarkDuplicateSuccess() {
-        reportBacker.setDuplicateOfID(100);
-        reportBacker.setReport(report);
-        user.setAdministrator(true);
-        when(session.getUser()).thenReturn(user);
-        doReturn(true).when(reportService).unmarkDuplicate(any());
-        reportBacker.unmarkDuplicate();
-        assertNull(reportBacker.getDuplicateOfID());
-    }*/
-
-   /* @Test
-    public void testDuplicatePaginator() {
-        Report duplicate1 = new Report();
-        Report duplicate2 = new Report();
-        List<Report> duplicates = List.of(duplicate1, duplicate2);
-        doReturn(duplicates.size()).when(reportService).getNumberOfDuplicates(any());
-        doReturn(duplicates).when(reportService).getDuplicatesFor(any(), any());
-        doReturn(true).when(configuration).isGuestReading();
-        doReturn(Map.of("id", "100")).when(ectx).getRequestParameterMap();
-        doReturn(configuration).when(settings).getConfiguration();
-        doReturn(report).when(reportService).getReportByID(100);
-
-        reportBacker.init();
-
-        List<Report> paginatedList = StreamSupport.stream(reportBacker.getDuplicates().spliterator(), false)
-                                                  .collect(Collectors.toList());
-        assertAll(() -> assertEquals(duplicates, paginatedList),
-                  () -> assertEquals(duplicates.size(), reportBacker.getDuplicates().getSelection().getTotalSize()),
-                  () -> verify(reportService).getNumberOfDuplicates(any()),
-                  () -> verify(reportService).getDuplicatesFor(any(), any()));
-    }*/
 
 }
