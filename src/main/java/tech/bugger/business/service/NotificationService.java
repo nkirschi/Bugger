@@ -229,7 +229,7 @@ public class NotificationService {
             topic.setId(notification.getTopicID());
             affectedUsers.addAll(gateway.getSubscribersOf(topic));
             affectedUsers.remove(causer);
-            affectedUsers.remove(gateway.getAllBannedUsers(topic));
+            affectedUsers.removeAll(gateway.getAllBannedUsers(topic));
             notifications = new ArrayList<>(affectedUsers.size());
             for (User user : affectedUsers) {
                 Notification n = new Notification(notification);
