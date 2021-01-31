@@ -22,6 +22,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -827,6 +829,40 @@ public class UserDBGatewayTest {
         assertThrows(InternalError.class,
                 () -> new UserDBGateway(connectionSpy).countSubscribedUsers(user)
         );
+    }
+
+    @Test
+    public void testGetAllBannedUsersWhenTopicIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> userGateway.getAllBannedUsers(null));
+    }
+
+    @Test
+    public void testGetAllBannedUsersWhenTopicIDIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> userGateway.getAllBannedUsers(new Topic()));
+    }
+
+    @Test
+    public void testGetAllBannedUsersWhenDatabaseError() throws Exception {
+        topic.setId(42);
+        Connection spy = spy(connection);
+        doThrow(SQLException.class).when(spy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new UserDBGateway(spy).getAllBannedUsers(topic));
+    }
+
+    @Test
+    public void testGetAllBannedUsersSuccess() throws Exception {
+        topicGateway.createTopic(topic);
+        userGateway.createUser(user);
+        topicGateway.banUser(topic, user);
+        List<User> expected = List.of(user);
+        assertEquals(expected, userGateway.getAllBannedUsers(topic));
+    }
+
+    @Test
+    public void testGetAllBannedUsersWhenNoBannedUsers() throws Exception {
+        topicGateway.createTopic(topic);
+        userGateway.createUser(user);
+        assertTrue(userGateway.getAllBannedUsers(topic).isEmpty());
     }
 
 }
