@@ -341,7 +341,7 @@ public class ReportDBGateway implements ReportGateway {
         try (PreparedStatement stmt = conn.prepareStatement(
                 "UPDATE report "
                         + "SET title = ?, type = ?::report_type, severity = ?::report_severity, "
-                        + "    version = ?, last_modified_by = ?, topic = ?, closed_at = ? "
+                        + "    version = ?, last_modified_by = ?, topic = ?, closed_at = ?, last_modified_at = ? "
                         + "WHERE id = ?;"
         )) {
             User modifier = report.getAuthorship().getModifier();
@@ -353,6 +353,7 @@ public class ReportDBGateway implements ReportGateway {
                     .object(modifier == null ? null : modifier.getId(), Types.INTEGER)
                     .object(report.getTopicID(), Types.INTEGER)
                     .object(report.getClosingDate())
+                    .object(report.getAuthorship().getModifiedDate(), Types.TIMESTAMP_WITH_TIMEZONE)
                     .integer(report.getId())
                     .toStatement().executeUpdate();
             if (rowsAffected == 0) {

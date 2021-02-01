@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -203,7 +204,11 @@ public class NotificationDBGateway implements NotificationGateway {
         if (notification == null) {
             log.error("Cannot update notification null.");
             throw new IllegalArgumentException("Notification cannot be null.");
+        } else if (notification.getId() == null) {
+            log.error("Cannot update notification with null ID.");
+            throw new IllegalArgumentException("Notification ID cannot be null.");
         }
+
         String sql = "UPDATE notification SET sent = ?, read = ?, type = ?::notification_type, recipient = ?,"
                 + " causer = ?, topic = ?, report = ?, post = ? WHERE id = ?;";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -271,7 +276,7 @@ public class NotificationDBGateway implements NotificationGateway {
 
         String sql = "INSERT INTO notification (sent, read, type, recipient, causer, topic, report, post)"
                 + " VALUES (?, ?, ?::notification_type, ?, ?, ?, ?, ?);";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             for (Notification notification : notifications) {
                 PreparedStatement statement = new StatementParametrizer(stmt)
                         .bool(notification.isSent())
@@ -285,7 +290,13 @@ public class NotificationDBGateway implements NotificationGateway {
                         .toStatement();
                 statement.addBatch();
             }
+
             stmt.executeBatch();
+            ResultSet rs = stmt.getGeneratedKeys();
+
+            for (int i = 0; i < notifications.size() && rs.next(); i++) {
+                notifications.get(i).setId(rs.getInt("id"));
+            }
         } catch (SQLException e) {
             log.error("Error when creating list of notifications " + notifications + ".", e);
             throw new StoreException("Error when creating list of notifications " + notifications + ".", e);

@@ -670,4 +670,39 @@ public class UserDBGateway implements UserGateway {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<User> getAllBannedUsers(final Topic topic) {
+        if (topic == null) {
+            log.error("Cannot retrieve all banned users for topic null.");
+            throw new IllegalArgumentException("Topic cannot be null.");
+        } else if (topic.getId() == null) {
+            log.error("Cannot retrieve all banned users for topic with ID null.");
+            throw new IllegalArgumentException("Topic ID cannot be null.");
+        }
+
+        List<User> banned = new ArrayList<>();
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT u.* FROM \"user\" AS u, topic_ban AS t "
+                + "WHERE t.topic = ? AND u.id = t.outcast;")) {
+            ResultSet rs = new StatementParametrizer(stmt)
+                    .integer(topic.getId())
+                    .toStatement().executeQuery();
+
+            while (rs.next()) {
+                banned.add(getUserFromResultSet(rs));
+            }
+
+            if (banned.size() == 0) {
+                log.debug("No users banned for the topic with id " + topic.getId());
+            }
+        } catch (SQLException e) {
+            log.error("Error while loading the banned users for the topic with id " + topic.getId(), e);
+            throw new StoreException("Error while loading the banned users for the topic with id " + topic.getId(), e);
+        }
+
+        return banned;
+    }
+
 }

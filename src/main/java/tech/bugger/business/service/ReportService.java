@@ -412,7 +412,6 @@ public class ReportService {
             notification.setActuatorID(report.getAuthorship().getCreator().getId());
             notification.setTopicID(report.getTopicID());
             notification.setReportID(report.getId());
-            notification.setPostID(firstPost.getId());
             notification.setReportTitle(report.getTitle());
             notificationService.createNotification(notification);
         }

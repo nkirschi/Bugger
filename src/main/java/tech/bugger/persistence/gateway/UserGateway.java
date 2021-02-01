@@ -179,4 +179,12 @@ public interface UserGateway {
      */
     int countSubscribedUsers(User user);
 
+    /**
+     * Retrieves all users who are banned in the specified topic.
+     *
+     * @param topic The specified topic.
+     * @return The list of all users banned in the specified topic.
+     */
+    List<User> getAllBannedUsers(Topic topic);
+
 }
