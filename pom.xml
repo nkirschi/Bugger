@@ -33,6 +33,9 @@
         <el.version>3.0.0</el.version>
         <dumbster.version>1.7.1</dumbster.version>
         <embeddedpostgres.version>1.2.9</embeddedpostgres.version>
+        <selenium.version>4.0.0-alpha-1</selenium.version>
+        <pitest.version>1.6.2</pitest.version>
+        <pitestjunit5.version>0.12</pitestjunit5.version>
     </properties>
 
     <dependencies>
@@ -113,6 +116,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Needed to run test suites with the JUniPlatform runner -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <version>${junitplatform.version}</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Mockito 3 -->
         <dependency>
             <groupId>org.mockito</groupId>
@@ -141,6 +152,21 @@
             <artifactId>embedded-postgres</artifactId>
             <version>${embeddedpostgres.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- Selenium UI Testing with firefox driver -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-firefox-driver</artifactId>
+            <version>${selenium.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Pitest for mutation testing -->
+        <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest</artifactId>
+            <version>${pitest.version}</version>
         </dependency>
     </dependencies>
 
@@ -216,6 +242,28 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- Pitest mutation testing -->
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>${pitest.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-junit5-plugin</artifactId>
+                        <version>${pitestjunit5.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <targetClasses>
+                        <param>tech.bugger.persistence.gateway.TokenDBGateway</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>tech.bugger.persistence.gateway.TokenDBGatewayTest</param>
+                    </targetTests>
+                </configuration>
             </plugin>
         </plugins>
     </build>
