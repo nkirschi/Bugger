@@ -290,11 +290,12 @@ public class NotificationDBGateway implements NotificationGateway {
                         .toStatement();
                 statement.addBatch();
             }
+
             stmt.executeBatch();
             ResultSet rs = stmt.getGeneratedKeys();
-            for (Notification n : notifications) {
-                rs.next();
-                n.setId(rs.getInt("id"));
+
+            for (int i = 0; i < notifications.size() && rs.next(); i++) {
+                notifications.get(i).setId(rs.getInt("id"));
             }
         } catch (SQLException e) {
             log.error("Error when creating list of notifications " + notifications + ".", e);
