@@ -679,7 +679,7 @@ public class UserDBGateway implements UserGateway {
             log.error("Cannot retrieve all banned users for topic null.");
             throw new IllegalArgumentException("Topic cannot be null.");
         } else if (topic.getId() == null) {
-            log.error("Cannot retrieve all banned user for topic with ID null.");
+            log.error("Cannot retrieve all banned users for topic with ID null.");
             throw new IllegalArgumentException("Topic ID cannot be null.");
         }
 
