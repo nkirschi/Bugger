@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -271,7 +272,7 @@ public class NotificationDBGateway implements NotificationGateway {
 
         String sql = "INSERT INTO notification (sent, read, type, recipient, causer, topic, report, post)"
                 + " VALUES (?, ?, ?::notification_type, ?, ?, ?, ?, ?);";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             for (Notification notification : notifications) {
                 PreparedStatement statement = new StatementParametrizer(stmt)
                         .bool(notification.isSent())
@@ -286,6 +287,11 @@ public class NotificationDBGateway implements NotificationGateway {
                 statement.addBatch();
             }
             stmt.executeBatch();
+            ResultSet rs = stmt.getGeneratedKeys();
+            for (Notification n : notifications) {
+                rs.next();
+                n.setId(rs.getInt("id"));
+            }
         } catch (SQLException e) {
             log.error("Error when creating list of notifications " + notifications + ".", e);
             throw new StoreException("Error when creating list of notifications " + notifications + ".", e);
