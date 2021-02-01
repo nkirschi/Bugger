@@ -204,7 +204,11 @@ public class NotificationDBGateway implements NotificationGateway {
         if (notification == null) {
             log.error("Cannot update notification null.");
             throw new IllegalArgumentException("Notification cannot be null.");
+        } else if (notification.getId() == null) {
+            log.error("Cannot update notification with null ID.");
+            throw new IllegalArgumentException("Notification ID cannot be null.");
         }
+
         String sql = "UPDATE notification SET sent = ?, read = ?, type = ?::notification_type, recipient = ?,"
                 + " causer = ?, topic = ?, report = ?, post = ? WHERE id = ?;";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
