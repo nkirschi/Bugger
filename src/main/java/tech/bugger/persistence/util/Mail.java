@@ -238,4 +238,21 @@ public final class Mail {
         return content;
     }
 
+    /**
+     * Converts this mail into a human-readable string representation.
+     *
+     * @return A human-readable string representation of this mail.
+     */
+    @Override
+    public String toString() {
+        return "Mail{"
+                + "to=" + to
+                + ", cc=" + cc
+                + ", bcc=" + bcc
+                + ", replyto=" + replyto
+                + ", subject='" + subject + '\''
+                + ", content.length='" + content.length() + '\''
+                + '}';
+    }
+
 }

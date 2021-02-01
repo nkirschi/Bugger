@@ -218,9 +218,11 @@ public class ReportEditBacker implements Serializable {
                 report.setTopicID(topic.getId());
                 success = reportService.move(report);
             }
+        } else {
+            success = reportService.updateReport(report);
         }
 
-        if (success && reportService.updateReport(report)) {
+        if (success) {
             try {
                 ectx.redirect(ectx.getRequestContextPath() + "/report?id=" + report.getId());
             } catch (IOException e) {

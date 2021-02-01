@@ -197,10 +197,10 @@ public class ReportEditBackerTest {
     public void testSaveChangesMove() throws Exception {
         setTopicsInBacker(List.of(testTopic, testTopic2));
         doReturn(true).when(reportService).move(any());
-        doReturn(true).when(reportService).updateReport(any());
         reportEditBacker.setDestination(reportEditBacker.getReport().getTopic() + "2");
         reportEditBacker.saveChanges();
         verify(ectx).redirect(any());
+        verify(reportService, never()).updateReport(any());
     }
 
     @Test

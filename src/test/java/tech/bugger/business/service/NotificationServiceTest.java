@@ -244,8 +244,6 @@ class NotificationServiceTest {
                 assertDoesNotThrow(() -> service.createNotification(notification));
             }
         }
-
-
     }
 
 }
