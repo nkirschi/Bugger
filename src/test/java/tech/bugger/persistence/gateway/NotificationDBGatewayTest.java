@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -256,7 +257,13 @@ class NotificationDBGatewayTest {
     }
 
     @Test
+    public void testUpdateNoID() {
+        assertThrows(IllegalArgumentException.class, () -> notificationGateway.update(new Notification()));
+    }
+
+    @Test
     public void testUpdateSQLException() throws SQLException {
+        notification1.setId(1);
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
         assertThrows(StoreException.class,
@@ -344,7 +351,7 @@ class NotificationDBGatewayTest {
         notifications.add(notification1);
         notifications.add(notification2);
         Connection connectionSpy = spy(connection);
-        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
+        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any(), eq(Statement.RETURN_GENERATED_KEYS));
         assertThrows(StoreException.class,
                 () -> new NotificationDBGateway(connectionSpy).createNotificationBulk(notifications)
         );
