@@ -49,10 +49,11 @@ public class AdministratorTest {
     private String alfEmailPrefix = "alfxtreme";
     private String alfEmailSuffix = "@gmail.com";
     private String alfPassword = "Welten-Mysterium1";
-    private String profilePage = "Profile Page of AlfDerBenutzer";
+    private String profilePage = "Profile of @AlfDerBenutzer";
     private String linkText = "";
     private String reversiFeedbackURL = "";
     private String reversiGraphicsURL = "";
+    private WebDriverWait wait;
 
     @BeforeAll
     public void setUp() {
@@ -62,6 +63,7 @@ public class AdministratorTest {
         js = (JavascriptExecutor) webDriver;
         vars = new HashMap<>();
         webDriver.get(baseURL);
+        wait = new WebDriverWait(webDriver, 5);
     }
 
     @AfterAll
@@ -116,13 +118,13 @@ public class AdministratorTest {
         WebElement element = webDriver.findElement(By.id("f-profile-edit:cb-apply"));
         js.executeScript("arguments[0].scrollIntoView();", element);
         WebDriverWait waitBio = new WebDriverWait(webDriver, 5);
-        waitBio.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ia-bio")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ia-bio")));
         WebDriverWait waitBioHint = new WebDriverWait(webDriver, 5);
-        waitBioHint.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ol-bio-hint")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ol-bio-hint")));
         WebDriverWait waitVote = new WebDriverWait(webDriver, 5);
-        waitVote.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:it-overwrite-vote")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:it-overwrite-vote")));
         WebDriverWait waitApply = new WebDriverWait(webDriver, 5);
-        waitApply.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:cb-apply")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:cb-apply")));
 
         webDriver.findElement(By.id("f-profile-edit:ia-bio")).click();
         webDriver.findElement(By.id("f-profile-edit:ol-bio-hint")).click();
@@ -148,13 +150,13 @@ public class AdministratorTest {
         WebElement element = webDriver.findElement(By.id("f-profile-edit:cb-apply"));
         js.executeScript("arguments[0].scrollIntoView();", element);
         WebDriverWait waitBio = new WebDriverWait(webDriver, 5);
-        waitBio.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ia-bio")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ia-bio")));
         WebDriverWait waitBioHint = new WebDriverWait(webDriver, 5);
-        waitBioHint.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ol-bio-hint")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ol-bio-hint")));
         WebDriverWait waitVote = new WebDriverWait(webDriver, 5);
-        waitVote.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:it-overwrite-vote")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:it-overwrite-vote")));
         WebDriverWait waitApply = new WebDriverWait(webDriver, 5);
-        waitApply.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:cb-apply")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:cb-apply")));
 
         webDriver.findElement(By.id("f-profile-edit:ia-bio")).click();
         webDriver.findElement(By.id("f-profile-edit:ol-bio-hint")).click();
@@ -190,9 +192,11 @@ public class AdministratorTest {
 
     @Test
     public void T050_addModerator() {
-        webDriver.findElement(By.id("f-moderator-status:g-promote")).click();
+        webDriver.findElement(By.id("f-moderator-status:cb-image-promote")).click();
         webDriver.findElement(By.id("f-promote-mod:it-username")).sendKeys(alf);
         webDriver.findElement(By.id("f-promote-mod:cb-promote")).click();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText(linkText)));
 
         assertTrue(isElementPresentBy(By.linkText(linkText)));
     }
@@ -213,11 +217,13 @@ public class AdministratorTest {
         webDriver.findElement(By.id("f-topic-edit:it-title")).clear();
         webDriver.findElement(By.id("f-topic-edit:it-title")).sendKeys(reversiGraphics);
         webDriver.findElement(By.id("f-topic-edit:cb-save")).click();
-        webDriver.findElement(By.id("f-moderator-status:g-promote")).click();
+        webDriver.findElement(By.id("f-moderator-status:cb-image-promote")).click();
         webDriver.findElement(By.id("f-promote-mod:it-username")).sendKeys(alf);
         webDriver.findElement(By.id("f-promote-mod:cb-promote")).click();
 
         reversiGraphicsURL = webDriver.getCurrentUrl();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText(linkText)));
 
         assertAll(
                 () -> assertTrue(webDriver.findElement(By.id("title")).getText().contains(reversiGraphics)),
@@ -238,7 +244,6 @@ public class AdministratorTest {
 
         WebElement element = webDriver.findElement(By.id("f-create-report:cb-create"));
         js.executeScript("arguments[0].scrollIntoView();", element);
-        WebDriverWait wait = new WebDriverWait(webDriver, 5);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-create-report:it-attachment")));
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-create-report:cb-add-attachment")));
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-create-report:cb-create")));
@@ -265,7 +270,7 @@ public class AdministratorTest {
         webDriver.findElement(By.id("f-create-report:cb-create")).click();
 
         assertAll(
-                () -> assertEquals(NO_TRANSLATION, webDriver.findElement(By.id("title")).getText()),
+                () -> assertTrue(webDriver.findElement(By.id("title")).getText().contains(NO_TRANSLATION)),
                 () -> assertEquals("Hint", webDriver.findElement(By.id("ot-type")).getText()),
                 () -> assertEquals("Minor", webDriver.findElement(By.id("ot-severity")).getText())
         );
@@ -298,13 +303,13 @@ public class AdministratorTest {
         WebElement element = webDriver.findElement(By.id("f-profile-edit:cb-delete"));
         js.executeScript("arguments[0].scrollIntoView();", element);
         WebDriverWait waitBio = new WebDriverWait(webDriver, 5);
-        waitBio.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ia-bio")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ia-bio")));
         WebDriverWait waitBioHint = new WebDriverWait(webDriver, 5);
-        waitBioHint.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ol-bio-hint")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ol-bio-hint")));
         WebDriverWait waitVote = new WebDriverWait(webDriver, 5);
-        waitVote.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:it-overwrite-vote")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:it-overwrite-vote")));
         WebDriverWait waitApply = new WebDriverWait(webDriver, 5);
-        waitApply.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:cb-apply")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:cb-apply")));
 
         webDriver.findElement(By.id("f-profile-edit:ia-bio")).click();
         webDriver.findElement(By.id("f-profile-edit:ol-bio-hint")).click();
