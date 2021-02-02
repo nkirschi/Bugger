@@ -13,6 +13,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import tech.bugger.LogExtension;
 
@@ -50,8 +51,6 @@ public class AdministratorTest {
     private String alfPassword = "Welten-Mysterium1";
     private String profilePage = "Profile Page of AlfDerBenutzer";
     private String linkText = "";
-    private int parameter;
-    private static int count = 0;
     private String reversiFeedbackURL = "";
     private String reversiGraphicsURL = "";
 
@@ -82,7 +81,12 @@ public class AdministratorTest {
         webDriver.findElement(By.id("f-login:it-password")).sendKeys(ADMIN_PASSWORD);
         webDriver.findElement(By.id("f-login:cb-login")).click();
 
-        assertTrue(isElementPresentBy(By.id("p-avatar-thumbnail")));
+        Select select = new Select(webDriver.findElement(By.id("f-language:s-language")));
+
+        assertAll(
+                () -> assertTrue(isElementPresentBy(By.id("p-avatar-thumbnail"))),
+                () -> assertEquals("English", select.getFirstSelectedOption().getText())
+        );
     }
 
     @Test
@@ -206,6 +210,7 @@ public class AdministratorTest {
 
     @Test
     public void T070_changeTitle() {
+        webDriver.findElement(By.id("f-topic-edit:it-title")).clear();
         webDriver.findElement(By.id("f-topic-edit:it-title")).sendKeys(reversiGraphics);
         webDriver.findElement(By.id("f-topic-edit:cb-save")).click();
         webDriver.findElement(By.id("f-moderator-status:g-promote")).click();
