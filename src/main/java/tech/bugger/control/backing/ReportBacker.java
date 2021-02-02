@@ -1,14 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-import java.util.stream.StreamSupport;
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
@@ -22,6 +13,16 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
+
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+import java.util.stream.StreamSupport;
 
 /**
  * Backing bean for the report page.
@@ -42,6 +43,11 @@ public class ReportBacker implements Serializable {
      * The report for this page.
      */
     private Report report;
+
+    /**
+     * The topic that the displayed report is in.
+     */
+    private Topic topic;
 
     /**
      * The paginated list of posts.
@@ -182,8 +188,6 @@ public class ReportBacker implements Serializable {
      */
     @PostConstruct
     void init() {
-        log.debug(">>>>>> INIT");
-
         int reportID;
         Integer postID = null;
         if (ectx.getRequestParameterMap().containsKey("p")) {
@@ -209,7 +213,7 @@ public class ReportBacker implements Serializable {
             throw new Error404Exception();
         }
 
-        Topic topic = topicService.getTopicByID(report.getTopicID());
+        topic = topicService.getTopicByID(report.getTopicID());
         if (topic == null) { // this should never happen!
             throw new InternalError("Report " + report + " without topic!");
         }
@@ -273,8 +277,6 @@ public class ReportBacker implements Serializable {
      * Updates the values for the relevance interface.
      */
     private void updateRelevance() {
-        log.debug(">>>>>> updateRelevance");
-
         report = reportService.getReportByID(report.getId());
         if (report == null) {
             throw new Error404Exception();
@@ -295,9 +297,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String displayDialog(final Dialog dialog) {
-        log.debug(">>>>>> displayDialog");
         currentDialog = dialog;
-        log.info("Displaying dialog " + dialog + ".");
         return null;
     }
 
@@ -308,7 +308,6 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String deletePostDialog(final Post post) {
-        log.debug(">>>>>> deletePostDialog");
         postToBeDeleted = post;
         return displayDialog(Dialog.DELETE_POST);
     }
@@ -319,7 +318,6 @@ public class ReportBacker implements Serializable {
      * @return The site to redirect to or {@code null} to reload the page.
      */
     public String toggleReportSubscription() {
-        log.debug(">>>>>> toggleReportSubscription");
         if (session.getUser() == null) {
             return null;
         }
@@ -338,7 +336,6 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String upvote() {
-        log.debug(">>>>>> upvote");
         if (session.getUser() != null) {
             reportService.upvote(report, session.getUser());
         }
@@ -352,7 +349,6 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String downvote() {
-        log.debug(">>>>>> downvote");
         if (session.getUser() != null) {
             reportService.downvote(report, session.getUser());
         }
@@ -366,7 +362,6 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String removeVote() {
-        log.debug(">>>>>> removeVote");
         if (session.getUser() != null) {
             reportService.removeVote(report, session.getUser());
         }
@@ -378,7 +373,6 @@ public class ReportBacker implements Serializable {
      * Opens a closed report and closes an open one.
      */
     public void toggleOpenClosed() {
-        log.debug(">>>>>> toggleOpenClosed");
         if (report.getClosingDate() == null) {
             reportService.close(report);
         } else {
@@ -391,7 +385,6 @@ public class ReportBacker implements Serializable {
      * Deletes the report along with all its posts irreversibly.
      */
     public void delete() {
-        log.debug(">>>>>> delete");
         reportService.deleteReport(report);
     }
 
@@ -399,7 +392,6 @@ public class ReportBacker implements Serializable {
      * Marks the report as a duplicate of another report. This automatically closes the report.
      */
     public void markDuplicate() {
-        log.debug(">>>>>> markDuplicate");
         if (isPrivileged() && reportService.markDuplicate(report, report.getDuplicateOf())) {
             reportService.close(report);
             displayDialog(null);
@@ -411,7 +403,6 @@ public class ReportBacker implements Serializable {
      * Removes the marking signifying that the report is a duplicate of another one.
      */
     public void unmarkDuplicate() {
-        log.debug(">>>>>> unmarkDuplicate");
         if (isPrivileged()) {
             reportService.unmarkDuplicate(report);
         }
@@ -423,7 +414,6 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String applyOverwriteRelevance() {
-        log.debug(">>>>>> applyOverwriteRelevance");
         if (session.getUser() != null && session.getUser().isAdministrator()) {
             reportService.overwriteRelevance(report, overwriteRelevanceValue);
             updateRelevance();
@@ -436,7 +426,6 @@ public class ReportBacker implements Serializable {
      * Deletes the {@code postToBeDeleted} irreversibly. If it is the first post, this deletes the whole report.
      */
     public void deletePost() {
-        log.debug(">>>>>> deletePost");
         postService.deletePost(postToBeDeleted, report);
         displayDialog(null);
     }
@@ -459,7 +448,6 @@ public class ReportBacker implements Serializable {
      * @return {@code true} iff the user is privileged.
      */
     public boolean privilegedForPost(final Post post) {
-        log.debug(">>>>>> privilegedForPost");
         return session.getUser() != null
                 && (report.getClosingDate() == null || applicationSettings.getConfiguration().isClosedReportPosting())
                 && (session.getUser().isAdministrator() || moderator
@@ -475,6 +463,13 @@ public class ReportBacker implements Serializable {
      */
     public Report getReport() {
         return report;
+    }
+
+    /**
+     * @return The topic.
+     */
+    public Topic getTopic() {
+        return topic;
     }
 
     /**
