@@ -97,26 +97,19 @@
                         </h:panelGroup>
                     </h:column>
                     <h:column>
-                        <h:commandLink id="l-demote-user" action="#{topicBacker.unmodSingleUser(var.username)}"
-                                       styleClass="button" rendered="#{topicBacker.moderator}">
-                            <h:graphicImage id="g-demote-user" value="/resources/images/trash.png"
-                                            styleClass="trashcan-small"/>
-                        </h:commandLink>
+                        <h:commandButton id="l-demote-user" action="#{topicBacker.unmodSingleUser(var.username)}"
+                                         styleClass="button trashcan-small" rendered="#{topicBacker.moderator}"
+                                         image="/resources/images/trash.png"/>
                     </h:column>
                 </b:pagitable>
             </h:panelGroup>
             <h:panelGroup id="p-moderator-status" layout="block" styleClass="col-sm-3">
                 <h:form id="f-moderator-status">
-                    <h:commandLink id="l-promote" action="#{topicBacker.openModDialog}" styleClass="button"
-                                   rendered="#{topicBacker.moderator}">
-                        <h:graphicImage id="g-promote" value="/resources/images/add.png"
-                                        alt="Button to promote moderators"/>
-                    </h:commandLink>
-                    <h:commandLink id="l-demote" action="#{topicBacker.openUnmodDialog}" styleClass="button"
-                                   rendered="#{topicBacker.moderator and topicBacker.moderators.selection.totalSize gt 0}">
-                        <h:graphicImage id="g-demote" value="/resources/images/delete.png"
-                                        alt="Button to demote moderators"/>
-                    </h:commandLink>
+                    <h:commandButton id="l-promote" action="#{topicBacker.openModDialog}" styleClass="button"
+                                     rendered="#{topicBacker.moderator}" image="/resources/images/add.png"/>
+                    <h:commandButton id="l-demote" action="#{topicBacker.openUnmodDialog}" styleClass="button"
+                                     rendered="#{topicBacker.moderator and topicBacker.moderators.selection.totalSize gt 0}"
+                                     image="/resources/images/delete.png"/>
                 </h:form>
             </h:panelGroup>
         </h:panelGroup>
@@ -138,24 +131,19 @@
                         </h:panelGroup>
                     </h:column>
                     <h:column>
-                        <h:commandLink id="l-unban-user" action="#{topicBacker.unbanSingleUser(var.username)}"
-                                       styleClass="button" rendered="#{topicBacker.moderator}">
-                            <h:graphicImage id="g-unban-user" value="/resources/images/trash.png"
-                                            styleClass="trashcan-small"/>
-                        </h:commandLink>
+                        <h:commandButton id="l-unban-user" action="#{topicBacker.unbanSingleUser(var.username)}"
+                                         styleClass="button trashcan-small" rendered="#{topicBacker.moderator}"
+                                         image="/resources/images/trash.png"/>
                     </h:column>
                 </b:pagitable>
             </h:panelGroup>
             <h:panelGroup id="p-banned-status" layout="block" styleClass="col-sm-3">
                 <h:form id="f-banned-status">
-                    <h:commandLink id="l-ban" action="#{topicBacker.openBanDialog}" styleClass="button"
-                                   rendered="#{topicBacker.moderator}">
-                        <h:graphicImage id="g-ban" value="/resources/images/add.png" alt="Button to ban users"/>
-                    </h:commandLink>
-                    <h:commandLink id="l-unban" action="#{topicBacker.openUnbanDialog}" styleClass="button"
-                                   rendered="#{topicBacker.moderator and topicBacker.bannedUsers.selection.totalSize gt 0}">
-                        <h:graphicImage id="g-unban" value="/resources/images/delete.png" alt="Button to unban users"/>
-                    </h:commandLink>
+                    <h:commandButton id="l-ban" action="#{topicBacker.openBanDialog}" styleClass="button"
+                                     rendered="#{topicBacker.moderator}" image="/resources/images/add.png"/>
+                    <h:commandButton id="l-unban" action="#{topicBacker.openUnbanDialog}" styleClass="button"
+                                     rendered="#{topicBacker.moderator and topicBacker.bannedUsers.selection.totalSize gt 0}"
+                                     image="/resources/images/delete.png"/>
                 </h:form>
             </h:panelGroup>
         </h:panelGroup>
@@ -196,7 +184,7 @@
                     </b:column>
                     <b:column title="#{labels.last_activity}" paginator="#{topicBacker.reports}" key="last_activity">
                         <h:outputText value="#{var.lastActivity}" styleClass="text-nowrap">
-                            <f:converter converterId="offsetDateTimeConverter" />
+                            <f:converter converterId="offsetDateTimeConverter"/>
                         </h:outputText>
                     </b:column>
                 </b:pagitable>
@@ -238,7 +226,9 @@
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
                     <h:commandButton id="cb-promote" value="#{labels.topic_promote_mod}"
-                                     action="#{topicBacker.makeModerator}" styleClass="btn btn-primary"/>
+                                     action="#{topicBacker.makeModerator}" styleClass="btn btn-primary">
+                        <f:ajax execute="@form" render="@all"/>
+                    </h:commandButton>
                     <h:commandButton id="cb-abort-promote" value="#{labels.abort}" styleClass="btn btn-secondary"
                                      action="#{topicBacker.closeDialog}" immediate="true"/>
                 </h:panelGroup>
