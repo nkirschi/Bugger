@@ -1,14 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,10 +17,24 @@ import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
@@ -241,7 +246,7 @@ public class PostDBGatewayTest {
 
     @Test
     public void testSelectPostsOfReportWhenThereAreSome() throws Exception {
-        DBExtension.emptyDatabase();
+        DBExtension.resetDatabase();
         validSelection();
         testSelection.setSortedBy("id");
         testReport.setId(100);
@@ -253,7 +258,7 @@ public class PostDBGatewayTest {
 
     @Test
     public void testSelectPostsOfReportWhenThereAreNone() throws Exception {
-        DBExtension.emptyDatabase();
+        DBExtension.resetDatabase();
         validSelection();
         testReport.setId(100);
         insertReport();
@@ -284,7 +289,7 @@ public class PostDBGatewayTest {
 
     @Test
     public void testSelectPostsOfReportWhenSortedByCreatedAtDescending() throws Exception {
-        DBExtension.emptyDatabase();
+        DBExtension.resetDatabase();
         insertReport();
         numberOfPosts = 1;
         for (int i = 0; i < 10; i++) {

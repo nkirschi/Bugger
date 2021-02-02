@@ -1,19 +1,20 @@
 package tech.bugger;
 
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
+import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
-import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.platform.launcher.TestExecutionListener;
-import org.junit.platform.launcher.TestPlan;
 
-public class DBExtension implements TestExecutionListener, BeforeEachCallback, AfterEachCallback {
+public class DBExtension implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback, AfterAllCallback {
 
     private static EmbeddedPostgres pg;
     private static String setupSQL;
@@ -21,7 +22,7 @@ public class DBExtension implements TestExecutionListener, BeforeEachCallback, A
     private static String minimalSQL;
 
     @Override
-    public void testPlanExecutionStarted(TestPlan testPlan) {
+    public void beforeAll(ExtensionContext extensionContext) {
         try {
             pg = EmbeddedPostgres.builder().start();
             setupSQL = Files.readString(Paths.get("src/main/webapp/WEB-INF/setup.sql"));
@@ -43,7 +44,7 @@ public class DBExtension implements TestExecutionListener, BeforeEachCallback, A
     }
 
     @Override
-    public void testPlanExecutionFinished(TestPlan testPlan) {
+    public void afterAll(ExtensionContext extensionContext) {
         try {
             pg.close();
         } catch (Exception e) {
@@ -59,7 +60,7 @@ public class DBExtension implements TestExecutionListener, BeforeEachCallback, A
         applyScript(minimalSQL);
     }
 
-    public static void emptyDatabase() {
+    public static void resetDatabase() {
         applyScript(eraseSQL);
         applyScript(setupSQL);
     }
