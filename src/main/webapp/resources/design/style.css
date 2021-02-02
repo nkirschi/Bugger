@@ -4,6 +4,8 @@
 
 body {
     background: #fafafa;
+    margin-top: 100px;
+    margin-bottom: 70px;
 }
 
 p {
@@ -37,7 +39,7 @@ p {
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
     overflow: auto;
     padding: 40px;
-    margin: 100px auto 70px auto;
+    margin: 0 auto;
     max-width: 1200px;
     background: #fff;
 }

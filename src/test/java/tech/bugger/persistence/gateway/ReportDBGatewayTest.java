@@ -1,12 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.time.OffsetDateTime;
-import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,9 +20,24 @@ import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.StoreException;
 import tech.bugger.persistence.util.StatementParametrizer;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.OffsetDateTime;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(DBExtension.class)
 @ExtendWith(LogExtension.class)
@@ -262,7 +270,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testCountPostsWhenThereAreNone() throws Exception {
-        DBExtension.emptyDatabase();
+        DBExtension.resetDatabase();
         insertReports();
         report.setId(100);
         assertEquals(0, gateway.countPosts(report));
@@ -270,7 +278,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testCountPostsWhenThereAreSome() throws Exception {
-        DBExtension.emptyDatabase();
+        DBExtension.resetDatabase();
         insertReports();
         insertPosts(100, 34);
         report.setId(100);
@@ -370,7 +378,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testCountDuplicatesWhenThereAreNone() throws Exception {
-        DBExtension.emptyDatabase();
+        DBExtension.resetDatabase();
         insertReports();
         report.setId(101);
         assertEquals(0, gateway.countDuplicates(report));
@@ -398,7 +406,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testSelectDuplicatesWhenThereAreSome() throws Exception {
-        DBExtension.emptyDatabase();
+        DBExtension.resetDatabase();
         insertReports();
         Report original = new Report();
         original.setId(100);
@@ -462,7 +470,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testUnmarkDuplicateSuccess() throws Exception {
-        DBExtension.emptyDatabase();
+        DBExtension.resetDatabase();
         insertReports();
         report.setId(101);
         assertDoesNotThrow(() -> gateway.unmarkDuplicate(report));
@@ -509,7 +517,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testMarkDuplicateNotFound() throws Exception {
-        DBExtension.emptyDatabase();
+        DBExtension.resetDatabase();
         insertReports();
         report.setId(101);
         assertThrows(NotFoundException.class, () -> gateway.markDuplicate(report, 93));
@@ -517,7 +525,7 @@ public class ReportDBGatewayTest {
 
     @Test
     public void testMarkDuplicateSuccess() throws Exception {
-        DBExtension.emptyDatabase();
+        DBExtension.resetDatabase();
         insertReports();
         report.setId(101);
         assertDoesNotThrow(() -> gateway.markDuplicate(report, 100));

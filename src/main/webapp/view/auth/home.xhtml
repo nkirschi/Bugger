@@ -32,10 +32,9 @@
                 </h:link>
             </b:column>
             <h:column>
-                <h:commandLink action="#{homeBacker.deleteNotification(var)}" styleClass="button">
-                    <h:graphicImage value="/resources/images/trash.png"
-                                    styleClass="trashcan-small"/>
-                </h:commandLink>
+                <h:commandButton action="#{homeBacker.deleteNotification(var)}"
+                                 styleClass="button trashcan-small"
+                                 image="/resources/images/trash.png"/>
             </h:column>
         </b:pagitable>
 
@@ -59,7 +58,7 @@
             </b:column>
             <b:column title="#{labels.last_activity}" paginator="#{homeBacker.topics}" key="last_activity">
                 <h:outputText value="#{var.lastActivity}" styleClass="text-nowrap">
-                    <f:converter converterId="offsetDateTimeConverter" />
+                    <f:converter converterId="offsetDateTimeConverter"/>
                 </h:outputText>
             </b:column>
         </b:pagitable>
