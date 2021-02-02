@@ -273,7 +273,7 @@
                 </executions>
             </plugin>
 
-            <!-- Pitest mutation testing -->
+            <!-- PIT Mutation Testing -->
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
@@ -294,6 +294,7 @@
                     </targetTests>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>
