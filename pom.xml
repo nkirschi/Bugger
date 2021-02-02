@@ -225,18 +225,30 @@
                 <version>1.6.2</version>
                 <configuration>
                     <targetClasses>
-                        <param>tech.bugger.persistence.gateway.TokenDBGateway</param>
+                        <param>tech.bugger.control.backing.RegisterBacker</param>
                     </targetClasses>
                     <targetTests>
-                        <param>tech.bugger.persistence.gateway.TokenDBGatewayTest</param>
+                        <param>tech.bugger.control.backing.RegisterBackerTest</param>
                     </targetTests>
+                    <excludedMethods>
+                        <excludedMethod>createToken</excludedMethod>
+                    </excludedMethods>
+                    <avoidCallsTo>
+                        <avoidCallsTo>java.util.logging</avoidCallsTo>
+                        <avoidCallsTo>org.apache.log4j</avoidCallsTo>
+                        <avoidCallsTo>org.slf4j</avoidCallsTo>
+                        <avoidCallsTo>org.apache.commons.logging</avoidCallsTo>
+                        <avoidCallsTo>tech.bugger.global.util.Log</avoidCallsTo>
+                        <avoidCallsTo>java.sql.PreparedStatement</avoidCallsTo>
+                    </avoidCallsTo>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.pitest</groupId>
-                <artifactId>pitest-junit5-plugin</artifactId>
-                <version>0.12</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-junit5-plugin</artifactId>
+                        <version>0.12</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
