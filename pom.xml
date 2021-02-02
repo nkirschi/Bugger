@@ -132,6 +132,7 @@
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
             <version>${bytebuddy.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- Selenium 3 -->
@@ -139,11 +140,13 @@
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
             <version>${selenium.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency> <!-- enables convenient driver management -->
             <groupId>io.github.bonigarcia</groupId>
             <artifactId>webdrivermanager</artifactId>
             <version>${webdrivermanager.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- Dumbster Fake SMTP Server -->
