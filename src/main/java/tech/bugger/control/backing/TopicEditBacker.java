@@ -1,18 +1,19 @@
 package tech.bugger.control.backing;
 
-import java.io.IOException;
-import java.io.Serial;
-import java.io.Serializable;
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.util.Log;
+
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * Backing bean for the topic edit page.
@@ -114,8 +115,6 @@ public class TopicEditBacker implements Serializable {
         if (success) {
             log.debug(topic.toString());
             ectx.redirect(ectx.getRequestContextPath() + "/topic?id=" + topic.getId());
-        } else {
-            throw new Error404Exception();
         }
         return null;
     }

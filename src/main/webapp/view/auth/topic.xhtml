@@ -221,7 +221,7 @@
                                      #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
                                      : 'is-invalid'}" a:placeholder="#{labels.search}">
                             <f:validateLength maximum="#{C.USERNAME_MAX}"/>
-                            <f:ajax listener="#{topicBacker.searchModUsers}" event="keyup"
+                            <f:ajax listener="#{topicBacker.searchModUsers}" event="keyup" delay="500"
                                     render="p-mod-suggestions"/>
                         </h:inputText>
                         <h:panelGroup id="p-username-message" layout="block" styleClass="invalid-tooltip end-0">
@@ -262,7 +262,7 @@
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
                                          : 'is-invalid'}" a:placeholder="#{labels.search}">
                                 <f:validateLength maximum="#{C.USERNAME_MAX}"/>
-                                <f:ajax listener="#{topicBacker.searchUnmodUsers}" event="keyup"
+                                <f:ajax listener="#{topicBacker.searchUnmodUsers}" event="keyup" delay="500"
                                         render="p-unmod-suggestions"/>
                             </h:inputText>
                             <h:panelGroup id="p-username-mod-message" layout="block" styleClass="invalid-tooltip end-0">
@@ -304,7 +304,7 @@
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
                                          : 'is-invalid'}" a:placeholder="#{labels.search}">
                                 <f:validateLength maximum="#{C.USERNAME_MAX}"/>
-                                <f:ajax listener="#{topicBacker.searchBanUsers}" event="keyup"
+                                <f:ajax listener="#{topicBacker.searchBanUsers}" event="keyup" delay="500"
                                         render="p-ban-suggestions"/>
                             </h:inputText>
                             <h:panelGroup id="p-username-ban-message" layout="block" styleClass="invalid-tooltip end-0">
@@ -347,7 +347,7 @@
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
                                          : 'is-invalid'}" a:placeholder="#{labels.search}">
                                 <f:validateLength maximum="#{C.USERNAME_MAX}"/>
-                                <f:ajax listener="#{topicBacker.searchUnbanUsers}" event="keyup"
+                                <f:ajax listener="#{topicBacker.searchUnbanUsers}" event="keyup" delay="500"
                                         render="p-unban-suggestions"/>
                             </h:inputText>
                             <h:panelGroup id="p-username-unban-message" layout="block"

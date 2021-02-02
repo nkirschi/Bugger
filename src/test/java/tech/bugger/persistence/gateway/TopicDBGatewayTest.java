@@ -1,15 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,10 +13,31 @@ import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
@@ -327,7 +338,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testPromoteModerator() throws NotFoundException {
+    public void testPromoteModerator() throws NotFoundException, DuplicateException {
         userGateway.createUser(user);
         topicGateway.createTopic(topic1);
         topicGateway.promoteModerator(topic1, user);
@@ -335,7 +346,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testPromoteModeratorNoUser() {
+    public void testPromoteModeratorNoUser() throws DuplicateException {
         topicGateway.createTopic(topic1);
         user.setId(10);
         assertThrows(NotFoundException.class,
@@ -382,7 +393,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testDemoteModerator() throws NotFoundException {
+    public void testDemoteModerator() throws NotFoundException, DuplicateException {
         userGateway.createUser(user);
         topicGateway.createTopic(topic1);
         topicGateway.promoteModerator(topic1, user);
@@ -391,7 +402,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testDemoteModeratorNotFound() {
+    public void testDemoteModeratorNotFound() throws DuplicateException {
         userGateway.createUser(user);
         topicGateway.createTopic(topic1);
         assertThrows(NotFoundException.class,
@@ -408,7 +419,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testDemoteModeratorUserIdNull() {
+    public void testDemoteModeratorUserIdNull() throws DuplicateException {
         topicGateway.createTopic(topic1);
         assertThrows(IllegalArgumentException.class,
                 () -> topicGateway.demoteModerator(topic1, user)
@@ -427,7 +438,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testCountModerators() throws NotFoundException {
+    public void testCountModerators() throws NotFoundException, DuplicateException {
         userGateway.createUser(user);
         topicGateway.createTopic(topic1);
         topicGateway.promoteModerator(topic1, user);
@@ -439,13 +450,13 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testCountModeratorsNotFound() {
+    public void testCountModeratorsNotFound() throws DuplicateException {
         topicGateway.createTopic(topic1);
         assertEquals(0, topicGateway.countModerators(topic1));
     }
 
     @Test
-    public void testCountModeratorsSQLException() throws SQLException {
+    public void testCountModeratorsSQLException() throws SQLException, DuplicateException {
         topicGateway.createTopic(topic1);
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
@@ -474,7 +485,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testGetModeratedTopics() throws NotFoundException {
+    public void testGetModeratedTopics() throws NotFoundException, DuplicateException {
         List<Topic> topics = new ArrayList<>();
         topics.add(topic1);
         topics.add(topic2);
@@ -524,7 +535,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testBanUser() throws NotFoundException {
+    public void testBanUser() throws NotFoundException, DuplicateException {
         userGateway.createUser(user);
         topicGateway.createTopic(topic1);
         topicGateway.banUser(topic1, user);
@@ -541,7 +552,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testBanUserForeignKeyViolationUser() {
+    public void testBanUserForeignKeyViolationUser() throws DuplicateException {
         user.setId(5);
         topicGateway.createTopic(topic1);
         assertThrows(NotFoundException.class,
@@ -566,7 +577,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testBanUserSQLException() throws SQLException {
+    public void testBanUserSQLException() throws SQLException, DuplicateException {
         userGateway.createUser(user);
         topicGateway.createTopic(topic1);
         Connection connectionSpy = spy(connection);
@@ -579,7 +590,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testUnbanUser() throws NotFoundException {
+    public void testUnbanUser() throws NotFoundException, DuplicateException {
         userGateway.createUser(user);
         topicGateway.createTopic(topic1);
         topicGateway.banUser(topic1, user);
@@ -588,7 +599,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testUnbanUserNotFound() {
+    public void testUnbanUserNotFound() throws DuplicateException {
         userGateway.createUser(user);
         topicGateway.createTopic(topic1);
         assertThrows(NotFoundException.class,
@@ -597,7 +608,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testUnbanUserUserIdNull() {
+    public void testUnbanUserUserIdNull() throws DuplicateException {
         topicGateway.createTopic(topic1);
         assertThrows(IllegalArgumentException.class,
                 () -> topicGateway.unbanUser(topic1, user)
@@ -613,7 +624,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testUnbanUserSQLException() throws SQLException {
+    public void testUnbanUserSQLException() throws SQLException, DuplicateException {
         userGateway.createUser(user);
         topicGateway.createTopic(topic1);
         Connection connectionSpy = spy(connection);
@@ -624,7 +635,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testCountBannedUsers() throws NotFoundException {
+    public void testCountBannedUsers() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic1);
         userGateway.createUser(user);
         topicGateway.banUser(topic1, user);
@@ -643,7 +654,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testCountBannedUsersSQLException() throws SQLException {
+    public void testCountBannedUsersSQLException() throws SQLException, DuplicateException {
         topicGateway.createTopic(topic1);
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
@@ -665,7 +676,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testCreateTopic() throws NotFoundException {
+    public void testCreateTopic() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic1);
         Topic topic = topicGateway.findTopic(topic1.getId());
         assertAll(
@@ -690,7 +701,9 @@ class TopicDBGatewayTest {
     @Test
     public void testCreateTopicStoreException() throws SQLException {
         Connection connectionSpy = spy(connection);
-        doThrow(SQLException.class).when(connectionSpy).prepareStatement(any(), anyInt());
+        SQLException mockException = mock(SQLException.class);
+        doThrow(mockException).when(connectionSpy).prepareStatement(any(), anyInt());
+        when(mockException.getSQLState()).thenReturn("");
         assertThrows(StoreException.class,
                 () -> new TopicDBGateway(connectionSpy).createTopic(topic1)
         );
@@ -707,7 +720,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testCountSubscribersNone() {
+    public void testCountSubscribersNone() throws DuplicateException {
         topicGateway.createTopic(topic1);
         assertEquals(0, topicGateway.countSubscribers(topic1));
     }
@@ -748,7 +761,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testDiscoverTopics() {
+    public void testDiscoverTopics() throws DuplicateException {
         topicGateway.createTopic(topic1);
         topicGateway.createTopic(topic2);
         List<String> topicTitles = topicGateway.discoverTopics().stream().map(Topic::getTitle)
@@ -815,7 +828,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testSelectSubscribedTopicsNoSubscriptions() {
+    public void testSelectSubscribedTopicsNoSubscriptions() throws DuplicateException {
         topicGateway.createTopic(topic1);
         userGateway.createUser(user);
         assertTrue(topicGateway.selectSubscribedTopics(user, selection).isEmpty());
@@ -871,7 +884,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testCountSubscribedTopicsZero() {
+    public void testCountSubscribedTopicsZero() throws DuplicateException {
         topicGateway.createTopic(topic1);
         topicGateway.createTopic(topic2);
         userGateway.createUser(user);
@@ -916,7 +929,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testDeleteTopic() {
+    public void testDeleteTopic() throws DuplicateException {
         topicGateway.createTopic(topic1);
         topicGateway.deleteTopic(topic1);
         assertThrows(NotFoundException.class,
@@ -934,7 +947,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testUpdateTopic() throws NotFoundException {
+    public void testUpdateTopic() throws NotFoundException, DuplicateException {
         String newTitle = "new title";
         String newDescription = "new description";
         topicGateway.createTopic(topic1);
@@ -966,7 +979,7 @@ class TopicDBGatewayTest {
     }
 
     @Test
-    public void testFindTopic() throws NotFoundException {
+    public void testFindTopic() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic1);
         Topic topic = topicGateway.findTopic(topic1.getId());
         assertAll(

@@ -36,7 +36,7 @@
                                  id="it-search"
                                  value="#{headerBacker.search}"
                                  a:placeholder="#{labels.search}...">
-                        <f:ajax listener="#{headerBacker.updateSuggestions}" event="keyup"
+                        <f:ajax listener="#{headerBacker.updateSuggestions}" event="keyup" delay="500"
                                 render="p-search-suggestions"/>
                     </h:inputText>
                     <h:panelGroup id="p-search-suggestions" layout="block" styleClass="header-search-suggestions">

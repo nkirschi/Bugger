@@ -33,7 +33,8 @@
         <el.version>3.0.0</el.version>
         <dumbster.version>1.7.1</dumbster.version>
         <embeddedpostgres.version>1.2.9</embeddedpostgres.version>
-        <selenium.version>4.0.0-alpha-1</selenium.version>
+        <selenium.version>3.141.59</selenium.version>
+        <bytebuddy.version>1.10.18</bytebuddy.version>
         <pitest.version>1.6.2</pitest.version>
         <pitestjunit5.version>0.12</pitestjunit5.version>
     </properties>
@@ -159,6 +160,20 @@
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-firefox-driver</artifactId>
             <version>${selenium.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-support</artifactId>
+            <version>${selenium.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Set explicit bytebuddy version as selenium 3 loads an older one-->
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>${bytebuddy.version}</version>
             <scope>test</scope>
         </dependency>
 

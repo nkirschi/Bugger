@@ -1,11 +1,13 @@
 package tech.bugger.persistence.gateway;
 
-import java.time.OffsetDateTime;
-import java.util.List;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
+import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
+
+import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * A topic gateway allows to query and modify a persistent storage of topics.
@@ -89,8 +91,9 @@ public interface TopicGateway {
      *
      * @param topic The topic to insert.
      * @throws NotFoundException The topic could not be found.
+     * @throws DuplicateException The topic name already exists.
      */
-    void createTopic(Topic topic) throws NotFoundException;
+    void createTopic(Topic topic) throws NotFoundException, DuplicateException;
 
     /**
      * Updates a topic's attributes in the topic storage.

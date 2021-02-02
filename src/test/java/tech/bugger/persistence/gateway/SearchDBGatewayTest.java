@@ -1,10 +1,5 @@
 package tech.bugger.persistence.gateway;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,12 +7,24 @@ import tech.bugger.DBExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
+import tech.bugger.persistence.exception.DuplicateException;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.StoreException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Locale;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 @ExtendWith(DBExtension.class)
 @ExtendWith(LogExtension.class)
@@ -59,7 +66,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetUserBanSuggestions() throws NotFoundException {
+    public void testGetUserBanSuggestions() throws NotFoundException, DuplicateException {
         userGateway.createUser(user1);
         userGateway.createUser(user2);
         userGateway.createUser(admin);
@@ -73,7 +80,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetUserBanSuggestionsWithModeratorsAndBanned() throws NotFoundException {
+    public void testGetUserBanSuggestionsWithModeratorsAndBanned() throws NotFoundException, DuplicateException {
         userGateway.createUser(user1);
         userGateway.createUser(user2);
         userGateway.createUser(admin);
@@ -85,7 +92,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetUserBanSuggestionsNone() throws NotFoundException {
+    public void testGetUserBanSuggestionsNone() throws NotFoundException, DuplicateException {
         userGateway.createUser(admin);
         topicGateway.createTopic(topic);
         List<String> suggestions = searchGateway.getUserBanSuggestions(QUERY, LIMIT, topic);
@@ -131,7 +138,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetUserUnbanSuggestions() throws NotFoundException {
+    public void testGetUserUnbanSuggestions() throws NotFoundException, DuplicateException {
         userGateway.createUser(user1);
         userGateway.createUser(user2);
         userGateway.createUser(admin);
@@ -146,7 +153,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetUserUnbanSuggestionsNone() throws NotFoundException {
+    public void testGetUserUnbanSuggestionsNone() throws NotFoundException, DuplicateException {
         userGateway.createUser(user1);
         topicGateway.createTopic(topic);
         List<String> suggestions = searchGateway.getUserUnbanSuggestions(QUERY, LIMIT, topic);
@@ -164,7 +171,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetUserModSuggestions() throws NotFoundException {
+    public void testGetUserModSuggestions() throws NotFoundException, DuplicateException {
         userGateway.createUser(user1);
         userGateway.createUser(user2);
         userGateway.createUser(admin);
@@ -179,7 +186,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetUserModSuggestionsNone() throws NotFoundException {
+    public void testGetUserModSuggestionsNone() throws NotFoundException, DuplicateException {
         userGateway.createUser(admin);
         topicGateway.createTopic(topic);
         List<String> suggestions = searchGateway.getUserModSuggestions(QUERY, LIMIT, topic);
@@ -197,7 +204,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetUserUnmodSuggestions() throws NotFoundException {
+    public void testGetUserUnmodSuggestions() throws NotFoundException, DuplicateException {
         userGateway.createUser(user1);
         userGateway.createUser(user2);
         userGateway.createUser(admin);
@@ -212,7 +219,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetUserUnmodSuggestionsNone() throws NotFoundException {
+    public void testGetUserUnmodSuggestionsNone() throws NotFoundException, DuplicateException {
         userGateway.createUser(admin);
         topicGateway.createTopic(topic);
         List<String> suggestions = searchGateway.getUserUnmodSuggestions(QUERY, LIMIT, topic);

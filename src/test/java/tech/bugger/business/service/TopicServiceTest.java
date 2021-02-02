@@ -1,11 +1,5 @@
 package tech.bugger.business.service;
 
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
-import javax.enterprise.event.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +27,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -670,7 +665,7 @@ class TopicServiceTest {
     }
 
     @Test
-    public void testCreateTopicNotFound() throws NotFoundException {
+    public void testCreateTopicNotFound() throws NotFoundException, DuplicateException {
         doThrow(NotFoundException.class).when(topicGateway).createTopic(testTopic1);
         assertFalse(topicService.createTopic(testTopic1, user));
         verify(feedbackEvent).fire(any());
