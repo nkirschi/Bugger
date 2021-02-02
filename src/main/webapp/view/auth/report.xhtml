@@ -7,7 +7,7 @@
 
     <ui:param name="helpKey" value="report"/>
 
-    <ui:param name="title" value="#{reportBacker.report.title}"/>
+    <ui:param name="title" value="#{labels.report} ##{reportBacker.report.id}: #{reportBacker.report.title}"/>
 
     <f:metadata>
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
@@ -185,9 +185,11 @@
                 <h:outputLabel value="#{labels.topic}" for="ot-topic" styleClass="form-label"/>
             </h:panelGroup>
             <h:panelGroup styleClass="col-9">
-                <h:link id="ot-topic" value="!#{reportBacker.report.topicID}" outcome="pretty:topic">
-                    <f:param name="id" value="#{reportBacker.report.topicID}"/>
+                <h:link id="ot-topic" value="!#{reportBacker.topic.id}"
+                        outcome="pretty:topic">
+                    <f:param name="id" value="#{reportBacker.topic.id}"/>
                 </h:link>
+                <h:outputText value=": #{reportBacker.topic.title}" />
             </h:panelGroup>
         </h:panelGroup>
 

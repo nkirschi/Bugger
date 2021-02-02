@@ -12,7 +12,7 @@
 
     <ui:param name="helpKey" value="topic"/>
 
-    <ui:param name="title" value="#{(labels.topic_page).concat(': ').concat(topicBacker.topic.title)}"/>
+    <ui:param name="title" value="#{labels.topic} !#{topicBacker.topicID}: #{topicBacker.topic.title}"/>
 
     <ui:define name="content">
         <h:form id="f-topic">
