@@ -1,11 +1,6 @@
 package tech.bugger.control.backing;
 
 import com.sun.faces.context.RequestParameterMap;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.time.OffsetDateTime;
-import java.util.Locale;
-import javax.faces.context.ExternalContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,8 +13,23 @@ import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import javax.faces.context.ExternalContext;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.time.OffsetDateTime;
+import java.util.Locale;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -126,14 +136,6 @@ public class TopicEditBackerTest {
     }
 
     @Test
-    public void testSaveChangesFalse() {
-        topicEditBacker.setTopic(topic);
-        assertThrows(Error404Exception.class,
-                () -> topicEditBacker.saveChanges()
-        );
-    }
-
-    @Test
     public void testSaveChangesCreate() throws IOException, IllegalAccessException {
         create.setBoolean(topicEditBacker, true);
         doReturn(true).when(topicService).createTopic(eq(topic), any());
@@ -141,15 +143,6 @@ public class TopicEditBackerTest {
         topicEditBacker.saveChanges();
         verify(ext).redirect(any());
         verify(topicService).createTopic(eq(topic), any());
-    }
-
-    @Test
-    public void testSaveChangesCreateFalse() throws IllegalAccessException {
-        create.setBoolean(topicEditBacker, true);
-        topicEditBacker.setTopic(topic);
-        assertThrows(Error404Exception.class,
-                () -> topicEditBacker.saveChanges()
-        );
     }
 
 }

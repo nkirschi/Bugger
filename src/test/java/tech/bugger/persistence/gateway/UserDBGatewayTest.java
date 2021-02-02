@@ -22,8 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -348,7 +346,7 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testIsModerator() throws NotFoundException {
+    public void testIsModerator() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic);
         userGateway.createUser(user);
         topicGateway.promoteModerator(topic, user);
@@ -383,7 +381,7 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testGetSelectedModerators() throws NotFoundException {
+    public void testGetSelectedModerators() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic);
         userGateway.createUser(user);
         userGateway.createUser(admin);
@@ -397,7 +395,7 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testGetSelectedModeratorsNoEntries() throws NotFoundException {
+    public void testGetSelectedModeratorsNoEntries() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic);
         assertTrue(userGateway.getSelectedModerators(topic, selection).isEmpty());
     }
@@ -437,7 +435,7 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testGetNumberOfModeratedTopics() throws NotFoundException {
+    public void testGetNumberOfModeratedTopics() throws NotFoundException, DuplicateException {
         userGateway.createUser(user);
         topicGateway.createTopic(topic);
         topicGateway.promoteModerator(topic, user);
@@ -480,7 +478,7 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testGetSelectedBannedUsers() throws NotFoundException {
+    public void testGetSelectedBannedUsers() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic);
         userGateway.createUser(user);
         userGateway.createUser(admin);
@@ -494,7 +492,7 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testGetSelectedBannedUsersNoneBanned() throws NotFoundException {
+    public void testGetSelectedBannedUsersNoneBanned() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic);
         assertEquals(0, userGateway.getSelectedBannedUsers(topic, selection).size());
     }
@@ -510,7 +508,7 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testIsBanned() throws NotFoundException {
+    public void testIsBanned() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic);
         userGateway.createUser(user);
         topicGateway.banUser(topic, user);
@@ -518,7 +516,7 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testIsBannedNotBanned() throws NotFoundException {
+    public void testIsBannedNotBanned() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic);
         userGateway.createUser(user);
         assertFalse(userGateway.isBanned(user, topic));
@@ -653,7 +651,7 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testGetSubscribersOfReportStoreException() throws SQLException, NotFoundException {
+    public void testGetSubscribersOfReportStoreException() throws SQLException, NotFoundException, DuplicateException {
         topicGateway.createTopic(topic);
         report.setTopicID(topic.getId());
         reportGateway.create(report);
@@ -663,7 +661,7 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testGetSubscribersOfReportNoSubscribers() throws NotFoundException {
+    public void testGetSubscribersOfReportNoSubscribers() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic);
         report.setTopicID(topic.getId());
         reportGateway.create(report);
@@ -700,7 +698,7 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testGetSubscribersOfTopicStoreException() throws SQLException, NotFoundException {
+    public void testGetSubscribersOfTopicStoreException() throws SQLException, NotFoundException, DuplicateException {
         topicGateway.createTopic(topic);
         Connection connectionSpy = spy(connection);
         doThrow(SQLException.class).when(connectionSpy).prepareStatement(any());
@@ -708,7 +706,7 @@ public class UserDBGatewayTest {
     }
 
     @Test
-    public void testGetSubscribersOfTopicNoSubscribers() throws NotFoundException {
+    public void testGetSubscribersOfTopicNoSubscribers() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic);
         assertTrue(userGateway.getSubscribersOf(topic).isEmpty());
     }
