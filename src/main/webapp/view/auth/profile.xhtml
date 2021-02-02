@@ -14,7 +14,7 @@
 
     <ui:param name="helpKey" value="profile"/>
 
-    <ui:param name="title" value="#{(labels.profile_page).concat(' ').concat(profileBacker.user.username)}"/>
+    <ui:param name="title" value="#{labels.profile_page} @#{profileBacker.user.username}"/>
 
     <ui:define name="content">
 
@@ -149,7 +149,7 @@
                                 <h:panelGroup id="p-register-date-output" styleClass="col-9">
                                     <h:outputText id="ot-register-date" value="#{profileBacker.user.registrationDate}"
                                                   styleClass="profile-info">
-                                        <f:converter converterId="offsetDateTimeConverter" />
+                                        <f:converter converterId="offsetDateTimeConverter"/>
                                     </h:outputText>
                                 </h:panelGroup>
                             </h:panelGroup>
@@ -228,11 +228,10 @@
                                 </h:link>
                             </b:column>
                             <h:column>
-                                <h:commandLink id="l-unsub-topic" action="#{profileBacker.deleteTopicSubscription(var)}"
-                                               styleClass="button">
-                                    <h:graphicImage id="g-unsub-topic" value="/resources/images/trash.png"
-                                                    styleClass="trashcan-small"/>
-                                </h:commandLink>
+                                <h:commandButton id="l-unsub-topic"
+                                                 action="#{profileBacker.deleteTopicSubscription(var)}"
+                                                 styleClass="button trashcan-small"
+                                                 image="/resources/images/trash.png"/>
                             </h:column>
                         </b:pagitable>
                     </h:panelGroup>
@@ -277,12 +276,10 @@
                                 <h:outputText value="#{labels['report_severity_' += var.severity]}"/>
                             </b:column>
                             <h:column>
-                                <h:commandLink id="l-unsub-report"
+                                <h:commandButton id="l-unsub-report"
                                                action="#{profileBacker.deleteReportSubscription(var)}"
-                                               styleClass="button">
-                                    <h:graphicImage id="g-unsub-report" value="/resources/images/trash.png"
-                                                    styleClass="trashcan-small"/>
-                                </h:commandLink>
+                                               styleClass="button trashcan-small"
+                                               image="/resources/images/trash.png"/>
                             </h:column>
                         </b:pagitable>
                     </h:panelGroup>
@@ -314,11 +311,9 @@
                                 </h:link>
                             </b:column>
                             <h:column>
-                                <h:commandLink id="l-unsub-user" action="#{profileBacker.deleteUserSubscription(var)}"
-                                               styleClass="button">
-                                    <h:graphicImage id="g-unsub-user" value="/resources/images/trash.png"
-                                                    styleClass="trashcan-small"/>
-                                </h:commandLink>
+                                <h:commandButton id="l-unsub-user" action="#{profileBacker.deleteUserSubscription(var)}"
+                                               styleClass="button trashcan-small"
+                                               image="/resources/images/trash.png"/>
                             </h:column>
                         </b:pagitable>
                     </h:panelGroup>

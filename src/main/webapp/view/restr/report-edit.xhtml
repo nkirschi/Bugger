@@ -11,7 +11,7 @@
 
     <ui:param name="helpKey" value="report_edit"/>
 
-    <ui:param name="title" value="#{labels.report_edit_title}"/>
+    <ui:param name="title" value="#{labels.report_edit_title} ##{reportEditBacker.report.id}: #{reportEditBacker.report.title}"/>
 
     <ui:define name="dialogs">
         <h:panelGroup id="p-confirm" layout="block" styleClass="dialog"
