@@ -13,7 +13,8 @@
 
     <ui:param name="title" value="#{topicEditBacker.create
                                     ? labels.topic_create_title
-                                    : labels.topic_edit_title.concat(': ').concat(topicEditBacker.topic.title)}"/>
+                                    : labels.topic_edit_title.concat(' !').concat(topicEditBacker.topic.id)
+                                    .concat(': ').concat(topicEditBacker.topic.title)}"/>
 
     <ui:define name="content">
         <h:panelGroup id="p-profile-info" styleClass="d-flex p-2 justify-content-center align-items-center container">
