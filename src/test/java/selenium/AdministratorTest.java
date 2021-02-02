@@ -17,6 +17,8 @@ import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import tech.bugger.LogExtension;
 
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 
@@ -117,13 +119,9 @@ public class AdministratorTest {
         // page properly into view is a very fun activity you should not miss. Sadly, the code seems to turn out ugly.
         WebElement element = webDriver.findElement(By.id("f-profile-edit:cb-apply"));
         js.executeScript("arguments[0].scrollIntoView();", element);
-        WebDriverWait waitBio = new WebDriverWait(webDriver, 5);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ia-bio")));
-        WebDriverWait waitBioHint = new WebDriverWait(webDriver, 5);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ol-bio-hint")));
-        WebDriverWait waitVote = new WebDriverWait(webDriver, 5);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:it-overwrite-vote")));
-        WebDriverWait waitApply = new WebDriverWait(webDriver, 5);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:cb-apply")));
 
         webDriver.findElement(By.id("f-profile-edit:ia-bio")).click();
@@ -149,13 +147,9 @@ public class AdministratorTest {
 
         WebElement element = webDriver.findElement(By.id("f-profile-edit:cb-apply"));
         js.executeScript("arguments[0].scrollIntoView();", element);
-        WebDriverWait waitBio = new WebDriverWait(webDriver, 5);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ia-bio")));
-        WebDriverWait waitBioHint = new WebDriverWait(webDriver, 5);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ol-bio-hint")));
-        WebDriverWait waitVote = new WebDriverWait(webDriver, 5);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:it-overwrite-vote")));
-        WebDriverWait waitApply = new WebDriverWait(webDriver, 5);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:cb-apply")));
 
         webDriver.findElement(By.id("f-profile-edit:ia-bio")).click();
@@ -233,7 +227,7 @@ public class AdministratorTest {
     }
 
     @Test
-    public void T080_createReport() {
+    public void T080_createReport() throws URISyntaxException {
         webDriver.findElement(By.id("f-topic:l-create-report")).click();
         {
             WebElement dropdown = webDriver.findElement(By.id("f-create-report:s-type"));
@@ -248,7 +242,8 @@ public class AdministratorTest {
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-create-report:cb-add-attachment")));
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-create-report:cb-create")));
 
-        String file = getClass().getClassLoader().getResource("images/boeseDatei.exe").getPath();
+        // Needed as Windows need backslashes to locate file.
+        String file = Paths.get(getClass().getClassLoader().getResource("images/boeseDatei.exe").toURI()).toFile().getPath();
         webDriver.findElement(By.id("f-create-report:it-attachment"));
         webDriver.findElement(By.id("f-create-report:it-attachment")).sendKeys(file);
         webDriver.findElement(By.className("justify-content-between"));
@@ -258,8 +253,9 @@ public class AdministratorTest {
     }
 
     @Test
-    public void T090_changePicture() throws InterruptedException {
-        String file = getClass().getClassLoader().getResource("images/bugger.png").getPath();
+    public void T090_changePicture() throws InterruptedException, URISyntaxException {
+        // Needed as Windows need backslashes to locate file.
+        String file = Paths.get(getClass().getClassLoader().getResource("images/bugger.png").toURI()).toFile().getPath();
 
         // I cannot get the method used above to work here, without the test being super flaky.
         js.executeScript("window.scrollTo(0, document.body.scrollHeight)");
@@ -302,13 +298,9 @@ public class AdministratorTest {
 
         WebElement element = webDriver.findElement(By.id("f-profile-edit:cb-delete"));
         js.executeScript("arguments[0].scrollIntoView();", element);
-        WebDriverWait waitBio = new WebDriverWait(webDriver, 5);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ia-bio")));
-        WebDriverWait waitBioHint = new WebDriverWait(webDriver, 5);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ol-bio-hint")));
-        WebDriverWait waitVote = new WebDriverWait(webDriver, 5);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:it-overwrite-vote")));
-        WebDriverWait waitApply = new WebDriverWait(webDriver, 5);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:cb-apply")));
 
         webDriver.findElement(By.id("f-profile-edit:ia-bio")).click();
