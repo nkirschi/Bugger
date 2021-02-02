@@ -18,7 +18,8 @@
 
     <ui:define name="content">
 
-        <h:panelGroup id="p-profile-info" styleClass="d-flex p-2 justify-content-center align-items-center container">
+        <h:panelGroup id="p-profile-info" layout="block"
+                      styleClass="d-flex p-2 justify-content-center align-items-center container">
             <h:panelGroup layout="block" styleClass="row vw-90">
                 <!-- Renders the profile owner's user information and subscriptions. -->
                 <h:form id="f-profile">
@@ -169,7 +170,7 @@
                 </h:form>
 
                 <!-- A paginated list of topics moderated by the profile owner. -->
-                <h:panelGroup styleClass="row my-3">
+                <h:panelGroup layout="block" styleClass="row my-3">
                     <h:outputText id="ot-moderated" styleClass="h2" value="#{labels.mod_topics}"/>
                     <h:panelGroup id="p-moderated" layout="block" styleClass="row">
                         <h:panelGroup id="p-moderated-pagination" layout="block" styleClass="col-12"
@@ -277,9 +278,9 @@
                             </b:column>
                             <h:column>
                                 <h:commandButton id="l-unsub-report"
-                                               action="#{profileBacker.deleteReportSubscription(var)}"
-                                               styleClass="button trashcan-small"
-                                               image="/resources/images/trash.png"/>
+                                                 action="#{profileBacker.deleteReportSubscription(var)}"
+                                                 styleClass="button trashcan-small"
+                                                 image="/resources/images/trash.png"/>
                             </h:column>
                         </b:pagitable>
                     </h:panelGroup>
@@ -312,8 +313,8 @@
                             </b:column>
                             <h:column>
                                 <h:commandButton id="l-unsub-user" action="#{profileBacker.deleteUserSubscription(var)}"
-                                               styleClass="button trashcan-small"
-                                               image="/resources/images/trash.png"/>
+                                                 styleClass="button trashcan-small"
+                                                 image="/resources/images/trash.png"/>
                             </h:column>
                         </b:pagitable>
                     </h:panelGroup>
