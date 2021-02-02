@@ -48,7 +48,7 @@ public class AdministratorTest {
     private String alfEmailPrefix = "alfxtreme";
     private String alfEmailSuffix = "@gmail.com";
     private String alfPassword = "Welten-Mysterium1";
-    private String profilePage = "Profilseite von AlfDerBenutzer";
+    private String profilePage = "Profile Page of AlfDerBenutzer";
     private String linkText = "";
     private int parameter;
     private static int count = 0;
@@ -98,7 +98,7 @@ public class AdministratorTest {
 
     @Test
     public void T020_createUser() {
-        webDriver.findElement(By.linkText("Erstellen")).click();
+        webDriver.findElement(By.id("l-create")).click();
         webDriver.findElement(By.id("f-profile-edit:it-username")).sendKeys(alf);
         webDriver.findElement(By.id("f-profile-edit:it-first-name")).sendKeys(alfFirstName);
         webDriver.findElement(By.id("f-profile-edit:it-last-name")).sendKeys(alfLastName);
@@ -226,7 +226,7 @@ public class AdministratorTest {
         webDriver.findElement(By.id("f-topic:l-create-report")).click();
         {
             WebElement dropdown = webDriver.findElement(By.id("f-create-report:s-type"));
-            dropdown.findElement(By.xpath("//option[. = 'Hinweis']")).click();
+            dropdown.findElement(By.xpath("//option[. = 'Hint']")).click();
         }
         webDriver.findElement(By.id("f-create-report:it-title")).sendKeys(NO_TRANSLATION);
         webDriver.findElement(By.id("f-create-report:it-post-content")).sendKeys(MISSING);
@@ -261,8 +261,8 @@ public class AdministratorTest {
 
         assertAll(
                 () -> assertEquals(NO_TRANSLATION, webDriver.findElement(By.id("title")).getText()),
-                () -> assertEquals("Hinweis", webDriver.findElement(By.id("ot-type")).getText()),
-                () -> assertEquals("Nebensächlich", webDriver.findElement(By.id("ot-severity")).getText())
+                () -> assertEquals("Hint", webDriver.findElement(By.id("ot-type")).getText()),
+                () -> assertEquals("Minor", webDriver.findElement(By.id("ot-severity")).getText())
         );
     }
 
