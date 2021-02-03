@@ -1,6 +1,16 @@
 package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
+import tech.bugger.global.util.Pagitable;
+import tech.bugger.persistence.exception.DuplicateException;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,14 +18,6 @@ import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-import tech.bugger.global.util.Pagitable;
-import tech.bugger.persistence.exception.NotFoundException;
-import tech.bugger.persistence.exception.StoreException;
-import tech.bugger.persistence.util.StatementParametrizer;
 
 /**
  * Topic gateway that gives access to topics stored in a database.
@@ -222,7 +224,7 @@ public class TopicDBGateway implements TopicGateway {
      * {@inheritDoc}
      */
     @Override
-    public void createTopic(final Topic topic) {
+    public void createTopic(final Topic topic) throws DuplicateException {
         try (PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO topic (title, description)"
                         + "VALUES (?, ?);",
@@ -241,6 +243,12 @@ public class TopicDBGateway implements TopicGateway {
                 throw new StoreException("Error while retrieving new topic ID.");
             }
         } catch (SQLException e) {
+            // The SQLState 23505 signifies that a violation of a unique index or unique constraint occured.
+            if (e.getSQLState().equals("23505")) {
+                log.warning("The topic with name " + topic.getTitle() + " already exists.");
+                throw new DuplicateException("The topic with name " + topic.getTitle() + " already exists.");
+            }
+
             log.error("Error while creating topic.", e);
             throw new StoreException("Error while creating topic.", e);
         }
