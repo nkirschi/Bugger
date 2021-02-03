@@ -11,16 +11,14 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import tech.bugger.LogExtension;
 
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.NoSuchElementException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,38 +28,37 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(LogExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class AdministratorTest {
+public class ModeratorTest {
+
+    private static final String MODERATOR_USERNAME = "AlfDerBenutzer";
+    private static final String MODERATOR_PASSWORD = "Welten-Mysterium1";
+
+    private static final String OVERWRITING_RELEVANCE = "42";
+    private static final String CALCULATED_RELEVANCE = "6";
+
+    private static final String REPORT_SEARCH_QUERY = "Button";
+    private static final String ORIGINAL_TITLE = "Button Übersetzung fehlt";
+    private static final String DUPLICATE_TITLE = "Button hat keinen Namen";
+    private static final String TOPIC_TITLE = "Reversi: Grafikoberfläche";
+    private static final String USER_TO_BAN = "BeaDieBiene";
+
+    private static final String USERNAME_PREFIX = "@";
+    private static final String CLOSED_AT = "closed at";
+    private static final String NEW_POST_NOTIFICATION_BUTTON = "New post";
+    private static final String NEW_REPORT_NOTIFICATION_BUTTON = "New report";
 
     private WebDriver webDriver;
     private static String baseURL;
     private JavascriptExecutor js;
     private HashMap<String, Object> vars;
-    private String reversiFeedback = "Reversi: Lob und Tadel";
-    private String reversiGraphics = "Reversi: Grafikoberfläche";
-    private static final String DESCRIPTION = "Hier können Sie Feedback jeglicher Art zur Version 1.0 abgeben.";
-    private static final String ADMINISTRATION = "Administration";
-    private static final String ADMIN = "admin";
-    private static final String ADMIN_PASSWORD = "BuggerFahrenMachtSpass42";
-    private static final String VOTING_WEIGHT = "5";
-    private static final String NO_TRANSLATION = "Button Übersetzung fehlt";
-    private static final String MISSING = "Für \"Zug rückgängig machen\" fehlt die englische Übersetzung.";
-    private String alf = "AlfDerBenutzer";
-    private String alfFirstName = "Alf";
-    private String alfLastName = "Albrecht";
-    private String alfEmailPrefix = "alfxtreme";
-    private String alfEmailSuffix = "@gmail.com";
-    private String alfPassword = "Welten-Mysterium1";
-    private String profilePage = "Profile of @AlfDerBenutzer";
-    private String linkText = "";
-    private String reversiFeedbackURL = "";
-    private String reversiGraphicsURL = "";
     private WebDriverWait wait;
+
+    private String originalID = "";
 
     @BeforeAll
     public void setUp() {
         baseURL = DriverExtension.getBaseURL();
         webDriver = DriverExtension.getDriver();
-        linkText = "@" + alf;
         js = (JavascriptExecutor) webDriver;
         vars = new HashMap<>();
         webDriver.get(baseURL);
@@ -70,258 +67,175 @@ public class AdministratorTest {
 
     @AfterAll
     public void tearDown() {
-        deleteReversiFeedback();
-        deleteAlf();
-        deleteReversiGraphics();
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         webDriver.close();
     }
 
     @Test
-    public void T010_login() {
+    public void T220_notifications() {
+        // Log in as moderator.
         webDriver.get(baseURL);
         webDriver.findElement(By.id("l-login")).click();
         webDriver.findElement(By.id("f-login:it-username")).click();
-        webDriver.findElement(By.id("f-login:it-username")).sendKeys(ADMIN);
-        webDriver.findElement(By.id("f-login:it-password")).sendKeys(ADMIN_PASSWORD);
+        webDriver.findElement(By.id("f-login:it-username")).sendKeys(MODERATOR_USERNAME);
+        webDriver.findElement(By.id("f-login:it-password")).sendKeys(MODERATOR_PASSWORD);
         webDriver.findElement(By.id("f-login:cb-login")).click();
 
-        Select select = new Select(webDriver.findElement(By.id("f-language:s-language")));
-
+        List<WebElement> notifications = webDriver.findElements(By.cssSelector("#p-notifications tbody tr"));
         assertAll(
-                () -> assertTrue(isElementPresentBy(By.id("p-avatar-thumbnail"))),
-                () -> assertEquals("English", select.getFirstSelectedOption().getText())
+                () -> assertEquals(2, notifications.size()),
+                () -> assertEquals(
+                        NEW_POST_NOTIFICATION_BUTTON,
+                        notifications.get(0).findElement(By.cssSelector(":nth-child(2) input")).getAttribute("value")),
+                () -> assertTrue(notifications.get(0).findElement(By.cssSelector(":nth-child(3) a")).getText()
+                        .endsWith(ORIGINAL_TITLE)),
+                () -> assertEquals(
+                        NEW_REPORT_NOTIFICATION_BUTTON,
+                        notifications.get(1).findElement(By.cssSelector(":nth-child(2) input")).getAttribute("value")),
+                () -> assertTrue(notifications.get(1).findElement(By.cssSelector(":nth-child(3) a")).getText()
+                        .endsWith(ORIGINAL_TITLE))
         );
     }
 
     @Test
-    public void T015_administration() {
-        WebElement element = webDriver.findElement(By.id("p-avatar-thumbnail"));
-        Actions builder = new Actions(webDriver);
-        builder.moveToElement(element).perform();
+    public void T230_deletePost() {
+        // TODO
+        webDriver.findElement(By.cssSelector("#p-notifications input[value=\"" + NEW_REPORT_NOTIFICATION_BUTTON + "\"]"))
+                .click();
 
-        webDriver.findElement(By.id("l-configuration")).click();
+        // Scroll down to the delete button of the second post and click it.
+        WebElement deleteButton = webDriver.findElement(By.cssSelector("table .mb-3:nth-child(2) input[type=\"submit\"]"));
 
-        assertEquals(ADMINISTRATION, webDriver.findElement(By.id("title")).getText());
-    }
-
-    @Test
-    public void T020_createUser() {
-        webDriver.findElement(By.id("l-create")).click();
-        webDriver.findElement(By.id("f-profile-edit:it-username")).sendKeys(alf);
-        webDriver.findElement(By.id("f-profile-edit:it-first-name")).sendKeys(alfFirstName);
-        webDriver.findElement(By.id("f-profile-edit:it-last-name")).sendKeys(alfLastName);
-        webDriver.findElement(By.id("f-profile-edit:it-email")).sendKeys(alfEmailPrefix + alfEmailSuffix);
-        webDriver.findElement(By.id("f-profile-edit:i-password-new")).sendKeys(alfPassword);
-        webDriver.findElement(By.id("f-profile-edit:i-password-new-repeat")).sendKeys(alfPassword);
-
-        // Turns out that scrolling in selenium is terrible, especially if you have a footer that causes Selenium to
-        // constantly throw ElementClickInterceptedExceptions. Forcing selenium to scroll elements at the bottom of a
-        // page properly into view is a very fun activity you should not miss. Sadly, the code seems to turn out ugly.
-        WebElement element = webDriver.findElement(By.id("f-profile-edit:cb-apply"));
-        js.executeScript("arguments[0].scrollIntoView();", element);
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ia-bio")));
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ol-bio-hint")));
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:it-overwrite-vote")));
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:cb-apply")));
-
-        webDriver.findElement(By.id("f-profile-edit:ia-bio")).click();
-        webDriver.findElement(By.id("f-profile-edit:ol-bio-hint")).click();
-        webDriver.findElement(By.id("f-profile-edit:it-overwrite-vote")).click();
-        webDriver.findElement(By.id("f-profile-edit:cb-apply")).click();
-        webDriver.findElement(By.id("f-change-user:i-password-change")).sendKeys(ADMIN_PASSWORD);
-        webDriver.findElement(By.id("f-change-user:cb-really-change")).click();
-
-        assertAll(
-                () -> assertEquals(profilePage, webDriver.findElement(By.id("title")).getText()),
-                () -> assertEquals(alf, webDriver.findElement(By.id("f-profile:ot-username")).getText()),
-                () -> assertEquals(alfFirstName, webDriver.findElement(By.id("f-profile:ot-first-name")).getText()),
-                () -> assertEquals(alfLastName, webDriver.findElement(By.id("f-profile:ot-last-name")).getText()),
-                () -> assertEquals(alfEmailPrefix + alfEmailSuffix,
-                        webDriver.findElement(By.id("f-profile:ot-email")).getText())
-        );
-    }
-
-    @Test
-    public void T030_changeVotingWeight() {
-        webDriver.findElement(By.id("f-profile:l-edit")).click();
-
-        WebElement element = webDriver.findElement(By.id("f-profile-edit:cb-apply"));
-        js.executeScript("arguments[0].scrollIntoView();", element);
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ia-bio")));
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ol-bio-hint")));
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:it-overwrite-vote")));
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:cb-apply")));
-
-        webDriver.findElement(By.id("f-profile-edit:ia-bio")).click();
-        webDriver.findElement(By.id("f-profile-edit:ol-bio-hint")).click();
-        webDriver.findElement(By.id("f-profile-edit:it-overwrite-vote")).click();
-
-        webDriver.findElement(By.id("f-profile-edit:it-overwrite-vote")).sendKeys(VOTING_WEIGHT);
-        webDriver.findElement(By.id("f-profile-edit:cb-apply")).click();
-        webDriver.findElement(By.id("f-change-user:i-password-change")).sendKeys(ADMIN_PASSWORD);
-        webDriver.findElement(By.id("f-change-user:cb-really-change")).click();
-
-        assertAll(
-                () -> assertEquals(profilePage, webDriver.findElement(By.id("title")).getText()),
-                () -> assertEquals(VOTING_WEIGHT, webDriver.findElement(By.id("f-profile:ot-weight")).getText()),
-                () -> assertTrue(isElementPresentBy(By.className("alert-success")))
-        );
-    }
-
-    @Test
-    public void T040_createTopic() {
-        webDriver.findElement(By.id("ot-comp-name")).click();
-        webDriver.findElement(By.id("l-create")).click();
-        webDriver.findElement(By.id("f-topic-edit:it-title")).sendKeys(reversiFeedback);
-        webDriver.findElement(By.id("f-topic-edit:it-description")).sendKeys(DESCRIPTION);
-        webDriver.findElement(By.id("f-topic-edit:cb-save")).click();
-
-        reversiFeedbackURL = webDriver.getCurrentUrl();
-
-        assertAll(
-                () -> assertTrue(webDriver.findElement(By.id("title")).getText().contains(reversiFeedback)),
-                () -> assertEquals(DESCRIPTION, webDriver.findElement(By.id("f-topic:ot-description")).getText())
-        );
-    }
-
-    @Test
-    public void T050_addModerator() {
-        webDriver.findElement(By.id("f-moderator-status:cb-image-promote")).click();
-        webDriver.findElement(By.id("f-promote-mod:it-username")).sendKeys(alf);
-        webDriver.findElement(By.id("f-promote-mod:cb-promote")).click();
-
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText(linkText)));
-
-        assertTrue(isElementPresentBy(By.linkText(linkText)));
-    }
-
-    @Test
-    public void T060_createTopicSameTitle() {
-        webDriver.findElement(By.id("ot-comp-name")).click();
-        webDriver.findElement(By.id("l-create")).click();
-        webDriver.findElement(By.id("f-topic-edit:it-title")).sendKeys(reversiFeedback);
-        webDriver.findElement(By.id("f-topic-edit:it-description")).sendKeys(DESCRIPTION);
-        webDriver.findElement(By.id("f-topic-edit:cb-save")).click();
-
-        assertTrue(isElementPresentBy(By.className("alert-danger")));
-    }
-
-    @Test
-    public void T070_changeTitle() {
-        webDriver.findElement(By.id("f-topic-edit:it-title")).clear();
-        webDriver.findElement(By.id("f-topic-edit:it-title")).sendKeys(reversiGraphics);
-        webDriver.findElement(By.id("f-topic-edit:cb-save")).click();
-        webDriver.findElement(By.id("f-moderator-status:cb-image-promote")).click();
-        webDriver.findElement(By.id("f-promote-mod:it-username")).sendKeys(alf);
-        webDriver.findElement(By.id("f-promote-mod:cb-promote")).click();
-
-        reversiGraphicsURL = webDriver.getCurrentUrl();
-
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText(linkText)));
-
-        assertAll(
-                () -> assertTrue(webDriver.findElement(By.id("title")).getText().contains(reversiGraphics)),
-                () -> assertEquals(DESCRIPTION, webDriver.findElement(By.id("f-topic:ot-description")).getText()),
-                () -> assertTrue(isElementPresentBy(By.linkText(linkText)))
-        );
-    }
-
-    @Test
-    public void T080_createReport() throws URISyntaxException {
-        webDriver.findElement(By.id("f-topic:l-create-report")).click();
-        {
-            WebElement dropdown = webDriver.findElement(By.id("f-create-report:s-type"));
-            dropdown.findElement(By.xpath("//option[. = 'Hint']")).click();
-        }
-        webDriver.findElement(By.id("f-create-report:it-title")).sendKeys(NO_TRANSLATION);
-        webDriver.findElement(By.id("f-create-report:it-post-content")).sendKeys(MISSING);
-
-        WebElement element = webDriver.findElement(By.id("f-create-report:cb-create"));
-        js.executeScript("arguments[0].scrollIntoView();", element);
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-create-report:it-attachment")));
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-create-report:cb-add-attachment")));
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-create-report:cb-create")));
-
-        // Needed as Windows need backslashes to locate file.
-        String file = Paths.get(getClass().getClassLoader().getResource("images/boeseDatei.exe").toURI()).toFile().getPath();
-        webDriver.findElement(By.id("f-create-report:it-attachment"));
-        webDriver.findElement(By.id("f-create-report:it-attachment")).sendKeys(file);
-        webDriver.findElement(By.className("justify-content-between"));
-        webDriver.findElement(By.id("f-create-report:cb-add-attachment")).click();
-
-        assertTrue(isElementPresentBy(By.className("alert-danger")));
-    }
-
-    @Test
-    public void T090_changePicture() throws InterruptedException, URISyntaxException {
-        // Needed as Windows need backslashes to locate file.
-        String file = Paths.get(getClass().getClassLoader().getResource("images/bugger.png").toURI()).toFile().getPath();
-
-        // I cannot get the method used above to work here, without the test being super flaky.
-        js.executeScript("window.scrollTo(0, document.body.scrollHeight)");
-        Thread.sleep(1000);
-
-        webDriver.findElement(By.id("f-create-report:it-attachment"));
-        webDriver.findElement(By.id("f-create-report:it-attachment")).sendKeys(file);
-        webDriver.findElement(By.id("f-create-report:cb-create")).click();
-
-        assertAll(
-                () -> assertTrue(webDriver.findElement(By.id("title")).getText().contains(NO_TRANSLATION)),
-                () -> assertEquals("Hint", webDriver.findElement(By.id("ot-type")).getText()),
-                () -> assertEquals("Minor", webDriver.findElement(By.id("ot-severity")).getText())
-        );
-    }
-
-    @Test
-    public void T100_demoteAdmin() {
-        webDriver.get(baseURL + "profile?u=admin");
-        webDriver.findElement(By.id("f-profile:cb-rem-admin")).click();
-        webDriver.findElement(By.id("f-change-status:i-user-password")).click();
-        webDriver.findElement(By.id("f-change-status:i-user-password")).sendKeys(ADMIN_PASSWORD);
-        webDriver.findElement(By.id("f-change-status:cb-change-status")).click();
-
-        assertTrue(isElementPresentBy(By.className("alert-danger")));
-    }
-
-    private boolean isElementPresentBy(By by) {
+        String scrollElementIntoMiddle = ""
+                + "arguments[0].scrollIntoView({behavior: 'smooth', block: 'center', inline: 'nearest'})";
+        ((JavascriptExecutor) webDriver).executeScript(scrollElementIntoMiddle, deleteButton);
+        wait.until(ExpectedConditions.elementToBeClickable(deleteButton));
         try {
-            webDriver.findElement(by);
-            return true;
-        } catch (NoSuchElementException e) {
-            return false;
-        }
+            Thread.sleep(150);
+        } catch (Exception e) {}
+
+        deleteButton.click();
+
+        // Confirm the deletion.
+        webDriver.findElement(By.id("f-delete-post:cb-delete-post")).click();
+
+        // Only one post should be left.
+        assertEquals(1, webDriver.findElements(By.cssSelector("td > .mb-3")).size());
     }
 
-    //Methods for cleanup until the database is cleaned.
-    private void deleteAlf() {
-        webDriver.get(baseURL + "profile-edit?e=" + alf);
-
-        WebElement element = webDriver.findElement(By.id("f-profile-edit:cb-delete"));
-        js.executeScript("arguments[0].scrollIntoView();", element);
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ia-bio")));
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:ol-bio-hint")));
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:it-overwrite-vote")));
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-profile-edit:cb-apply")));
-
-        webDriver.findElement(By.id("f-profile-edit:ia-bio")).click();
-        webDriver.findElement(By.id("f-profile-edit:ol-bio-hint")).click();
-        webDriver.findElement(By.id("f-profile-edit:it-overwrite-vote")).click();
-
-        webDriver.findElement(By.id("f-profile-edit:cb-delete")).click();
-        webDriver.findElement(By.id("f-del-user:i-password-del")).sendKeys(ADMIN_PASSWORD);
-        webDriver.findElement(By.id("f-del-user:cb-really-del")).click();
+    @Test
+    public void T240_overwriteRelevance() {
+        WebElement overwriteInput = webDriver.findElement(By.id("f-relevance:i-overwrite-relevance-value"));
+        overwriteInput.clear();
+        overwriteInput.sendKeys(OVERWRITING_RELEVANCE);
+        webDriver.findElement(By.id("f-relevance:cb-overwrite-relevance")).click();
+        assertEquals(OVERWRITING_RELEVANCE, webDriver.findElement(By.id("ot-relevance")).getText());
     }
 
-    private void deleteReversiFeedback() {
-        webDriver.get(reversiFeedbackURL);
-        webDriver.findElement(By.id("f-topic:cb-delete")).click();
-        webDriver.findElement(By.id("f-delTopic:cb-delTopic")).click();
+    @Test
+    public void T250_upvote() {
+        webDriver.findElement(By.id("f-relevance:cb-upvote")).click();
+        assertEquals(OVERWRITING_RELEVANCE, webDriver.findElement(By.id("ot-relevance")).getText());
     }
 
-    private void deleteReversiGraphics() {
-        webDriver.get(reversiGraphicsURL);
-        webDriver.findElement(By.id("f-topic:cb-delete")).click();
-        webDriver.findElement(By.id("f-delTopic:cb-delTopic")).click();
+    @Test
+    public void T260_undoOverwrite() {
+        webDriver.findElement(By.id("f-relevance:i-overwrite-relevance-value")).clear();
+        webDriver.findElement(By.name("f-relevance:cb-overwrite-relevance")).click();
+        assertEquals(CALCULATED_RELEVANCE, webDriver.findElement(By.id("ot-relevance")).getText());
+    }
+
+    @Test
+    public void T270_reportSearchSuggestions() {
+        // Search for reports and check for expected suggestions.
+        webDriver.findElement(By.id("f-search-header:it-search")).sendKeys(REPORT_SEARCH_QUERY);
+        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(
+                "#f-search-header\\:p-search-suggestions .search")));
+        List<String> suggestions = getSearchSuggestions();
+        assertTrue(suggestions.size() == 2
+                && suggestions.contains(ORIGINAL_TITLE)
+                && suggestions.contains(DUPLICATE_TITLE));
+    }
+
+    @Test
+    public void T280_reportSearch() {
+        // Search and save search results.
+        webDriver.findElement(By.id("f-search-header:cb-search")).click();
+        List<String> resultTitles = getResultTitles();
+        originalID = webDriver.findElement(By.linkText(ORIGINAL_TITLE))
+                .findElement(By.xpath("./../../td[1]/a[1]"))
+                .getText().substring(1);
+
+        // Search again with additional filters.
+        webDriver.findElement(By.id("f-search:s-show-hint-reports")).click();
+        webDriver.findElement(By.id("f-search:s-show-feature-reports")).click();
+        webDriver.findElement(By.id("f-search:cb-search-large")).click();
+        List<String> resultTitlesFiltered = getResultTitles();
+
+        // Check if search results are what we expected.
+        assertTrue(resultTitles.size() == 2
+                && resultTitles.contains(ORIGINAL_TITLE)
+                && resultTitles.contains(DUPLICATE_TITLE));
+        assertEquals(Arrays.asList(DUPLICATE_TITLE), resultTitlesFiltered);
+    }
+
+    @Test
+    public void T290_markDuplicate() {
+        webDriver.findElement(By.linkText(DUPLICATE_TITLE)).click();
+        webDriver.findElement(By.name("f-report:cb-mark-duplicate")).click();
+        WebElement originalIDInput = webDriver.findElement(By.name("f-duplicate:it-duplicate"));
+        originalIDInput.clear();
+        originalIDInput.sendKeys(originalID);
+        webDriver.findElement(By.name("f-duplicate:cb-duplicate")).click();
+
+        assertEquals(webDriver.findElement(By.id("ot-status1")).getText(), CLOSED_AT);
+        assertEquals(webDriver.findElement(By.id("l-duplicate")).getText(), "#" + originalID);
+    }
+
+    @Test
+    public void T300_topicSearchSuggestions() {
+        webDriver.findElement(By.id("f-search-header:it-search")).sendKeys(TOPIC_TITLE);
+        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(
+                "#f-search-header\\:p-search-suggestions .search")));
+        assertEquals(Arrays.asList(TOPIC_TITLE), getSearchSuggestions());
+
+        webDriver.findElement(By.cssSelector("#f-search-header\\:p-search-suggestions .search")).click();
+        webDriver.findElement(By.cssSelector("#p-tab-topic-content tbody td:first-child a")).click();
+        assertTrue(webDriver.findElement(By.id("title")).getText().endsWith(TOPIC_TITLE));
+    }
+
+    @Test
+    public void T310_banUser() {
+        webDriver.findElement(By.id("f-banned-status:cb-image-ban")).click();
+        webDriver.findElement(By.id("f-ban:it-username-ban")).sendKeys(USER_TO_BAN);
+        webDriver.findElement(By.id("f-ban:cb-ban")).click();
+
+        List<String> bannedUsers = webDriver
+                .findElements(By.cssSelector("#p-banned tbody a"))
+                .stream()
+                .map(WebElement::getText)
+                .collect(Collectors.toList());
+        assertEquals(Arrays.asList(USERNAME_PREFIX + USER_TO_BAN), bannedUsers);
+    }
+
+    private List<String> getSearchSuggestions() {
+        return webDriver
+                .findElements(By.cssSelector("#f-search-header\\:p-search-suggestions > a"))
+                .stream()
+                .map(WebElement::getText)
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getResultTitles() {
+        return webDriver
+                .findElements(By.cssSelector("#p-tab-report-content td:nth-child(2) a"))
+                .stream()
+                .map(WebElement::getText)
+                .collect(Collectors.toList());
     }
 
 }
