@@ -1,5 +1,6 @@
 package tech.bugger.control.backing;
 
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,12 +18,15 @@ import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
 import javax.faces.context.ExternalContext;
 import java.lang.reflect.Field;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -54,11 +58,15 @@ public class ReportBackerTest {
     @Mock
     private Configuration configuration;
 
+    @Mock
+    private Map<String, String> requestParameterMap;
+
     private User user;
     private Report report;
 
     @BeforeEach
     public void setUp() {
+        lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
         reportBacker = new ReportBacker(settings, topicService, reportService, postService, session, ectx);
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
                 "User",
@@ -136,8 +144,10 @@ public class ReportBackerTest {
         reportBacker.setReport(report);
         doReturn(report).when(reportService).getReportByID(anyInt());
         doReturn(user).when(session).getUser();
+        doReturn(true).when(reportService).hasUpvoted(report, user);
         assertNull(reportBacker.upvote());
-        verify(reportService).upvote(eq(report), eq(user));
+        assertTrue(reportBacker.isUpvoted());
+        verify(reportService).upvote(report, user);
     }
 
     @Test
@@ -163,8 +173,10 @@ public class ReportBackerTest {
         reportBacker.setReport(report);
         doReturn(report).when(reportService).getReportByID(anyInt());
         doReturn(user).when(session).getUser();
+        doReturn(true).when(reportService).hasDownvoted(report, user);
         assertNull(reportBacker.downvote());
-        verify(reportService).downvote(eq(report), eq(user));
+        assertTrue(reportBacker.isDownvoted());
+        verify(reportService).downvote(report, user);
     }
 
     @Test
@@ -404,4 +416,197 @@ public class ReportBackerTest {
         assertFalse(reportBacker.privilegedForPost(post));
     }
 
+    @Test
+    public void testInitWhenPostIDInvalid() {
+        doReturn(true).when(requestParameterMap).containsKey("p");
+        doReturn("invalid").when(requestParameterMap).get("p");
+        assertThrows(Error404Exception.class, () -> reportBacker.init());
+    }
+
+    @Test
+    public void testInitWhenNoIDsPresent() {
+        assertThrows(Error404Exception.class, () -> reportBacker.init());
+    }
+
+    @Test
+    public void testInitWhenReportIDInvalid() {
+        // explicitly needed here
+        doReturn(false).when(requestParameterMap).containsKey("p");
+        doReturn(true).when(requestParameterMap).containsKey("id");
+        doReturn("invalid").when(requestParameterMap).get("id");
+        assertThrows(Error404Exception.class, () -> reportBacker.init());
+    }
+
+    @Test
+    public void testInitWhenReportNotFound() {
+        doReturn(false).when(requestParameterMap).containsKey("p");
+        doReturn(true).when(requestParameterMap).containsKey("id");
+        doReturn("100").when(requestParameterMap).get("id");
+        assertThrows(Error404Exception.class, () -> reportBacker.init());
+    }
+
+    @Test
+    public void testInitWhenTopicNotFound() {
+        doReturn(false).when(requestParameterMap).containsKey("p");
+        doReturn(true).when(requestParameterMap).containsKey("id");
+        doReturn("100").when(requestParameterMap).get("id");
+        doReturn(report).when(reportService).getReportByID(anyInt());
+        assertThrows(InternalError.class, () -> reportBacker.init());
+    }
+
+    @Test
+    public void testInit() {
+        doReturn(false).when(requestParameterMap).containsKey("p");
+        doReturn(true).when(requestParameterMap).containsKey("id");
+        doReturn("100").when(requestParameterMap).get("id");
+        doReturn(report).when(reportService).getReportByID(anyInt());
+        Topic topic = new Topic();
+        topic.setId(12);
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        doReturn(configuration).when(settings).getConfiguration();
+        assertDoesNotThrow(() -> reportBacker.init());
+        assertEquals(topic, reportBacker.getTopic());
+        assertEquals(report, reportBacker.getReport());
+    }
+
+    @Test
+    public void testInitWhenPostIDGiven() {
+        doReturn(true).when(requestParameterMap).containsKey("p");
+        doReturn("42").when(requestParameterMap).get("p");
+        doReturn(100).when(reportService).findReportOfPost(anyInt());
+        doReturn(report).when(reportService).getReportByID(anyInt());
+        Topic topic = new Topic();
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        doReturn(configuration).when(settings).getConfiguration();
+        ArrayList<Post> posts = new ArrayList<>();
+        Post post = new Post(42, "a", 100, null, null);
+        posts.add(post);
+        doReturn(posts).when(reportService).getPostsFor(eq(report), any());
+        doReturn(1).when(reportService).getNumberOfPosts(report);
+        assertDoesNotThrow(() -> reportBacker.init());
+    }
+
+    @Test
+    public void testInitWhenPostIDGivenNotOnFirstPage() {
+        doReturn(true).when(requestParameterMap).containsKey("p");
+        doReturn("42").when(requestParameterMap).get("p");
+        doReturn(100).when(reportService).findReportOfPost(anyInt());
+        doReturn(report).when(reportService).getReportByID(anyInt());
+        Topic topic = new Topic();
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        doReturn(configuration).when(settings).getConfiguration();
+        ArrayList<Post> firstPage = new ArrayList<>(20);
+        for (int i = 0; i < 20; i++) {
+            firstPage.add(new Post(i+1, "a", 100, null, null));
+        }
+        ArrayList<Post> posts = new ArrayList<>();
+        Post post = new Post(42, "a", 100, null, null);
+        posts.add(post);
+        doReturn(firstPage, posts).when(reportService).getPostsFor(eq(report), any());
+        doReturn(21).when(reportService).getNumberOfPosts(report);
+        assertDoesNotThrow(() -> reportBacker.init());
+        assertEquals(posts, reportBacker.getPosts().getWrappedData());
+    }
+
+    @Test
+    public void testInitWhenPostIDGivenButNotFound() {
+        doReturn(true).when(requestParameterMap).containsKey("p");
+        doReturn("42").when(requestParameterMap).get("p");
+        doReturn(100).when(reportService).findReportOfPost(anyInt());
+        doReturn(report).when(reportService).getReportByID(anyInt());
+        Topic topic = new Topic();
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        doReturn(configuration).when(settings).getConfiguration();
+        ArrayList<Post> posts = new ArrayList<>();
+        Post post = new Post(5, "a", 100, null, null);
+        posts.add(post);
+        doReturn(posts).when(reportService).getPostsFor(eq(report), any());
+        doReturn(1).when(reportService).getNumberOfPosts(report);
+        assertThrows(Error404Exception.class, () -> reportBacker.init());
+    }
+
+    @Test
+    public void testInitWhenUserIsBannedAndGuestReadingDisabled() {
+        doReturn(false).when(requestParameterMap).containsKey("p");
+        doReturn(true).when(requestParameterMap).containsKey("id");
+        doReturn("100").when(requestParameterMap).get("id");
+        doReturn(report).when(reportService).getReportByID(anyInt());
+        Topic topic = new Topic();
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        doReturn(configuration).when(settings).getConfiguration();
+        doReturn(user).when(session).getUser();
+        doReturn(true).when(topicService).isBanned(user, topic);
+        assertThrows(Error404Exception.class, () -> reportBacker.init());
+    }
+
+    @Test
+    public void testInitWhenUserIsMod() throws Exception {
+        doReturn(false).when(requestParameterMap).containsKey("p");
+        doReturn(true).when(requestParameterMap).containsKey("id");
+        doReturn("100").when(requestParameterMap).get("id");
+        doReturn(report).when(reportService).getReportByID(anyInt());
+        Topic topic = new Topic();
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        doReturn(configuration).when(settings).getConfiguration();
+        doReturn(user).when(session).getUser();
+        doReturn(true).when(topicService).isModerator(user, topic);
+        assertDoesNotThrow(() -> reportBacker.init());
+        assertNull(reportBacker.getCurrentDialog());
+        assertFalse(reportBacker.isBanned());
+        Field f = ReportBacker.class.getDeclaredField("moderator");
+        f.setAccessible(true);
+        assertTrue((boolean) f.get(reportBacker));
+        assertTrue(reportBacker.isPrivileged());
+    }
+
+    @Test
+    public void testInitWhenUserIsAuthor() {
+        Authorship authorship = new Authorship(user, null, null, null);
+        report.setAuthorship(authorship);
+        doReturn(false).when(requestParameterMap).containsKey("p");
+        doReturn(true).when(requestParameterMap).containsKey("id");
+        doReturn("100").when(requestParameterMap).get("id");
+        doReturn(report).when(reportService).getReportByID(anyInt());
+        Topic topic = new Topic();
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        doReturn(configuration).when(settings).getConfiguration();
+        doReturn(user).when(session).getUser();
+        assertDoesNotThrow(() -> reportBacker.init());
+        assertTrue(reportBacker.isPrivileged());
+    }
+
+    @Test
+    public void testInitWhenReportHasDuplicates() {
+        doReturn(false).when(requestParameterMap).containsKey("p");
+        doReturn(true).when(requestParameterMap).containsKey("id");
+        doReturn("100").when(requestParameterMap).get("id");
+        doReturn(report).when(reportService).getReportByID(anyInt());
+        Topic topic = new Topic();
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        doReturn(configuration).when(settings).getConfiguration();
+        ArrayList<Report> duplicates = new ArrayList<>();
+        Report report1 = new Report(report);
+        report1.setId(420);
+        duplicates.add(report1);
+        doReturn(duplicates).when(reportService).getDuplicatesFor(eq(report), any());
+        doReturn(1).when(reportService).getNumberOfDuplicates(report);
+        assertDoesNotThrow(() -> reportBacker.init());
+        reportBacker.getDuplicates().update();
+        assertEquals(duplicates, reportBacker.getDuplicates().getWrappedData());
+    }
+
+    @Test
+    public void testInitWhenUserIsSubscribed() {
+        doReturn(false).when(requestParameterMap).containsKey("p");
+        doReturn(true).when(requestParameterMap).containsKey("id");
+        doReturn("100").when(requestParameterMap).get("id");
+        doReturn(report).when(reportService).getReportByID(anyInt());
+        Topic topic = new Topic();
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        doReturn(configuration).when(settings).getConfiguration();
+        doReturn(user).when(session).getUser();
+        doReturn(true).when(reportService).isSubscribed(user, report);
+        assertDoesNotThrow(() -> reportBacker.init());
+        assertTrue(reportBacker.isSubscribed());
+    }
 }
