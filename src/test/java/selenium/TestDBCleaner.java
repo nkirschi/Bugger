@@ -18,11 +18,9 @@ public class TestDBCleaner {
     @Test
     public void run() {
         // retrieve DB scripts
-        String setupSQL;
-        String eraseSQL;
+        String clearSQL;
         try {
-            setupSQL = Files.readString(Paths.get("src/main/webapp/WEB-INF/setup.sql"));
-            eraseSQL = Files.readString(Paths.get("src/main/webapp/WEB-INF/erase.sql"));
+            clearSQL = Files.readString(Paths.get("src/main/webapp/WEB-INF/clear.sql"));
         } catch (IOException e) {
             throw new AssertionError("Error when reading SQL scripts from disk.", e);
         }
@@ -44,8 +42,7 @@ public class TestDBCleaner {
 
         // reset DB
         Connection conn = connectionPool.getConnection();
-        applyScript(conn, eraseSQL);
-        applyScript(conn, setupSQL);
+        applyScript(conn, clearSQL);
         connectionPool.releaseConnection(conn);
         connectionPool.shutdown();
     }

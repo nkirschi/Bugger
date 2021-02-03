@@ -46,8 +46,8 @@
             <ui:insert name="dialogs"/>
             <h:panelGroup layout="block" id="p-help" styleClass="dialog" rendered="#{footerBacker.helpDisplayed}">
                 <h:outputText id="ot-help" value="#{footerBacker.getHelp(helpKey)}" escape="false"/>
-                <h:form id="f-toggle-help" styleClass="mb-3">
-                    <h:commandButton id="cb-toggle-help"
+                <h:form id="f-close-help" styleClass="mb-3">
+                    <h:commandButton id="cb-close-help"
                                      styleClass="btn btn-lg btn-close form-control position-absolute top-0 end-0
                                      bg-danger mt-2 me-2"
                                      action="#{footerBacker.toggleHelp}"/>

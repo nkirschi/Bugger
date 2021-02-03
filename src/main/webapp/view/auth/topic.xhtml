@@ -23,7 +23,8 @@
                             <h:link id="l-statistics" outcome="pretty:statistics" value="#{labels.statistics}">
                                 <f:param name="t" value="#{topicBacker.topic.id}"/>
                             </h:link>
-                            <h:commandButton id="cb-subscribe" action="#{topicBacker.toggleTopicSubscription}"
+                            <h:commandButton id="cb-#{topicBacker.subscribed ? 'un' : ''}subscribe"
+                                             action="#{topicBacker.toggleTopicSubscription}"
                                              styleClass="button btn btn-primary" value="#{topicBacker.subscribed
                                              ? labels.unsubscribe : labels.subscribe}"
                                              rendered="#{userSession.user != null}"/>

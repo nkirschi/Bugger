@@ -26,7 +26,8 @@
                     <!-- Contains the buttons for changing administration status, profile editing and subscribing -->
                     <h:panelGroup id="p-profile-buttons" layout="block" styleClass="row">
                         <h:panelGroup styleClass="col-12 align-right">
-                            <h:commandButton id="cb-subscribe" action="#{profileBacker.toggleUserSubscription}"
+                            <h:commandButton id="cb-#{profileBacker.subscribed ? 'un' : ''}subscribe"
+                                             action="#{profileBacker.toggleUserSubscription}"
                                              value="#{profileBacker.subscribed ? labels.unsubscribe : labels.subscribe}"
                                              styleClass="button btn btn-primary" rendered="#{userSession.user != null
                                              and userSession.user.id != profileBacker.user.id}"/>

@@ -11,12 +11,13 @@
 
     <ui:param name="helpKey" value="report_edit"/>
 
-    <ui:param name="title" value="#{labels.report_edit_title} ##{reportEditBacker.report.id}: #{reportEditBacker.report.title}"/>
+    <ui:param name="title"
+              value="#{labels.report_edit_title} ##{reportEditBacker.report.id}: #{reportEditBacker.report.title}"/>
 
     <ui:define name="dialogs">
         <h:panelGroup id="p-confirm" layout="block" styleClass="dialog"
                       rendered="#{reportEditBacker.displayConfirmDialog}">
-            <h:form id="f-confirm-dialogs">
+            <h:form id="f-confirm-dialog">
                 <h:outputText id="ot-really-move-report" styleClass="h2" value="#{labels.report_edit_move}"/>
                 <h:panelGroup layout="block" styleClass="mb-3">
                     <h:outputText value="#{labels.report_edit_move_warning}"
@@ -27,12 +28,16 @@
                                   rendered="#{reportEditBacker.displayNoModerationWarning}"/>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
-                    <h:commandButton value="#{labels.report_edit_confirm}" action="#{reportEditBacker.saveChanges}"
+                    <h:commandButton id="cb-save-changes"
+                                     value="#{labels.report_edit_confirm}"
+                                     action="#{reportEditBacker.saveChanges}"
                                      styleClass="btn btn-primary">
                         <f:param name="id" value="#{reportBacker.report.id}"/>
                     </h:commandButton>
-                    <h:commandButton value="#{labels.report_edit_cancel}"
-                                     action="#{reportEditBacker.closeConfirmDialog}" styleClass="btn btn-secondary"/>
+                    <h:commandButton id="cb-close-confirm"
+                                     value="#{labels.report_edit_cancel}"
+                                     action="#{reportEditBacker.closeConfirmDialog}"
+                                     styleClass="btn btn-secondary"/>
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>
@@ -130,8 +135,10 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <h:commandButton value="#{labels.report_edit_submit}"
-                                     action="#{reportEditBacker.saveChangesWithConfirm}" styleClass="btn btn-primary"/>
+                    <h:commandButton id="cb-submit"
+                                    value="#{labels.report_edit_submit}"
+                                     action="#{reportEditBacker.saveChangesWithConfirm}"
+                                     styleClass="btn btn-primary"/>
                 </h:form>
             </h:panelGroup>
         </h:panelGroup>

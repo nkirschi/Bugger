@@ -115,7 +115,8 @@
                                          rendered="#{reportBacker.report.duplicateOf != null}"/>
                     </h:panelGroup>
                     <h:panelGroup rendered="#{userSession.user != null}">
-                        <h:commandButton id="cb-subscribe" action="#{reportBacker.toggleReportSubscription}"
+                        <h:commandButton id="cb-#{reportBacker.subscribed ? 'un' : ''}subscribe"
+                                         action="#{reportBacker.toggleReportSubscription}"
                                          value="#{reportBacker.subscribed ? labels.unsubscribe : labels.subscribe}"
                                          styleClass="button btn btn-primary"/>
                     </h:panelGroup>
@@ -130,20 +131,32 @@
                 </h:panelGroup>
             </h:panelGroup>
         </h:form>
-        <h:form rendered="#{userSession.user != null}">
+        <h:form rendered="#{userSession.user != null}" id="f-vote">
             <h:panelGroup layout="block" styleClass="row my-3">
                 <h:panelGroup layout="block" styleClass="col-3">
                     <h:panelGroup layout="block" styleClass="row">
-                        <h:commandButton value="#{labels.upvote_button}" action="#{reportBacker.removeVote}"
-                                         rendered="#{reportBacker.upvoted}" styleClass="vote-cast"/>
-                        <h:commandButton value="#{labels.upvote_button}" action="#{reportBacker.upvote}"
-                                         rendered="#{!reportBacker.upvoted}" styleClass="vote-not-cast"/>
+                        <h:commandButton id="cb-upvote"
+                                         value="#{labels.upvote_button}"
+                                         action="#{reportBacker.upvote}"
+                                         rendered="#{!reportBacker.upvoted}"
+                                         styleClass="vote-not-cast"/>
+                        <h:commandButton id="cb-unupvote"
+                                         value="#{labels.upvote_button}"
+                                         action="#{reportBacker.removeVote}"
+                                         rendered="#{reportBacker.upvoted}"
+                                         styleClass="vote-cast"/>
                     </h:panelGroup>
                     <h:panelGroup layout="block" styleClass="row">
-                        <h:commandButton value="#{labels.downvote_button}" action="#{reportBacker.removeVote}"
-                                         rendered="#{reportBacker.downvoted}" styleClass="vote-cast"/>
-                        <h:commandButton value="#{labels.downvote_button}" action="#{reportBacker.downvote}"
-                                         rendered="#{!reportBacker.downvoted}" styleClass="vote-not-cast"/>
+                        <h:commandButton id="cb-downvote"
+                                         value="#{labels.downvote_button}"
+                                         action="#{reportBacker.downvote}"
+                                         rendered="#{!reportBacker.downvoted}"
+                                         styleClass="vote-not-cast"/>
+                        <h:commandButton id="cb-undownvote"
+                                         value="#{labels.downvote_button}"
+                                         action="#{reportBacker.removeVote}"
+                                         rendered="#{reportBacker.downvoted}"
+                                         styleClass="vote-cast"/>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="col 9">
@@ -185,11 +198,11 @@
                 <h:outputLabel value="#{labels.topic}" for="ot-topic" styleClass="form-label"/>
             </h:panelGroup>
             <h:panelGroup styleClass="col-9">
-                <h:link id="ot-topic" value="!#{reportBacker.topic.id}"
+                <h:link id="l-topic" value="!#{reportBacker.topic.id}"
                         outcome="pretty:topic">
                     <f:param name="id" value="#{reportBacker.topic.id}"/>
                 </h:link>
-                <h:outputText value=": #{reportBacker.topic.title}" />
+                <h:outputText id="ot-topic" value=": #{reportBacker.topic.title}"/>
             </h:panelGroup>
         </h:panelGroup>
 
@@ -300,7 +313,8 @@
             </h:panelGroup>
         </h:panelGroup>
 
-        <h:panelGroup layout="block" styleClass="row mb3" rendered="#{reportBacker.report.authorship.modifiedDate != null}">
+        <h:panelGroup layout="block" styleClass="row mb3"
+                      rendered="#{reportBacker.report.authorship.modifiedDate != null}">
             <h:panelGroup styleClass="col-3">
                 <h:outputText id="ot-modified-by" value="#{labels.report_last_modified_by}"/>
             </h:panelGroup>
