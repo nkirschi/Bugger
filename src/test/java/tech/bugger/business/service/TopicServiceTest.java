@@ -679,6 +679,13 @@ class TopicServiceTest {
     }
 
     @Test
+    public void testCreateTopicDuplicate() throws NotFoundException, DuplicateException {
+        doThrow(DuplicateException.class).when(topicGateway).createTopic(testTopic1);
+        assertFalse(topicService.createTopic(testTopic1, user));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
     public void testUpdateTopic() throws NotFoundException {
         assertTrue(topicService.updateTopic(testTopic1));
         verify(topicGateway).updateTopic(testTopic1);
@@ -921,6 +928,41 @@ class TopicServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> topicService.countSubscribedTopics(user)
         );
+    }
+
+    @Test
+    public void testGetNumberOfSubscribers() throws NotFoundException {
+        doReturn(42).when(topicGateway).countSubscribers(testTopic1);
+        assertEquals(42, topicService.getNumberOfSubscribers(testTopic1));
+    }
+
+    @Test
+    public void testGetNumberOfSubscribersTopicNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.getNumberOfSubscribers(null)
+        );
+    }
+
+    @Test
+    public void testGetNumberOfSubscribersTopicIdNull() {
+        testTopic1.setId(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> topicService.getNumberOfSubscribers(testTopic1)
+        );
+    }
+
+    @Test
+    public void testGetNumberOfSubscribersNotFound() throws NotFoundException {
+        doThrow(NotFoundException.class).when(topicGateway).countSubscribers(testTopic1);
+        assertEquals(0, topicService.getNumberOfSubscribers(testTopic1));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testGetNumberOfSubscribersTransaction() throws TransactionException {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertEquals(0, topicService.getNumberOfSubscribers(testTopic1));
+        verify(feedbackEvent).fire(any());
     }
 
 }
