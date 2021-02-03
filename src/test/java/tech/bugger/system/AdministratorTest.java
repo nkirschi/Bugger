@@ -1,4 +1,4 @@
-package selenium;
+package tech.bugger.system;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,17 +16,16 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import tech.bugger.LogExtension;
+import tech.bugger.SeleniumDriverExtension;
 
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(DriverExtension.class)
+@ExtendWith(SeleniumDriverExtension.class)
 @ExtendWith(LogExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -59,8 +58,8 @@ public class AdministratorTest {
 
     @BeforeAll
     public void setUp() {
-        baseURL = DriverExtension.getBaseURL();
-        webDriver = DriverExtension.getDriver();
+        baseURL = SeleniumDriverExtension.getBaseURL();
+        webDriver = SeleniumDriverExtension.getDriver();
         linkText = "@" + alf;
         js = (JavascriptExecutor) webDriver;
         vars = new HashMap<>();
@@ -73,7 +72,7 @@ public class AdministratorTest {
         deleteReversiFeedback();
         deleteAlf();
         deleteReversiGraphics();
-        webDriver.close();
+        webDriver.quit();
     }
 
     @Test

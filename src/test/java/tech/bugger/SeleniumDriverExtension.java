@@ -1,4 +1,4 @@
-package selenium;
+package tech.bugger;
 
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -6,7 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import tech.bugger.persistence.util.PropertiesReader;
 
-public class DriverExtension implements BeforeAllCallback {
+public class SeleniumDriverExtension implements BeforeAllCallback {
 
     private static String driverType;
     private static String driverPath;
@@ -15,7 +15,7 @@ public class DriverExtension implements BeforeAllCallback {
     private static WebDriver webDriver;
     private static PropertiesReader propertiesReader;
 
-    public DriverExtension() {
+    public SeleniumDriverExtension() {
         try {
             propertiesReader = new PropertiesReader(ClassLoader.getSystemResourceAsStream("selenium.properties"));
             driverType = propertiesReader.getString("driver.type");
