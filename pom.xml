@@ -249,10 +249,10 @@
                 <version>1.6.2</version>
                 <configuration>
                     <targetClasses>
-                        <param>tech.bugger.control.backing.RegisterBacker</param>
+                        <param>tech.bugger.control.backing.ReportBacker</param>
                     </targetClasses>
                     <targetTests>
-                        <param>tech.bugger.control.backing.RegisterBackerTest</param>
+                        <param>tech.bugger.control.backing.ReportBackerTest</param>
                     </targetTests>
                     <excludedMethods>
                         <excludedMethod>createToken</excludedMethod>

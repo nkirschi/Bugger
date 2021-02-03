@@ -126,6 +126,7 @@ public class ReportBackerTest {
     public void testToggleReportSubscriptionWhenUserIsNotSubscribed() {
         doReturn(user).when(session).getUser();
         assertNull(reportBacker.toggleReportSubscription());
+        assertTrue(reportBacker.isSubscribed());
         verify(reportService).isSubscribed(eq(user), any());
         verify(reportService, never()).unsubscribeFromReport(any(), any());
         verify(reportService).subscribeToReport(eq(user), any());
@@ -147,6 +148,7 @@ public class ReportBackerTest {
         doReturn(true).when(reportService).hasUpvoted(report, user);
         assertNull(reportBacker.upvote());
         assertTrue(reportBacker.isUpvoted());
+        assertFalse(reportBacker.isDownvoted());
         verify(reportService).upvote(report, user);
     }
 
@@ -176,6 +178,7 @@ public class ReportBackerTest {
         doReturn(true).when(reportService).hasDownvoted(report, user);
         assertNull(reportBacker.downvote());
         assertTrue(reportBacker.isDownvoted());
+        assertFalse(reportBacker.isUpvoted());
         verify(reportService).downvote(report, user);
     }
 
@@ -246,6 +249,25 @@ public class ReportBackerTest {
         verify(reportService).markDuplicate(report, 42);
         verify(reportService).close(report);
         assertNull(reportBacker.getCurrentDialog());
+    }
+
+    @Test
+    public void testMarkDuplicateVerifyUpdate() {
+        report.setDuplicateOf(42);
+        doReturn(false).when(requestParameterMap).containsKey("p");
+        doReturn(true).when(requestParameterMap).containsKey("id");
+        doReturn("100").when(requestParameterMap).get("id");
+        doReturn(report).when(reportService).getReportByID(anyInt());
+        Topic topic = new Topic();
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        doReturn(configuration).when(settings).getConfiguration();
+        user.setAdministrator(true);
+        doReturn(user).when(session).getUser();
+        doReturn(true).when(reportService).markDuplicate(report, 42);
+        doReturn(12).when(reportService).getNumberOfDuplicates(report);
+        assertDoesNotThrow(() -> reportBacker.init());
+        assertDoesNotThrow(() -> reportBacker.markDuplicate());
+        verify(reportService, times(2)).getDuplicatesFor(eq(report), any());
     }
 
     @Test
@@ -608,5 +630,22 @@ public class ReportBackerTest {
         doReturn(true).when(reportService).isSubscribed(user, report);
         assertDoesNotThrow(() -> reportBacker.init());
         assertTrue(reportBacker.isSubscribed());
+    }
+
+    @Test
+    public void testInitWhenUserIsAdmin() {
+        doReturn(false).when(requestParameterMap).containsKey("p");
+        doReturn(true).when(requestParameterMap).containsKey("id");
+        doReturn("100").when(requestParameterMap).get("id");
+        doReturn(report).when(reportService).getReportByID(anyInt());
+        Topic topic = new Topic();
+        doReturn(topic).when(topicService).getTopicByID(anyInt());
+        doReturn(configuration).when(settings).getConfiguration();
+        user.setAdministrator(true);
+        doReturn(user).when(session).getUser();
+        assertDoesNotThrow(() -> reportBacker.init());
+        assertTrue(reportBacker.isPrivileged());
+        assertFalse(reportBacker.isSubscribed());
+        verify(reportService).hasUpvoted(report, user);
     }
 }
