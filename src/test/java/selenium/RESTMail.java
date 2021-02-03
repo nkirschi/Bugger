@@ -1,10 +1,12 @@
-package tech.bugger;
+package selenium;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,9 +21,9 @@ public final class RESTMail {
     private static final String BASE_URL = "http://restmail.net/mail/";
 
     /**
-     * Regex pattern matching the last URL in a RESTMail JSON array.
+     * Regex pattern matching any URL in the bodies of the e-mails in a RESTMail JSON array.
      */
-    private static final Pattern LAST_URL_PAT = Pattern.compile("[sS]*\"text\":.*?(https?://[^\",]*?)[\\s\\\\n].*?\",");
+    private static final Pattern URL_PATTERN = Pattern.compile("\"text\":.*?(https?://[^\",]*?)(\\\\n|\\s).*?\",");
 
     /**
      * Prevents instantiation of this utility class.
@@ -67,10 +69,11 @@ public final class RESTMail {
      * @param username The user whose RESTMail inbox to crawl through.
      * @return The latest confirmation URL for {@code username}.
      */
-    public static String getLatestURL(final String username) {
-        Matcher matcher = LAST_URL_PAT.matcher(retrieveEmails(username));
-        if (matcher.find()) {
-            return matcher.group(1);
+    public static String findLatestURL(final String username) {
+        Matcher matcher = URL_PATTERN.matcher(retrieveEmails(username));
+        Optional<MatchResult> match = matcher.results().reduce((a, b) -> b);
+        if (match.isPresent()) {
+            return match.get().group(1);
         } else {
             throw new AssertionError("No registration URL in e-mails of user " + username);
         }

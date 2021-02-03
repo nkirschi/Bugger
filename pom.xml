@@ -27,8 +27,8 @@
         <commonmark.version>0.15.2</commonmark.version>
         <postgresql.version>42.2.18</postgresql.version>
         <checkstyle.version>8.37</checkstyle.version>
-        <junit.version>5.8.0-SNAPSHOT</junit.version>
-        <junitplatform.version>1.8.0-SNAPSHOT</junitplatform.version>
+        <junit.version>5.7.0</junit.version>
+        <junitplatform.version>1.7.0</junitplatform.version>
         <mockito.version>3.6.28</mockito.version>
         <selenium.version>3.141.59</selenium.version>
         <webdrivermanager.version>4.3.1</webdrivermanager.version>
@@ -39,15 +39,6 @@
         <pitest.version>1.6.2</pitest.version>
         <pitestjunit5.version>0.12</pitestjunit5.version>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>oss.sonatype.org-snapshot</id>
-            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases><enabled>false</enabled></releases>
-            <snapshots><enabled>true</enabled></snapshots>
-        </repository>
-    </repositories>
 
     <dependencies>
 
@@ -117,6 +108,12 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <version>${junitplatform.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

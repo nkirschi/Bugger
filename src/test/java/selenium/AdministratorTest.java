@@ -1,4 +1,4 @@
-package tech.bugger.system;
+package selenium;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,18 +15,14 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import tech.bugger.LogExtension;
-import tech.bugger.SeleniumDriverExtension;
 
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SeleniumDriverExtension.class)
-@ExtendWith(LogExtension.class)
+@ExtendWith(SeleniumExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AdministratorTest {
@@ -34,7 +30,6 @@ public class AdministratorTest {
     private WebDriver webDriver;
     private static String baseURL;
     private JavascriptExecutor js;
-    private HashMap<String, Object> vars;
     private String reversiFeedback = "Reversi: Lob und Tadel";
     private String reversiGraphics = "Reversi: Grafikoberfläche";
     private static final String DESCRIPTION = "Hier können Sie Feedback jeglicher Art zur Version 1.0 abgeben.";
@@ -58,21 +53,19 @@ public class AdministratorTest {
 
     @BeforeAll
     public void setUp() {
-        baseURL = SeleniumDriverExtension.getBaseURL();
-        webDriver = SeleniumDriverExtension.getDriver();
+        baseURL = SeleniumExtension.getBaseURL();
+        webDriver = SeleniumExtension.getDriver();
         linkText = "@" + alf;
         js = (JavascriptExecutor) webDriver;
-        vars = new HashMap<>();
         webDriver.get(baseURL);
         wait = new WebDriverWait(webDriver, 5);
     }
 
     @AfterAll
     public void tearDown() {
-        deleteReversiFeedback();
+        /*deleteReversiFeedback();
         deleteAlf();
-        deleteReversiGraphics();
-        webDriver.quit();
+        deleteReversiGraphics();*/
     }
 
     @Test
@@ -136,7 +129,7 @@ public class AdministratorTest {
                 () -> assertEquals(alfFirstName, webDriver.findElement(By.id("f-profile:ot-first-name")).getText()),
                 () -> assertEquals(alfLastName, webDriver.findElement(By.id("f-profile:ot-last-name")).getText()),
                 () -> assertEquals(alfEmailPrefix + alfEmailSuffix,
-                        webDriver.findElement(By.id("f-profile:ot-email")).getText())
+                                   webDriver.findElement(By.id("f-profile:ot-email")).getText())
         );
     }
 
@@ -242,7 +235,8 @@ public class AdministratorTest {
         wait.until(ExpectedConditions.elementToBeClickable(By.id("f-create-report:cb-create")));
 
         // Needed as Windows need backslashes to locate file.
-        String file = Paths.get(getClass().getClassLoader().getResource("images/boeseDatei.exe").toURI()).toFile().getPath();
+        String file =
+                Paths.get(getClass().getClassLoader().getResource("images/boeseDatei.exe").toURI()).toFile().getPath();
         webDriver.findElement(By.id("f-create-report:it-attachment"));
         webDriver.findElement(By.id("f-create-report:it-attachment")).sendKeys(file);
         webDriver.findElement(By.className("justify-content-between"));
@@ -254,7 +248,8 @@ public class AdministratorTest {
     @Test
     public void T090_changePicture() throws InterruptedException, URISyntaxException {
         // Needed as Windows need backslashes to locate file.
-        String file = Paths.get(getClass().getClassLoader().getResource("images/bugger.png").toURI()).toFile().getPath();
+        String file =
+                Paths.get(getClass().getClassLoader().getResource("images/bugger.png").toURI()).toFile().getPath();
 
         // I cannot get the method used above to work here, without the test being super flaky.
         js.executeScript("window.scrollTo(0, document.body.scrollHeight)");
