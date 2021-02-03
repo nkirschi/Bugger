@@ -115,7 +115,8 @@
                                          rendered="#{reportBacker.report.duplicateOf != null}"/>
                     </h:panelGroup>
                     <h:panelGroup rendered="#{userSession.user != null}">
-                        <h:commandButton id="cb-subscribe" action="#{reportBacker.toggleReportSubscription}"
+                        <h:commandButton id="cb-#{reportBacker.subscribed ? 'un' : ''}subscribe"
+                                         action="#{reportBacker.toggleReportSubscription}"
                                          value="#{reportBacker.subscribed ? labels.unsubscribe : labels.subscribe}"
                                          styleClass="button btn btn-primary"/>
                     </h:panelGroup>
@@ -130,7 +131,7 @@
                 </h:panelGroup>
             </h:panelGroup>
         </h:form>
-        <h:form id="f-relevance" rendered="#{userSession.user != null}">
+        <h:form id="f-vote" rendered="#{userSession.user != null}">
             <h:panelGroup layout="block" styleClass="row my-3">
                 <h:panelGroup layout="block" styleClass="col-3">
                     <h:panelGroup layout="block" styleClass="row">
@@ -200,11 +201,11 @@
                 <h:outputLabel value="#{labels.topic}" for="ot-topic" styleClass="form-label"/>
             </h:panelGroup>
             <h:panelGroup styleClass="col-9">
-                <h:link id="ot-topic" value="!#{reportBacker.topic.id}"
+                <h:link id="l-topic" value="!#{reportBacker.topic.id}"
                         outcome="pretty:topic">
                     <f:param name="id" value="#{reportBacker.topic.id}"/>
                 </h:link>
-                <h:outputText value=": #{reportBacker.topic.title}" />
+                <h:outputText id="ot-topic" value=": #{reportBacker.topic.title}"/>
             </h:panelGroup>
         </h:panelGroup>
 
@@ -315,7 +316,8 @@
             </h:panelGroup>
         </h:panelGroup>
 
-        <h:panelGroup layout="block" styleClass="row mb3" rendered="#{reportBacker.report.authorship.modifiedDate != null}">
+        <h:panelGroup layout="block" styleClass="row mb3"
+                      rendered="#{reportBacker.report.authorship.modifiedDate != null}">
             <h:panelGroup styleClass="col-3">
                 <h:outputText id="ot-modified-by" value="#{labels.report_last_modified_by}"/>
             </h:panelGroup>
