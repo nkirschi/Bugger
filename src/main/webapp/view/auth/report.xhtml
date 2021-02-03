@@ -130,20 +130,32 @@
                 </h:panelGroup>
             </h:panelGroup>
         </h:form>
-        <h:form rendered="#{userSession.user != null}">
+        <h:form id="f-relevance" rendered="#{userSession.user != null}">
             <h:panelGroup layout="block" styleClass="row my-3">
                 <h:panelGroup layout="block" styleClass="col-3">
                     <h:panelGroup layout="block" styleClass="row">
-                        <h:commandButton value="#{labels.upvote_button}" action="#{reportBacker.removeVote}"
-                                         rendered="#{reportBacker.upvoted}" styleClass="vote-cast"/>
-                        <h:commandButton value="#{labels.upvote_button}" action="#{reportBacker.upvote}"
-                                         rendered="#{!reportBacker.upvoted}" styleClass="vote-not-cast"/>
+                        <h:commandButton id="cb-upvote"
+                                         value="#{labels.upvote_button}"
+                                         action="#{reportBacker.upvote}"
+                                         rendered="#{!reportBacker.upvoted}"
+                                         styleClass="vote-not-cast"/>
+                        <h:commandButton id="cb-unupvote"
+                                         value="#{labels.upvote_button}"
+                                         action="#{reportBacker.removeVote}"
+                                         rendered="#{reportBacker.upvoted}"
+                                         styleClass="vote-cast"/>
                     </h:panelGroup>
                     <h:panelGroup layout="block" styleClass="row">
-                        <h:commandButton value="#{labels.downvote_button}" action="#{reportBacker.removeVote}"
-                                         rendered="#{reportBacker.downvoted}" styleClass="vote-cast"/>
-                        <h:commandButton value="#{labels.downvote_button}" action="#{reportBacker.downvote}"
-                                         rendered="#{!reportBacker.downvoted}" styleClass="vote-not-cast"/>
+                        <h:commandButton id="cb-downvote"
+                                         value="#{labels.downvote_button}"
+                                         action="#{reportBacker.downvote}"
+                                         rendered="#{!reportBacker.downvoted}"
+                                         styleClass="vote-not-cast"/>
+                        <h:commandButton id="cb-undownvote"
+                                         value="#{labels.downvote_button}"
+                                         action="#{reportBacker.removeVote}"
+                                         rendered="#{reportBacker.downvoted}"
+                                         styleClass="vote-cast"/>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="col 9">
@@ -153,10 +165,13 @@
             </h:panelGroup>
             <h:panelGroup layout="block" styleClass="row my-3">
                 <h:panelGroup layout="block" styleClass="col 9" rendered="#{reportBacker.privileged}">
-                    <h:inputText value="#{reportBacker.overwriteRelevanceValue}" styleClass="form-control"/>
+                    <h:inputText id="i-overwrite-relevance-value"
+                                 value="#{reportBacker.overwriteRelevanceValue}"
+                                 styleClass="form-control"/>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="col 3" rendered="#{reportBacker.privileged}">
-                    <h:commandButton value="#{labels.overwrite_relevance}" styleClass="button btn btn-primary"
+                    <h:commandButton id="cb-overwrite-relevance"
+                                     value="#{labels.overwrite_relevance}" styleClass="button btn btn-primary"
                                      action="#{reportBacker.applyOverwriteRelevance}"/>
                 </h:panelGroup>
             </h:panelGroup>
