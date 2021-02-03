@@ -98,9 +98,10 @@ public class RegisterBackerTest {
         lenient().doReturn(buffer).when(request).getRequestURL();
         doReturn(true).when(profileService).createUser(any());
         doReturn(true).when(authenticationService).register(any(), any());
-        assertNotNull(registerBacker.register());
+        assertEquals("pretty:home", registerBacker.register());
         verify(profileService).createUser(any());
         verify(authenticationService).register(any(), any());
+        verify(feedbackEvent).fire(any());
     }
 
     @Test
@@ -140,6 +141,13 @@ public class RegisterBackerTest {
         lenient().doReturn(false).when(authenticationService).register(any(), any());
         assertNull(registerBacker.register());
         verify(profileService).createUser(any());
+    }
+
+    @Test
+    public void testSetUserForCoverage() {
+        testUser.setId(42);
+        assertDoesNotThrow(() -> registerBacker.setUser(testUser));
+        assertEquals(testUser, registerBacker.getUser());
     }
 
 }

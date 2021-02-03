@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html
         PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -41,8 +40,10 @@
                 <h:panelGrid id="pg-error-general" columns="1">
                     <h:outputText value="#{error_description}"/>
                     <h:outputText value="#{labels.contact_info}" styleClass="h2"/>
-                    <h:outputText value="#{applicationSettings.organization.supportInfo}"/>
-                    <a href="#{errorBacker.getHomeUrl()}">#{labels.go_home}</a>
+                    <h:outputText value="#{errorBacker.supportInformation}" escape="false"/>
+                    <a href="#{errorBacker.getHomeUrl()}" class="display-6">
+                        #{labels.go_home}
+                    </a>
                 </h:panelGrid>
 
                 <ui:insert name="content"/>

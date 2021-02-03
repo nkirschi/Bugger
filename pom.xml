@@ -273,7 +273,7 @@
                 </executions>
             </plugin>
 
-            <!-- Pitest mutation testing -->
+            <!-- PIT Mutation Testing -->
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
@@ -287,13 +287,26 @@
                 </dependencies>
                 <configuration>
                     <targetClasses>
-                        <param>tech.bugger.persistence.gateway.TokenDBGateway</param>
+                        <param>tech.bugger.business.service.*</param>
                     </targetClasses>
                     <targetTests>
-                        <param>tech.bugger.persistence.gateway.TokenDBGatewayTest</param>
+                        <param>tech.bugger.business.service.*t</param>
                     </targetTests>
+                    <excludedMethods>
+                        <excludedMethod>checkState</excludedMethod>
+                    </excludedMethods>
+                    <avoidCallsTo>
+                        <avoidCallsTo>java.util.logging</avoidCallsTo>
+                        <avoidCallsTo>org.apache.log4j</avoidCallsTo>
+                        <avoidCallsTo>org.slf4j</avoidCallsTo>
+                        <avoidCallsTo>org.apache.commons.logging</avoidCallsTo>
+                        <avoidCallsTo>tech.bugger.global.util.Log</avoidCallsTo>
+                        <avoidCallsTo>java.sql.PreparedStatement</avoidCallsTo>
+                        <avoidCallsTo>tech.bugger.persistence.util.Transaction</avoidCallsTo>
+                    </avoidCallsTo>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>
