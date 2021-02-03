@@ -414,7 +414,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String applyOverwriteRelevance() {
-        if (session.getUser() != null && session.getUser().isAdministrator()) {
+        if (session.getUser() != null && (session.getUser().isAdministrator() || moderator)) {
             reportService.overwriteRelevance(report, overwriteRelevanceValue);
             updateRelevance();
             return null;
