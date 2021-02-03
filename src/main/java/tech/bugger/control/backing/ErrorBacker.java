@@ -6,7 +6,10 @@ import java.io.StringWriter;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
+import javax.inject.Inject;
 import javax.inject.Named;
+import tech.bugger.business.internal.ApplicationSettings;
+import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.util.Log;
@@ -25,11 +28,36 @@ public class ErrorBacker {
     private static final Log log = Log.forClass(ErrorBacker.class);
 
     /**
+     * The current application settings.
+     */
+    private final ApplicationSettings applicationSettings;
+
+    /**
+     * Constructs a new error page backing bean with the necessary dependencies.
+     *
+     * @param applicationSettings The application settings to use.
+     */
+    @Inject
+    public ErrorBacker(final ApplicationSettings applicationSettings) {
+        this.applicationSettings = applicationSettings;
+    }
+
+    /**
      * Initializes the error page.
      */
     @PostConstruct
     void init() {
         log.debug("init called on error backer.");
+    }
+
+    /**
+     * Parses and returns the support information in HTML.
+     *
+     * @return The parsed support information in HTML.
+     */
+    public String getSupportInformation() {
+        String support = applicationSettings.getOrganization().getSupportInfo();
+        return support == null ? "" : MarkdownHandler.toHtml(support);
     }
 
     /**

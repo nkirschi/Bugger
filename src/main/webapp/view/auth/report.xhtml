@@ -92,8 +92,8 @@
     <ui:define name="content">
         <h:form id="f-report">
             <h:panelGroup layout="block" styleClass="row">
-                <h:panelGroup styleClass="col-12 align-right">
-                    <h:panelGroup rendered="#{reportBacker.privileged}">
+                <h:panelGroup layout="block" styleClass="col-12 align-right">
+                    <h:panelGroup layout="block" rendered="#{reportBacker.privileged}">
                         <h:commandButton id="cb-open-close-report-dialog"
                                          action="#{reportBacker.displayDialog('OPEN_CLOSE')}"
                                          value="#{reportBacker.report.closingDate == null ? labels.report_action_close
@@ -114,7 +114,7 @@
                                          value="#{labels.report_unmark_duplicate}" styleClass="button btn btn-primary"
                                          rendered="#{reportBacker.report.duplicateOf != null}"/>
                     </h:panelGroup>
-                    <h:panelGroup rendered="#{userSession.user != null}">
+                    <h:panelGroup layout="block" rendered="#{userSession.user != null}">
                         <h:commandButton id="cb-subscribe" action="#{reportBacker.toggleReportSubscription}"
                                          value="#{reportBacker.subscribed ? labels.unsubscribe : labels.subscribe}"
                                          styleClass="button btn btn-primary"/>
@@ -163,28 +163,28 @@
         </h:form>
 
         <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup styleClass="col-3">
+            <h:panelGroup layout="block" styleClass="col-3">
                 <h:outputLabel value="#{labels.current_relevance}" for="ot-relevance" styleClass="form-label"/>
             </h:panelGroup>
-            <h:panelGroup styleClass="col-9">
+            <h:panelGroup layout="block" styleClass="col-9">
                 <h:outputText id="ot-relevance" value="#{reportBacker.report.relevance}"/>
             </h:panelGroup>
         </h:panelGroup>
 
         <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup styleClass="col-3">
+            <h:panelGroup layout="block" styleClass="col-3">
                 <h:outputLabel value="#{labels.id}" for="ot-id" styleClass="form-label"/>
             </h:panelGroup>
-            <h:panelGroup styleClass="col-9">
+            <h:panelGroup layout="block" styleClass="col-9">
                 <h:outputText id="ot-id" value="##{reportBacker.report.id}"/>
             </h:panelGroup>
         </h:panelGroup>
 
         <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup styleClass="col-3">
+            <h:panelGroup layout="block" styleClass="col-3">
                 <h:outputLabel value="#{labels.topic}" for="ot-topic" styleClass="form-label"/>
             </h:panelGroup>
-            <h:panelGroup styleClass="col-9">
+            <h:panelGroup layout="block" styleClass="col-9">
                 <h:link id="ot-topic" value="!#{reportBacker.topic.id}"
                         outcome="pretty:topic">
                     <f:param name="id" value="#{reportBacker.topic.id}"/>
@@ -194,10 +194,10 @@
         </h:panelGroup>
 
         <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup styleClass="col-3">
+            <h:panelGroup layout="block" styleClass="col-3">
                 <h:outputLabel value="#{labels.status}" for="ot-status1" styleClass="form-label"/>
             </h:panelGroup>
-            <h:panelGroup styleClass="col-9">
+            <h:panelGroup layout="block" styleClass="col-9">
                 <h:outputText id="ot-status1" value="#{reportBacker.report.closingDate == null
                               ? labels.report_status_open : labels.report_status_closed.concat(' ')}"/>
                 <h:outputText id="ot-status3" value="#{reportBacker.report.closingDate}">
@@ -207,19 +207,19 @@
         </h:panelGroup>
 
         <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup styleClass="col-3">
+            <h:panelGroup layout="block" styleClass="col-3">
                 <h:outputLabel value="#{labels.report_type}" for="ot-type" styleClass="form-label"/>
             </h:panelGroup>
-            <h:panelGroup styleClass="col-9">
+            <h:panelGroup layout="block" styleClass="col-9">
                 <h:outputText id="ot-type" value="#{labels['report_type_'.concat(reportBacker.report.type)]}"/>
             </h:panelGroup>
         </h:panelGroup>
 
         <h:panelGroup layout="block" styleClass="row mb3" rendered="#{reportBacker.report.duplicateOf != null}">
-            <h:panelGroup styleClass="col-3">
+            <h:panelGroup layout="block" styleClass="col-3">
                 <h:outputLabel id="ol-duplicate-desc" value="#{labels.report_original}: " styleClass="form-label"/>
             </h:panelGroup>
-            <h:panelGroup styleClass="col-9">
+            <h:panelGroup layout="block" styleClass="col-9">
                 <h:link id="l-duplicate" outcome="pretty:report" rendered="#{reportBacker.report.duplicateOf != null}"
                         value="##{reportBacker.report.duplicateOf}">
                     <f:param name="id" value="#{reportBacker.report.duplicateOf}"/>
@@ -228,20 +228,20 @@
         </h:panelGroup>
 
         <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup styleClass="col-3">
+            <h:panelGroup layout="block" styleClass="col-3">
                 <h:outputLabel value="#{labels.report_severity}" for="ot-severity" styleClass="form-label"/>
             </h:panelGroup>
-            <h:panelGroup styleClass="col-9">
+            <h:panelGroup layout="block" styleClass="col-9">
                 <h:outputText id="ot-severity"
                               value="#{labels['report_severity_'.concat(reportBacker.report.severity)]}"/>
             </h:panelGroup>
         </h:panelGroup>
 
         <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup styleClass="col-3">
+            <h:panelGroup layout="block" styleClass="col-3">
                 <h:outputLabel value="#{labels.report_version}" for="ot-version" styleClass="form-label"/>
             </h:panelGroup>
-            <h:panelGroup styleClass="col-9">
+            <h:panelGroup layout="block" styleClass="col-9">
                 <h:outputText id="ot-version" value="#{reportBacker.report.version}"/>
             </h:panelGroup>
         </h:panelGroup>
@@ -257,12 +257,12 @@
         </b:pagitable>
 
         <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup styleClass="col-3">
+            <h:panelGroup layout="block" styleClass="col-3">
                 <h:outputText id="ot-created-by" value="#{labels.report_created_by}"/>
             </h:panelGroup>
-            <h:panelGroup styleClass="col-9">
-                <h:panelGroup styleClass="row">
-                    <h:panelGroup styleClass="col-12">
+            <h:panelGroup layout="block" styleClass="col-9">
+                <h:panelGroup layout="block" styleClass="row">
+                    <h:panelGroup layout="block" styleClass="col-12">
                         <h:panelGroup>
                             <h:graphicImage id="g-creator-thumbnail-r#{reportBacker.report.id}"
                                             value="/avatar?id=#{reportBacker.report.authorship.creator == null ? 0
@@ -289,8 +289,8 @@
                                       rendered="#{reportBacker.report.authorship.creator == null}"/>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:panelGroup styleClass="row">
-                    <h:panelGroup styleClass="col-12">
+                <h:panelGroup layout="block" styleClass="row">
+                    <h:panelGroup layout="block" styleClass="col-12">
                         <h:outputText id="ot-created-at" value="#{labels.report_at.concat(' ')}"/>
                         <h:outputText id="ot-created-date" value="#{reportBacker.report.authorship.creationDate}">
                             <f:converter converterId="offsetDateTimeConverter"/>
@@ -301,12 +301,12 @@
         </h:panelGroup>
 
         <h:panelGroup layout="block" styleClass="row mb3" rendered="#{reportBacker.report.authorship.modifiedDate != null}">
-            <h:panelGroup styleClass="col-3">
+            <h:panelGroup layout="block" styleClass="col-3">
                 <h:outputText id="ot-modified-by" value="#{labels.report_last_modified_by}"/>
             </h:panelGroup>
-            <h:panelGroup styleClass="col-9">
-                <h:panelGroup styleClass="row">
-                    <h:panelGroup styleClass="col-12">
+            <h:panelGroup layout="block" styleClass="col-9">
+                <h:panelGroup layout="block" styleClass="row">
+                    <h:panelGroup layout="block" styleClass="col-12">
                         <h:panelGroup>
                             <h:graphicImage id="g-modifier-thumbnail-r#{reportBacker.report.id}"
                                             value="/avatar?id=#{reportBacker.report.authorship.modifier == null ? 0
@@ -333,8 +333,8 @@
                                       rendered="#{reportBacker.report.authorship.modifier == null}"/>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:panelGroup styleClass="row">
-                    <h:panelGroup styleClass="col-12">
+                <h:panelGroup layout="block" styleClass="row">
+                    <h:panelGroup layout="block" styleClass="col-12">
                         <h:outputText id="ot-modified-at" value="#{labels.report_at.concat(' ')}"/>
                         <h:outputText id="ot-modified-date" value="#{reportBacker.report.authorship.modifiedDate}">
                             <f:converter converterId="offsetDateTimeConverter"/>
@@ -351,9 +351,9 @@
                 <div class="card" id="post-#{var.id}">
                     <h:panelGroup layout="block" styleClass="card-header">
                         <h:panelGroup layout="block" styleClass="row mb3">
-                            <h:panelGroup styleClass="col-9">
-                                <h:panelGroup styleClass="row">
-                                    <h:panelGroup styleClass="col-12">
+                            <h:panelGroup layout="block" styleClass="col-9">
+                                <h:panelGroup layout="block" styleClass="row">
+                                    <h:panelGroup layout="block" styleClass="col-12">
                                         <h:panelGroup>
                                             <h:graphicImage id="g-creator-thumbnail-p#{var.id}"
                                                             value="/avatar?id=#{var.authorship.creator == null ? 0
@@ -380,8 +380,8 @@
                                                       rendered="#{var.authorship.creator == null}"/>
                                     </h:panelGroup>
                                 </h:panelGroup>
-                                <h:panelGroup styleClass="row">
-                                    <h:panelGroup styleClass="col-12">
+                                <h:panelGroup layout="block" styleClass="row">
+                                    <h:panelGroup layout="block" styleClass="col-12">
                                         <h:outputText id="ot-post-created-at" value="#{labels.report_at.concat(' ')}"/>
                                         <h:outputText id="ot-post-created-date" value="#{var.authorship.creationDate}">
                                             <f:converter converterId="offsetDateTimeConverter"/>
@@ -389,8 +389,9 @@
                                     </h:panelGroup>
                                 </h:panelGroup>
                             </h:panelGroup>
-                            <h:panelGroup styleClass="col-3" rendered="#{reportBacker.privilegedForPost(var)}">
-                                <h:panelGroup styleClass="align-right">
+                            <h:panelGroup layout="block" styleClass="col-3"
+                                          rendered="#{reportBacker.privilegedForPost(var)}">
+                                <h:panelGroup layout="block" styleClass="align-right">
                                     <h:link id="cb-edit-post" outcome="pretty:post-edit" value="#{labels.edit}"
                                             styleClass="button btn btn-secondary">
                                         <f:param name="p" value="#{var.id}"/>
@@ -408,12 +409,12 @@
                     </h:panelGrid>
 
 
-                    <h:panelGroup styleClass="card-footer">
+                    <h:panelGroup layout="block" styleClass="card-footer">
                         <h:panelGroup layout="block" styleClass="row mb3">
-                            <h:panelGroup styleClass="col-3">
+                            <h:panelGroup layout="block" styleClass="col-3">
                                 <h:outputText value="#{labels.id}"/>
                             </h:panelGroup>
-                            <h:panelGroup styleClass="col-9">
+                            <h:panelGroup layout="block" styleClass="col-9">
                                 <h:link value="###{var.id}" outcome="pretty:report" fragment="post-#{var.id}">
                                     <f:param name="id" value="#{reportBacker.report.id}"/>
                                     <f:param name="p" value="#{var.id}"/>
@@ -422,9 +423,9 @@
                         </h:panelGroup>
 
                         <h:panelGroup layout="block" styleClass="row" rendered="#{var.authorship.modifiedDate != null}">
-                            <h:panelGroup styleClass="row">
-                                <h:panelGroup styleClass="col-12">
-                                    <h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="row">
+                                <h:panelGroup layout="block" styleClass="col-12">
+                                    <h:panelGroup layout="block">
                                         <h:graphicImage id="g-modifier-thumbnail-p#{var.id}"
                                                         value="avatar?id=#{var.authorship.modifier == null
                                                         ? labels.deleted_user
@@ -450,8 +451,8 @@
                                                   rendered="#{var.authorship.modifier == null}"/>
                                 </h:panelGroup>
                             </h:panelGroup>
-                            <h:panelGroup styleClass="row">
-                                <h:panelGroup styleClass="col-12">
+                            <h:panelGroup layout="block" styleClass="row">
+                                <h:panelGroup layout="block" styleClass="col-12">
                                     <h:outputText id="ot-post-modified-at"
                                                   value="#{labels.report_modified_at.concat(' ')}"/>
                                     <h:outputText id="ot-post-modified-date" value="#{var.authorship.modifiedDate}">
