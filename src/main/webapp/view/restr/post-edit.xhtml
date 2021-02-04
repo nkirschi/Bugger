@@ -88,8 +88,10 @@
                                  rendered="#{postEditBacker.attachments.size() gt 0}"/>
             </h:panelGroup>
 
-            <h:commandButton value="#{postEditBacker.create ? labels.post_create : labels.post_save_changes}"
-                             action="#{postEditBacker.saveChanges}" styleClass="btn btn-primary"/>
+            <h:commandButton id="cb-submit"
+                             value="#{postEditBacker.create ? labels.post_create : labels.post_save_changes}"
+                             action="#{postEditBacker.saveChanges}"
+                             styleClass="btn btn-primary"/>
         </h:form>
     </ui:define>
 </ui:composition>

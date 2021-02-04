@@ -1,13 +1,5 @@
 package tech.bugger.business.service;
 
-import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Notification;
@@ -23,6 +15,15 @@ import tech.bugger.persistence.exception.SelfReferenceException;
 import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.ResourceBundle;
 
 /**
  * Service providing methods related to reports. A {@link Feedback} event is fired, if unexpected circumstances occur.
@@ -433,6 +434,7 @@ public class ReportService {
             tx.newReportGateway().update(report);
             tx.commit();
             success = true;
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("operation_successful"), Feedback.Type.INFO));
         } catch (NotFoundException e) {
             log.error("Report to be moved could not be found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));

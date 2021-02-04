@@ -53,9 +53,11 @@
                                      action="#{footerBacker.toggleHelp}"/>
                 </h:form>
             </h:panelGroup>
-            <h:panelGroup layout="block" id="p-content">
-                <h:outputText value="#{title}" styleClass="h1" id="title"/>
-                <ui:insert name="content"/>
+            <h:panelGroup layout="block" id="p-main">
+                <h:panelGroup layout="block" id="p-content">
+                    <h:outputText value="#{title}" styleClass="h1" id="title"/>
+                    <ui:insert name="content"/>
+                </h:panelGroup>
             </h:panelGroup>
             <ui:include src="/WEB-INF/template/footer.xhtml" id="p-footer">
                 <ui:param name="helpKey" value="#{title}"/>
