@@ -137,9 +137,14 @@ public class AdministratorTest {
 
     @Test
     public void T040_create_topic() {
+        startTime(testID);
         driver.findElement(By.id("l-logo")).click();
         driver.findElement(By.id("l-create")).click();
+        stopTime(testID, "T040 home");
+        startTime(testID);
         driver.findElement(By.id("f-topic-edit:it-title")).sendKeys(TOPIC_FEEDBACK + testID);
+        stopTime(testID, "T040 topic-edit");
+        startTime(testID);
         driver.findElement(By.id("f-topic-edit:it-description")).sendKeys(TOPIC_FEEDBACK_DESCRIPTION);
         driver.findElement(By.id("f-topic-edit:cb-save")).click();
 
@@ -148,35 +153,52 @@ public class AdministratorTest {
                 () -> assertEquals(TOPIC_FEEDBACK_DESCRIPTION,
                                    driver.findElement(By.id("f-topic:ot-description")).getText())
         );
+
+        stopTime(testID, "T040 topic");
     }
 
     @Test
     public void T050_add_moderator() {
+        startTime(testID);
         driver.findElement(By.id("f-moderator-status:cb-image-promote")).click();
         driver.findElement(By.id("f-promote-mod:it-username")).sendKeys(ALF_USERNAME + testID);
+        stopTime(testID, "T050 topic");
+        startTime(testID);
         driver.findElement(By.id("f-promote-mod:cb-promote")).click();
 
         assertDoesNotThrow(() -> driver.findElement(By.linkText(ALF_LINK_TEXT + testID)));
+        stopTime(testID, "T050 topic2");
     }
 
     @Test
     public void T060_create_topic_with_same_title() {
+        startTime(testID);
         driver.findElement(By.id("l-logo")).click();
         driver.findElement(By.id("l-create")).click();
+        stopTime(testID, "T060 home");
+        startTime(testID);
         driver.findElement(By.id("f-topic-edit:it-title")).sendKeys(TOPIC_FEEDBACK + testID);
+        stopTime(testID, "T060 topic-edit");
+        startTime(testID);
         driver.findElement(By.id("f-topic-edit:it-description")).sendKeys(TOPIC_FEEDBACK_DESCRIPTION);
         driver.findElement(By.id("f-topic-edit:cb-save")).click();
 
         assertDoesNotThrow(() -> driver.findElement(By.className("alert-danger")));
+        stopTime(testID, "T060 topic-edit2");
     }
 
     @Test
     public void T070_change_topic_title() {
+        startTime(testID);
         driver.findElement(By.id("f-topic-edit:it-title")).clear();
         driver.findElement(By.id("f-topic-edit:it-title")).sendKeys(TOPIC_GUI + testID);
         driver.findElement(By.id("f-topic-edit:cb-save")).click();
         driver.findElement(By.id("f-moderator-status:cb-image-promote")).click();
+        stopTime(testID, "T070 topic");
+        startTime(testID);
         driver.findElement(By.id("f-promote-mod:it-username")).sendKeys(ALF_USERNAME + testID);
+        stopTime(testID, "T070 topic2");
+        startTime(testID);
         driver.findElement(By.id("f-promote-mod:cb-promote")).click();
 
         assertAll(
@@ -185,12 +207,16 @@ public class AdministratorTest {
                                    driver.findElement(By.id("f-topic:ot-description")).getText()),
                 () -> assertDoesNotThrow(() -> driver.findElement(By.linkText(ALF_LINK_TEXT + testID)))
         );
+        stopTime(testID, "T070 topic3");
     }
 
     @Test
     public void T080_create_report_with_invalid_attachment() {
+        startTime(testID);
         driver.findElement(By.id("f-topic:l-create-report")).click();
         new Select(driver.findElement(By.id("f-create-report:s-type"))).selectByValue(TYPE_HINT_OPTION);
+        stopTime(testID, "T080 create-report");
+        startTime(testID);
         driver.findElement(By.id("f-create-report:it-title")).sendKeys(testID + REPORT_NO_TRANSLATION);
         driver.findElement(By.id("f-create-report:it-post-content")).sendKeys(POST_NO_TRANSLATION);
 
@@ -199,10 +225,12 @@ public class AdministratorTest {
         driver.findElement(By.id("f-create-report:cb-add-attachment")).click();
 
         assertDoesNotThrow(() -> driver.findElement(By.className("alert-danger")));
+        stopTime(testID, "T080 create-report2");
     }
 
     @Test
     public void T090_create_report_with_valid_attachment() {
+        startTime(testID);
         String file = absolutePathOf(FRIENDLY_FILE);
         driver.findElement(By.id("f-create-report:it-attachment")).sendKeys(file);
         driver.findElement(By.id("f-create-report:cb-create")).click();
@@ -212,18 +240,25 @@ public class AdministratorTest {
                 () -> assertEquals(TYPE_HINT_TEXT, driver.findElement(By.id("ot-type")).getText()),
                 () -> assertEquals(SEVERITY_MINOR_TEXT, driver.findElement(By.id("ot-severity")).getText())
         );
+        stopTime(testID, "T090 report");
     }
 
     @Test
     public void T100_try_demote_admin() {
+        startTime(testID);
         new Actions(driver).moveToElement(driver.findElement(By.id("p-avatar-thumbnail"))).perform();
         driver.findElement(By.id("l-profile")).click();
 
         driver.findElement(By.id("f-profile:cb-rem-admin")).click();
+        stopTime(testID, "T100 profile");
+        startTime(testID);
         driver.findElement(By.id("f-change-status:i-user-password")).sendKeys(ADMIN_PASSWORD);
+        stopTime(testID, "T100 profile2");
+        startTime(testID);
         driver.findElement(By.id("f-change-status:cb-change-status")).click();
 
         assertDoesNotThrow(() -> driver.findElement(By.className("alert-danger")));
+        stopTime(testID, "T100 profile3");
     }
 
     private String absolutePathOf(String path) {
