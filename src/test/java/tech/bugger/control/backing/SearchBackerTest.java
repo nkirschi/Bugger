@@ -17,9 +17,12 @@ import tech.bugger.global.transfer.*;
 
 import javax.faces.context.ExternalContext;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -50,15 +53,6 @@ public class SearchBackerTest {
 
     @Mock
     private RequestParameterMap map;
-
-    @Mock
-    private Paginator<Topic> topicResults;
-
-    @Mock
-    private Paginator<Report> reportResults;
-
-    @Mock
-    private Paginator<User> userResults;
 
     User user1;
     User user2;
@@ -186,27 +180,33 @@ public class SearchBackerTest {
     }
 
     @Test
-    public void testSearchTabTopic() {
-        query = "1";
-        doReturn(topicResults).when(searchService).
+    public void testSearchTabUser() throws NoSuchFieldException, IllegalAccessException {
+        searchBacker.setTab(SearchBacker.Tab.USER);
+        Paginator paginator = mock(Paginator.class);
+        Field userResults = searchBacker.getClass().getDeclaredField("userResults");
+        userResults.setAccessible(true);
+        userResults.set(searchBacker, paginator);
+        assertNull(searchBacker.search());
+    }
+
+    @Test
+    public void testSearchTabTopic() throws NoSuchFieldException, IllegalAccessException {
         searchBacker.setTab(SearchBacker.Tab.TOPIC);
-        searchBacker.setQuery(query);
-        searchBacker.search();
-        assertAll(
-                () -> assertEquals(query, searchBacker.getQuery()),
-                () -> assertEquals(tab, searchBacker.getTab()),
-                () -> assertTrue(searchBacker.isOpenReportShown()),
-                () -> assertTrue(searchBacker.isClosedReportShown()),
-                () -> assertTrue(searchBacker.isDuplicatesShown()),
-                () -> assertTrue(searchBacker.isAdminShown()),
-                () -> assertTrue(searchBacker.isNonAdminShown()),
-                () -> assertTrue(searchBacker.isShowBug()),
-                () -> assertTrue(searchBacker.isShowFeature()),
-                () -> assertTrue(searchBacker.isShowHint()),
-                () -> assertTrue(searchBacker.isShowMinor()),
-                () -> assertTrue(searchBacker.isShowSevere()),
-                () -> assertTrue(searchBacker.isShowRelevant())
-        );
+        Paginator paginator = mock(Paginator.class);
+        Field topicResults = searchBacker.getClass().getDeclaredField("topicResults");
+        topicResults.setAccessible(true);
+        topicResults.set(searchBacker, paginator);
+        assertNull(searchBacker.search());
+    }
+
+    @Test
+    public void testSearchTabReport() throws NoSuchFieldException, IllegalAccessException {
+        searchBacker.setTab(SearchBacker.Tab.REPORT);
+        Paginator paginator = mock(Paginator.class);
+        Field reportResults = searchBacker.getClass().getDeclaredField("reportResults");
+        reportResults.setAccessible(true);
+        reportResults.set(searchBacker, paginator);
+        assertNull(searchBacker.search());
     }
 
 }
