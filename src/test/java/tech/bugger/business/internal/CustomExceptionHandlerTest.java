@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -75,6 +76,9 @@ class CustomExceptionHandlerTest {
     @Mock
     private ViewDeclarationLanguage viewDeclarationLanguage;
 
+    @Mock
+    private Map<String, Object> requestScope;
+
     private CustomExceptionHandler customExceptionHandler;
 
     @BeforeEach
@@ -89,6 +93,7 @@ class CustomExceptionHandlerTest {
         lenient().doReturn(response).when(ectx).getResponse();
         lenient().doReturn(pvctx).when(fctx).getPartialViewContext();
         lenient().doReturn(viewDeclarationLanguage).when(viewHandler).getViewDeclarationLanguage(any(), any());
+        lenient().doReturn(requestScope).when(ectx).getRequestMap();
     }
 
     public void makeEvent() {
@@ -119,7 +124,7 @@ class CustomExceptionHandlerTest {
         makeEvent();
         doReturn(true, false).when(exceptionQueuedEventIterator).hasNext();
         assertDoesNotThrow(() -> customExceptionHandler.handleException(fctx));
-        // verify(viewHandler).createView(fctx, "/WEB-INF/errorpages/404.xhtml"); TODO fix
+        verify(requestScope).put("Show404", "yes");
         verify(ectx).setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
@@ -129,6 +134,7 @@ class CustomExceptionHandlerTest {
         doReturn(true, false).when(exceptionQueuedEventIterator).hasNext();
         assertDoesNotThrow(() -> customExceptionHandler.handleException(fctx));
         verify(viewHandler).createView(fctx, "/WEB-INF/errorpages/500.xhtml");
+        verify(requestScope).put("Show404", "no");
         verify(ectx).setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
@@ -139,7 +145,7 @@ class CustomExceptionHandlerTest {
         makeEvent();
         doReturn(true, false).when(exceptionQueuedEventIterator).hasNext();
         assertDoesNotThrow(() -> customExceptionHandler.handleException(fctx));
-        // verify(viewHandler).createView(fctx, "/WEB-INF/errorpages/404.xhtml"); TODO fix
+        verify(requestScope).put("Show404", "yes");
         verify(ectx).setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
