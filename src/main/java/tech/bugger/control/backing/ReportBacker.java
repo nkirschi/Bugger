@@ -436,7 +436,7 @@ public class ReportBacker implements Serializable {
      *
      * @return {@code true} iff the user is allowed to edit the report.
      */
-    public boolean isAllowedToEdit() {
+    public boolean isAllowedToPost() {
         return session.getUser() != null
                 && !isBanned()
                 && (report.getClosingDate() == null || applicationSettings.getConfiguration().isClosedReportPosting());

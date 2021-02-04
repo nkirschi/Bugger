@@ -368,7 +368,7 @@ public class TopicService {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("create_failure"), Feedback.Type.ERROR));
             return false;
         } catch (DuplicateException e) {
-            log.error("The topic with name " + topic.getTitle() + "already exists.");
+            log.error("The topic with name " + topic.getTitle() + " already exists.");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("topic_exists"), Feedback.Type.ERROR));
             return false;
         }

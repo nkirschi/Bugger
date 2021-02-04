@@ -13,10 +13,12 @@
                     id="l-logo"
                     styleClass="d-flex align-items-center h-100">
                 <h:graphicImage id="g-logo"
+                                alt="Logo"
                                 value="/logo"
                                 styleClass="h-100 w-auto me-3"
                                 rendered="#{applicationSettings.organization.existsLogo}"/>
                 <h:graphicImage id="g-logo-fallback"
+                                alt="Logo"
                                 library="images"
                                 name="bugger.png"
                                 styleClass="h-100 w-auto me-3"
@@ -31,7 +33,7 @@
                       styleClass="d-flex justify-content-center align-items-center mx-5 px-5 col">
             <h:form styleClass="d-flex justify-content-center align-items-center col"
                     id="f-search-header">
-                <h:panelGroup styleClass="col me-2">
+                <h:panelGroup layout="block" styleClass="col me-2">
                     <h:inputText styleClass="form-control form-text mt-0"
                                  id="it-search"
                                  value="#{headerBacker.search}"
@@ -99,11 +101,10 @@
                       rendered="#{userSession.user != null}">
             <h:panelGroup id="p-avatar-thumbnail" layout="block">
                 <h:panelGroup layout="block" styleClass="dropdown-toggle">
-                    <h:graphicImage library="images" name="bugger.png" rendered="#{!userSession.user.existsAvatar}"
-                                    styleClass="rounded-circle me-2"/>
-                    <h:graphicImage value="/avatar?id=#{userSession.user.id}"
-                                    rendered="#{userSession.user.existsAvatar}"
-                                    styleClass="rounded-circle me-2"/>
+                    <h:graphicImage library="images" name="bugger.png" alt="#{userSession.user.username}"
+                                    rendered="#{!userSession.user.existsAvatar}" styleClass="rounded-circle me-2"/>
+                    <h:graphicImage value="/avatar?id=#{userSession.user.id}" alt="#{userSession.user.username}"
+                                    rendered="#{userSession.user.existsAvatar}" styleClass="rounded-circle me-2"/>
                 </h:panelGroup>
                 <h:panelGroup layout="block"
                               id="p-profile-menu"

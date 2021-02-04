@@ -2,6 +2,7 @@ package selenium;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,33 +11,14 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
 
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static selenium.Constants.ADMIN_PASSWORD;
-import static selenium.Constants.ADMIN_TITLE;
-import static selenium.Constants.ADMIN_USERNAME;
-import static selenium.Constants.ALF_EMAIL_ADDRESS;
-import static selenium.Constants.ALF_FIRST_NAME;
-import static selenium.Constants.ALF_LAST_NAME;
-import static selenium.Constants.ALF_LINK_TEXT;
-import static selenium.Constants.ALF_PASSWORD;
-import static selenium.Constants.ALF_PROFILE_TITLE;
-import static selenium.Constants.ALF_USERNAME;
-import static selenium.Constants.ALF_VOTING_WEIGHT;
-import static selenium.Constants.EVIL_FILE;
-import static selenium.Constants.FRIENDLY_FILE;
-import static selenium.Constants.POST_NO_TRANSLATION;
-import static selenium.Constants.REPORT_NO_TRANSLATION;
-import static selenium.Constants.SEVERITY_MINOR_TEXT;
-import static selenium.Constants.TOPIC_FEEDBACK;
-import static selenium.Constants.TOPIC_FEEDBACK_DESCRIPTION;
-import static selenium.Constants.TOPIC_GUI;
-import static selenium.Constants.TYPE_HINT_OPTION;
-import static selenium.Constants.TYPE_HINT_TEXT;
+import static selenium.Constants.*;
 
 @ExtendWith(SeleniumExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
+@Order(2)
 public class AdministratorTest {
 
     private WebDriver driver;
@@ -122,7 +104,8 @@ public class AdministratorTest {
 
         assertAll(
                 () -> assertTrue(driver.getTitle().contains(TOPIC_FEEDBACK)),
-                () -> assertEquals(TOPIC_FEEDBACK_DESCRIPTION, driver.findElement(By.id("f-topic:ot-description")).getText())
+                () -> assertEquals(TOPIC_FEEDBACK_DESCRIPTION,
+                                   driver.findElement(By.id("f-topic:ot-description")).getText())
         );
     }
 
@@ -157,7 +140,8 @@ public class AdministratorTest {
 
         assertAll(
                 () -> assertTrue(driver.findElement(By.id("title")).getText().contains(TOPIC_GUI)),
-                () -> assertEquals(TOPIC_FEEDBACK_DESCRIPTION, driver.findElement(By.id("f-topic:ot-description")).getText()),
+                () -> assertEquals(TOPIC_FEEDBACK_DESCRIPTION,
+                                   driver.findElement(By.id("f-topic:ot-description")).getText()),
                 () -> assertDoesNotThrow(() -> driver.findElement(By.linkText(ALF_LINK_TEXT)))
         );
     }
@@ -169,8 +153,7 @@ public class AdministratorTest {
         driver.findElement(By.id("f-create-report:it-title")).sendKeys(REPORT_NO_TRANSLATION);
         driver.findElement(By.id("f-create-report:it-post-content")).sendKeys(POST_NO_TRANSLATION);
 
-        // Ugly as Windows needs backslashes to locate file.
-        String file = Paths.get(ClassLoader.getSystemResource(EVIL_FILE).toURI()).toFile().getPath();
+        String file = Path.of(ClassLoader.getSystemResource(EVIL_FILE).toURI()).toAbsolutePath().toString();
         driver.findElement(By.id("f-create-report:it-attachment")).sendKeys(file);
         driver.findElement(By.id("f-create-report:cb-add-attachment")).click();
 
@@ -179,8 +162,7 @@ public class AdministratorTest {
 
     @Test
     public void T090_create_report_with_valid_attachment() throws Exception {
-        // Ugly as Windows needs backslashes to locate file.
-        String file = Paths.get(ClassLoader.getSystemResource(FRIENDLY_FILE).toURI()).toFile().getPath();
+        String file = Path.of(ClassLoader.getSystemResource(FRIENDLY_FILE).toURI()).toAbsolutePath().toString();
         driver.findElement(By.id("f-create-report:it-attachment")).sendKeys(file);
         driver.findElement(By.id("f-create-report:cb-create")).click();
 

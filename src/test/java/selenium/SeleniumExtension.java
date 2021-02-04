@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import tech.bugger.persistence.util.PropertiesReader;
 
@@ -39,7 +40,9 @@ public class SeleniumExtension implements BeforeAllCallback, AfterAllCallback, P
     @Override
     public void beforeAll(ExtensionContext context) {
         if (driverType.equals("firefox")) {
-            driver = new FirefoxDriver();
+            FirefoxOptions options = new FirefoxOptions();
+            options.addPreference("intl.accept_languages", "en-US");
+            driver = new FirefoxDriver(options);
             driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
             waiter = new WebDriverWait(driver, 5);
         } else {

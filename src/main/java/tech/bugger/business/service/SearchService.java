@@ -258,15 +258,16 @@ public class SearchService {
         if (posts == 0) {
             votingWeight = 1;
         } else {
-            String[] votingDef = applicationSettings.getConfiguration().getVotingWeightDefinition().split(",");
-            if (votingDef.length == 0) {
+            String votingDef = applicationSettings.getConfiguration().getVotingWeightDefinition();
+            String[] votingDefArr = votingDef.split(",");
+            if (votingDef.isBlank() || votingDefArr.length == 0) {
                 log.error("The voting weight definition is empty");
                 feedback.fire(new Feedback(messages.getString("voting_weight_failure"), Feedback.Type.ERROR));
                 return votingWeight;
             }
 
             try {
-                int[] votingWeightDef = Arrays.stream(votingDef).mapToInt(Integer::parseInt).sorted().toArray();
+                int[] votingWeightDef = Arrays.stream(votingDefArr).mapToInt(Integer::parseInt).sorted().toArray();
                 votingWeight = calculateVotingWeight(posts, votingWeightDef);
             } catch (NumberFormatException e) {
                 log.error("The voting weight definition could not be parsed to a number");
