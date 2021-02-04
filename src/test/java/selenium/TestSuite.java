@@ -6,7 +6,7 @@ import org.junit.platform.suite.api.SuiteDisplayName;
 import org.junit.runner.RunWith;
 
 @RunWith(JUnitPlatform.class)
-@SelectClasses({TestDBCleaner.class, AdministratorTest.class, RegistrationTest.class, TestDBCleaner.class})
+@SelectClasses({TestDBCleaner.class, AdministratorTest.class, UserTest.class, TestDBCleaner.class})
 @SuiteDisplayName("Bugger System Test")
 public class TestSuite {
 

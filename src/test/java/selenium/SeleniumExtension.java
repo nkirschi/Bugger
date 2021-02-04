@@ -3,46 +3,44 @@ package selenium;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.openqa.selenium.JavascriptExecutor;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import tech.bugger.persistence.util.PropertiesReader;
 
 import java.util.concurrent.TimeUnit;
 
-public class SeleniumExtension implements BeforeAllCallback, AfterAllCallback {
+public class SeleniumExtension implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
 
-    private static String driverType;
-    private static String driverPath;
-    private static String baseURL;
-    private static String os;
-    private static WebDriver driver;
-    private static WebDriverWait waiter;
-    private static PropertiesReader propertiesReader;
+    private final String driverType;
+    private final String driverDir;
+    private final String driverOS;
+    private final String baseURL;
+
+    private WebDriver driver;
+    private WebDriverWait waiter;
 
     public SeleniumExtension() {
         try {
-            propertiesReader = new PropertiesReader(ClassLoader.getSystemResourceAsStream("selenium.properties"));
-            driverType = propertiesReader.getString("driver.type");
-            driverPath = propertiesReader.getString("driver.path");
-            baseURL = propertiesReader.getString("url");
-            os = propertiesReader.getString("os");
+            PropertiesReader conf = new PropertiesReader(ClassLoader.getSystemResourceAsStream("selenium.properties"));
+            driverType = conf.getString("driver.type");
+            driverDir = conf.getString("driver.path");
+            baseURL = conf.getString("url");
+            driverOS = conf.getString("os");
+            registerDriver(driverType);
         } catch (Exception e) {
             throw new InternalError("Could not load properties for selenium tests.", e);
         }
-
     }
 
     @Override
     public void beforeAll(ExtensionContext context) {
-        setDriverType(driverType);
         if (driverType.equals("firefox")) {
             driver = new FirefoxDriver();
-            driver.manage().window().maximize();
-            driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS); // time to make screenshots ;)
+            driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
             waiter = new WebDriverWait(driver, 5);
         } else {
             throw new IllegalArgumentException("The configured driver type is not supported!");
@@ -54,43 +52,36 @@ public class SeleniumExtension implements BeforeAllCallback, AfterAllCallback {
         driver.quit();
     }
 
-    public static void setDriverType(String type) {
-        if (type.equals("firefox")) {
-            switch (os) {
-            case "Windows" -> driverPath += "geckodriver.exe";
-            case "Linux" -> driverPath += "geckodriver";
-            case "Mac" -> driverPath += "geckodriverMac";
-            default -> throw new IllegalArgumentException("The configured OS is invalid!");
-            }
-            System.setProperty("webdriver.gecko.driver", driverPath);
+    @Override
+    public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+        Class<?> type = parameterContext.getParameter().getType();
+        return WebDriver.class.equals(type) || WebDriverWait.class.equals(type) || String.class.equals(type);
+    }
+
+    @Override
+    public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+        Class<?> type = parameterContext.getParameter().getType();
+        if (WebDriver.class.equals(type)) {
+            return driver;
+        } else if (WebDriverWait.class.equals(type)) {
+            return waiter;
+        } else if (String.class.equals(type)) {
+            return baseURL;
         } else {
-            throw new IllegalArgumentException("The configured driver type is not supported!");
+            throw new ParameterResolutionException("Unsupported parameter type " + type);
         }
     }
 
-    public static WebDriver getDriver() {
-        return driver;
-    }
-
-    public static WebElement scrollTo(WebElement element) {
-        System.out.println(">>>> begin scrolling to " + element.getAttribute("id"));
-        String scrollElementIntoMiddle = ""
-                + "arguments[0].scrollIntoView({behavior: 'smooth', block: 'center', inline: 'nearest'})";
-        ((JavascriptExecutor) driver).executeScript(scrollElementIntoMiddle, element);
-        waiter.until(ExpectedConditions.elementToBeClickable(element));
-        try {
-            Thread.sleep(150);
-        } catch (Exception e) {}
-
-        System.out.println(">>>> end scrolling");
-        return element;
-    }
-
-    public static String getBaseURL() {
-        if (baseURL == null || baseURL.trim().isBlank()) {
-            throw new IllegalArgumentException("The configured url must not be null or blank!");
+    private void registerDriver(String type) {
+        if (type.equals("firefox")) {
+            System.setProperty("webdriver.gecko.driver", switch (driverOS) {
+                case "Windows" -> driverDir + "geckodriver.exe";
+                case "Linux" -> driverDir + "geckodriver";
+                case "Mac" -> driverDir + "geckodriverMac";
+                default -> throw new IllegalArgumentException("The configured OS is invalid!");
+            });
         } else {
-            return baseURL;
+            throw new IllegalArgumentException("The configured driver type is not supported!");
         }
     }
 
