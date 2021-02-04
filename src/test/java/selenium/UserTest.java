@@ -28,6 +28,16 @@ public class UserTest {
     private String baseURL;
     private WebDriver driver;
 
+    private final String testID;
+
+    public UserTest() {
+        this.testID = "";
+    }
+
+    public UserTest(final String testID) {
+        this.testID = testID;
+    }
+
     @BeforeEach
     public void setUp(WebDriver driver, String baseURL) {
         this.driver = driver;
@@ -44,7 +54,7 @@ public class UserTest {
     public void T120_register_with_validation_errors() {
         driver.findElement(By.id("l-go-home")).click();
         driver.findElement(By.id("b-register")).click();
-        driver.findElement(By.id("f-register:it-username")).sendKeys(ALF_USERNAME);
+        driver.findElement(By.id("f-register:it-username")).sendKeys(ALF_USERNAME + testID);
         driver.findElement(By.id("f-register:it-first-name")).sendKeys(BEA_FIRST_NAME);
         driver.findElement(By.id("f-register:it-last-name")).sendKeys(BEA_LAST_NAME);
         driver.findElement(By.id("f-register:cb-register")).click();
@@ -57,10 +67,10 @@ public class UserTest {
 
     @Test
     public void T130_register_successfully() {
-        RESTMail.clearEmails(EMAIL_USER);
+        RESTMail.clearEmails(BEA_EMAIL_USER + testID + EMAIL_HOST);
         driver.findElement(By.id("f-register:it-username")).clear();
-        driver.findElement(By.id("f-register:it-username")).sendKeys(BEA_USERNAME);
-        driver.findElement(By.id("f-register:it-email")).sendKeys(EMAIL_USER + EMAIL_HOST);
+        driver.findElement(By.id("f-register:it-username")).sendKeys(BEA_USERNAME + testID);
+        driver.findElement(By.id("f-register:it-email")).sendKeys(BEA_EMAIL_USER + testID + EMAIL_HOST);
         driver.findElement(By.id("f-register:cb-register")).click();
 
         assertDoesNotThrow(() -> driver.findElement(By.className("alert-success")));
@@ -68,12 +78,12 @@ public class UserTest {
 
     @Test
     public void T135_set_password_with_validation_errors() {
-        String confirmationURL = new FluentWait<>(EMAIL_USER)
+        String confirmationURL = new FluentWait<>(BEA_EMAIL_USER + testID + EMAIL_HOST)
                 .withTimeout(Duration.ofSeconds(30))
                 .pollingEvery(Duration.ofSeconds(1))
                 .ignoring(AssertionError.class)
                 .until(RESTMail::findLatestURL);
-        RESTMail.clearEmails(EMAIL_USER);
+        RESTMail.clearEmails(BEA_EMAIL_USER + testID + EMAIL_HOST);
 
         driver.get(confirmationURL);
         driver.findElement(By.id("f-password:it-password")).sendKeys(BEA_INSUFFICIENT_PASSWORD);
@@ -117,8 +127,8 @@ public class UserTest {
     public void T160_browse_content() {
         driver.findElement(By.id("l-logo")).click();
         assertTrue(driver.getTitle().contains(HOME_TITLE));
-        driver.findElement(By.linkText(TOPIC_FEEDBACK)).click();
-        assertTrue(driver.getTitle().contains(TOPIC_FEEDBACK));
+        driver.findElement(By.linkText(TOPIC_FEEDBACK + testID)).click();
+        assertTrue(driver.getTitle().contains(TOPIC_FEEDBACK + testID));
         driver.findElement(By.id("f-topic:cb-subscribe")).click();
 
         assertDoesNotThrow(() -> driver.findElement(By.id("f-topic:cb-unsubscribe")));
@@ -152,13 +162,13 @@ public class UserTest {
     public void T190_edit_report() {
         driver.findElement(By.id("f-report:cb-edit-report")).click();
         driver.findElement(By.id("f-report-edit:s-topic")).click();
-        new Select(driver.findElement(By.id("f-report-edit:s-topic"))).selectByVisibleText(TOPIC_GUI);
+        new Select(driver.findElement(By.id("f-report-edit:s-topic"))).selectByVisibleText(TOPIC_GUI + testID);
         driver.findElement(By.id("f-report-edit:cb-submit")).click();
         driver.findElement(By.id("f-confirm-dialog:cb-save-changes")).click();
 
         assertAll(
                 () -> assertDoesNotThrow(() -> driver.findElement(By.className("alert-success"))),
-                () -> assertTrue(driver.findElement(By.id("ot-topic")).getText().contains(TOPIC_GUI))
+                () -> assertTrue(driver.findElement(By.id("ot-topic")).getText().contains(TOPIC_GUI + testID))
         );
     }
 
@@ -178,7 +188,7 @@ public class UserTest {
         driver.findElement(By.name("f-edit-post:cb-submit")).click();
 
         List<WebElement> elements = driver.findElements(By.cssSelector("[id*=l-post-modifier]"));
-        assertEquals(BEA_LINK_TEXT, elements.get(elements.size() - 1).getText());
+        assertEquals(BEA_LINK_TEXT + testID, elements.get(elements.size() - 1).getText());
     }
 
 }

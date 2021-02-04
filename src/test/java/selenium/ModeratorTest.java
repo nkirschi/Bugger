@@ -28,6 +28,16 @@ public class ModeratorTest {
     private WebDriverWait wait;
     private String baseURL;
 
+    private final String testID;
+
+    public ModeratorTest() {
+        this.testID = "";
+    }
+
+    public ModeratorTest(final String testID) {
+        this.testID = testID;
+    }
+
     @BeforeEach
     public void setUp(WebDriver driver, WebDriverWait wait, String baseURL) {
         this.driver = driver;
@@ -41,7 +51,7 @@ public class ModeratorTest {
 
         // Log in as moderator.
         driver.findElement(By.id("l-login")).click();
-        driver.findElement(By.id("f-login:it-username")).sendKeys(ALF_USERNAME);
+        driver.findElement(By.id("f-login:it-username")).sendKeys(ALF_USERNAME + testID);
         driver.findElement(By.id("f-login:it-password")).sendKeys(ALF_PASSWORD);
         driver.findElement(By.id("f-login:cb-login")).click();
 
@@ -111,7 +121,7 @@ public class ModeratorTest {
                 .get(resultTitles.indexOf(REPORT_NO_TRANSLATION))
                 .getText()
                 .substring(1);
-        GLOBAL_VARS.put("originalID", originalID);
+        GLOBAL_VARS.put("originalID" + testID, originalID);
 
         // Search again with additional filters.
         driver.findElement(By.id("f-search:s-show-hint-reports")).click();
@@ -131,7 +141,7 @@ public class ModeratorTest {
         driver.findElement(By.linkText(REPORT_NO_NAME)).click();
         driver.findElement(By.id("f-report:cb-mark-duplicate")).click();
 
-        String originalID = GLOBAL_VARS.get("originalID");
+        String originalID = GLOBAL_VARS.get("originalID" + testID);
         driver.findElement(By.id("f-duplicate:it-duplicate")).clear();
         driver.findElement(By.id("f-duplicate:it-duplicate")).sendKeys(originalID);
         driver.findElement(By.id("f-duplicate:cb-duplicate")).click();
@@ -144,23 +154,23 @@ public class ModeratorTest {
 
     @Test
     public void T300_search_topic_suggestions() {
-        driver.findElement(By.id("f-search-header:it-search")).sendKeys(TOPIC_GUI);
+        driver.findElement(By.id("f-search-header:it-search")).sendKeys(TOPIC_GUI + testID);
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(
                 "#f-search-header\\:p-search-suggestions .search")));
-        assertEquals(Collections.singletonList(TOPIC_GUI), getSearchSuggestions());
+        assertEquals(Collections.singletonList(TOPIC_GUI + testID), getSearchSuggestions());
 
         driver.findElement(By.cssSelector("#f-search-header\\:p-search-suggestions .search")).click();
-        driver.findElement(By.linkText(TOPIC_GUI)).click();
-        assertTrue(driver.getTitle().contains(TOPIC_GUI));
+        driver.findElement(By.linkText(TOPIC_GUI + testID)).click();
+        assertTrue(driver.getTitle().contains(TOPIC_GUI + testID));
     }
 
     @Test
     public void T310_ban_user() {
         driver.findElement(By.id("f-banned-status:cb-image-ban")).click();
-        driver.findElement(By.id("f-ban:it-username-ban")).sendKeys(BEA_USERNAME);
+        driver.findElement(By.id("f-ban:it-username-ban")).sendKeys(BEA_USERNAME + testID);
         driver.findElement(By.id("f-ban:cb-ban")).click();
 
-        assertEquals(Collections.singletonList(USERNAME_PREFIX + BEA_USERNAME), getBannedUsers());
+        assertEquals(Collections.singletonList(USERNAME_PREFIX + BEA_USERNAME + testID), getBannedUsers());
     }
 
     private List<String> getSearchSuggestions() {
