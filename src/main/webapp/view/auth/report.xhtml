@@ -412,13 +412,18 @@
                                     </h:panelGroup>
                                 </h:panelGroup>
                             </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="col-3" rendered="#{reportBacker.privilegedForPost(var)}">
+                            <h:panelGroup layout="block"
+                                          styleClass="col-3"
+                                          rendered="#{reportBacker.privilegedForPost(var)}">
                                 <h:panelGroup layout="block" styleClass="align-right">
-                                    <h:link id="cb-edit-post" outcome="pretty:post-edit" value="#{labels.edit}"
+                                    <h:link id="cb-edit-post"
+                                            outcome="pretty:post-edit"
+                                            value="#{labels.edit}"
                                             styleClass="button btn btn-secondary">
                                         <f:param name="p" value="#{var.id}"/>
                                     </h:link>
-                                    <h:commandButton id="cb-delete-post-dialog" styleClass="button btn btn-primary"
+                                    <h:commandButton id="cb-delete-post-dialog"
+                                                     styleClass="button btn btn-primary"
                                                      action="#{reportBacker.deletePostDialog(var)}"
                                                      value="#{labels.delete}"/>
                                 </h:panelGroup>

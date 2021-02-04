@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
@@ -22,10 +21,8 @@ import static selenium.Constants.*;
 
 @ExtendWith(SeleniumExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Order(3)
 public class ModeratorTest {
-
 
     private WebDriver driver;
     private String baseURL;
@@ -69,7 +66,6 @@ public class ModeratorTest {
         driver.findElement(By.cssSelector("table .mb-3:nth-child(2) input[type=\"submit\"]")).click();
         driver.findElement(By.id("f-delete-post:cb-delete-post")).click();
 
-        // Only one post should be left.
         assertEquals(EXPECTED_POST_NUM, driver.findElements(By.cssSelector("[id^=post]")).size());
     }
 
@@ -114,7 +110,7 @@ public class ModeratorTest {
         driver.findElement(By.id("f-search-header:cb-search")).click();
         List<String> resultTitles = getSearchResultTitles();
         originalID = driver.findElement(By.linkText(REPORT_NO_TRANSLATION))
-                           .findElement(By.xpath("./../../td[1]/a[1]")) // TODO does this rly need to be this ugly? :/
+                           .findElement(By.xpath("./../../td[1]/a[1]"))
                            .getText().substring(1);
 
         // Search again with additional filters.
@@ -137,6 +133,7 @@ public class ModeratorTest {
 
         driver.findElement(By.name("f-duplicate:it-duplicate")).clear();
         driver.findElement(By.name("f-duplicate:it-duplicate")).sendKeys(originalID);
+
         driver.findElement(By.name("f-duplicate:cb-duplicate")).click();
 
         assertAll(
@@ -153,7 +150,7 @@ public class ModeratorTest {
         assertEquals(Collections.singletonList(TOPIC_GUI), getSearchSuggestions());
 
         driver.findElement(By.cssSelector("#f-search-header\\:p-search-suggestions .search")).click();
-        driver.findElement(By.cssSelector("#p-tab-topic-content tbody td:first-child a")).click(); // TODO less ugly?
+        driver.findElement(By.linkText(TOPIC_GUI)).click();
         assertTrue(driver.getTitle().contains(TOPIC_GUI));
     }
 

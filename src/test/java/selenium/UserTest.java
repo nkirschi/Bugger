@@ -42,7 +42,8 @@ public class UserTest {
 
     @Test
     public void T120_register_with_validation_errors() {
-        driver.get(baseURL + REGISTER_PAGE); // TODO: no header on error page :(
+        driver.findElement(By.id("l-go-home")).click();
+        driver.findElement(By.id("b-register")).click();
         driver.findElement(By.id("f-register:it-username")).sendKeys(ALF_USERNAME);
         driver.findElement(By.id("f-register:it-first-name")).sendKeys(BEA_FIRST_NAME);
         driver.findElement(By.id("f-register:it-last-name")).sendKeys(BEA_LAST_NAME);
