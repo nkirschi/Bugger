@@ -294,7 +294,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetReportSuggestions() throws NotFoundException {
+    public void testGetReportSuggestions() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic1);
         topicGateway.createTopic(topic2);
         reportGateway.create(report1);
@@ -308,7 +308,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetTopicSuggestions() throws NotFoundException {
+    public void testGetTopicSuggestions() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic1);
         topicGateway.createTopic(topic2);
         List<String> suggestions = searchGateway.getTopicSuggestions(QUERY2, LIMIT);
@@ -390,7 +390,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetReportResults() throws NotFoundException {
+    public void testGetReportResults() throws NotFoundException, DuplicateException {
         Map<Report.Type, Boolean> typeHashMap = new HashMap<>();
         typeHashMap.put(Report.Type.BUG, true);
         typeHashMap.put(Report.Type.FEATURE, true);
@@ -476,7 +476,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void testGetTopicResults() throws NotFoundException {
+    public void testGetTopicResults() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic1);
         topicGateway.createTopic(topic2);
         selection.setSortedBy("title");
@@ -509,7 +509,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void getNumberOfReportResults() throws NotFoundException {
+    public void getNumberOfReportResults() throws NotFoundException, DuplicateException {
         Map<Report.Type, Boolean> typeHashMap = new HashMap<>();
         typeHashMap.put(Report.Type.BUG, true);
         typeHashMap.put(Report.Type.FEATURE, true);
@@ -526,7 +526,7 @@ public class SearchDBGatewayTest {
     }
 
     @Test
-    public void getNumberOfTopicResults() throws NotFoundException {
+    public void getNumberOfTopicResults() throws NotFoundException, DuplicateException {
         topicGateway.createTopic(topic1);
         topicGateway.createTopic(topic2);
         selection.setSortedBy("title");
