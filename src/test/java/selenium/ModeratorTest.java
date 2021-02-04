@@ -69,7 +69,7 @@ public class ModeratorTest {
     @Test
     public void T230_delete_post() {
         driver.findElement(By.cssSelector("[id*=cb-notification-button][value='" + NEW_POST_NOTIFICATION_BUTTON + "']"))
-              .click();
+                .click();
         driver.findElements(By.cssSelector("[id*=cb-delete-post-dialog")).get(1).click();
         driver.findElement(By.id("f-delete-post:cb-delete-post")).click();
 
@@ -107,8 +107,8 @@ public class ModeratorTest {
 
         List<String> suggestions = getSearchSuggestions();
         assertTrue(suggestions.size() == 2
-                           && suggestions.contains(REPORT_NO_TRANSLATION)
-                           && suggestions.contains(REPORT_NO_NAME));
+                && suggestions.contains(REPORT_NO_TRANSLATION)
+                && suggestions.contains(REPORT_NO_NAME));
     }
 
     @Test
@@ -130,10 +130,9 @@ public class ModeratorTest {
         List<String> resultTitlesFiltered = getSearchResultTitles();
 
         // Check if search results are what we expected.
-        assertTrue(resultTitles.size() == 2
-                           && resultTitles.contains(REPORT_NO_TRANSLATION)
-                           && resultTitles.contains(REPORT_NO_NAME));
-        assertEquals(Collections.singletonList(REPORT_NO_NAME), resultTitlesFiltered);
+        assertAll(() -> assertTrue(resultTitles.contains(REPORT_NO_TRANSLATION)),
+                () -> assertTrue(resultTitles.contains(REPORT_NO_NAME)),
+                () -> assertEquals(Collections.singletonList(REPORT_NO_NAME), resultTitlesFiltered));
     }
 
     @Test

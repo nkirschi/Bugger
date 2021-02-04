@@ -81,7 +81,7 @@ public class AdministratorTest {
 
         assertAll(
                 () -> assertTrue(driver.getTitle().contains(ALF_PROFILE_TITLE + testID)),
-                () -> assertEquals(ALF_USERNAME, driver.findElement(By.id("f-profile:ot-username")).getText()),
+                () -> assertEquals(ALF_USERNAME + testID, driver.findElement(By.id("f-profile:ot-username")).getText()),
                 () -> assertEquals(ALF_FIRST_NAME, driver.findElement(By.id("f-profile:ot-first-name")).getText()),
                 () -> assertEquals(ALF_LAST_NAME, driver.findElement(By.id("f-profile:ot-last-name")).getText()),
                 () -> assertEquals(ALF_EMAIL_USER + testID + EMAIL_HOST,
