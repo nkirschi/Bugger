@@ -241,13 +241,12 @@ class NotificationServiceTest {
     public void testCreateNotificationSuccess() {
         notification.setReportID(420);
         notification.setTopicID(69);
-        try (MockedStatic<JFConfig> jfConfigMock = mockStatic(JFConfig.class)) {
-            try (MockedStatic<FacesContext> fctxMock = mockStatic(FacesContext.class)) {
-                jfConfigMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("Hi");
-                FacesContext fctx = mock(FacesContext.class);
-                fctxMock.when(FacesContext::getCurrentInstance).thenReturn(fctx);
-                assertDoesNotThrow(() -> service.createNotification(notification));
-            }
+        try (MockedStatic<JFConfig> jfConfigMock = mockStatic(JFConfig.class);
+             MockedStatic<FacesContext> fctxMock = mockStatic(FacesContext.class)) {
+            jfConfigMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("Hi");
+            FacesContext fctx = mock(FacesContext.class);
+            fctxMock.when(FacesContext::getCurrentInstance).thenReturn(fctx);
+            assertDoesNotThrow(() -> service.createNotification(notification));
         }
     }
 
@@ -284,20 +283,19 @@ class NotificationServiceTest {
         topic.setId(notification.getTopicID());
         doReturn(topicSubs).when(userGateway).getSubscribersOf(eq(topic));
         doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(eq("interactions"), any());
-        try (MockedStatic<JFConfig> jfConfigMock = mockStatic(JFConfig.class)) {
-            try (MockedStatic<FacesContext> fctxMock = mockStatic(FacesContext.class)) {
-                jfConfigMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("Hi");
-                FacesContext fctx = mock(FacesContext.class);
-                fctxMock.when(FacesContext::getCurrentInstance).thenReturn(fctx);
-                doReturn(3).when(configReader).getInt("MAX_EMAIL_TRIES");
-                assertDoesNotThrow(() -> service.createNotification(notification));
-                doReturn(true).when(mailer).send(any());
-                assertDoesNotThrow(() -> service.createNotification(notification1));
-                doThrow(NotFoundException.class).doNothing().when(notificationGateway).update(any());
-                assertDoesNotThrow(() -> service.createNotification(notification1));
-                doNothing().doThrow(TransactionException.class).when(tx).commit();
-                assertDoesNotThrow(() -> service.createNotification(notification1));
-            }
+        try (MockedStatic<JFConfig> jfConfigMock = mockStatic(JFConfig.class);
+             MockedStatic<FacesContext> fctxMock = mockStatic(FacesContext.class)) {
+            jfConfigMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("Hi");
+            FacesContext fctx = mock(FacesContext.class);
+            fctxMock.when(FacesContext::getCurrentInstance).thenReturn(fctx);
+            doReturn(3).when(configReader).getInt("MAX_EMAIL_TRIES");
+            assertDoesNotThrow(() -> service.createNotification(notification));
+            doReturn(true).when(mailer).send(any());
+            assertDoesNotThrow(() -> service.createNotification(notification1));
+            doThrow(NotFoundException.class).doNothing().when(notificationGateway).update(any());
+            assertDoesNotThrow(() -> service.createNotification(notification1));
+            doNothing().doThrow(TransactionException.class).when(tx).commit();
+            assertDoesNotThrow(() -> service.createNotification(notification1));
         }
     }
 

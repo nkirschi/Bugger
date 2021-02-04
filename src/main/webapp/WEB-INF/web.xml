@@ -105,7 +105,7 @@
     </resource-env-ref>
 
     <error-page>
-        <location>/WEB-INF/errorpages/500.xhtml</location>
+        <location>/WEB-INF/errorpages/error.xhtml</location>
     </error-page>
 
 </web-app>

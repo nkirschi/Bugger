@@ -71,14 +71,13 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
         Map<String, Object> requestScope = ectx.getRequestMap();
         requestScope.put(RequestDispatcher.ERROR_REQUEST_URI, uri);
         requestScope.put(RequestDispatcher.ERROR_EXCEPTION, exception);
-        String viewID;
         if (exception instanceof Error404Exception
                 || (exception.getCause() != null && exception.getCause() instanceof Error404Exception)) {
             requestScope.put("Show404", "yes");
         } else {
             requestScope.put("Show404", "no");
         }
-        viewID = "/WEB-INF/errorpages/500.xhtml";
+        String viewID = "/WEB-INF/errorpages/error.xhtml";
         Application application = fctx.getApplication();
         ViewHandler viewHandler = application.getViewHandler();
         UIViewRoot viewRoot = viewHandler.createView(fctx, viewID);

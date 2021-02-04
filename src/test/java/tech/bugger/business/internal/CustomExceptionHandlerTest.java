@@ -133,7 +133,7 @@ class CustomExceptionHandlerTest {
         makeEvent();
         doReturn(true, false).when(exceptionQueuedEventIterator).hasNext();
         assertDoesNotThrow(() -> customExceptionHandler.handleException(fctx));
-        verify(viewHandler).createView(fctx, "/WEB-INF/errorpages/500.xhtml");
+        verify(viewHandler).createView(fctx, "/WEB-INF/errorpages/error.xhtml");
         verify(requestScope).put("Show404", "no");
         verify(ectx).setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
@@ -157,7 +157,7 @@ class CustomExceptionHandlerTest {
         makeEvent();
         doReturn(true, false).when(exceptionQueuedEventIterator).hasNext();
         assertDoesNotThrow(() -> customExceptionHandler.handleException(fctx));
-        verify(viewHandler).createView(fctx, "/WEB-INF/errorpages/500.xhtml");
+        verify(viewHandler).createView(fctx, "/WEB-INF/errorpages/error.xhtml");
         verify(ectx).setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
@@ -166,7 +166,7 @@ class CustomExceptionHandlerTest {
         makeEvent();
         doReturn(true, true, false).when(exceptionQueuedEventIterator).hasNext();
         assertDoesNotThrow(() -> customExceptionHandler.handleException(fctx));
-        verify(viewHandler).createView(fctx, "/WEB-INF/errorpages/500.xhtml");
+        verify(viewHandler).createView(fctx, "/WEB-INF/errorpages/error.xhtml");
         verify(ectx).setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         verify(exceptionQueuedEventIterator, times(2)).next();
         verify(exceptionQueuedEventIterator, times(2)).remove();
