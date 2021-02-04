@@ -414,7 +414,7 @@ public class ReportBacker implements Serializable {
      * @return {@code null} to reload the page.
      */
     public String applyOverwriteRelevance() {
-        if (session.getUser() != null && session.getUser().isAdministrator()) {
+        if (session.getUser() != null && (session.getUser().isAdministrator() || moderator)) {
             reportService.overwriteRelevance(report, overwriteRelevanceValue);
             updateRelevance();
             return null;
@@ -427,6 +427,7 @@ public class ReportBacker implements Serializable {
      */
     public void deletePost() {
         postService.deletePost(postToBeDeleted, report);
+        posts.update();
         displayDialog(null);
     }
 
@@ -528,6 +529,15 @@ public class ReportBacker implements Serializable {
      */
     public Paginator<Post> getPosts() {
         return posts;
+    }
+
+    /**
+     * Sets the paginator managing all posts of the currently shown report.
+     *
+     * @param posts The paginator managing the posts.
+     */
+    public void setPosts(final Paginator<Post> posts) {
+        this.posts = posts;
     }
 
     /**

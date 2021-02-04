@@ -10,33 +10,38 @@
     <ui:param name="helpKey" value="home"/>
 
     <ui:define name="content">
-        <h:outputText value="#{labels.home_notifications}" styleClass="h2" rendered="#{userSession.user != null}"/>
-        <b:pagitable paginator="#{homeBacker.inbox}" rendered="#{userSession.user != null}">
-            <!--@elvariable id="var" type="tech.bugger.global.transfer.Notification"-->
-            <b:column title="#{labels.home_seen}" paginator="#{homeBacker.inbox}" key="read">
-                <h:outputText value="#{var.read ? '&#x2713;' : ' '}"/>
-            </b:column>
-            <b:column title="#{labels.type}" paginator="#{homeBacker.inbox}" key="type">
-                <h:commandButton value="#{labels['notification_type_'.concat(var.type)]}"
-                                 action="#{homeBacker.openNotification(var)}"
-                                 styleClass="btn btm-sm btn-link"/>
-            </b:column>
-            <b:column title="#{labels.report}" paginator="#{homeBacker.inbox}" key="report">
-                <h:link value="##{var.reportID}: #{var.reportTitle}" outcome="pretty:report">
-                    <f:param name="id" value="#{var.reportID}"/>
-                </h:link>
-            </b:column>
-            <b:column title="#{labels.causer}" paginator="#{homeBacker.inbox}" key="causer">
-                <h:link value="@#{var.actuatorUsername}" outcome="pretty:profile">
-                    <f:param name="u" value="#{var.actuatorUsername}"/>
-                </h:link>
-            </b:column>
-            <h:column>
-                <h:commandButton action="#{homeBacker.deleteNotification(var)}"
-                                 styleClass="button trashcan-small"
-                                 image="/resources/images/trash.png"/>
-            </h:column>
-        </b:pagitable>
+        <h:panelGroup id="p-notifications" layout="box" rendered="#{userSession.user != null}">
+            <h:outputText value="#{labels.home_notifications}" styleClass="h2"/>
+            <b:pagitable paginator="#{homeBacker.inbox}">
+                <!--@elvariable id="var" type="tech.bugger.global.transfer.Notification"-->
+                <b:column title="#{labels.home_seen}" paginator="#{homeBacker.inbox}" key="read">
+                    <h:outputText value="#{var.read ? '&#x2713;' : ' '}"/>
+                </b:column>
+                <b:column title="#{labels.type}" paginator="#{homeBacker.inbox}" key="type">
+                    <h:commandButton id="cb-notification-button-#{var.id}"
+                                     value="#{labels['notification_type_'.concat(var.type)]}"
+                                     action="#{homeBacker.openNotification(var)}"
+                                     styleClass="btn btm-sm btn-link"/>
+                </b:column>
+                <b:column title="#{labels.report}" paginator="#{homeBacker.inbox}" key="report">
+                    <h:link id="l-notification-report-#{var.id}"
+                            value="##{var.reportID}: #{var.reportTitle}"
+                            outcome="pretty:report">
+                        <f:param name="id" value="#{var.reportID}"/>
+                    </h:link>
+                </b:column>
+                <b:column title="#{labels.causer}" paginator="#{homeBacker.inbox}" key="causer">
+                    <h:link value="@#{var.actuatorUsername}" outcome="pretty:profile">
+                        <f:param name="u" value="#{var.actuatorUsername}"/>
+                    </h:link>
+                </b:column>
+                <h:column>
+                    <h:commandButton action="#{homeBacker.deleteNotification(var)}"
+                                     styleClass="button trashcan-small"
+                                     image="/resources/images/trash.png"/>
+                </h:column>
+            </b:pagitable>
+        </h:panelGroup>
 
         <h:outputText value="#{labels.home_topics}" styleClass="h2"/>
         <h:link id="l-create" value="#{labels.topic_edit_add}" outcome="pretty:topic-edit"

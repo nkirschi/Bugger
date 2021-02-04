@@ -139,7 +139,7 @@ p {
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
 }
 
-.dialog + #p-content {
+.dialog + #p-main {
     filter: blur(4px);
     opacity: 0.5;
     pointer-events: none;

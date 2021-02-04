@@ -18,7 +18,7 @@ import static selenium.Constants.*;
 
 @ExtendWith(SeleniumExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
-@Order(2)
+@Order(1)
 public class AdministratorTest {
 
     private WebDriver driver;

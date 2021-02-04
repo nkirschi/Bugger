@@ -1,10 +1,14 @@
 package selenium;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class Constants {
+
+    public static final Map<String, String> GLOBAL_VARS = new ConcurrentHashMap<>();
 
     // Page Slugs
     public static final String ADMIN_PAGE = "admin";
-    public static final String REGISTER_PAGE = "register";
 
     // Page Titles
     public static final String NOT_FOUND_TITLE = "Not Found!";
@@ -20,7 +24,7 @@ public class Constants {
 
     // Reports
     public static final String REPORT_NO_NAME = "Button hat keinen Namen";
-    public static final String REPORT_NO_TRANSLATION = "Button Übersetzung fehlt";
+    public static final String REPORT_NO_TRANSLATION = "Button-Übersetzung fehlt";
 
     public static final String REPORT_NO_TRANSLATION_RELEVANCE = "1";
 
@@ -70,5 +74,16 @@ public class Constants {
     public static final String BEA_NEW_LAST_NAME = "Blume";
     public static final String BEA_LINK_TEXT = "@" + BEA_USERNAME;
 
+    // Moderation
+    public static final int OVERWRITING_RELEVANCE = 42;
+    public static final int CALCULATED_RELEVANCE = 6;
+    public static final int EXPECTED_INBOX_SIZE = 4;
+    public static final int EXPECTED_POST_NUM = 1;
+
+    public static final String REPORT_SEARCH_QUERY = "Button";
+    public static final String USERNAME_PREFIX = "@";
+    public static final String CLOSED_AT = "closed at";
+    public static final String NEW_POST_NOTIFICATION_BUTTON = "New post";
+    public static final String NEW_REPORT_NOTIFICATION_BUTTON = "New report";
 
 }
