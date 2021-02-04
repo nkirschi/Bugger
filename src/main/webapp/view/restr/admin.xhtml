@@ -72,10 +72,12 @@
                                        styleClass="form-label"/>
                         <h:panelGrid columns="1">
                             <h:graphicImage id="g-logo-preview"
+                                            alt="#{labels.logo}"
                                             value="logo"
                                             styleClass="img-thumbnail img-size-small"
                                             rendered="#{applicationSettings.organization.existsLogo}"/>
                             <h:graphicImage id="g-logo-preview-fallback"
+                                            alt="#{labels.logo}"
                                             library="images"
                                             name="bugger.png"
                                             styleClass="img-thumbnail img-size-small"
