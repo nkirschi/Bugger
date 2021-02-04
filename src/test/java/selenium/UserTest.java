@@ -17,31 +17,7 @@ import java.time.Duration;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static selenium.Constants.ADMIN_PAGE;
-import static selenium.Constants.ALF_USERNAME;
-import static selenium.Constants.BEA_FIRST_NAME;
-import static selenium.Constants.BEA_INSUFFICIENT_PASSWORD;
-import static selenium.Constants.BEA_LAST_NAME;
-import static selenium.Constants.BEA_LINK_TEXT;
-import static selenium.Constants.BEA_NEW_LAST_NAME;
-import static selenium.Constants.BEA_PASSWORD;
-import static selenium.Constants.BEA_UNMATCHING_PASSWORD;
-import static selenium.Constants.BEA_USERNAME;
-import static selenium.Constants.EMAIL_HOST;
-import static selenium.Constants.EMAIL_USER;
-import static selenium.Constants.HELP_TOPIC_TITLE;
-import static selenium.Constants.HOME_TITLE;
-import static selenium.Constants.NOT_FOUND_TITLE;
-import static selenium.Constants.POST_NO_NAME;
-import static selenium.Constants.POST_SPAM;
-import static selenium.Constants.REGISTER_PAGE;
-import static selenium.Constants.REPORT_NO_NAME;
-import static selenium.Constants.REPORT_NO_TRANSLATION;
-import static selenium.Constants.REPORT_NO_TRANSLATION_RELEVANCE;
-import static selenium.Constants.SEVERITY_MINOR_OPTION;
-import static selenium.Constants.TOPIC_FEEDBACK;
-import static selenium.Constants.TOPIC_GUI;
-import static selenium.Constants.TYPE_BUG_OPTION;
+import static selenium.Constants.*;
 
 @ExtendWith(SeleniumExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
@@ -70,8 +46,10 @@ public class UserTest {
         driver.findElement(By.id("f-register:it-last-name")).sendKeys(BEA_LAST_NAME);
         driver.findElement(By.id("f-register:cb-register")).click();
 
-        // TODO check for tooltips as specified in the requirements?
-        assertDoesNotThrow(() -> driver.findElement(By.className("alert-danger")));
+        assertAll(
+                () -> assertDoesNotThrow(() -> driver.findElement(By.id("f-register:m-username"))),
+                () -> assertDoesNotThrow(() -> driver.findElement(By.className("alert-danger")))
+        );
     }
 
     @Test
@@ -99,7 +77,11 @@ public class UserTest {
         driver.findElement(By.id("f-password:it-repeat")).sendKeys(BEA_UNMATCHING_PASSWORD);
         driver.findElement(By.id("f-password:cb-submit")).click();
 
-        assertDoesNotThrow(() -> driver.findElement(By.className("alert-danger")));
+        assertAll(
+                () -> assertDoesNotThrow(() -> driver.findElement(By.id("f-password:m-password"))),
+                () -> assertDoesNotThrow(() -> driver.findElement(By.id("f-password:m-repeat"))),
+                () -> assertDoesNotThrow(() -> driver.findElement(By.className("alert-danger")))
+        );
     }
 
     @Test
@@ -175,7 +157,6 @@ public class UserTest {
                 () -> assertDoesNotThrow(() -> driver.findElement(By.className("alert-success"))),
                 () -> assertTrue(driver.findElement(By.id("ot-topic")).getText().contains(TOPIC_GUI))
         );
-
     }
 
     @Test
@@ -193,7 +174,6 @@ public class UserTest {
         driver.findElement(By.id("f-edit-post:it-content")).sendKeys(POST_SPAM);
         driver.findElement(By.name("f-edit-post:cb-submit")).click();
 
-        // TODO nicer element locator
         List<WebElement> elements = driver.findElements(By.cssSelector("[id*=l-post-modifier]"));
         assertEquals(BEA_LINK_TEXT, elements.get(elements.size() - 1).getText());
     }

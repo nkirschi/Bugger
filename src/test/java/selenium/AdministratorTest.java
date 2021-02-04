@@ -13,27 +13,7 @@ import org.openqa.selenium.support.ui.Select;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static selenium.Constants.ADMIN_PASSWORD;
-import static selenium.Constants.ADMIN_TITLE;
-import static selenium.Constants.ADMIN_USERNAME;
-import static selenium.Constants.ALF_EMAIL_ADDRESS;
-import static selenium.Constants.ALF_FIRST_NAME;
-import static selenium.Constants.ALF_LAST_NAME;
-import static selenium.Constants.ALF_LINK_TEXT;
-import static selenium.Constants.ALF_PASSWORD;
-import static selenium.Constants.ALF_PROFILE_TITLE;
-import static selenium.Constants.ALF_USERNAME;
-import static selenium.Constants.ALF_VOTING_WEIGHT;
-import static selenium.Constants.EVIL_FILE;
-import static selenium.Constants.FRIENDLY_FILE;
-import static selenium.Constants.POST_NO_TRANSLATION;
-import static selenium.Constants.REPORT_NO_TRANSLATION;
-import static selenium.Constants.SEVERITY_MINOR_TEXT;
-import static selenium.Constants.TOPIC_FEEDBACK;
-import static selenium.Constants.TOPIC_FEEDBACK_DESCRIPTION;
-import static selenium.Constants.TOPIC_GUI;
-import static selenium.Constants.TYPE_HINT_OPTION;
-import static selenium.Constants.TYPE_HINT_TEXT;
+import static selenium.Constants.*;
 
 @ExtendWith(SeleniumExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
