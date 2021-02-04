@@ -162,7 +162,7 @@ public class AdministratorTest {
     public void T080_create_report_with_invalid_attachment() {
         driver.findElement(By.id("f-topic:l-create-report")).click();
         new Select(driver.findElement(By.id("f-create-report:s-type"))).selectByValue(TYPE_HINT_OPTION);
-        driver.findElement(By.id("f-create-report:it-title")).sendKeys(REPORT_NO_TRANSLATION);
+        driver.findElement(By.id("f-create-report:it-title")).sendKeys(testID + REPORT_NO_TRANSLATION);
         driver.findElement(By.id("f-create-report:it-post-content")).sendKeys(POST_NO_TRANSLATION);
 
         String file = absolutePathOf(EVIL_FILE);
@@ -179,7 +179,7 @@ public class AdministratorTest {
         driver.findElement(By.id("f-create-report:cb-create")).click();
 
         assertAll(
-                () -> assertTrue(driver.findElement(By.id("title")).getText().contains(REPORT_NO_TRANSLATION)),
+                () -> assertTrue(driver.findElement(By.id("title")).getText().contains(testID + REPORT_NO_TRANSLATION)),
                 () -> assertEquals(TYPE_HINT_TEXT, driver.findElement(By.id("ot-type")).getText()),
                 () -> assertEquals(SEVERITY_MINOR_TEXT, driver.findElement(By.id("ot-severity")).getText())
         );

@@ -146,7 +146,7 @@ public class UserTest {
     @Test
     public void T180_create_report() {
         driver.findElement(By.id("f-topic:l-create-report")).click();
-        driver.findElement(By.id("f-create-report:it-title")).sendKeys(REPORT_NO_NAME);
+        driver.findElement(By.id("f-create-report:it-title")).sendKeys(testID + REPORT_NO_NAME);
         driver.findElement(By.id("f-create-report:it-post-content")).sendKeys(POST_NO_NAME);
         new Select(driver.findElement(By.id("f-create-report:s-type"))).selectByValue(TYPE_BUG_OPTION);
         new Select(driver.findElement(By.id("f-create-report:s-severity"))).selectByValue(SEVERITY_MINOR_OPTION);
@@ -175,7 +175,7 @@ public class UserTest {
     @Test
     public void T200_change_report_and_vote() {
         driver.findElement(By.id("l-topic")).click();
-        driver.findElement(By.linkText(REPORT_NO_TRANSLATION)).click();
+        driver.findElement(By.linkText(testID + REPORT_NO_TRANSLATION)).click();
         driver.findElement(By.name("f-vote:cb-upvote")).click();
 
         assertEquals(REPORT_NO_TRANSLATION_RELEVANCE, driver.findElement(By.id("ot-relevance")).getText());

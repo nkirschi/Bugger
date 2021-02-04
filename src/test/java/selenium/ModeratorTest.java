@@ -61,9 +61,9 @@ public class ModeratorTest {
 
         assertEquals(EXPECTED_INBOX_SIZE, notificationButtons.size());
         assertEquals(NEW_POST_NOTIFICATION_BUTTON, notificationButtons.get(0).getAttribute("value"));
-        assertTrue(notificationReports.get(0).getText().endsWith(REPORT_NO_TRANSLATION));
+        assertTrue(notificationReports.get(0).getText().endsWith(testID + REPORT_NO_TRANSLATION));
         assertEquals(NEW_REPORT_NOTIFICATION_BUTTON, notificationButtons.get(3).getAttribute("value"));
-        assertTrue(notificationReports.get(3).getText().endsWith(REPORT_NO_TRANSLATION));
+        assertTrue(notificationReports.get(3).getText().endsWith(testID + REPORT_NO_TRANSLATION));
     }
 
     @Test
@@ -101,14 +101,14 @@ public class ModeratorTest {
     @Test
     public void T270_search_report_suggestions() {
         // Search for reports and check for expected suggestions.
-        driver.findElement(By.id("f-search-header:it-search")).sendKeys(REPORT_SEARCH_QUERY);
+        driver.findElement(By.id("f-search-header:it-search")).sendKeys(testID + REPORT_SEARCH_QUERY);
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(
                 "#f-search-header\\:p-search-suggestions .search")));
 
         List<String> suggestions = getSearchSuggestions();
         assertTrue(suggestions.size() == 2
-                && suggestions.contains(REPORT_NO_TRANSLATION)
-                && suggestions.contains(REPORT_NO_NAME));
+                && suggestions.contains(testID + REPORT_NO_TRANSLATION)
+                && suggestions.contains(testID + REPORT_NO_NAME));
     }
 
     @Test
@@ -118,7 +118,7 @@ public class ModeratorTest {
         List<String> resultTitles = getSearchResultTitles();
         String originalID = driver
                 .findElements(By.cssSelector("#p-tab-report-content td:nth-child(1) a"))
-                .get(resultTitles.indexOf(REPORT_NO_TRANSLATION))
+                .get(resultTitles.indexOf(testID + REPORT_NO_TRANSLATION))
                 .getText()
                 .substring(1);
         GLOBAL_VARS.put("originalID" + testID, originalID);
@@ -130,14 +130,14 @@ public class ModeratorTest {
         List<String> resultTitlesFiltered = getSearchResultTitles();
 
         // Check if search results are what we expected.
-        assertAll(() -> assertTrue(resultTitles.contains(REPORT_NO_TRANSLATION)),
-                () -> assertTrue(resultTitles.contains(REPORT_NO_NAME)),
-                () -> assertEquals(Collections.singletonList(REPORT_NO_NAME), resultTitlesFiltered));
+        assertAll(() -> assertTrue(resultTitles.contains(testID + REPORT_NO_TRANSLATION)),
+                () -> assertTrue(resultTitles.contains(testID + REPORT_NO_NAME)),
+                () -> assertEquals(Collections.singletonList(testID + REPORT_NO_NAME), resultTitlesFiltered));
     }
 
     @Test
     public void T290_mark_duplicate() {
-        driver.findElement(By.linkText(REPORT_NO_NAME)).click();
+        driver.findElement(By.linkText(testID + REPORT_NO_NAME)).click();
         driver.findElement(By.id("f-report:cb-mark-duplicate")).click();
 
         String originalID = GLOBAL_VARS.get("originalID" + testID);

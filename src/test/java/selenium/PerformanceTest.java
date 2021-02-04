@@ -25,7 +25,6 @@ public class PerformanceTest {
             final String testID = String.format("%0" + numDigits + "d", i);
             Thread thread = new Thread(() -> {
                 latch.countDown();
-                System.out.println("Latch countdown.");
                 try {
                     latch.await();
                 } catch (InterruptedException e) {
