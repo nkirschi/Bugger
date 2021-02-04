@@ -9,6 +9,7 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core">
 <!--@elvariable id="title" type="java.lang.String"-->
 <!--@elvariable id="helpKey" type="java.lang.String"-->
+<!--@elvariable id="hideHeaderFooter" type="java.lang.String"-->
 <f:event listener="#{headerBacker.validateForm}" type="postValidate"/>
 <f:view locale="#{userSession.locale}">
     <h:head>
@@ -26,7 +27,9 @@
     </h:head>
 
     <h:body>
-        <ui:include src="/WEB-INF/template/header.xhtml" id="header"/>
+        <h:panelGroup rendered="#{hideHeaderFooter == null || not hideHeaderFooter eq 'yes'}">
+            <ui:include src="/WEB-INF/template/header.xhtml" id="header"/>
+        </h:panelGroup>
         <h:panelGroup layout="block"
                       id="p-messages"
                       rendered="#{not empty facesContext.messageList}">
@@ -57,9 +60,11 @@
                 <ui:insert name="content"/>
             </h:panelGroup>
         </h:panelGroup>
-        <ui:include src="/WEB-INF/template/footer.xhtml" id="p-footer">
-            <ui:param name="helpKey" value="#{title}"/>
-        </ui:include>
+        <h:panelGroup rendered="#{hideHeaderFooter == null || not hideHeaderFooter eq 'yes'}">
+            <ui:include src="/WEB-INF/template/footer.xhtml" id="p-footer">
+                <ui:param name="helpKey" value="#{title}"/>
+            </ui:include>
+        </h:panelGroup>
     </h:body>
 
 </f:view>
