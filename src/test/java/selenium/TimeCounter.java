@@ -1,0 +1,38 @@
+package selenium;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class TimeCounter {
+
+    private static final Map<String, Long> STARTS = new ConcurrentHashMap<>();
+    private static PrintWriter WRITER;
+
+    static {
+        try {
+            WRITER = new PrintWriter(Files.newBufferedWriter(Path.of("out.txt")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void startTime(String id) {
+        STARTS.put(id, System.currentTimeMillis());
+    }
+
+    public static void stopTime(String id) {
+        long end = System.currentTimeMillis();
+        long start = STARTS.get(id);
+        WRITER.println(end - start + System.lineSeparator());
+    }
+
+    public static void close() {
+        WRITER.flush();
+        WRITER.close();
+    }
+
+}

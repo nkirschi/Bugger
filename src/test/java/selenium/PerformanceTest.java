@@ -148,5 +148,6 @@ public class PerformanceTest {
         });
 
         cleaner.setup();
+        TimeCounter.close();
     }
 }
