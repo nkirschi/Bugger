@@ -188,6 +188,13 @@ class HomeBackerTest {
     }
 
     @Test
+    public void testIsSubscribedWhenUserIsSubscribed() {
+        doReturn(user).when(session).getUser();
+        doReturn(true).when(topicService).isSubscribed(any(), any());
+        assertTrue(homeBacker.isSubscribed(testTopic1));
+    }
+
+    @Test
     public void testLastChange() {
         OffsetDateTime mockDate = OffsetDateTime.now();
         doReturn(mockDate).when(topicService).lastChange(any());
