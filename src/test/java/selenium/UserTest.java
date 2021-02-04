@@ -22,7 +22,7 @@ import static selenium.Constants.*;
 
 @ExtendWith(SeleniumExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
-@Order(3)
+@Order(2)
 public class UserTest {
 
     private String baseURL;
