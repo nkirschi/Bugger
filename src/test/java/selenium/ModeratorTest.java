@@ -25,14 +25,14 @@ import static selenium.Constants.*;
 public class ModeratorTest {
 
     private WebDriver driver;
-    private String baseURL;
     private WebDriverWait wait;
+    private String baseURL;
 
     @BeforeEach
-    public void setUp(WebDriver driver, String baseURL) {
+    public void setUp(WebDriver driver, WebDriverWait wait, String baseURL) {
         this.driver = driver;
+        this.wait = wait;
         this.baseURL = baseURL;
-        wait = new WebDriverWait(driver, 5);
     }
 
     @Test
@@ -111,7 +111,7 @@ public class ModeratorTest {
                 .get(resultTitles.indexOf(REPORT_NO_TRANSLATION))
                 .getText()
                 .substring(1);
-        globalVars.put("originalID", originalID);
+        GLOBAL_VARS.put("originalID", originalID);
 
         // Search again with additional filters.
         driver.findElement(By.id("f-search:s-show-hint-reports")).click();
@@ -131,7 +131,7 @@ public class ModeratorTest {
         driver.findElement(By.linkText(REPORT_NO_NAME)).click();
         driver.findElement(By.id("f-report:cb-mark-duplicate")).click();
 
-        String originalID = globalVars.get("originalID");
+        String originalID = GLOBAL_VARS.get("originalID");
         driver.findElement(By.id("f-duplicate:it-duplicate")).clear();
         driver.findElement(By.id("f-duplicate:it-duplicate")).sendKeys(originalID);
         driver.findElement(By.id("f-duplicate:cb-duplicate")).click();

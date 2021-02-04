@@ -1,16 +1,14 @@
 package selenium;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Constants {
 
-    public static final Map<String, String> globalVars = new ConcurrentHashMap<>();
+    public static final Map<String, String> GLOBAL_VARS = new ConcurrentHashMap<>();
 
     // Page Slugs
     public static final String ADMIN_PAGE = "admin";
-    public static final String REGISTER_PAGE = "register";
 
     // Page Titles
     public static final String NOT_FOUND_TITLE = "Not Found!";
