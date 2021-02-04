@@ -56,7 +56,7 @@
                                 <f:validateLength maximum="#{Constants.SMALL_FIELD}"/>
                             </h:inputText>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="it-name"/>
+                                <h:message id="m-name" for="it-name"/>
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:outputLabel id="ot-name-hint"
@@ -89,7 +89,7 @@
                                              styleClass="form-control #{!facesContext.validationFailed ? ''
                                                  : component.valid ? 'is-valid' : 'is-invalid'}"/>
                                 <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                    <h:message for="i-logo"/>
+                                    <h:message id="m-logo" for="i-logo"/>
                                 </h:panelGroup>
                             </h:panelGroup>
 
@@ -127,7 +127,7 @@
                                 <f:selectItems value="#{adminBacker.availableThemes}"/>
                             </h:selectOneMenu>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="s-theme"/>
+                                <h:message id="m-theme" for="s-theme"/>
                             </h:panelGroup>
                         </h:panelGroup>
 
@@ -151,7 +151,7 @@
                                 <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
                             </h:inputTextarea>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="it-imprint"/>
+                                <h:message id="m-imprint" for="it-imprint"/>
                             </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
@@ -171,7 +171,7 @@
                                 <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
                             </h:inputTextarea>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="it-privacy-policy"/>
+                                <h:message id="m-privacy-policy" for="it-privacy-policy"/>
                             </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
@@ -191,7 +191,7 @@
                                 <f:validateLength maximum="#{Constants.LARGE_AREA}"/>
                             </h:inputTextarea>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="it-support-info"/>
+                                <h:message id="m-support-info" for="it-support-info"/>
                             </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
@@ -221,7 +221,7 @@
                                            value="#{labels.guest_reading}"
                                            styleClass="form-check-label"/>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="s-guest-reading"/>
+                                <h:message id="m-guest-reading" for="s-guest-reading"/>
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:panelGroup layout="block" styleClass="form-text">
@@ -240,7 +240,7 @@
                                            value="#{labels.closed_report_posting}"
                                            styleClass="form-check-label"/>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="s-closed-report-posting"/>
+                                <h:message id="m-closed-report-posting" for="s-closed-report-posting"/>
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:panelGroup layout="block"
@@ -266,7 +266,7 @@
                                 <f:validateLength maximum="#{Constants.LARGE_FIELD}"/>
                             </h:inputText>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="s-user-email-format"/>
+                                <h:message id="m-user-email-format" for="s-user-email-format"/>
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:outputLabel id="ot-user-email-format-hint"
@@ -291,7 +291,7 @@
                                 <f:validateRegex pattern="#{Constants.INTEGER_LIST_REGEX}"/>
                             </h:inputText>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="it-voting-weight-definition"/>
+                                <h:message id="m-voting-weight-definition" for="it-voting-weight-definition"/>
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:outputLabel id="ot-voting-weight-definition-hint"
@@ -316,7 +316,7 @@
                                 <f:validateRegex pattern="#{Constants.EXTENSION_LIST_REGEX}"/>
                             </h:inputTextarea>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="it-allowed-file-extensions"/>
+                                <h:message id="m-allowed-file-extensions" for="it-allowed-file-extensions"/>
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:outputLabel id="ot-allowed-file-extensions-hint"
@@ -341,7 +341,7 @@
                                 <f:validateLongRange minimum="0" maximum="#{Constants.SMALL_FIELD}"/>
                             </h:inputText>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="it-max-attachments-per-post"/>
+                                <h:message id="m-max-attachments-per-post" for="it-max-attachments-per-post"/>
                             </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>

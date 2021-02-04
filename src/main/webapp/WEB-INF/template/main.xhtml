@@ -26,40 +26,40 @@
     </h:head>
 
     <h:body>
-        <h:panelGroup layout="block">
-            <ui:include src="/WEB-INF/template/header.xhtml" id="header"/>
+        <ui:include src="/WEB-INF/template/header.xhtml" id="header"/>
+        <h:panelGroup layout="block"
+                      id="p-messages"
+                      rendered="#{not empty facesContext.messageList}">
             <h:panelGroup layout="block"
-                          id="p-messages"
-                          rendered="#{not empty facesContext.messageList}">
-                <h:panelGroup layout="block"
-                              styleClass="btn btn-close btn-danger float-end ms-1"
-                              onclick="document.getElementById('p-messages').hidden = true;"/>
-                <h:messages id="m-global"
-                            globalOnly="true"
-                            layout="table"
-                            fatalClass="alert alert-danger"
-                            errorClass="alert alert-danger"
-                            warnClass="alert alert-warning"
-                            infoClass="alert alert-success"/>
-            </h:panelGroup>
-            <ui:insert name="dialogs"/>
-            <h:panelGroup layout="block" id="p-help" styleClass="dialog" rendered="#{footerBacker.helpDisplayed}">
-                <h:outputText id="ot-help" value="#{footerBacker.getHelp(helpKey)}" escape="false"/>
-                <h:form id="f-toggle-help" styleClass="mb-3">
-                    <h:commandButton id="cb-toggle-help"
-                                     styleClass="btn btn-lg btn-close form-control position-absolute top-0 end-0
+                          styleClass="btn btn-close btn-danger float-end ms-1"
+                          onclick="document.getElementById('p-messages').hidden = true;"/>
+            <h:messages id="m-global"
+                        globalOnly="true"
+                        layout="table"
+                        fatalClass="alert alert-danger"
+                        errorClass="alert alert-danger"
+                        warnClass="alert alert-warning"
+                        infoClass="alert alert-success"/>
+        </h:panelGroup>
+        <ui:insert name="dialogs"/>
+        <h:panelGroup layout="block" id="p-help" styleClass="dialog" rendered="#{footerBacker.helpDisplayed}">
+            <h:outputText id="ot-help" value="#{footerBacker.getHelp(helpKey)}" escape="false"/>
+            <h:form id="f-close-help" styleClass="mb-3">
+                <h:commandButton id="cb-close-help"
+                                 styleClass="btn btn-lg btn-close form-control position-absolute top-0 end-0
                                      bg-danger mt-2 me-2"
-                                     action="#{footerBacker.toggleHelp}"/>
-                </h:form>
-            </h:panelGroup>
+                                 action="#{footerBacker.toggleHelp}"/>
+            </h:form>
+        </h:panelGroup>
+        <h:panelGroup layout="block" id="p-main">
             <h:panelGroup layout="block" id="p-content">
                 <h:outputText value="#{title}" styleClass="h1" id="title"/>
                 <ui:insert name="content"/>
             </h:panelGroup>
-            <ui:include src="/WEB-INF/template/footer.xhtml" id="p-footer">
-                <ui:param name="helpKey" value="#{title}"/>
-            </ui:include>
         </h:panelGroup>
+        <ui:include src="/WEB-INF/template/footer.xhtml" id="p-footer">
+            <ui:param name="helpKey" value="#{title}"/>
+        </ui:include>
     </h:body>
 
 </f:view>

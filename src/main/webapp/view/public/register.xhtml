@@ -30,7 +30,7 @@
                         <f:validator validatorId="usernameAssignedValidator"/>
                     </h:inputText>
                     <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                        <h:message for="it-username"/>
+                        <h:message id="m-username" for="it-username"/>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:outputLabel id="ol-username-hint" value="#{labels.register_username_hint}"
@@ -51,10 +51,11 @@
                         <f:validator validatorId="emailAssignedValidator"/>
                     </h:inputText>
                     <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                        <h:message for="it-email"/>
+                        <h:message id="m-email" for="it-email"/>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:outputLabel id="ol-email-hint" value="#{labels.register_email_hint}"
+                <h:outputLabel id="ol-email-hint"
+                               value="#{labels.register_email_hint}"
                                styleClass="form-text"/>
             </h:panelGroup>
 
@@ -69,7 +70,7 @@
                                  styleClass="form-control #{!facesContext.validationFailed ? ''
                                                                 : component.valid ? 'is-valid' : 'is-invalid'}"/>
                     <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                        <h:message for="it-first-name"/>
+                        <h:message id="m-first-name" for="it-first-name"/>
                     </h:panelGroup>
                 </h:panelGroup>
             </h:panelGroup>
@@ -85,7 +86,7 @@
                                  styleClass="form-control #{!facesContext.validationFailed ? ''
                                                                 : component.valid ? 'is-valid' : 'is-invalid'}"/>
                     <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                        <h:message for="it-last-name"/>
+                        <h:message id="m-last-name" for="it-last-name"/>
                     </h:panelGroup>
                 </h:panelGroup>
             </h:panelGroup>
