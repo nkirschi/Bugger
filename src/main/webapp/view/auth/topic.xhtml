@@ -23,11 +23,16 @@
                             <h:link id="l-statistics" outcome="pretty:statistics" value="#{labels.statistics}">
                                 <f:param name="t" value="#{topicBacker.topic.id}"/>
                             </h:link>
-                            <h:commandButton id="cb-#{topicBacker.subscribed ? 'un' : ''}subscribe"
+                            <h:commandButton id="cb-subscribe"
                                              action="#{topicBacker.toggleTopicSubscription}"
-                                             styleClass="button btn btn-primary" value="#{topicBacker.subscribed
-                                             ? labels.unsubscribe : labels.subscribe}"
-                                             rendered="#{userSession.user != null}"/>
+                                             styleClass="button btn btn-primary"
+                                             value="#{labels.subscribe}"
+                                             rendered="#{userSession.user != null and not topicBacker.subscribed}"/>
+                            <h:commandButton id="cb-unsubscribe"
+                                             action="#{topicBacker.toggleTopicSubscription}"
+                                             styleClass="button btn btn-primary"
+                                             value="#{labels.unsubscribe}"
+                                             rendered="#{userSession.user != null and topicBacker.subscribed}"/>
                             <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}"
                                              styleClass="button btn btn-primary"
                                              value="#{labels.delete_topic}"

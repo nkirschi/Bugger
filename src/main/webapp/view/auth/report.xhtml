@@ -115,10 +115,16 @@
                                          rendered="#{reportBacker.report.duplicateOf != null}"/>
                     </h:panelGroup>
                     <h:panelGroup layout="block" rendered="#{userSession.user != null}">
-                        <h:commandButton id="cb-#{reportBacker.subscribed ? 'un' : ''}subscribe"
+                        <h:commandButton id="cb-subscribe"
                                          action="#{reportBacker.toggleReportSubscription}"
-                                         value="#{reportBacker.subscribed ? labels.unsubscribe : labels.subscribe}"
-                                         styleClass="button btn btn-primary"/>
+                                         value="#{labels.subscribe}"
+                                         styleClass="button btn btn-primary"
+                                         rendered="#{not reportBacker.subscribed}"/>
+                        <h:commandButton id="cb-unsubscribe"
+                                         action="#{reportBacker.toggleReportSubscription}"
+                                         value="#{labels.unsubscribe}"
+                                         styleClass="button btn btn-primary"
+                                         rendered="#{reportBacker.subscribed}"/>
                     </h:panelGroup>
                     <h:link id="cb-add-post"
                             outcome="pretty:post-edit"

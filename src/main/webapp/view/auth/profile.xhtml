@@ -27,11 +27,20 @@
                     <!-- Contains the buttons for changing administration status, profile editing and subscribing -->
                     <h:panelGroup id="p-profile-buttons" layout="block" styleClass="row">
                         <h:panelGroup styleClass="col-12 align-right">
-                            <h:commandButton id="cb-#{profileBacker.subscribed ? 'un' : ''}subscribe"
+                            <h:commandButton id="cb-subscribe"
                                              action="#{profileBacker.toggleUserSubscription}"
-                                             value="#{profileBacker.subscribed ? labels.unsubscribe : labels.subscribe}"
-                                             styleClass="button btn btn-primary" rendered="#{userSession.user != null
-                                             and userSession.user.id != profileBacker.user.id}"/>
+                                             value="#{labels.subscribe}"
+                                             styleClass="button btn btn-primary"
+                                             rendered="#{userSession.user != null
+                                             and userSession.user.id != profileBacker.user.id
+                                             and not profileBacker.subscribed}"/>
+                            <h:commandButton id="cb-unsubscribe"
+                                             action="#{profileBacker.toggleUserSubscription}"
+                                             value="#{labels.unsubscribe}"
+                                             styleClass="button btn btn-primary"
+                                             rendered="#{userSession.user != null
+                                             and userSession.user.id != profileBacker.user.id
+                                             and profileBacker.subscribed}"/>
                             <h:commandButton id="cb-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
                                              styleClass="button btn btn-primary" value="#{labels.promote}"
                                              rendered="#{userSession.user.administrator
