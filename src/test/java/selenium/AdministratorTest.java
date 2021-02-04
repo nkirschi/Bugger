@@ -69,16 +69,21 @@ public class AdministratorTest {
 
     @Test
     public void T015_administration() {
+        startTime(testID);
         new Actions(driver).moveToElement(driver.findElement(By.id("p-avatar-thumbnail"))).perform();
         driver.findElement(By.id("l-configuration")).click();
 
         assertTrue(driver.getTitle().contains(ADMIN_TITLE));
+        stopTime(testID, "T015 admin");
     }
 
     @Test
     public void T020_create_user() {
+        startTime(testID);
         driver.findElement(By.id("l-create")).click();
         driver.findElement(By.id("f-profile-edit:it-username")).sendKeys(ALF_USERNAME + testID);
+        stopTime(testID, "T020 profile");
+        startTime(testID);
         driver.findElement(By.id("f-profile-edit:it-first-name")).sendKeys(ALF_FIRST_NAME);
         driver.findElement(By.id("f-profile-edit:it-last-name")).sendKeys(ALF_LAST_NAME);
         driver.findElement(By.id("f-profile-edit:it-email")).sendKeys(ALF_EMAIL_USER + testID + EMAIL_HOST);
@@ -87,6 +92,8 @@ public class AdministratorTest {
         driver.findElement(By.id("f-profile-edit:cb-apply")).click();
 
         driver.findElement(By.id("f-change-user:i-password-change")).sendKeys(ADMIN_PASSWORD);
+        stopTime(testID, "T020 profile2");
+        startTime(testID);
         driver.findElement(By.id("f-change-user:cb-really-change")).click();
 
         assertAll(
@@ -97,16 +104,22 @@ public class AdministratorTest {
                 () -> assertEquals(ALF_EMAIL_USER + testID + EMAIL_HOST,
                         driver.findElement(By.id("f-profile:ot-email")).getText())
         );
+        stopTime(testID, "T020 profile3");
     }
 
     @Test
     public void T030_change_voting_weight() {
+        startTime(testID);
         driver.findElement(By.id("f-profile:l-edit")).click();
 
         driver.findElement(By.id("f-profile-edit:it-overwrite-vote")).sendKeys(ALF_VOTING_WEIGHT);
+        stopTime(testID, "T030 profile");
+        startTime(testID);
         driver.findElement(By.id("f-profile-edit:cb-apply")).click();
 
         driver.findElement(By.id("f-change-user:i-password-change")).sendKeys(ADMIN_PASSWORD);
+        stopTime(testID, "T030 profile2");
+        startTime(testID);
         driver.findElement(By.id("f-change-user:cb-really-change")).click();
 
         assertAll(
@@ -114,6 +127,7 @@ public class AdministratorTest {
                 () -> assertEquals(ALF_VOTING_WEIGHT, driver.findElement(By.id("f-profile:ot-weight")).getText()),
                 () -> assertDoesNotThrow(() -> driver.findElement(By.className("alert-success")))
         );
+        stopTime(testID, "T030 profile3");
     }
 
     @Test
