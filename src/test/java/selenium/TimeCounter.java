@@ -14,7 +14,7 @@ public class TimeCounter {
 
     static {
         try {
-            WRITER = new PrintWriter(Files.newBufferedWriter(Path.of("out.txt")));
+            WRITER = new PrintWriter(Files.newBufferedWriter(Path.of("response-times.txt")));
         } catch (IOException e) {
             e.printStackTrace();
         }

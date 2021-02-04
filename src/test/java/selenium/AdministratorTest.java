@@ -11,6 +11,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
 
+import static selenium.TimeCounter.startTime;
+import static selenium.TimeCounter.stopTime;
+
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 
@@ -43,11 +46,14 @@ public class AdministratorTest {
 
     @Test
     public void T010_login() {
-        long startTime = System.currentTimeMillis();
-
+        startTime(testID);
         driver.get(baseURL);
         driver.findElement(By.id("l-login")).click();
+        stopTime(testID, "T010 home");
+        startTime(testID);
         driver.findElement(By.id("f-login:it-username")).click();
+        stopTime(testID, "T010 login");
+        startTime(testID);
         driver.findElement(By.id("f-login:it-username")).sendKeys(ADMIN_USERNAME);
         driver.findElement(By.id("f-login:it-password")).sendKeys(ADMIN_PASSWORD);
         driver.findElement(By.id("f-login:cb-login")).click();
@@ -57,6 +63,8 @@ public class AdministratorTest {
                 () -> assertEquals("en", languageDropdown.getFirstSelectedOption().getAttribute("value")),
                 () -> assertDoesNotThrow(() -> driver.findElement(By.id("p-avatar-thumbnail")))
         );
+
+        stopTime(testID, "T010 home2");
     }
 
     @Test
