@@ -1,0 +1,38 @@
+<ui:composition template="/WEB-INF/template/main.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:param name="hideHeaderFooter" value="yes"/>
+
+    <ui:param name="title"
+              value="#{requestScope['javax.servlet.error.status_code'] eq 404
+               || requestScope['PretendErrorCode'] eq '404' ? labels.content_not_found : labels.generic_error}"/>
+
+    <ui:define name="content">
+
+        <h:panelGrid id="pg-error-general" columns="1">
+            <h:outputText value="#{requestScope['javax.servlet.error.status_code'] eq 404
+             || requestScope['PretendErrorCode'] eq '404' ? labels.not_found_message : labels.generic_message}"/>
+            <h:outputText value="#{labels.contact_info}" styleClass="h2"/>
+            <h:outputText value="#{errorBacker.supportInformation}" escape="false"/>
+            <a id="l-go-home" href="#{errorBacker.getHomeUrl()}" class="display-6">
+                #{labels.go_home}
+            </a>
+        </h:panelGrid>
+
+        <h:panelGrid id="pg-error-details" columns="1"
+                     rendered="#{facesContext.application.projectStage eq 'Development'
+                     and requestScope['javax.servlet.error.exception'] != null}">
+            <h:outputText value="Request URI"/>
+            <h:outputText value="#{requestScope['javax.servlet.error.request_uri']}"/>
+            <h:outputText value="Exception type"/>
+            <h:outputText value="#{requestScope['javax.servlet.error.exception']['class']}"/>
+            <h:outputText value="Exception message"/>
+            <h:outputText value="#{requestScope['javax.servlet.error.exception'].message}"/>
+            <h:outputText value="Stack trace"/>
+            <pre id="ot-stack-trace">#{errorBacker.stackTrace(requestScope['javax.servlet.error.exception'])}</pre>
+        </h:panelGrid>
+
+    </ui:define>
+</ui:composition>

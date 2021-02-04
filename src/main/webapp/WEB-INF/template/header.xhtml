@@ -138,8 +138,10 @@
                     <h:panelGroup layout="block" styleClass="dropdown-divider"/>
                     <h:panelGroup layout="block" styleClass="text-center">
                         <!-- logout -->
-                        <h:form>
-                            <h:commandButton id="cb-logout" value="#{labels.logout}" action="#{headerBacker.logout}"
+                        <h:form id="f-logout">
+                            <h:commandButton id="cb-logout"
+                                             value="#{labels.logout}"
+                                             action="#{headerBacker.logout}"
                                              styleClass="btn btn-primary"/>
                         </h:form>
                     </h:panelGroup>
