@@ -8,16 +8,20 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import java.util.Scanner;
-import org.junit.Test;
 import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
 import tech.bugger.persistence.util.ConnectionPool;
 import tech.bugger.persistence.util.PropertiesReader;
 
-@Order(1)
+@Order(Integer.MIN_VALUE)
 public class TestDBCleaner {
 
     @Test
-    public void run() {
+    public void setup() {
+        cleanup();
+    }
+
+    public static void cleanup() {
         // retrieve DB scripts
         String clearSQL;
         try {
