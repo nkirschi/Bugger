@@ -36,16 +36,6 @@
             </h:panelGroup>
             <h:panelGroup layout="block" id="p-content">
                 <h:outputText value="#{title}" styleClass="h1" id="title"/>
-
-                <h:panelGrid id="pg-error-general" columns="1">
-                    <h:outputText value="#{error_description}"/>
-                    <h:outputText value="#{labels.contact_info}" styleClass="h2"/>
-                    <h:outputText value="#{errorBacker.supportInformation}" escape="false"/>
-                    <a href="#{errorBacker.getHomeUrl()}" class="display-6">
-                        #{labels.go_home}
-                    </a>
-                </h:panelGrid>
-
                 <ui:insert name="content"/>
             </h:panelGroup>
         </h:panelGroup>

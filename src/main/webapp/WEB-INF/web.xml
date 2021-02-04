@@ -105,10 +105,6 @@
     </resource-env-ref>
 
     <error-page>
-        <error-code>404</error-code>
-        <location>/WEB-INF/errorpages/404.xhtml</location>
-    </error-page>
-    <error-page>
         <location>/WEB-INF/errorpages/500.xhtml</location>
     </error-page>
 
