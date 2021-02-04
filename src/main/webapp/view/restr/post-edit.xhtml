@@ -50,7 +50,7 @@
                     <f:validateLength maximum="#{C.SMALL_AREA}"/>
                 </h:inputTextarea>
                 <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                    <h:message for="it-content"/>
+                    <h:message id="m-content" for="it-content"/>
                 </h:panelGroup>
                 <h:panelGroup>
                     <h:outputFormat id="post-attachments-info"
@@ -75,7 +75,7 @@
                     <f:validator validatorId="fileValidator"/>
                 </h:inputFile>
                 <h:panelGroup/>
-                <h:message for="it-attachment"/>
+                <h:message id="m-attachment" for="it-attachment"/>
             </h:panelGroup>
 
             <h:panelGroup layout="block" styleClass="d-flex justify-content-between my-3">

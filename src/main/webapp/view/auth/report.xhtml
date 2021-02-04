@@ -26,7 +26,7 @@
                                  styleClass="form-control#{component.valid ? '' : ' border-danger'}"/>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="mb-3">
-                    <h:message for="it-duplicate" styleClass="text-danger"/>
+                    <h:message id="m-duplicate" for="it-duplicate" styleClass="text-danger"/>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
                     <h:commandButton id="cb-duplicate-submit" styleClass="hide" action="#{reportBacker.markDuplicate}"/>

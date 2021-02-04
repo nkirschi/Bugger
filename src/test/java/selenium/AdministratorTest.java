@@ -10,7 +10,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
 
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static selenium.Constants.*;
@@ -102,7 +102,8 @@ public class AdministratorTest {
 
         assertAll(
                 () -> assertTrue(driver.getTitle().contains(TOPIC_FEEDBACK)),
-                () -> assertEquals(TOPIC_FEEDBACK_DESCRIPTION, driver.findElement(By.id("f-topic:ot-description")).getText())
+                () -> assertEquals(TOPIC_FEEDBACK_DESCRIPTION,
+                                   driver.findElement(By.id("f-topic:ot-description")).getText())
         );
     }
 
@@ -137,7 +138,8 @@ public class AdministratorTest {
 
         assertAll(
                 () -> assertTrue(driver.findElement(By.id("title")).getText().contains(TOPIC_GUI)),
-                () -> assertEquals(TOPIC_FEEDBACK_DESCRIPTION, driver.findElement(By.id("f-topic:ot-description")).getText()),
+                () -> assertEquals(TOPIC_FEEDBACK_DESCRIPTION,
+                                   driver.findElement(By.id("f-topic:ot-description")).getText()),
                 () -> assertDoesNotThrow(() -> driver.findElement(By.linkText(ALF_LINK_TEXT)))
         );
     }
@@ -149,8 +151,7 @@ public class AdministratorTest {
         driver.findElement(By.id("f-create-report:it-title")).sendKeys(REPORT_NO_TRANSLATION);
         driver.findElement(By.id("f-create-report:it-post-content")).sendKeys(POST_NO_TRANSLATION);
 
-        // Ugly as Windows needs backslashes to locate file.
-        String file = Paths.get(ClassLoader.getSystemResource(EVIL_FILE).toURI()).toFile().getPath();
+        String file = Path.of(ClassLoader.getSystemResource(EVIL_FILE).toURI()).toAbsolutePath().toString();
         driver.findElement(By.id("f-create-report:it-attachment")).sendKeys(file);
         driver.findElement(By.id("f-create-report:cb-add-attachment")).click();
 
@@ -159,8 +160,7 @@ public class AdministratorTest {
 
     @Test
     public void T090_create_report_with_valid_attachment() throws Exception {
-        // Ugly as Windows needs backslashes to locate file.
-        String file = Paths.get(ClassLoader.getSystemResource(FRIENDLY_FILE).toURI()).toFile().getPath();
+        String file = Path.of(ClassLoader.getSystemResource(FRIENDLY_FILE).toURI()).toAbsolutePath().toString();
         driver.findElement(By.id("f-create-report:it-attachment")).sendKeys(file);
         driver.findElement(By.id("f-create-report:cb-create")).click();
 
