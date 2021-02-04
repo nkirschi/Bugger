@@ -43,6 +43,8 @@ public class AdministratorTest {
 
     @Test
     public void T010_login() {
+        long startTime = System.currentTimeMillis();
+
         driver.get(baseURL);
         driver.findElement(By.id("l-login")).click();
         driver.findElement(By.id("f-login:it-username")).click();
