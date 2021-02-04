@@ -9,7 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import static selenium.TimeCounter.startTime;
 import static selenium.TimeCounter.stopTime;
@@ -26,6 +28,7 @@ import static selenium.Constants.*;
 public class AdministratorTest {
 
     private WebDriver driver;
+    private WebDriverWait wait;
     private String baseURL;
 
     private final String testID;
@@ -39,8 +42,9 @@ public class AdministratorTest {
     }
 
     @BeforeEach
-    public void setUp(WebDriver driver, String baseURL) {
+    public void setUp(WebDriver driver, WebDriverWait wait, String baseURL) {
         this.driver = driver;
+        this.wait = wait;
         this.baseURL = baseURL;
     }
 
@@ -91,6 +95,7 @@ public class AdministratorTest {
         driver.findElement(By.id("f-profile-edit:i-password-new-repeat")).sendKeys(ALF_PASSWORD);
         driver.findElement(By.id("f-profile-edit:cb-apply")).click();
 
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-change-user:i-password-change")));
         driver.findElement(By.id("f-change-user:i-password-change")).sendKeys(ADMIN_PASSWORD);
         stopTime(testID, "T020 profile2");
         startTime(testID);

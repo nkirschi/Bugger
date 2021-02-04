@@ -68,7 +68,7 @@
                 </h:panelGroup>
             </h:panelGroup>
 
-            <h:panelGroup styleClass="row my-3" layout="block" rendered="#{postEditBacker.attachments.size()
+            <h:panelGroup styleClass="my-3" layout="block" rendered="#{postEditBacker.attachments.size()
                           lt applicationSettings.configuration.maxAttachmentsPerPost}">
                 <h:inputFile id="it-attachment" value="#{postEditBacker.lastAttachmentUploaded}"
                              styleClass="form-control">

@@ -288,9 +288,11 @@
                 <configuration>
                     <targetClasses>
                         <param>tech.bugger.business.service.*</param>
+                        <param>tech.bugger.control.backing.*</param>
                     </targetClasses>
                     <targetTests>
-                        <param>tech.bugger.business.service.*t</param>
+                        <param>tech.bugger.business.service.*</param>
+                        <param>tech.bugger.control.backing.*</param>
                     </targetTests>
                     <excludedMethods>
                         <excludedMethod>checkState</excludedMethod>

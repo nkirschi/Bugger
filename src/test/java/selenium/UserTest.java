@@ -191,4 +191,12 @@ public class UserTest {
         assertEquals(BEA_LINK_TEXT + testID, elements.get(elements.size() - 1).getText());
     }
 
+    @Test
+    public void T215_logout() {
+        new Actions(driver).moveToElement(driver.findElement(By.id("p-avatar-thumbnail"))).perform();
+        driver.findElement(By.id("f-logout:cb-logout")).click();
+
+        assertDoesNotThrow(() -> driver.findElement(By.id("l-login")));
+    }
+
 }

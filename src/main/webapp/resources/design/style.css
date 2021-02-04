@@ -285,3 +285,8 @@ code {
     font-size: 105% !important;
     border-radius: 6px;
 }
+
+#ot-stack-trace {
+    max-width: 1100px;
+    overflow: auto;
+}

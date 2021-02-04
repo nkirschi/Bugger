@@ -1,5 +1,6 @@
 package tech.bugger.business.service;
 
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +16,9 @@ import tech.bugger.business.util.PriorityTask;
 import tech.bugger.business.util.Registry;
 import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Notification;
+import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.persistence.exception.NotFoundException;
 import tech.bugger.persistence.exception.TransactionException;
@@ -31,6 +34,7 @@ import javax.faces.context.FacesContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,9 +51,6 @@ class NotificationServiceTest {
 
     @Mock
     private Transaction tx;
-
-    @Mock
-    private Event<Feedback> feedbackEvent;
 
     @Mock
     private Mailer mailer;
@@ -83,6 +84,10 @@ class NotificationServiceTest {
             return null;
         }).when(priorityExecutor).enqueue(any());
 
+        lenient().doReturn(priorityExecutor).when(registry).getPriorityExecutor("mails");
+        lenient().doReturn(mailer).when(registry).getMailer("main");
+        lenient().doReturn(configReader).when(registry).getPropertiesReader("config");
+
         service = new NotificationService(transactionManager, registry);
 
         lenient().doReturn(tx).when(transactionManager).begin();
@@ -109,7 +114,7 @@ class NotificationServiceTest {
     @Test
     public void testDeleteNotificationWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(notificationGateway).delete(any());
-        assertDoesNotThrow(() -> service.deleteNotification(notification));
+        assertFalse(service.deleteNotification(notification));
     }
 
     @Test
@@ -120,7 +125,7 @@ class NotificationServiceTest {
 
     @Test
     public void testDeleteNotificationSuccess() throws Exception {
-        assertDoesNotThrow(() -> service.deleteNotification(notification));
+        assertTrue(service.deleteNotification(notification));
         verify(notificationGateway).delete(notification);
     }
 
@@ -137,7 +142,7 @@ class NotificationServiceTest {
     @Test
     public void testMarkAsReadWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(notificationGateway).update(any());
-        assertDoesNotThrow(() -> service.markAsRead(notification));
+        assertFalse(service.markAsRead(notification));
     }
 
     @Test
@@ -148,7 +153,7 @@ class NotificationServiceTest {
 
     @Test
     public void testMarkAsReadSuccess() throws Exception {
-        assertDoesNotThrow(() -> service.markAsRead(notification));
+        assertTrue(service.markAsRead(notification));
         verify(notificationGateway).update(notification);
         assertTrue(notification.isRead());
     }
@@ -236,13 +241,61 @@ class NotificationServiceTest {
     public void testCreateNotificationSuccess() {
         notification.setReportID(420);
         notification.setTopicID(69);
-        try (MockedStatic<JFConfig> jfConfigMock = mockStatic(JFConfig.class)) {
-            try (MockedStatic<FacesContext> fctxMock = mockStatic(FacesContext.class)) {
-                jfConfigMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("Hi");
-                FacesContext fctx = mock(FacesContext.class);
-                fctxMock.when(() -> FacesContext.getCurrentInstance()).thenReturn(fctx);
-                assertDoesNotThrow(() -> service.createNotification(notification));
-            }
+        try (MockedStatic<JFConfig> jfConfigMock = mockStatic(JFConfig.class);
+             MockedStatic<FacesContext> fctxMock = mockStatic(FacesContext.class)) {
+            jfConfigMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("Hi");
+            FacesContext fctx = mock(FacesContext.class);
+            fctxMock.when(FacesContext::getCurrentInstance).thenReturn(fctx);
+            assertDoesNotThrow(() -> service.createNotification(notification));
+        }
+    }
+
+    @Test
+    public void testCreateNotification() throws Exception {
+        notification.setReportID(420);
+        notification.setTopicID(69);
+        notification.setActuatorID(user.getId());
+        Notification notification1 = new Notification(notification);
+        notification1.setPostID(66);
+        User userSub = new User(user);
+        userSub.setId(667);
+        userSub.setEmailAddress("mail667");
+        userSub.setPreferredLanguage(Locale.ENGLISH);
+        User reportSub = new User(user);
+        reportSub.setId(668);
+        reportSub.setEmailAddress("");
+        reportSub.setPreferredLanguage(Locale.ENGLISH);
+        User topicSub = new User(user);
+        topicSub.setId(669);
+        topicSub.setEmailAddress("mail669");
+        topicSub.setPreferredLanguage(Locale.GERMAN);
+        ArrayList<User> userSubs = new ArrayList<>();
+        userSubs.add(userSub);
+        ArrayList<User> reportSubs = new ArrayList<>();
+        reportSubs.add(reportSub);
+        ArrayList<User> topicSubs = new ArrayList<>();
+        topicSubs.add(topicSub);
+        doReturn(userSubs).when(userGateway).getSubscribersOf(eq(user));
+        Report report = new Report();
+        report.setId(notification.getReportID());
+        doReturn(reportSubs).when(userGateway).getSubscribersOf(eq(report));
+        Topic topic = new Topic();
+        topic.setId(notification.getTopicID());
+        doReturn(topicSubs).when(userGateway).getSubscribersOf(eq(topic));
+        doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(eq("interactions"), any());
+        try (MockedStatic<JFConfig> jfConfigMock = mockStatic(JFConfig.class);
+             MockedStatic<FacesContext> fctxMock = mockStatic(FacesContext.class)) {
+            jfConfigMock.when(() -> JFConfig.getApplicationPath(any())).thenReturn("Hi");
+            FacesContext fctx = mock(FacesContext.class);
+            fctxMock.when(FacesContext::getCurrentInstance).thenReturn(fctx);
+            doReturn(3).when(configReader).getInt("MAX_EMAIL_TRIES");
+            assertDoesNotThrow(() -> service.createNotification(notification));
+            doReturn(true).when(mailer).send(any());
+            assertDoesNotThrow(() -> service.createNotification(notification1));
+            doThrow(NotFoundException.class).doNothing().when(notificationGateway).update(any());
+            assertDoesNotThrow(() -> service.createNotification(notification1));
+            doNothing().doThrow(TransactionException.class).when(tx).commit();
+            assertDoesNotThrow(() -> service.createNotification(notification1));
         }
     }
 
