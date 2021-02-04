@@ -1,9 +1,5 @@
 package selenium;
 
-import org.junit.jupiter.api.Test;
-import tech.bugger.persistence.util.ConnectionPool;
-import tech.bugger.persistence.util.PropertiesReader;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -12,7 +8,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import java.util.Scanner;
+import org.junit.Test;
+import org.junit.jupiter.api.Order;
+import tech.bugger.persistence.util.ConnectionPool;
+import tech.bugger.persistence.util.PropertiesReader;
 
+@Order(1)
 public class TestDBCleaner {
 
     @Test
@@ -34,8 +35,8 @@ public class TestDBCleaner {
 
 
             connectionPool = new ConnectionPool(config.getString("DB_DRIVER"),
-                                                config.getString("DB_URL"),
-                                                props, 1, 1, 2000);
+                    config.getString("DB_URL"),
+                    props, 1, 1, 2000);
         } catch (IOException e) {
             throw new AssertionError("Error when reading JDBC properties from disk.", e);
         }
