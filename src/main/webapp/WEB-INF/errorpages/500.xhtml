@@ -3,14 +3,25 @@
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
-    <ui:param name="title" value="#{labels.generic_error}"/>
-
-    <ui:param name="error_description" value="#{labels.generic_message}"/>
+    <ui:param name="title"
+              value="#{requestScope['javax.servlet.error.status_code'] eq 404 || requestScope['Show404'] eq 'yes'
+               ? labels.content_not_found : labels.generic_error}"/>
 
     <ui:define name="content">
 
+        <h:panelGrid id="pg-error-general" columns="1">
+            <h:outputText value="#{requestScope['javax.servlet.error.status_code'] eq 404
+             || requestScope['Show404'] eq 'yes' ? labels.not_found_message : labels.generic_message}"/>
+            <h:outputText value="#{labels.contact_info}" styleClass="h2"/>
+            <h:outputText value="#{errorBacker.supportInformation}" escape="false"/>
+            <a href="#{errorBacker.getHomeUrl()}" class="display-6">
+                #{labels.go_home}
+            </a>
+        </h:panelGrid>
+
         <h:panelGrid id="pg-error-details" columns="1"
-                     rendered="#{facesContext.application.projectStage eq 'Development'}">
+                     rendered="#{facesContext.application.projectStage eq 'Development'
+                     and requestScope['javax.servlet.error.exception'] != null}">
             <h:outputText value="Request URI"/>
             <h:outputText value="#{requestScope['javax.servlet.error.request_uri']}"/>
             <h:outputText value="Exception type"/>
