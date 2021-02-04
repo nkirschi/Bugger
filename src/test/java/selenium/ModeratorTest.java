@@ -1,6 +1,5 @@
 package selenium;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import tech.bugger.LogExtension;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,8 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(DriverExtension.class)
-@ExtendWith(LogExtension.class)
+@ExtendWith(SeleniumExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ModeratorTest {
@@ -35,6 +32,8 @@ public class ModeratorTest {
 
     private static final String OVERWRITING_RELEVANCE = "42";
     private static final String CALCULATED_RELEVANCE = "6";
+    private static final int EXPECTED_INBOX_SIZE = 4;
+    private static final int EXPECTED_POST_NUM = 1;
 
     private static final String REPORT_SEARCH_QUERY = "Button";
     private static final String ORIGINAL_TITLE = "Button Übersetzung fehlt";
@@ -48,104 +47,69 @@ public class ModeratorTest {
     private static final String NEW_REPORT_NOTIFICATION_BUTTON = "New report";
 
     private WebDriver webDriver;
-    private static String baseURL;
-    private JavascriptExecutor js;
-    private HashMap<String, Object> vars;
     private WebDriverWait wait;
 
     private String originalID = "";
 
     @BeforeAll
     public void setUp() {
-        baseURL = DriverExtension.getBaseURL();
-        webDriver = DriverExtension.getDriver();
-        js = (JavascriptExecutor) webDriver;
-        vars = new HashMap<>();
-        webDriver.get(baseURL);
+        webDriver = SeleniumExtension.getDriver();
+        webDriver.get(SeleniumExtension.getBaseURL());
         wait = new WebDriverWait(webDriver, 5);
-    }
-
-    @AfterAll
-    public void tearDown() {
-        try {
-            Thread.sleep(30000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        webDriver.close();
     }
 
     @Test
     public void T220_notifications() {
         // Log in as moderator.
-        webDriver.get(baseURL);
         webDriver.findElement(By.id("l-login")).click();
         webDriver.findElement(By.id("f-login:it-username")).click();
         webDriver.findElement(By.id("f-login:it-username")).sendKeys(MODERATOR_USERNAME);
         webDriver.findElement(By.id("f-login:it-password")).sendKeys(MODERATOR_PASSWORD);
         webDriver.findElement(By.id("f-login:cb-login")).click();
 
-        List<WebElement> notifications = webDriver.findElements(By.cssSelector("#p-notifications tbody tr"));
-        assertAll(
-                () -> assertEquals(2, notifications.size()),
-                () -> assertEquals(
-                        NEW_POST_NOTIFICATION_BUTTON,
-                        notifications.get(0).findElement(By.cssSelector(":nth-child(2) input")).getAttribute("value")),
-                () -> assertTrue(notifications.get(0).findElement(By.cssSelector(":nth-child(3) a")).getText()
-                        .endsWith(ORIGINAL_TITLE)),
-                () -> assertEquals(
-                        NEW_REPORT_NOTIFICATION_BUTTON,
-                        notifications.get(1).findElement(By.cssSelector(":nth-child(2) input")).getAttribute("value")),
-                () -> assertTrue(notifications.get(1).findElement(By.cssSelector(":nth-child(3) a")).getText()
-                        .endsWith(ORIGINAL_TITLE))
-        );
+        // Check inbox for expected notifications.
+        List<WebElement> notificationButtons = webDriver.findElements(By.cssSelector("[id*=cb-notification-button]"));
+        List<WebElement> notificationReports = webDriver.findElements(By.cssSelector("[id*=cb-notification-report]"));
+        assertEquals(EXPECTED_INBOX_SIZE, notificationButtons.size());
+        assertEquals(NEW_POST_NOTIFICATION_BUTTON, notificationButtons.get(0).getAttribute("value"));
+        assertTrue(notificationReports.get(0).getText().endsWith(ORIGINAL_TITLE));
+        assertEquals(NEW_REPORT_NOTIFICATION_BUTTON, notificationButtons.get(3).getAttribute("value"));
+        assertTrue(notificationReports.get(3).getText().endsWith(ORIGINAL_TITLE));
     }
 
     @Test
     public void T230_deletePost() {
-        // TODO
-        webDriver.findElement(By.cssSelector("#p-notifications input[value=\"" + NEW_REPORT_NOTIFICATION_BUTTON + "\"]"))
+        webDriver.findElement(By.cssSelector("#p-notifications input[value=\"" + NEW_POST_NOTIFICATION_BUTTON + "\"]"))
                 .click();
-
-        // Scroll down to the delete button of the second post and click it.
-        WebElement deleteButton = webDriver.findElement(By.cssSelector("table .mb-3:nth-child(2) input[type=\"submit\"]"));
-
-        String scrollElementIntoMiddle = ""
-                + "arguments[0].scrollIntoView({behavior: 'smooth', block: 'center', inline: 'nearest'})";
-        ((JavascriptExecutor) webDriver).executeScript(scrollElementIntoMiddle, deleteButton);
-        wait.until(ExpectedConditions.elementToBeClickable(deleteButton));
-        try {
-            Thread.sleep(150);
-        } catch (Exception e) {}
-
-        deleteButton.click();
-
-        // Confirm the deletion.
+        SeleniumExtension
+                .scrollTo(webDriver.findElement(By.cssSelector("table .mb-3:nth-child(2) input[type=\"submit\"]")))
+                .click();
         webDriver.findElement(By.id("f-delete-post:cb-delete-post")).click();
 
         // Only one post should be left.
-        assertEquals(1, webDriver.findElements(By.cssSelector("td > .mb-3")).size());
+        assertEquals(EXPECTED_POST_NUM, webDriver.findElements(By.cssSelector("td > .mb-3")).size());
     }
 
     @Test
     public void T240_overwriteRelevance() {
-        WebElement overwriteInput = webDriver.findElement(By.id("f-relevance:i-overwrite-relevance-value"));
+        WebElement overwriteInput = webDriver.findElement(By.id("f-vote:i-overwrite-relevance-value"));
         overwriteInput.clear();
         overwriteInput.sendKeys(OVERWRITING_RELEVANCE);
-        webDriver.findElement(By.id("f-relevance:cb-overwrite-relevance")).click();
+        webDriver.findElement(By.id("f-vote:cb-overwrite-relevance")).click();
+
         assertEquals(OVERWRITING_RELEVANCE, webDriver.findElement(By.id("ot-relevance")).getText());
     }
 
     @Test
     public void T250_upvote() {
-        webDriver.findElement(By.id("f-relevance:cb-upvote")).click();
+        webDriver.findElement(By.id("f-vote:cb-upvote")).click();
         assertEquals(OVERWRITING_RELEVANCE, webDriver.findElement(By.id("ot-relevance")).getText());
     }
 
     @Test
     public void T260_undoOverwrite() {
-        webDriver.findElement(By.id("f-relevance:i-overwrite-relevance-value")).clear();
-        webDriver.findElement(By.name("f-relevance:cb-overwrite-relevance")).click();
+        webDriver.findElement(By.id("f-vote:i-overwrite-relevance-value")).clear();
+        webDriver.findElement(By.name("f-vote:cb-overwrite-relevance")).click();
         assertEquals(CALCULATED_RELEVANCE, webDriver.findElement(By.id("ot-relevance")).getText());
     }
 
@@ -155,6 +119,7 @@ public class ModeratorTest {
         webDriver.findElement(By.id("f-search-header:it-search")).sendKeys(REPORT_SEARCH_QUERY);
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(
                 "#f-search-header\\:p-search-suggestions .search")));
+
         List<String> suggestions = getSearchSuggestions();
         assertTrue(suggestions.size() == 2
                 && suggestions.contains(ORIGINAL_TITLE)
@@ -165,7 +130,7 @@ public class ModeratorTest {
     public void T280_reportSearch() {
         // Search and save search results.
         webDriver.findElement(By.id("f-search-header:cb-search")).click();
-        List<String> resultTitles = getResultTitles();
+        List<String> resultTitles = getSearchResultTitles();
         originalID = webDriver.findElement(By.linkText(ORIGINAL_TITLE))
                 .findElement(By.xpath("./../../td[1]/a[1]"))
                 .getText().substring(1);
@@ -174,7 +139,7 @@ public class ModeratorTest {
         webDriver.findElement(By.id("f-search:s-show-hint-reports")).click();
         webDriver.findElement(By.id("f-search:s-show-feature-reports")).click();
         webDriver.findElement(By.id("f-search:cb-search-large")).click();
-        List<String> resultTitlesFiltered = getResultTitles();
+        List<String> resultTitlesFiltered = getSearchResultTitles();
 
         // Check if search results are what we expected.
         assertTrue(resultTitles.size() == 2
@@ -230,7 +195,7 @@ public class ModeratorTest {
                 .collect(Collectors.toList());
     }
 
-    private List<String> getResultTitles() {
+    private List<String> getSearchResultTitles() {
         return webDriver
                 .findElements(By.cssSelector("#p-tab-report-content td:nth-child(2) a"))
                 .stream()

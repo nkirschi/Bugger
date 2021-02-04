@@ -427,6 +427,7 @@ public class ReportBacker implements Serializable {
      */
     public void deletePost() {
         postService.deletePost(postToBeDeleted, report);
+        posts.update();
         displayDialog(null);
     }
 
