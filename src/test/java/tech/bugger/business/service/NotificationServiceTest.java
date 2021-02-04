@@ -53,9 +53,6 @@ class NotificationServiceTest {
     private Transaction tx;
 
     @Mock
-    private Event<Feedback> feedbackEvent;
-
-    @Mock
     private Mailer mailer;
 
     @Mock
@@ -117,7 +114,7 @@ class NotificationServiceTest {
     @Test
     public void testDeleteNotificationWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(notificationGateway).delete(any());
-        assertDoesNotThrow(() -> service.deleteNotification(notification));
+        assertFalse(service.deleteNotification(notification));
     }
 
     @Test
@@ -128,7 +125,7 @@ class NotificationServiceTest {
 
     @Test
     public void testDeleteNotificationSuccess() throws Exception {
-        assertDoesNotThrow(() -> service.deleteNotification(notification));
+        assertTrue(service.deleteNotification(notification));
         verify(notificationGateway).delete(notification);
     }
 
@@ -145,7 +142,7 @@ class NotificationServiceTest {
     @Test
     public void testMarkAsReadWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(notificationGateway).update(any());
-        assertDoesNotThrow(() -> service.markAsRead(notification));
+        assertFalse(service.markAsRead(notification));
     }
 
     @Test
@@ -156,7 +153,7 @@ class NotificationServiceTest {
 
     @Test
     public void testMarkAsReadSuccess() throws Exception {
-        assertDoesNotThrow(() -> service.markAsRead(notification));
+        assertTrue(service.markAsRead(notification));
         verify(notificationGateway).update(notification);
         assertTrue(notification.isRead());
     }
