@@ -1,6 +1,5 @@
 package tech.bugger.control.backing;
 
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -332,6 +331,7 @@ public class ReportBackerTest {
         Post post = new Post(42, "a", 100, null, null);
         reportBacker.setReport(report);
         reportBacker.setPostToBeDeleted(post);
+        reportBacker.setPosts(mock(Paginator.class));
         assertDoesNotThrow(() -> reportBacker.deletePost());
         verify(postService).deletePost(post, report);
         assertNull(reportBacker.getCurrentDialog());

@@ -532,6 +532,15 @@ public class ReportBacker implements Serializable {
     }
 
     /**
+     * Sets the paginator managing all posts of the currently shown report.
+     *
+     * @param posts The paginator managing the posts.
+     */
+    public void setPosts(Paginator<Post> posts) {
+        this.posts = posts;
+    }
+
+    /**
      * Returns the paginator managing all duplicates of the currently shown report.
      *
      * @return The paginator managing the duplicates.
