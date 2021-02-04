@@ -1,6 +1,11 @@
-package selenium;
+package performance;
 
 import org.junit.jupiter.api.Test;
+import selenium.AdministratorTest;
+import selenium.ModeratorTest;
+import selenium.SeleniumExtension;
+import selenium.TestDBCleaner;
+import selenium.UserTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +41,8 @@ public class PerformanceTest {
 
                 extension.beforeAll(null);
                 try {
-                    AdministratorTest administratorTest = new AdministratorTest(testID);
+                    AdministratorTest administratorTest = new AdministratorTest();
+                    administratorTest.setTestID(testID);
                     administratorTest.setUp(extension.getDriver(), extension.getWaiter(), extension.getBaseURL());
                     System.out.println(testID + ": B010");
                     administratorTest.T010_login();
@@ -69,7 +75,8 @@ public class PerformanceTest {
 
                 extension.beforeAll(null);
                 try {
-                    UserTest userTest = new UserTest(testID);
+                    UserTest userTest = new UserTest();
+                    userTest.setTestID(testID);
                     userTest.setUp(extension.getDriver(), extension.getBaseURL());
                     System.out.println(testID + ": B020");
                     userTest.T110_insecure_direct_object_access();
@@ -104,7 +111,8 @@ public class PerformanceTest {
 
                 extension.beforeAll(null);
                 try {
-                    ModeratorTest moderatorTest = new ModeratorTest(testID);
+                    ModeratorTest moderatorTest = new ModeratorTest();
+                    moderatorTest.setTestID(testID);
                     moderatorTest.setUp(extension.getDriver(), extension.getWaiter(), extension.getBaseURL());
                     System.out.println(testID + ": B030");
                     moderatorTest.T220_discover_notifications();

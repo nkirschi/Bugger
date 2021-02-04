@@ -13,8 +13,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import static selenium.TimeCounter.startTime;
-import static selenium.TimeCounter.stopTime;
+import static performance.TimeCounter.startTime;
+import static performance.TimeCounter.stopTime;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -31,14 +31,10 @@ public class AdministratorTest {
     private WebDriverWait wait;
     private String baseURL;
 
-    private final String testID;
+    private String testID;
 
     public AdministratorTest() {
         this.testID = "";
-    }
-
-    public AdministratorTest(final String testID) {
-        this.testID = testID;
     }
 
     @BeforeEach
@@ -267,6 +263,10 @@ public class AdministratorTest {
         } catch (URISyntaxException e) {
             throw new AssertionError("Could not determine absolute path of " + path, e);
         }
+    }
+
+    public void setTestID(String testID) {
+        this.testID = testID;
     }
 
 }

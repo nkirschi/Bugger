@@ -28,14 +28,10 @@ public class ModeratorTest {
     private WebDriverWait wait;
     private String baseURL;
 
-    private final String testID;
+    private String testID;
 
     public ModeratorTest() {
         this.testID = "";
-    }
-
-    public ModeratorTest(final String testID) {
-        this.testID = testID;
     }
 
     @BeforeEach
@@ -194,6 +190,10 @@ public class ModeratorTest {
                 .stream()
                 .map(WebElement::getText)
                 .collect(Collectors.toList());
+    }
+
+    public void setTestID(String testID) {
+        this.testID = testID;
     }
 
 }

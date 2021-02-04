@@ -28,14 +28,10 @@ public class UserTest {
     private String baseURL;
     private WebDriver driver;
 
-    private final String testID;
+    private String testID;
 
     public UserTest() {
         this.testID = "";
-    }
-
-    public UserTest(final String testID) {
-        this.testID = testID;
     }
 
     @BeforeEach
@@ -197,6 +193,10 @@ public class UserTest {
         driver.findElement(By.id("f-logout:cb-logout")).click();
 
         assertDoesNotThrow(() -> driver.findElement(By.id("l-login")));
+    }
+
+    public void setTestID(String testID) {
+        this.testID = testID;
     }
 
 }
