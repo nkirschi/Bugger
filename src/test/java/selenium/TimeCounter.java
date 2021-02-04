@@ -24,10 +24,10 @@ public class TimeCounter {
         STARTS.put(id, System.currentTimeMillis());
     }
 
-    public static void stopTime(String id) {
+    public static void stopTime(String id, String extra) {
         long end = System.currentTimeMillis();
         long start = STARTS.get(id);
-        WRITER.println(end - start + System.lineSeparator());
+        WRITER.println(id + "," + extra + "," + (end - start));
     }
 
     public static void close() {
