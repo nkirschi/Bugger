@@ -22,7 +22,7 @@
             <h:form id="f-duplicate">
                 <h:panelGroup layout="block" styleClass="mb-3 input-group">
                     <h:outputLabel styleClass="input-group-text" id="ol-username-icon">#</h:outputLabel>
-                    <h:inputText id="it-duplicate" value="#{reportBacker.report.duplicateOf}"
+                    <h:inputText id="it-duplicate" value="#{reportBacker.report.duplicateOf}" required="true"
                                  styleClass="form-control#{component.valid ? '' : ' border-danger'}"/>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="mb-3">

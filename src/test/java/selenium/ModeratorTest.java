@@ -28,8 +28,6 @@ public class ModeratorTest {
     private String baseURL;
     private WebDriverWait wait;
 
-    private String originalID = "";
-
     @BeforeEach
     public void setUp(WebDriver driver, String baseURL) {
         this.driver = driver;
@@ -62,8 +60,7 @@ public class ModeratorTest {
     public void T230_delete_post() {
         driver.findElement(By.cssSelector("[id*=cb-notification-button][value='" + NEW_POST_NOTIFICATION_BUTTON + "']"))
               .click();
-        // TODO maybe select by n-th id of page strategy rather?
-        driver.findElement(By.cssSelector("table .mb-3:nth-child(2) input[type=\"submit\"]")).click();
+        driver.findElements(By.cssSelector("[id*=cb-delete-post-dialog")).get(1).click();
         driver.findElement(By.id("f-delete-post:cb-delete-post")).click();
 
         assertEquals(EXPECTED_POST_NUM, driver.findElements(By.cssSelector("[id^=post]")).size());
@@ -109,9 +106,12 @@ public class ModeratorTest {
         // Search and save search results.
         driver.findElement(By.id("f-search-header:cb-search")).click();
         List<String> resultTitles = getSearchResultTitles();
-        originalID = driver.findElement(By.linkText(REPORT_NO_TRANSLATION))
-                           .findElement(By.xpath("./../../td[1]/a[1]"))
-                           .getText().substring(1);
+        String originalID = driver
+                .findElements(By.cssSelector("#p-tab-report-content td:nth-child(1) a"))
+                .get(resultTitles.indexOf(REPORT_NO_TRANSLATION))
+                .getText()
+                .substring(1);
+        globalVars.put("originalID", originalID);
 
         // Search again with additional filters.
         driver.findElement(By.id("f-search:s-show-hint-reports")).click();
@@ -129,12 +129,12 @@ public class ModeratorTest {
     @Test
     public void T290_mark_duplicate() {
         driver.findElement(By.linkText(REPORT_NO_NAME)).click();
-        driver.findElement(By.name("f-report:cb-mark-duplicate")).click();
+        driver.findElement(By.id("f-report:cb-mark-duplicate")).click();
 
-        driver.findElement(By.name("f-duplicate:it-duplicate")).clear();
-        driver.findElement(By.name("f-duplicate:it-duplicate")).sendKeys(originalID);
-
-        driver.findElement(By.name("f-duplicate:cb-duplicate")).click();
+        String originalID = globalVars.get("originalID");
+        driver.findElement(By.id("f-duplicate:it-duplicate")).clear();
+        driver.findElement(By.id("f-duplicate:it-duplicate")).sendKeys(originalID);
+        driver.findElement(By.id("f-duplicate:cb-duplicate")).click();
 
         assertAll(
                 () -> assertEquals(CLOSED_AT, driver.findElement(By.id("ot-status1")).getText()),

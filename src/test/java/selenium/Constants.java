@@ -1,6 +1,12 @@
 package selenium;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class Constants {
+
+    public static final Map<String, String> globalVars = new ConcurrentHashMap<>();
 
     // Page Slugs
     public static final String ADMIN_PAGE = "admin";
