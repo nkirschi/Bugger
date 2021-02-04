@@ -27,8 +27,8 @@
         <commonmark.version>0.15.2</commonmark.version>
         <postgresql.version>42.2.18</postgresql.version>
         <checkstyle.version>8.37</checkstyle.version>
-        <junit.version>5.7.0</junit.version>
-        <junitplatform.version>1.7.0</junitplatform.version>
+        <junit.version>5.8.0-SNAPSHOT</junit.version>
+        <junitplatform.version>1.8.0-SNAPSHOT</junitplatform.version>
         <mockito.version>3.6.28</mockito.version>
         <selenium.version>3.141.59</selenium.version>
         <webdrivermanager.version>4.3.1</webdrivermanager.version>
@@ -36,7 +36,18 @@
         <el.version>3.0.0</el.version>
         <dumbster.version>1.7.1</dumbster.version>
         <embeddedpostgres.version>1.2.9</embeddedpostgres.version>
+        <pitest.version>1.6.2</pitest.version>
+        <pitestjunit5.version>0.12</pitestjunit5.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>oss.sonatype.org-snapshot</id>
+            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+    </repositories>
 
     <dependencies>
 
@@ -128,17 +139,17 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency> <!-- ensures correct version for Mockito -->
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy</artifactId>
-            <version>${bytebuddy.version}</version>
-            <scope>test</scope>
-        </dependency>
 
         <!-- Selenium 3 -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
+            <artifactId>selenium-firefox-driver</artifactId>
+            <version>${selenium.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-support</artifactId>
             <version>${selenium.version}</version>
             <scope>test</scope>
         </dependency>
@@ -165,6 +176,21 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Set explicit bytebuddy version as selenium 3 loads an older one-->
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>${bytebuddy.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Pitest for mutation testing -->
+        <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest</artifactId>
+            <version>${pitest.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -218,6 +244,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/selenium/**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
 
             <!-- JaCoCo Test report -->
@@ -240,6 +271,40 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- PIT Mutation Testing -->
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>${pitest.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-junit5-plugin</artifactId>
+                        <version>${pitestjunit5.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <targetClasses>
+                        <param>tech.bugger.business.service.*</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>tech.bugger.business.service.*t</param>
+                    </targetTests>
+                    <excludedMethods>
+                        <excludedMethod>checkState</excludedMethod>
+                    </excludedMethods>
+                    <avoidCallsTo>
+                        <avoidCallsTo>java.util.logging</avoidCallsTo>
+                        <avoidCallsTo>org.apache.log4j</avoidCallsTo>
+                        <avoidCallsTo>org.slf4j</avoidCallsTo>
+                        <avoidCallsTo>org.apache.commons.logging</avoidCallsTo>
+                        <avoidCallsTo>tech.bugger.global.util.Log</avoidCallsTo>
+                        <avoidCallsTo>java.sql.PreparedStatement</avoidCallsTo>
+                        <avoidCallsTo>tech.bugger.persistence.util.Transaction</avoidCallsTo>
+                    </avoidCallsTo>
+                </configuration>
             </plugin>
 
         </plugins>

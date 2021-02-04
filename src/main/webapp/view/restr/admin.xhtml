@@ -25,7 +25,7 @@
                 <f:param name="t" value="USER"/><!-- user results tab on the search page -->
                 <f:param name="q" value=""/><!-- empty query string => all results displayed -->
             </h:link>
-            <h:link value="#{labels.create}"
+            <h:link id="l-create" value="#{labels.create}"
                     outcome="pretty:profile-edit"
                     styleClass="btn btn-primary">
                 <f:param name="c" value="true"/><!-- empty profile-edit username = "create user" -->
@@ -72,10 +72,12 @@
                                        styleClass="form-label"/>
                         <h:panelGrid columns="1">
                             <h:graphicImage id="g-logo-preview"
+                                            alt="#{labels.logo}"
                                             value="logo"
                                             styleClass="img-thumbnail img-size-small"
                                             rendered="#{applicationSettings.organization.existsLogo}"/>
                             <h:graphicImage id="g-logo-preview-fallback"
+                                            alt="#{labels.logo}"
                                             library="images"
                                             name="bugger.png"
                                             styleClass="img-thumbnail img-size-small"

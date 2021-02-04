@@ -17,7 +17,8 @@
                                     .concat(': ').concat(topicEditBacker.topic.title)}"/>
 
     <ui:define name="content">
-        <h:panelGroup id="p-profile-info" styleClass="d-flex p-2 justify-content-center align-items-center container">
+        <h:panelGroup id="p-profile-info" layout="block"
+                      styleClass="d-flex p-2 justify-content-center align-items-center container">
             <h:panelGroup layout="block" styleClass="row vw-90">
                 <h:form id="f-topic-edit">
                     <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
@@ -50,8 +51,8 @@
                             </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <h:commandButton value="#{labels.topic_edit_submit}" action="#{topicEditBacker.saveChanges}"
-                                     styleClass="btn btn-primary"/>
+                    <h:commandButton id="cb-save" value="#{labels.topic_edit_submit}"
+                                     action="#{topicEditBacker.saveChanges}" styleClass="btn btn-primary"/>
                 </h:form>
             </h:panelGroup>
         </h:panelGroup>
