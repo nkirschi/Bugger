@@ -536,7 +536,7 @@ public class ReportBacker implements Serializable {
      *
      * @param posts The paginator managing the posts.
      */
-    public void setPosts(Paginator<Post> posts) {
+    public void setPosts(final Paginator<Post> posts) {
         this.posts = posts;
     }
 
