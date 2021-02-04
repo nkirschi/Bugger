@@ -4,8 +4,7 @@
 
 body {
     background: #fafafa;
-    margin-top: 100px;
-    margin-bottom: 70px;
+    overflow: hidden;
 }
 
 p {
@@ -13,7 +12,7 @@ p {
 }
 
 #p-header {
-    position: fixed;
+    position: absolute;
     height: 80px;
     top: 0;
     left: 0;
@@ -24,7 +23,7 @@ p {
 }
 
 #p-footer {
-    position: fixed;
+    position: absolute;
     height: 50px;
     bottom: 0;
     left: 0;
@@ -35,11 +34,20 @@ p {
     background: #fff;
 }
 
+#p-main {
+    position: absolute;
+    top: 80px;
+    bottom: 50px;
+    left: 0;
+    right: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 #p-content {
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
-    overflow: auto;
     padding: 40px;
-    margin: 0 auto;
+    margin: 20px auto;
     max-width: 1200px;
     background: #fff;
 }

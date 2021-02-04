@@ -23,10 +23,16 @@
                             <h:link id="l-statistics" outcome="pretty:statistics" value="#{labels.statistics}">
                                 <f:param name="t" value="#{topicBacker.topic.id}"/>
                             </h:link>
-                            <h:commandButton id="cb-subscribe" action="#{topicBacker.toggleTopicSubscription}"
-                                             styleClass="button btn btn-primary" value="#{topicBacker.subscribed
-                                             ? labels.unsubscribe : labels.subscribe}"
-                                             rendered="#{userSession.user != null}"/>
+                            <h:commandButton id="cb-subscribe"
+                                             action="#{topicBacker.toggleTopicSubscription}"
+                                             styleClass="button btn btn-primary"
+                                             value="#{labels.subscribe}"
+                                             rendered="#{userSession.user != null and not topicBacker.subscribed}"/>
+                            <h:commandButton id="cb-unsubscribe"
+                                             action="#{topicBacker.toggleTopicSubscription}"
+                                             styleClass="button btn btn-primary"
+                                             value="#{labels.unsubscribe}"
+                                             rendered="#{userSession.user != null and topicBacker.subscribed}"/>
                             <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}"
                                              styleClass="button btn btn-primary"
                                              value="#{labels.delete_topic}"
@@ -215,7 +221,7 @@
                                     render="p-mod-suggestions"/>
                         </h:inputText>
                         <h:panelGroup id="p-username-message" layout="block" styleClass="invalid-tooltip end-0">
-                            <h:message for="it-username"/>
+                            <h:message id="m-username" for="it-username"/>
                         </h:panelGroup>
                     </h:panelGroup>
                     <h:panelGroup id="p-mod-suggestions" layout="block">
@@ -258,7 +264,7 @@
                                         render="p-unmod-suggestions"/>
                             </h:inputText>
                             <h:panelGroup id="p-username-mod-message" layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="it-username-mod"/>
+                                <h:message id="m-username-mod" for="it-username-mod"/>
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:panelGroup id="p-unmod-suggestions" layout="block">
@@ -302,7 +308,7 @@
                                         render="p-ban-suggestions"/>
                             </h:inputText>
                             <h:panelGroup id="p-username-ban-message" layout="block" styleClass="invalid-tooltip end-0">
-                                <h:message for="it-username-ban"/>
+                                <h:message id="m-username-ban" for="it-username-ban"/>
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:panelGroup id="p-ban-suggestions" layout="block">
@@ -348,7 +354,7 @@
                             </h:inputText>
                             <h:panelGroup id="p-username-unban-message" layout="block"
                                           styleClass="invalid-tooltip end-0">
-                                <h:message for="it-username-unban"/>
+                                <h:message id="m-username-unban" for="it-username-unban"/>
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:panelGroup id="p-unban-suggestions" layout="block">

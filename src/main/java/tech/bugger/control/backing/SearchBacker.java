@@ -15,6 +15,7 @@ import javax.inject.Named;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
+import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
@@ -197,7 +198,11 @@ public class SearchBacker implements Serializable {
             query = ectx.getRequestParameterMap().get("q");
         }
         if (ectx.getRequestParameterMap().containsKey("t")) {
-            tab = Tab.valueOf(ectx.getRequestParameterMap().get("t"));
+            try {
+                tab = Tab.valueOf(ectx.getRequestParameterMap().get("t"));
+            } catch (IllegalArgumentException e) {
+                throw new Error404Exception();
+            }
         }
         openReportShown = true;
         closedReportShown = true;
@@ -434,7 +439,7 @@ public class SearchBacker implements Serializable {
      * @return {@code true} if Bug-type reports are shown, {@code false} otherwise.
      */
     public boolean isShowBug() {
-        return showSevere;
+        return showBug;
     }
 
     /**
@@ -476,7 +481,7 @@ public class SearchBacker implements Serializable {
      * @return {@code true} if Minor-Severity reports are shown, {@code false} otherwise.
      */
     public boolean isShowMinor() {
-        return showSevere;
+        return showMinor;
     }
 
     /**

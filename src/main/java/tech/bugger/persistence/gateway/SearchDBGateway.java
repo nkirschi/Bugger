@@ -74,7 +74,8 @@ public class SearchDBGateway implements SearchGateway {
                 adminFilter = "AND is_admin = false ";
             }
         }
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" as u JOIN user_num_posts as p "
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM \"user\" as u "
+                + "LEFT OUTER JOIN user_num_posts as p "
                 + "on u.id = p.author WHERE TRIM(LOWER(username)) LIKE CONCAT('%',?,'%') "
                 + adminFilter
                 + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
@@ -392,7 +393,8 @@ public class SearchDBGateway implements SearchGateway {
         List<Topic> topicResults = new ArrayList<>(Math.max(0, selection.getTotalSize()));
         try (PreparedStatement stmt = conn.prepareStatement("Select * FROM \"topic\" as t JOIN topic_num_subscribers "
                 + "as s "
-                + "on s.topic = t.id JOIN topic_last_activity as a on t.id = a.topic join topic_num_posts as p "
+                + "on s.topic = t.id LEFT OUTER JOIN topic_last_activity as a on t.id = a.topic "
+                + "LEFT OUTER JOIN topic_num_posts as p "
                 + "on t.id = p.topic WHERE TRIM(LOWER(title)) LIKE CONCAT('%',?,'%') "
                 + "ORDER BY " + selection.getSortedBy() + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
@@ -451,8 +453,10 @@ public class SearchDBGateway implements SearchGateway {
             orderBy = "COALESCE(forced_relevance, relevance)";
         }
         try (PreparedStatement stmt = conn.prepareStatement("SELECT r.*, t.title as t_title , a.last_activity, "
-                + "v.relevance FROM report AS r JOIN topic AS t ON r.topic = t.id JOIN report_last_activity AS a "
-                + "ON a.report = r.id JOIN report_relevance AS v ON r.id = v.report WHERE TRIM(LOWER(r.title)) LIKE "
+                + "v.relevance FROM report AS r LEFT OUTER JOIN topic AS t ON r.topic = t.id "
+                + "LEFT OUTER JOIN report_last_activity AS a "
+                + "ON a.report = r.id LEFT OUTER JOIN report_relevance AS v ON r.id = v.report "
+                + "WHERE TRIM(LOWER(r.title)) LIKE "
                 + "CONCAT('%',?,'%') "
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) " + filter

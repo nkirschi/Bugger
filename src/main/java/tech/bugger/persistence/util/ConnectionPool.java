@@ -1,5 +1,8 @@
 package tech.bugger.persistence.util;
 
+import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.OutOfConnectionsException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -8,8 +11,6 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.OutOfConnectionsException;
 
 /**
  * Thread-safe object pool of database connections.
@@ -174,6 +175,7 @@ public final class ConnectionPool {
      *
      * @param connection The connection to be reintegrated.
      * @throws IllegalStateException if the connection pool has already been shut down.
+     * @throws IllegalStateException if the {@code connection} is already closed.
      */
     public synchronized void releaseConnection(final Connection connection) {
         if (shutDown) {
@@ -207,7 +209,9 @@ public final class ConnectionPool {
 
     private void rollback(final Connection connection) {
         try {
-            connection.rollback();
+            if (!connection.getAutoCommit()) {
+                connection.rollback();
+            }
         } catch (SQLException e) {
             log.warning("Error when defensively rolling back connection to be released.", e);
         }
@@ -225,8 +229,6 @@ public final class ConnectionPool {
 
     /**
      * Shuts down the connection pool by releasing all resources.
-     *
-     * @throws IllegalStateException if the connection pool has already been shut down.
      */
     public synchronized void shutdown() {
         if (!shutDown) {

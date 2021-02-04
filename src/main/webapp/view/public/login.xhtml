@@ -28,7 +28,7 @@
                             <f:validateLength maximum="#{C.USERNAME_MAX}"/>
                         </h:inputText>
                         <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                            <h:message for="it-username"/>
+                            <h:message id="m-username" for="it-username"/>
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -45,7 +45,7 @@
                             <f:validateLength maximum="#{C.PASSWORD_MAX}"/>
                         </h:inputSecret>
                         <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
-                            <h:message for="it-password"/>
+                            <h:message id="m-password" for="it-password"/>
                         </h:panelGroup>
                     </h:panelGroup>
                     <h:link id="l-forgot" value="#{labels.password_forgot_question}" outcome="pretty:password-forgot"

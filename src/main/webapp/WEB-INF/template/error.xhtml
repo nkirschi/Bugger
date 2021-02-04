@@ -12,7 +12,7 @@
 <f:event listener="#{headerBacker.validateForm}" type="postValidate"/>
 <f:view locale="#{userSession.locale}">
     <h:head>
-        <title> Bugger: #{title} </title>
+        <title>#{title} &#x2022; #{labels.app_name}</title>
         <h:outputStylesheet library="design" name="bootstrap.min.css"/>
         <h:outputStylesheet library="design" name="style.css"/>
         <h:outputStylesheet library="design" name="themes/#{applicationSettings.organization.theme}"/>
