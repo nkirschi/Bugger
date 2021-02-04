@@ -73,9 +73,9 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
         requestScope.put(RequestDispatcher.ERROR_EXCEPTION, exception);
         if (exception instanceof Error404Exception
                 || (exception.getCause() != null && exception.getCause() instanceof Error404Exception)) {
-            requestScope.put("Show404", "yes");
+            requestScope.put("PretendErrorCode", "404");
         } else {
-            requestScope.put("Show404", "no");
+            requestScope.put("PretendErrorCode", "500");
         }
         String viewID = "/WEB-INF/errorpages/error.xhtml";
         Application application = fctx.getApplication();

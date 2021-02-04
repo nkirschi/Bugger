@@ -124,7 +124,7 @@ class CustomExceptionHandlerTest {
         makeEvent();
         doReturn(true, false).when(exceptionQueuedEventIterator).hasNext();
         assertDoesNotThrow(() -> customExceptionHandler.handleException(fctx));
-        verify(requestScope).put("Show404", "yes");
+        verify(requestScope).put("PretendErrorCode", "404");
         verify(ectx).setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
@@ -134,7 +134,7 @@ class CustomExceptionHandlerTest {
         doReturn(true, false).when(exceptionQueuedEventIterator).hasNext();
         assertDoesNotThrow(() -> customExceptionHandler.handleException(fctx));
         verify(viewHandler).createView(fctx, "/WEB-INF/errorpages/error.xhtml");
-        verify(requestScope).put("Show404", "no");
+        verify(requestScope).put("PretendErrorCode", "500");
         verify(ectx).setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
@@ -145,7 +145,7 @@ class CustomExceptionHandlerTest {
         makeEvent();
         doReturn(true, false).when(exceptionQueuedEventIterator).hasNext();
         assertDoesNotThrow(() -> customExceptionHandler.handleException(fctx));
-        verify(requestScope).put("Show404", "yes");
+        verify(requestScope).put("PretendErrorCode", "404");
         verify(ectx).setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 

@@ -6,14 +6,14 @@
     <ui:param name="hideHeaderFooter" value="yes"/>
 
     <ui:param name="title"
-              value="#{requestScope['javax.servlet.error.status_code'] eq 404 || requestScope['Show404'] eq 'yes'
-               ? labels.content_not_found : labels.generic_error}"/>
+              value="#{requestScope['javax.servlet.error.status_code'] eq 404
+               || requestScope['PretendErrorCode'] eq '404' ? labels.content_not_found : labels.generic_error}"/>
 
     <ui:define name="content">
 
         <h:panelGrid id="pg-error-general" columns="1">
             <h:outputText value="#{requestScope['javax.servlet.error.status_code'] eq 404
-             || requestScope['Show404'] eq 'yes' ? labels.not_found_message : labels.generic_message}"/>
+             || requestScope['PretendErrorCode'] eq '404' ? labels.not_found_message : labels.generic_message}"/>
             <h:outputText value="#{labels.contact_info}" styleClass="h2"/>
             <h:outputText value="#{errorBacker.supportInformation}" escape="false"/>
             <a href="#{errorBacker.getHomeUrl()}" class="display-6">
