@@ -12,6 +12,8 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import tech.bugger.persistence.util.PropertiesReader;
 
+import java.util.concurrent.TimeUnit;
+
 public class SeleniumExtension implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
 
     private final String driverType;
@@ -45,6 +47,7 @@ public class SeleniumExtension implements BeforeAllCallback, AfterAllCallback, P
             options.addPreference("intl.accept_languages", "en-US");
             options.setHeadless(headless);
             driver = new FirefoxDriver(options);
+            driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
             waiter = new WebDriverWait(driver, 5);
         } else {
             throw new IllegalArgumentException("The configured driver type is not supported!");
