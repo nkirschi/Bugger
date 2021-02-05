@@ -31,7 +31,6 @@
         <junitplatform.version>1.8.0-SNAPSHOT</junitplatform.version>
         <mockito.version>3.6.28</mockito.version>
         <selenium.version>3.141.59</selenium.version>
-        <webdrivermanager.version>4.3.1</webdrivermanager.version>
         <bytebuddy.version>1.10.18</bytebuddy.version>
         <el.version>3.0.0</el.version>
         <dumbster.version>1.7.1</dumbster.version>
@@ -151,12 +150,6 @@
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-support</artifactId>
             <version>${selenium.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency> <!-- enables convenient driver management -->
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>${webdrivermanager.version}</version>
             <scope>test</scope>
         </dependency>
 
