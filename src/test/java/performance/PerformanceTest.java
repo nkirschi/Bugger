@@ -35,7 +35,7 @@ public class PerformanceTest {
                 try {
                     AdministratorTest administratorTest = new AdministratorTest();
                     administratorTest.setTestID(testID);
-                    administratorTest.setUp(extension.getDriver(), extension.getBaseURL());
+                    administratorTest.setUp(extension.getDriver(), extension.getWaiter(), extension.getBaseURL());
                     System.out.println(testID + ": B010");
                     administratorTest.T010_login();
                     System.out.println(testID + ": T010");

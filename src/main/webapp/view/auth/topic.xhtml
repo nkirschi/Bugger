@@ -225,8 +225,8 @@
                         </h:panelGroup>
                     </h:panelGroup>
                     <h:panelGroup id="p-mod-suggestions" layout="block">
-                        <ui:repeat value="#{empty topicBacker.userModSuggestions ? labels.no_suggestions
-                            : topicBacker.userModSuggestions}" var="user">
+                        <ui:repeat value="#{empty topicBacker.userModSuggestions ? null
+                                            : topicBacker.userModSuggestions}" var="user">
                             <h:commandLink action="#{topicBacker.setUserMod(user)}" value="#{user}"
                                            styleClass="row search"/>
                         </ui:repeat>
@@ -268,7 +268,7 @@
                             </h:panelGroup>
                         </h:panelGroup>
                         <h:panelGroup id="p-unmod-suggestions" layout="block">
-                            <ui:repeat value="#{empty topicBacker.userModSuggestions ? labels.no_suggestions
+                            <ui:repeat value="#{empty topicBacker.userModSuggestions ? null
                                 : topicBacker.userModSuggestions}" var="user">
                                 <h:commandLink action="#{topicBacker.setUserMod(user)}" value="#{user}"
                                                styleClass="row search"/>

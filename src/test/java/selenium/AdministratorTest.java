@@ -9,7 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -25,6 +27,7 @@ import static selenium.Constants.*;
 public class AdministratorTest {
 
     private WebDriver driver;
+    private WebDriverWait wait;
     private String baseURL;
 
     private String testID;
@@ -34,8 +37,9 @@ public class AdministratorTest {
     }
 
     @BeforeEach
-    public void setUp(WebDriver driver, String baseURL) {
+    public void setUp(WebDriver driver, WebDriverWait wait, String baseURL) {
         this.driver = driver;
+        this.wait = wait;
         this.baseURL = baseURL;
     }
 
@@ -188,6 +192,8 @@ public class AdministratorTest {
         driver.findElement(By.id("f-moderator-status:cb-image-promote")).click();
         stopTime(testID, "T070 topic2");
         driver.findElement(By.id("f-promote-mod:it-username")).sendKeys(ALF_USERNAME + testID);
+        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(
+                "#f-promote-mod\\:p-mod-suggestions .search")));
         startTime(testID);
         driver.findElement(By.id("f-promote-mod:cb-promote")).click();
         stopTime(testID, "T070 topic3");
