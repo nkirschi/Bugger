@@ -16,7 +16,7 @@
              || requestScope['PretendErrorCode'] eq '404' ? labels.not_found_message : labels.generic_message}"/>
             <h:outputText value="#{labels.contact_info}" styleClass="h2"/>
             <h:outputText value="#{errorBacker.supportInformation}" escape="false"/>
-            <a href="#{errorBacker.getHomeUrl()}" class="display-6">
+            <a id="l-go-home" href="#{errorBacker.getHomeUrl()}" class="display-6">
                 #{labels.go_home}
             </a>
         </h:panelGrid>

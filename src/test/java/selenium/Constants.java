@@ -7,8 +7,9 @@ public class Constants {
 
     public static final Map<String, String> GLOBAL_VARS = new ConcurrentHashMap<>();
 
-    // Page Slugs
+    // Misc
     public static final String ADMIN_PAGE = "admin";
+    public static final String EMAIL_HOST = "@restmail.net";
 
     // Page Titles
     public static final String NOT_FOUND_TITLE = "Not Found!";
@@ -57,7 +58,7 @@ public class Constants {
     public static final String ALF_USERNAME = "AlfDerBenutzer";
     public static final String ALF_FIRST_NAME = "Alf";
     public static final String ALF_LAST_NAME = "Albrecht";
-    public static final String ALF_EMAIL_ADDRESS = "alfxtreme@gmail.com";
+    public static final String ALF_EMAIL_USER = "alfxtreme";
     public static final String ALF_PASSWORD = "Welten-Mysterium1";
     public static final String ALF_VOTING_WEIGHT = "5";
     public static final String ALF_LINK_TEXT = "@" + ALF_USERNAME;
@@ -67,8 +68,7 @@ public class Constants {
     public static final String BEA_INSUFFICIENT_PASSWORD = "EineKuri0sitaeturiositaet";
     public static final String BEA_UNMATCHING_PASSWORD = "EineKuriosität";
     public static final String BEA_PASSWORD = "EineKuri0sitaet!";
-    public static final String EMAIL_USER = BEA_USERNAME.toLowerCase();
-    public static final String EMAIL_HOST = "@restmail.net";
+    public static final String BEA_EMAIL_USER = BEA_USERNAME.toLowerCase();
     public static final String BEA_FIRST_NAME = "Bea";
     public static final String BEA_LAST_NAME = "Baum";
     public static final String BEA_NEW_LAST_NAME = "Blume";

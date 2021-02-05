@@ -123,7 +123,7 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <h:panelGroup styleClass="row my-3" layout="block" rendered="#{reportCreateBacker.attachments.size()
+                    <h:panelGroup styleClass="my-3" layout="block" rendered="#{reportCreateBacker.attachments.size()
                                   lt applicationSettings.configuration.maxAttachmentsPerPost}">
                         <h:inputFile id="it-attachment" value="#{reportCreateBacker.uploadedAttachment}"
                                      styleClass="form-control">

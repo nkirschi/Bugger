@@ -247,6 +247,7 @@
                 <configuration>
                     <excludes>
                         <exclude>**/selenium/**</exclude>
+                        <exclude>**/performance/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>

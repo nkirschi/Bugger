@@ -12,16 +12,16 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import tech.bugger.persistence.util.PropertiesReader;
 
-import java.util.concurrent.TimeUnit;
-
 public class SeleniumExtension implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
 
     private final String driverType;
     private final String driverDir;
     private final String driverOS;
     private final String baseURL;
+    private final boolean headless;
 
     private WebDriver driver;
+
     private WebDriverWait waiter;
 
     public SeleniumExtension() {
@@ -31,6 +31,7 @@ public class SeleniumExtension implements BeforeAllCallback, AfterAllCallback, P
             driverDir = conf.getString("driver.path");
             baseURL = conf.getString("url");
             driverOS = conf.getString("os");
+            headless = conf.getBoolean("headless");
             registerDriver(driverType);
         } catch (Exception e) {
             throw new InternalError("Could not load properties for selenium tests.", e);
@@ -42,8 +43,8 @@ public class SeleniumExtension implements BeforeAllCallback, AfterAllCallback, P
         if (driverType.equals("firefox")) {
             FirefoxOptions options = new FirefoxOptions();
             options.addPreference("intl.accept_languages", "en-US");
+            options.setHeadless(headless);
             driver = new FirefoxDriver(options);
-            driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
             waiter = new WebDriverWait(driver, 5);
         } else {
             throw new IllegalArgumentException("The configured driver type is not supported!");
@@ -86,6 +87,18 @@ public class SeleniumExtension implements BeforeAllCallback, AfterAllCallback, P
         } else {
             throw new IllegalArgumentException("The configured driver type is not supported!");
         }
+    }
+
+    public String getBaseURL() {
+        return baseURL;
+    }
+
+    public WebDriver getDriver() {
+        return driver;
+    }
+
+    public WebDriverWait getWaiter() {
+        return waiter;
     }
 
 }
