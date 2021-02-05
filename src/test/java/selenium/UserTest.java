@@ -132,7 +132,6 @@ public class UserTest {
         startTime(testID);
         driver.findElement(By.id("f-profile:l-edit")).click();
         stopTime(testID, "T150 profile-edit");
-
         driver.findElement(By.id("f-profile-edit:it-last-name")).sendKeys(BEA_NEW_LAST_NAME);
         driver.findElement(By.id("f-profile-edit:cb-apply")).click();
         driver.findElement(By.id("f-change-user:i-password-change")).sendKeys(BEA_PASSWORD);
@@ -149,6 +148,9 @@ public class UserTest {
         driver.findElement(By.id("l-logo")).click();
         stopTime(testID, "T160 home");
         assertTrue(driver.getTitle().contains(HOME_TITLE));
+
+        new Select(driver.findElement(By.cssSelector("[id*=s-entriesPP]"))).selectByValue("HUGE");
+
         startTime(testID);
         driver.findElement(By.linkText(TOPIC_FEEDBACK + testID)).click();
         stopTime(testID, "T160 topic");

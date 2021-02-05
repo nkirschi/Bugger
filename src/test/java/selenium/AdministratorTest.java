@@ -9,9 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -27,7 +25,6 @@ import static selenium.Constants.*;
 public class AdministratorTest {
 
     private WebDriver driver;
-    private WebDriverWait wait;
     private String baseURL;
 
     private String testID;
@@ -37,9 +34,8 @@ public class AdministratorTest {
     }
 
     @BeforeEach
-    public void setUp(WebDriver driver, WebDriverWait wait, String baseURL) {
+    public void setUp(WebDriver driver, String baseURL) {
         this.driver = driver;
-        this.wait = wait;
         this.baseURL = baseURL;
     }
 
@@ -91,7 +87,6 @@ public class AdministratorTest {
         driver.findElement(By.id("f-profile-edit:cb-apply")).click();
         stopTime(testID, "T020 profile2");
 
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("f-change-user:i-password-change")));
         driver.findElement(By.id("f-change-user:i-password-change")).sendKeys(ADMIN_PASSWORD);
         startTime(testID);
         driver.findElement(By.id("f-change-user:cb-really-change")).click();
@@ -103,7 +98,7 @@ public class AdministratorTest {
                 () -> assertEquals(ALF_FIRST_NAME, driver.findElement(By.id("f-profile:ot-first-name")).getText()),
                 () -> assertEquals(ALF_LAST_NAME, driver.findElement(By.id("f-profile:ot-last-name")).getText()),
                 () -> assertEquals(ALF_EMAIL_USER + testID + EMAIL_HOST,
-                        driver.findElement(By.id("f-profile:ot-email")).getText())
+                                   driver.findElement(By.id("f-profile:ot-email")).getText())
         );
     }
 
@@ -196,9 +191,8 @@ public class AdministratorTest {
         startTime(testID);
         driver.findElement(By.id("f-promote-mod:cb-promote")).click();
         stopTime(testID, "T070 topic3");
-
         assertAll(
-                () -> assertTrue(driver.findElement(By.id("title")).getText().contains(TOPIC_GUI + testID)),
+                () -> assertTrue(driver.getTitle().contains(TOPIC_GUI + testID)),
                 () -> assertEquals(TOPIC_FEEDBACK_DESCRIPTION,
                                    driver.findElement(By.id("f-topic:ot-description")).getText()),
                 () -> assertDoesNotThrow(() -> driver.findElement(By.linkText(ALF_LINK_TEXT + testID)))
@@ -232,7 +226,7 @@ public class AdministratorTest {
         stopTime(testID, "T090 report");
 
         assertAll(
-                () -> assertTrue(driver.findElement(By.id("title")).getText().contains(testID + REPORT_NO_TRANSLATION)),
+                () -> assertTrue(driver.getTitle().contains(testID + REPORT_NO_TRANSLATION)),
                 () -> assertEquals(TYPE_HINT_TEXT, driver.findElement(By.id("ot-type")).getText()),
                 () -> assertEquals(SEVERITY_MINOR_TEXT, driver.findElement(By.id("ot-severity")).getText())
         );

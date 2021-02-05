@@ -1,5 +1,8 @@
 package selenium;
 
+import tech.bugger.persistence.util.ConnectionPool;
+import tech.bugger.persistence.util.PropertiesReader;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -8,18 +11,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import java.util.Scanner;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import tech.bugger.persistence.util.ConnectionPool;
-import tech.bugger.persistence.util.PropertiesReader;
 
-@Order(Integer.MIN_VALUE)
-public class TestDBCleaner {
-
-    @Test
-    public void setup() {
-        cleanup();
-    }
+public class DBCleaner {
 
     public static void cleanup() {
         // retrieve DB scripts

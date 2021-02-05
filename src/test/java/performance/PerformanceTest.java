@@ -4,38 +4,30 @@ import org.junit.jupiter.api.Test;
 import selenium.AdministratorTest;
 import selenium.ModeratorTest;
 import selenium.SeleniumExtension;
-import selenium.TestDBCleaner;
+import selenium.TestDBSetup;
 import selenium.UserTest;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 public class PerformanceTest {
 
-    private static final int NUM_PARALLEL_EXECUTIONS = 1;
+    private static final int NUM_PARALLEL_EXECUTIONS = 5;
 
     @Test
     public void run() {
-        TestDBCleaner cleaner = new TestDBCleaner();
+        TestDBSetup cleaner = new TestDBSetup();
         cleaner.setup();
 
         System.out.println("Running " + NUM_PARALLEL_EXECUTIONS + " test suites in parallel.");
 
-        CountDownLatch latch = new CountDownLatch(NUM_PARALLEL_EXECUTIONS);
         List<Thread> threads = new ArrayList<>();
-        int numDigits = Math.max(1, (int) Math.floor(Math.log10(NUM_PARALLEL_EXECUTIONS)));
+        int numDigits = Math.max(1, (int) Math.floor(Math.log10(NUM_PARALLEL_EXECUTIONS - 1)) + 1);
 
         for (int i = 0; i < NUM_PARALLEL_EXECUTIONS; i++) {
             final String testID = String.format("%0" + numDigits + "d", i);
+            System.out.println(testID);
             Thread thread = new Thread(() -> {
-                latch.countDown();
-                try {
-                    latch.await();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
                 System.out.println("Running test suite with ID " + testID);
                 SeleniumExtension extension = new SeleniumExtension();
 
@@ -43,7 +35,7 @@ public class PerformanceTest {
                 try {
                     AdministratorTest administratorTest = new AdministratorTest();
                     administratorTest.setTestID(testID);
-                    administratorTest.setUp(extension.getDriver(), extension.getWaiter(), extension.getBaseURL());
+                    administratorTest.setUp(extension.getDriver(), extension.getBaseURL());
                     System.out.println(testID + ": B010");
                     administratorTest.T010_login();
                     System.out.println(testID + ": T010");
@@ -103,6 +95,8 @@ public class PerformanceTest {
                     System.out.println(testID + ": T200");
                     userTest.T210_create_post();
                     System.out.println(testID + ": T210");
+                    userTest.T215_logout();
+                    System.out.println(testID + ": T215");
                 } catch (Throwable t) {
                     t.printStackTrace();
                 } finally {
@@ -145,6 +139,11 @@ public class PerformanceTest {
             });
             threads.add(thread);
             thread.start();
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         threads.forEach(t -> {
@@ -158,4 +157,5 @@ public class PerformanceTest {
         cleaner.setup();
         TimeCounter.close();
     }
+
 }
