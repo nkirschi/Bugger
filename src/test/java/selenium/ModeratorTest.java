@@ -16,10 +16,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static performance.TimeCounter.startTime;
 import static performance.TimeCounter.stopTime;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static selenium.Constants.*;
 
 @ExtendWith(SeleniumExtension.class)
@@ -48,21 +47,21 @@ public class ModeratorTest {
     public void T220_discover_notifications() {
         startTime(testID);
         driver.get(baseURL);
+        stopTime(testID, "T220 home");
 
         // Log in as moderator.
+        startTime(testID);
         driver.findElement(By.id("l-login")).click();
-        stopTime(testID, "T220 moderator home");
-        startTime(testID);
+        stopTime(testID, "T220 login");
         driver.findElement(By.id("f-login:it-username")).sendKeys(ALF_USERNAME + testID);
-        stopTime(testID, "T220 moderator login");
-        startTime(testID);
         driver.findElement(By.id("f-login:it-password")).sendKeys(ALF_PASSWORD);
+        startTime(testID);
         driver.findElement(By.id("f-login:cb-login")).click();
+        stopTime(testID, "T220 home2");
 
         // Check inbox for expected notifications.
         List<WebElement> notificationButtons = driver.findElements(By.cssSelector("[id*=cb-notification-button]"));
         List<WebElement> notificationReports = driver.findElements(By.cssSelector("[id*=l-notification-report]"));
-        stopTime(testID, "T220 hom2");
 
         assertEquals(EXPECTED_INBOX_SIZE, notificationButtons.size());
         assertEquals(NEW_POST_NOTIFICATION_BUTTON, notificationButtons.get(0).getAttribute("value"));
@@ -76,65 +75,67 @@ public class ModeratorTest {
         startTime(testID);
         driver.findElement(By.cssSelector("[id*=cb-notification-button][value='" + NEW_POST_NOTIFICATION_BUTTON + "']"))
                 .click();
-        stopTime(testID, "T230 load post");
+        stopTime(testID, "T230 report");
         startTime(testID);
         driver.findElements(By.cssSelector("[id*=cb-delete-post-dialog]")).get(1).click();
         driver.findElement(By.id("f-delete-post:cb-delete-post")).click();
+        stopTime(testID, "T230 report2");
 
         assertEquals(EXPECTED_POST_NUM, driver.findElements(By.cssSelector("[id^=post]")).size());
-        stopTime(testID, "T230 delete post");
     }
 
     @Test
     public void T240_overwrite_relevance() {
-        startTime(testID);
         driver.findElement(By.id("f-vote:i-overwrite-relevance-value")).clear();
         driver.findElement(By.id("f-vote:i-overwrite-relevance-value")).sendKeys(String.valueOf(OVERWRITING_RELEVANCE));
+        startTime(testID);
         driver.findElement(By.id("f-vote:cb-overwrite-relevance")).click();
+        stopTime(testID, "T240 report");
 
         assertEquals(String.valueOf(OVERWRITING_RELEVANCE), driver.findElement(By.id("ot-relevance")).getText());
-        stopTime(testID, "T240 overwrite releveance");
     }
 
     @Test
     public void T250_upvote() {
         startTime(testID);
         driver.findElement(By.id("f-vote:cb-upvote")).click();
+        stopTime(testID, "T250 report");
+
         assertEquals(String.valueOf(OVERWRITING_RELEVANCE), driver.findElement(By.id("ot-relevance")).getText());
-        stopTime(testID, "T250 upvote");
     }
 
     @Test
     public void T260_undo_overwrite() {
-        startTime(testID);
         driver.findElement(By.id("f-vote:i-overwrite-relevance-value")).clear();
+        startTime(testID);
         driver.findElement(By.name("f-vote:cb-overwrite-relevance")).click();
+        stopTime(testID, "T260 report");
+
         assertEquals(String.valueOf(CALCULATED_RELEVANCE), driver.findElement(By.id("ot-relevance")).getText());
-        stopTime(testID, "T260 undo overwrite");
     }
 
     @Test
     public void T270_search_report_suggestions() {
-        startTime(testID);
         // Search for reports and check for expected suggestions.
         driver.findElement(By.id("f-search-header:it-search")).sendKeys(testID + REPORT_SEARCH_QUERY);
+        startTime(testID);
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(
                 "#f-search-header\\:p-search-suggestions .search")));
+        stopTime(testID, "T270 suggestions");
 
         List<String> suggestions = getSearchSuggestions();
         assertTrue(suggestions.size() == 2
                 && suggestions.contains(testID + REPORT_NO_TRANSLATION)
                 && suggestions.contains(testID + REPORT_NO_NAME));
-        stopTime(testID, "T270 search report suggestions");
     }
 
     @Test
     public void T280_search_report() {
-        startTime(testID);
         // Search and save search results.
+        startTime(testID);
         driver.findElement(By.id("f-search-header:cb-search")).click();
+        stopTime(testID, "T280 search");
         List<String> resultTitles = getSearchResultTitles();
-        stopTime(testID, "T280 search results for report");
         String originalID = driver
                 .findElements(By.cssSelector("#p-tab-report-content td:nth-child(1) a"))
                 .get(resultTitles.indexOf(testID + REPORT_NO_TRANSLATION))
@@ -147,8 +148,8 @@ public class ModeratorTest {
         driver.findElement(By.id("f-search:s-show-feature-reports")).click();
         startTime(testID);
         driver.findElement(By.id("f-search:cb-search-large")).click();
+        stopTime(testID, "T280 search2");
         List<String> resultTitlesFiltered = getSearchResultTitles();
-        stopTime(testID, "T280 filter results");
 
         // Check if search results are what we expected.
         assertAll(() -> assertTrue(resultTitles.contains(testID + REPORT_NO_TRANSLATION)),
@@ -160,49 +161,54 @@ public class ModeratorTest {
     public void T290_mark_duplicate() {
         startTime(testID);
         driver.findElement(By.linkText(testID + REPORT_NO_NAME)).click();
+        stopTime(testID, "T290 report");
+        startTime(testID);
         driver.findElement(By.id("f-report:cb-mark-duplicate")).click();
-        stopTime(testID, "T290 find duplicate button");
+        stopTime(testID, "T290 report2");
 
         String originalID = GLOBAL_VARS.get("originalID" + testID);
         driver.findElement(By.id("f-duplicate:it-duplicate")).clear();
         driver.findElement(By.id("f-duplicate:it-duplicate")).sendKeys(originalID);
         startTime(testID);
         driver.findElement(By.id("f-duplicate:cb-duplicate")).click();
+        stopTime(testID, "T290 report3");
 
         assertAll(
                 () -> assertEquals(CLOSED_AT, driver.findElement(By.id("ot-status1")).getText()),
                 () -> assertEquals(driver.findElement(By.id("l-duplicate")).getText(), "#" + originalID)
         );
-        stopTime(testID, "T290 mark duplicate");
     }
 
     @Test
     public void T300_search_topic_suggestions() {
-        startTime(testID);
         driver.findElement(By.id("f-search-header:it-search")).sendKeys(TOPIC_GUI + testID);
+        startTime(testID);
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(
                 "#f-search-header\\:p-search-suggestions .search")));
+        stopTime(testID, "T300 suggestions");
         assertEquals(Collections.singletonList(TOPIC_GUI + testID), getSearchSuggestions());
-        stopTime(testID, "T300 search topic suggestions");
 
         startTime(testID);
         driver.findElement(By.cssSelector("#f-search-header\\:p-search-suggestions .search")).click();
+        stopTime(testID, "T300 search");
+        startTime(testID);
         driver.findElement(By.linkText(TOPIC_GUI + testID)).click();
+        stopTime(testID, "T300 topic");
+
         assertTrue(driver.getTitle().contains(TOPIC_GUI + testID));
-        stopTime(testID, "T300 navigate to topic");
     }
 
     @Test
     public void T310_ban_user() {
         startTime(testID);
         driver.findElement(By.id("f-banned-status:cb-image-ban")).click();
+        stopTime(testID, "T310 topic");
         driver.findElement(By.id("f-ban:it-username-ban")).sendKeys(BEA_USERNAME + testID);
-        stopTime(testID, "T310 ban user overlay");
         startTime(testID);
         driver.findElement(By.id("f-ban:cb-ban")).click();
+        stopTime(testID, "T310 topic2");
 
         assertEquals(Collections.singletonList(USERNAME_PREFIX + BEA_USERNAME + testID), getBannedUsers());
-        stopTime(testID, "T310 ban user");
     }
 
     private List<String> getSearchSuggestions() {

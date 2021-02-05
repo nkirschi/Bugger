@@ -63,7 +63,7 @@ public class UserTest {
         driver.findElement(By.id("f-register:it-last-name")).sendKeys(BEA_LAST_NAME);
         startTime(testID);
         driver.findElement(By.id("f-register:cb-register")).click();
-        stopTime(testID, "T120 register");
+        stopTime(testID, "T120 register2");
 
         assertAll(
                 () -> assertDoesNotThrow(() -> driver.findElement(By.id("f-register:m-username"))),
@@ -100,7 +100,7 @@ public class UserTest {
         driver.findElement(By.id("f-password:it-repeat")).sendKeys(BEA_UNMATCHING_PASSWORD);
         startTime(testID);
         driver.findElement(By.id("f-password:cb-submit")).click();
-        stopTime(testID, "T135 password-set");
+        stopTime(testID, "T135 password-set2");
 
         assertAll(
                 () -> assertDoesNotThrow(() -> driver.findElement(By.id("f-password:m-password"))),
@@ -138,7 +138,7 @@ public class UserTest {
         driver.findElement(By.id("f-change-user:i-password-change")).sendKeys(BEA_PASSWORD);
         startTime(testID);
         driver.findElement(By.id("f-change-user:cb-really-change")).click();
-        stopTime(testID, "T150 profile");
+        stopTime(testID, "T150 profile2");
 
         assertDoesNotThrow(() -> driver.findElement(By.className("alert-success")));
     }
@@ -155,7 +155,7 @@ public class UserTest {
         assertTrue(driver.getTitle().contains(TOPIC_FEEDBACK + testID));
         startTime(testID);
         driver.findElement(By.id("f-topic:cb-subscribe")).click();
-        stopTime(testID, "T160 topic");
+        stopTime(testID, "T160 topic2");
 
         assertDoesNotThrow(() -> driver.findElement(By.id("f-topic:cb-unsubscribe")));
     }
@@ -164,12 +164,12 @@ public class UserTest {
     public void T170_help_popup() {
         startTime(testID);
         driver.findElement(By.id("f-help:cb-help")).click();
-        stopTime(testID, "T170 topic help");
+        stopTime(testID, "T170 topic");
         assertTrue(driver.findElement(By.id("ot-help")).getText().contains(HELP_TOPIC_TITLE));
 
         startTime(testID);
         driver.findElement(By.id("f-close-help:cb-close-help")).click();
-        stopTime(testID, "T170 topic");
+        stopTime(testID, "T170 topic2");
         assertThrows(NoSuchElementException.class, () -> driver.findElement(By.id("p-help")));
     }
 
@@ -199,7 +199,7 @@ public class UserTest {
         stopTime(testID, "T190 report-edit");
         startTime(testID);
         driver.findElement(By.id("f-report-edit:s-topic")).click();
-        stopTime(testID, "T190 report-edit confirm");
+        stopTime(testID, "T190 report-edit2");
         new Select(driver.findElement(By.id("f-report-edit:s-topic"))).selectByVisibleText(TOPIC_GUI + testID);
         driver.findElement(By.id("f-report-edit:cb-submit")).click();
         startTime(testID);
@@ -222,7 +222,7 @@ public class UserTest {
         stopTime(testID, "T200 report");
         startTime(testID);
         driver.findElement(By.name("f-vote:cb-upvote")).click();
-        stopTime(testID, "T200 report");
+        stopTime(testID, "T200 report2");
 
         assertEquals(REPORT_NO_TRANSLATION_RELEVANCE, driver.findElement(By.id("ot-relevance")).getText());
     }
