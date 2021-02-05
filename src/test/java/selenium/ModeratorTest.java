@@ -16,10 +16,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static performance.TimeCounter.startTime;
+import static performance.TimeCounter.stopTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static selenium.Constants.*;
-import static selenium.TimeCounter.startTime;
-import static selenium.TimeCounter.stopTime;
 
 @ExtendWith(SeleniumExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
@@ -50,16 +51,18 @@ public class ModeratorTest {
 
         // Log in as moderator.
         driver.findElement(By.id("l-login")).click();
-        stopTime(testID, "T220 moderator login");
+        stopTime(testID, "T220 moderator home");
         startTime(testID);
         driver.findElement(By.id("f-login:it-username")).sendKeys(ALF_USERNAME + testID);
+        stopTime(testID, "T220 moderator login");
+        startTime(testID);
         driver.findElement(By.id("f-login:it-password")).sendKeys(ALF_PASSWORD);
         driver.findElement(By.id("f-login:cb-login")).click();
 
         // Check inbox for expected notifications.
         List<WebElement> notificationButtons = driver.findElements(By.cssSelector("[id*=cb-notification-button]"));
         List<WebElement> notificationReports = driver.findElements(By.cssSelector("[id*=l-notification-report]"));
-        stopTime(testID, "T220 home");
+        stopTime(testID, "T220 hom2");
 
         assertEquals(EXPECTED_INBOX_SIZE, notificationButtons.size());
         assertEquals(NEW_POST_NOTIFICATION_BUTTON, notificationButtons.get(0).getAttribute("value"));
