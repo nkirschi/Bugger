@@ -91,13 +91,18 @@ p {
     position: absolute;
     padding: 10px;
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
-    right: 20px;
+    right: 20px !important; /* Bootstrap tries to overrule */
     top: 60px;
     left: auto;
     z-index: 9999;
     background: #fff;
     width: 220px;
     display: none;
+}
+
+#p-avatar-thumbnail {
+    margin: -10px;
+    padding: 10px;
 }
 
 #p-avatar-thumbnail img {
@@ -219,6 +224,16 @@ p {
     display: block;
     margin: 0.3em 0 0;
     font-size: 1.3em;
+}
+
+[id$="p-avatar"] {
+    width: 300px;
+    height: 300px;
+    margin-right: 30px;
+}
+
+[id$="p-avatar"] img {
+    object-fit: cover;
 }
 
 .button {
