@@ -99,7 +99,9 @@
                       id="p-profile-menu-toggle"
                       styleClass="d-flex justify-content-end align-items-center flex-grow-1 flex-basis-0"
                       rendered="#{userSession.user != null}">
-            <h:panelGroup id="p-avatar-thumbnail" layout="block">
+            <h:panelGroup id="p-avatar-thumbnail" layout="block"
+                          onclick="document.getElementById('p-profile-menu').style.display =
+                          document.getElementById('p-profile-menu').style.display === '' ? 'block' : '';">
                 <h:panelGroup layout="block" styleClass="dropdown-toggle">
                     <h:graphicImage library="images" name="bugger.png" alt="#{userSession.user.username}"
                                     rendered="#{!userSession.user.existsAvatar}" styleClass="rounded-circle me-2"/>
