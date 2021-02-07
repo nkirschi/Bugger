@@ -1,16 +1,15 @@
 package tech.bugger.control.backing;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Locale;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Registry;
 import tech.bugger.global.util.Constants;
-
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Locale;
 
 /**
  * Backing Bean for the footer.
@@ -76,11 +75,17 @@ public class FooterBacker implements Serializable {
     /**
      * Returns the current help key for loading the help from the properties.
      *
-     * @param helpKey The help key of the currently loaded page.
+     * @param helpKey    The help key of the currently loaded page.
+     * @param helpSuffix The help suffix for the additional, role-specific help text.
      * @return The current help key.
      */
-    public String getHelp(final String helpKey) {
-        return MarkdownHandler.toHtml(registry.getBundle("help", session.getLocale()).getString(helpKey));
+    public String getHelp(final String helpKey, final String helpSuffix) {
+        String extra = "";
+        if (helpSuffix != null && !helpSuffix.isEmpty()) {
+            extra = "\n\n" + MarkdownHandler.toHtml(registry.getBundle("help", session.getLocale())
+                    .getString(helpKey + helpSuffix));
+        }
+        return MarkdownHandler.toHtml(registry.getBundle("help", session.getLocale()).getString(helpKey)) + extra;
     }
 
     /**

@@ -1,5 +1,6 @@
 package tech.bugger.control.backing;
 
+import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,15 +13,8 @@ import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Registry;
 
-import java.util.Locale;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -59,12 +53,32 @@ public class FooterBackerTest {
     }
 
     @Test
-    public void testGetHelp() {
+    public void testGetHelpNullSuffix() {
         try (MockedStatic<MarkdownHandler> handlerMock = mockStatic(MarkdownHandler.class)) {
             String html = "nananananana batman";
             handlerMock.when(() -> MarkdownHandler.toHtml(any())).thenReturn(html);
-            assertEquals(html, backer.getHelp("helpKey"));
+            assertEquals(html, backer.getHelp("helpKey", null));
             handlerMock.verify(() -> MarkdownHandler.toHtml(eq("help")));
+        }
+    }
+
+    @Test
+    public void testGetHelpBlankSuffix() {
+        try (MockedStatic<MarkdownHandler> handlerMock = mockStatic(MarkdownHandler.class)) {
+            String html = "nananananana batman";
+            handlerMock.when(() -> MarkdownHandler.toHtml(any())).thenReturn(html);
+            assertEquals(html, backer.getHelp("helpKey", ""));
+            handlerMock.verify(() -> MarkdownHandler.toHtml(eq("help")));
+        }
+    }
+
+    @Test
+    public void testGetHelpNormalSuffix() {
+        try (MockedStatic<MarkdownHandler> handlerMock = mockStatic(MarkdownHandler.class)) {
+            String html = "nananananana batman";
+            handlerMock.when(() -> MarkdownHandler.toHtml(any())).thenReturn(html);
+            assertEquals(html + "\n\n" + html, backer.getHelp("helpKey", "helpSuffix"));
+            handlerMock.verify(times(2), () -> MarkdownHandler.toHtml(eq("help")));
         }
     }
 
