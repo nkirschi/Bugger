@@ -37,6 +37,8 @@
                     <h:inputText styleClass="form-control form-text mt-0"
                                  id="it-search"
                                  value="#{headerBacker.search}"
+                                 onkeypress="if (event.keyCode == 13) {e.preventDefault();
+                                 inputEnter.onkeyup(); return false; }"
                                  a:placeholder="#{labels.search}...">
                         <f:ajax listener="#{headerBacker.updateSuggestions}" event="keyup" delay="100"
                                 render="p-search-suggestions"/>
