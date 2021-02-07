@@ -31,6 +31,7 @@
             <h:form styleClass="d-flex" id="f-language">
                 <h:selectOneMenu value="#{footerBacker.language}"
                                  id="s-language"
+                                 onchange="document.getElementById('f-language:cb-language').click()"
                                  styleClass="form-control form-select me-2">
                     <f:selectItems value="#{footerBacker.availableLanguages}"
                                    var="language" itemValue="#{language}"
