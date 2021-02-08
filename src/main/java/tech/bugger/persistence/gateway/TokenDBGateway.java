@@ -1,5 +1,11 @@
 package tech.bugger.persistence.gateway;
 
+import tech.bugger.global.transfer.Token;
+import tech.bugger.global.util.Log;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,11 +13,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import tech.bugger.global.transfer.Token;
-import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.NotFoundException;
-import tech.bugger.persistence.exception.StoreException;
-import tech.bugger.persistence.util.StatementParametrizer;
 
 /**
  * Token gateway that gives access to verification tokens stored in a database.
@@ -100,7 +101,7 @@ public class TokenDBGateway implements TokenGateway {
                         rs.getObject("timestamp", OffsetDateTime.class),
                         rs.getString("meta"), UserDBGateway.getUserFromResultSet(rs));
             } else {
-                log.error("Searched token by value could not be found.");
+                log.debug("Searched token by value could not be found.");
                 throw new NotFoundException("Searched token by value could not be found!");
             }
         } catch (SQLException e) {

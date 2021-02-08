@@ -1,4 +1,4 @@
-package tech.bugger.control.component;
+package tech.bugger.control.util;
 
 import javax.faces.component.FacesComponent;
 import javax.faces.component.UIComponent;

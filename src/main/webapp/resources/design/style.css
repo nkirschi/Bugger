@@ -91,13 +91,18 @@ p {
     position: absolute;
     padding: 10px;
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
-    right: 20px;
+    right: 20px !important; /* Bootstrap tries to overrule */
     top: 60px;
     left: auto;
     z-index: 9999;
     background: #fff;
     width: 220px;
     display: none;
+}
+
+#p-avatar-thumbnail {
+    margin: -10px;
+    padding: 10px;
 }
 
 #p-avatar-thumbnail img {
@@ -113,6 +118,38 @@ p {
 
 #p-avatar-thumbnail:hover img {
     opacity: 0.5;
+}
+
+#f-help\:cb-help, #f-search-header\:cb-search {
+    background-repeat: no-repeat;
+    background-size: auto 16px;
+    background-position: left 12px center;
+    padding-left: 36px;
+}
+
+#f-help\:cb-help {
+    background-image: url('/resources/images/help.png');
+}
+
+#f-search-header\:cb-search {
+    background-image: url('/resources/images/search.png');
+}
+
+#l-statistics::before, #l-imprint::before, #l-privacy::before {
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+#l-statistics::before {
+    content: url('/resources/images/statistics.png');
+}
+
+#l-imprint::before {
+    content: url('/resources/images/imprint.png');
+}
+
+#l-privacy::before {
+    content: url('/resources/images/privacy.png');
 }
 
 .header-search-suggestions {
@@ -221,6 +258,16 @@ p {
     font-size: 1.3em;
 }
 
+[id$="p-avatar"] {
+    width: 300px;
+    height: 300px;
+    margin-right: 30px;
+}
+
+[id$="p-avatar"] img {
+    object-fit: cover;
+}
+
 .button {
     margin: 1%;
 }
@@ -245,6 +292,7 @@ p {
 .trashcan-small {
     width: 16px;
     height: 16px;
+    vertical-align: middle;
 }
 
 .search {

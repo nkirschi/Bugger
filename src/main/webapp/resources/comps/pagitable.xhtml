@@ -75,12 +75,12 @@
                                   styleClass="col"/>
                     <h:selectOneMenu id="s-entriesPP" value="#{cc.attrs.paginator.selection.pageSize}"
                                      onchange="document.getElementById('#{cc.refreshBtnID}').click()"
-                                     styleClass="form-select form-select-sm col sel-float">
+                                     styleClass="form-select form-select-sm col sel-float me-1">
                         <f:selectItems value="#{cc.attrs.paginator.pageSizeValues()}"
                                        var="item" itemValue="#{item}" itemLabel="#{item.size}"/>
                     </h:selectOneMenu>
                     <h:commandButton id="cb-refresh" action="#{cc.attrs.paginator.updateReset}" value="&#x27f3;"
-                                     type="submit" styleClass="btn btn-sm font-weight-bold col"
+                                     type="submit" styleClass="btn btn-secondary btn-sm font-weight-bold col"
                                      binding="#{cc.refreshBtn}"/>
                 </h:form>
             </h:panelGroup>
