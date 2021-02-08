@@ -31,7 +31,7 @@
             <h:form styleClass="d-flex" id="f-language">
                 <h:selectOneMenu value="#{footerBacker.language}"
                                  id="s-language"
-                                 onchange="document.getElementById('f-language:cb-language').click()"
+                                 onchange="document.getElementById('#{languageButton.clientId}').click()"
                                  styleClass="form-control form-select me-2">
                     <f:selectItems value="#{footerBacker.availableLanguages}"
                                    var="language" itemValue="#{language}"
@@ -41,6 +41,7 @@
                 <h:commandButton value="#{labels.ok}"
                                  id="cb-language"
                                  action="#{footerBacker.changeLanguage}"
+                                 binding="#{languageButton}"
                                  styleClass="btn btn-outline-primary me-4"/>
             </h:form>
             <h:form id="f-help">
