@@ -318,11 +318,14 @@ public class TopicBacker implements Serializable {
 
     /**
      * Apply the current filter to the report pagination.
+     *
+     * @return {@code null} to refresh the page.
      */
-    public void applyFilters() {
+    public String applyFilters() {
         if (reports != null) {
             reports.updateReset();
         }
+        return null;
     }
 
     /**

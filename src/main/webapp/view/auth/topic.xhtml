@@ -131,26 +131,28 @@
         </h:panelGroup>
 
         <h:panelGroup layout="block">
-            <h:panelGroup layout="block" styleClass="row">
-                <h:panelGroup layout="block" styleClass="col-12">
-                    <h:selectBooleanCheckbox id="s-showOpen" value="#{topicBacker.openReportShown}"
-                                             styleClass="form-check-input"/>
-                    <h:outputLabel value="#{labels.topic_show_open_reports}:"/>
+            <h:form id="topic-filters">
+                <h:panelGroup layout="block" styleClass="row">
+                    <h:panelGroup layout="block" styleClass="col-12">
+                        <h:selectBooleanCheckbox id="s-showOpen" value="#{topicBacker.openReportShown}"
+                                                 styleClass="form-check-input"/>
+                        <h:outputLabel value="#{labels.topic_show_open_reports}:"/>
+                    </h:panelGroup>
                 </h:panelGroup>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="row">
-                <h:panelGroup layout="block" styleClass="col-12">
-                    <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"
-                                             styleClass="form-check-input"/>
-                    <h:outputLabel value="#{labels.topic_show_closed_reports}:"/>
+                <h:panelGroup layout="block" styleClass="row">
+                    <h:panelGroup layout="block" styleClass="col-12">
+                        <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"
+                                                 styleClass="form-check-input"/>
+                        <h:outputLabel value="#{labels.topic_show_closed_reports}:"/>
+                    </h:panelGroup>
                 </h:panelGroup>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="row">
-                <h:panelGroup layout="block" styleClass="col-sm-12">
-                    <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}"
-                                     styleClass="btn btn-primary" value="#{labels.apply_filter}"/>
+                <h:panelGroup layout="block" styleClass="row">
+                    <h:panelGroup layout="block" styleClass="col-sm-12">
+                        <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}"
+                                         styleClass="btn btn-primary" value="#{labels.apply_filter}"/>
+                    </h:panelGroup>
                 </h:panelGroup>
-            </h:panelGroup>
+            </h:form>
         </h:panelGroup>
 
         <h:outputText id="ot-reports" styleClass="h2 my-3" value="#{labels.reports}"/>
