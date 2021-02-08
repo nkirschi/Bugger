@@ -584,6 +584,36 @@ public class TopicBackerTest {
     }
 
     @Test
+    public void testGetHelpSuffixAnonymousUser() {
+        doReturn(null).when(session).getUser();
+        assertEquals("", topicBacker.getHelpSuffix());
+    }
+
+    @Test
+    public void testGetHelpSuffixNormalUser() {
+        doReturn(user).when(session).getUser();
+        assertEquals("", topicBacker.getHelpSuffix());
+    }
+
+    @Test
+    public void testGetHelpSuffixMod() throws Exception {
+        doReturn(user).when(session).getUser();
+
+        Field f = TopicBacker.class.getDeclaredField("moderator");
+        f.setAccessible(true);
+        f.set(topicBacker, true);
+
+        assertEquals("_mod", topicBacker.getHelpSuffix());
+    }
+
+    @Test
+    public void testGetHelpSuffixAdmin() {
+        user.setAdministrator(true);
+        doReturn(user).when(session).getUser();
+        assertEquals("_admin", topicBacker.getHelpSuffix());
+    }
+
+    @Test
     public void testSettersForCoverage() {
         List<String> suggestions = new ArrayList<>();
         suggestions.add(user.getUsername());

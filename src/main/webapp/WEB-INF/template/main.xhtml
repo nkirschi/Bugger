@@ -9,6 +9,7 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core">
 <!--@elvariable id="title" type="java.lang.String"-->
 <!--@elvariable id="helpKey" type="java.lang.String"-->
+<!--@elvariable id="helpSuffix" type="java.lang.String"-->
 <!--@elvariable id="hideHeaderFooter" type="java.lang.String"-->
 <f:event listener="#{headerBacker.validateForm}" type="postValidate"/>
 <f:view locale="#{userSession.locale}">
@@ -46,7 +47,7 @@
         </h:panelGroup>
         <ui:insert name="dialogs"/>
         <h:panelGroup layout="block" id="p-help" styleClass="dialog" rendered="#{footerBacker.helpDisplayed}">
-            <h:outputText id="ot-help" value="#{footerBacker.getHelp(helpKey)}" escape="false"/>
+            <h:outputText id="ot-help" value="#{footerBacker.getHelp(helpKey, helpSuffix)}" escape="false"/>
             <h:form id="f-close-help" styleClass="mb-3">
                 <h:commandButton id="cb-close-help"
                                  styleClass="btn btn-lg btn-close form-control position-absolute top-0 end-0
