@@ -26,7 +26,7 @@ CREATE TABLE system_settings (
 
     organization_name VARCHAR NOT NULL DEFAULT 'Bugger',
     organization_logo BYTEA DEFAULT '',
-    organization_theme VARCHAR NOT NULL DEFAULT 'light.css',
+    organization_theme VARCHAR NOT NULL DEFAULT 'classic.css',
     organization_privacy_policy VARCHAR NOT NULL DEFAULT '',
     organization_imprint VARCHAR NOT NULL DEFAULT '',
     organization_support_info VARCHAR NOT NULL DEFAULT '',
