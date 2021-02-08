@@ -120,6 +120,34 @@ p {
     opacity: 0.5;
 }
 
+#f-help\:cb-help {
+    background-repeat: no-repeat;
+    background-size: auto 16px;
+    background-position: left 12px center;
+    padding-left: 36px;
+}
+
+#f-help\:cb-help {
+    background-image: url('/resources/images/help.png');
+}
+
+#l-statistics::before, #l-imprint::before, #l-privacy::before {
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+#l-statistics::before {
+    content: url('/resources/images/statistics.png');
+}
+
+#l-imprint::before {
+    content: url('/resources/images/imprint.png');
+}
+
+#l-privacy::before {
+    content: url('/resources/images/privacy.png');
+}
+
 .header-search-suggestions {
     position: absolute;
     top: 60px;

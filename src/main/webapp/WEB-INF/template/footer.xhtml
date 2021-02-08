@@ -15,13 +15,16 @@
         <h:panelGroup layout="block"
                       id="p-menu"
                       styleClass="d-flex justify-content-center flex-grow-1 flex-basis-0 text-center">
-            <h:link outcome="pretty:statistics"
+            <h:link id="l-statistics"
+                    outcome="pretty:statistics"
                     value="#{labels.statistics}"
                     styleClass="mx-3"/>
-            <h:link outcome="pretty:imprint"
+            <h:link id="l-imprint"
+                    outcome="pretty:imprint"
                     value="#{labels.imprint}"
                     styleClass="mx-3"/>
-            <h:link outcome="pretty:privacy"
+            <h:link id="l-privacy"
+                    outcome="pretty:privacy"
                     value="#{labels.privacy_policy}"
                     styleClass="mx-3"/>
         </h:panelGroup>
