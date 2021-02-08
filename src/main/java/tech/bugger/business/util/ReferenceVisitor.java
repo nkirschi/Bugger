@@ -26,6 +26,11 @@ public class ReferenceVisitor extends AbstractVisitor {
     private static final Log log = Log.forClass(ReferenceVisitor.class);
 
     /**
+     * Escape character for escaping references to normal texts.
+     */
+    private static final char ESCAPE_CHARACTER = '\\';
+
+    /**
      * Allowed characters in references.
      */
     private static final String CHARACTERS_IN_REFERENCES = "a-zA-Z0-9_äöüÄÖÜßẞ";
@@ -117,17 +122,25 @@ public class ReferenceVisitor extends AbstractVisitor {
         if (split.length < 2) {
             return;
         }
+        String start = split[0];
         String refAndRest = split[1];
 
         // Reference end index
         int indexEnd = getRefEndIndex(refAndRest);
 
         // Parse Link if needed
-        Node refNode = parseLink(sequence, refAndRest.substring(0, indexEnd), dest);
+        Text beforeNode;
+        Node refNode;
+        if (!start.isEmpty() && start.charAt(start.length() - 1) == ESCAPE_CHARACTER) {
+            beforeNode = new Text(start.substring(0, start.length() - 1));
+            refNode = new Text(sequence + refAndRest.substring(0, indexEnd));
+        } else {
+            beforeNode = new Text(start);
+            refNode = parseLink(sequence, refAndRest.substring(0, indexEnd), dest);
+        }
 
         // Append rest
         String rest = refAndRest.substring(indexEnd);
-        Text beforeNode = new Text(split[0]);
         Text afterNode = new Text(rest);
 
         // Parse recursively until all references are parsed
