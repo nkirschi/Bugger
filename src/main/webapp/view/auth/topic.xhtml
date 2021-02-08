@@ -12,17 +12,14 @@
 
     <ui:param name="helpKey" value="topic"/>
 
-    <ui:param name="title" value="#{labels.topic} !#{topicBacker.topicID}: #{topicBacker.topic.title}"/>
+    <ui:param name="title" value="[#{labels.topic} !#{topicBacker.topicID}] #{topicBacker.topic.title}"/>
 
     <ui:define name="content">
         <h:form id="f-topic">
             <h:panelGroup layout="block" styleClass="row">
                 <h:panelGroup layout="block" styleClass="col-sm-12">
                     <h:panelGroup layout="block" styleClass="row">
-                        <h:panelGroup layout="block" styleClass="col-sm-12 align-right">
-                            <h:link id="l-statistics" outcome="pretty:statistics" value="#{labels.statistics}">
-                                <f:param name="t" value="#{topicBacker.topic.id}"/>
-                            </h:link>
+                        <h:panelGroup layout="block" styleClass="col-12">
                             <h:commandButton id="cb-subscribe"
                                              action="#{topicBacker.toggleTopicSubscription}"
                                              styleClass="button btn btn-primary"
@@ -49,110 +46,110 @@
                         </h:panelGroup>
                     </h:panelGroup>
                     <h:panelGroup layout="block" styleClass="row">
-                        <h:panelGroup layout="block" styleClass="col-sm-12">
-                            <h:outputLabel value="#{labels.description}"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="row">
                         <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
                     </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="row">
-                        <h:panelGroup layout="block" styleClass="col-12">
-                            <h:outputLabel value="#{labels.id}:&#xA0;" for="ot-id"/>
-                            <h:outputText id="ot-id" value="!#{topicBacker.topicID}"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="row">
-                        <h:panelGroup layout="block" styleClass="col-12">
-                            <h:outputLabel value="#{labels.topic_show_open_reports}:"/>
-                            <h:selectBooleanCheckbox id="s-showOpen" value="#{topicBacker.openReportShown}"
-                                                     styleClass="form-check-input"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="row">
-                        <h:panelGroup layout="block" styleClass="col-12">
-                            <h:outputLabel value="#{labels.topic_show_closed_reports}:"/>
-                            <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"
-                                                     styleClass="form-check-input"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="row">
-                        <h:panelGroup layout="block" styleClass="col-sm-12">
-                            <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}"
-                                             styleClass="btn btn-primary" value="#{labels.apply_filter}"/>
-                        </h:panelGroup>
-                    </h:panelGroup>
+                    <h:link id="l-statistics" outcome="pretty:statistics" value="#{labels.statistics}">
+                        <f:param name="t" value="#{topicBacker.topic.id}"/>
+                    </h:link>
                 </h:panelGroup>
             </h:panelGroup>
         </h:form>
 
-        <!-- A paginated list of moderators for this topic. -->
-        <h:outputText id="ot-moderators" styleClass="h2 my-3" value="#{labels.topic_moderators}"/>
-        <h:panelGroup layout="block" styleClass="row" id="p-moderators">
-            <h:panelGroup layout="block" id="p-moderators-pagination" styleClass="col-sm-9">
-                <b:pagitable paginator="#{topicBacker.moderators}" simple="true">
-                    <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
-                    <h:column>
-                        <h:panelGroup layout="block" styleClass="text-nowrap">
-                            <h:outputLink value="/faces/view/auth/profile.xhtml">
-                                <h:graphicImage styleClass="img-size-mini me-2 rounded-circle"
-                                                value="/avatar?u=#{var.username}&amp;type=thumbnail"
-                                                alt="#{var.username}'s avatar"/>@#{var.username}
-                                <f:param name="u" value="#{var.username}"/>
-                            </h:outputLink>
-                        </h:panelGroup>
-                    </h:column>
-                    <h:column>
-                        <h:commandButton id="cb-demote-user" action="#{topicBacker.unmodSingleUser(var.username)}"
-                                         styleClass="button trashcan-small" rendered="#{topicBacker.moderator}"
-                                         image="/resources/images/trash.png" alt="#{labels.remove}"/>
-                    </h:column>
-                </b:pagitable>
+        <h:panelGroup layout="block" styleClass="row">
+
+            <!-- A paginated list of moderators for this topic. -->
+            <h:panelGroup layout="block" styleClass="col-6" id="p-moderators">
+                <h:outputText id="ot-moderators" styleClass="h2 my-3" value="#{labels.topic_moderators}"/>
+                <h:panelGroup layout="block" id="p-moderators-pagination" styleClass="col-sm-9">
+                    <b:pagitable paginator="#{topicBacker.moderators}" simple="true">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
+                        <h:column>
+                            <h:panelGroup layout="block" styleClass="text-nowrap">
+                                <h:outputLink value="/faces/view/auth/profile.xhtml">
+                                    <h:graphicImage styleClass="img-size-mini me-2 rounded-circle"
+                                                    value="/avatar?u=#{var.username}&amp;type=thumbnail"
+                                                    alt="#{var.username}'s avatar"/>@#{var.username}
+                                    <f:param name="u" value="#{var.username}"/>
+                                </h:outputLink>
+                            </h:panelGroup>
+                        </h:column>
+                        <h:column>
+                            <h:commandButton id="cb-demote-user" action="#{topicBacker.unmodSingleUser(var.username)}"
+                                             styleClass="button trashcan-small" rendered="#{topicBacker.moderator}"
+                                             image="/resources/images/trash.png" alt="#{labels.remove}"/>
+                        </h:column>
+                    </b:pagitable>
+                </h:panelGroup>
+                <h:panelGroup id="p-moderator-status" layout="block" styleClass="col-sm-3">
+                    <h:form id="f-moderator-status">
+                        <h:commandButton id="cb-image-promote" action="#{topicBacker.openModDialog}" styleClass="button"
+                                         rendered="#{topicBacker.moderator}" image="/resources/images/add.png"
+                                         alt="#{labels.promote}"/>
+                        <h:commandButton id="cb-image-demote" action="#{topicBacker.openUnmodDialog}"
+                                         styleClass="button"
+                                         rendered="#{topicBacker.moderator and topicBacker.moderators.selection.totalSize gt 0}"
+                                         image="/resources/images/delete.png" alt="#{labels.demote}"/>
+                    </h:form>
+                </h:panelGroup>
             </h:panelGroup>
-            <h:panelGroup id="p-moderator-status" layout="block" styleClass="col-sm-3">
-                <h:form id="f-moderator-status">
-                    <h:commandButton id="cb-image-promote" action="#{topicBacker.openModDialog}" styleClass="button"
-                                     rendered="#{topicBacker.moderator}" image="/resources/images/add.png"
-                                     alt="#{labels.promote}"/>
-                    <h:commandButton id="cb-image-demote" action="#{topicBacker.openUnmodDialog}" styleClass="button"
-                                     rendered="#{topicBacker.moderator and topicBacker.moderators.selection.totalSize gt 0}"
-                                     image="/resources/images/delete.png" alt="#{labels.demote}"/>
-                </h:form>
+
+            <!-- A paginated list of users banned from this topic. -->
+            <h:panelGroup layout="block" styleClass="col-6" id="p-banned">
+                <h:outputText id="ot-banned" styleClass="h2 my-3" value="#{labels.topic_banned}"/>
+                <h:panelGroup layout="block" styleClass="col-sm-9" id="p-banned-pagination">
+                    <b:pagitable paginator="#{topicBacker.bannedUsers}" simple="true">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
+                        <h:column>
+                            <h:panelGroup layout="block" styleClass="text-nowrap">
+                                <h:outputLink value="/faces/view/auth/profile.xhtml">
+                                    <h:graphicImage styleClass="img-size-mini me-2 rounded-circle"
+                                                    value="/avatar?u=#{var.username}&amp;type=thumbnail"
+                                                    alt="#{var.username}'s avatar"/>@#{var.username}
+                                    <f:param name="u" value="#{var.username}"/>
+                                </h:outputLink>
+                            </h:panelGroup>
+                        </h:column>
+                        <h:column>
+                            <h:commandButton id="cb-unban-user" action="#{topicBacker.unbanSingleUser(var.username)}"
+                                             styleClass="button trashcan-small" rendered="#{topicBacker.moderator}"
+                                             image="/resources/images/trash.png" alt="#{labels.topic_unban}"/>
+                        </h:column>
+                    </b:pagitable>
+                </h:panelGroup>
+                <h:panelGroup id="p-banned-status" layout="block" styleClass="col-sm-3">
+                    <h:form id="f-banned-status">
+                        <h:commandButton id="cb-image-ban" action="#{topicBacker.openBanDialog}" styleClass="button"
+                                         rendered="#{topicBacker.moderator}" image="/resources/images/add.png"
+                                         alt="#{labels.topic_ban}"/>
+                        <h:commandButton id="cb-image-unban" action="#{topicBacker.openUnbanDialog}" styleClass="button"
+                                         rendered="#{topicBacker.moderator and topicBacker.bannedUsers.selection.totalSize gt 0}"
+                                         image="/resources/images/delete.png" alt="#{labels.topic_unban}"/>
+                    </h:form>
+                </h:panelGroup>
             </h:panelGroup>
+
         </h:panelGroup>
 
-        <!-- A paginated list of users banned from this topic. -->
-        <h:outputText id="ot-banned" styleClass="h2 my-3" value="#{labels.topic_banned}"/>
-        <h:panelGroup layout="block" styleClass="row" id="p-banned">
-            <h:panelGroup layout="block" styleClass="col-sm-9" id="p-banned-pagination">
-                <b:pagitable paginator="#{topicBacker.bannedUsers}" simple="true">
-                    <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
-                    <h:column>
-                        <h:panelGroup layout="block" styleClass="text-nowrap">
-                            <h:outputLink value="/faces/view/auth/profile.xhtml">
-                                <h:graphicImage styleClass="img-size-mini me-2 rounded-circle"
-                                                value="/avatar?u=#{var.username}&amp;type=thumbnail"
-                                                alt="#{var.username}'s avatar"/>@#{var.username}
-                                <f:param name="u" value="#{var.username}"/>
-                            </h:outputLink>
-                        </h:panelGroup>
-                    </h:column>
-                    <h:column>
-                        <h:commandButton id="cb-unban-user" action="#{topicBacker.unbanSingleUser(var.username)}"
-                                         styleClass="button trashcan-small" rendered="#{topicBacker.moderator}"
-                                         image="/resources/images/trash.png" alt="#{labels.topic_unban}"/>
-                    </h:column>
-                </b:pagitable>
+        <h:panelGroup layout="block">
+            <h:panelGroup layout="block" styleClass="row">
+                <h:panelGroup layout="block" styleClass="col-12">
+                    <h:selectBooleanCheckbox id="s-showOpen" value="#{topicBacker.openReportShown}"
+                                             styleClass="form-check-input"/>
+                    <h:outputLabel value="#{labels.topic_show_open_reports}:"/>
+                </h:panelGroup>
             </h:panelGroup>
-            <h:panelGroup id="p-banned-status" layout="block" styleClass="col-sm-3">
-                <h:form id="f-banned-status">
-                    <h:commandButton id="cb-image-ban" action="#{topicBacker.openBanDialog}" styleClass="button"
-                                     rendered="#{topicBacker.moderator}" image="/resources/images/add.png"
-                                     alt="#{labels.topic_ban}"/>
-                    <h:commandButton id="cb-image-unban" action="#{topicBacker.openUnbanDialog}" styleClass="button"
-                                     rendered="#{topicBacker.moderator and topicBacker.bannedUsers.selection.totalSize gt 0}"
-                                     image="/resources/images/delete.png" alt="#{labels.topic_unban}"/>
-                </h:form>
+            <h:panelGroup layout="block" styleClass="row">
+                <h:panelGroup layout="block" styleClass="col-12">
+                    <h:selectBooleanCheckbox id="s-showClosed" value="#{topicBacker.closedReportShown}"
+                                             styleClass="form-check-input"/>
+                    <h:outputLabel value="#{labels.topic_show_closed_reports}:"/>
+                </h:panelGroup>
+            </h:panelGroup>
+            <h:panelGroup layout="block" styleClass="row">
+                <h:panelGroup layout="block" styleClass="col-sm-12">
+                    <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}"
+                                     styleClass="btn btn-primary" value="#{labels.apply_filter}"/>
+                </h:panelGroup>
             </h:panelGroup>
         </h:panelGroup>
 
