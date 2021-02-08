@@ -145,24 +145,24 @@
                                          value="#{labels.upvote_button}"
                                          action="#{reportBacker.upvote}"
                                          rendered="#{!reportBacker.upvoted}"
-                                         styleClass="vote-not-cast"/>
+                                         styleClass="button btn vote-not-cast"/>
                         <h:commandButton id="cb-unupvote"
                                          value="#{labels.upvote_button}"
                                          action="#{reportBacker.removeVote}"
                                          rendered="#{reportBacker.upvoted}"
-                                         styleClass="vote-cast"/>
+                                         styleClass="button btn vote-cast"/>
                     </h:panelGroup>
                     <h:panelGroup layout="block" styleClass="row">
                         <h:commandButton id="cb-downvote"
                                          value="#{labels.downvote_button}"
                                          action="#{reportBacker.downvote}"
                                          rendered="#{!reportBacker.downvoted}"
-                                         styleClass="vote-not-cast"/>
+                                         styleClass="button btn vote-not-cast"/>
                         <h:commandButton id="cb-undownvote"
                                          value="#{labels.downvote_button}"
                                          action="#{reportBacker.removeVote}"
                                          rendered="#{reportBacker.downvoted}"
-                                         styleClass="vote-cast"/>
+                                         styleClass="button btn vote-cast"/>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="col 9">
