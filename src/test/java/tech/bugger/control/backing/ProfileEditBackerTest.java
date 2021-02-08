@@ -1,13 +1,6 @@
 package tech.bugger.control.backing;
 
 import com.sun.faces.context.RequestParameterMap;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.time.OffsetDateTime;
-import java.util.Locale;
-import javax.faces.context.ExternalContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,9 +15,31 @@ import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
 
-import static org.junit.jupiter.api.Assertions.*;
+import javax.faces.context.ExternalContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.time.OffsetDateTime;
+import java.util.Locale;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(LogExtension.class)
 public class ProfileEditBackerTest {
@@ -524,6 +539,19 @@ public class ProfileEditBackerTest {
         profileEditBacker.setDialog(ProfileEditBacker.ProfileEditDialog.UPDATE);
         profileEditBacker.closeDialog();
         assertEquals(ProfileEditBacker.ProfileEditDialog.NONE, profileEditBacker.getDialog());
+    }
+
+    @Test
+    public void testGetHelpSuffix() {
+        profileEditBacker.setUser(user);
+        assertEquals("", profileEditBacker.getHelpSuffix());
+    }
+
+    @Test
+    public void testGetHelpSuffixAdmin() {
+        user.setAdministrator(true);
+        profileEditBacker.setUser(user);
+        assertEquals("_admin", profileEditBacker.getHelpSuffix());
     }
 
     @Test

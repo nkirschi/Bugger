@@ -12,6 +12,7 @@ import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
 
 import javax.annotation.PostConstruct;
@@ -453,6 +454,23 @@ public class ReportBacker implements Serializable {
                 && (report.getClosingDate() == null || applicationSettings.getConfiguration().isClosedReportPosting())
                 && (session.getUser().isAdministrator() || moderator
                 || session.getUser().equals(post.getAuthorship().getCreator()));
+    }
+
+    /**
+     * Returns the appropriate suffix for the help key.
+     *
+     * @return The appropriate suffix for the help key.
+     */
+    public String getHelpSuffix() {
+        User user = session.getUser();
+        if (user != null) {
+            if (moderator || user.isAdministrator()) {
+                return "_mod";
+            } else {
+                return "_user";
+            }
+        }
+        return "";
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

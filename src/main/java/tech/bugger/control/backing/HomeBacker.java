@@ -12,6 +12,7 @@ import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
@@ -206,6 +207,23 @@ public class HomeBacker implements Serializable {
             throw new Error404Exception("Error when redirecting.", e);
         }
         return null;
+    }
+
+    /**
+     * Returns the appropriate suffix for the help key.
+     *
+     * @return The appropriate suffix for the help key.
+     */
+    public String getHelpSuffix() {
+        User user = session.getUser();
+        if (user != null) {
+            if (user.isAdministrator()) {
+                return "_admin";
+            } else {
+                return "_user";
+            }
+        }
+        return "";
     }
 
     /**

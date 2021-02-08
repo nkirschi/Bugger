@@ -648,4 +648,32 @@ public class ReportBackerTest {
         assertFalse(reportBacker.isSubscribed());
         verify(reportService).hasUpvoted(report, user);
     }
+
+    @Test
+    public void testGetHelpSuffix() {
+        doReturn(user).when(session).getUser();
+        assertEquals("_user", reportBacker.getHelpSuffix());
+    }
+
+    @Test
+    public void testGetHelpUserMod() throws NoSuchFieldException, IllegalAccessException {
+        Field field = reportBacker.getClass().getDeclaredField("moderator");
+        field.setAccessible(true);
+        field.set(reportBacker, true);
+        doReturn(user).when(session).getUser();
+        assertEquals("_mod", reportBacker.getHelpSuffix());
+    }
+
+    @Test
+    public void testGetHelpUserAdmin() {
+        user.setAdministrator(true);
+        doReturn(user).when(session).getUser();
+        assertEquals("_mod", reportBacker.getHelpSuffix());
+    }
+
+    @Test
+    public void testGetHelpUserNoUser() {
+        assertEquals("", reportBacker.getHelpSuffix());
+    }
+
 }
