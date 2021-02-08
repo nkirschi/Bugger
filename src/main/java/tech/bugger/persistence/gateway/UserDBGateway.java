@@ -163,7 +163,7 @@ public class UserDBGateway implements UserGateway {
             if (rs.next()) {
                 user = getUserFromResultSet(rs);
             } else {
-                log.error("No user with id " + id + " could be found in the database");
+                log.debug("No user with id " + id + " could be found in the database");
                 throw new NotFoundException("No user with id " + id + " could be found in the database.");
             }
         } catch (SQLException e) {
@@ -186,7 +186,7 @@ public class UserDBGateway implements UserGateway {
             if (rs.next()) {
                 user = getUserFromResultSet(rs);
             } else {
-                log.error("No user with the given username could be found in the database");
+                log.debug("No user with the given username could be found in the database");
                 throw new NotFoundException("No user with the given username could be found in the database.");
             }
         } catch (SQLException e) {
@@ -208,7 +208,7 @@ public class UserDBGateway implements UserGateway {
             if (rs.next()) {
                 return rs.getBytes("avatar");
             } else {
-                log.error("No user with the given id could be found in the database.");
+                log.debug("No user with the given id could be found in the database.");
                 throw new NotFoundException("No user with the given id could be found in the database.");
             }
         } catch (SQLException e) {
@@ -230,7 +230,7 @@ public class UserDBGateway implements UserGateway {
             if (rs.next()) {
                 user = getUserFromResultSet(rs);
             } else {
-                log.error("No user with the given e-mail address could be found in the database");
+                log.debug("No user with the given e-mail address could be found in the database");
                 throw new NotFoundException("No user with the given e-mail address could be found in the database.");
             }
         } catch (SQLException e) {
