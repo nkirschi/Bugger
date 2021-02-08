@@ -72,11 +72,6 @@ public class HomeBacker implements Serializable {
     private final Event<Feedback> feedbackEvent;
 
     /**
-     * Resource bundle for feedback messages.
-     */
-    private ResourceBundle messagesBundle;
-
-    /**
      * The current registry which to retrieve resource bundles from.
      */
     private final Registry registry;
@@ -104,7 +99,6 @@ public class HomeBacker implements Serializable {
         this.ectx = ectx;
         this.feedbackEvent = feedbackEvent;
         this.registry = registry;
-        messagesBundle = registry.getBundle("messages", session.getLocale());
     }
 
     /**
@@ -112,6 +106,7 @@ public class HomeBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
         if (session.getUser() != null) {
             inbox = new Paginator<>("created_at", Selection.PageSize.SMALL, false) {
                 @Override
@@ -119,7 +114,6 @@ public class HomeBacker implements Serializable {
                     try {
                         return notificationService.selectNotifications(session.getUser(), getSelection());
                     } catch (DataAccessException e) {
-                        changeMessageBundle();
                         feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"),
                                 Feedback.Type.ERROR));
                     }
@@ -133,7 +127,6 @@ public class HomeBacker implements Serializable {
                         size = notificationService.countNotifications(session.getUser());
                     } catch (DataAccessException e) {
                         size = 0;
-                        changeMessageBundle();
                         feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"),
                                 Feedback.Type.ERROR));
                     }
@@ -154,10 +147,6 @@ public class HomeBacker implements Serializable {
         };
     }
 
-    private void changeMessageBundle() {
-        messagesBundle = registry.getBundle("messages", session.getLocale());
-    }
-
     /**
      * Irreversibly deletes the notification.
      *
@@ -165,7 +154,7 @@ public class HomeBacker implements Serializable {
      * @return {@code null}
      */
     public String deleteNotification(final Notification notification) {
-        changeMessageBundle();
+        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
         try {
             if (!notificationService.deleteNotification(notification)) {
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
@@ -184,7 +173,7 @@ public class HomeBacker implements Serializable {
      * @return A String that is used to redirect a user to the post of the opened notification.
      */
     public String openNotification(final Notification notification) {
-        changeMessageBundle();
+        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
         try {
             if (!notificationService.markAsRead(notification)) {
                 feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));

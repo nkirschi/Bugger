@@ -80,7 +80,7 @@ class HomeBackerTest {
     @BeforeEach
     public void setUp() {
         user = new User();
-        doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(eq("messages"), any());
+        lenient().doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(eq("messages"), any());
         this.homeBacker = new HomeBacker(session, notificationService, topicService, ectx, feedbackEvent, registry);
     }
 
