@@ -23,7 +23,7 @@
                 <h:form id="f-profile-edit" rendered="#{userSession.user != null and userSession.user.administrator
                         or userSession.user.id == profileEditBacker.user.id}" enctype="multipart/form-data">
 
-                    <h:panelGroup layout="block" styleClass="align-right">
+                    <h:panelGroup layout="block" styleClass="align-right" rendered="#{!profileEditBacker.create}">
                         <h:link id="l-profile" outcome="pretty:profile" value="@#{profileEditBacker.user.username}"
                                 styleClass="profile-info">
                             <f:param name="u" value="#{profileEditBacker.user.username}"/>
@@ -280,10 +280,15 @@
                     </h:panelGroup>
 
                     <h:panelGroup id="p-buttons" layout="block" styleClass="d-flex justify-content-between">
-                        <h:commandButton id="cb-apply" value="#{labels.profile_edit_apply_changes}"
+                        <h:commandButton id="cb-apply"
+                                         value="#{profileEditBacker.create ? labels.create
+                                                  : labels.profile_edit_apply_changes}"
                                          action="#{profileEditBacker.openChangeDialog}" styleClass="btn btn-primary"/>
-                        <h:commandButton id="cb-delete" value="#{labels.profile_edit_delete}"
-                                         action="#{profileEditBacker.openDeleteDialog}" styleClass="btn btn-primary"/>
+                        <h:commandButton id="cb-delete"
+                                         value="#{labels.profile_edit_delete}"
+                                         action="#{profileEditBacker.openDeleteDialog}"
+                                         styleClass="btn btn-primary"
+                                         rendered="#{!profileEditBacker.create}"/>
                     </h:panelGroup>
                 </h:form>
             </h:panelGroup>
