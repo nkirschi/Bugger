@@ -1,9 +1,12 @@
 package tech.bugger.control.backing;
 
+import javax.enterprise.event.Event;
+import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Registry;
 import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Report;
@@ -77,9 +80,14 @@ public class ReportEditBacker implements Serializable {
     private final ExternalContext ectx;
 
     /**
-     * Resource bundle for feedback message.
+     * {@link Registry} for dynamically retrieving resource bundles.
      */
-    private final ResourceBundle messagesBundle;
+    private final Registry registry;
+
+    /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
 
     /**
      * The ID of the report to edit.
@@ -123,25 +131,28 @@ public class ReportEditBacker implements Serializable {
      * @param topicService        The topic service to use.
      * @param reportService       The report service to use.
      * @param session             The current user session.
+     * @param registry            The dependency registry to use.
+     * @param feedbackEvent       The feedback event to use for user feedback.
      * @param fctx                The current {@link FacesContext} of the application.
      * @param ectx                The current {@link ExternalContext} of the application.
-     * @param registry            The dependency registry to use.
      */
     @Inject
     public ReportEditBacker(final ApplicationSettings applicationSettings,
                             final TopicService topicService,
                             final ReportService reportService,
                             final UserSession session,
+                            final Registry registry,
+                            final Event<Feedback> feedbackEvent,
                             final FacesContext fctx,
-                            final ExternalContext ectx,
-                            final Registry registry) {
+                            final ExternalContext ectx) {
         this.applicationSettings = applicationSettings;
         this.topicService = topicService;
         this.reportService = reportService;
         this.session = session;
+        this.registry = registry;
+        this.feedbackEvent = feedbackEvent;
         this.fctx = fctx;
         this.ectx = ectx;
-        this.messagesBundle = registry.getBundle("messages", session.getLocale());
     }
 
     /**
@@ -150,6 +161,8 @@ public class ReportEditBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
+
         try {
             reportID = Integer.parseInt(ectx.getRequestParameterMap().get("id"));
         } catch (NumberFormatException e) {
@@ -158,7 +171,11 @@ public class ReportEditBacker implements Serializable {
         }
 
         User user = session.getUser();
-        report = reportService.getReportByID(reportID);
+        try {
+            report = reportService.getReportByID(reportID);
+        } catch (DataAccessException e) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+        }
         if (report == null) {
             throw new Error404Exception();
         } else {
@@ -256,6 +273,7 @@ public class ReportEditBacker implements Serializable {
      * @return Whether the report can be moved to the destination topic.
      */
     private boolean canMoveToTopic() {
+        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
         Topic toTopic = getTopicByTitle(destination);
         User user = session.getUser();
 

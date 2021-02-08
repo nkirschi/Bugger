@@ -1,5 +1,6 @@
 package tech.bugger.control.backing;
 
+import javax.enterprise.event.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +11,8 @@ import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
+import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.Registry;
 import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
@@ -64,6 +67,12 @@ public class PostEditBackerTest {
     @Mock
     private Configuration configuration;
 
+    @Mock
+    private Event<Feedback> feedbackEvent;
+
+    @Mock
+    private Registry registry;
+
     private Post post;
 
     private Report report;
@@ -72,7 +81,8 @@ public class PostEditBackerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        postEditBacker = new PostEditBacker(applicationSettings, reportService, postService, session, ectx);
+        postEditBacker = new PostEditBacker(applicationSettings, reportService, postService, session,
+                feedbackEvent, registry, ectx);
 
         List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         report = new Report(1234, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
@@ -88,7 +98,7 @@ public class PostEditBackerTest {
     }
 
     @Test
-    public void testInitCreate() {
+    public void testInitCreate() throws Exception {
         doReturn("1234").when(requestParameterMap).get("r");
         doReturn(true).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
@@ -110,7 +120,7 @@ public class PostEditBackerTest {
     }
 
     @Test
-    public void testInitCreateReportNull() {
+    public void testInitCreateReportNull() throws Exception {
         doReturn("1234").when(requestParameterMap).get("r");
         doReturn(true).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
@@ -119,7 +129,7 @@ public class PostEditBackerTest {
     }
 
     @Test
-    public void testInitCreateBanned() {
+    public void testInitCreateBanned() throws Exception {
         doReturn("1234").when(requestParameterMap).get("r");
         doReturn(true).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
@@ -129,7 +139,7 @@ public class PostEditBackerTest {
     }
 
     @Test
-    public void testInitEdit() {
+    public void testInitEdit() throws Exception {
         doReturn("5678").when(requestParameterMap).get("p");
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(report).when(reportService).getReportByID(1234);
@@ -171,7 +181,7 @@ public class PostEditBackerTest {
     }
 
     @Test
-    public void testInitEditReportNull() {
+    public void testInitEditReportNull() throws Exception {
         doReturn("5678").when(requestParameterMap).get("p");
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
@@ -182,7 +192,7 @@ public class PostEditBackerTest {
     }
 
     @Test
-    public void testInitEditNotPrivileged() {
+    public void testInitEditNotPrivileged() throws Exception {
         doReturn("5678").when(requestParameterMap).get("p");
         doReturn(false).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();
@@ -194,7 +204,7 @@ public class PostEditBackerTest {
     }
 
     @Test
-    public void testInitReportClosed() {
+    public void testInitReportClosed() throws Exception {
         doReturn("1234").when(requestParameterMap).get("r");
         doReturn(true).when(requestParameterMap).containsKey("c");
         doReturn(user).when(session).getUser();

@@ -5,16 +5,21 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Part;
+import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
+import tech.bugger.business.util.Feedback;
+import tech.bugger.business.util.Registry;
 import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
@@ -83,12 +88,24 @@ public class PostEditBacker implements Serializable {
     private final ExternalContext ectx;
 
     /**
+     * {@link Registry} for dynamically retrieving resource bundles.
+     */
+    private final Registry registry;
+
+    /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
      * Constructs a new post editing backing bean with the necessary dependencies.
      *
      * @param applicationSettings The current application settings.
      * @param reportService       The report service to use.
      * @param postService         The post service to use.
      * @param session             The current user session.
+     * @param feedbackEvent       The feedback event to use for user feedback.
+     * @param registry            The dependency registry to use.
      * @param ectx                The current {@link ExternalContext} of the application.
      */
     @Inject
@@ -96,11 +113,15 @@ public class PostEditBacker implements Serializable {
                           final ReportService reportService,
                           final PostService postService,
                           final UserSession session,
+                          final Event<Feedback> feedbackEvent,
+                          final Registry registry,
                           final ExternalContext ectx) {
         this.applicationSettings = applicationSettings;
         this.reportService = reportService;
         this.postService = postService;
         this.session = session;
+        this.feedbackEvent = feedbackEvent;
+        this.registry = registry;
         this.ectx = ectx;
         attachments = new ArrayList<>();
     }
@@ -111,6 +132,8 @@ public class PostEditBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
+
         User user = session.getUser();
         create = ectx.getRequestParameterMap().containsKey("c");
         if (create) {
@@ -118,7 +141,11 @@ public class PostEditBacker implements Serializable {
             if (reportID == null) {
                 throw new Error404Exception();
             }
-            report = reportService.getReportByID(reportID);
+            try {
+                report = reportService.getReportByID(reportID);
+            } catch (DataAccessException e) {
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            }
             if (report == null || !reportService.canPostInReport(user, report)) {
                 throw new Error404Exception();
             }
@@ -133,7 +160,11 @@ public class PostEditBacker implements Serializable {
             if (post == null) {
                 throw new Error404Exception();
             }
-            report = reportService.getReportByID(post.getReport());
+            try {
+                report = reportService.getReportByID(post.getReport());
+            } catch (DataAccessException e) {
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            }
             if (report == null || !postService.isPrivileged(user, post, report)) {
                 throw new Error404Exception();
             }

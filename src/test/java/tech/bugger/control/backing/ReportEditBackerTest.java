@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,7 @@ import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Registry;
 import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Authorship;
@@ -61,6 +63,9 @@ public class ReportEditBackerTest {
     private Registry registry;
 
     @Mock
+    private Event<Feedback> feedbackEvent;
+
+    @Mock
     private Configuration configuration;
 
     private Topic testTopic;
@@ -71,8 +76,8 @@ public class ReportEditBackerTest {
     @BeforeEach
     public void setUp() throws Exception {
         doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(anyString(), any());
-        reportEditBacker = new ReportEditBacker(applicationSettings, topicService, reportService, session, fctx, ectx,
-                registry);
+        reportEditBacker = new ReportEditBacker(applicationSettings, topicService, reportService, session,
+                registry, feedbackEvent, fctx, ectx);
 
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
                 new Authorship(null, null, null, null), mock(OffsetDateTime.class),
@@ -100,7 +105,7 @@ public class ReportEditBackerTest {
     }
 
     @Test
-    public void testInit() {
+    public void testInit() throws Exception {
         doReturn("1234").when(requestParameterMap).get("id");
         doReturn(testReport).when(reportService).getReportByID(1234);
         doReturn(user).when(session).getUser();
@@ -121,14 +126,14 @@ public class ReportEditBackerTest {
     }
 
     @Test
-    public void testInitWhenNoReport() {
+    public void testInitWhenNoReport() throws Exception {
         doReturn("1234").when(requestParameterMap).get("id");
         doReturn(null).when(reportService).getReportByID(1234);
         assertThrows(Error404Exception.class, () -> reportEditBacker.init());
     }
 
     @Test
-    public void testInitWhenNotPrivileged() {
+    public void testInitWhenNotPrivileged() throws Exception {
         doReturn("1234").when(requestParameterMap).get("id");
         doReturn(testReport).when(reportService).getReportByID(1234);
         doReturn(user).when(session).getUser();
@@ -137,7 +142,7 @@ public class ReportEditBackerTest {
     }
 
     @Test
-    public void testInitWhenReportClosed() {
+    public void testInitWhenReportClosed() throws Exception {
         doReturn("1234").when(requestParameterMap).get("id");
         doReturn(testReport).when(reportService).getReportByID(1234);
         doReturn(user).when(session).getUser();

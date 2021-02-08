@@ -362,8 +362,9 @@ public class ReportService {
      *
      * @param id The ID of the desired report.
      * @return The report with that ID if it exists, {@code null} if there is no report with that ID.
+     * @throws DataAccessException Some error when writing to the database occurred.
      */
-    public Report getReportByID(final int id) {
+    public Report getReportByID(final int id) throws DataAccessException {
         try (Transaction tx = transactionManager.begin()) {
             Report report = tx.newReportGateway().find(id);
             tx.commit();
@@ -373,8 +374,7 @@ public class ReportService {
             return null;
         } catch (TransactionException e) {
             log.error("Error while searching for report.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
-            return null;
+            throw new DataAccessException("Error while searching for report.", e);
         }
     }
 
@@ -524,7 +524,12 @@ public class ReportService {
         }
 
         int originalID = duplicateOfID;
-        Report original = getReportByID(originalID);
+        Report original = null;
+        try {
+            original = getReportByID(originalID);
+        } catch (DataAccessException ignored) {
+            // This will be handled below.
+        }
         if (original == null) {
             log.error("Could not find report " + duplicate + ".");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
