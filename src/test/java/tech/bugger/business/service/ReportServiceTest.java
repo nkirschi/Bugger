@@ -468,8 +468,7 @@ public class ReportServiceTest {
     @Test
     public void testGetReportByIDWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertNull(service.getReportByID(100));
-        verify(feedbackEvent).fire(any());
+        assertThrows(DataAccessException.class, () -> service.getReportByID(100));
     }
 
     @Test
