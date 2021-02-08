@@ -6,12 +6,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
+import tech.bugger.ResourceBundleMocker;
+import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Paginator;
+import tech.bugger.business.util.Registry;
 import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Authorship;
 import tech.bugger.global.transfer.Configuration;
@@ -20,7 +24,9 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
+import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -60,13 +66,21 @@ public class ReportBackerTest {
     @Mock
     private Map<String, String> requestParameterMap;
 
+    @Mock
+    private Event<Feedback> feedbackEvent;
+
+    @Mock
+    private Registry registry;
+
     private User user;
     private Report report;
 
     @BeforeEach
     public void setUp() {
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
-        reportBacker = new ReportBacker(settings, topicService, reportService, postService, session, ectx);
+        lenient().doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(eq("messages"), any());
+        reportBacker = new ReportBacker(settings, topicService, reportService, postService, session, ectx,
+                feedbackEvent, registry);
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
                 "User",
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
@@ -227,10 +241,35 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testDelete() {
+    public void testDeleteSuccess() throws Exception {
+        doReturn(true).when(reportService).deleteReport(report);
         reportBacker.setReport(report);
         assertDoesNotThrow(() -> reportBacker.delete());
         verify(reportService).deleteReport(report);
+        verify(ectx).redirect(any());
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testDeleteNoSuccess() {
+        reportBacker.setReport(report);
+        assertThrows(Error404Exception.class, () -> reportBacker.delete());
+    }
+
+    @Test
+    public void testDeleteDataAccessFailed() throws Exception {
+        reportBacker.setReport(report);
+        doThrow(DataAccessException.class).when(reportService).deleteReport(report);
+        assertDoesNotThrow(() -> reportBacker.delete());
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testDeleteRedirectFailed() throws Exception {
+        doReturn(true).when(reportService).deleteReport(report);
+        doThrow(IOException.class).when(ectx).redirect(any());
+        reportBacker.setReport(report);
+        assertThrows(Error404Exception.class, () -> reportBacker.delete());
     }
 
     @Test
@@ -327,14 +366,34 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testDeletePost() {
+    public void testDeletePostReportStillThere() {
         Post post = new Post(42, "a", 100, null, null);
         reportBacker.setReport(report);
         reportBacker.setPostToBeDeleted(post);
         reportBacker.setPosts(mock(Paginator.class));
+        doReturn(report).when(reportService).getReportByID(report.getId());
         assertDoesNotThrow(() -> reportBacker.deletePost());
         verify(postService).deletePost(post, report);
+        verify(feedbackEvent).fire(any());
         assertNull(reportBacker.getCurrentDialog());
+    }
+
+    @Test
+    public void testDeletePostWhenReportDeletedAsWell() throws Exception {
+        Post post = new Post(42, "a", 100, null, null);
+        reportBacker.setReport(report);
+        reportBacker.setPostToBeDeleted(post);
+        assertDoesNotThrow(() -> reportBacker.deletePost());
+        verify(ectx).redirect(any());
+    }
+
+    @Test
+    public void testDeletePostWhenReportDeletedAndRedirectFails() throws Exception {
+        Post post = new Post(42, "a", 100, null, null);
+        reportBacker.setReport(report);
+        reportBacker.setPostToBeDeleted(post);
+        doThrow(IOException.class).when(ectx).redirect(any());
+        assertThrows(Error404Exception.class, () -> reportBacker.deletePost());
     }
 
     @Test

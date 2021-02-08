@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.ResourceBundleMocker;
+import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
@@ -532,23 +533,21 @@ public class ReportServiceTest {
     }
 
     @Test
-    public void testDeleteReport() throws NotFoundException {
-        service.deleteReport(testReport);
+    public void testDeleteReport() throws Exception {
+        assertTrue(service.deleteReport(testReport));
         verify(reportGateway).delete(testReport);
     }
 
     @Test
-    public void testDeleteReportNotFound() throws NotFoundException {
+    public void testDeleteReportNotFound() throws Exception {
         doThrow(NotFoundException.class).when(reportGateway).delete(testReport);
-        service.deleteReport(testReport);
-        verify(feedbackEvent).fire(any());
+        assertFalse(service.deleteReport(testReport));
     }
 
     @Test
-    public void testDeleteReportTransaction() throws TransactionException {
+    public void testDeleteReportTransaction() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        service.deleteReport(testReport);
-        verify(feedbackEvent).fire(any());
+        assertThrows(DataAccessException.class, () -> service.deleteReport(testReport));
     }
 
     @Test
