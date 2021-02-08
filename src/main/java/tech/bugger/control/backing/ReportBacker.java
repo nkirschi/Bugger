@@ -146,11 +146,6 @@ public class ReportBacker implements Serializable {
     private final Event<Feedback> feedbackEvent;
 
     /**
-     * Resource bundle for feedback messages.
-     */
-    private ResourceBundle messagesBundle;
-
-    /**
      * The current registry which to retrieve resource bundles from.
      */
     private final Registry registry;
@@ -207,7 +202,6 @@ public class ReportBacker implements Serializable {
         this.ectx = ectx;
         this.feedbackEvent = feedbackEvent;
         this.registry = registry;
-        messagesBundle = registry.getBundle("messages", session.getLocale());
     }
 
     /**
@@ -299,10 +293,6 @@ public class ReportBacker implements Serializable {
             }
         }
         updateRelevance();
-    }
-
-    private void changeMessageBundle() {
-        messagesBundle = registry.getBundle("messages", session.getLocale());
     }
 
     /**
@@ -417,7 +407,7 @@ public class ReportBacker implements Serializable {
      * Deletes the report along with all its posts irreversibly.
      */
     public void delete() {
-        changeMessageBundle();
+        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
         boolean success;
         try {
             success = reportService.deleteReport(report);
@@ -475,7 +465,7 @@ public class ReportBacker implements Serializable {
      * Deletes the {@code postToBeDeleted} irreversibly. If it is the first post, this deletes the whole report.
      */
     public void deletePost() {
-        changeMessageBundle();
+        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
         postService.deletePost(postToBeDeleted, report);
         if (reportService.getReportByID(report.getId()) == null) {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("report_deleted"), Feedback.Type.INFO));
