@@ -32,20 +32,22 @@
                       id="p-accessibility"
                       styleClass="d-flex justify-content-end flex-grow-1 flex-basis-0 text-center">
             <h:form styleClass="d-flex" id="f-language">
-                <h:selectOneMenu value="#{footerBacker.language}"
-                                 id="s-language"
-                                 onchange="document.getElementById('#{languageButton.clientId}').click()"
-                                 styleClass="form-control form-select me-2">
-                    <f:selectItems value="#{footerBacker.availableLanguages}"
-                                   var="language" itemValue="#{language}"
-                                   itemLabel="#{labels['lang_' += language]}"/>
-                    <f:converter converterId="localeConverter"/>
-                </h:selectOneMenu>
-                <h:commandButton value="#{labels.ok}"
-                                 id="cb-language"
-                                 action="#{footerBacker.changeLanguage}"
-                                 binding="#{languageButton}"
-                                 styleClass="btn btn-outline-primary me-4"/>
+                <h:panelGroup styleClass="input-group me-2">
+                    <h:selectOneMenu value="#{footerBacker.language}"
+                                     id="s-language"
+                                     onchange="document.getElementById('#{languageButton.clientId}').click()"
+                                     styleClass="form-control form-select">
+                        <f:selectItems value="#{footerBacker.availableLanguages}"
+                                       var="language" itemValue="#{language}"
+                                       itemLabel="#{labels['lang_' += language]}"/>
+                        <f:converter converterId="localeConverter"/>
+                    </h:selectOneMenu>
+                    <h:commandButton value="#{labels.ok}"
+                                     id="cb-language"
+                                     action="#{footerBacker.changeLanguage}"
+                                     binding="#{languageButton}"
+                                     styleClass="btn btn-outline-primary"/>
+                </h:panelGroup>
             </h:form>
             <h:form id="f-help">
                 <h:commandButton value="#{labels.help}"

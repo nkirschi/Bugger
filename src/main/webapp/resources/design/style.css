@@ -120,7 +120,7 @@ p {
     opacity: 0.5;
 }
 
-#f-help\:cb-help {
+#f-help\:cb-help, #f-search-header\:cb-search {
     background-repeat: no-repeat;
     background-size: auto 16px;
     background-position: left 12px center;
@@ -129,6 +129,10 @@ p {
 
 #f-help\:cb-help {
     background-image: url('/resources/images/help.png');
+}
+
+#f-search-header\:cb-search {
+    background-image: url('/resources/images/search.png');
 }
 
 #l-statistics::before, #l-imprint::before, #l-privacy::before {
@@ -288,6 +292,7 @@ p {
 .trashcan-small {
     width: 16px;
     height: 16px;
+    vertical-align: middle;
 }
 
 .search {

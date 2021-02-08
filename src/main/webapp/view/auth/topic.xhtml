@@ -48,7 +48,7 @@
                     <h:panelGroup layout="block" styleClass="row">
                         <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
                     </h:panelGroup>
-                    <h:link id="l-statistics" outcome="pretty:statistics" value="#{labels.statistics}">
+                    <h:link id="l-statistics" outcome="pretty:statistics" value="#{labels.statistics_for_topic}">
                         <f:param name="t" value="#{topicBacker.topic.id}"/>
                     </h:link>
                 </h:panelGroup>
@@ -59,7 +59,23 @@
 
             <!-- A paginated list of moderators for this topic. -->
             <h:panelGroup layout="block" styleClass="col-6" id="p-moderators">
-                <h:outputText id="ot-moderators" styleClass="h2 my-3" value="#{labels.topic_moderators}"/>
+                <h:panelGroup styleClass="d-flex justify-content-between align-items-center">
+                    <h:outputText id="ot-moderators" styleClass="h2 my-3" value="#{labels.topic_moderators}"/>
+                    <h:panelGroup id="p-moderator-status" layout="block">
+                        <h:form id="f-moderator-status" styleClass="d-flex">
+                            <h:commandButton id="cb-image-promote"
+                                             action="#{topicBacker.openModDialog}"
+                                             styleClass="button me-2"
+                                             rendered="#{topicBacker.moderator}"
+                                             image="/resources/images/add.png"
+                                             alt="#{labels.promote}"/>
+                            <h:commandButton id="cb-image-demote" action="#{topicBacker.openUnmodDialog}"
+                                             styleClass="button"
+                                             rendered="#{topicBacker.moderator and topicBacker.moderators.selection.totalSize gt 0}"
+                                             image="/resources/images/delete.png" alt="#{labels.demote}"/>
+                        </h:form>
+                    </h:panelGroup>
+                </h:panelGroup>
                 <h:panelGroup layout="block" id="p-moderators-pagination" styleClass="col-sm-9">
                     <b:pagitable paginator="#{topicBacker.moderators}" simple="true">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
@@ -80,22 +96,23 @@
                         </h:column>
                     </b:pagitable>
                 </h:panelGroup>
-                <h:panelGroup id="p-moderator-status" layout="block" styleClass="col-sm-3">
-                    <h:form id="f-moderator-status">
-                        <h:commandButton id="cb-image-promote" action="#{topicBacker.openModDialog}" styleClass="button"
-                                         rendered="#{topicBacker.moderator}" image="/resources/images/add.png"
-                                         alt="#{labels.promote}"/>
-                        <h:commandButton id="cb-image-demote" action="#{topicBacker.openUnmodDialog}"
-                                         styleClass="button"
-                                         rendered="#{topicBacker.moderator and topicBacker.moderators.selection.totalSize gt 0}"
-                                         image="/resources/images/delete.png" alt="#{labels.demote}"/>
-                    </h:form>
-                </h:panelGroup>
             </h:panelGroup>
 
             <!-- A paginated list of users banned from this topic. -->
             <h:panelGroup layout="block" styleClass="col-6" id="p-banned">
-                <h:outputText id="ot-banned" styleClass="h2 my-3" value="#{labels.topic_banned}"/>
+                <h:panelGroup styleClass="d-flex justify-content-between align-items-center">
+                    <h:outputText id="ot-banned" styleClass="h2 my-3" value="#{labels.topic_banned}"/>
+                    <h:panelGroup id="p-banned-status" layout="block">
+                        <h:form id="f-banned-status" styleClass="d-flex">
+                            <h:commandButton id="cb-image-ban" action="#{topicBacker.openBanDialog}" styleClass="button"
+                                             rendered="#{topicBacker.moderator}" image="/resources/images/add.png"
+                                             alt="#{labels.topic_ban}"/>
+                            <h:commandButton id="cb-image-unban" action="#{topicBacker.openUnbanDialog}" styleClass="button"
+                                             rendered="#{topicBacker.moderator and topicBacker.bannedUsers.selection.totalSize gt 0}"
+                                             image="/resources/images/delete.png" alt="#{labels.topic_unban}"/>
+                        </h:form>
+                    </h:panelGroup>
+                </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="col-sm-9" id="p-banned-pagination">
                     <b:pagitable paginator="#{topicBacker.bannedUsers}" simple="true">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
@@ -116,19 +133,11 @@
                         </h:column>
                     </b:pagitable>
                 </h:panelGroup>
-                <h:panelGroup id="p-banned-status" layout="block" styleClass="col-sm-3">
-                    <h:form id="f-banned-status">
-                        <h:commandButton id="cb-image-ban" action="#{topicBacker.openBanDialog}" styleClass="button"
-                                         rendered="#{topicBacker.moderator}" image="/resources/images/add.png"
-                                         alt="#{labels.topic_ban}"/>
-                        <h:commandButton id="cb-image-unban" action="#{topicBacker.openUnbanDialog}" styleClass="button"
-                                         rendered="#{topicBacker.moderator and topicBacker.bannedUsers.selection.totalSize gt 0}"
-                                         image="/resources/images/delete.png" alt="#{labels.topic_unban}"/>
-                    </h:form>
-                </h:panelGroup>
             </h:panelGroup>
 
         </h:panelGroup>
+
+        <hr />
 
         <h:panelGroup layout="block">
             <h:form id="topic-filters">
@@ -146,7 +155,7 @@
                         <h:outputLabel value="#{labels.topic_show_closed_reports}:"/>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="row">
+                <h:panelGroup layout="block" styleClass="row mt-3">
                     <h:panelGroup layout="block" styleClass="col-sm-12">
                         <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}"
                                          styleClass="btn btn-primary" value="#{labels.apply_filter}"/>

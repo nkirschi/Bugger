@@ -1,1 +1,5 @@
 /* bare-bones theme */
+
+#l-statistics::before, #l-imprint::before, #l-privacy::before {
+    filter: invert(100%)
+}
