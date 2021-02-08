@@ -366,14 +366,34 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testDeletePost() {
+    public void testDeletePostReportStillThere() {
         Post post = new Post(42, "a", 100, null, null);
         reportBacker.setReport(report);
         reportBacker.setPostToBeDeleted(post);
         reportBacker.setPosts(mock(Paginator.class));
+        doReturn(report).when(reportService).getReportByID(report.getId());
         assertDoesNotThrow(() -> reportBacker.deletePost());
         verify(postService).deletePost(post, report);
+        verify(feedbackEvent).fire(any());
         assertNull(reportBacker.getCurrentDialog());
+    }
+
+    @Test
+    public void testDeletePostWhenReportDeletedAsWell() throws Exception {
+        Post post = new Post(42, "a", 100, null, null);
+        reportBacker.setReport(report);
+        reportBacker.setPostToBeDeleted(post);
+        assertDoesNotThrow(() -> reportBacker.deletePost());
+        verify(ectx).redirect(any());
+    }
+
+    @Test
+    public void testDeletePostWhenReportDeletedAndRedirectFails() throws Exception {
+        Post post = new Post(42, "a", 100, null, null);
+        reportBacker.setReport(report);
+        reportBacker.setPostToBeDeleted(post);
+        doThrow(IOException.class).when(ectx).redirect(any());
+        assertThrows(Error404Exception.class, () -> reportBacker.deletePost());
     }
 
     @Test

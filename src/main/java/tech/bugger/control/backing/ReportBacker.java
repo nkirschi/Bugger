@@ -481,6 +481,7 @@ public class ReportBacker implements Serializable {
             feedbackEvent.fire(new Feedback(messagesBundle.getString("report_deleted"), Feedback.Type.INFO));
             try {
                 ectx.redirect(ectx.getApplicationContextPath() + "/topic?id=" + report.getTopicID());
+                return;
             } catch (IOException e) {
                 throw new Error404Exception("Redirection failed.", e);
             }
