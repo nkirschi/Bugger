@@ -461,8 +461,8 @@ public class SearchDBGateway implements SearchGateway {
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) " + filter + ' '
                 + "AND t.title = COALESCE(?, t.title)) "
-                + "OR ((SELECT COUNT(*) FROM post p WHERE p.report = r.id AND TRIM(LOWER(p.content)) LIKE "
-                + "CONCAT('%',?,'%') AND ?) > 0) "
+                + "OR ((SELECT COUNT(*) FROM post p WHERE ? AND p.report = r.id AND TRIM(LOWER(p.content)) LIKE "
+                + "CONCAT('%',?,'%')) > 0) "
                 + "ORDER BY " + orderBy + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
@@ -470,8 +470,8 @@ public class SearchDBGateway implements SearchGateway {
                     .object(latestOpeningDateTime)
                     .object(earliestClosingDateTime)
                     .string(topic)
-                    .string(query)
                     .bool(fulltext)
+                    .string(query)
                     .integer(Pagitable.getItemLimit(selection))
                     .integer(Pagitable.getItemOffset(selection))
                     .toStatement().executeQuery();
@@ -658,15 +658,15 @@ public class SearchDBGateway implements SearchGateway {
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL)" + filter + ' '
                 + "AND t.title = COALESCE(?, t.title))"
-                + "OR ((SELECT COUNT(*) FROM post p WHERE p.report = r.id AND TRIM(LOWER(p.content)) LIKE "
-                + "CONCAT('%',?,'%') AND ?) > 0);")) {
+                + "OR ((SELECT COUNT(*) FROM post p WHERE ? AND p.report = r.id AND TRIM(LOWER(p.content)) LIKE "
+                + "CONCAT('%',?,'%')) > 0);")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string(query)
                     .object(latestOpeningDateTime)
                     .object(earliestClosingDateTime)
                     .string(topic)
-                    .string(query)
                     .bool(fulltext)
+                    .string(query)
                     .toStatement().executeQuery();
             while (rs.next()) {
                 reports = rs.getInt("num_reports");
