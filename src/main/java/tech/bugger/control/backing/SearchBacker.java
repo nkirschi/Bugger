@@ -217,7 +217,7 @@ public class SearchBacker implements Serializable {
         showMinor = true;
         showSevere = true;
         showRelevant = true;
-        searchInFullText = true;
+        searchInFullText = false;
         topic = null;
 
         if (tab == Tab.USER) {

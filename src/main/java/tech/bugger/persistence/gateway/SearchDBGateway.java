@@ -456,22 +456,21 @@ public class SearchDBGateway implements SearchGateway {
                 + "v.relevance FROM report AS r LEFT OUTER JOIN topic AS t ON r.topic = t.id "
                 + "LEFT OUTER JOIN report_last_activity AS a "
                 + "ON a.report = r.id LEFT OUTER JOIN report_relevance AS v ON r.id = v.report "
-                + "WHERE (TRIM(LOWER(r.title)) LIKE "
-                + "CONCAT('%',?,'%') "
+                + "WHERE (TRIM(LOWER(r.title)) LIKE CONCAT('%',?,'%') "
+                + "OR (SELECT COUNT(*) FROM post p WHERE ? AND p.report = r.id AND TRIM(LOWER(p.content)) LIKE "
+                + "CONCAT('%',?,'%')) > 0) "
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) " + filter + ' '
-                + "AND t.title = COALESCE(?, t.title)) "
-                + "OR ((SELECT COUNT(*) FROM post p WHERE ? AND p.report = r.id AND TRIM(LOWER(p.content)) LIKE "
-                + "CONCAT('%',?,'%')) > 0) "
+                + "AND t.title = COALESCE(?, t.title) "
                 + "ORDER BY " + orderBy + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
                     .string(query)
+                    .bool(fulltext)
+                    .string(query)
                     .object(latestOpeningDateTime)
                     .object(earliestClosingDateTime)
                     .string(topic)
-                    .bool(fulltext)
-                    .string(query)
                     .integer(Pagitable.getItemLimit(selection))
                     .integer(Pagitable.getItemOffset(selection))
                     .toStatement().executeQuery();
@@ -655,18 +654,18 @@ public class SearchDBGateway implements SearchGateway {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT Count(*) AS num_reports FROM \"report\" AS r "
                 + "JOIN topic AS t "
                 + "ON r.topic = t.id WHERE (TRIM(LOWER(r.title)) LIKE CONCAT('%',?,'%') "
+                + "OR (SELECT COUNT(*) FROM post p WHERE ? AND p.report = r.id AND TRIM(LOWER(p.content)) LIKE "
+                + "CONCAT('%',?,'%')) > 0) "
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
-                + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL)" + filter + ' '
-                + "AND t.title = COALESCE(?, t.title))"
-                + "OR ((SELECT COUNT(*) FROM post p WHERE ? AND p.report = r.id AND TRIM(LOWER(p.content)) LIKE "
-                + "CONCAT('%',?,'%')) > 0);")) {
+                + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) " + filter + ' '
+                + "AND t.title = COALESCE(?, t.title);")) {
             ResultSet rs = new StatementParametrizer(stmt)
+                    .string(query)
+                    .bool(fulltext)
                     .string(query)
                     .object(latestOpeningDateTime)
                     .object(earliestClosingDateTime)
                     .string(topic)
-                    .bool(fulltext)
-                    .string(query)
                     .toStatement().executeQuery();
             while (rs.next()) {
                 reports = rs.getInt("num_reports");
