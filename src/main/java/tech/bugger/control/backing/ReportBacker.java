@@ -182,9 +182,9 @@ public class ReportBacker implements Serializable {
      * @param reportService       The report service to use.
      * @param postService         The post service to use.
      * @param session             The user session.
-     * @param ectx                The current {@link ExternalContext} of the application.
      * @param feedbackEvent       The feedback event to use for user feedback.
-     * @param registry            The current registry.
+     * @param registry            The dependency registry to use.
+     * @param ectx                The current {@link ExternalContext} of the application.
      */
     @Inject
     public ReportBacker(final ApplicationSettings applicationSettings,
@@ -192,17 +192,17 @@ public class ReportBacker implements Serializable {
                         final ReportService reportService,
                         final PostService postService,
                         final UserSession session,
-                        final ExternalContext ectx,
                         final Event<Feedback> feedbackEvent,
-                        final Registry registry) {
+                        final Registry registry,
+                        final ExternalContext ectx) {
         this.applicationSettings = applicationSettings;
         this.topicService = topicService;
         this.reportService = reportService;
         this.postService = postService;
         this.session = session;
-        this.ectx = ectx;
         this.feedbackEvent = feedbackEvent;
         this.registry = registry;
+        this.ectx = ectx;
     }
 
     /**
@@ -211,6 +211,8 @@ public class ReportBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
+
         int reportID;
         Integer postID = null;
         if (ectx.getRequestParameterMap().containsKey("p")) {
@@ -231,13 +233,17 @@ public class ReportBacker implements Serializable {
             }
         }
 
-        report = reportService.getReportByID(reportID);
+        try {
+            report = reportService.getReportByID(reportID);
+        } catch (DataAccessException e) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+        }
         if (report == null) { // no report with this ID
             throw new Error404Exception();
         }
 
         topic = topicService.getTopicByID(report.getTopicID());
-        if (topic == null) { // this should never happen!
+        if (topic == null) { // race condition handling
             throw new InternalError("Report " + report + " without topic!");
         }
 
@@ -300,7 +306,13 @@ public class ReportBacker implements Serializable {
      * Updates the values for the relevance interface.
      */
     private void updateRelevance() {
-        report = reportService.getReportByID(report.getId());
+        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
+
+        try {
+            report = reportService.getReportByID(report.getId());
+        } catch (DataAccessException e) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+        }
         if (report == null) {
             throw new Error404Exception();
         }
@@ -467,15 +479,20 @@ public class ReportBacker implements Serializable {
      */
     public void deletePost() {
         ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
+
         postService.deletePost(postToBeDeleted, report);
-        if (reportService.getReportByID(report.getId()) == null) {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("report_deleted"), Feedback.Type.INFO));
-            try {
-                ectx.redirect(ectx.getApplicationContextPath() + "/topic?id=" + report.getTopicID());
-                return;
-            } catch (IOException e) {
-                throw new Error404Exception("Redirection failed.", e);
+        try {
+            if (reportService.getReportByID(report.getId()) == null) {
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("report_deleted"), Feedback.Type.INFO));
+                try {
+                    ectx.redirect(ectx.getApplicationContextPath() + "/topic?id=" + report.getTopicID());
+                    return;
+                } catch (IOException e) {
+                    throw new Error404Exception("Redirection failed.", e);
+                }
             }
+        } catch (DataAccessException e) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
         }
         posts.update();
         feedbackEvent.fire(new Feedback(messagesBundle.getString("post_deleted"), Feedback.Type.INFO));

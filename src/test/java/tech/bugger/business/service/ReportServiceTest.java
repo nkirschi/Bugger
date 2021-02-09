@@ -468,8 +468,7 @@ public class ReportServiceTest {
     @Test
     public void testGetReportByIDWhenCommitFails() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertNull(service.getReportByID(100));
-        verify(feedbackEvent).fire(any());
+        assertThrows(DataAccessException.class, () -> service.getReportByID(100));
     }
 
     @Test
@@ -557,7 +556,7 @@ public class ReportServiceTest {
     }
 
     @Test
-    public void testMarkDuplicateWhenOriginalNotFound() {
+    public void testMarkDuplicateWhenOriginalNotFound() throws Exception {
         ReportService service = spy(this.service);
         doReturn(null).when(service).getReportByID(anyInt());
         assertFalse(service.markDuplicate(testReport, testReport.getId() - 1));
@@ -565,7 +564,7 @@ public class ReportServiceTest {
     }
 
     @Test
-    public void testMarkDuplicateWhenOriginalOfItself() {
+    public void testMarkDuplicateWhenOriginalOfItself() throws Exception {
         Report original = new Report();
         original.setDuplicateOf(testReport.getId());
         ReportService service = spy(this.service);
@@ -605,7 +604,7 @@ public class ReportServiceTest {
     }
 
     @Test
-    public void testMarkDuplicateWhenSuccess() {
+    public void testMarkDuplicateWhenSuccess() throws Exception {
         Report original = new Report();
         ReportService service = spy(this.service);
         doReturn(original).when(service).getReportByID(anyInt());
