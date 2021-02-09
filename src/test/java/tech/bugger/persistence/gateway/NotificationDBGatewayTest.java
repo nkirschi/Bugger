@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(DBExtension.class)
 @ExtendWith(LogExtension.class)
-class NotificationDBGatewayTest {
+public class NotificationDBGatewayTest {
 
     private NotificationGateway notificationGateway;
 

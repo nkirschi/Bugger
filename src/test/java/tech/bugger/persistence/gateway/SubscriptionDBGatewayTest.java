@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(DBExtension.class)
 @ExtendWith(LogExtension.class)
-class SubscriptionDBGatewayTest {
+public class SubscriptionDBGatewayTest {
 
     private SubscriptionDBGateway gateway;
 
