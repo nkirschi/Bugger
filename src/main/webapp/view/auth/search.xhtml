@@ -159,6 +159,14 @@
                         </h:panelGroup>
 
                         <h:panelGroup layout="block" styleClass="mb-2">
+                            <h:selectBooleanCheckbox id="s-show-fulltext"
+                                                     value="#{searchBacker.searchInFullText}"
+                                                     styleClass="form-check-input"/>
+                            <h:outputLabel for="s-show-fulltext"
+                                           value="full"/>
+                        </h:panelGroup>
+
+                        <h:panelGroup layout="block" styleClass="mb-2">
                             <h:selectBooleanCheckbox id="s-show-severe-reports" value="#{searchBacker.showSevere}"
                                                      styleClass="form-check-input"/>
                             <h:outputLabel for="s-show-severe-reports"

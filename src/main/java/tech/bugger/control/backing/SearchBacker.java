@@ -215,6 +215,7 @@ public class SearchBacker implements Serializable {
         showMinor = true;
         showSevere = true;
         showRelevant = true;
+        searchInFullText = true;
         topic = null;
         if (tab == Tab.USER) {
             userResults = new Paginator<>("username", Selection.PageSize.NORMAL) {
@@ -240,8 +241,8 @@ public class SearchBacker implements Serializable {
                         topic = null;
                     }
                     return searchService.getReportResults(query, getSelection(), latestCreationDateTime,
-                            earliestClosingDateTime, openReportShown, closedReportShown, duplicatesShown, topic,
-                            typeHashMap, severityHashMap);
+                            earliestClosingDateTime, openReportShown, closedReportShown, duplicatesShown,
+                            searchInFullText, topic, typeHashMap, severityHashMap);
                 }
 
                 @Override
@@ -252,8 +253,8 @@ public class SearchBacker implements Serializable {
                         topic = null;
                     }
                     return searchService.getNumberOfReportResults(query, latestCreationDateTime,
-                            earliestClosingDateTime, openReportShown, closedReportShown, duplicatesShown, topic,
-                            typeHashMap, severityHashMap);
+                            earliestClosingDateTime, openReportShown, closedReportShown, duplicatesShown,
+                            searchInFullText, topic, typeHashMap, severityHashMap);
                 }
 
                 private Map<Report.Type, Boolean> getTypeHashMap() {
@@ -489,6 +490,20 @@ public class SearchBacker implements Serializable {
      */
     public void setShowMinor(final boolean showMinor) {
         this.showMinor = showMinor;
+    }
+
+    /**
+     * @return {@code true} if full text should be searched (postings), {@code false} otherwise.
+     */
+    public boolean isSearchInFullText() {
+        return searchInFullText;
+    }
+
+    /**
+     * @param searchInFullText {@code true} if full text should be searched (postings), {@code false} otherwise.
+     */
+    public void setSearchInFullText(final boolean searchInFullText) {
+        this.searchInFullText = searchInFullText;
     }
 
     /**
