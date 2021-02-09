@@ -461,8 +461,8 @@ public class SearchDBGateway implements SearchGateway {
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) " + filter + ' '
                 + "AND t.title = COALESCE(?, t.title)) "
-                + (fulltext ? "OR ((SELECT COUNT(*) FROM post p WHERE p.report = r.id AND p.content "
-                + "LIKE CONCAT('%',?,'%')) > 0) " : "")
+                + (fulltext ? "OR ((SELECT COUNT(*) FROM post p WHERE p.report = r.id AND TRIM(LOWER(p.content)) LIKE "
+                + "CONCAT('%',?,'%')) > 0) " : "")
                 + "ORDER BY " + orderBy + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
             StatementParametrizer param = new StatementParametrizer(stmt)
@@ -661,8 +661,8 @@ public class SearchDBGateway implements SearchGateway {
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
                 + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL)" + filter + ' '
                 + "AND t.title = COALESCE(?, t.title))"
-                + (fulltext ? " OR ((SELECT COUNT(*) FROM post p WHERE p.report = r.id AND p.content "
-                + "LIKE CONCAT('%',?,'%')) > 0);" : ";"))) {
+                + (fulltext ? " OR ((SELECT COUNT(*) FROM post p WHERE p.report = r.id AND TRIM(LOWER(p.content)) LIKE "
+                + "CONCAT('%',?,'%')) > 0);" : ";"))) {
             StatementParametrizer param = new StatementParametrizer(stmt)
                     .string(query)
                     .object(latestOpeningDateTime)

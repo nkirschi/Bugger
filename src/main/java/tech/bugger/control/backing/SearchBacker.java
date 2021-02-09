@@ -194,16 +194,18 @@ public class SearchBacker implements Serializable {
     void init() {
         tab = Tab.REPORT;
         query = "";
-        if (ectx.getRequestParameterMap().containsKey("q")) {
-            query = ectx.getRequestParameterMap().get("q");
+        Map<String, String> params = ectx.getRequestParameterMap();
+        if (params.containsKey("q")) {
+            query = params.get("q");
         }
-        if (ectx.getRequestParameterMap().containsKey("t")) {
+        if (params.containsKey("t")) {
             try {
-                tab = Tab.valueOf(ectx.getRequestParameterMap().get("t"));
+                tab = Tab.valueOf(params.get("t"));
             } catch (IllegalArgumentException e) {
                 throw new Error404Exception();
             }
         }
+
         openReportShown = true;
         closedReportShown = true;
         duplicatesShown = true;
@@ -217,6 +219,7 @@ public class SearchBacker implements Serializable {
         showRelevant = true;
         searchInFullText = true;
         topic = null;
+
         if (tab == Tab.USER) {
             userResults = new Paginator<>("username", Selection.PageSize.NORMAL) {
                 @Override
