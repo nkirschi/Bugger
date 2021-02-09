@@ -34,13 +34,24 @@
             <h:form styleClass="d-flex justify-content-center align-items-center col"
                     id="f-search-header">
                 <h:panelGroup layout="block" styleClass="col me-2">
-                    <h:inputText styleClass="form-control form-text mt-0"
-                                 id="it-search"
-                                 value="#{headerBacker.search}"
-                                 a:placeholder="#{labels.search}...">
-                        <f:ajax listener="#{headerBacker.updateSuggestions}" event="keyup" delay="100"
-                                render="p-search-suggestions"/>
-                    </h:inputText>
+                    <h:panelGroup styleClass="input-group">
+                        <h:inputText styleClass="form-control form-text mt-0"
+                                     id="it-search"
+                                     value="#{headerBacker.search}"
+                                     onkeypress="if (event.keyCode == 13) {e.preventDefault();
+                                 inputEnter.onkeyup(); return false; }"
+                                     a:placeholder="#{labels.search}...">
+                            <f:ajax listener="#{headerBacker.updateSuggestions}" event="keyup" delay="100"
+                                    render="p-search-suggestions"/>
+                        </h:inputText>
+                        <h:commandButton value="#{labels.search}"
+                                         action="#{headerBacker.executeSearch}"
+                                         styleClass="btn btn-outline-primary"
+                                         id="cb-search">
+                            <!-- This is to avoid mixed requests, ajax and full requests -->
+                            <f:ajax execute="@form"/>
+                        </h:commandButton>
+                    </h:panelGroup>
                     <h:panelGroup id="p-search-suggestions" layout="block" styleClass="header-search-suggestions">
                         <ui:repeat value="#{empty headerBacker.userSearchSuggestion ? null
                                 : headerBacker.userSearchSuggestion}" var="user">
@@ -71,13 +82,6 @@
                         </ui:repeat>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:commandButton value="#{labels.search}"
-                                 action="#{headerBacker.executeSearch}"
-                                 styleClass="button btn btn-outline-primary"
-                                 id="cb-search">
-                    <!-- This is to avoid mixed requests, ajax and full requests -->
-                    <f:ajax execute="@form"/>
-                </h:commandButton>
             </h:form>
         </h:panelGroup>
         <h:panelGroup layout="block"
@@ -99,7 +103,9 @@
                       id="p-profile-menu-toggle"
                       styleClass="d-flex justify-content-end align-items-center flex-grow-1 flex-basis-0"
                       rendered="#{userSession.user != null}">
-            <h:panelGroup id="p-avatar-thumbnail" layout="block">
+            <h:panelGroup id="p-avatar-thumbnail" layout="block"
+                          onclick="document.getElementById('p-profile-menu').style.display =
+                          document.getElementById('p-profile-menu').style.display === '' ? 'block' : '';">
                 <h:panelGroup layout="block" styleClass="dropdown-toggle">
                     <h:graphicImage library="images" name="bugger.png" alt="#{userSession.user.username}"
                                     rendered="#{!userSession.user.existsAvatar}" styleClass="rounded-circle me-2"/>

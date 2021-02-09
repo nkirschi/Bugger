@@ -1,6 +1,16 @@
 package tech.bugger.persistence.gateway;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Selection;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
+import tech.bugger.global.util.Log;
+import tech.bugger.global.util.Pagitable;
+import tech.bugger.persistence.exception.NotFoundException;
+import tech.bugger.persistence.exception.StoreException;
+import tech.bugger.persistence.util.StatementParametrizer;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,15 +21,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Selection;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
-import tech.bugger.global.util.Log;
-import tech.bugger.global.util.Pagitable;
-import tech.bugger.persistence.exception.NotFoundException;
-import tech.bugger.persistence.exception.StoreException;
-import tech.bugger.persistence.util.StatementParametrizer;
 
 /**
  * User gateway that gives access to user stored in a database.
@@ -162,7 +163,7 @@ public class UserDBGateway implements UserGateway {
             if (rs.next()) {
                 user = getUserFromResultSet(rs);
             } else {
-                log.error("No user with id " + id + " could be found in the database");
+                log.debug("No user with id " + id + " could be found in the database");
                 throw new NotFoundException("No user with id " + id + " could be found in the database.");
             }
         } catch (SQLException e) {
@@ -185,7 +186,7 @@ public class UserDBGateway implements UserGateway {
             if (rs.next()) {
                 user = getUserFromResultSet(rs);
             } else {
-                log.error("No user with the given username could be found in the database");
+                log.debug("No user with the given username could be found in the database");
                 throw new NotFoundException("No user with the given username could be found in the database.");
             }
         } catch (SQLException e) {
@@ -207,7 +208,7 @@ public class UserDBGateway implements UserGateway {
             if (rs.next()) {
                 return rs.getBytes("avatar");
             } else {
-                log.error("No user with the given id could be found in the database.");
+                log.debug("No user with the given id could be found in the database.");
                 throw new NotFoundException("No user with the given id could be found in the database.");
             }
         } catch (SQLException e) {
@@ -229,7 +230,7 @@ public class UserDBGateway implements UserGateway {
             if (rs.next()) {
                 user = getUserFromResultSet(rs);
             } else {
-                log.error("No user with the given e-mail address could be found in the database");
+                log.debug("No user with the given e-mail address could be found in the database");
                 throw new NotFoundException("No user with the given e-mail address could be found in the database.");
             }
         } catch (SQLException e) {
@@ -582,7 +583,7 @@ public class UserDBGateway implements UserGateway {
         // @formatter:off
         String query =
                 "DELETE FROM \"user\""
-              + "WHERE password_hash IS NULL "
+              + "WHERE NULLIF(password_hash, '') IS NULL "
               + "AND NOT EXISTS("
               + "    SELECT * "
               + "    FROM   token "

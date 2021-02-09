@@ -1,20 +1,5 @@
 package tech.bugger.business.internal;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import javax.inject.Inject;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
 import tech.bugger.business.util.Registry;
@@ -30,6 +15,22 @@ import tech.bugger.persistence.util.Mailer;
 import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
+
+import javax.inject.Inject;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Listener observing application startup and shutdown in order to initialize and clean up critical resources.
@@ -70,7 +71,7 @@ public class SystemLifetimeListener implements ServletContextListener {
     /**
      * Rate in minutes at which maintenance tasks are periodically run.
      */
-    private static final long MAINTENANCE_PERIODICITY_MINUTES = 15;
+    private static final long MAINTENANCE_PERIODICITY_MINUTES = 30;
 
     /**
      * The {@link Log} instance associated with this class for logging purposes.
@@ -132,7 +133,7 @@ public class SystemLifetimeListener implements ServletContextListener {
         registerPriorityExecutors();
         registerShutdownHooks();
         scheduleMaintenanceTasks();
-        processUnsentNotifications();
+        // processUnsentNotifications();
 
         log.info("Application startup completed.");
     }

@@ -59,17 +59,17 @@
                     </h:panelGroup>
 
                     <!-- The profile owner's user information -->
-                    <h:panelGroup layout="block" styleClass="row">
-                        <h:panelGroup id="p-avatar" layout="block" styleClass="col-4">
+                    <h:panelGroup layout="block" styleClass="d-flex">
+                        <h:panelGroup id="p-avatar" layout="block" styleClass="flex-grow-0">
                             <h:graphicImage id="g-avatar" value="avatar?id=#{profileBacker.user.id}"
-                                            styleClass="img-thumbnail" alt="The user's avatar"
+                                            styleClass="rounded-circle w-100 h-100" alt="The user's avatar"
                                             rendered="#{profileBacker.user.existsAvatar}"/>
                             <h:graphicImage id="g-avatar-fallback" library="images" name="bugger.png"
-                                            styleClass="img-thumbnail" alt="The user's avatar"
+                                            styleClass="rounded-circle w-100 h-100" alt="The user's avatar"
                                             rendered="#{not profileBacker.user.existsAvatar}"/>
                         </h:panelGroup>
 
-                        <h:panelGroup layout="block" styleClass="col-8">
+                        <h:panelGroup layout="block" styleClass="flex-grow-1">
                             <h:panelGroup id="p-username" layout="block" styleClass="row">
                                 <h:panelGroup id="p-username-label" styleClass="col-3">
                                     <h:outputLabel id="ol-username" value="#{labels.username}" for="ot-username"

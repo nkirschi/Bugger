@@ -26,7 +26,7 @@ CREATE TABLE system_settings (
 
     organization_name VARCHAR NOT NULL DEFAULT 'Bugger',
     organization_logo BYTEA DEFAULT '',
-    organization_theme VARCHAR NOT NULL DEFAULT 'light.css',
+    organization_theme VARCHAR NOT NULL DEFAULT 'classic.css',
     organization_privacy_policy VARCHAR NOT NULL DEFAULT '',
     organization_imprint VARCHAR NOT NULL DEFAULT '',
     organization_support_info VARCHAR NOT NULL DEFAULT '',
@@ -78,8 +78,8 @@ INSERT INTO "user" (username, password_hash, password_salt, hashing_algorithm,
     email_address, first_name, last_name, avatar, avatar_thumbnail, biography,
     profile_visibility, is_admin, forced_voting_weight)
 VALUES ('admin',
-    'cb64f9739595a2eb5d58cb7a291aed0b0627f4efcbbf1a6b1c5e5864df3f6c941a0495fad7939cdd810bc74852a670ca14a9ae5033843c8d233d2a4f33b11393',
-    'aa35afbed60537ff39a5be70dc1d183fbf6614ea5ce7d36c2e5f154d2d3e1706d9429f8597fb12fd4d0601391aaa5684d15d8d0078645b4946acf5512766fc25',
+    '598205e23b1ea3852ac682a4eb943c5e676accd709db577362c190f1821b23b794bf6ab093ecb461d2f782ac58f14e82f332a0e02ea16b1babbdfda4328621c6',
+    'b9fcfd8f9bb9bdff853d4ec56a4a062337115bed8900424d572c3733781a412a',
     'SHA3-512', '', 'Admin', 'Is Traitor', '', '', '', 'MINIMAL', TRUE, NULL
 );
 

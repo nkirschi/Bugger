@@ -86,6 +86,20 @@ body {
   color: black;
 }
 
+#f-help\:cb-help {
+  filter: invert(100%);
+  border-color: #938a82;
+  color: #dd74dd;
+  background-color: #1f021f;
+}
+
+#f-help\:cb-help:hover {
+  filter: none;
+  border-color: inherit;
+  color: inherit;
+  background-color: inherit;
+}
+
 /* Popup dialogs */
 .dialog {
   background-color: #e0fde0;
