@@ -47,6 +47,11 @@ public class HomeBacker implements Serializable {
     private Paginator<Topic> topics;
 
     /**
+     * The currently displayed dialog.
+     */
+    private Dialog currentDialog;
+
+    /**
      * The session containing the currently logged in user.
      */
     private final UserSession session;
@@ -75,6 +80,14 @@ public class HomeBacker implements Serializable {
      * The current registry which to retrieve resource bundles from.
      */
     private final Registry registry;
+
+    public enum Dialog {
+
+        /**
+         * Delete all notifications.
+         */
+        DELETE_ALL_NOTIFICATIONS
+    }
 
     /**
      * Constructs a new home page backing bean.
@@ -106,6 +119,7 @@ public class HomeBacker implements Serializable {
      */
     @PostConstruct
     void init() {
+        currentDialog = null;
         ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
         if (session.getUser() != null) {
             inbox = new Paginator<>("created_at", Selection.PageSize.SMALL, false) {
@@ -148,6 +162,17 @@ public class HomeBacker implements Serializable {
     }
 
     /**
+     * Displays the specified dialog and reloads the page. {@code null} closes the dialog.
+     *
+     * @param dialog The dialog to display.
+     * @return {@code null} to reload the page.
+     */
+    public String displayDialog(final Dialog dialog) {
+        currentDialog = dialog;
+        return null;
+    }
+
+    /**
      * Irreversibly deletes the notification.
      *
      * @param notification The notification to be deleted.
@@ -164,6 +189,24 @@ public class HomeBacker implements Serializable {
         }
         inbox.updateReset();
         return null;
+    }
+
+    /**
+     * Deletes all notifications addressed to the user.
+     *
+     * @return {@code null}
+     */
+    public String deleteAllNotifications() {
+        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
+        try {
+            notificationService.deleteAllNotifications(session.getUser());
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("delete_all_notifications_success"),
+                    Feedback.Type.INFO));
+        } catch (DataAccessException e) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
+        }
+        inbox.updateReset();
+        return displayDialog(null);
     }
 
     /**
@@ -261,6 +304,15 @@ public class HomeBacker implements Serializable {
      */
     public Paginator<Topic> getTopics() {
         return topics;
+    }
+
+    /**
+     * Gets the current dialog.
+     *
+     * @return The current dialog.
+     */
+    public Dialog getCurrentDialog() {
+        return currentDialog;
     }
 
 }

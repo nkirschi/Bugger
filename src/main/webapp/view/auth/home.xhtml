@@ -11,9 +11,37 @@
 
     <ui:param name="helpSuffix" value="#{homeBacker.helpSuffix}"/>
 
+    <ui:define name="dialogs">
+        <h:panelGroup layout="block" styleClass="dialog"
+                      rendered="#{homeBacker.currentDialog == 'DELETE_ALL_NOTIFICATIONS'}">
+            <h:form id="f-delete-all-notifications-dialog">
+                <h:outputText value="#{labels.home_delete_notifications}" styleClass="h2"/>
+                <h:panelGroup layout="block" styleClass="mb-3">
+                    <h:outputText value="#{labels.home_delete_notifications_dialog}"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
+                    <h:commandButton id="cb-delete-report" action="#{homeBacker.deleteAllNotifications}"
+                                     styleClass="btn btn-primary"
+                                     value="#{labels.delete}"/>
+                    <h:commandButton id="cb-delete-report-cancel" action="#{homeBacker.displayDialog(null)}"
+                                     styleClass="btn btn-secondary" value="#{labels.cancel}"/>
+                </h:panelGroup>
+            </h:form>
+        </h:panelGroup>
+    </ui:define>
+
     <ui:define name="content">
         <h:panelGroup id="p-notifications" layout="box" rendered="#{userSession.user != null}">
             <h:outputText value="#{labels.home_notifications}" styleClass="h2"/>
+            <h:panelGroup styleClass="col-3 col-auto align-right">
+                <h:form id="f-delete-all-notifications">
+                    <h:commandButton id="cb-delete-all-notifications"
+                                     value="#{labels.home_delete_notifications}"
+                                     rendered="#{not homeBacker.inbox.isEmpty()}"
+                                     action="#{homeBacker.displayDialog('DELETE_ALL_NOTIFICATIONS')}"
+                                     styleClass="btn btn-primary"/>
+                </h:form>
+            </h:panelGroup>
             <b:pagitable paginator="#{homeBacker.inbox}">
                 <!--@elvariable id="var" type="tech.bugger.global.transfer.Notification"-->
                 <b:column title="#{labels.home_seen}" paginator="#{homeBacker.inbox}" key="read">
