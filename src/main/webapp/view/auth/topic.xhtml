@@ -67,7 +67,7 @@
                         <h:form id="f-moderator-status" styleClass="d-flex">
                             <h:commandButton id="cb-image-promote"
                                              action="#{topicBacker.openModDialog}"
-                                             styleClass="button me-2"
+                                             styleClass="button me-1"
                                              rendered="#{topicBacker.moderator}"
                                              image="/resources/images/add.png"
                                              alt="#{labels.promote}"/>
@@ -106,8 +106,10 @@
                     <h:outputText id="ot-banned" styleClass="h2 my-3" value="#{labels.topic_banned}"/>
                     <h:panelGroup id="p-banned-status" layout="block">
                         <h:form id="f-banned-status" styleClass="d-flex">
-                            <h:commandButton id="cb-image-ban" action="#{topicBacker.openBanDialog}" styleClass="button"
-                                             rendered="#{topicBacker.moderator}" image="/resources/images/add.png"
+                            <h:commandButton id="cb-image-ban" action="#{topicBacker.openBanDialog}"
+                                             styleClass="button me-1"
+                                             rendered="#{topicBacker.moderator}"
+                                             image="/resources/images/add.png"
                                              alt="#{labels.topic_ban}"/>
                             <h:commandButton id="cb-image-unban" action="#{topicBacker.openUnbanDialog}" styleClass="button"
                                              rendered="#{topicBacker.moderator and topicBacker.bannedUsers.selection.totalSize gt 0}"
