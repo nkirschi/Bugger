@@ -8,6 +8,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 import tech.bugger.business.internal.ApplicationSettings;
+import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.global.transfer.Organization;
 
@@ -24,12 +25,15 @@ public class PrivacyBackerTest {
     private ApplicationSettings settings;
 
     @Mock
+    private UserSession session;
+
+    @Mock
     private Organization organization;
 
     @BeforeEach
     public void setUp() {
         doReturn(organization).when(settings).getOrganization();
-        backer = new PrivacyBacker(settings);
+        backer = new PrivacyBacker(settings, session);
     }
 
     @Test
