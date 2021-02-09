@@ -52,13 +52,13 @@
                             <h:selectBooleanCheckbox id="s-show-admin-user" value="#{searchBacker.adminShown}"
                                                      styleClass="form-check-input"/>
                             <h:outputLabel for="s-show-admin-user"
-                                           value="#{labels.show_admin_user}"/>
+                                           value="#{labels.search_show_admin_user}"/>
                         </h:panelGroup>
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:selectBooleanCheckbox id="s-show-non-admin-user" value="#{searchBacker.nonAdminShown}"
                                                      styleClass="form-check-input"/>
                             <h:outputLabel for="s-show-non-admin-user"
-                                           value="#{labels.show_non_admin_user}"/>
+                                           value="#{labels.search_show_non_admin_user}"/>
                         </h:panelGroup>
                     </h:panelGroup>
                     <h:panelGroup class="row" layout="block" id="p-tab-report-filter"
@@ -119,35 +119,35 @@
                                                      value="#{searchBacker.duplicatesShown}"
                                                      styleClass="form-check-input"/>
                             <h:outputLabel for="s-show-duplicate-reports"
-                                           value="#{labels.show_duplicate}"/>
+                                           value="#{labels.search_show_duplicate}"/>
                         </h:panelGroup>
 
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:selectBooleanCheckbox id="s-show-bug-reports" value="#{searchBacker.showBug}"
                                                      styleClass="form-check-input"/>
                             <h:outputLabel for="s-show-bug-reports"
-                                           value="#{labels.show_bug_reports}"/>
+                                           value="#{labels.search_show_bug_reports}"/>
                         </h:panelGroup>
 
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:selectBooleanCheckbox id="s-show-hint-reports" value="#{searchBacker.showHint}"
                                                      styleClass="form-check-input"/>
                             <h:outputLabel for="s-show-hint-reports"
-                                           value="#{labels.show_hint_reports}"/>
+                                           value="#{labels.search_show_hint_reports}"/>
                         </h:panelGroup>
 
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:selectBooleanCheckbox id="s-show-feature-reports" value="#{searchBacker.showFeature}"
                                                      styleClass="form-check-input"/>
                             <h:outputLabel for="s-show-feature-reports"
-                                           value="#{labels.show_feature_reports}"/>
+                                           value="#{labels.search_show_feature_reports}"/>
                         </h:panelGroup>
 
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:selectBooleanCheckbox id="s-show-minor-reports" value="#{searchBacker.showMinor}"
                                                      styleClass="form-check-input"/>
                             <h:outputLabel for="s-show-minor-reports"
-                                           value="#{labels.show_minor_reports}"/>
+                                           value="#{labels.search_show_minor_reports}"/>
                         </h:panelGroup>
 
                         <h:panelGroup layout="block" styleClass="mb-2">
@@ -155,14 +155,14 @@
                                                      value="#{searchBacker.showRelevant}"
                                                      styleClass="form-check-input"/>
                             <h:outputLabel for="s-show-relevante-reports"
-                                           value="#{labels.show_relevant_reports}"/>
+                                           value="#{labels.search_show_relevant_reports}"/>
                         </h:panelGroup>
 
                         <h:panelGroup layout="block" styleClass="mb-2">
                             <h:selectBooleanCheckbox id="s-show-severe-reports" value="#{searchBacker.showSevere}"
                                                      styleClass="form-check-input"/>
                             <h:outputLabel for="s-show-severe-reports"
-                                           value="#{labels.show_severe_reports}"/>
+                                           value="#{labels.search_show_severe_reports}"/>
                         </h:panelGroup>
 
                         <h:panelGroup layout="block" styleClass="mb-2">
@@ -170,7 +170,7 @@
                                                      value="#{searchBacker.searchInFullText}"
                                                      styleClass="form-check-input"/>
                             <h:outputLabel for="s-show-fulltext"
-                                           value="#{labels.fulltext}"/>
+                                           value="#{labels.search_full_text}"/>
                         </h:panelGroup>
 
                         <h:panelGroup layout="block" styleClass="mb-2">
@@ -263,7 +263,7 @@
                                     <f:converter converterId="offsetDateTimeConverter"/>
                                 </h:outputLabel>
                             </b:column>
-                            <b:column title="#{labels.num_sub}" paginator="#{searchBacker.topicResults}"
+                            <b:column title="#{labels.search_num_sub}" paginator="#{searchBacker.topicResults}"
                                       key="num_subscribers">
                                 <h:outputLabel value="#{var.numSub}"/>
                             </b:column>
