@@ -1,5 +1,6 @@
 package tech.bugger.business.internal;
 
+import com.ocpsoft.pretty.PrettyException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -62,21 +63,24 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
 
         while (exception.getCause() != null
                 && (exception instanceof FacesException || exception instanceof ELException
-                || exception instanceof WeldException)) {
+                || exception instanceof WeldException || exception instanceof PrettyException)) {
             exception = exception.getCause();
         }
 
         ExternalContext ectx = fctx.getExternalContext();
         String uri = ectx.getRequestContextPath() + ectx.getRequestServletPath();
         Map<String, Object> requestScope = ectx.getRequestMap();
-        requestScope.put(RequestDispatcher.ERROR_REQUEST_URI, uri);
-        requestScope.put(RequestDispatcher.ERROR_EXCEPTION, exception);
-        if (exception instanceof Error404Exception
-                || (exception.getCause() != null && exception.getCause() instanceof Error404Exception)) {
+        if (exception instanceof Error404Exception) {
             requestScope.put("PretendErrorCode", "404");
+        } else if (exception.getCause() != null && exception.getCause() instanceof Error404Exception) {
+            requestScope.put("PretendErrorCode", "404");
+            exception = exception.getCause();
         } else {
             requestScope.put("PretendErrorCode", "500");
         }
+        requestScope.put(RequestDispatcher.ERROR_REQUEST_URI, uri);
+        requestScope.put(RequestDispatcher.ERROR_EXCEPTION, exception);
+
         String viewID = "/WEB-INF/errorpages/error.xhtml";
         Application application = fctx.getApplication();
         ViewHandler viewHandler = application.getViewHandler();
