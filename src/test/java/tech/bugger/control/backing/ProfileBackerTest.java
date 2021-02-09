@@ -380,4 +380,22 @@ public class ProfileBackerTest {
         assertEquals(user.getPasswordHash(), profileBacker.getPassword());
     }
 
+    @Test
+    public void testGetHelpSuffix() {
+        when(session.getUser()).thenReturn(user);
+        assertEquals("_user", profileBacker.getHelpSuffix());
+    }
+
+    @Test
+    public void testGetHelpSuffixAdmin() {
+        user.setAdministrator(true);
+        when(session.getUser()).thenReturn(user);
+        assertEquals("_admin", profileBacker.getHelpSuffix());
+    }
+
+    @Test
+    public void testGetHelpSuffixNoUser() {
+        assertEquals("", profileBacker.getHelpSuffix());
+    }
+
 }

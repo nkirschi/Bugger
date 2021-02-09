@@ -4,7 +4,9 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import tech.bugger.business.internal.ApplicationSettings;
+import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.util.MarkdownHandler;
+import tech.bugger.global.transfer.User;
 
 /**
  * Backing Bean for the imprint page.
@@ -19,13 +21,21 @@ public class ImprintBacker {
     private final ApplicationSettings settings;
 
     /**
+     * The current user session.
+     */
+    private final UserSession session;
+
+    /**
      * Constructs a new imprint page backing bean with the necessary dependencies.
      *
      * @param settings The application settings to use.
+     * @param session  The current {@link UserSession}.
      */
     @Inject
-    public ImprintBacker(final ApplicationSettings settings) {
+    public ImprintBacker(final ApplicationSettings settings,
+                         final UserSession session) {
         this.settings = settings;
+        this.session = session;
     }
 
     /**
@@ -41,6 +51,19 @@ public class ImprintBacker {
         } else {
             return MarkdownHandler.toHtml(policy);
         }
+    }
+
+    /**
+     * Returns the appropriate suffix for the help key.
+     *
+     * @return The appropriate suffix for the help key.
+     */
+    public String getHelpSuffix() {
+        User user = session.getUser();
+        if (user != null && user.isAdministrator()) {
+            return "_admin";
+        }
+        return "";
     }
 
 }

@@ -1,12 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import javax.enterprise.event.Event;
-import javax.faces.context.ExternalContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,9 +21,29 @@ import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
-import static org.junit.jupiter.api.Assertions.*;
+import javax.enterprise.event.Event;
+import javax.faces.context.ExternalContext;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -212,6 +225,24 @@ class HomeBackerTest {
             markdownHandlerMockedStatic.when(() -> MarkdownHandler.toHtml("senberg")).thenReturn("Walter White");
             assertEquals("Walter White", homeBacker.getDescription(testTopic1));
         }
+    }
+
+    @Test
+    public void testGetHelpSuffix() {
+        doReturn(user).when(session).getUser();
+        assertEquals("_user", homeBacker.getHelpSuffix());
+    }
+
+    @Test
+    public void testGetHelpSuffixAdmin() {
+        user.setAdministrator(true);
+        doReturn(user).when(session).getUser();
+        assertEquals("_admin", homeBacker.getHelpSuffix());
+    }
+
+    @Test
+    public void testGetHelpSuffixNoUser() {
+        assertEquals("", homeBacker.getHelpSuffix());
     }
 
 }

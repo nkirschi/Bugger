@@ -102,9 +102,9 @@ public class MarkdownTest {
     public void testCombinedUserAndReportReferenceString() {
         String keyword1 = "hyperspeeed";
         String keyword2 = "42069";
-        String md = "Hello @" + keyword1 + " and goodbye #" + keyword2 + "!";
+        String md = "Hello @" + keyword1 + " and goodbye #" + keyword2 + " with no ref \\\\@user!";
         String html = MarkdownHandler.toHtml(md);
-        assertEquals("<p>Hello <a href=\"/profile?u=" + keyword1 + "\" title=\"" + keyword1 + "\">@" + keyword1 + "</a> and goodbye <a href=\"/report?id=" + keyword2 + "\" title=\"" + keyword2 + "\">#" + keyword2 + "</a>!</p>\n", html);
+        assertEquals("<p>Hello <a href=\"/profile?u=" + keyword1 + "\" title=\"" + keyword1 + "\">@" + keyword1 + "</a> and goodbye <a href=\"/report?id=" + keyword2 + "\" title=\"" + keyword2 + "\">#" + keyword2 + "</a> with no ref @user!</p>\n", html);
     }
 
     @Test

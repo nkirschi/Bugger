@@ -1,14 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.io.IOException;
-import java.io.Serial;
-import java.io.Serializable;
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.Part;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.AuthenticationService;
 import tech.bugger.business.service.ProfileService;
@@ -18,6 +9,16 @@ import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Token;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.Part;
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * Backing bean for the profile edit page.
@@ -364,6 +365,18 @@ public class ProfileEditBacker implements Serializable {
     public String closeDialog() {
         dialog = ProfileEditDialog.NONE;
         return null;
+    }
+
+    /**
+     * Returns the appropriate suffix for the help key.
+     *
+     * @return The appropriate suffix for the help key.
+     */
+    public String getHelpSuffix() {
+        if (user.isAdministrator()) {
+            return "_admin";
+        }
+        return "";
     }
 
     /**

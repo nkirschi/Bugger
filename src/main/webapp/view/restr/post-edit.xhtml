@@ -19,7 +19,7 @@
             <h:panelGroup rendered="#{postEditBacker.create}">
                 <p>
                     <h:outputText value="#{labels.post_create_info} "/>
-                    <h:link value="###{postEditBacker.report.id} (#{postEditBacker.report.title})"
+                    <h:link value="##{postEditBacker.report.id} (#{postEditBacker.report.title})"
                             outcome="pretty:report">
                         <f:param name="id" value="#{postEditBacker.report.id}"/>
                     </h:link>
@@ -35,7 +35,7 @@
                         <f:param name="p" value="#{postEditBacker.post.id}"/>
                     </h:link>
                     <h:outputText value=" #{labels.post_edit_info2} "/>
-                    <h:link value="###{postEditBacker.report.id} (#{postEditBacker.report.title})"
+                    <h:link value="##{postEditBacker.report.id} (#{postEditBacker.report.title})"
                             outcome="pretty:report">
                         <f:param name="id" value="#{postEditBacker.report.id}"/>
                     </h:link>

@@ -138,6 +138,7 @@ p {
 #l-statistics::before, #l-imprint::before, #l-privacy::before {
     margin-right: 8px;
     vertical-align: middle;
+    white-space: nowrap;
 }
 
 #l-statistics::before {

@@ -592,7 +592,7 @@ public class TopicBackerTest {
     @Test
     public void testGetHelpSuffixNormalUser() {
         doReturn(user).when(session).getUser();
-        assertEquals("", topicBacker.getHelpSuffix());
+        assertEquals("_user", topicBacker.getHelpSuffix());
     }
 
     @Test
