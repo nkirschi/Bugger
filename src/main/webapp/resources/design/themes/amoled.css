@@ -135,6 +135,10 @@ td, th {
   border-color: #c62a25;
 }
 
+#cb-close-messages {
+  filter: invert()
+}
+
 pre {
   background-color: #666666;
 }
