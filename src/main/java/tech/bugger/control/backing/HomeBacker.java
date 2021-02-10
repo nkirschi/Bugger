@@ -1,13 +1,10 @@
 package tech.bugger.control.backing;
 
-import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.NotificationService;
 import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
-import tech.bugger.business.util.Registry;
 import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Selection;
@@ -15,7 +12,6 @@ import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
@@ -24,7 +20,6 @@ import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
-import java.util.ResourceBundle;
 
 /**
  * Backing Bean for the home page.
@@ -71,16 +66,6 @@ public class HomeBacker implements Serializable {
      */
     private final ExternalContext ectx;
 
-    /**
-     * Feedback Event for user feedback.
-     */
-    private final Event<Feedback> feedbackEvent;
-
-    /**
-     * The current registry which to retrieve resource bundles from.
-     */
-    private final Registry registry;
-
     public enum Dialog {
 
         /**
@@ -96,22 +81,16 @@ public class HomeBacker implements Serializable {
      * @param notificationService The notification service to use.
      * @param topicService        The topic service to use.
      * @param ectx                The current external context.
-     * @param feedbackEvent       The feedback event to use for user feedback.
-     * @param registry            The current registry.
      */
     @Inject
     public HomeBacker(final UserSession session,
                       final NotificationService notificationService,
                       final TopicService topicService,
-                      final ExternalContext ectx,
-                      final Event<Feedback> feedbackEvent,
-                      final Registry registry) {
+                      final ExternalContext ectx) {
         this.session = session;
         this.notificationService = notificationService;
         this.topicService = topicService;
         this.ectx = ectx;
-        this.feedbackEvent = feedbackEvent;
-        this.registry = registry;
     }
 
     /**
@@ -120,31 +99,16 @@ public class HomeBacker implements Serializable {
     @PostConstruct
     void init() {
         currentDialog = null;
-        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
         if (session.getUser() != null) {
             inbox = new Paginator<>("created_at", Selection.PageSize.SMALL, false) {
                 @Override
                 protected Iterable<Notification> fetch() {
-                    try {
-                        return notificationService.selectNotifications(session.getUser(), getSelection());
-                    } catch (DataAccessException e) {
-                        feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"),
-                                Feedback.Type.ERROR));
-                    }
-                    return null;
+                    return notificationService.selectNotifications(session.getUser(), getSelection());
                 }
 
                 @Override
                 protected int totalSize() {
-                    int size;
-                    try {
-                        size = notificationService.countNotifications(session.getUser());
-                    } catch (DataAccessException e) {
-                        size = 0;
-                        feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"),
-                                Feedback.Type.ERROR));
-                    }
-                    return size;
+                    return notificationService.countNotifications(session.getUser());
                 }
             };
         }
@@ -179,14 +143,7 @@ public class HomeBacker implements Serializable {
      * @return {@code null}
      */
     public String deleteNotification(final Notification notification) {
-        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
-        try {
-            if (!notificationService.deleteNotification(notification)) {
-                feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
-            }
-        } catch (DataAccessException e) {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
-        }
+        notificationService.deleteNotification(notification);
         inbox.updateReset();
         return null;
     }
@@ -197,14 +154,7 @@ public class HomeBacker implements Serializable {
      * @return {@code null}
      */
     public String deleteAllNotifications() {
-        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
-        try {
-            notificationService.deleteAllNotifications(session.getUser());
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("delete_all_notifications_success"),
-                    Feedback.Type.INFO));
-        } catch (DataAccessException e) {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
-        }
+        notificationService.deleteAllNotifications(session.getUser());
         inbox.updateReset();
         return displayDialog(null);
     }
@@ -216,16 +166,7 @@ public class HomeBacker implements Serializable {
      * @return A String that is used to redirect a user to the post of the opened notification.
      */
     public String openNotification(final Notification notification) {
-        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
-        try {
-            if (!notificationService.markAsRead(notification)) {
-                feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
-                return null;
-            }
-        } catch (DataAccessException e) {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
-            return null;
-        }
+        notificationService.markAsRead(notification);
         String query = "/report?";
         if (notification.getPostID() != null) {
             query += "p=" + notification.getPostID() + "#post-" + notification.getPostID();

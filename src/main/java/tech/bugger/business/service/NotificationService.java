@@ -1,9 +1,10 @@
 package tech.bugger.business.service;
 
-import tech.bugger.business.exception.DataAccessException;
+import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.PriorityExecutor;
 import tech.bugger.business.util.PriorityTask;
 import tech.bugger.business.util.Registry;
+import tech.bugger.business.util.RegistryKey;
 import tech.bugger.control.util.JFConfig;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Report;
@@ -21,6 +22,7 @@ import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import java.text.MessageFormat;
@@ -63,7 +65,17 @@ public class NotificationService {
     private final Mailer mailer;
 
     /**
-     * The current registry which to retrieve resource bundles from.
+     * Resource bundle for feedback messages.
+     */
+    private final ResourceBundle messagesBundle;
+
+    /**
+     * Feedback Event for user feedback.
+     */
+    private final Event<Feedback> feedbackEvent;
+
+    /**
+     * Registry to retrieve resource bundles.
      */
     private final Registry registry;
 
@@ -71,25 +83,36 @@ public class NotificationService {
      * Constructs a new notification service with the given dependencies.
      *
      * @param transactionManager The transaction manager to use for creating transactions.
-     * @param registry           The current registry.
+     * @param feedbackEvent      The feedback event to use for user feedback.
+     * @param configReader       The configuration reader to use.
+     * @param priorityExecutor   The priority executor to use for sending mails.
+     * @param mailer             The mailer to use.
+     * @param messagesBundle     The resource bundle for feedback messages.
+     * @param registry           The registry to retrieve resource bundles dynamically.
      */
     @Inject
     public NotificationService(final TransactionManager transactionManager,
+                               final Event<Feedback> feedbackEvent,
+                               final @RegistryKey("config") PropertiesReader configReader,
+                               final @RegistryKey("mails") PriorityExecutor priorityExecutor,
+                               final @RegistryKey("main") Mailer mailer,
+                               final @RegistryKey("messages") ResourceBundle messagesBundle,
                                final Registry registry) {
         this.transactionManager = transactionManager;
+        this.feedbackEvent = feedbackEvent;
+        this.configReader = configReader;
+        this.priorityExecutor = priorityExecutor;
+        this.mailer = mailer;
+        this.messagesBundle = messagesBundle;
         this.registry = registry;
-        configReader = registry.getPropertiesReader("config");
-        priorityExecutor = registry.getPriorityExecutor("mails");
-        mailer = registry.getMailer("main");
     }
 
     /**
      * Irreversibly deletes a notification.
      *
      * @param notification The notification to be deleted.
-     * @return {@code true} iff deleting the notification was successful.
      */
-    public boolean deleteNotification(final Notification notification) throws DataAccessException {
+    public void deleteNotification(final Notification notification) {
         if (notification == null) {
             log.error("Cannot delete notification null.");
             throw new IllegalArgumentException("Notification cannot be null.");
@@ -101,13 +124,12 @@ public class NotificationService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newNotificationGateway().delete(notification);
             tx.commit();
-            return true;
         } catch (NotFoundException e) {
             log.error("Could not find notification to delete " + notification + ".", e);
-            return false;
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error when deleting notification " + notification + ".", e);
-            throw new DataAccessException("Error when deleting notification " + notification + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
     }
 
@@ -116,7 +138,7 @@ public class NotificationService {
      *
      * @param user The given user.
      */
-    public void deleteAllNotifications(final User user) throws DataAccessException {
+    public void deleteAllNotifications(final User user) {
         if (user == null) {
             log.error("Cannot delete all notifications for user null.");
             throw new IllegalArgumentException("User cannot be null.");
@@ -128,9 +150,11 @@ public class NotificationService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newNotificationGateway().deleteAllNotifications(user);
             tx.commit();
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("delete_all_notifications_success"),
+                    Feedback.Type.INFO));
         } catch (TransactionException e) {
             log.error("Error when deleting all notifications for user " + user + ".", e);
-            throw new DataAccessException("Error when deleting all notifications for user " + user + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
     }
 
@@ -138,9 +162,8 @@ public class NotificationService {
      * Marks a notification as read.
      *
      * @param notification The notification to be marked as read.
-     * @return {@code true} iff marking the notification as read was successful.
      */
-    public boolean markAsRead(final Notification notification) throws DataAccessException {
+    public void markAsRead(final Notification notification) {
         if (notification == null) {
             log.error("Cannot mark notification null as read.");
             throw new IllegalArgumentException("Notification cannot be null.");
@@ -153,13 +176,12 @@ public class NotificationService {
         try (Transaction tx = transactionManager.begin()) {
             tx.newNotificationGateway().update(notification);
             tx.commit();
-            return true;
         } catch (NotFoundException e) {
             log.error("Could not find notification to mark as read " + notification + ".", e);
-            return false;
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error when marking notification " + notification + " as sent.", e);
-            throw new DataAccessException("Error when marking notification " + notification + " as sent.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
     }
 
@@ -169,7 +191,7 @@ public class NotificationService {
      * @param user The user in question.
      * @return The number of notifications as an {@code int}.
      */
-    public int countNotifications(final User user) throws DataAccessException {
+    public int countNotifications(final User user) {
         if (user == null) {
             log.error("Cannot count notifications for user null.");
             throw new IllegalArgumentException("User cannot be null.");
@@ -183,8 +205,9 @@ public class NotificationService {
             numberOfNotifications = tx.newNotificationGateway().countNotifications(user);
             tx.commit();
         } catch (TransactionException e) {
+            numberOfNotifications = 0;
             log.error("Error when counting notifications for user " + user + ".", e);
-            throw new DataAccessException("Error when counting notifications for user " + user + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return numberOfNotifications;
     }
@@ -196,8 +219,7 @@ public class NotificationService {
      * @param selection Information on which notifications to return.
      * @return A list containing the requested notifications.
      */
-    public List<Notification> selectNotifications(final User user, final Selection selection)
-            throws DataAccessException {
+    public List<Notification> selectNotifications(final User user, final Selection selection) {
         if (user == null) {
             log.error("Cannot select notifications for user null.");
             throw new IllegalArgumentException("User cannot be null.");
@@ -214,9 +236,9 @@ public class NotificationService {
             selectedNotifications = tx.newNotificationGateway().selectNotifications(user, selection);
             tx.commit();
         } catch (TransactionException e) {
+            selectedNotifications = null;
             log.error("Error when selecting notifications for user " + user + "with selection " + selection + ".", e);
-            throw new DataAccessException("Error when selecting notifications for user " + user + "with selection "
-                    + selection + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
         return selectedNotifications;
     }
