@@ -205,6 +205,8 @@ public class TopicBacker implements Serializable {
         this.ectx = ectx;
         this.session = session;
         this.applicationSettings = applicationSettings;
+        userBanSuggestions = new ArrayList<>();
+        userModSuggestions = new ArrayList<>();
     }
 
     /**
@@ -237,8 +239,6 @@ public class TopicBacker implements Serializable {
         moderator = topicService.isModerator(user, topic);
         subscribed = topicService.isSubscribed(user, topic);
         displayDialog = null;
-        userBanSuggestions = new ArrayList<>();
-        userModSuggestions = new ArrayList<>();
         openReportShown = true;
         closedReportShown = false;
         sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
