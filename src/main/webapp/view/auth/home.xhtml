@@ -45,9 +45,11 @@
             </b:pagitable>
         </h:panelGroup>
 
-        <h:outputText value="#{labels.home_topics}" styleClass="h2"/>
-        <h:link id="l-create" value="#{labels.topic_edit_add}" outcome="pretty:topic-edit"
-                rendered="#{userSession.user.administrator}" styleClass="button"/>
+        <h:panelGroup layout="block" styleClass="d-flex justify-content-between align-items-center">
+            <h:outputText value="#{labels.home_topics}" styleClass="h2"/>
+            <h:link id="l-create" value="#{labels.topic_edit_add}" outcome="pretty:topic-edit"
+                    rendered="#{userSession.user.administrator}" styleClass="btn btn-primary"/>
+        </h:panelGroup>
         <b:pagitable paginator="#{homeBacker.topics}">
             <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
             <b:column title="#{labels.id}" paginator="#{homeBacker.topics}" key="id">
