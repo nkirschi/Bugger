@@ -12,7 +12,7 @@
     <ui:param name="helpSuffix" value="#{homeBacker.helpSuffix}"/>
 
     <ui:define name="content">
-        <h:panelGroup id="p-notifications" layout="box" rendered="#{userSession.user != null}">
+        <h:panelGroup id="p-notifications" layout="block" styleClass="mb-3" rendered="#{userSession.user != null}">
             <h:outputText value="#{labels.home_notifications}" styleClass="h2"/>
             <b:pagitable paginator="#{homeBacker.inbox}">
                 <!--@elvariable id="var" type="tech.bugger.global.transfer.Notification"-->
