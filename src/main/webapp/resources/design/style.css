@@ -62,8 +62,6 @@ p {
 }
 
 #p-help {
-    max-height: 80%;
-    overflow-y: auto;
     max-width: 800px;
 }
 
@@ -128,11 +126,11 @@ p {
 }
 
 #f-help\:cb-help {
-    background-image: url('/resources/images/help.png');
+    background-image: url('../../resources/images/help.png');
 }
 
 #f-search-header\:cb-search {
-    background-image: url('/resources/images/search.png');
+    background-image: url('../../resources/images/search.png');
 }
 
 #l-statistics::before, #l-imprint::before, #l-privacy::before {
@@ -142,15 +140,15 @@ p {
 }
 
 #l-statistics::before {
-    content: url('/resources/images/statistics.png');
+    content: url('../../resources/images/statistics.png');
 }
 
 #l-imprint::before {
-    content: url('/resources/images/imprint.png');
+    content: url('../../resources/images/imprint.png');
 }
 
 #l-privacy::before {
-    content: url('/resources/images/privacy.png');
+    content: url('../../resources/images/privacy.png');
 }
 
 .header-search-suggestions {
@@ -172,6 +170,8 @@ p {
     transform: translateX(-50%) translateY(-50%);
     z-index: 9999;
     max-width: 600px;
+    max-height: 80%;
+    overflow-y: auto;
     background: #fff;
     padding: 20px;
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, .08);
