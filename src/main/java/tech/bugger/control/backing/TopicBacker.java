@@ -284,8 +284,11 @@ public class TopicBacker implements Serializable {
      * Enables suggestions for users to be banned.
      */
     public void searchBanUsers() {
+        System.out.println(">>> USER BAN: " + userBan);
         if (userBan != null && !userBan.isBlank()) {
             userBanSuggestions = searchService.getUserBanSuggestions(userBan, topic);
+        } else {
+            userBanSuggestions.clear();
         }
     }
 
@@ -295,6 +298,8 @@ public class TopicBacker implements Serializable {
     public void searchUnbanUsers() {
         if (userBan != null && !userBan.isBlank()) {
             userBanSuggestions = searchService.getUserUnbanSuggestions(userBan, topic);
+        } else {
+            userBanSuggestions.clear();
         }
     }
 
@@ -304,6 +309,8 @@ public class TopicBacker implements Serializable {
     public void searchModUsers() {
         if (userMod != null && !userMod.isBlank()) {
             userModSuggestions = searchService.getUserModSuggestions(userMod, topic);
+        } else {
+            userModSuggestions.clear();
         }
     }
 
@@ -313,6 +320,8 @@ public class TopicBacker implements Serializable {
     public void searchUnmodUsers() {
         if (userMod != null && !userMod.isBlank()) {
             userModSuggestions = searchService.getUserUnmodSuggestions(userMod, topic);
+        } else {
+            userModSuggestions.clear();
         }
     }
 
@@ -608,6 +617,14 @@ public class TopicBacker implements Serializable {
     }
 
     /**
+     * @param userBan The userToBeBanned to set.
+     */
+    public void applyUserBanSuggestion(final String userBan) {
+        setUserBan(userBan);
+        userBanSuggestions.clear();
+    }
+
+    /**
      * @return The userToBeModded.
      */
     public String getUserMod() {
@@ -619,6 +636,14 @@ public class TopicBacker implements Serializable {
      */
     public void setUserMod(final String userMod) {
         this.userMod = userMod;
+    }
+
+    /**
+     * @param userMod The userToBeModded to set.
+     */
+    public void applyUserModSuggestion(final String userMod) {
+        setUserMod(userMod);
+        userModSuggestions.clear();
     }
 
     /**

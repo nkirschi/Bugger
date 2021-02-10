@@ -18,44 +18,33 @@
 
     <ui:define name="content">
         <h:form id="f-topic">
-            <h:panelGroup layout="block" styleClass="row">
-                <h:panelGroup layout="block" styleClass="col-sm-12">
-                    <h:panelGroup layout="block" styleClass="row">
-                        <h:panelGroup layout="block" styleClass="col-12">
-                            <h:commandButton id="cb-subscribe"
-                                             action="#{topicBacker.toggleTopicSubscription}"
-                                             styleClass="button btn btn-primary"
-                                             value="#{labels.subscribe}"
-                                             rendered="#{userSession.user != null and not topicBacker.subscribed}"/>
-                            <h:commandButton id="cb-unsubscribe"
-                                             action="#{topicBacker.toggleTopicSubscription}"
-                                             styleClass="button btn btn-primary"
-                                             value="#{labels.unsubscribe}"
-                                             rendered="#{userSession.user != null and topicBacker.subscribed}"/>
-                            <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}"
-                                             styleClass="button btn btn-primary"
-                                             value="#{labels.delete_topic}"
-                                             rendered="#{userSession.user.administrator}"/>
-                            <h:link id="l-edit" outcome="pretty:topic-edit" value="#{labels.edit_topic}"
-                                    styleClass="button btn btn-secondary" rendered="#{userSession.user.administrator}">
-                                <f:param name="id" value="#{topicBacker.topicID}"/>
-                            </h:link>
-                            <h:link id="l-create-report" outcome="pretty:report-create" value="#{labels.create_report}"
-                                    styleClass="button btn btn-secondary" rendered="#{userSession.user != null and
-                                    not topicBacker.banned}">
-                                <f:param name="id" value="#{topicBacker.topicID}"/>
-                            </h:link>
-                        </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="row">
-                        <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
-                    </h:panelGroup>
-                    <h:link id="l-statistics" outcome="pretty:statistics" value="#{labels.statistics_for_topic}">
-                        <f:param name="t" value="#{topicBacker.topic.id}"/>
-                    </h:link>
-                </h:panelGroup>
+            <h:panelGroup layout="block" styleClass="d-flex align-items-center mb-3">
+                <h:commandButton id="cb-subscribe"
+                                 action="#{topicBacker.toggleTopicSubscription}"
+                                 styleClass="btn btn-primary me-3"
+                                 value="#{labels.subscribe}"
+                                 rendered="#{userSession.user != null and not topicBacker.subscribed}"/>
+                <h:commandButton id="cb-unsubscribe"
+                                 action="#{topicBacker.toggleTopicSubscription}"
+                                 styleClass="btn btn-primary me-3"
+                                 value="#{labels.unsubscribe}"
+                                 rendered="#{userSession.user != null and topicBacker.subscribed}"/>
+                <h:link id="l-edit" outcome="pretty:topic-edit" value="#{labels.edit_topic}"
+                        styleClass="btn btn-secondary me-3" rendered="#{userSession.user.administrator}">
+                    <f:param name="id" value="#{topicBacker.topicID}"/>
+                </h:link>
+                <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}"
+                                 styleClass="btn btn-primary me-3"
+                                 value="#{labels.delete_topic}"
+                                 rendered="#{userSession.user.administrator}"/>
+                <h:link id="l-statistics" outcome="pretty:statistics" value="#{labels.statistics_for_topic}">
+                    <f:param name="t" value="#{topicBacker.topic.id}"/>
+                </h:link>
             </h:panelGroup>
         </h:form>
+        <h:panelGroup layout="block">
+            <h:outputText id="ot-description" value="#{topicBacker.sanitizedDescription}" escape="false"/>
+        </h:panelGroup>
 
         <h:panelGroup layout="block" styleClass="row">
 
@@ -78,7 +67,7 @@
                         </h:form>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:panelGroup layout="block" id="p-moderators-pagination" styleClass="col-sm-9">
+                <h:panelGroup layout="block" id="p-moderators-pagination">
                     <b:pagitable paginator="#{topicBacker.moderators}" simple="true">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
                         <h:column>
@@ -111,13 +100,14 @@
                                              rendered="#{topicBacker.moderator}"
                                              image="/resources/images/add.png"
                                              alt="#{labels.topic_ban}"/>
-                            <h:commandButton id="cb-image-unban" action="#{topicBacker.openUnbanDialog}" styleClass="button"
+                            <h:commandButton id="cb-image-unban" action="#{topicBacker.openUnbanDialog}"
+                                             styleClass="button"
                                              rendered="#{topicBacker.moderator and topicBacker.bannedUsers.selection.totalSize gt 0}"
                                              image="/resources/images/delete.png" alt="#{labels.topic_unban}"/>
                         </h:form>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="col-sm-9" id="p-banned-pagination">
+                <h:panelGroup layout="block" id="p-banned-pagination">
                     <b:pagitable paginator="#{topicBacker.bannedUsers}" simple="true">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
                         <h:column>
@@ -141,7 +131,7 @@
 
         </h:panelGroup>
 
-        <hr />
+        <hr/>
 
         <h:outputText id="ot-reports" styleClass="h2 my-3" value="#{labels.reports}"/>
         <h:panelGroup layout="block">
@@ -160,11 +150,16 @@
                         <h:outputLabel value="#{labels.topic_show_closed_reports}"/>
                     </h:panelGroup>
                 </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="row mt-3">
-                    <h:panelGroup layout="block" styleClass="col-sm-12">
+                <h:panelGroup layout="block" styleClass="d-flex mt-3">
+                    <h:panelGroup layout="block" styleClass="me-3">
                         <h:commandButton id="cb-applyFilter" action="#{topicBacker.applyFilters}"
                                          styleClass="btn btn-primary" value="#{labels.apply_filter}"/>
                     </h:panelGroup>
+                    <h:link id="l-create-report" outcome="pretty:report-create" value="#{labels.create_report}"
+                            styleClass="btn btn-secondary" rendered="#{userSession.user != null and
+                                    not topicBacker.banned}">
+                        <f:param name="id" value="#{topicBacker.topicID}"/>
+                    </h:link>
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>
@@ -222,7 +217,7 @@
                 <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                     <h:outputLabel id="ol-username" value="#{labels.username}" for="it-username"
                                    styleClass="form-label"/>
-                    <h:panelGroup id="p-username-input" layout="block" styleClass="input-group">
+                    <h:panelGroup id="p-username-input" layout="block">
                         <h:inputText id="it-username" value="#{topicBacker.userMod}" required="true"
                                      a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
                                      #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -234,13 +229,13 @@
                         <h:panelGroup id="p-username-message" layout="block" styleClass="invalid-tooltip end-0">
                             <h:message id="m-username" for="it-username"/>
                         </h:panelGroup>
-                    </h:panelGroup>
-                    <h:panelGroup id="p-mod-suggestions" layout="block">
-                        <ui:repeat value="#{empty topicBacker.userModSuggestions ? null
+                        <h:panelGroup id="p-mod-suggestions" layout="block" styleClass="position-absolute w-100">
+                            <ui:repeat value="#{empty topicBacker.userModSuggestions ? null
                                             : topicBacker.userModSuggestions}" var="user">
-                            <h:commandLink action="#{topicBacker.setUserMod(user)}" value="#{user}"
-                                           styleClass="row search"/>
-                        </ui:repeat>
+                                <h:commandLink action="#{topicBacker.applyUserModSuggestion(user)}" value="#{user}"
+                                               styleClass="d-block search"/>
+                            </ui:repeat>
+                        </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
@@ -265,7 +260,7 @@
                     <h:panelGroup id="p-username-mod" layout="block" styleClass="row align-center">
                         <h:outputLabel id="ol-username-mod" value="#{labels.username}" for="it-username-mod"
                                        styleClass="form-label"/>
-                        <h:panelGroup id="p-username-mod-input" layout="block" styleClass="input-group">
+                        <h:panelGroup id="p-username-mod-input" layout="block">
                             <h:inputText id="it-username-mod" value="#{topicBacker.userMod}" required="true"
                                          a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -277,13 +272,13 @@
                             <h:panelGroup id="p-username-mod-message" layout="block" styleClass="invalid-tooltip end-0">
                                 <h:message id="m-username-mod" for="it-username-mod"/>
                             </h:panelGroup>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-unmod-suggestions" layout="block">
-                            <ui:repeat value="#{empty topicBacker.userModSuggestions ? null
+                            <h:panelGroup id="p-unmod-suggestions" layout="block" styleClass="position-absolute w-100">
+                                <ui:repeat value="#{empty topicBacker.userModSuggestions ? null
                                 : topicBacker.userModSuggestions}" var="user">
-                                <h:commandLink action="#{topicBacker.setUserMod(user)}" value="#{user}"
-                                               styleClass="row search"/>
-                            </ui:repeat>
+                                    <h:commandLink action="#{topicBacker.applyUserModSuggestion(user)}" value="#{user}"
+                                                   styleClass="search"/>
+                                </ui:repeat>
+                            </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -309,8 +304,8 @@
                     <h:panelGroup id="p-username-ban" layout="block" styleClass="row align-center">
                         <h:outputLabel id="ol-username-ban" value="#{labels.username}" for="it-username-ban"
                                        styleClass="form-label"/>
-                        <h:panelGroup id="p-username-ban-input" layout="block" styleClass="input-group">
-                            <h:inputText id="it-username-ban" value="#{topicBacker.userBan}" required="true"
+                        <h:panelGroup id="p-username-ban-input" layout="block">
+                            <h:inputText id="it-username-ban" value="#{topicBacker.userBan}"
                                          a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
                                          : 'is-invalid'}" a:placeholder="#{labels.search}">
@@ -321,13 +316,12 @@
                             <h:panelGroup id="p-username-ban-message" layout="block" styleClass="invalid-tooltip end-0">
                                 <h:message id="m-username-ban" for="it-username-ban"/>
                             </h:panelGroup>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-ban-suggestions" layout="block">
-                            <ui:repeat value="#{empty topicBacker.userBanSuggestions ? labels.no_suggestions
-                                : topicBacker.userBanSuggestions}" var="user">
-                                <h:commandLink action="#{topicBacker.setUserBan(user)}" value="#{user}"
-                                               styleClass="row search"/>
-                            </ui:repeat>
+                            <h:panelGroup id="p-ban-suggestions" layout="block" styleClass="position-absolute w-100">
+                                <ui:repeat value="#{topicBacker.userBanSuggestions}" var="user">
+                                    <h:commandLink action="#{topicBacker.applyUserBanSuggestion(user)}" value="#{user}"
+                                                   styleClass="search"/>
+                                </ui:repeat>
+                            </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -353,8 +347,7 @@
                     <h:panelGroup id="p-username-unban" layout="block" styleClass="row align-center">
                         <h:outputLabel id="ol-username-unban" value="#{labels.username}" for="it-username-unban"
                                        styleClass="form-label"/>
-                        <h:panelGroup id="p-username-unban-input" layout="block"
-                                      styleClass="input-group">
+                        <h:panelGroup id="p-username-unban-input" layout="block">
                             <h:inputText id="it-username-unban" value="#{topicBacker.userBan}" required="true"
                                          a:maxlength="#{C.USERNAME_MAX}" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -367,13 +360,12 @@
                                           styleClass="invalid-tooltip end-0">
                                 <h:message id="m-username-unban" for="it-username-unban"/>
                             </h:panelGroup>
-                        </h:panelGroup>
-                        <h:panelGroup id="p-unban-suggestions" layout="block">
-                            <ui:repeat value="#{empty topicBacker.userBanSuggestions ? labels.no_suggestions
-                                : topicBacker.userBanSuggestions}" var="user">
-                                <h:commandLink action="#{topicBacker.setUserBan(user)}" value="#{user}"
-                                               styleClass="row search"/>
-                            </ui:repeat>
+                            <h:panelGroup id="p-unban-suggestions" layout="block" styleClass="position-absolute w-100">
+                                <ui:repeat value="#{topicBacker.userBanSuggestions}" var="user">
+                                    <h:commandLink action="#{topicBacker.applyUserBanSuggestion(user)}" value="#{user}"
+                                                   styleClass="search"/>
+                                </ui:repeat>
+                            </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>
@@ -396,7 +388,9 @@
                     <h:outputText id="ot-delete-warn" value="#{labels.delete_affirm_warn}"/>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
-                    <h:commandButton id="cb-delTopic" action="#{topicBacker.delete}" styleClass="btn btn-primary"
+                    <h:commandButton id="cb-delTopic"
+                                     action="#{topicBacker.delete}"
+                                     styleClass="btn btn-danger"
                                      value="#{labels.delete}"/>
                     <h:commandButton id="cb-abortDelTopic" action="#{topicBacker.closeDialog}"
                                      styleClass="btn btn-secondary" value="#{labels.cancel}"/>

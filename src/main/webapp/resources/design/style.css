@@ -303,6 +303,9 @@ p {
     padding: 1%;
     text-decoration: none;
     color: black;
+    display: block;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 .vote-cast {
