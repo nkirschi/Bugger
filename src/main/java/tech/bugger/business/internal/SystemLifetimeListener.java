@@ -133,7 +133,7 @@ public class SystemLifetimeListener implements ServletContextListener {
         registerPriorityExecutors();
         registerShutdownHooks();
         scheduleMaintenanceTasks();
-        // processUnsentNotifications();
+        processUnsentNotifications();
 
         log.info("Application startup completed.");
     }
