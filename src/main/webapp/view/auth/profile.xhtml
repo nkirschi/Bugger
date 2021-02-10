@@ -169,10 +169,11 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <h:panelGroup layout="block" styleClass="mb3">
+                    <h:panelGroup layout="block" styleClass="mt-3">
                         <h:panelGroup id="p-biography" layout="block" styleClass="row"
-                                      rendered="#{profileBacker.user.profileVisibility == V.FULL
-                                      or profileBacker.privileged}">
+                                      rendered="#{(profileBacker.user.profileVisibility == V.FULL
+                                                       or profileBacker.privileged)
+                                                   and not empty profileBacker.sanitizedBiography}">
                             <h:outputLabel id="ol-biography" value="#{labels.biography}" for="ot-biography"
                                            styleClass="form-label"/>
                             <h:outputText id="ot-biography" value="#{profileBacker.sanitizedBiography}" escape="false"
