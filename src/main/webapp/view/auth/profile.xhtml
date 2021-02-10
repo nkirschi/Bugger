@@ -27,35 +27,33 @@
                 <h:form id="f-profile">
 
                     <!-- Contains the buttons for changing administration status, profile editing and subscribing -->
-                    <h:panelGroup id="p-profile-buttons" layout="block" styleClass="row">
-                        <h:panelGroup styleClass="col-12 align-right">
+                    <h:panelGroup id="p-profile-buttons" layout="block" styleClass="d-flex float-end">
                             <h:commandButton id="cb-subscribe"
                                              action="#{profileBacker.toggleUserSubscription}"
                                              value="#{labels.subscribe}"
-                                             styleClass="button btn btn-primary"
+                                             styleClass="btn btn-primary"
                                              rendered="#{userSession.user != null
                                              and userSession.user.id != profileBacker.user.id
                                              and not profileBacker.subscribed}"/>
                             <h:commandButton id="cb-unsubscribe"
                                              action="#{profileBacker.toggleUserSubscription}"
                                              value="#{labels.unsubscribe}"
-                                             styleClass="button btn btn-primary"
+                                             styleClass="btn btn-primary ms-3"
                                              rendered="#{userSession.user != null
                                              and userSession.user.id != profileBacker.user.id
                                              and profileBacker.subscribed}"/>
                             <h:commandButton id="cb-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
-                                             styleClass="button btn btn-primary" value="#{labels.promote}"
+                                             styleClass="btn btn-primary ms-3" value="#{labels.promote}"
                                              rendered="#{userSession.user.administrator
                                              and not profileBacker.user.administrator}"/>
                             <h:commandButton id="cb-rem-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
-                                             styleClass="button btn btn-primary" value="#{labels.demote}"
+                                             styleClass="btn btn-primary ms-3" value="#{labels.demote}"
                                              rendered="#{userSession.user.administrator
                                              and profileBacker.user.administrator}"/>
                             <h:link id="l-edit" value="#{labels.edit}" outcome="/view/restr/profile-edit.xhtml"
-                                    rendered="#{profileBacker.privileged}" styleClass="button btn btn-secondary">
+                                    rendered="#{profileBacker.privileged}" styleClass="btn btn-secondary ms-3">
                                 <f:param name="e" value="#{profileBacker.user.username}"/>
                             </h:link>
-                        </h:panelGroup>
                     </h:panelGroup>
 
                     <!-- The profile owner's user information -->
@@ -210,23 +208,21 @@
                     </h:panelGroup>
                 </h:panelGroup>
 
-                <!-- Renders the title and command button of the profile owner's subscribed topics. This form is
-                necessary since the pagitable contains an additional form. -->
-                <h:form id="f-sub-topics" styleClass="row my-3" rendered="#{profileBacker.privileged}">
-                    <h:panelGroup layout="block" styleClass="col-9">
+                <!-- A paginated list of the profile owner's subscribed topics. -->
+                <h:panelGroup id="p-sub-topics"
+                              styleClass="row my-3"
+                              layout="block"
+                              rendered="#{profileBacker.privileged}">
+                    <h:form id="f-sub-topics"
+                            styleClass="d-flex justify-content-between align-items-center"
+                            rendered="#{profileBacker.privileged}">
                         <h:outputText id="ot-sub-topics" styleClass="h2" value="#{labels.topic_subs}"/>
-                    </h:panelGroup>
-                    <h:panelGroup styleClass="col-3 col-auto align-right">
                         <h:commandButton id="cb-unsub-all-topics"
                                          action="#{profileBacker.openDeleteAllTopicSubscriptionsDialog}"
-                                         rendered="#{not profileBacker.topicSubscriptions.isEmpty()
-                                         and profileBacker.privileged}" value="#{labels.unsub_all}"
+                                         rendered="#{not profileBacker.topicSubscriptions.isEmpty()}"
+                                         value="#{labels.unsub_all}"
                                          styleClass="btn btn-primary"/>
-                    </h:panelGroup>
-                </h:form>
-
-                <!-- A paginated list of the profile owner's subscribed topics. -->
-                <h:panelGroup id="p-sub-topics" styleClass="row" layout="block" rendered="#{profileBacker.privileged}">
+                    </h:form>
                     <h:panelGroup id="p-sub-topics-pagination" styleClass="col-12" layout="block">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                         <b:pagitable paginator="#{profileBacker.topicSubscriptions}">
@@ -251,22 +247,20 @@
                     </h:panelGroup>
                 </h:panelGroup>
 
-                <!-- Same as previous form for reports -->
-                <h:form id="f-sub-reports" styleClass="row my-3" rendered="#{profileBacker.privileged}">
-                    <h:panelGroup layout="block" styleClass="col-9">
+                <!-- A paginated list of the profile owner's subscribed reports. -->
+                <h:panelGroup id="p-sub-reports"
+                              layout="block"
+                              styleClass="row my-3"
+                              rendered="#{profileBacker.privileged}">
+                    <h:form id="f-sub-reports"
+                            styleClass="d-flex justify-content-between align-items-center"
+                            rendered="#{profileBacker.privileged}">
                         <h:outputText id="ot-sub-reports" styleClass="h2" value="#{labels.report_subs}"/>
-                    </h:panelGroup>
-                    <h:panelGroup styleClass="col-3 col-auto align-right">
                         <h:commandButton id="cb-unsub-all-reports"
                                          action="#{profileBacker.openDeleteAllReportSubscriptionsDialog}"
-                                         rendered="#{not profileBacker.reportSubscriptions.isEmpty()
-                                         and profileBacker.privileged}" value="#{labels.unsub_all}"
+                                         rendered="#{not profileBacker.reportSubscriptions.isEmpty()}" value="#{labels.unsub_all}"
                                          styleClass="btn btn-primary"/>
-                    </h:panelGroup>
-                </h:form>
-
-                <!-- A paginated list of the profile owner's subscribed reports. -->
-                <h:panelGroup id="p-sub-reports" layout="block" styleClass="row" rendered="#{profileBacker.privileged}">
+                    </h:form>
                     <h:panelGroup id="p-sub-reports-pagination" layout="block" styleClass="col-12">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
                         <b:pagitable paginator="#{profileBacker.reportSubscriptions}">
@@ -299,22 +293,21 @@
                     </h:panelGroup>
                 </h:panelGroup>
 
-                <!-- Same as previous form for users -->
-                <h:form id="f-sub-users" styleClass="row my-3" rendered="#{profileBacker.privileged}">
-                    <h:panelGroup layout="block" styleClass="col-9">
+                <!-- A paginated list of the profile owner's subscribed users. -->
+                <h:panelGroup id="p-sub-users"
+                              layout="block"
+                              styleClass="row my-3"
+                              rendered="#{profileBacker.privileged}">
+                    <h:form id="f-sub-users"
+                            styleClass="d-flex justify-content-between align-items-center"
+                            rendered="#{profileBacker.privileged}">
                         <h:outputText id="ot-sub-users" styleClass="h2" value="#{labels.user_subs}"/>
-                    </h:panelGroup>
-                    <h:panelGroup styleClass="col-3 col-auto align-right">
                         <h:commandButton id="cb-unsub-all-users"
                                          action="#{profileBacker.openDeleteAllUserSubscriptionsDialog}"
-                                         rendered="#{not profileBacker.userSubscriptions.isEmpty()
-                                         and profileBacker.privileged}" value="#{labels.unsub_all}"
+                                         rendered="#{not profileBacker.userSubscriptions.isEmpty()}"
+                                         value="#{labels.unsub_all}"
                                          styleClass="btn btn-primary"/>
-                    </h:panelGroup>
-                </h:form>
-
-                <!-- A paginated list of the profile owner's subscribed users. -->
-                <h:panelGroup id="p-sub-users" layout="block" styleClass="row" rendered="#{profileBacker.privileged}">
+                    </h:form>
                     <h:panelGroup id="p-sub-users-pagination" layout="block" styleClass="col-12">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
                         <b:pagitable paginator="#{profileBacker.userSubscriptions}">
