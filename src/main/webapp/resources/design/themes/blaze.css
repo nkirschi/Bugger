@@ -64,6 +64,11 @@ body {
   color: #ef5e01;
 }
 
+#p-content .btn-outline-primary {
+  border-color: #fc990f;
+  color: #fc990f;
+}
+
 .btn-primary {
   border-color: #ef5e01;
   background-color: #fc990f;
