@@ -18,6 +18,10 @@ body a:hover {
   color: #dfbf66;
 }
 
+#g-logo-fallback {
+  filter: invert(71%) sepia(48%) saturate(389%) hue-rotate(6deg) brightness(99%) contrast(90%);
+}
+
 #p-footer {
   background: #2b2b2b;
   color: #dfbf66;

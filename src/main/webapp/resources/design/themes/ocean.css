@@ -12,6 +12,10 @@ body {
   color: #f4f1e8;
 }
 
+#g-logo-fallback {
+  filter: invert(94%) sepia(9%) saturate(394%) hue-rotate(3deg) brightness(109%) contrast(91%);
+}
+
 #p-footer {
   background: #005eb8;
   color: #f4f1e8;

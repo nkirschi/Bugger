@@ -18,6 +18,10 @@ body a:hover {
   color: white;
 }
 
+#g-logo-fallback {
+  filter: invert();
+}
+
 #p-footer {
   background: #2b2b2b;
   color: white;

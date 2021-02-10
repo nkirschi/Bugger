@@ -12,6 +12,10 @@ body {
   color: white;
 }
 
+#g-logo-fallback {
+  filter: invert();
+}
+
 #p-footer {
   background-color: #1565C0;
   color: white;
