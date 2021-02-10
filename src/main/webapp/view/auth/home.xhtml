@@ -31,17 +31,20 @@
     </ui:define>
 
     <ui:define name="content">
-        <h:panelGroup id="p-notifications" layout="box" rendered="#{userSession.user != null}">
-            <h:outputText value="#{labels.home_notifications}" styleClass="h2"/>
-            <h:panelGroup styleClass="col-3 col-auto align-right">
-                <h:form id="f-delete-all-notifications">
+        <h:panelGroup id="p-notifications"
+                      layout="block"
+                      rendered="#{userSession.user != null and not homeBacker.inbox.isEmpty()}">
+            <h:form id="f-delete-all-notifications">
+                <h:panelGroup layout="block"
+                              styleClass="d-flex justify-content-between align-items-center">
+                    <h:outputText value="#{labels.home_notifications}" styleClass="h2"/>
                     <h:commandButton id="cb-delete-all-notifications"
                                      value="#{labels.home_delete_notifications}"
-                                     rendered="#{not homeBacker.inbox.isEmpty()}"
                                      action="#{homeBacker.displayDialog('DELETE_ALL_NOTIFICATIONS')}"
                                      styleClass="btn btn-primary"/>
-                </h:form>
-            </h:panelGroup>
+                </h:panelGroup>
+            </h:form>
+
             <b:pagitable paginator="#{homeBacker.inbox}">
                 <!--@elvariable id="var" type="tech.bugger.global.transfer.Notification"-->
                 <b:column title="#{labels.home_seen}" paginator="#{homeBacker.inbox}" key="read">
