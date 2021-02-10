@@ -1,5 +1,17 @@
 package tech.bugger.control.backing;
 
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.StreamSupport;
+import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
@@ -17,19 +29,6 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.event.Event;
-import javax.faces.context.ExternalContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.StreamSupport;
 
 /**
  * Backing bean for the report page.
@@ -211,8 +210,6 @@ public class ReportBacker implements Serializable {
      */
     @PostConstruct
     void init() {
-        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
-
         int reportID;
         Integer postID = null;
         if (ectx.getRequestParameterMap().containsKey("p")) {
@@ -233,11 +230,7 @@ public class ReportBacker implements Serializable {
             }
         }
 
-        try {
-            report = reportService.getReportByID(reportID);
-        } catch (DataAccessException e) {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
-        }
+        report = reportService.getReportByID(reportID);
         if (report == null) { // no report with this ID
             throw new Error404Exception();
         }
@@ -306,13 +299,7 @@ public class ReportBacker implements Serializable {
      * Updates the values for the relevance interface.
      */
     private void updateRelevance() {
-        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
-
-        try {
-            report = reportService.getReportByID(report.getId());
-        } catch (DataAccessException e) {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
-        }
+        report = reportService.getReportByID(report.getId());
         if (report == null) {
             throw new Error404Exception();
         }
@@ -481,18 +468,14 @@ public class ReportBacker implements Serializable {
         ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
 
         postService.deletePost(postToBeDeleted, report);
-        try {
-            if (reportService.getReportByID(report.getId()) == null) {
-                feedbackEvent.fire(new Feedback(messagesBundle.getString("report_deleted"), Feedback.Type.INFO));
-                try {
-                    ectx.redirect(ectx.getApplicationContextPath() + "/topic?id=" + report.getTopicID());
-                    return;
-                } catch (IOException e) {
-                    throw new Error404Exception("Redirection failed.", e);
-                }
+        if (reportService.getReportByID(report.getId()) == null) {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("report_deleted"), Feedback.Type.INFO));
+            try {
+                ectx.redirect(ectx.getApplicationContextPath() + "/topic?id=" + report.getTopicID());
+                return;
+            } catch (IOException e) {
+                throw new Error404Exception("Redirection failed.", e);
             }
-        } catch (DataAccessException e) {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
         }
         posts.update();
         feedbackEvent.fire(new Feedback(messagesBundle.getString("post_deleted"), Feedback.Type.INFO));
