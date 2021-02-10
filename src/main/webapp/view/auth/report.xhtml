@@ -34,8 +34,8 @@
                     <h:commandButton id="cb-duplicate-submit" styleClass="hide" action="#{reportBacker.markDuplicate}"/>
                     <h:commandButton id="cb-duplicate" value="#{labels.ok}" styleClass="btn btn-primary"
                                      action="#{reportBacker.markDuplicate}"/>
-                    <h:commandButton id="cb-abort-duplicate" value="#{labels.cancel}"
-                                     styleClass="btn btn-secondary me-3" action="#{reportBacker.displayDialog(null)}"/>
+                    <h:commandButton id="cb-abort-duplicate" value="#{labels.cancel}" immediate="true"
+                                     styleClass="btn btn-secondary" action="#{reportBacker.displayDialog(null)}"/>
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>

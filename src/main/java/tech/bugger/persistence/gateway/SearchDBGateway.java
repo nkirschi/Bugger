@@ -51,7 +51,6 @@ public class SearchDBGateway implements SearchGateway {
         if (selection == null || query == null) {
             log.error("The selection or query cannot be null!");
             throw new IllegalArgumentException("The selection or query cannot be null!");
-
         } else if (StringUtils.isBlank(selection.getSortedBy())) {
             log.error("Error when trying to get users sorted by nothing.");
             throw new IllegalArgumentException("The selection needs to have a column to sort by.");
@@ -422,7 +421,8 @@ public class SearchDBGateway implements SearchGateway {
                                          final OffsetDateTime latestOpeningDateTime,
                                          final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                          final boolean showClosedReports, final boolean showDuplicates,
-                                         final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
+                                         final boolean fulltext, final String topic,
+                                         final Map<Report.Type, Boolean> reportTypeFilter,
                                          final Map<Report.Severity, Boolean> severityFilter) {
         if (selection == null || query == null || severityFilter == null || reportTypeFilter == null) {
             log.error("The selection or query cannot be null!");
@@ -456,14 +456,17 @@ public class SearchDBGateway implements SearchGateway {
                 + "v.relevance FROM report AS r LEFT OUTER JOIN topic AS t ON r.topic = t.id "
                 + "LEFT OUTER JOIN report_last_activity AS a "
                 + "ON a.report = r.id LEFT OUTER JOIN report_relevance AS v ON r.id = v.report "
-                + "WHERE TRIM(LOWER(r.title)) LIKE "
-                + "CONCAT('%',?,'%') "
+                + "WHERE (TRIM(LOWER(r.title)) LIKE CONCAT('%',?,'%') "
+                + "OR (SELECT COUNT(*) FROM post p WHERE ? AND p.report = r.id AND TRIM(LOWER(p.content)) LIKE "
+                + "CONCAT('%',?,'%')) > 0) "
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
-                + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) " + filter
+                + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) " + filter + ' '
                 + "AND t.title = COALESCE(?, t.title) "
                 + "ORDER BY " + orderBy + (selection.isAscending() ? " ASC " : " DESC ")
                 + "LIMIT ? OFFSET ?;")) {
             ResultSet rs = new StatementParametrizer(stmt)
+                    .string(query)
+                    .bool(fulltext)
                     .string(query)
                     .object(latestOpeningDateTime)
                     .object(earliestClosingDateTime)
@@ -482,7 +485,8 @@ public class SearchDBGateway implements SearchGateway {
     }
 
     private String getFilter(final String prefix, final boolean showOpenReports, final boolean showClosedReports,
-                             final boolean showDuplicates, final Map<Report.Type, Boolean> reportTypeFilter,
+                             final boolean showDuplicates,
+                             final Map<Report.Type, Boolean> reportTypeFilter,
                              final Map<Report.Severity, Boolean> severityFilter) {
         String filterClosedAt = "";
         if (!showClosedReports) {
@@ -543,20 +547,6 @@ public class SearchDBGateway implements SearchGateway {
         String filterSeverity = filterSeverityBuilder.toString();
 
         return filterClosedAt + filterDuplicate + filterType + filterSeverity;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<Report> getFulltextResults(final String query, final Selection selection,
-                                           final OffsetDateTime latestOpeningDateTime,
-                                           final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
-                                           final boolean showClosedReports, final boolean showDuplicates,
-                                           final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
-                                           final Map<Report.Severity, Boolean> severityFilter) {
-        return getReportResults(query, selection, latestOpeningDateTime, earliestClosingDateTime, showOpenReports,
-                showClosedReports, showDuplicates, topic, reportTypeFilter, severityFilter);
     }
 
     /**
@@ -637,7 +627,8 @@ public class SearchDBGateway implements SearchGateway {
     public int getNumberOfReportResults(final String query, final OffsetDateTime latestOpeningDateTime,
                                         final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                         final boolean showClosedReports, final boolean showDuplicates,
-                                        final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
+                                        final boolean fulltext, final String topic,
+                                        final Map<Report.Type, Boolean> reportTypeFilter,
                                         final Map<Report.Severity, Boolean> severityFilter) {
         if (query == null || severityFilter == null || reportTypeFilter == null) {
             log.error("The query cannot be null!");
@@ -662,11 +653,15 @@ public class SearchDBGateway implements SearchGateway {
 
         try (PreparedStatement stmt = conn.prepareStatement("SELECT Count(*) AS num_reports FROM \"report\" AS r "
                 + "JOIN topic AS t "
-                + "ON r.topic = t.id WHERE TRIM(LOWER(r.title)) LIKE CONCAT('%',?,'%') "
+                + "ON r.topic = t.id WHERE (TRIM(LOWER(r.title)) LIKE CONCAT('%',?,'%') "
+                + "OR (SELECT COUNT(*) FROM post p WHERE ? AND p.report = r.id AND TRIM(LOWER(p.content)) LIKE "
+                + "CONCAT('%',?,'%')) > 0) "
                 + "AND r.created_at <= COALESCE(?, r.created_at) "
-                + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL)" + filter
+                + "AND (r.closed_at >= COALESCE(?, r.closed_at) OR r.closed_at IS NULL) " + filter + ' '
                 + "AND t.title = COALESCE(?, t.title);")) {
             ResultSet rs = new StatementParametrizer(stmt)
+                    .string(query)
+                    .bool(fulltext)
                     .string(query)
                     .object(latestOpeningDateTime)
                     .object(earliestClosingDateTime)
@@ -681,18 +676,6 @@ public class SearchDBGateway implements SearchGateway {
         }
 
         return reports;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getNumberOfFulltextResults(final String query, final OffsetDateTime latestOpeningDateTime,
-                                          final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
-                                          final boolean showClosedReports, final boolean showDuplicates,
-                                          final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
-                                          final Map<Report.Severity, Boolean> severityFilter) {
-        return 0;
     }
 
 }

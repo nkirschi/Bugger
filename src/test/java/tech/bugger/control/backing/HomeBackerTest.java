@@ -47,7 +47,7 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
-class HomeBackerTest {
+public class HomeBackerTest {
 
     private HomeBacker homeBacker;
 

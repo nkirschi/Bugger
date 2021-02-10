@@ -30,7 +30,8 @@
             <h:panelGroup rendered="#{not postEditBacker.create}">
                 <p>
                     <h:outputText value="#{labels.post_edit_info} "/>
-                    <h:link value="###{postEditBacker.post.id}" outcome="pretty:report">
+                    <h:link value="###{postEditBacker.post.id}" outcome="pretty:report"
+                            fragment="post-#{postEditBacker.post.id}">
                         <f:param name="id" value="#{postEditBacker.report.id}"/>
                         <f:param name="p" value="#{postEditBacker.post.id}"/>
                     </h:link>

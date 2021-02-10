@@ -2,6 +2,7 @@ package tech.bugger.business.internal;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.faces.context.PartialViewContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +30,9 @@ public class SessionIDChangerTest {
     private FacesContext fctx;
 
     @Mock
+    private PartialViewContext pctx;
+
+    @Mock
     private ExternalContext ectx;
 
     @Mock
@@ -38,6 +42,7 @@ public class SessionIDChangerTest {
     public void setUp() {
         sessionIDChanger = new SessionIDChanger();
         lenient().doReturn(fctx).when(phaseEvent).getFacesContext();
+        lenient().doReturn(pctx).when(fctx).getPartialViewContext();
         lenient().doReturn(ectx).when(fctx).getExternalContext();
         lenient().doReturn(request).when(ectx).getRequest();
     }
@@ -63,7 +68,14 @@ public class SessionIDChangerTest {
     public void testAfterPhaseWhenSessionNotExists() {
         lenient().doReturn(null).when(ectx).getSession(false);
         sessionIDChanger.afterPhase(phaseEvent);
-        verify(request, times(0)).changeSessionId();
+        verify(request, never()).changeSessionId();
+    }
+
+    @Test
+    public void testAfterPhaseWhenAjaxRequest() {
+        doReturn(true).when(pctx).isAjaxRequest();
+        sessionIDChanger.afterPhase(phaseEvent);
+        verify(request, never()).changeSessionId();
     }
 
 }

@@ -9,11 +9,13 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.annotation.FacesConfig;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
 
@@ -51,9 +53,15 @@ public class JFConfigTest {
     }
 
     @Test
-    public void testGetApplicationPathFail() {
-        doReturn(new StringBuffer("thisshouldneverhappen")).when(request).getRequestURL();
-        assertThrows(InternalError.class, () -> JFConfig.getApplicationPath(ectx));
+    public void testGetApplicationPathDefault() {
+        FacesContext fctx = mock(FacesContext.class);
+        doReturn(ectx).when(fctx).getExternalContext();
+        try (MockedStatic<FacesContext> fctxStatic = mockStatic(FacesContext.class)) {
+            fctxStatic.when(FacesContext::getCurrentInstance).thenReturn(fctx);
+            doReturn("").when(ectx).getApplicationContextPath();
+            doReturn(new StringBuffer("https://bugger.tech:8080")).when(request).getRequestURL();
+            assertEquals("https://bugger.tech:8080", JFConfig.getApplicationPath());
+        }
     }
 
     @Test
@@ -61,6 +69,12 @@ public class JFConfigTest {
         doReturn("").when(ectx).getApplicationContextPath();
         doReturn(new StringBuffer("https://bugger.tech:8080")).when(request).getRequestURL();
         assertEquals("https://bugger.tech:8080", JFConfig.getApplicationPath(ectx));
+    }
+
+    @Test
+    public void testGetApplicationPathFail() {
+        doReturn(new StringBuffer("thisshouldneverhappen")).when(request).getRequestURL();
+        assertThrows(InternalError.class, () -> JFConfig.getApplicationPath(ectx));
     }
 
     @Test

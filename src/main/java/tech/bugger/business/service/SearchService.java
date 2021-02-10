@@ -332,6 +332,7 @@ public class SearchService {
      * @param showOpenReports         Whether or not to include open reports.
      * @param showClosedReports       Whether or not to include closed reports.
      * @param showDuplicates          Whether or not to include duplicates.
+     * @param fulltext                Whether or not to enable fulltext search in postings.
      * @param topic                   Only reports belonging to this topic are taken into account. Passing {@code null}
      *                                includes reports regardless of which topic they belong to.
      * @param reportTypeFilter        Which types of reports to include and which to exclude.
@@ -342,61 +343,18 @@ public class SearchService {
                                          final OffsetDateTime latestCreationDateTime,
                                          final OffsetDateTime earliestClosingDateTime,
                                          final boolean showOpenReports, final boolean showClosedReports,
-                                         final boolean showDuplicates, final String topic,
+                                         final boolean showDuplicates, final boolean fulltext, final String topic,
                                          final Map<Report.Type, Boolean> reportTypeFilter,
                                          final Map<Report.Severity, Boolean> severityFilter) {
         List<Report> reports = new ArrayList<>();
         String searchInput = query.trim().toLowerCase();
         try (Transaction tx = transactionManager.begin()) {
             reports = tx.newSearchGateway().getReportResults(searchInput, selection, latestCreationDateTime,
-                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic,
+                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, fulltext, topic,
                     reportTypeFilter, severityFilter);
             tx.commit();
         } catch (NotFoundException e) {
             log.error("Filter Topic " + topic + " not found while searching for reports", e);
-            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
-        } catch (TransactionException e) {
-            log.error("Error while loading the report search results.", e);
-            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
-        }
-        return reports;
-    }
-
-    /**
-     * Searches the data source for specific topics. The results are reports which can also contain the search query
-     * somewhere in the full texts of their posts.
-     *
-     * @param query                   The search query for report titles and full texts of posts.
-     * @param selection               Information on which part of the result to retrieve.
-     * @param latestCreationDateTime  Only reports created before this date are taken into account. Passing {@code null}
-     *                                includes reports regardless of when they were created.
-     * @param earliestClosingDateTime Only reports closed after this date are taken into account. Passing {@code null}
-     *                                includes reports regardless of when they were closed. Reports still open are never
-     *                                excluded via this filter.
-     * @param showOpenReports         Whether or not to include open reports.
-     * @param showClosedReports       Whether or not to include closed reports.
-     * @param showDuplicates          Whether or not to include duplicates.
-     * @param topic                   Only reports belonging to this topic are taken into account. Passing {@code null}
-     *                                includes reports regardless of which topic they belong to.
-     * @param reportTypeFilter        Which types of reports to include and which to exclude.
-     * @param severityFilter          Which reports of certain severities to include or exclude.
-     * @return A list of reports containing the selected search results.
-     */
-    public List<Report> getFulltextResults(final String query, final Selection selection,
-                                           final OffsetDateTime latestCreationDateTime,
-                                           final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
-                                           final boolean showClosedReports, final boolean showDuplicates,
-                                           final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
-                                           final Map<Report.Severity, Boolean> severityFilter) {
-        List<Report> reports = new ArrayList<>();
-        String searchInput = query.trim().toLowerCase();
-        try (Transaction tx = transactionManager.begin()) {
-            reports = tx.newSearchGateway().getFulltextResults(searchInput, selection, latestCreationDateTime,
-                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic,
-                    reportTypeFilter, severityFilter);
-            tx.commit();
-        } catch (NotFoundException e) {
-            log.error("Filter Topic with title " + topic + " not found while searching for reports", e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while loading the report search results.", e);
@@ -457,6 +415,7 @@ public class SearchService {
      * @param showOpenReports         Whether or not to include open reports.
      * @param showClosedReports       Whether or not to include closed reports.
      * @param showDuplicates          Whether or not to include duplicates.
+     * @param fulltext                Whether or not to enable fulltext search in postings.
      * @param topic                   Only reports belonging to this topic are taken into account. Passing {@code null}
      *                                includes reports regardless of which topic they belong to.
      * @param reportTypeFilter        Which types of reports to include and which to exclude.
@@ -466,56 +425,18 @@ public class SearchService {
     public int getNumberOfReportResults(final String query, final OffsetDateTime latestCreationDateTime,
                                         final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
                                         final boolean showClosedReports, final boolean showDuplicates,
-                                        final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
+                                        final boolean fulltext, final String topic,
+                                        final Map<Report.Type, Boolean> reportTypeFilter,
                                         final Map<Report.Severity, Boolean> severityFilter) {
         String searchInput = query.trim().toLowerCase();
         int results = 0;
         try (Transaction tx = transactionManager.begin()) {
             results = tx.newSearchGateway().getNumberOfReportResults(searchInput, latestCreationDateTime,
-                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic,
-                    reportTypeFilter, severityFilter);
+                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, fulltext,
+                    topic, reportTypeFilter, severityFilter);
             tx.commit();
         } catch (NotFoundException e) {
             log.error("Filter Topic " + topic + " not found while searching for reports", e);
-            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
-        } catch (TransactionException e) {
-            log.error("Error while loading the report search results.", e);
-            feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
-        }
-        return results;
-    }
-
-    /**
-     * Returns the number of report results for a certain full text search request.
-     *
-     * @param query                   The search query for report titles.
-     * @param latestCreationDateTime  Only reports created before this date are taken into account. Passing {@code null}
-     *                                includes reports regardless of when they were created.
-     * @param earliestClosingDateTime Only reports closed after this date are taken into account. Passing {@code null}
-     *                                includes reports regardless of when they were closed. Reports still open are never
-     *                                excluded via this filter.
-     * @param showOpenReports         Whether or not to include open reports.
-     * @param showClosedReports       Whether or not to include closed reports.
-     * @param showDuplicates          Whether or not to include duplicates.
-     * @param topic                   Only reports belonging to this topic are taken into account. Passing {@code null}
-     *                                includes reports regardless of which topic they belong to.
-     * @param reportTypeFilter        Which types of reports to include and which to exclude.
-     * @param severityFilter          Which reports of certain severities to include or exclude.
-     * @return The number of results as an {@code int}.
-     */
-    public int getNumberOfFulltextResults(final String query, final OffsetDateTime latestCreationDateTime,
-                                          final OffsetDateTime earliestClosingDateTime, final boolean showOpenReports,
-                                          final boolean showClosedReports, final boolean showDuplicates,
-                                          final String topic, final Map<Report.Type, Boolean> reportTypeFilter,
-                                          final Map<Report.Severity, Boolean> severityFilter) {
-        int results = 0;
-        try (Transaction tx = transactionManager.begin()) {
-            results = tx.newSearchGateway().getNumberOfFulltextResults(query, latestCreationDateTime,
-                    earliestClosingDateTime, showOpenReports, showClosedReports, showDuplicates, topic,
-                    reportTypeFilter, severityFilter);
-            tx.commit();
-        } catch (NotFoundException e) {
-            log.error("Filter Topic with title " + topic + " not found while searching for reports", e);
             feedback.fire(new Feedback(messages.getString("data_access_error"), Feedback.Type.ERROR));
         } catch (TransactionException e) {
             log.error("Error while loading the report search results.", e);

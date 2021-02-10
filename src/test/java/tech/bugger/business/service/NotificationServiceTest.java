@@ -42,7 +42,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
-class NotificationServiceTest {
+public class NotificationServiceTest {
 
     private NotificationService service;
 
