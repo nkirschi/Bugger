@@ -143,6 +143,7 @@
 
         <hr />
 
+        <h:outputText id="ot-reports" styleClass="h2 my-3" value="#{labels.reports}"/>
         <h:panelGroup layout="block">
             <h:form id="topic-filters">
                 <h:panelGroup layout="block" styleClass="row">
@@ -167,8 +168,6 @@
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>
-
-        <h:outputText id="ot-reports" styleClass="h2 my-3" value="#{labels.reports}"/>
         <h:panelGroup styleClass="row" layout="block">
             <h:panelGroup styleClass="col-sm-12" layout="block">
                 <b:pagitable paginator="#{topicBacker.reports}">
