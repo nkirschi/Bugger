@@ -309,4 +309,27 @@ public class NotificationServiceTest {
         }
     }
 
+    @Test
+    public void testDeleteAllNotificationsWhenUserIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> service.deleteAllNotifications(null));
+    }
+
+    @Test
+    public void testDeleteAllNotificationsWhenUserIDIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> service.deleteAllNotifications(new User()));
+    }
+
+    @Test
+    public void testDeleteAllNotificationsWhenCommitFails() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertDoesNotThrow(() -> service.deleteAllNotifications(user));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testDeleteAllNotificationsSuccess() {
+        assertDoesNotThrow(() -> service.deleteAllNotifications(user));
+        verify(feedbackEvent).fire(any());
+    }
+
 }
