@@ -191,4 +191,21 @@ public class HomeBackerTest {
         assertEquals("", homeBacker.getHelpSuffix());
     }
 
+    @Test
+    public void testDisplayDialog() {
+        HomeBacker.Dialog dialog = HomeBacker.Dialog.DELETE_ALL_NOTIFICATIONS;
+        assertNull(homeBacker.displayDialog(dialog));
+        assertEquals(dialog, homeBacker.getCurrentDialog());
+    }
+
+    @Test
+    public void testDeleteAllNotifications() throws Exception {
+        setupInbox();
+        doReturn(user).when(session).getUser();
+        assertNull(homeBacker.deleteAllNotifications());
+        assertNull(homeBacker.getCurrentDialog());
+        verify(notificationService).deleteAllNotifications(user);
+        verify(inboxMock).updateReset();
+    }
+
 }
