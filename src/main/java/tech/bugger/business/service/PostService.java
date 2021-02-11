@@ -120,7 +120,7 @@ public class PostService {
             tx.commit();
         } catch (NotFoundException e) {
             log.error("Post to be updated could not be found.", e);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_report"), Feedback.Type.ERROR));
             return false;
         } catch (TransactionException e) {
             log.error("Error while updating a post.", e);
