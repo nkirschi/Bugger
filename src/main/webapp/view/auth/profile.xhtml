@@ -237,7 +237,7 @@
                                     <f:param name="id" value="#{var.id}"/>
                                 </h:link>
                             </b:column>
-                            <h:column>
+                            <h:column styleClass="trashcan-col">
                                 <h:commandButton id="l-unsub-topic"
                                                  action="#{profileBacker.deleteTopicSubscription(var)}"
                                                  styleClass="button trashcan-small"
@@ -283,7 +283,7 @@
                                       key="severity">
                                 <h:outputText value="#{labels['report_severity_' += var.severity]}"/>
                             </b:column>
-                            <h:column>
+                            <h:column styleClass="trashcan-col">
                                 <h:commandButton id="l-unsub-report"
                                                  action="#{profileBacker.deleteReportSubscription(var)}"
                                                  styleClass="button trashcan-small"
@@ -317,7 +317,7 @@
                                     <f:param name="u" value="#{var.username}"/>
                                 </h:link>
                             </b:column>
-                            <h:column>
+                            <h:column styleClass="trashcan-col">
                                 <h:commandButton id="l-unsub-user" action="#{profileBacker.deleteUserSubscription(var)}"
                                                  styleClass="button trashcan-small"
                                                  image="/resources/images/trash.png"/>

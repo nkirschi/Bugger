@@ -85,7 +85,7 @@
                                 </h:outputLink>
                             </h:panelGroup>
                         </h:column>
-                        <h:column>
+                        <h:column styleClass="trashcan-col">
                             <h:commandButton id="cb-demote-user" action="#{topicBacker.unmodSingleUser(var.username)}"
                                              styleClass="button trashcan-small" rendered="#{topicBacker.moderator}"
                                              image="/resources/images/trash.png" alt="#{labels.remove}"/>
@@ -125,7 +125,7 @@
                                 </h:outputLink>
                             </h:panelGroup>
                         </h:column>
-                        <h:column>
+                        <h:column styleClass="trashcan-col">
                             <h:commandButton id="cb-unban-user" action="#{topicBacker.unbanSingleUser(var.username)}"
                                              styleClass="button trashcan-small" rendered="#{topicBacker.moderator}"
                                              image="/resources/images/trash.png" alt="#{labels.topic_unban}"/>
