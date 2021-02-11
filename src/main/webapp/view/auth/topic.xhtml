@@ -18,28 +18,33 @@
 
     <ui:define name="content">
         <h:form id="f-topic">
-            <h:panelGroup layout="block" styleClass="d-flex align-items-center mb-3">
-                <h:commandButton id="cb-subscribe"
-                                 action="#{topicBacker.toggleTopicSubscription}"
-                                 styleClass="btn btn-primary me-3"
-                                 value="#{labels.subscribe}"
-                                 rendered="#{userSession.user != null and not topicBacker.subscribed}"/>
-                <h:commandButton id="cb-unsubscribe"
-                                 action="#{topicBacker.toggleTopicSubscription}"
-                                 styleClass="btn btn-primary me-3"
-                                 value="#{labels.unsubscribe}"
-                                 rendered="#{userSession.user != null and topicBacker.subscribed}"/>
-                <h:link id="l-edit" outcome="pretty:topic-edit" value="#{labels.edit_topic}"
-                        styleClass="btn btn-secondary me-3" rendered="#{userSession.user.administrator}">
-                    <f:param name="id" value="#{topicBacker.topicID}"/>
-                </h:link>
-                <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}"
-                                 styleClass="btn btn-primary me-3"
-                                 value="#{labels.delete_topic}"
-                                 rendered="#{userSession.user.administrator}"/>
-                <h:link id="l-statistics" outcome="pretty:statistics" value="#{labels.statistics_for_topic}">
-                    <f:param name="t" value="#{topicBacker.topic.id}"/>
-                </h:link>
+            <h:panelGroup layout="block" styleClass="d-flex justify-content-between align-items-center mb-3">
+                <h:panelGroup layout="block" styleClass="d-flex align-items-center"
+                              rendered="#{userSession.user != null}">
+                    <h:commandButton id="cb-subscribe"
+                                     action="#{topicBacker.toggleTopicSubscription}"
+                                     styleClass="btn btn-primary me-3"
+                                     value="#{labels.subscribe}"
+                                     rendered="#{userSession.user != null and not topicBacker.subscribed}"/>
+                    <h:commandButton id="cb-unsubscribe"
+                                     action="#{topicBacker.toggleTopicSubscription}"
+                                     styleClass="btn btn-primary me-3"
+                                     value="#{labels.unsubscribe}"
+                                     rendered="#{userSession.user != null and topicBacker.subscribed}"/>
+                    <h:link id="l-edit" outcome="pretty:topic-edit" value="#{labels.edit_topic}"
+                            styleClass="btn btn-secondary me-3" rendered="#{userSession.user.administrator}">
+                        <f:param name="id" value="#{topicBacker.topicID}"/>
+                    </h:link>
+                    <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}"
+                                     styleClass="btn btn-primary me-3"
+                                     value="#{labels.delete_topic}"
+                                     rendered="#{userSession.user.administrator}"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block">
+                    <h:link id="l-statistics" outcome="pretty:statistics" value="#{labels.statistics_for_topic}">
+                        <f:param name="t" value="#{topicBacker.topic.id}"/>
+                    </h:link>
+                </h:panelGroup>
             </h:panelGroup>
         </h:form>
         <h:panelGroup layout="block">

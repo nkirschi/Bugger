@@ -130,13 +130,13 @@ body {
     background-image: url('../../resources/images/search.png');
 }
 
-#l-statistics::before, #l-imprint::before, #l-privacy::before {
+#l-statistics::before, #l-imprint::before, #l-privacy::before, #f-topic\:l-statistics::before {
     margin-right: 8px;
     vertical-align: middle;
     white-space: nowrap;
 }
 
-#l-statistics::before {
+#l-statistics::before, #f-topic\:l-statistics::before {
     content: url('../../resources/images/statistics.png');
 }
 
@@ -146,6 +146,10 @@ body {
 
 #l-privacy::before {
     content: url('../../resources/images/privacy.png');
+}
+
+#f-topic\:l-statistics::before {
+    filter: invert();
 }
 
 .header-search-suggestions {

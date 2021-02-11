@@ -152,4 +152,8 @@ code {
   background-color: #666666;
 }
 
+#f-topic\:l-statistics::before {
+  filter: none;
+}
+
 /*# sourceMappingURL=amoled.css.map */

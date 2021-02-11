@@ -154,4 +154,8 @@ code {
   background-color: #2b2b2b;
 }
 
+#f-topic\:l-statistics::before {
+  filter: none;
+}
+
 /*# sourceMappingURL=darcula.css.map */
