@@ -71,7 +71,7 @@
                             <h:panelGroup id="p-username" layout="block" styleClass="row">
                                 <h:panelGroup id="p-username-label" styleClass="col-3">
                                     <h:outputLabel id="ol-username" value="#{labels.username}" for="ot-username"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-username-output" styleClass="col-9">
                                     <h:outputText id="ot-username" value="#{profileBacker.user.username}"
@@ -84,7 +84,7 @@
                                   or profileBacker.privileged}">
                                 <h:panelGroup id="p-first-name-label" styleClass="col-3">
                                     <h:outputLabel id="ol-first-name" value="#{labels.first_name}" for="ot-first-name"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-first-name-output" styleClass="col-9">
                                     <h:outputText id="ot-first-name" value="#{profileBacker.user.firstName}"
@@ -97,7 +97,7 @@
                                   or profileBacker.privileged}">
                                 <h:panelGroup id="p-last-name-label" styleClass="col-3">
                                     <h:outputLabel id="ol-last-name" value="#{labels.last_name}" for="ot-last-name"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-last-name-output" styleClass="col-9">
                                     <h:outputText id="ot-last-name" value="#{profileBacker.user.lastName}"
@@ -110,7 +110,7 @@
                                           or profileBacker.privileged}">
                                 <h:panelGroup id="p-email-label" styleClass="col-3">
                                     <h:outputLabel id="ol-email" value="#{labels.email}" for="ot-email"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-email-output" styleClass="col-9">
                                     <h:outputText id="ot-email" value="#{profileBacker.user.emailAddress}"
@@ -121,7 +121,7 @@
                             <h:panelGroup id="p-weight" layout="block" styleClass="row">
                                 <h:panelGroup id="p-weight-label" styleClass="col-3">
                                     <h:outputLabel id="ol-weight" value="#{labels.voting_weight}" for="ot-weight"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-weight-output" styleClass="col-9">
                                     <h:outputText id="ot-weight" value="#{profileBacker.votingWeight}"
@@ -132,7 +132,7 @@
                             <h:panelGroup id="p-post-count" layout="block" styleClass="row">
                                 <h:panelGroup id="p-post-count-label" styleClass="col-3">
                                     <h:outputLabel id="ol-post-count" value="#{labels.num_posts}" for="ot-post-count"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-post-count-output" styleClass="col-9">
                                     <h:outputText id="ot-post-count" value="#{profileBacker.numberOfPosts}"
@@ -144,7 +144,7 @@
                                           rendered="#{profileBacker.user.administrator}">
                                 <h:panelGroup id="p-is-admin-label" styleClass="col-3">
                                     <h:outputLabel id="ol-is-admin" value="#{labels.status}" for="ot-is-admin"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-is-admin-output" styleClass="col-9">
                                     <h:outputText id="ot-is-admin" value="#{labels.administrator}"
@@ -155,7 +155,7 @@
                             <h:panelGroup id="p-register-date" layout="block" styleClass="row">
                                 <h:panelGroup id="p-register-date-label" styleClass="col-3">
                                     <h:outputLabel id="ol-register-date" value="#{labels.registration_date}"
-                                                   for="ot-register-date" styleClass="form-label"/>
+                                                   for="ot-register-date" styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-register-date-output" styleClass="col-9">
                                     <h:outputText id="ot-register-date" value="#{profileBacker.user.registrationDate}"
