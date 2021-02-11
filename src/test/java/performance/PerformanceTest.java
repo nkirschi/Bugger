@@ -1,5 +1,6 @@
 package performance;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import selenium.AdministratorTest;
 import selenium.ModeratorTest;
@@ -10,6 +11,7 @@ import selenium.UserTest;
 import java.util.ArrayList;
 import java.util.List;
 
+@Tag("performance")
 public class PerformanceTest {
 
     private static final int NUM_PARALLEL_EXECUTIONS = 5;
