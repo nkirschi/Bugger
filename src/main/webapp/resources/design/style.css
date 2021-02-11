@@ -5,6 +5,9 @@
 body {
     background: #fafafa;
     overflow: hidden;
+}
+
+p {
     text-align: justify;
 }
 
