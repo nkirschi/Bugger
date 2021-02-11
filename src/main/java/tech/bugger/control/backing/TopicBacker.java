@@ -284,7 +284,6 @@ public class TopicBacker implements Serializable {
      * Enables suggestions for users to be banned.
      */
     public void searchBanUsers() {
-        System.out.println(">>> USER BAN: " + userBan);
         if (userBan != null && !userBan.isBlank()) {
             userBanSuggestions = searchService.getUserBanSuggestions(userBan, topic);
         } else {
