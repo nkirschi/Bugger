@@ -50,8 +50,7 @@ public class StatisticsService {
      */
     public int countOpenReports(final ReportCriteria criteria) throws DataAccessException {
         try (Transaction tx = transactionManager.begin()) {
-            int openReports;
-            openReports = tx.newStatisticsGateway().getNumberOfOpenReports(criteria);
+            int openReports = tx.newStatisticsGateway().getNumberOfOpenReports(criteria);
             tx.commit();
             return openReports;
         } catch (TransactionException e) {

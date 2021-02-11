@@ -123,7 +123,7 @@ public class SettingsService {
      * Discovers all regular files non-recursively in the given directory.
      *
      * @param path The path of the directory to discover files in.
-     * @return The filenames of the files in {@code path}. Is {@code null} iff an error occurred.
+     * @return The filenames of the files in {@code path} or {@code null} iff an error occurred.
      */
     public List<String> discoverFiles(final String path) {
         List<String> filenames = new ArrayList<>();
@@ -142,8 +142,7 @@ public class SettingsService {
      * Reads the given input stream to the internal format for further use.
      *
      * @param is The uploaded file as input stream.
-     * @return The fully read file as {@code byte[]} array or {@code null} iff reading failed. Is {@code null} iff an
-     *         error occurred.
+     * @return The fully read file as {@code byte[]} array or {@code null} iff reading failed.
      */
     public byte[] readFile(final InputStream is) {
         try {

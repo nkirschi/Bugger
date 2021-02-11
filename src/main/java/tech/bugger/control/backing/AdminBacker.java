@@ -45,16 +45,6 @@ public class AdminBacker {
     private final SettingsService settingsService;
 
     /**
-     * Temporary configuration being filled with user input.
-     */
-    private Configuration configuration;
-
-    /**
-     * Temporary organization being filled with user input.
-     */
-    private Organization organization;
-
-    /**
      * Reference to the current {@link ExternalContext}.
      */
     private final ExternalContext ectx;
@@ -65,22 +55,34 @@ public class AdminBacker {
     private final Event<Feedback> feedbackEvent;
 
     /**
+     * Temporary configuration being filled with user input.
+     */
+    private Configuration configuration;
+
+    /**
+     * Temporary organization being filled with user input.
+     */
+    private Organization organization;
+
+    /**
      * Resource bundle for feedback messages.
      */
     private final ResourceBundle messagesBundle;
 
     /**
      * Constructs a new admin page backing bean with the necessary dependencies.
+     *
      * @param applicationSettings The application settings cache.
      * @param settingsService     The settings service to use.
      * @param ectx                The current {@link ExternalContext} of the application.
-     * @param feedbackEvent      The feedback event to use for user feedback.
-     * @param messagesBundle     The resource bundle for feedback messages.
+     * @param feedbackEvent       The feedback event to use for user feedback.
+     * @param messagesBundle      The resource bundle for feedback messages.
      */
     @Inject
     public AdminBacker(final ApplicationSettings applicationSettings,
                        final SettingsService settingsService,
-                       final ExternalContext ectx, final Event<Feedback> feedbackEvent,
+                       final ExternalContext ectx,
+                       final Event<Feedback> feedbackEvent,
                        @RegistryKey("messages") final ResourceBundle messagesBundle) {
         this.applicationSettings = applicationSettings;
         this.settingsService = settingsService;
@@ -96,6 +98,49 @@ public class AdminBacker {
     void init() {
         configuration = new Configuration(applicationSettings.getConfiguration());
         organization = new Organization(applicationSettings.getOrganization());
+    }
+
+    /**
+     * Saves and applies the changes made to the application configuration.
+     */
+    public void saveConfiguration() {
+        if (settingsService.updateConfiguration(configuration)) {
+            applicationSettings.setConfiguration(configuration);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("successfully_applied"), Feedback.Type.INFO));
+        } else {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
+        }
+    }
+
+    /**
+     * Saves and applies the changes made to the organization data.
+     */
+    public void saveOrganization() {
+        if (settingsService.updateOrganization(organization)) {
+            applicationSettings.setOrganization(organization);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("successfully_applied"), Feedback.Type.INFO));
+        } else {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
+        }
+    }
+
+    /**
+     * Determines the available themes for skinning the application.
+     *
+     * @return The filenames of the available themes.
+     */
+    public List<String> getAvailableThemes() {
+        List<String> files = settingsService.discoverFiles(ectx.getRealPath("/resources/design/themes"));
+        if (files != null) {
+            List<String> themes = files.stream().filter(f -> f.endsWith(".css")).collect(Collectors.toList());
+            if (themes.isEmpty()) {
+                themes.add(organization.getTheme()); // defensive: at least current theme for displaying
+            }
+            return themes;
+        } else {
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("themes_discovery_error"), Feedback.Type.WARNING));
+            return Collections.singletonList(organization.getTheme());
+        }
     }
 
     /**
@@ -128,51 +173,6 @@ public class AdminBacker {
     public void removeLogo(final ValueChangeEvent vce) {
         if ((boolean) vce.getNewValue()) {
             organization.setLogo(new byte[0]);
-        }
-    }
-
-    /**
-     * Determines the available themes for skinning the application.
-     *
-     * @return The filenames of the available themes.
-     */
-    public List<String> getAvailableThemes() {
-        List<String> files = settingsService.discoverFiles(ectx.getRealPath("/resources/design/themes"));
-        if (files != null) {
-            List<String> themes = files.stream().filter(f -> f.endsWith(".css")).collect(Collectors.toList());
-            if (themes.isEmpty()) {
-                themes.add(organization.getTheme()); // defensive: at least current theme for displaying
-            }
-            return themes;
-        } else {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("themes_discovery_error"), Feedback.Type.WARNING));
-            return Collections.singletonList(organization.getTheme());
-        }
-    }
-
-    /**
-     * Saves and applies the changes made to the application configuration.
-     */
-    public void saveConfiguration() {
-        if (settingsService.updateConfiguration(configuration)) {
-            applicationSettings.setConfiguration(configuration);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("changes_successfully_saved"),
-                                            Feedback.Type.INFO));
-        } else {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
-        }
-    }
-
-    /**
-     * Saves and applies the changes made to the organization data.
-     */
-    public void saveOrganization() {
-        if (settingsService.updateOrganization(organization)) {
-            applicationSettings.setOrganization(organization);
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("changes_successfully_saved"),
-                                            Feedback.Type.INFO));
-        } else {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("update_failure"), Feedback.Type.ERROR));
         }
     }
 
