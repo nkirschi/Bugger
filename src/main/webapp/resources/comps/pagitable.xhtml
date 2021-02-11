@@ -23,7 +23,7 @@
         <h:panelGroup layout="block" styleClass="d-flex justify-content-between"
                       rendered="#{not cc.attrs.paginator.isEmpty()}">
             <h:panelGroup layout="block" styleClass="col p-2">
-                <h:outputFormat id="ot-pag-count" styleClass="text-sm-left"
+                <h:outputFormat id="ot-pag-count" styleClass="text-sm-left text-nowrap"
                                 value="#{cc.attrs.paginator.selection.totalSize == 1
                         ? labels.paginator_entry
                         : labels.paginator_entries}">

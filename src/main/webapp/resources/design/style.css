@@ -11,6 +11,10 @@ p {
     text-align: justify;
 }
 
+p:last-child {
+    margin-bottom: 0;
+}
+
 #p-header {
     position: absolute;
     height: 80px;
@@ -195,6 +199,16 @@ p {
 
 .flex-basis-0 {
     flex-basis: 0;
+}
+
+.lh-3 {
+    line-height: 3;
+    margin-top: -4px;
+
+}
+
+.ihatejsf {
+
 }
 
 
