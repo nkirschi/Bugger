@@ -230,7 +230,13 @@ public class HomeBacker implements Serializable {
         if (topic.getDescription() == null) {
             return "";
         }
-        return MarkdownHandler.toHtml(topic.getDescription());
+        String description = topic.getDescription();
+        int index = description.indexOf("\n");
+        if (index > 0) {
+            return MarkdownHandler.toHtml(description.substring(0, index));
+        } else {
+            return MarkdownHandler.toHtml(description);
+        }
     }
 
     /**
