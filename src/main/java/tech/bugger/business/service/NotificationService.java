@@ -159,29 +159,6 @@ public class NotificationService {
     }
 
     /**
-     * Irreversibly deletes all notifications addressed to the given user.
-     *
-     * @param user The given user.
-     */
-    public void deleteAllNotifications(final User user) throws DataAccessException {
-        if (user == null) {
-            log.error("Cannot delete all notifications for user null.");
-            throw new IllegalArgumentException("User cannot be null.");
-        } else if (user.getId() == null) {
-            log.error("Cannot delete all notifications for user with ID null.");
-            throw new IllegalArgumentException("User ID cannot be null.");
-        }
-
-        try (Transaction tx = transactionManager.begin()) {
-            tx.newNotificationGateway().deleteAllNotifications(user);
-            tx.commit();
-        } catch (TransactionException e) {
-            log.error("Error when deleting all notifications for user " + user + ".", e);
-            throw new DataAccessException("Error when deleting all notifications for user " + user + ".", e);
-        }
-    }
-
-    /**
      * Marks a notification as read.
      *
      * @param notification The notification to be marked as read.
