@@ -54,7 +54,7 @@
                     <h:commandButton id="cb-notification-button-#{var.id}"
                                      value="#{labels['notification_type_'.concat(var.type)]}"
                                      action="#{homeBacker.openNotification(var)}"
-                                     styleClass="btn btm-sm btn-link"/>
+                                     styleClass="btn btn-outline-primary rounded-pill"/>
                 </b:column>
                 <b:column title="#{labels.report}" paginator="#{homeBacker.inbox}" key="report">
                     <h:link id="l-notification-report-#{var.id}"
