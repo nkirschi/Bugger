@@ -36,7 +36,7 @@
                         <f:param name="id" value="#{topicBacker.topicID}"/>
                     </h:link>
                     <h:commandButton id="cb-delete" action="#{topicBacker.openDeleteDialog}"
-                                     styleClass="btn btn-primary me-3"
+                                     styleClass="btn btn-outline-danger me-3"
                                      value="#{labels.delete_topic}"
                                      rendered="#{userSession.user.administrator}"/>
                 </h:panelGroup>

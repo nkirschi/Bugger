@@ -47,7 +47,8 @@
                     <h:outputText value="#{labels.report_delete_warn}"/>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
-                    <h:commandButton id="cb-delete-report" action="#{reportBacker.delete}" styleClass="btn btn-primary"
+                    <h:commandButton id="cb-delete-report" action="#{reportBacker.delete}"
+                                     styleClass="btn btn-danger"
                                      value="#{labels.delete}"/>
                     <h:commandButton id="cb-delete-report-cancel" action="#{reportBacker.displayDialog(null)}"
                                      styleClass="btn btn-secondary" value="#{labels.cancel}"/>
@@ -83,7 +84,7 @@
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
                     <h:commandButton id="cb-delete-post" action="#{reportBacker.deletePost}"
-                                     styleClass="btn btn-primary" value="#{labels.delete}"/>
+                                     styleClass="btn btn-danger" value="#{labels.delete}"/>
                     <h:commandButton id="cb-delete-post-cancel" action="#{reportBacker.displayDialog(null)}"
                                      styleClass="btn btn-secondary" value="#{labels.cancel}"/>
                 </h:panelGroup>
@@ -109,7 +110,7 @@
                         </h:link>
                         <h:commandButton id="cb-delete-report-dialog"
                                          action="#{reportBacker.displayDialog('DELETE_REPORT')}"
-                                         value="#{labels.delete}" styleClass="button btn btn-primary"/>
+                                         value="#{labels.delete}" styleClass="button btn btn-outline-danger"/>
                         <h:commandButton id="cb-mark-duplicate" action="#{reportBacker.displayDialog('DUPLICATE')}"
                                          value="#{labels.report_mark_duplicate}" styleClass="button btn btn-primary"/>
                         <h:commandButton id="cb-unmark-duplicate" action="#{reportBacker.unmarkDuplicate}"
@@ -425,7 +426,7 @@
                                         <f:param name="p" value="#{var.id}"/>
                                     </h:link>
                                     <h:commandButton id="cb-delete-post-dialog"
-                                                     styleClass="button btn btn-primary"
+                                                     styleClass="button btn btn-outline-danger"
                                                      action="#{reportBacker.deletePostDialog(var)}"
                                                      value="#{labels.delete}"/>
                                 </h:panelGroup>
