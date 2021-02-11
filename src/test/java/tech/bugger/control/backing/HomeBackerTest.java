@@ -7,21 +7,16 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.bugger.LogExtension;
-import tech.bugger.ResourceBundleMocker;
-import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.NotificationService;
 import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
-import tech.bugger.business.util.Registry;
 import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Notification;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 
-import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -29,21 +24,9 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -64,12 +47,6 @@ public class HomeBackerTest {
     private ExternalContext ectx;
 
     @Mock
-    private Event<Feedback> feedbackEvent;
-
-    @Mock
-    private Registry registry;
-
-    @Mock
     private Paginator<Notification> inboxMock;
 
     private final Topic testTopic1 = new Topic(1, "Hi", "senberg");
@@ -81,8 +58,7 @@ public class HomeBackerTest {
     @BeforeEach
     public void setUp() {
         user = new User();
-        lenient().doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(eq("messages"), any());
-        this.homeBacker = new HomeBacker(session, notificationService, topicService, ectx, feedbackEvent, registry);
+        this.homeBacker = new HomeBacker(session, notificationService, topicService, ectx);
     }
 
     @Test
@@ -112,44 +88,25 @@ public class HomeBackerTest {
     }
 
     @Test
-    public void testInboxWhenDataAccessExceptionDuringSelect() throws Exception {
-        doThrow(DataAccessException.class).when(notificationService).selectNotifications(any(), any());
-        doReturn(42).when(notificationService).countNotifications(any());
+    public void testInbox() {
+        ArrayList<Notification> selectedNotifications = new ArrayList<>();
+        selectedNotifications.add(new Notification());
+        doReturn(selectedNotifications).when(notificationService).selectNotifications(any(), any());
+        doReturn(selectedNotifications.size()).when(notificationService).countNotifications(any());
         doReturn(user).when(session).getUser();
-        assertDoesNotThrow(() -> homeBacker.init());
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testInboxWhenDataAccessExceptionDuringCount() throws Exception {
-        doThrow(DataAccessException.class).when(notificationService).countNotifications(any());
-        doReturn(user).when(session).getUser();
-        assertDoesNotThrow(() -> homeBacker.init());
-        verify(feedbackEvent).fire(any());
+        assertAll(
+                () -> assertDoesNotThrow(() -> homeBacker.init()),
+                () -> assertEquals(selectedNotifications.size(), homeBacker.getInbox().getSelection().getTotalSize()),
+                () -> assertEquals(selectedNotifications, homeBacker.getInbox().getWrappedData())
+        );
     }
 
     @Test
     public void testDeleteNotification() throws Exception {
         setupInbox();
-        doReturn(true).when(notificationService).deleteNotification(any());
         assertNull(homeBacker.deleteNotification(notification));
         verify(notificationService).deleteNotification(notification);
         verify(inboxMock).updateReset();
-    }
-
-    @Test
-    public void testDeleteNotificationWhenDataAccessException() throws Exception {
-        setupInbox();
-        doThrow(DataAccessException.class).when(notificationService).deleteNotification(any());
-        assertNull(homeBacker.deleteNotification(notification));
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testDeleteNotificationWHenServiceFails() throws Exception {
-        setupInbox();
-        assertNull(homeBacker.deleteNotification(notification));
-        verify(feedbackEvent).fire(any());
     }
 
     private void setupInbox() throws NoSuchFieldException, IllegalAccessException {
@@ -161,7 +118,6 @@ public class HomeBackerTest {
     @Test
     public void testOpenNotification() throws Exception {
         notification.setPostID(100);
-        doReturn(true).when(notificationService).markAsRead(any());
         assertNull(homeBacker.openNotification(notification));
         verify(ectx).redirect(any());
     }
@@ -169,7 +125,6 @@ public class HomeBackerTest {
     @Test
     public void testOpenNotificationPostIdNull() throws Exception {
         notification.setTopicID(100);
-        doReturn(true).when(notificationService).markAsRead(any());
         assertNull(homeBacker.openNotification(notification));
         verify(ectx).redirect(any());
     }
@@ -177,7 +132,6 @@ public class HomeBackerTest {
     @Test
     public void testOpenNotificationIOException() throws Exception {
         doThrow(IOException.class).when(ectx).redirect(any());
-        doReturn(true).when(notificationService).markAsRead(any());
         notification.setPostID(100);
         assertThrows(Error404Exception.class, () -> homeBacker.openNotification(notification));
     }
@@ -185,14 +139,6 @@ public class HomeBackerTest {
     @Test
     public void testOpenNotificationWhenMarkAsReadFails() {
         assertNull(homeBacker.openNotification(notification));
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testOpenNotificationWhenDataAccessException() throws Exception {
-        doThrow(DataAccessException.class).when(notificationService).markAsRead(any());
-        assertNull(homeBacker.openNotification(notification));
-        verify(feedbackEvent).fire(any());
     }
 
     @Test
@@ -243,6 +189,23 @@ public class HomeBackerTest {
     @Test
     public void testGetHelpSuffixNoUser() {
         assertEquals("", homeBacker.getHelpSuffix());
+    }
+
+    @Test
+    public void testDisplayDialog() {
+        HomeBacker.Dialog dialog = HomeBacker.Dialog.DELETE_ALL_NOTIFICATIONS;
+        assertNull(homeBacker.displayDialog(dialog));
+        assertEquals(dialog, homeBacker.getCurrentDialog());
+    }
+
+    @Test
+    public void testDeleteAllNotifications() throws Exception {
+        setupInbox();
+        doReturn(user).when(session).getUser();
+        assertNull(homeBacker.deleteAllNotifications());
+        assertNull(homeBacker.getCurrentDialog());
+        verify(notificationService).deleteAllNotifications(user);
+        verify(inboxMock).updateReset();
     }
 
 }

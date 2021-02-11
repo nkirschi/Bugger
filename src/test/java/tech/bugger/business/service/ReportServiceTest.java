@@ -547,7 +547,8 @@ public class ReportServiceTest {
     @Test
     public void testDeleteReportTransaction() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertThrows(DataAccessException.class, () -> service.deleteReport(testReport));
+        assertFalse(service.deleteReport(testReport));
+        verify(feedbackEvent).fire(any());
     }
 
     @Test

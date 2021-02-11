@@ -394,4 +394,26 @@ public class NotificationDBGatewayTest {
         );
     }
 
+    @Test
+    public void testDeleteAllNotificationsWhenUserIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> notificationGateway.deleteAllNotifications(null));
+    }
+
+    @Test
+    public void testDeleteAllNotificationsWhenUserIDIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> notificationGateway.deleteAllNotifications(new User()));
+    }
+
+    @Test
+    public void testDeleteAllNotificationsWhenDatabaseError() throws Exception {
+        Connection spy = spy(connection);
+        doThrow(SQLException.class).when(spy).prepareStatement(any());
+        assertThrows(StoreException.class, () -> new NotificationDBGateway(spy).deleteAllNotifications(admin));
+    }
+
+    @Test
+    public void testDeleteAllNotificationsSuccess() {
+        assertDoesNotThrow(() -> notificationGateway.deleteAllNotifications(admin));
+    }
+
 }

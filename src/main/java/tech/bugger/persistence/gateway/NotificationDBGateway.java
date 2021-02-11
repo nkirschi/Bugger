@@ -268,6 +268,31 @@ public class NotificationDBGateway implements NotificationGateway {
      * {@inheritDoc}
      */
     @Override
+    public void deleteAllNotifications(final User user) {
+        if (user == null) {
+            log.error("Cannot delete all notifications for user null.");
+            throw new IllegalArgumentException("User cannot be null.");
+        } else if (user.getId() == null) {
+            log.error("Cannot delete all notifications for user with ID null.");
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        String sql = "DELETE FROM notification WHERE recipient = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement statement = new StatementParametrizer(stmt)
+                    .integer(user.getId())
+                    .toStatement();
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error when deleting all notifications for user " + user + ".", e);
+            throw new StoreException("Error when deleting all notifications for user " + user + ".", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void createNotificationBulk(final List<Notification> notifications) {
         if (notifications == null) {
             log.error("Cannot create list of notifications null.");

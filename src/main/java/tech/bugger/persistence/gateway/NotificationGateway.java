@@ -68,6 +68,13 @@ public interface NotificationGateway {
     void delete(Notification notification) throws NotFoundException;
 
     /**
+     * Deletes all notifications addressed to the given user.
+     *
+     * @param user The given user.
+     */
+    void deleteAllNotifications(User user);
+
+    /**
      * Returns all unsent notifications.
      *
      * @return The unsent notifications

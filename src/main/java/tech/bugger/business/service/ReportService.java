@@ -1,6 +1,5 @@
 package tech.bugger.business.service;
 
-import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Notification;
@@ -495,18 +494,19 @@ public class ReportService {
      * @param report The report to be deleted.
      * @return {@code true} iff deleting the report was successful.
      */
-    public boolean deleteReport(final Report report) throws DataAccessException {
+    public boolean deleteReport(final Report report) {
         try (Transaction tx = transactionManager.begin()) {
             tx.newReportGateway().delete(report);
             tx.commit();
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("report_deleted"), Feedback.Type.INFO));
             return true;
         } catch (NotFoundException e) {
             log.error("Could not find report " + report + ".", e);
-            return false;
         } catch (TransactionException e) {
             log.error("Error when deleting report " + report + ".", e);
-            throw new DataAccessException("Error when deleting report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+        return false;
     }
 
     /**
