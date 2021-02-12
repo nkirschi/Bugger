@@ -148,7 +148,7 @@ public class AdministratorTest {
         assertAll(
                 () -> assertTrue(driver.getTitle().contains(TOPIC_FEEDBACK + testID)),
                 () -> assertEquals(TOPIC_FEEDBACK_DESCRIPTION,
-                                   driver.findElement(By.id("f-topic:ot-description")).getText())
+                                   driver.findElement(By.id("ot-description")).getText())
         );
 
     }
@@ -202,7 +202,7 @@ public class AdministratorTest {
         assertAll(
                 () -> assertTrue(driver.getTitle().contains(TOPIC_GUI + testID)),
                 () -> assertEquals(TOPIC_FEEDBACK_DESCRIPTION,
-                                   driver.findElement(By.id("f-topic:ot-description")).getText()),
+                                   driver.findElement(By.id("ot-description")).getText()),
                 () -> assertDoesNotThrow(() -> driver.findElement(By.linkText(ALF_LINK_TEXT + testID)))
         );
     }
@@ -210,7 +210,7 @@ public class AdministratorTest {
     @Test
     public void T080_create_report_with_invalid_attachment() {
         startTime(testID);
-        driver.findElement(By.id("f-topic:l-create-report")).click();
+        driver.findElement(By.id("topic-filters:l-create-report")).click();
         stopTime(testID, "T080 create-report");
         new Select(driver.findElement(By.id("f-create-report:s-type"))).selectByValue(TYPE_HINT_OPTION);
         driver.findElement(By.id("f-create-report:it-title")).sendKeys(testID + REPORT_NO_TRANSLATION);

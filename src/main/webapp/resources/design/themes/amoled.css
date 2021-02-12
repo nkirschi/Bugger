@@ -136,7 +136,7 @@ td, th {
 }
 
 #cb-close-messages {
-  filter: invert()
+  filter: invert(100%)
 }
 
 pre {

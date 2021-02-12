@@ -9,7 +9,7 @@ import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Service for content statistics.
  */
-@ApplicationScoped
+@RequestScoped
 public class StatisticsService {
 
     /**
@@ -50,8 +50,7 @@ public class StatisticsService {
      */
     public int countOpenReports(final ReportCriteria criteria) throws DataAccessException {
         try (Transaction tx = transactionManager.begin()) {
-            int openReports;
-            openReports = tx.newStatisticsGateway().getNumberOfOpenReports(criteria);
+            int openReports = tx.newStatisticsGateway().getNumberOfOpenReports(criteria);
             tx.commit();
             return openReports;
         } catch (TransactionException e) {

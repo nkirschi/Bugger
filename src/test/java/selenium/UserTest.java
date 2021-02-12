@@ -180,7 +180,7 @@ public class UserTest {
     @Test
     public void T180_create_report() {
         startTime(testID);
-        driver.findElement(By.id("f-topic:l-create-report")).click();
+        driver.findElement(By.id("topic-filters:l-create-report")).click();
         stopTime(testID, "T180 report-create");
         driver.findElement(By.id("f-create-report:it-title")).sendKeys(testID + REPORT_NO_NAME);
         driver.findElement(By.id("f-create-report:it-post-content")).sendKeys(POST_NO_NAME);
@@ -228,7 +228,7 @@ public class UserTest {
         driver.findElement(By.name("f-vote:cb-upvote")).click();
         stopTime(testID, "T200 report2");
 
-        assertEquals(REPORT_NO_TRANSLATION_RELEVANCE, driver.findElement(By.id("ot-relevance")).getText());
+        assertEquals(REPORT_NO_TRANSLATION_RELEVANCE, driver.findElement(By.id("f-vote:ot-relevance")).getText());
     }
 
     @Test
@@ -241,7 +241,7 @@ public class UserTest {
         driver.findElement(By.name("f-edit-post:cb-submit")).click();
         stopTime(testID, "T210 report");
 
-        List<WebElement> elements = driver.findElements(By.cssSelector("[id*=l-post-modifier]"));
+        List<WebElement> elements = driver.findElements(By.cssSelector("[id*=l-post-creator]"));
         assertEquals(BEA_LINK_TEXT + testID, elements.get(elements.size() - 1).getText());
     }
 

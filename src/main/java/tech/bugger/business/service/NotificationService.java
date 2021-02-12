@@ -21,7 +21,7 @@ import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -36,7 +36,7 @@ import java.util.Set;
 /**
  * Service providing methods related to notifications.
  */
-@ApplicationScoped
+@RequestScoped
 public class NotificationService {
 
     /**
@@ -329,8 +329,8 @@ public class NotificationService {
         priorityExecutor.enqueue(new PriorityTask(priority, () -> {
             int tries = 1;
             log.debug("Sending e-mail " + mail + ".");
-            while (!mailer.send(mail) && tries++ <= maxEmailTries) {
-                log.warning("Trying to send e-mail again. Try #" + tries + '.');
+            while (tries <= maxEmailTries && !mailer.send(mail)) {
+                log.warning("Trying to send e-mail again. Try #" + tries++ + '.');
             }
             if (tries > maxEmailTries) {
                 log.error("Couldn't send e-mail for more than " + maxEmailTries + " times! Please investigate!");
@@ -343,8 +343,8 @@ public class NotificationService {
         priorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.LOW, () -> {
             int tries = 1;
             log.debug("Sending e-mail " + mail + ".");
-            while (!mailer.send(mail) && tries++ <= maxEmailTries) {
-                log.warning("Trying to send e-mail again. Try #" + tries + '.');
+            while (tries++ <= maxEmailTries && !mailer.send(mail)) {
+                log.warning("Trying to send e-mail again. Try #" + tries++ + '.');
             }
             if (tries > maxEmailTries) {
                 log.error("Couldn't send e-mail for more than " + maxEmailTries + " times! Please investigate!");

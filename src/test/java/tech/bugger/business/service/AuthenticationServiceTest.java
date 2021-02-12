@@ -177,7 +177,7 @@ public class AuthenticationServiceTest {
         doReturn(false).when(mailer).send(any());
         service.register(testUser, "http://test.de");
         verify(tokenGateway).createToken(any());
-        verify(mailer, times(4)).send(any());
+        verify(mailer, times(3)).send(any());
     }
 
     @Test
@@ -416,7 +416,7 @@ public class AuthenticationServiceTest {
         doReturn(false).when(mailer).send(any());
         service.forgotPassword(testUser, "http://test.de");
         verify(tokenGateway).createToken(any());
-        verify(mailer, times(4)).send(any());
+        verify(mailer, times(3)).send(any());
     }
 
     @Test

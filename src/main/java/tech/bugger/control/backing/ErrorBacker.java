@@ -1,19 +1,17 @@
 package tech.bugger.control.backing;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import tech.bugger.business.internal.ApplicationSettings;
+import tech.bugger.business.util.MarkdownHandler;
+import tech.bugger.control.util.JFConfig;
+import tech.bugger.global.util.Log;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import tech.bugger.business.internal.ApplicationSettings;
-import tech.bugger.business.util.MarkdownHandler;
-import tech.bugger.control.exception.Error404Exception;
-import tech.bugger.control.util.JFConfig;
-import tech.bugger.global.util.Log;
-import tech.bugger.persistence.exception.StoreException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Backing Bean for the error page.
@@ -58,42 +56,6 @@ public class ErrorBacker {
     public String getSupportInformation() {
         String support = applicationSettings.getOrganization().getSupportInfo();
         return support == null ? "" : MarkdownHandler.toHtml(support);
-    }
-
-    /**
-     * Throws a StoreException for testing purposes.
-     *
-     * @return Never returns.
-     */
-    public String throwStoreException() {
-        throw new StoreException("Test exception thrown from error backer.");
-    }
-
-    /**
-     * Throws an InternalError for testing purposes.
-     *
-     * @return Never returns.
-     */
-    public String throwInternalError() {
-        throw new InternalError("Test internal error thrown from error backer.");
-    }
-
-    /**
-     * Throws an IOException for testing purposes.
-     *
-     * @return Never returns.
-     */
-    public String throwIOException() throws IOException {
-        throw new IOException("Test exception thrown from error backer.");
-    }
-
-    /**
-     * Throws an Error404Exception for testing purposes.
-     *
-     * @return Never returns.
-     */
-    public String throw404Exception() {
-        throw new Error404Exception("Test exception thrown from error backer.");
     }
 
     /**

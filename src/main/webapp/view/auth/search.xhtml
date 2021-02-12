@@ -8,7 +8,7 @@
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
     <ui:param name="helpKey" value="search"/>
-    <ui:param name="title" value="#{labels.search}: '#{searchBacker.query}'"/>
+    <ui:param name="title" value="#{labels.search}#{empty searchBacker.query ? '' : ': '.concat(searchBacker.query)}"/>
     <ui:define name="content">
         <h:panelGroup class="row" layout="block">
             <h:form id="f-search">

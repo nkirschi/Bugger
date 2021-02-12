@@ -13,7 +13,7 @@ body {
 }
 
 #g-logo-fallback {
-  filter: invert();
+  filter: invert(100%);
 }
 
 #p-footer {
