@@ -12,6 +12,10 @@ body {
   color: white;
 }
 
+#g-logo-fallback {
+  filter: invert();
+}
+
 #p-footer {
   background-color: #1565C0;
   color: white;
@@ -54,16 +58,17 @@ body {
 }
 
 pre {
-  background-color: #999999;
+  background: #333;
 }
 
 pre code {
-  color: #1565C0;
+  background: transparent;
+  color: #999;
 }
 
 code {
-  color: #1565C0;
-  background-color: #999999;
+  color: #999;
+  background: #333;
 }
 
 /*# sourceMappingURL=classic.css.map */

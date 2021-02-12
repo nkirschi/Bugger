@@ -24,13 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -74,9 +68,10 @@ public class TopicBackerTest {
 
     @BeforeEach
     public void setUp() {
-        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test", "User",
-                new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
-                Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
+        user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
+                        "User",
+                        new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
+                        Locale.GERMAN, User.ProfileVisibility.MINIMAL, null, null, false);
         topic = new Topic(1, "Some title", "Some description");
         topicBacker = new TopicBacker(topicService, searchService, ectx, session, applicationSettings);
         lenient().doReturn(map).when(ectx).getRequestParameterMap();
@@ -106,7 +101,7 @@ public class TopicBackerTest {
         doReturn(true).when(map).containsKey(KEY);
         doReturn(ID).when(map).get(KEY);
         assertThrows(Error404Exception.class,
-                () -> topicBacker.init()
+                     () -> topicBacker.init()
         );
     }
 
@@ -118,7 +113,7 @@ public class TopicBackerTest {
         doReturn(user).when(session).getUser();
         doReturn(true).when(topicService).isBanned(user, topic);
         assertThrows(Error404Exception.class,
-                () -> topicBacker.init()
+                     () -> topicBacker.init()
         );
     }
 
@@ -127,14 +122,14 @@ public class TopicBackerTest {
         doReturn(true).when(map).containsKey(KEY);
         doReturn(KEY).when(map).get(KEY);
         assertThrows(Error404Exception.class,
-                () -> topicBacker.init()
+                     () -> topicBacker.init()
         );
     }
 
     @Test
     public void testInitNoKey() {
         assertThrows(Error404Exception.class,
-                () -> topicBacker.init()
+                     () -> topicBacker.init()
         );
     }
 
@@ -152,14 +147,14 @@ public class TopicBackerTest {
     @Test
     public void testSearchBanUserNull() {
         topicBacker.searchBanUsers();
-        assertNull(topicBacker.getUserBanSuggestions());
+        assertTrue(topicBacker.getUserBanSuggestions().isEmpty());
     }
 
     @Test
     public void testSearchBanUserBlank() {
         topicBacker.setUserBan("");
         topicBacker.searchBanUsers();
-        assertNull(topicBacker.getUserBanSuggestions());
+        assertTrue(topicBacker.getUserBanSuggestions().isEmpty());
     }
 
     @Test
@@ -176,14 +171,21 @@ public class TopicBackerTest {
     @Test
     public void testSearchUnbanUserNull() {
         topicBacker.searchUnbanUsers();
-        assertNull(topicBacker.getUserBanSuggestions());
+        assertTrue(topicBacker.getUserBanSuggestions().isEmpty());
     }
 
     @Test
     public void testSearchUnbanUserBlank() {
         topicBacker.setUserBan("");
         topicBacker.searchUnbanUsers();
-        assertNull(topicBacker.getUserBanSuggestions());
+        assertTrue(topicBacker.getUserBanSuggestions().isEmpty());
+    }
+
+    @Test
+    public void testApplyUserBanSuggestions() {
+        topicBacker.getUserBanSuggestions().add("notempty");
+        topicBacker.applyUserBanSuggestion("suggestion");
+        assertTrue(topicBacker.getUserBanSuggestions().isEmpty());
     }
 
     @Test
@@ -200,14 +202,14 @@ public class TopicBackerTest {
     @Test
     public void testSearchModUserNull() {
         topicBacker.searchModUsers();
-        assertNull(topicBacker.getUserModSuggestions());
+        assertTrue(topicBacker.getUserModSuggestions().isEmpty());
     }
 
     @Test
     public void testSearchModUserBlank() {
         topicBacker.setUserMod("");
         topicBacker.searchModUsers();
-        assertNull(topicBacker.getUserModSuggestions());
+        assertTrue(topicBacker.getUserModSuggestions().isEmpty());
     }
 
     @Test
@@ -224,14 +226,21 @@ public class TopicBackerTest {
     @Test
     public void testSearchUnmodUserNull() {
         topicBacker.searchUnmodUsers();
-        assertNull(topicBacker.getUserModSuggestions());
+        assertTrue(topicBacker.getUserModSuggestions().isEmpty());
     }
 
     @Test
     public void testSearchUnmodUserBlank() {
         topicBacker.setUserMod("");
         topicBacker.searchUnmodUsers();
-        assertNull(topicBacker.getUserModSuggestions());
+        assertTrue(topicBacker.getUserModSuggestions().isEmpty());
+    }
+
+    @Test
+    public void testApplyUserModSuggestions() {
+        topicBacker.getUserModSuggestions().add("notempty");
+        topicBacker.applyUserModSuggestion("suggestion");
+        assertTrue(topicBacker.getUserModSuggestions().isEmpty());
     }
 
     @Test

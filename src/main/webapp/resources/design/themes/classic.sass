@@ -2,7 +2,8 @@
 $lightBlue: #f1f8fb
 $blue: #1e88e5
 $darkBlue: #1565C0
-$lightGray: #999999
+$lightGray: #999
+$darkGray: #333
 $white: white
 
 /* Template */
@@ -15,6 +16,9 @@ body
 
   #ot-comp-name
     color: $white
+
+#g-logo-fallback
+  filter: invert()
 
 #p-footer
   background-color: $darkBlue
@@ -51,11 +55,12 @@ body
   background-color: gray
 
 pre
-  background-color: $lightGray
+  background-color: $darkGray
 
 pre code
-  color: $darkBlue
+  color: $lightGray
+  background: transparent
 
 code
-  color: $darkBlue
-  background-color: $lightGray
+  color: $lightGray
+  background-color: $darkGray

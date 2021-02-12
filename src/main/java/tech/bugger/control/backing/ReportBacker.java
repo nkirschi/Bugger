@@ -1,27 +1,12 @@
 package tech.bugger.control.backing;
 
-import java.io.IOException;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.StreamSupport;
-import javax.annotation.PostConstruct;
-import javax.enterprise.event.Event;
-import javax.faces.context.ExternalContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.MarkdownHandler;
 import tech.bugger.business.util.Paginator;
-import tech.bugger.business.util.Registry;
 import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
@@ -29,6 +14,17 @@ import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
 import tech.bugger.global.util.Log;
+
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+import java.util.stream.StreamSupport;
 
 /**
  * Backing bean for the report page.
@@ -140,16 +136,6 @@ public class ReportBacker implements Serializable {
      */
     private final ExternalContext ectx;
 
-    /**
-     * Feedback Event for user feedback.
-     */
-    private final Event<Feedback> feedbackEvent;
-
-    /**
-     * The current registry which to retrieve resource bundles from.
-     */
-    private final Registry registry;
-
     public enum Dialog {
 
         /**
@@ -181,8 +167,6 @@ public class ReportBacker implements Serializable {
      * @param reportService       The report service to use.
      * @param postService         The post service to use.
      * @param session             The user session.
-     * @param feedbackEvent       The feedback event to use for user feedback.
-     * @param registry            The dependency registry to use.
      * @param ectx                The current {@link ExternalContext} of the application.
      */
     @Inject
@@ -191,16 +175,12 @@ public class ReportBacker implements Serializable {
                         final ReportService reportService,
                         final PostService postService,
                         final UserSession session,
-                        final Event<Feedback> feedbackEvent,
-                        final Registry registry,
                         final ExternalContext ectx) {
         this.applicationSettings = applicationSettings;
         this.topicService = topicService;
         this.reportService = reportService;
         this.postService = postService;
         this.session = session;
-        this.feedbackEvent = feedbackEvent;
-        this.registry = registry;
         this.ectx = ectx;
     }
 
@@ -407,16 +387,7 @@ public class ReportBacker implements Serializable {
      * Deletes the report along with all its posts irreversibly.
      */
     public void delete() {
-        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
-        boolean success;
-        try {
-            success = reportService.deleteReport(report);
-        } catch (DataAccessException e) {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
-            return;
-        }
-        if (success) {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("report_deleted"), Feedback.Type.INFO));
+        if (reportService.deleteReport(report)) {
             try {
                 ectx.redirect(ectx.getApplicationContextPath() + "/topic?id=" + report.getTopicID());
             } catch (IOException e) {
@@ -465,11 +436,8 @@ public class ReportBacker implements Serializable {
      * Deletes the {@code postToBeDeleted} irreversibly. If it is the first post, this deletes the whole report.
      */
     public void deletePost() {
-        ResourceBundle messagesBundle = registry.getBundle("messages", session.getLocale());
-
         postService.deletePost(postToBeDeleted, report);
         if (reportService.getReportByID(report.getId()) == null) {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("report_deleted"), Feedback.Type.INFO));
             try {
                 ectx.redirect(ectx.getApplicationContextPath() + "/topic?id=" + report.getTopicID());
                 return;
@@ -478,7 +446,6 @@ public class ReportBacker implements Serializable {
             }
         }
         posts.update();
-        feedbackEvent.fire(new Feedback(messagesBundle.getString("post_deleted"), Feedback.Type.INFO));
         displayDialog(null);
     }
 

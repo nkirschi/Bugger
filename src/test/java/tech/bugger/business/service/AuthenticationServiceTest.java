@@ -97,7 +97,8 @@ public class AuthenticationServiceTest {
             return null;
         }).when(priorityExecutor).enqueue(any());
 
-        NotificationService notificationService = new NotificationService(transactionManager, registry);
+        NotificationService notificationService = new NotificationService(transactionManager, feedbackEvent,
+                configReader, priorityExecutor, mailer, ResourceBundleMocker.mock(""), registry);
 
         service = new AuthenticationService(transactionManager, feedbackEvent, notificationService,
                 ResourceBundleMocker.mock(""), ResourceBundleMocker.mock(""), configReader);

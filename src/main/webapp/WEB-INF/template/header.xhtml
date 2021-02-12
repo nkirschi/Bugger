@@ -52,7 +52,8 @@
                             <f:ajax execute="@form"/>
                         </h:commandButton>
                     </h:panelGroup>
-                    <h:panelGroup id="p-search-suggestions" layout="block" styleClass="header-search-suggestions">
+                    <h:panelGroup id="p-search-suggestions" layout="block" styleClass="header-search-suggestions"
+                                  rendered="#{userSession.user != null or applicationSettings.configuration.guestReading}">
                         <ui:repeat value="#{empty headerBacker.userSearchSuggestion ? null
                                 : headerBacker.userSearchSuggestion}" var="user">
                             <h:link value="#{user}" outcome="pretty:search" styleClass="row search">

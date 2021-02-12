@@ -79,8 +79,7 @@ public class ReportBackerTest {
     public void setUp() {
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
         lenient().doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(eq("messages"), any());
-        reportBacker = new ReportBacker(settings, topicService, reportService, postService, session,
-                feedbackEvent, registry, ectx);
+        reportBacker = new ReportBacker(settings, topicService, reportService, postService, session, ectx);
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
                 "User",
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
@@ -247,21 +246,12 @@ public class ReportBackerTest {
         assertDoesNotThrow(() -> reportBacker.delete());
         verify(reportService).deleteReport(report);
         verify(ectx).redirect(any());
-        verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void testDeleteNoSuccess() {
         reportBacker.setReport(report);
         assertThrows(Error404Exception.class, () -> reportBacker.delete());
-    }
-
-    @Test
-    public void testDeleteDataAccessFailed() throws Exception {
-        reportBacker.setReport(report);
-        doThrow(DataAccessException.class).when(reportService).deleteReport(report);
-        assertDoesNotThrow(() -> reportBacker.delete());
-        verify(feedbackEvent).fire(any());
     }
 
     @Test
@@ -375,7 +365,6 @@ public class ReportBackerTest {
         doReturn(report).when(reportService).getReportByID(report.getId());
         assertDoesNotThrow(() -> reportBacker.deletePost());
         verify(postService).deletePost(post, report);
-        verify(feedbackEvent).fire(any());
         assertNull(reportBacker.getCurrentDialog());
     }
 
