@@ -205,6 +205,8 @@ public class TopicBacker implements Serializable {
         this.ectx = ectx;
         this.session = session;
         this.applicationSettings = applicationSettings;
+        userBanSuggestions = new ArrayList<>();
+        userModSuggestions = new ArrayList<>();
     }
 
     /**
@@ -237,8 +239,6 @@ public class TopicBacker implements Serializable {
         moderator = topicService.isModerator(user, topic);
         subscribed = topicService.isSubscribed(user, topic);
         displayDialog = null;
-        userBanSuggestions = new ArrayList<>();
-        userModSuggestions = new ArrayList<>();
         openReportShown = true;
         closedReportShown = false;
         sanitizedDescription = MarkdownHandler.toHtml(topic.getDescription());
@@ -286,6 +286,8 @@ public class TopicBacker implements Serializable {
     public void searchBanUsers() {
         if (userBan != null && !userBan.isBlank()) {
             userBanSuggestions = searchService.getUserBanSuggestions(userBan, topic);
+        } else {
+            userBanSuggestions.clear();
         }
     }
 
@@ -295,6 +297,8 @@ public class TopicBacker implements Serializable {
     public void searchUnbanUsers() {
         if (userBan != null && !userBan.isBlank()) {
             userBanSuggestions = searchService.getUserUnbanSuggestions(userBan, topic);
+        } else {
+            userBanSuggestions.clear();
         }
     }
 
@@ -304,6 +308,8 @@ public class TopicBacker implements Serializable {
     public void searchModUsers() {
         if (userMod != null && !userMod.isBlank()) {
             userModSuggestions = searchService.getUserModSuggestions(userMod, topic);
+        } else {
+            userModSuggestions.clear();
         }
     }
 
@@ -313,6 +319,8 @@ public class TopicBacker implements Serializable {
     public void searchUnmodUsers() {
         if (userMod != null && !userMod.isBlank()) {
             userModSuggestions = searchService.getUserUnmodSuggestions(userMod, topic);
+        } else {
+            userModSuggestions.clear();
         }
     }
 
@@ -608,6 +616,14 @@ public class TopicBacker implements Serializable {
     }
 
     /**
+     * @param userBan The userToBeBanned to set.
+     */
+    public void applyUserBanSuggestion(final String userBan) {
+        setUserBan(userBan);
+        userBanSuggestions.clear();
+    }
+
+    /**
      * @return The userToBeModded.
      */
     public String getUserMod() {
@@ -619,6 +635,14 @@ public class TopicBacker implements Serializable {
      */
     public void setUserMod(final String userMod) {
         this.userMod = userMod;
+    }
+
+    /**
+     * @param userMod The userToBeModded to set.
+     */
+    public void applyUserModSuggestion(final String userMod) {
+        setUserMod(userMod);
+        userModSuggestions.clear();
     }
 
     /**

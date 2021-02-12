@@ -25,7 +25,7 @@
                 <h:form id="f-profile-edit" rendered="#{userSession.user != null and userSession.user.administrator
                         or userSession.user.id == profileEditBacker.user.id}" enctype="multipart/form-data">
 
-                    <h:panelGroup layout="block" styleClass="align-right" rendered="#{!profileEditBacker.create}">
+                    <h:panelGroup layout="block" styleClass="float-end" rendered="#{!profileEditBacker.create}">
                         <h:link id="l-profile" outcome="pretty:profile" value="@#{profileEditBacker.user.username}"
                                 styleClass="profile-info">
                             <f:param name="u" value="#{profileEditBacker.user.username}"/>
@@ -42,7 +42,9 @@
                     </h:panelGroup>
 
                     <h:panelGroup layout="block" id="p-upload" styleClass="mb-3 form-group position-relative">
-                        <h:outputLabel id="o-upload" for="i-upload" value="#{labels.profile_edit_change_avatar}"/>
+                        <h:outputLabel id="o-upload" for="i-upload"
+                                       value="#{labels.profile_edit_change_avatar}"
+                                       styleClass="form-label"/>
                         <h:panelGroup layout="block" styleClass="input-group">
                             <h:inputFile id="i-upload" validator="imageValidator" styleClass="form-control"
                                          value="#{profileEditBacker.uploadedAvatar}"/>
@@ -58,10 +60,14 @@
                         </h:outputFormat>
                     </h:panelGroup>
 
-                    <h:panelGroup layout="block" id="p-delete-avatar" styleClass="mb-3 form-group position-relative">
-                        <h:outputLabel id="o-delete-avatar" for="s-delete-avatar"
+                    <h:panelGroup layout="block"
+                                  id="p-delete-avatar"
+                                  styleClass="mb-3 form-group position-relative">
+                        <h:outputLabel id="o-delete-avatar"
+                                       for="s-delete-avatar"
                                        value="#{labels.profile_edit_del_avatar}"/>
-                        <h:selectBooleanCheckbox id="s-delete-avatar" value="#{profileEditBacker.deleteAvatar}"
+                        <h:selectBooleanCheckbox id="s-delete-avatar"
+                                                 value="#{profileEditBacker.deleteAvatar}"
                                                  styleClass="form-check-input"/>
                     </h:panelGroup>
 
@@ -71,7 +77,7 @@
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-visibility" for="s-visibility"
                                                value="#{labels.profile_edit_visibility}" styleClass="form-label"/>
-                                <h:panelGroup layout="block" styleClass="input-group">
+                                <h:panelGroup layout="block">
                                     <h:selectOneMenu id="s-visibility"
                                                      value="#{profileEditBacker.user.profileVisibility}"
                                                      required="true" styleClass="form-select">
@@ -88,7 +94,7 @@
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-language" for="s-language" value="#{labels.language}"
                                                styleClass="form-label"/>
-                                <h:panelGroup layout="block" styleClass="input-group">
+                                <h:panelGroup layout="block">
                                     <h:selectOneMenu id="s-language" value="#{profileEditBacker.user.preferredLanguage}"
                                                      required="true" styleClass="form-select">
                                         <f:selectItems id="s-language-values"
@@ -111,7 +117,7 @@
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-username" for="it-username" value="#{labels.username}"
                                                styleClass="form-label"/>
-                                <h:panelGroup layout="block" styleClass="input-group">
+                                <h:panelGroup layout="block">
                                     <h:inputText id="it-username" value="#{profileEditBacker.usernameNew}"
                                                  required="true" a:maxlength="#{C.USERNAME_MAX}"
                                                  styleClass="form-control #{!facesContext.validationFailed ? ''
@@ -129,7 +135,7 @@
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-email" for="it-email" value="#{labels.email}"
                                                styleClass="form-label"/>
-                                <h:panelGroup layout="block" styleClass="input-group">
+                                <h:panelGroup layout="block">
                                     <h:inputText id="it-email" value="#{profileEditBacker.emailNew}" required="true"
                                                  a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
                                                  #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -153,7 +159,7 @@
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-first-name" for="it-first-name" value="#{labels.first_name}"
                                                styleClass="form-label"/>
-                                <h:panelGroup layout="block" styleClass="input-group">
+                                <h:panelGroup layout="block">
                                     <h:inputText id="it-first-name" value="#{profileEditBacker.user.firstName}"
                                                  required="true" a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
                                                  #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -168,7 +174,7 @@
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-last-name" for="it-last-name" value="#{labels.last_name}"
                                                styleClass="form-label"/>
-                                <h:panelGroup layout="block" styleClass="input-group">
+                                <h:panelGroup layout="block">
                                     <h:inputText id="it-last-name" value="#{profileEditBacker.user.lastName}"
                                                  required="true" a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
                                                  #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -190,7 +196,7 @@
                             <h:panelGroup layout="block" styleClass="col-6">
                                 <h:outputLabel id="o-password-new" for="i-password-new" styleClass="form-label"
                                                value="#{labels.profile_edit_password_new}"/>
-                                <h:panelGroup layout="block" styleClass="input-group">
+                                <h:panelGroup layout="block">
                                     <h:inputSecret id="i-password-new" value="#{profileEditBacker.passwordNew}"
                                                    binding="#{password1}" required="#{profileEditBacker.create}"
                                                    a:maxlength="#{C.PASSWORD_MAX}" a:placeholder="#{labels.password}"
@@ -207,7 +213,7 @@
                                 <h:outputLabel id="o-password-new-repeat" for="i-password-new-repeat"
                                                styleClass="form-label"
                                                value="#{labels.profile_edit_repeat}"/>
-                                <h:panelGroup layout="block" styleClass="input-group">
+                                <h:panelGroup layout="block">
                                     <h:inputSecret id="i-password-new-repeat"
                                                    value="#{profileEditBacker.passwordNewConfirm}"
                                                    required="#{profileEditBacker.create
@@ -227,16 +233,21 @@
                     </h:panelGroup>
 
                     <!-- Renders the normal input field for the user biography. -->
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative"
-                                  rendered="#{profileEditBacker.dialog != E.PREVIEW}">
+                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative">
                         <h:outputLabel id="o-bio" for="ia-bio" value="#{labels.biography}" styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group">
-                            <h:inputTextarea id="ia-bio" value="#{profileEditBacker.user.biography}"
-                                             a:maxlength="#{C.SMALL_AREA}" styleClass="form-control
+                        <h:panelGroup layout="block">
+                            <h:panelGroup layout="block" styleClass="input-group">
+                                <h:inputTextarea id="ia-bio" value="#{profileEditBacker.user.biography}"
+                                                 a:maxlength="#{C.SMALL_AREA}" styleClass="form-control
                                              #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
                                              : 'is-invalid'}" rows="10">
-                                <f:validateLength maximum="#{C.SMALL_AREA}"/>
-                            </h:inputTextarea>
+                                    <f:validateLength maximum="#{C.SMALL_AREA}"/>
+                                </h:inputTextarea>
+                                <h:commandButton id="cb-preview" value="#{labels.profile_edit_preview}"
+                                                 action="#{profileEditBacker.openPreviewDialog}"
+                                                 styleClass="btn btn-primary"
+                                                 rendered="#{profileEditBacker.dialog != E.PREVIEW}"/>
+                            </h:panelGroup>
                             <h:panelGroup layout="block" styleClass="invalid-tooltip end-0">
                                 <h:message id="m-bio" for="ia-bio"/>
                             </h:panelGroup>
@@ -245,29 +256,11 @@
                                        styleClass="form-text"/>
                     </h:panelGroup>
 
-                    <!-- Renders a preview version of the current biography showing the effects of markdown. -->
-                    <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative"
-                                  rendered="#{profileEditBacker.dialog == E.PREVIEW}">
-                        <h:outputLabel id="ol-biography" value="#{labels.biography}" for="ot-biography"
-                                       styleClass="form-label"/>
-                        <h:outputText id="ot-biography" value="#{profileEditBacker.sanitizedBio}" escape="false"
-                                      styleClass="form-label"/>
-                    </h:panelGroup>
-
-                    <h:panelGroup layout="block" styleClass="d-flex justify-content-center">
-                        <h:commandButton id="cb-preview" value="#{labels.profile_edit_preview}"
-                                         action="#{profileEditBacker.openPreviewDialog}" styleClass="btn btn-primary"
-                                         rendered="#{profileEditBacker.dialog != E.PREVIEW}"/>
-                        <h:commandButton id="cb-stop-preview" value="#{labels.profile_edit_stop_preview}"
-                                         action="#{profileEditBacker.closeDialog}" styleClass="btn btn-primary"
-                                         rendered="#{profileEditBacker.dialog == E.PREVIEW}"/>
-                    </h:panelGroup>
-
                     <h:panelGroup layout="block" styleClass="mb-3 form-group position-relative"
                                   rendered="#{userSession.user.administrator}">
                         <h:outputLabel id="o-overwrite-vote" for="it-overwrite-vote"
                                        value="#{labels.profile_edit_overwrite}" styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group">
+                        <h:panelGroup layout="block">
                             <h:inputText id="it-overwrite-vote" value="#{profileEditBacker.user.forcedVotingWeight}"
                                          a:maxlength="#{C.SMALL_FIELD}" styleClass="form-control
                                          #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -289,7 +282,7 @@
                         <h:commandButton id="cb-delete"
                                          value="#{labels.profile_edit_delete}"
                                          action="#{profileEditBacker.openDeleteDialog}"
-                                         styleClass="btn btn-primary"
+                                         styleClass="btn btn-outline-danger"
                                          rendered="#{!profileEditBacker.create}"/>
                     </h:panelGroup>
                 </h:form>
@@ -306,10 +299,10 @@
                     <h:outputText id="ot-really-del-warn" value="#{labels.profile_edit_delete_warn}"/>
                 </h:panelGroup>
                 <h:panelGroup id="p-delete-password" styleClass="mb-3 form-group position-relative">
-                    <h:panelGroup id="p-username-ban" layout="block" styleClass="row align-center">
+                    <h:panelGroup id="p-username-ban" layout="block">
                         <h:outputLabel id="o-password-del" for="i-password-del" value="#{labels.password}"
                                        styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group">
+                        <h:panelGroup layout="block">
                             <h:inputSecret id="i-password-del" value="#{profileEditBacker.password}" required="true"
                                            a:maxlength="#{C.PASSWORD_MAX}" styleClass="form-control
                                            #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -339,10 +332,10 @@
                     <h:outputText id="ot-really-change-info" value="#{labels.profile_edit_apply_info}"/>
                 </h:panelGroup>
                 <h:panelGroup id="p-update-password" styleClass="mb-3 form-group position-relative">
-                    <h:panelGroup layout="block" styleClass="row align-center">
+                    <h:panelGroup layout="block">
                         <h:outputLabel id="o-password-change" for="i-password-change" value="#{labels.password}"
                                        styleClass="form-label"/>
-                        <h:panelGroup layout="block" styleClass="input-group">
+                        <h:panelGroup layout="block">
                             <h:inputSecret id="i-password-change" value="#{profileEditBacker.password}" required="true"
                                            a:maxlength="#{C.PASSWORD_MAX}" styleClass="form-control
                                            #{!facesContext.validationFailed ? '' : component.valid ? 'is-valid'
@@ -362,6 +355,28 @@
                     </h:commandButton>
                     <h:commandButton id="cb-cancel-change" value="#{labels.abort}" styleClass="btn btn-secondary"
                                      action="#{profileEditBacker.closeDialog}" immediate="true"/>
+                </h:panelGroup>
+            </h:form>
+        </h:panelGroup>
+
+        <!-- Renders the popup dialog to show the biography preview with the effects of Markdown. -->
+        <h:panelGroup layout="block" styleClass="dialog" rendered="#{profileEditBacker.dialog == E.PREVIEW}">
+            <h:form id="f-biography-preview">
+                <h:outputText id="ot-biography-preview-header"
+                              value="#{labels.profile_edit_preview_header}"
+                              styleClass="h2"/>
+                <h:panelGroup layout="block" styleClass="mb-3">
+                    <h:outputText id="ot-biography"
+                                  value="#{profileEditBacker.sanitizedBio}"
+                                  escape="false"
+                                  styleClass="form-label"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="align-center">
+                    <h:commandButton id="cb-hide-preview"
+                                     value="#{labels.profile_edit_hide_preview}"
+                                     action="#{profileEditBacker.closeDialog}"
+                                     styleClass="btn btn-primary"
+                                     rendered="#{profileEditBacker.dialog == E.PREVIEW}"/>
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>

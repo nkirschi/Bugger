@@ -129,7 +129,7 @@ CREATE TABLE report (
 
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     created_by INTEGER REFERENCES "user" (id) ON DELETE SET NULL,
-    last_modified_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    last_modified_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
     last_modified_by INTEGER REFERENCES "user" (id) ON DELETE SET NULL,
     closed_at TIMESTAMP WITH TIME ZONE,
     duplicate_of INTEGER REFERENCES report (id) ON DELETE SET NULL,
@@ -148,7 +148,7 @@ CREATE TABLE post (
 
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     created_by INTEGER REFERENCES "user" (id) ON DELETE SET NULL,
-    last_modified_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    last_modified_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
     last_modified_by INTEGER REFERENCES "user" (id) ON DELETE SET NULL,
 
     report INTEGER NOT NULL REFERENCES report (id) ON DELETE CASCADE,
@@ -244,7 +244,7 @@ CREATE TABLE relevance_vote (
  **************************/
 
 CREATE VIEW report_last_activity (report, last_activity) AS
-    SELECT r.id, GREATEST(MAX(p.last_modified_at), r.last_modified_at)
+    SELECT r.id, GREATEST(MAX(p.last_modified_at), r.last_modified_at, MAX(p.created_at), r.created_at)
     FROM report AS r
     LEFT OUTER JOIN post AS p
     ON r.id = p.report

@@ -18,7 +18,7 @@
         <!-- insight figures -->
         <h:outputText value="#{labels.insight_figures}" styleClass="h2"/>
         <h:panelGroup layout="block" styleClass="mb-3">
-            <h:outputText value="#{labels.insight_figures_description}"/>
+            <h:outputText value="#{labels.insight_figures_description}" styleClass="text-justify"/>
         </h:panelGroup>
         <h:panelGroup layout="block"
                       styleClass="row"
@@ -107,7 +107,7 @@
                             </h:panelGroup>
                         </h:panelGroup>
                     </h:panelGroup>
-                    <h:panelGroup id="p-earliest-closing-date" layout="block" styleClass="mb-2">
+                    <h:panelGroup id="p-earliest-closing-date" layout="block" styleClass="mb-3">
                         <h:outputLabel id="ol-earliest-closing-date"
                                        for="it-earliest-closing-date"
                                        value="#{labels.earliest_closing_date}"/>
@@ -140,7 +140,7 @@
             <h:panelGroup layout="block" styleClass="col-6 p-4">
                 <h:outputLabel value="#{labels.top_ten_reports}" styleClass="h2"/>
                 <h:panelGroup layout="block" styleClass="mb-3">
-                    <h:outputText value="#{labels.top_ten_reports_description}"/>
+                    <h:outputText value="#{labels.top_ten_reports_description}" styleClass="text-justify"/>
                 </h:panelGroup>
                 <!--@elvariable id="report" type="tech.bugger.global.transfer.TopReport"-->
                 <h:dataTable id="t-top-ten-reports"
@@ -189,7 +189,7 @@
             <h:panelGroup layout="block" styleClass="col-6 p-4">
                 <h:outputLabel value="#{labels.top_ten_users}" styleClass="h2"/>
                 <h:panelGroup layout="block" styleClass="mb-3">
-                    <h:outputText value="#{labels.top_ten_users_description}"/>
+                    <h:outputText value="#{labels.top_ten_users_description}" styleClass="text-justify"/>
                 </h:panelGroup>
                 <!--@elvariable id="user" type="tech.bugger.global.transfer.TopUser"-->
                 <h:dataTable id="t-top-ten-users"

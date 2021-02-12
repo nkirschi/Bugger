@@ -27,35 +27,33 @@
                 <h:form id="f-profile">
 
                     <!-- Contains the buttons for changing administration status, profile editing and subscribing -->
-                    <h:panelGroup id="p-profile-buttons" layout="block" styleClass="row">
-                        <h:panelGroup styleClass="col-12 align-right">
+                    <h:panelGroup id="p-profile-buttons" layout="block" styleClass="d-flex float-end">
                             <h:commandButton id="cb-subscribe"
                                              action="#{profileBacker.toggleUserSubscription}"
                                              value="#{labels.subscribe}"
-                                             styleClass="button btn btn-primary"
+                                             styleClass="btn btn-primary"
                                              rendered="#{userSession.user != null
                                              and userSession.user.id != profileBacker.user.id
                                              and not profileBacker.subscribed}"/>
                             <h:commandButton id="cb-unsubscribe"
                                              action="#{profileBacker.toggleUserSubscription}"
                                              value="#{labels.unsubscribe}"
-                                             styleClass="button btn btn-primary"
+                                             styleClass="btn btn-primary ms-3"
                                              rendered="#{userSession.user != null
                                              and userSession.user.id != profileBacker.user.id
                                              and profileBacker.subscribed}"/>
                             <h:commandButton id="cb-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
-                                             styleClass="button btn btn-primary" value="#{labels.promote}"
+                                             styleClass="btn btn-primary ms-3" value="#{labels.promote}"
                                              rendered="#{userSession.user.administrator
                                              and not profileBacker.user.administrator}"/>
                             <h:commandButton id="cb-rem-admin" action="#{profileBacker.openPromoteDemoteAdminDialog}"
-                                             styleClass="button btn btn-primary" value="#{labels.demote}"
+                                             styleClass="btn btn-primary ms-3" value="#{labels.demote}"
                                              rendered="#{userSession.user.administrator
                                              and profileBacker.user.administrator}"/>
                             <h:link id="l-edit" value="#{labels.edit}" outcome="/view/restr/profile-edit.xhtml"
-                                    rendered="#{profileBacker.privileged}" styleClass="button btn btn-secondary">
+                                    rendered="#{profileBacker.privileged}" styleClass="btn btn-secondary ms-3">
                                 <f:param name="e" value="#{profileBacker.user.username}"/>
                             </h:link>
-                        </h:panelGroup>
                     </h:panelGroup>
 
                     <!-- The profile owner's user information -->
@@ -73,7 +71,7 @@
                             <h:panelGroup id="p-username" layout="block" styleClass="row">
                                 <h:panelGroup id="p-username-label" styleClass="col-3">
                                     <h:outputLabel id="ol-username" value="#{labels.username}" for="ot-username"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-username-output" styleClass="col-9">
                                     <h:outputText id="ot-username" value="#{profileBacker.user.username}"
@@ -86,7 +84,7 @@
                                   or profileBacker.privileged}">
                                 <h:panelGroup id="p-first-name-label" styleClass="col-3">
                                     <h:outputLabel id="ol-first-name" value="#{labels.first_name}" for="ot-first-name"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-first-name-output" styleClass="col-9">
                                     <h:outputText id="ot-first-name" value="#{profileBacker.user.firstName}"
@@ -99,7 +97,7 @@
                                   or profileBacker.privileged}">
                                 <h:panelGroup id="p-last-name-label" styleClass="col-3">
                                     <h:outputLabel id="ol-last-name" value="#{labels.last_name}" for="ot-last-name"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-last-name-output" styleClass="col-9">
                                     <h:outputText id="ot-last-name" value="#{profileBacker.user.lastName}"
@@ -112,7 +110,7 @@
                                           or profileBacker.privileged}">
                                 <h:panelGroup id="p-email-label" styleClass="col-3">
                                     <h:outputLabel id="ol-email" value="#{labels.email}" for="ot-email"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-email-output" styleClass="col-9">
                                     <h:outputText id="ot-email" value="#{profileBacker.user.emailAddress}"
@@ -123,7 +121,7 @@
                             <h:panelGroup id="p-weight" layout="block" styleClass="row">
                                 <h:panelGroup id="p-weight-label" styleClass="col-3">
                                     <h:outputLabel id="ol-weight" value="#{labels.voting_weight}" for="ot-weight"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-weight-output" styleClass="col-9">
                                     <h:outputText id="ot-weight" value="#{profileBacker.votingWeight}"
@@ -134,7 +132,7 @@
                             <h:panelGroup id="p-post-count" layout="block" styleClass="row">
                                 <h:panelGroup id="p-post-count-label" styleClass="col-3">
                                     <h:outputLabel id="ol-post-count" value="#{labels.num_posts}" for="ot-post-count"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-post-count-output" styleClass="col-9">
                                     <h:outputText id="ot-post-count" value="#{profileBacker.numberOfPosts}"
@@ -146,7 +144,7 @@
                                           rendered="#{profileBacker.user.administrator}">
                                 <h:panelGroup id="p-is-admin-label" styleClass="col-3">
                                     <h:outputLabel id="ol-is-admin" value="#{labels.status}" for="ot-is-admin"
-                                                   styleClass="form-label"/>
+                                                   styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-is-admin-output" styleClass="col-9">
                                     <h:outputText id="ot-is-admin" value="#{labels.administrator}"
@@ -157,7 +155,7 @@
                             <h:panelGroup id="p-register-date" layout="block" styleClass="row">
                                 <h:panelGroup id="p-register-date-label" styleClass="col-3">
                                     <h:outputLabel id="ol-register-date" value="#{labels.registration_date}"
-                                                   for="ot-register-date" styleClass="form-label"/>
+                                                   for="ot-register-date" styleClass="form-label mt-1"/>
                                 </h:panelGroup>
                                 <h:panelGroup id="p-register-date-output" styleClass="col-9">
                                     <h:outputText id="ot-register-date" value="#{profileBacker.user.registrationDate}"
@@ -169,10 +167,11 @@
                         </h:panelGroup>
                     </h:panelGroup>
 
-                    <h:panelGroup layout="block" styleClass="mb3">
+                    <h:panelGroup layout="block" styleClass="mt-3">
                         <h:panelGroup id="p-biography" layout="block" styleClass="row"
-                                      rendered="#{profileBacker.user.profileVisibility == V.FULL
-                                      or profileBacker.privileged}">
+                                      rendered="#{(profileBacker.user.profileVisibility == V.FULL
+                                                       or profileBacker.privileged)
+                                                   and not empty profileBacker.sanitizedBiography}">
                             <h:outputLabel id="ol-biography" value="#{labels.biography}" for="ot-biography"
                                            styleClass="form-label"/>
                             <h:outputText id="ot-biography" value="#{profileBacker.sanitizedBiography}" escape="false"
@@ -209,23 +208,21 @@
                     </h:panelGroup>
                 </h:panelGroup>
 
-                <!-- Renders the title and command button of the profile owner's subscribed topics. This form is
-                necessary since the pagitable contains an additional form. -->
-                <h:form id="f-sub-topics" styleClass="row my-3" rendered="#{profileBacker.privileged}">
-                    <h:panelGroup layout="block" styleClass="col-9">
+                <!-- A paginated list of the profile owner's subscribed topics. -->
+                <h:panelGroup id="p-sub-topics"
+                              styleClass="row my-3"
+                              layout="block"
+                              rendered="#{profileBacker.privileged}">
+                    <h:form id="f-sub-topics"
+                            styleClass="d-flex justify-content-between align-items-center"
+                            rendered="#{profileBacker.privileged}">
                         <h:outputText id="ot-sub-topics" styleClass="h2" value="#{labels.topic_subs}"/>
-                    </h:panelGroup>
-                    <h:panelGroup styleClass="col-3 col-auto align-right">
                         <h:commandButton id="cb-unsub-all-topics"
                                          action="#{profileBacker.openDeleteAllTopicSubscriptionsDialog}"
-                                         rendered="#{not profileBacker.topicSubscriptions.isEmpty()
-                                         and profileBacker.privileged}" value="#{labels.unsub_all}"
+                                         rendered="#{not profileBacker.topicSubscriptions.isEmpty()}"
+                                         value="#{labels.unsub_all}"
                                          styleClass="btn btn-primary"/>
-                    </h:panelGroup>
-                </h:form>
-
-                <!-- A paginated list of the profile owner's subscribed topics. -->
-                <h:panelGroup id="p-sub-topics" styleClass="row" layout="block" rendered="#{profileBacker.privileged}">
+                    </h:form>
                     <h:panelGroup id="p-sub-topics-pagination" styleClass="col-12" layout="block">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Topic"-->
                         <b:pagitable paginator="#{profileBacker.topicSubscriptions}">
@@ -240,7 +237,7 @@
                                     <f:param name="id" value="#{var.id}"/>
                                 </h:link>
                             </b:column>
-                            <h:column>
+                            <h:column styleClass="trashcan-col">
                                 <h:commandButton id="l-unsub-topic"
                                                  action="#{profileBacker.deleteTopicSubscription(var)}"
                                                  styleClass="button trashcan-small"
@@ -250,22 +247,20 @@
                     </h:panelGroup>
                 </h:panelGroup>
 
-                <!-- Same as previous form for reports -->
-                <h:form id="f-sub-reports" styleClass="row my-3" rendered="#{profileBacker.privileged}">
-                    <h:panelGroup layout="block" styleClass="col-9">
+                <!-- A paginated list of the profile owner's subscribed reports. -->
+                <h:panelGroup id="p-sub-reports"
+                              layout="block"
+                              styleClass="row my-3"
+                              rendered="#{profileBacker.privileged}">
+                    <h:form id="f-sub-reports"
+                            styleClass="d-flex justify-content-between align-items-center"
+                            rendered="#{profileBacker.privileged}">
                         <h:outputText id="ot-sub-reports" styleClass="h2" value="#{labels.report_subs}"/>
-                    </h:panelGroup>
-                    <h:panelGroup styleClass="col-3 col-auto align-right">
                         <h:commandButton id="cb-unsub-all-reports"
                                          action="#{profileBacker.openDeleteAllReportSubscriptionsDialog}"
-                                         rendered="#{not profileBacker.reportSubscriptions.isEmpty()
-                                         and profileBacker.privileged}" value="#{labels.unsub_all}"
+                                         rendered="#{not profileBacker.reportSubscriptions.isEmpty()}" value="#{labels.unsub_all}"
                                          styleClass="btn btn-primary"/>
-                    </h:panelGroup>
-                </h:form>
-
-                <!-- A paginated list of the profile owner's subscribed reports. -->
-                <h:panelGroup id="p-sub-reports" layout="block" styleClass="row" rendered="#{profileBacker.privileged}">
+                    </h:form>
                     <h:panelGroup id="p-sub-reports-pagination" layout="block" styleClass="col-12">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
                         <b:pagitable paginator="#{profileBacker.reportSubscriptions}">
@@ -288,7 +283,7 @@
                                       key="severity">
                                 <h:outputText value="#{labels['report_severity_' += var.severity]}"/>
                             </b:column>
-                            <h:column>
+                            <h:column styleClass="trashcan-col">
                                 <h:commandButton id="l-unsub-report"
                                                  action="#{profileBacker.deleteReportSubscription(var)}"
                                                  styleClass="button trashcan-small"
@@ -298,22 +293,21 @@
                     </h:panelGroup>
                 </h:panelGroup>
 
-                <!-- Same as previous form for users -->
-                <h:form id="f-sub-users" styleClass="row my-3" rendered="#{profileBacker.privileged}">
-                    <h:panelGroup layout="block" styleClass="col-9">
+                <!-- A paginated list of the profile owner's subscribed users. -->
+                <h:panelGroup id="p-sub-users"
+                              layout="block"
+                              styleClass="row my-3"
+                              rendered="#{profileBacker.privileged}">
+                    <h:form id="f-sub-users"
+                            styleClass="d-flex justify-content-between align-items-center"
+                            rendered="#{profileBacker.privileged}">
                         <h:outputText id="ot-sub-users" styleClass="h2" value="#{labels.user_subs}"/>
-                    </h:panelGroup>
-                    <h:panelGroup styleClass="col-3 col-auto align-right">
                         <h:commandButton id="cb-unsub-all-users"
                                          action="#{profileBacker.openDeleteAllUserSubscriptionsDialog}"
-                                         rendered="#{not profileBacker.userSubscriptions.isEmpty()
-                                         and profileBacker.privileged}" value="#{labels.unsub_all}"
+                                         rendered="#{not profileBacker.userSubscriptions.isEmpty()}"
+                                         value="#{labels.unsub_all}"
                                          styleClass="btn btn-primary"/>
-                    </h:panelGroup>
-                </h:form>
-
-                <!-- A paginated list of the profile owner's subscribed users. -->
-                <h:panelGroup id="p-sub-users" layout="block" styleClass="row" rendered="#{profileBacker.privileged}">
+                    </h:form>
                     <h:panelGroup id="p-sub-users-pagination" layout="block" styleClass="col-12">
                         <!--@elvariable id="var" type="tech.bugger.global.transfer.User"-->
                         <b:pagitable paginator="#{profileBacker.userSubscriptions}">
@@ -323,7 +317,7 @@
                                     <f:param name="u" value="#{var.username}"/>
                                 </h:link>
                             </b:column>
-                            <h:column>
+                            <h:column styleClass="trashcan-col">
                                 <h:commandButton id="l-unsub-user" action="#{profileBacker.deleteUserSubscription(var)}"
                                                  styleClass="button trashcan-small"
                                                  image="/resources/images/trash.png"/>

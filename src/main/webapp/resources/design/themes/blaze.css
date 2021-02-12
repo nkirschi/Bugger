@@ -12,6 +12,10 @@ body {
   color: #fc990f;
 }
 
+#g-logo-fallback {
+  filter: invert(62%) sepia(78%) saturate(1609%) hue-rotate(352deg) brightness(100%) contrast(98%);
+}
+
 #p-footer {
   background: #740200;
   color: #fc990f;
@@ -58,6 +62,11 @@ body {
 .btn-outline-primary:active {
   background-color: #fefcd5;
   color: #ef5e01;
+}
+
+#p-content .btn-outline-primary {
+  border-color: #fc990f;
+  color: #fc990f;
 }
 
 .btn-primary {

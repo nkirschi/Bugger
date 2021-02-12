@@ -15,6 +15,378 @@
         <f:importConstants type="tech.bugger.global.util.Constants" var="C"/>
     </f:metadata>
 
+    <ui:define name="content">
+        <h:form id="f-report">
+
+            <h:panelGroup layout="block" styleClass="d-flex justify-content-between align-items-center mb-3">
+                <h:panelGroup layout="block" styleClass="ihatejsf">
+                    <h:outputText value="#{labels.in} "/>
+                    <h:link id="l-topic"
+                            value="[#{labels.topic} !#{reportBacker.topic.id}]"
+                            outcome="pretty:topic">
+                        <f:param name="id" value="#{reportBacker.topic.id}"/>
+                    </h:link>
+                    <h:outputText value=" #{reportBacker.topic.title}"/>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="ihatejsf">
+                    <h:panelGroup layout="block" rendered="#{reportBacker.privileged}">
+                        <h:commandButton id="cb-open-close-report-dialog"
+                                         action="#{reportBacker.displayDialog('OPEN_CLOSE')}"
+                                         value="#{reportBacker.report.closingDate == null ? labels.report_action_close
+                                         : labels.report_action_open}"
+                                         styleClass="btn btn-primary ms-3"/>
+                        <h:link id="cb-edit-report" value="#{labels.edit}" outcome="pretty:report-edit"
+                                styleClass="btn btn-secondary ms-3"
+                                rendered="#{empty reportBacker.report.closingDate
+                                            or applicationSettings.configuration.closedReportPosting}">
+                            <f:param name="id" value="#{reportBacker.report.id}"/>
+                        </h:link>
+                        <h:commandButton id="cb-delete-report-dialog"
+                                         action="#{reportBacker.displayDialog('DELETE_REPORT')}"
+                                         value="#{labels.delete}" styleClass="btn btn-outline-danger ms-3"/>
+                        <h:commandButton id="cb-mark-duplicate" action="#{reportBacker.displayDialog('DUPLICATE')}"
+                                         value="#{labels.report_mark_duplicate}" styleClass="btn btn-primary ms-3"/>
+                        <h:commandButton id="cb-unmark-duplicate" action="#{reportBacker.unmarkDuplicate}"
+                                         value="#{labels.report_unmark_duplicate}" styleClass="btn btn-primary ms-3"
+                                         rendered="#{reportBacker.report.duplicateOf != null}"/>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" rendered="#{userSession.user != null}">
+                        <h:commandButton id="cb-subscribe"
+                                         action="#{reportBacker.toggleReportSubscription}"
+                                         value="#{labels.subscribe}"
+                                         styleClass="btn btn-primary ms-3"
+                                         rendered="#{not reportBacker.subscribed}"/>
+                        <h:commandButton id="cb-unsubscribe"
+                                         action="#{reportBacker.toggleReportSubscription}"
+                                         value="#{labels.unsubscribe}"
+                                         styleClass="btn btn-primary ms-3"
+                                         rendered="#{reportBacker.subscribed}"/>
+                    </h:panelGroup>
+                    <h:link id="cb-add-post"
+                            outcome="pretty:post-edit"
+                            value="#{labels.post_create}"
+                            styleClass="btn btn-secondary ms-3"
+                            rendered="#{reportBacker.allowedToPost}">
+                        <f:param name="r" value="#{reportBacker.report.id}"/>
+                        <f:param name="c" value="1"/>
+                    </h:link>
+                </h:panelGroup>
+            </h:panelGroup>
+
+            <h:panelGroup layout="block" styleClass="d-flex  justify-content-between align-items-center mb-3">
+                <h:panelGroup layout="block" styleClass="d-flex flex-column">
+                    <h:panelGroup layout="block" styleClass="d-flex align-items-center">
+                        <h:panelGroup layout="block" styleClass="me-4">
+                            <h:form id="f-vote" rendered="#{userSession.user != null and not reportBacker.banned}">
+                                <h:panelGroup layout="block" styleClass="ihatejsf">
+                                    <h:commandButton id="cb-upvote"
+                                                     value="&#9650; #{labels.upvote_button}"
+                                                     action="#{reportBacker.upvote}"
+                                                     rendered="#{!reportBacker.upvoted}"
+                                                     styleClass="btn vote-not-cast w-100 mb-2 text-start"/>
+                                    <h:commandButton id="cb-unupvote"
+                                                     value="&#9650; #{labels.upvote_button}"
+                                                     action="#{reportBacker.removeVote}"
+                                                     rendered="#{reportBacker.upvoted}"
+                                                     styleClass="btn vote-cast w-100 mb-2 text-start"/>
+                                </h:panelGroup>
+                                <h:panelGroup layout="block" styleClass="ihatejsf">
+                                    <h:commandButton id="cb-downvote"
+                                                     value="&#9660; #{labels.downvote_button}"
+                                                     action="#{reportBacker.downvote}"
+                                                     rendered="#{!reportBacker.downvoted}"
+                                                     styleClass="btn vote-not-cast w-100 text-start"/>
+                                    <h:commandButton id="cb-undownvote"
+                                                     value="&#9660; #{labels.downvote_button}"
+                                                     action="#{reportBacker.removeVote}"
+                                                     rendered="#{reportBacker.downvoted}"
+                                                     styleClass="btn vote-cast w-100 text-start"/>
+                                </h:panelGroup>
+                            </h:form>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="ihatejsf">
+                            <h:panelGroup styleClass="row text-center">
+                                <h:outputText id="ot-relevance"
+                                              styleClass="display-2"
+                                              value="#{reportBacker.report.relevance}"/>
+                            </h:panelGroup>
+                            <h:panelGroup styleClass="row text-center">
+                                <h:outputLabel value="#{labels.col_relevance}"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" styleClass="input-group mt-3" rendered="#{reportBacker.privileged}">
+                        <h:inputText id="i-overwrite-relevance-value"
+                                     value="#{reportBacker.overwriteRelevanceValue}"
+                                     size="3"
+                                     styleClass="form-control"/>
+                        <h:commandButton id="cb-overwrite-relevance"
+                                         value="#{labels.overwrite_relevance}"
+                                         styleClass="btn btn-primary"
+                                         action="#{reportBacker.applyOverwriteRelevance}"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+
+                <h:panelGroup layout="block" styleClass="ihatejsf">
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="#{labels.status}: " for="ot-status" styleClass="me-2"/>
+                        <h:panelGroup styleClass="ihatejsf">
+                            <h:outputText id="ot-status" value="#{reportBacker.report.closingDate == null
+                              ? labels.report_status_open : labels.report_status_closed}"
+                                          styleClass="badge rounded-pill
+                                #{reportBacker.report.closingDate != null ? 'bg-danger' : 'bg-success'}"/>
+                            <h:outputText value=" #{labels.report_at}: "
+                                          rendered="#{reportBacker.report.closingDate != null}"/>
+                            <h:outputText id="ot-closing-date"
+                                          value="#{reportBacker.report.closingDate}"
+                                          rendered="#{reportBacker.report.closingDate != null}">
+                                <f:converter converterId="offsetDateTimeConverter"/>
+                            </h:outputText>
+                        </h:panelGroup>
+
+                        <h:outputLabel value="#{labels.report_type}: " for="ot-type" styleClass="me-2"/>
+                        <h:outputText id="ot-type" value="#{labels['report_type_'.concat(reportBacker.report.type)]}"/>
+
+                        <h:outputLabel value="#{labels.report_severity}: " for="ot-severity" styleClass="me-2"/>
+                        <h:outputText id="ot-severity" styleClass="badge
+                                      #{reportBacker.report.severity == 'SEVERE' ? 'bg-danger'
+                                      : reportBacker.report.severity == 'RELEVANT' ? 'bg-warning' : 'bg-secondary'}"
+                                      value="#{labels['report_severity_'.concat(reportBacker.report.severity)]}"/>
+
+                        <h:outputLabel value="#{labels.report_version}" for="ot-version" styleClass="me-2"/>
+                        <h:outputText id="ot-version" value="#{reportBacker.report.version}"/>
+
+                        <h:outputLabel id="ol-duplicate-desc"
+                                       value="#{labels.report_original}: "
+                                       rendered="#{reportBacker.report.duplicateOf != null}"
+                                       styleClass="me-2"/>
+                        <h:panelGroup styleClass="ihatejsf"
+                                      rendered="#{reportBacker.report.duplicateOf != null}">
+                            <h:link id="l-duplicate" outcome="pretty:report"
+                                    rendered="#{reportBacker.report.duplicateOf != null}"
+                                    value="##{reportBacker.report.duplicateOf}">
+                                <f:param name="id" value="#{reportBacker.report.duplicateOf}"/>
+                            </h:link>
+                        </h:panelGroup>
+                    </h:panelGrid>
+                </h:panelGroup>
+
+                <h:panelGroup layout="block" styleClass="ihatejsf">
+                    <h:panelGroup layout="block" styleClass="d-flex">
+                        <h:link id="l-report-creator-avatar" outcome="pretty:profile" styleClass="fs-3"
+                                rendered="#{reportBacker.report.authorship.creator != null}">
+                            <h:graphicImage id="g-creator-thumbnail"
+                                            value="/avatar?id=#{reportBacker.report.authorship.creator.id}&amp;type=thumbnail"
+                                            styleClass="g-avatar-thumbnail rounded-circle me-2"
+                                            alt="#{reportBacker.report.authorship.creator.username}'s avatar"
+                                            rendered="#{reportBacker.report.authorship.creator.existsAvatar}"/>
+                            <h:graphicImage id="g-creator-thumbnail-fallback-p#{reportBacker.report.id}"
+                                            library="images" name="avatar.jpg"
+                                            styleClass="g-avatar-thumbnail rounded-circle me-2"
+                                            alt="#{reportBacker.report.authorship.creator.username}'s avatar"
+                                            rendered="#{!reportBacker.report.authorship.creator.existsAvatar}"/>
+                            <f:param name="u" value="#{reportBacker.report.authorship.creator.username}"/>
+                        </h:link>
+                        <h:graphicImage id="g-creator-thumbnail-deleted-p#{reportBacker.report.id}"
+                                        library="images" name="ghost.jpg"
+                                        styleClass="g-avatar-thumbnail rounded-circle me-2"
+                                        alt="#{labels.deleted_user}'s avatar"
+                                        rendered="#{reportBacker.report.authorship.creator == null}"/>
+                        <h:panelGroup styleClass="d-flex flex-column">
+                            <h:link id="l-report-creator" outcome="pretty:profile" styleClass="fs-5"
+                                    value="@#{reportBacker.report.authorship.creator.username}"
+                                    rendered="#{reportBacker.report.authorship.creator != null}">
+                                <f:param name="u" value="#{reportBacker.report.authorship.creator.username}"/>
+                            </h:link>
+                            <h:outputText id="ot-report-creator" value="#{labels.deleted_user}" styleClass="fs-5"
+                                          rendered="#{reportBacker.report.authorship.creator == null}"/>
+                            <h:panelGroup styleClass="ihatejsf">
+                                <h:outputText id="ot-report-created-at" value="#{labels.report_at.concat(' ')}"/>
+                                <h:outputText id="ot-report-created-date"
+                                              value="#{reportBacker.report.authorship.creationDate}">
+                                    <f:converter converterId="offsetDateTimeConverter"/>
+                                </h:outputText>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" styleClass="text-muted mt-3"
+                                  rendered="#{reportBacker.report.authorship.modifiedDate != null}">
+                        <h:panelGroup layout="block" styleClass="ihatejsf">
+                            <h:outputText value="#{labels.report_last_modified_by} "/>
+                            <h:link id="l-report-modifier-avatar" outcome="pretty:profile"
+                                    rendered="#{reportBacker.report.authorship.modifier != null}">
+                                <h:graphicImage id="g-modifier-thumbnail-p#{reportBacker.report.id}"
+                                                value="/avatar?id=#{reportBacker.report.authorship.modifier.id}&amp;type=thumbnail"
+                                                styleClass="g-avatar-thumbnail img-size-mini rounded-circle me-1"
+                                                alt="#{reportBacker.report.authorship.modifier.username}'s avatar"
+                                                rendered="#{reportBacker.report.authorship.modifier.existsAvatar}"/>
+                                <h:graphicImage id="g-modifier-thumbnail-fallback-p#{reportBacker.report.id}"
+                                                library="images" name="avatar.jpg"
+                                                styleClass="g-avatar-thumbnail img-size-mini rounded-circle me-1"
+                                                alt="#{reportBacker.report.authorship.modifier.username}'s avatar"
+                                                rendered="#{!reportBacker.report.authorship.modifier.existsAvatar}"/>
+                                <f:param name="u" value="#{reportBacker.report.authorship.modifier.username}"/>
+                            </h:link>
+                            <h:graphicImage id="g-modifier-thumbnail-deleted-p#{reportBacker.report.id}"
+                                            library="images" name="ghost.jpg"
+                                            styleClass="g-avatar-thumbnail img-size-mini rounded-circle me-1"
+                                            alt="#{labels.deleted_user}'s avatar"
+                                            rendered="#{reportBacker.report.authorship.modifier == null}"/>
+                            <h:link id="l-report-modifier" outcome="pretty:profile"
+                                    value="@#{reportBacker.report.authorship.modifier.username}"
+                                    rendered="#{reportBacker.report.authorship.modifier != null}">
+                                <f:param name="u" value="#{reportBacker.report.authorship.modifier.username}"/>
+                            </h:link>
+                            <h:outputText id="ot-report-modifier" value="#{labels.deleted_user}"
+                                          rendered="#{reportBacker.report.authorship.modifier == null}"/>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="ihatejsf">
+                            <h:outputText value="#{labels.report_at} "/>
+                            <h:outputText id="ot-report-modified-date"
+                                          value="#{reportBacker.report.authorship.modifiedDate}">
+                                <f:converter converterId="offsetDateTimeConverter"/>
+                            </h:outputText>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </h:panelGroup>
+
+                <h:panelGroup layout="block" styleClass="ihatejsf">
+                    <b:pagitable id="p-duplicates" paginator="#{reportBacker.duplicates}" simple="true"
+                                 rendered="#{not reportBacker.duplicates.isEmpty()}">
+                        <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
+                        <b:column title="#{labels.report_duplicates}" paginator="#{reportBacker.duplicates}" key="ID">
+                            <h:link outcome="pretty:report" value="##{var.id}">
+                                <f:param name="id" value="#{var.id}"/>
+                            </h:link>
+                        </b:column>
+                    </b:pagitable>
+                </h:panelGroup>
+            </h:panelGroup>
+        </h:form>
+
+        <b:pagitable_post paginator="#{reportBacker.posts}" id="p-posts">
+            <!--@elvariable id="var" type="tech.bugger.global.transfer.Post"-->
+            <h:panelGroup layout="block" styleClass="mb-3">
+                <!-- div used here because of: https://stackoverflow.com/questions/18358604/ -->
+                <div class="card" id="post-#{var.id}">
+                    <h:panelGroup styleClass="card-header d-flex justify-content-between">
+                        <h:panelGroup styleClass="d-flex align-items-center">
+                            <h:panelGroup styleClass="d-flex me-5">
+                                <h:link id="l-post-creator-avatar" outcome="pretty:profile" styleClass="fs-3"
+                                        rendered="#{var.authorship.creator != null}">
+                                    <h:graphicImage id="g-creator-thumbnail-p#{var.id}"
+                                                    value="/avatar?id=#{var.authorship.creator.id}&amp;type=thumbnail"
+                                                    styleClass="g-avatar-thumbnail rounded-circle me-2"
+                                                    alt="#{var.authorship.creator.username}'s avatar"
+                                                    rendered="#{var.authorship.creator.existsAvatar}"/>
+                                    <h:graphicImage id="g-creator-thumbnail-fallback-p#{var.id}"
+                                                    library="images" name="avatar.jpg"
+                                                    styleClass="g-avatar-thumbnail rounded-circle me-2"
+                                                    alt="#{var.authorship.creator.username}'s avatar"
+                                                    rendered="#{!var.authorship.creator.existsAvatar}"/>
+                                    <f:param name="u" value="#{var.authorship.creator.username}"/>
+                                </h:link>
+                                <h:graphicImage id="g-creator-thumbnail-deleted-p#{var.id}"
+                                                library="images" name="ghost.jpg"
+                                                styleClass="g-avatar-thumbnail rounded-circle me-2"
+                                                alt="#{labels.deleted_user}'s avatar"
+                                                rendered="#{var.authorship.creator == null}"/>
+                                <h:panelGroup styleClass="d-flex flex-column">
+                                    <h:link id="l-post-creator" outcome="pretty:profile" styleClass="fs-5"
+                                            value="@#{var.authorship.creator.username}"
+                                            rendered="#{var.authorship.creator != null}">
+                                        <f:param name="u" value="#{var.authorship.creator.username}"/>
+                                    </h:link>
+                                    <h:outputText id="ot-post-creator" value="#{labels.deleted_user}" styleClass="fs-5"
+                                                  rendered="#{var.authorship.creator == null}"/>
+                                    <h:panelGroup styleClass="ihatejsf">
+                                        <h:outputText id="ot-post-created-at" value="#{labels.report_at.concat(' ')}"/>
+                                        <h:outputText id="ot-post-created-date" value="#{var.authorship.creationDate}">
+                                            <f:converter converterId="offsetDateTimeConverter"/>
+                                        </h:outputText>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="d-flex flex-column"
+                                          rendered="#{var.authorship.modifiedDate != null}">
+                                <h:panelGroup styleClass="ihatejsf">
+                                    <h:outputText value="#{labels.report_last_modified_by} "/>
+                                    <h:link id="l-post-modifier-avatar" outcome="pretty:profile"
+                                            rendered="#{var.authorship.modifier != null}">
+                                        <h:graphicImage id="g-modifier-thumbnail-p#{var.id}"
+                                                        value="/avatar?id=#{var.authorship.modifier.id}&amp;type=thumbnail"
+                                                        styleClass="g-avatar-thumbnail img-size-mini rounded-circle me-1"
+                                                        alt="#{var.authorship.modifier.username}'s avatar"
+                                                        rendered="#{var.authorship.modifier.existsAvatar}"/>
+                                        <h:graphicImage id="g-modifier-thumbnail-fallback-p#{var.id}"
+                                                        library="images" name="avatar.jpg"
+                                                        styleClass="g-avatar-thumbnail img-size-mini rounded-circle me-1"
+                                                        alt="#{var.authorship.modifier.username}'s avatar"
+                                                        rendered="#{!var.authorship.modifier.existsAvatar}"/>
+                                        <f:param name="u" value="#{var.authorship.modifier.username}"/>
+                                    </h:link>
+                                    <h:graphicImage id="g-modifier-thumbnail-deleted-p#{var.id}"
+                                                    library="images" name="ghost.jpg"
+                                                    styleClass="g-avatar-thumbnail img-size-mini rounded-circle me-1"
+                                                    alt="#{labels.deleted_user}'s avatar"
+                                                    rendered="#{var.authorship.modifier == null}"/>
+                                    <h:link id="l-post-modifier" outcome="pretty:profile"
+                                            value="@#{var.authorship.modifier.username}"
+                                            rendered="#{var.authorship.modifier != null}">
+                                        <f:param name="u" value="#{var.authorship.modifier.username}"/>
+                                    </h:link>
+                                    <h:outputText id="ot-post-modifier" value="#{labels.deleted_user}"
+                                                  rendered="#{var.authorship.modifier == null}"/>
+                                </h:panelGroup>
+                                <h:panelGroup styleClass="ihatejsf">
+                                    <h:outputText value="#{labels.report_at} "/>
+                                    <h:outputText id="ot-post-modified-date" value="#{var.authorship.modifiedDate}">
+                                        <f:converter converterId="offsetDateTimeConverter"/>
+                                    </h:outputText>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block"
+                                      styleClass="d-flex align-items-center"
+                                      rendered="#{reportBacker.privilegedForPost(var)}">
+                            <h:link id="cb-edit-post"
+                                    outcome="pretty:post-edit"
+                                    value="#{labels.edit}"
+                                    styleClass="btn btn-secondary me-2">
+                                <f:param name="p" value="#{var.id}"/>
+                            </h:link>
+                            <h:commandButton id="cb-delete-post-dialog"
+                                             styleClass="btn btn-outline-danger"
+                                             action="#{reportBacker.deletePostDialog(var)}"
+                                             value="#{labels.delete}"/>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" styleClass="card-body">
+                        <h:outputText value="#{var.content}" escape="false"/>
+                    </h:panelGroup>
+                    <h:panelGroup styleClass="card-footer p-2 d-flex justify-content-between align-items-start">
+                        <h:panelGroup layout="block" styleClass="lh-3">
+                            <ui:repeat var="attachment" value="#{var.attachments}">
+                                <h:outputLink value="#{request.contextPath}/attachment?id=#{attachment.id}"
+                                              styleClass="btn btn-outline-primary rounded-pill me-2">
+                                    <h:outputText value="#{attachment.name}">
+                                        <f:converter converterId="attachmentNameConverter"/>
+                                    </h:outputText>
+                                </h:outputLink>
+                            </ui:repeat>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="ihatejsf">
+                            <h:link value="###{var.id}" outcome="pretty:report" fragment="post-#{var.id}">
+                                <f:param name="id" value="#{reportBacker.report.id}"/>
+                                <f:param name="p" value="#{var.id}"/>
+                            </h:link>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </div>
+            </h:panelGroup>
+        </b:pagitable_post>
+    </ui:define>
+
     <ui:define name="dialogs">
         <h:panelGroup layout="block" styleClass="dialog" rendered="#{reportBacker.currentDialog == 'DUPLICATE'}">
             <h:outputText value="#{labels.report_duplicate_dialog_title}" styleClass="h2"/>
@@ -47,7 +419,8 @@
                     <h:outputText value="#{labels.report_delete_warn}"/>
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
-                    <h:commandButton id="cb-delete-report" action="#{reportBacker.delete}" styleClass="btn btn-primary"
+                    <h:commandButton id="cb-delete-report" action="#{reportBacker.delete}"
+                                     styleClass="btn btn-danger"
                                      value="#{labels.delete}"/>
                     <h:commandButton id="cb-delete-report-cancel" action="#{reportBacker.displayDialog(null)}"
                                      styleClass="btn btn-secondary" value="#{labels.cancel}"/>
@@ -83,426 +456,11 @@
                 </h:panelGroup>
                 <h:panelGroup layout="block" styleClass="d-flex justify-content-between">
                     <h:commandButton id="cb-delete-post" action="#{reportBacker.deletePost}"
-                                     styleClass="btn btn-primary" value="#{labels.delete}"/>
+                                     styleClass="btn btn-danger" value="#{labels.delete}"/>
                     <h:commandButton id="cb-delete-post-cancel" action="#{reportBacker.displayDialog(null)}"
                                      styleClass="btn btn-secondary" value="#{labels.cancel}"/>
                 </h:panelGroup>
             </h:form>
         </h:panelGroup>
-    </ui:define>
-
-    <ui:define name="content">
-        <h:form id="f-report">
-            <h:panelGroup layout="block" styleClass="row">
-                <h:panelGroup layout="block" styleClass="col-12 align-right">
-                    <h:panelGroup layout="block" rendered="#{reportBacker.privileged}">
-                        <h:commandButton id="cb-open-close-report-dialog"
-                                         action="#{reportBacker.displayDialog('OPEN_CLOSE')}"
-                                         value="#{reportBacker.report.closingDate == null ? labels.report_action_close
-                                         : labels.report_action_open}"
-                                         styleClass="button btn btn-primary"/>
-                        <h:link id="cb-edit-report" value="#{labels.edit}" outcome="pretty:report-edit"
-                                styleClass="button btn btn-secondary"
-                                rendered="#{empty reportBacker.report.closingDate
-                                            or applicationSettings.configuration.closedReportPosting}">
-                            <f:param name="id" value="#{reportBacker.report.id}"/>
-                        </h:link>
-                        <h:commandButton id="cb-delete-report-dialog"
-                                         action="#{reportBacker.displayDialog('DELETE_REPORT')}"
-                                         value="#{labels.delete}" styleClass="button btn btn-primary"/>
-                        <h:commandButton id="cb-mark-duplicate" action="#{reportBacker.displayDialog('DUPLICATE')}"
-                                         value="#{labels.report_mark_duplicate}" styleClass="button btn btn-primary"/>
-                        <h:commandButton id="cb-unmark-duplicate" action="#{reportBacker.unmarkDuplicate}"
-                                         value="#{labels.report_unmark_duplicate}" styleClass="button btn btn-primary"
-                                         rendered="#{reportBacker.report.duplicateOf != null}"/>
-                    </h:panelGroup>
-                    <h:panelGroup layout="block" rendered="#{userSession.user != null}">
-                        <h:commandButton id="cb-subscribe"
-                                         action="#{reportBacker.toggleReportSubscription}"
-                                         value="#{labels.subscribe}"
-                                         styleClass="button btn btn-primary"
-                                         rendered="#{not reportBacker.subscribed}"/>
-                        <h:commandButton id="cb-unsubscribe"
-                                         action="#{reportBacker.toggleReportSubscription}"
-                                         value="#{labels.unsubscribe}"
-                                         styleClass="button btn btn-primary"
-                                         rendered="#{reportBacker.subscribed}"/>
-                    </h:panelGroup>
-                    <h:link id="cb-add-post"
-                            outcome="pretty:post-edit"
-                            value="#{labels.post_create}"
-                            styleClass="button btn btn-secondary"
-                            rendered="#{reportBacker.allowedToPost}">
-                        <f:param name="r" value="#{reportBacker.report.id}"/>
-                        <f:param name="c" value="1"/>
-                    </h:link>
-                </h:panelGroup>
-            </h:panelGroup>
-        </h:form>
-        <h:form id="f-vote" rendered="#{userSession.user != null}">
-            <h:panelGroup layout="block" styleClass="row my-3">
-                <h:panelGroup layout="block" styleClass="col-3">
-                    <h:panelGroup layout="block" styleClass="row">
-                        <h:commandButton id="cb-upvote"
-                                         value="#{labels.upvote_button}"
-                                         action="#{reportBacker.upvote}"
-                                         rendered="#{!reportBacker.upvoted}"
-                                         styleClass="button btn vote-not-cast"/>
-                        <h:commandButton id="cb-unupvote"
-                                         value="#{labels.upvote_button}"
-                                         action="#{reportBacker.removeVote}"
-                                         rendered="#{reportBacker.upvoted}"
-                                         styleClass="button btn vote-cast"/>
-                    </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="row">
-                        <h:commandButton id="cb-downvote"
-                                         value="#{labels.downvote_button}"
-                                         action="#{reportBacker.downvote}"
-                                         rendered="#{!reportBacker.downvoted}"
-                                         styleClass="button btn vote-not-cast"/>
-                        <h:commandButton id="cb-undownvote"
-                                         value="#{labels.downvote_button}"
-                                         action="#{reportBacker.removeVote}"
-                                         rendered="#{reportBacker.downvoted}"
-                                         styleClass="button btn vote-cast"/>
-                    </h:panelGroup>
-                </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="col 9">
-                    <h:outputLabel value="#{labels.relevance_overwritten}"
-                                   rendered="#{reportBacker.report.relevanceOverwritten}"/>
-                </h:panelGroup>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="row my-3">
-                <h:panelGroup layout="block" styleClass="col 9" rendered="#{reportBacker.privileged}">
-                    <h:inputText id="i-overwrite-relevance-value"
-                                 value="#{reportBacker.overwriteRelevanceValue}"
-                                 styleClass="form-control"/>
-                </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="col 3" rendered="#{reportBacker.privileged}">
-                    <h:commandButton id="cb-overwrite-relevance"
-                                     value="#{labels.overwrite_relevance}" styleClass="button btn btn-primary"
-                                     action="#{reportBacker.applyOverwriteRelevance}"/>
-                </h:panelGroup>
-            </h:panelGroup>
-        </h:form>
-
-        <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup layout="block" styleClass="col-3">
-                <h:outputLabel value="#{labels.current_relevance}" for="ot-relevance" styleClass="form-label"/>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="col-9">
-                <h:outputText id="ot-relevance" value="#{reportBacker.report.relevance}"/>
-            </h:panelGroup>
-        </h:panelGroup>
-
-        <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup layout="block" styleClass="col-3">
-                <h:outputLabel value="#{labels.id}" for="ot-id" styleClass="form-label"/>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="col-9">
-                <h:outputText id="ot-id" value="##{reportBacker.report.id}"/>
-            </h:panelGroup>
-        </h:panelGroup>
-
-        <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup layout="block" styleClass="col-3">
-                <h:outputLabel value="#{labels.topic}" for="ot-topic" styleClass="form-label"/>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="col-9">
-                <h:link id="l-topic" value="!#{reportBacker.topic.id}"
-                        outcome="pretty:topic">
-                    <f:param name="id" value="#{reportBacker.topic.id}"/>
-                </h:link>
-                <h:outputText id="ot-topic" value=": #{reportBacker.topic.title}"/>
-            </h:panelGroup>
-        </h:panelGroup>
-
-        <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup layout="block" styleClass="col-3">
-                <h:outputLabel value="#{labels.status}" for="ot-status1" styleClass="form-label"/>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="col-9">
-                <h:outputText id="ot-status1" value="#{reportBacker.report.closingDate == null
-                              ? labels.report_status_open : labels.report_status_closed.concat(' ')}"/>
-                <h:outputText id="ot-status3" value="#{reportBacker.report.closingDate}">
-                    <f:converter converterId="offsetDateTimeConverter"/>
-                </h:outputText>
-            </h:panelGroup>
-        </h:panelGroup>
-
-        <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup layout="block" styleClass="col-3">
-                <h:outputLabel value="#{labels.report_type}" for="ot-type" styleClass="form-label"/>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="col-9">
-                <h:outputText id="ot-type" value="#{labels['report_type_'.concat(reportBacker.report.type)]}"/>
-            </h:panelGroup>
-        </h:panelGroup>
-
-        <h:panelGroup layout="block" styleClass="row mb3" rendered="#{reportBacker.report.duplicateOf != null}">
-            <h:panelGroup layout="block" styleClass="col-3">
-                <h:outputLabel id="ol-duplicate-desc" value="#{labels.report_original}: " styleClass="form-label"/>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="col-9">
-                <h:link id="l-duplicate" outcome="pretty:report" rendered="#{reportBacker.report.duplicateOf != null}"
-                        value="##{reportBacker.report.duplicateOf}">
-                    <f:param name="id" value="#{reportBacker.report.duplicateOf}"/>
-                </h:link>
-            </h:panelGroup>
-        </h:panelGroup>
-
-        <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup layout="block" styleClass="col-3">
-                <h:outputLabel value="#{labels.report_severity}" for="ot-severity" styleClass="form-label"/>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="col-9">
-                <h:outputText id="ot-severity"
-                              value="#{labels['report_severity_'.concat(reportBacker.report.severity)]}"/>
-            </h:panelGroup>
-        </h:panelGroup>
-
-        <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup layout="block" styleClass="col-3">
-                <h:outputLabel value="#{labels.report_version}" for="ot-version" styleClass="form-label"/>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="col-9">
-                <h:outputText id="ot-version" value="#{reportBacker.report.version}"/>
-            </h:panelGroup>
-        </h:panelGroup>
-
-        <b:pagitable id="p-duplicates" paginator="#{reportBacker.duplicates}" simple="true"
-                     rendered="#{not reportBacker.duplicates.isEmpty()}">
-            <!--@elvariable id="var" type="tech.bugger.global.transfer.Report"-->
-            <b:column title="#{labels.report_duplicates}" paginator="#{reportBacker.duplicates}" key="ID">
-                <h:link outcome="pretty:report" value="##{var.id}">
-                    <f:param name="id" value="#{var.id}"/>
-                </h:link>
-            </b:column>
-        </b:pagitable>
-
-        <h:panelGroup layout="block" styleClass="row mb3">
-            <h:panelGroup layout="block" styleClass="col-3">
-                <h:outputText id="ot-created-by" value="#{labels.report_created_by}"/>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="col-9">
-                <h:panelGroup layout="block" styleClass="row">
-                    <h:panelGroup layout="block" styleClass="col-12">
-                        <h:panelGroup>
-                            <h:graphicImage id="g-creator-thumbnail-r#{reportBacker.report.id}"
-                                            value="/avatar?id=#{reportBacker.report.authorship.creator == null ? 0
-                                            : reportBacker.report.authorship.creator.id}&amp;type=thumbnail"
-                                            styleClass="g-avatar-thumbnail rounded-circle"
-                                            alt="#{reportBacker.report.authorship.creator == null ? labels.deleted_user
-                                            : reportBacker.report.authorship.creator.username}'s avatar"
-                                            rendered="#{reportBacker.report.authorship.creator != null
-                                            and reportBacker.report.authorship.creator.existsAvatar}"/>
-                            <h:graphicImage id="g-creator-thumbnail-fallback-r#{reportBacker.report.id}"
-                                            library="images" name="bugger.png"
-                                            styleClass="g-avatar-thumbnail rounded-circle"
-                                            alt="#{reportBacker.report.authorship.creator == null ? labels.deleted_user
-                                            : reportBacker.report.authorship.creator.username}'s avatar"
-                                            rendered="#{reportBacker.report.authorship.creator == null
-                                            or !reportBacker.report.authorship.creator.existsAvatar}"/>
-                        </h:panelGroup>
-                        <h:link id="l-creator" outcome="pretty:profile"
-                                value="@#{reportBacker.report.authorship.creator.username}"
-                                rendered="#{reportBacker.report.authorship.creator != null}">
-                            <f:param name="u" value="#{reportBacker.report.authorship.creator.username}"/>
-                        </h:link>
-                        <h:outputText id="ot-creator" value="#{labels.deleted_user}"
-                                      rendered="#{reportBacker.report.authorship.creator == null}"/>
-                    </h:panelGroup>
-                </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="row">
-                    <h:panelGroup layout="block" styleClass="col-12">
-                        <h:outputText id="ot-created-at" value="#{labels.report_at.concat(' ')}"/>
-                        <h:outputText id="ot-created-date" value="#{reportBacker.report.authorship.creationDate}">
-                            <f:converter converterId="offsetDateTimeConverter"/>
-                        </h:outputText>
-                    </h:panelGroup>
-                </h:panelGroup>
-            </h:panelGroup>
-        </h:panelGroup>
-
-        <h:panelGroup layout="block" styleClass="row mb3"
-                      rendered="#{reportBacker.report.authorship.modifiedDate != null}">
-            <h:panelGroup layout="block" styleClass="col-3">
-                <h:outputText id="ot-modified-by" value="#{labels.report_last_modified_by}"/>
-            </h:panelGroup>
-            <h:panelGroup layout="block" styleClass="col-9">
-                <h:panelGroup layout="block" styleClass="row">
-                    <h:panelGroup layout="block" styleClass="col-12">
-                        <h:panelGroup>
-                            <h:graphicImage id="g-modifier-thumbnail-r#{reportBacker.report.id}"
-                                            value="/avatar?id=#{reportBacker.report.authorship.modifier == null ? 0
-                                            : reportBacker.report.authorship.modifier.id}&amp;type=thumbnail"
-                                            styleClass="g-avatar-thumbnail rounded-circle"
-                                            alt="#{reportBacker.report.authorship.modifier == null ? labels.deleted_user
-                                            : reportBacker.report.authorship.modifier.username}'s avatar"
-                                            rendered="#{reportBacker.report.authorship.modifier != null
-                                            and reportBacker.report.authorship.modifier.existsAvatar}"/>
-                            <h:graphicImage id="g-modifier-thumbnail-fallback-r#{reportBacker.report.id}"
-                                            library="images" name="bugger.png"
-                                            styleClass="g-avatar-thumbnail rounded-circle"
-                                            alt="#{reportBacker.report.authorship.modifier == null ? labels.deleted_user
-                                            : reportBacker.report.authorship.modifier.username}'s avatar"
-                                            rendered="#{reportBacker.report.authorship.modifier == null
-                                            or !reportBacker.report.authorship.modifier.existsAvatar}"/>
-                        </h:panelGroup>
-                        <h:link id="l-modifier" outcome="pretty:profile"
-                                value="@#{reportBacker.report.authorship.modifier.username}"
-                                rendered="#{reportBacker.report.authorship.modifier != null}">
-                            <f:param name="u" value="#{reportBacker.report.authorship.modifier.username}"/>
-                        </h:link>
-                        <h:outputText id="ot-modifier" value="#{labels.deleted_user}"
-                                      rendered="#{reportBacker.report.authorship.modifier == null}"/>
-                    </h:panelGroup>
-                </h:panelGroup>
-                <h:panelGroup layout="block" styleClass="row">
-                    <h:panelGroup layout="block" styleClass="col-12">
-                        <h:outputText id="ot-modified-at" value="#{labels.report_at.concat(' ')}"/>
-                        <h:outputText id="ot-modified-date" value="#{reportBacker.report.authorship.modifiedDate}">
-                            <f:converter converterId="offsetDateTimeConverter"/>
-                        </h:outputText>
-                    </h:panelGroup>
-                </h:panelGroup>
-            </h:panelGroup>
-        </h:panelGroup>
-
-        <b:pagitable_post paginator="#{reportBacker.posts}" id="p-posts">
-            <!--@elvariable id="var" type="tech.bugger.global.transfer.Post"-->
-            <h:panelGroup layout="block" styleClass="mb-3">
-                <!-- div used here because of: https://stackoverflow.com/questions/18358604/ -->
-                <div class="card" id="post-#{var.id}">
-                    <h:panelGroup layout="block" styleClass="card-header">
-                        <h:panelGroup layout="block" styleClass="row mb3">
-                            <h:panelGroup layout="block" styleClass="col-9">
-                                <h:panelGroup layout="block" styleClass="row">
-                                    <h:panelGroup layout="block" styleClass="col-12">
-                                        <h:panelGroup>
-                                            <h:graphicImage id="g-creator-thumbnail-p#{var.id}"
-                                                            value="/avatar?id=#{var.authorship.creator == null ? 0
-                                                            : var.authorship.creator.id}&amp;type=thumbnail"
-                                                            styleClass="g-avatar-thumbnail rounded-circle"
-                                                            alt="#{var.authorship.creator == null ? labels.deleted_user
-                                                            : var.authorship.creator.username}'s avatar"
-                                                            rendered="#{var.authorship.creator != null
-                                                            and var.authorship.creator.existsAvatar}"/>
-                                            <h:graphicImage id="g-creator-thumbnail-fallback-p#{var.id}"
-                                                            library="images" name="bugger.png"
-                                                            styleClass="g-avatar-thumbnail rounded-circle"
-                                                            alt="#{var.authorship.creator == null ? labels.deleted_user
-                                                            : var.authorship.creator.username}'s avatar"
-                                                            rendered="#{var.authorship.creator == null
-                                                            or !var.authorship.creator.existsAvatar}"/>
-                                        </h:panelGroup>
-                                        <h:link id="l-post-creator" outcome="pretty:profile"
-                                                value="@#{var.authorship.modifier.username}"
-                                                rendered="#{var.authorship.creator != null}">
-                                            <f:param name="u" value="#{var.authorship.creator.username}"/>
-                                        </h:link>
-                                        <h:outputText id="ot-post-creator" value="#{labels.deleted_user}"
-                                                      rendered="#{var.authorship.creator == null}"/>
-                                    </h:panelGroup>
-                                </h:panelGroup>
-                                <h:panelGroup layout="block" styleClass="row">
-                                    <h:panelGroup layout="block" styleClass="col-12">
-                                        <h:outputText id="ot-post-created-at" value="#{labels.report_at.concat(' ')}"/>
-                                        <h:outputText id="ot-post-created-date" value="#{var.authorship.creationDate}">
-                                            <f:converter converterId="offsetDateTimeConverter"/>
-                                        </h:outputText>
-                                    </h:panelGroup>
-                                </h:panelGroup>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block"
-                                          styleClass="col-3"
-                                          rendered="#{reportBacker.privilegedForPost(var)}">
-                                <h:panelGroup layout="block" styleClass="align-right">
-                                    <h:link id="cb-edit-post"
-                                            outcome="pretty:post-edit"
-                                            value="#{labels.edit}"
-                                            styleClass="button btn btn-secondary">
-                                        <f:param name="p" value="#{var.id}"/>
-                                    </h:link>
-                                    <h:commandButton id="cb-delete-post-dialog"
-                                                     styleClass="button btn btn-primary"
-                                                     action="#{reportBacker.deletePostDialog(var)}"
-                                                     value="#{labels.delete}"/>
-                                </h:panelGroup>
-                            </h:panelGroup>
-                        </h:panelGroup>
-                    </h:panelGroup>
-
-                    <h:panelGrid columns="1" styleClass="card-body">
-                        <h:outputText value="#{var.content}" escape="false"/>
-                    </h:panelGrid>
-
-
-                    <h:panelGroup layout="block" styleClass="card-footer">
-                        <h:panelGroup layout="block" styleClass="row mb3">
-                            <h:panelGroup layout="block" styleClass="col-3">
-                                <h:outputText value="#{labels.id}"/>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="col-9">
-                                <h:link value="###{var.id}" outcome="pretty:report" fragment="post-#{var.id}">
-                                    <f:param name="id" value="#{reportBacker.report.id}"/>
-                                    <f:param name="p" value="#{var.id}"/>
-                                </h:link>
-                            </h:panelGroup>
-                        </h:panelGroup>
-
-                        <h:panelGroup layout="block" styleClass="row" rendered="#{var.authorship.modifiedDate != null}">
-                            <h:panelGroup layout="block" styleClass="row">
-                                <h:panelGroup layout="block" styleClass="col-12">
-                                    <h:panelGroup layout="block">
-                                        <h:graphicImage id="g-modifier-thumbnail-p#{var.id}"
-                                                        value="avatar?id=#{var.authorship.modifier == null
-                                                        ? labels.deleted_user
-                                                        : var.authorship.modifier.id}&amp;type=thumbnail"
-                                                        styleClass="g-avatar-thumbnail rounded-circle"
-                                                        alt="#{var.authorship.modifier == null ? 0
-                                                        : var.authorship.modifier.username}'s avatar"
-                                                        rendered="#{var.authorship.modifier != null
-                                                        and var.authorship.modifier.existsAvatar}"/>
-                                        <h:graphicImage id="g-modifier-thumbnail-fallback-p#{var.id}"
-                                                        library="images" name="bugger.png"
-                                                        styleClass="g-avatar-thumbnail rounded-circle"
-                                                        alt="#{var.authorship.modifier == null ? labels.deleted_user
-                                                        : var.authorship.modifier.username}'s avatar"
-                                                        rendered="#{var.authorship.modifier == null
-                                                        or !var.authorship.modifier.existsAvatar}"/>
-                                    </h:panelGroup>
-                                    <h:link id="l-post-modifier" value="@#{var.authorship.modifier.username}"
-                                            rendered="#{var.authorship.modifier != null}" outcome="pretty:profile">
-                                        <f:param name="u" value="#{var.authorship.modifier.username}"/>
-                                    </h:link>
-                                    <h:outputText id="ot-post-modifier" value="#{labels.deleted_user}"
-                                                  rendered="#{var.authorship.modifier == null}"/>
-                                </h:panelGroup>
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="row">
-                                <h:panelGroup layout="block" styleClass="col-12">
-                                    <h:outputText id="ot-post-modified-at"
-                                                  value="#{labels.report_modified_at.concat(' ')}"/>
-                                    <h:outputText id="ot-post-modified-date" value="#{var.authorship.modifiedDate}">
-                                        <f:converter converterId="offsetDateTimeConverter"/>
-                                    </h:outputText>
-                                </h:panelGroup>
-                            </h:panelGroup>
-                        </h:panelGroup>
-                    </h:panelGroup>
-
-                    <ul>
-                        <ui:repeat var="attachment" value="#{var.attachments}">
-                            <li>
-                                <h:outputLink value="#{request.contextPath}/attachment?id=#{attachment.id}">
-                                    <h:outputText value="#{attachment.name}"/>
-                                </h:outputLink>
-                            </li>
-                        </ui:repeat>
-                    </ul>
-                </div>
-            </h:panelGroup>
-        </b:pagitable_post>
     </ui:define>
 </ui:composition>

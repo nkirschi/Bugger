@@ -133,7 +133,7 @@ public class SystemLifetimeListener implements ServletContextListener {
         registerPriorityExecutors();
         registerShutdownHooks();
         scheduleMaintenanceTasks();
-        // processUnsentNotifications();
+        processUnsentNotifications();
 
         log.info("Application startup completed.");
     }
@@ -294,7 +294,7 @@ public class SystemLifetimeListener implements ServletContextListener {
             mailPriorityExecutor.enqueue(new PriorityTask(PriorityTask.Priority.LOW, () -> {
                 int tries = 1;
                 log.debug("Sending e-mail " + mail + ".");
-                while (!mailer.send(mail) && tries++ <= maxEmailTries) {
+                while (tries++ <= maxEmailTries && !mailer.send(mail)) {
                     log.warning("Trying to send e-mail again. Try #" + tries + '.');
                 }
                 if (tries > maxEmailTries) {
