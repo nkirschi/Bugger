@@ -1,17 +1,5 @@
 package tech.bugger.control.backing;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import javax.faces.context.ExternalContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
 import tech.bugger.business.service.SearchService;
 import tech.bugger.business.service.TopicService;
 import tech.bugger.business.util.Paginator;
@@ -20,6 +8,19 @@ import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.Selection;
 import tech.bugger.global.transfer.Topic;
 import tech.bugger.global.transfer.User;
+
+import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Backing bean for the search page.
@@ -235,6 +236,7 @@ public class SearchBacker implements Serializable {
         }
 
         if (tab == Tab.REPORT) {
+            topicTitles = topicService.discoverTopics().stream().map(Topic::getTitle).collect(Collectors.toList());
             reportResults = new Paginator<>("id", Selection.PageSize.NORMAL) {
                 @Override
                 protected Iterable<Report> fetch() {
@@ -336,9 +338,6 @@ public class SearchBacker implements Serializable {
      */
     public void setTab(final Tab tab) {
         this.tab = tab;
-        if (tab == Tab.REPORT) {
-            topicTitles = topicService.discoverTopics().stream().map(Topic::getTitle).collect(Collectors.toList());
-        }
     }
 
     /**
