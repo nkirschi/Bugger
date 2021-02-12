@@ -3,6 +3,7 @@ package selenium;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ import static selenium.Constants.*;
 @ExtendWith(SeleniumExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @Order(2)
+@Tag("system")
 public class UserTest {
 
     private String baseURL;

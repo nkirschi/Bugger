@@ -5,7 +5,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javax.enterprise.event.Event;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +17,6 @@ import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.ReportService;
 import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Registry;
 import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Authorship;
@@ -63,9 +61,6 @@ public class ReportEditBackerTest {
     private Registry registry;
 
     @Mock
-    private Event<Feedback> feedbackEvent;
-
-    @Mock
     private Configuration configuration;
 
     private Topic testTopic;
@@ -77,7 +72,7 @@ public class ReportEditBackerTest {
     public void setUp() throws Exception {
         lenient().doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(anyString(), any());
         reportEditBacker = new ReportEditBacker(applicationSettings, topicService, reportService, session,
-                registry, feedbackEvent, fctx, ectx);
+                registry, fctx, ectx);
 
         testReport = new Report(100, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
                 new Authorship(null, null, null, null), mock(OffsetDateTime.class),

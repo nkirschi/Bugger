@@ -41,7 +41,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(DBExtension.class)
-class TopicDBGatewayTest {
+public class TopicDBGatewayTest {
 
     private TopicDBGateway topicGateway;
     private UserDBGateway userGateway;

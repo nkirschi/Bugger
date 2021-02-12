@@ -79,8 +79,7 @@ public class ReportBackerTest {
     public void setUp() {
         lenient().doReturn(requestParameterMap).when(ectx).getRequestParameterMap();
         lenient().doReturn(ResourceBundleMocker.mock("")).when(registry).getBundle(eq("messages"), any());
-        reportBacker = new ReportBacker(settings, topicService, reportService, postService, session,
-                feedbackEvent, registry, ectx);
+        reportBacker = new ReportBacker(settings, topicService, reportService, postService, session, ectx);
         user = new User(1, "testuser", "0123456789abcdef", "0123456789abcdef", "SHA3-512", "test@test.de", "Test",
                 "User",
                 new byte[]{1, 2, 3, 4}, new byte[]{1}, "# I am a test user.",
@@ -146,7 +145,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testUpvoteWhenUserIsNull() throws Exception {
+    public void testUpvoteWhenUserIsNull() {
         reportBacker.setReport(report);
         doReturn(report).when(reportService).getReportByID(anyInt());
         assertNull(reportBacker.upvote());
@@ -154,7 +153,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testUpvote() throws Exception {
+    public void testUpvote() {
         reportBacker.setReport(report);
         doReturn(report).when(reportService).getReportByID(anyInt());
         doReturn(user).when(session).getUser();
@@ -173,7 +172,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testUpvoteWhenRelevanceOverwritten() throws Exception {
+    public void testUpvoteWhenRelevanceOverwritten() {
         report.setRelevanceOverwritten(true);
         report.setRelevance(42);
         reportBacker.setReport(report);
@@ -184,7 +183,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testDownvote() throws Exception {
+    public void testDownvote() {
         reportBacker.setReport(report);
         doReturn(report).when(reportService).getReportByID(anyInt());
         doReturn(user).when(session).getUser();
@@ -196,7 +195,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testDownvoteWhenUserIsNull() throws Exception {
+    public void testDownvoteWhenUserIsNull() {
         reportBacker.setReport(report);
         doReturn(report).when(reportService).getReportByID(anyInt());
         assertNull(reportBacker.downvote());
@@ -204,7 +203,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testRemoveVote() throws Exception {
+    public void testRemoveVote() {
         reportBacker.setReport(report);
         doReturn(report).when(reportService).getReportByID(anyInt());
         doReturn(user).when(session).getUser();
@@ -213,7 +212,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testRemoveVoteWhenUserIsNull() throws Exception {
+    public void testRemoveVoteWhenUserIsNull() {
         reportBacker.setReport(report);
         doReturn(report).when(reportService).getReportByID(anyInt());
         assertNull(reportBacker.removeVote());
@@ -247,21 +246,12 @@ public class ReportBackerTest {
         assertDoesNotThrow(() -> reportBacker.delete());
         verify(reportService).deleteReport(report);
         verify(ectx).redirect(any());
-        verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void testDeleteNoSuccess() {
         reportBacker.setReport(report);
         assertThrows(Error404Exception.class, () -> reportBacker.delete());
-    }
-
-    @Test
-    public void testDeleteDataAccessFailed() throws Exception {
-        reportBacker.setReport(report);
-        doThrow(DataAccessException.class).when(reportService).deleteReport(report);
-        assertDoesNotThrow(() -> reportBacker.delete());
-        verify(feedbackEvent).fire(any());
     }
 
     @Test
@@ -290,7 +280,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testMarkDuplicateVerifyUpdate() throws Exception {
+    public void testMarkDuplicateVerifyUpdate() {
         report.setDuplicateOf(42);
         doReturn(false).when(requestParameterMap).containsKey("p");
         doReturn(true).when(requestParameterMap).containsKey("id");
@@ -355,7 +345,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testApplyOverwriteRelevance() throws Exception {
+    public void testApplyOverwriteRelevance() {
         user.setAdministrator(true);
         doReturn(user).when(session).getUser();
         reportBacker.setReport(report);
@@ -366,7 +356,8 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testDeletePostReportStillThere() throws Exception {
+    @SuppressWarnings("unchecked")
+    public void testDeletePostReportStillThere() {
         Post post = new Post(42, "a", 100, null, null);
         reportBacker.setReport(report);
         reportBacker.setPostToBeDeleted(post);
@@ -374,7 +365,6 @@ public class ReportBackerTest {
         doReturn(report).when(reportService).getReportByID(report.getId());
         assertDoesNotThrow(() -> reportBacker.deletePost());
         verify(postService).deletePost(post, report);
-        verify(feedbackEvent).fire(any());
         assertNull(reportBacker.getCurrentDialog());
     }
 
@@ -527,7 +517,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testInitWhenTopicNotFound() throws Exception {
+    public void testInitWhenTopicNotFound() {
         doReturn(false).when(requestParameterMap).containsKey("p");
         doReturn(true).when(requestParameterMap).containsKey("id");
         doReturn("100").when(requestParameterMap).get("id");
@@ -536,7 +526,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testInit() throws Exception {
+    public void testInit() {
         doReturn(false).when(requestParameterMap).containsKey("p");
         doReturn(true).when(requestParameterMap).containsKey("id");
         doReturn("100").when(requestParameterMap).get("id");
@@ -551,7 +541,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testInitWhenPostIDGiven() throws Exception {
+    public void testInitWhenPostIDGiven() {
         doReturn(true).when(requestParameterMap).containsKey("p");
         doReturn("42").when(requestParameterMap).get("p");
         doReturn(100).when(reportService).findReportOfPost(anyInt());
@@ -568,7 +558,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testInitWhenPostIDGivenNotOnFirstPage() throws Exception {
+    public void testInitWhenPostIDGivenNotOnFirstPage() {
         doReturn(true).when(requestParameterMap).containsKey("p");
         doReturn("42").when(requestParameterMap).get("p");
         doReturn(100).when(reportService).findReportOfPost(anyInt());
@@ -590,7 +580,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testInitWhenPostIDGivenButNotFound() throws Exception {
+    public void testInitWhenPostIDGivenButNotFound() {
         doReturn(true).when(requestParameterMap).containsKey("p");
         doReturn("42").when(requestParameterMap).get("p");
         doReturn(100).when(reportService).findReportOfPost(anyInt());
@@ -607,7 +597,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testInitWhenUserIsBannedAndGuestReadingDisabled() throws Exception {
+    public void testInitWhenUserIsBannedAndGuestReadingDisabled() {
         doReturn(false).when(requestParameterMap).containsKey("p");
         doReturn(true).when(requestParameterMap).containsKey("id");
         doReturn("100").when(requestParameterMap).get("id");
@@ -641,7 +631,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testInitWhenUserIsAuthor() throws Exception {
+    public void testInitWhenUserIsAuthor() {
         Authorship authorship = new Authorship(user, null, null, null);
         report.setAuthorship(authorship);
         doReturn(false).when(requestParameterMap).containsKey("p");
@@ -657,7 +647,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testInitWhenReportHasDuplicates() throws Exception {
+    public void testInitWhenReportHasDuplicates() {
         doReturn(false).when(requestParameterMap).containsKey("p");
         doReturn(true).when(requestParameterMap).containsKey("id");
         doReturn("100").when(requestParameterMap).get("id");
@@ -677,7 +667,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testInitWhenUserIsSubscribed() throws Exception {
+    public void testInitWhenUserIsSubscribed() {
         doReturn(false).when(requestParameterMap).containsKey("p");
         doReturn(true).when(requestParameterMap).containsKey("id");
         doReturn("100").when(requestParameterMap).get("id");
@@ -692,7 +682,7 @@ public class ReportBackerTest {
     }
 
     @Test
-    public void testInitWhenUserIsAdmin() throws Exception {
+    public void testInitWhenUserIsAdmin() {
         doReturn(false).when(requestParameterMap).containsKey("p");
         doReturn(true).when(requestParameterMap).containsKey("id");
         doReturn("100").when(requestParameterMap).get("id");

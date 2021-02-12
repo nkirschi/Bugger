@@ -404,7 +404,7 @@ public class SearchDBGatewayTest {
         reportGateway.create(report1);
         reportGateway.create(report2);
         selection.setSortedBy("title");
-        List<Report> result = searchGateway.getReportResults(QUERY2, selection, null, null, true, true, true, null, typeHashMap, severityHashMap);
+        List<Report> result = searchGateway.getReportResults(QUERY2, selection, null, null, true, true, true, true, null, typeHashMap, severityHashMap);
         assertEquals(1, result.size());
     }
 
@@ -418,7 +418,7 @@ public class SearchDBGatewayTest {
         severityHashMap.put(Report.Severity.MINOR, true);
         severityHashMap.put(Report.Severity.RELEVANT, true);
         severityHashMap.put(Report.Severity.SEVERE, true);
-        assertThrows(IllegalArgumentException.class, () -> searchGateway.getReportResults(QUERY2, null, null, null, true, true, true, null, typeHashMap, severityHashMap));
+        assertThrows(IllegalArgumentException.class, () -> searchGateway.getReportResults(QUERY2, null, null, null, true, true, true, true, null, typeHashMap, severityHashMap));
     }
 
     @Test
@@ -431,7 +431,7 @@ public class SearchDBGatewayTest {
         severityHashMap.put(Report.Severity.MINOR, true);
         severityHashMap.put(Report.Severity.RELEVANT, true);
         severityHashMap.put(Report.Severity.SEVERE, true);
-        assertThrows(IllegalArgumentException.class, () -> searchGateway.getReportResults(null , selection, null, null, true, true, true, null, typeHashMap, severityHashMap));
+        assertThrows(IllegalArgumentException.class, () -> searchGateway.getReportResults(null , selection, null, null, true, true, true, true, null, typeHashMap, severityHashMap));
     }
 
     @Test
@@ -445,7 +445,7 @@ public class SearchDBGatewayTest {
         severityHashMap.put(Report.Severity.MINOR, true);
         severityHashMap.put(Report.Severity.RELEVANT, true);
         severityHashMap.put(Report.Severity.SEVERE, true);
-        assertThrows(IllegalArgumentException.class, () -> searchGateway.getReportResults(QUERY2, selection, null, null, true, true, true, null, typeHashMap, severityHashMap));
+        assertThrows(IllegalArgumentException.class, () -> searchGateway.getReportResults(QUERY2, selection, null, null, true, true, true, true, null, typeHashMap, severityHashMap));
     }
 
     @Test
@@ -458,7 +458,7 @@ public class SearchDBGatewayTest {
         severityHashMap.put(Report.Severity.MINOR, true);
         severityHashMap.put(Report.Severity.RELEVANT, true);
         severityHashMap.put(Report.Severity.SEVERE, true);
-        List<Report> result = searchGateway.getReportResults(QUERY2, selection, null, null, true, true, true, null, typeHashMap, severityHashMap);
+        List<Report> result = searchGateway.getReportResults(QUERY2, selection, null, null, true, true, true, true, null, typeHashMap, severityHashMap);
         assertEquals(0, result.size());    }
 
     @Test
@@ -471,7 +471,7 @@ public class SearchDBGatewayTest {
         severityHashMap.put(Report.Severity.MINOR, false);
         severityHashMap.put(Report.Severity.RELEVANT, false);
         severityHashMap.put(Report.Severity.SEVERE, false);
-        List<Report> result = searchGateway.getReportResults(QUERY2, selection, null, null, true, true, true, null, typeHashMap, severityHashMap);
+        List<Report> result = searchGateway.getReportResults(QUERY2, selection, null, null, true, true, true, true, null, typeHashMap, severityHashMap);
         assertEquals(0, result.size());
     }
 
@@ -522,7 +522,7 @@ public class SearchDBGatewayTest {
         topicGateway.createTopic(topic2);
         reportGateway.create(report1);
         reportGateway.create(report2);
-        assertEquals(1, searchGateway.getNumberOfReportResults(QUERY2, null, null, true, true, true, null, typeHashMap, severityHashMap));
+        assertEquals(1, searchGateway.getNumberOfReportResults(QUERY2, null, null, true, true, true, true, null, typeHashMap, severityHashMap));
     }
 
     @Test

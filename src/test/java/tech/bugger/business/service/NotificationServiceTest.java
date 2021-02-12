@@ -42,7 +42,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
-class NotificationServiceTest {
+public class NotificationServiceTest {
 
     private NotificationService service;
 
@@ -63,6 +63,9 @@ class NotificationServiceTest {
 
     @Mock
     private NotificationGateway notificationGateway;
+
+    @Mock
+    private Event<Feedback> feedbackEvent;
 
     @Mock
     private UserGateway userGateway;
@@ -88,7 +91,8 @@ class NotificationServiceTest {
         lenient().doReturn(mailer).when(registry).getMailer("main");
         lenient().doReturn(configReader).when(registry).getPropertiesReader("config");
 
-        service = new NotificationService(transactionManager, registry);
+        service = new NotificationService(transactionManager, feedbackEvent, configReader, priorityExecutor, mailer,
+                ResourceBundleMocker.mock(""), registry);
 
         lenient().doReturn(tx).when(transactionManager).begin();
         lenient().doReturn(notificationGateway).when(tx).newNotificationGateway();
@@ -114,18 +118,21 @@ class NotificationServiceTest {
     @Test
     public void testDeleteNotificationWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(notificationGateway).delete(any());
-        assertFalse(service.deleteNotification(notification));
+        assertDoesNotThrow(() -> service.deleteNotification(notification));
+        verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void testDeleteNotificationWhenDatabaseError() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertThrows(DataAccessException.class, () -> service.deleteNotification(notification));
+        assertDoesNotThrow(() -> service.deleteNotification(notification));
+        verify(feedbackEvent).fire(any());
+
     }
 
     @Test
     public void testDeleteNotificationSuccess() throws Exception {
-        assertTrue(service.deleteNotification(notification));
+        assertDoesNotThrow(() -> service.deleteNotification(notification));
         verify(notificationGateway).delete(notification);
     }
 
@@ -142,18 +149,19 @@ class NotificationServiceTest {
     @Test
     public void testMarkAsReadWhenNotFound() throws Exception {
         doThrow(NotFoundException.class).when(notificationGateway).update(any());
-        assertFalse(service.markAsRead(notification));
+        assertDoesNotThrow(() -> service.markAsRead(notification));
     }
 
     @Test
     public void testMarkAsReadWhenDatabaseError() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertThrows(DataAccessException.class, () -> service.markAsRead(notification));
+        assertDoesNotThrow(() -> service.markAsRead(notification));
+        verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void testMarkAsReadSuccess() throws Exception {
-        assertTrue(service.markAsRead(notification));
+        assertDoesNotThrow(() -> service.markAsRead(notification));
         verify(notificationGateway).update(notification);
         assertTrue(notification.isRead());
     }
@@ -172,7 +180,8 @@ class NotificationServiceTest {
     public void testCountNotificationsWhenDatabaseError() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
         doReturn(42).when(notificationGateway).countNotifications(user);
-        assertThrows(DataAccessException.class, () -> service.countNotifications(user));
+        assertEquals(0, service.countNotifications(user));
+        verify(feedbackEvent).fire(any());
     }
 
     @Test
@@ -201,7 +210,8 @@ class NotificationServiceTest {
     public void testSelectNotificationsWhenDatabaseError() throws Exception {
         doReturn(Collections.EMPTY_LIST).when(notificationGateway).selectNotifications(user, selection);
         doThrow(TransactionException.class).when(tx).commit();
-        assertThrows(DataAccessException.class, () -> service.selectNotifications(user, selection));
+        assertNull(service.selectNotifications(user, selection));
+        verify(feedbackEvent).fire(any());
     }
 
     @Test
@@ -297,6 +307,29 @@ class NotificationServiceTest {
             doNothing().doThrow(TransactionException.class).when(tx).commit();
             assertDoesNotThrow(() -> service.createNotification(notification1));
         }
+    }
+
+    @Test
+    public void testDeleteAllNotificationsWhenUserIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> service.deleteAllNotifications(null));
+    }
+
+    @Test
+    public void testDeleteAllNotificationsWhenUserIDIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> service.deleteAllNotifications(new User()));
+    }
+
+    @Test
+    public void testDeleteAllNotificationsWhenCommitFails() throws Exception {
+        doThrow(TransactionException.class).when(tx).commit();
+        assertDoesNotThrow(() -> service.deleteAllNotifications(user));
+        verify(feedbackEvent).fire(any());
+    }
+
+    @Test
+    public void testDeleteAllNotificationsSuccess() {
+        assertDoesNotThrow(() -> service.deleteAllNotifications(user));
+        verify(feedbackEvent).fire(any());
     }
 
 }

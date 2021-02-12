@@ -274,6 +274,14 @@ public class ConnectionPoolTest {
         }
 
         @Test
+        public void testReleaseConnectionWhenUsed() throws Exception {
+            Connection connection = mock(Connection.class);
+            doNothing().when(connection).rollback();
+            usedConnections.add(connection);
+            assertDoesNotThrow(() -> connectionPool.releaseConnection(connection));
+        }
+
+        @Test
         public void testReleaseConnectionWhenConnectionIsFine() {
             Connection connection = connectionPool.getConnection();
             connectionPool.releaseConnection(connection);

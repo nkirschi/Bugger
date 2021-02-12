@@ -288,12 +288,19 @@ public class PostService {
         }
         try (Transaction tx = transactionManager.begin()) {
             Post firstPost = tx.newPostGateway().getFirstPost(report);
+            boolean reportGone = false;
             if (post.equals(firstPost)) {
+                reportGone = true;
                 tx.newReportGateway().delete(report);
             } else {
                 tx.newPostGateway().delete(post);
             }
             tx.commit();
+            if (reportGone) {
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("report_deleted"), Feedback.Type.INFO));
+            } else {
+                feedbackEvent.fire(new Feedback(messagesBundle.getString("post_deleted"), Feedback.Type.INFO));
+            }
         } catch (NotFoundException e) {
             log.error("Post to be deleted " + post + " not found.", e);
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));

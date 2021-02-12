@@ -1,6 +1,5 @@
 package tech.bugger.business.service;
 
-import tech.bugger.business.exception.DataAccessException;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.RegistryKey;
 import tech.bugger.global.transfer.Notification;
@@ -362,9 +361,8 @@ public class ReportService {
      *
      * @param id The ID of the desired report.
      * @return The report with that ID if it exists, {@code null} if there is no report with that ID.
-     * @throws DataAccessException Some error when writing to the database occurred.
      */
-    public Report getReportByID(final int id) throws DataAccessException {
+    public Report getReportByID(final int id) {
         try (Transaction tx = transactionManager.begin()) {
             Report report = tx.newReportGateway().find(id);
             tx.commit();
@@ -374,7 +372,8 @@ public class ReportService {
             return null;
         } catch (TransactionException e) {
             log.error("Error while searching for report.", e);
-            throw new DataAccessException("Error while searching for report.", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
+            return null;
         }
     }
 
@@ -495,18 +494,19 @@ public class ReportService {
      * @param report The report to be deleted.
      * @return {@code true} iff deleting the report was successful.
      */
-    public boolean deleteReport(final Report report) throws DataAccessException {
+    public boolean deleteReport(final Report report) {
         try (Transaction tx = transactionManager.begin()) {
             tx.newReportGateway().delete(report);
             tx.commit();
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("report_deleted"), Feedback.Type.INFO));
             return true;
         } catch (NotFoundException e) {
             log.error("Could not find report " + report + ".", e);
-            return false;
         } catch (TransactionException e) {
             log.error("Error when deleting report " + report + ".", e);
-            throw new DataAccessException("Error when deleting report " + report + ".", e);
+            feedbackEvent.fire(new Feedback(messagesBundle.getString("data_access_error"), Feedback.Type.ERROR));
         }
+        return false;
     }
 
     /**
@@ -524,12 +524,7 @@ public class ReportService {
         }
 
         int originalID = duplicateOfID;
-        Report original = null;
-        try {
-            original = getReportByID(originalID);
-        } catch (DataAccessException ignored) {
-            // This will be handled below.
-        }
+        Report original = getReportByID(originalID);
         if (original == null) {
             log.error("Could not find report " + duplicate + ".");
             feedbackEvent.fire(new Feedback(messagesBundle.getString("not_found_error"), Feedback.Type.ERROR));

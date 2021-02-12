@@ -267,25 +267,25 @@ public class SearchServiceTest {
     public void testGetReportResults() throws Exception {
         List<Report> reports = new ArrayList<>();
         reports.add(report);
-        when(searchGateway.getReportResults(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+        when(searchGateway.getReportResults(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
                 any(), any(), any())).thenReturn(reports);
-        assertEquals(reports, service.getReportResults(query, null, null, null, true, false, false,
+        assertEquals(reports, service.getReportResults(query, null, null, null, true, false, false, false,
                 null, Map.of(), Map.of()));
     }
 
     @Test
     public void testGetReportResultsNoReports() throws Exception {
-        when(searchGateway.getReportResults(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+        when(searchGateway.getReportResults(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
                 any(), any(), any())).thenReturn(new ArrayList<>());
-        assertTrue(service.getReportResults(query, null, null, null, true, false, false,
+        assertTrue(service.getReportResults(query, null, null, null, true, false, false, false,
                 null, Map.of(), Map.of()).isEmpty());
     }
 
     @Test
     public void testGetReportResultsNotFoundException() throws Exception {
-        when(searchGateway.getReportResults(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+        when(searchGateway.getReportResults(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
                 any(), any(), any())).thenThrow(NotFoundException.class);
-        assertTrue(service.getReportResults(query, null, null, null, true, false, false,
+        assertTrue(service.getReportResults(query, null, null, null, true, false, false, false,
                 null, Map.of(), Map.of()).isEmpty());
         verify(feedbackEvent).fire(any());
     }
@@ -293,32 +293,32 @@ public class SearchServiceTest {
     @Test
     public void testGetReportResultsTransactionException() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertTrue(service.getReportResults(query, null, null, null, true, false, false,
+        assertTrue(service.getReportResults(query, null, null, null, true, false, false, false,
                 null, Map.of(), Map.of()).isEmpty());
         verify(feedbackEvent).fire(any());
     }
 
     @Test
     public void testGetNumberOfReportResults() throws Exception {
-        when(searchGateway.getNumberOfReportResults(any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+        when(searchGateway.getNumberOfReportResults(any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
                 any(), any(), any())).thenReturn(26);
-        assertEquals(26, service.getNumberOfReportResults(query, null, null, true, false, false,
+        assertEquals(26, service.getNumberOfReportResults(query, null, null, true, false, false, false,
                 null, Map.of(), Map.of()));
     }
 
     @Test
     public void testGetNumberOfReportResultsNoReports() throws Exception {
-        when(searchGateway.getNumberOfReportResults(any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+        when(searchGateway.getNumberOfReportResults(any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
                 any(), any(), any())).thenReturn(0);
-        assertEquals(0, service.getNumberOfReportResults(query, null, null, true, false, false,
+        assertEquals(0, service.getNumberOfReportResults(query, null, null, true, false, false, false,
                 null, Map.of(), Map.of()));
     }
 
     @Test
     public void testGetNumberOfReportResultsNotFoundException() throws Exception {
-        when(searchGateway.getNumberOfReportResults(any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+        when(searchGateway.getNumberOfReportResults(any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
                 any(), any(), any())).thenThrow(NotFoundException.class);
-        assertEquals(0, service.getNumberOfReportResults(query, null, null, true, false, false,
+        assertEquals(0, service.getNumberOfReportResults(query, null, null, true, false, false, false,
                 null, Map.of(), Map.of()));
         verify(feedbackEvent).fire(any());
     }
@@ -326,7 +326,7 @@ public class SearchServiceTest {
     @Test
     public void testGetNumberOfReportResultsTransactionException() throws Exception {
         doThrow(TransactionException.class).when(tx).commit();
-        assertEquals(0, service.getNumberOfReportResults(query, null, null, true, false, false,
+        assertEquals(0, service.getNumberOfReportResults(query, null, null, true, false, false, false,
                 null, Map.of(), Map.of()));
         verify(feedbackEvent).fire(any());
     }
@@ -411,74 +411,6 @@ public class SearchServiceTest {
     public void testGetVotingWeightFromPostsWhenSomePostsSettingsWithoutZero() {
         doReturn("1,2").when(config).getVotingWeightDefinition();
         assertEquals(0, service.getVotingWeightFromPosts(42));
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testGetFulltextResults() throws Exception {
-        List<Report> reports = new ArrayList<>();
-        reports.add(report);
-        when(searchGateway.getFulltextResults(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
-                any(), any(), any())).thenReturn(reports);
-        assertEquals(reports, service.getFulltextResults(query, null, null, null, true, false, false,
-                null, Map.of(), Map.of()));
-    }
-
-    @Test
-    public void testGetFulltextResultsNoReports() throws Exception {
-        when(searchGateway.getFulltextResults(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
-                any(), any(), any())).thenReturn(new ArrayList<>());
-        assertTrue(service.getFulltextResults(query, null, null, null, true, false, false,
-                null, Map.of(), Map.of()).isEmpty());
-    }
-
-    @Test
-    public void testGetFulltextResultsNotFoundException() throws Exception {
-        when(searchGateway.getFulltextResults(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
-                any(), any(), any())).thenThrow(NotFoundException.class);
-        assertTrue(service.getFulltextResults(query, null, null, null, true, false, false,
-                null, Map.of(), Map.of()).isEmpty());
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testGetFulltextResultsTransactionException() throws Exception {
-        doThrow(TransactionException.class).when(tx).commit();
-        assertTrue(service.getFulltextResults(query, null, null, null, true, false, false,
-                null, Map.of(), Map.of()).isEmpty());
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testNumberOfGetFulltextResults() throws Exception {
-        when(searchGateway.getNumberOfFulltextResults(any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
-                any(), any(), any())).thenReturn(42);
-        assertEquals(42, service.getNumberOfFulltextResults(query, null, null, true, false, false,
-                null, Map.of(), Map.of()));
-    }
-
-    @Test
-    public void testGetNumberOfFulltextResultsNoReports() throws Exception {
-        when(searchGateway.getNumberOfFulltextResults(any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
-                any(), any(), any())).thenReturn(0);
-        assertEquals(0, service.getNumberOfFulltextResults(query, null, null, true, false, false,
-                null, Map.of(), Map.of()));
-    }
-
-    @Test
-    public void testGetNumberOfFulltextResultsNotFoundException() throws Exception {
-        when(searchGateway.getNumberOfFulltextResults(any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
-                any(), any(), any())).thenThrow(NotFoundException.class);
-        assertEquals(0, service.getNumberOfFulltextResults(query, null, null, true, false, false,
-                null, Map.of(), Map.of()));
-        verify(feedbackEvent).fire(any());
-    }
-
-    @Test
-    public void testGetNumberOfFulltextResultsTransactionException() throws Exception {
-        doThrow(TransactionException.class).when(tx).commit();
-        assertEquals(0, service.getNumberOfFulltextResults(query, null, null, true, false, false,
-                null, Map.of(), Map.of()));
         verify(feedbackEvent).fire(any());
     }
 

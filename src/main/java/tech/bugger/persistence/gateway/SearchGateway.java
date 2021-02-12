@@ -111,6 +111,7 @@ public interface SearchGateway {
      * @param showOpenReports         Whether to include open reports.
      * @param showClosedReports       Whether to include closed reports.
      * @param showDuplicates          Whether to include reports that were marked as a duplicate of another report.
+     * @param fulltext                Whether or not to enable fulltext search in postings.
      * @param topic                   The topic the search results have to belong to. Can be {@code null} to search in
      *                                all topics.
      * @param reportTypeFilter        Map that indicates for each report type whether to include or exclude reports of
@@ -122,35 +123,9 @@ public interface SearchGateway {
      */
     List<Report> getReportResults(String query, Selection selection, OffsetDateTime latestOpeningDateTime,
                                   OffsetDateTime earliestClosingDateTime, boolean showOpenReports,
-                                  boolean showClosedReports, boolean showDuplicates, String topic,
+                                  boolean showClosedReports, boolean showDuplicates, boolean fulltext, String topic,
                                   Map<Report.Type, Boolean> reportTypeFilter,
                                   Map<Report.Severity, Boolean> severityFilter) throws NotFoundException;
-
-    /**
-     * Searches for reports by the contents of their posts and filters the results according to given selection
-     * criteria.
-     *
-     * @param query                   The search string to use.
-     * @param selection               The pagination filters to apply.
-     * @param latestOpeningDateTime   The date and time before which the search results must have been opened.
-     * @param earliestClosingDateTime The date and time after which closed search results must have been closed.
-     * @param showOpenReports         Whether to show open reports.
-     * @param showClosedReports       Whether to show closed reports.
-     * @param showDuplicates          Whether to show reports that were marked as a duplicate of another report.
-     * @param topic                   The topic the search results have to belong to. Can be {@code null} to search in
-     *                                all topics.
-     * @param reportTypeFilter        Map that indicates for each report type whether to include or exclude reports of
-     *                                this type.
-     * @param severityFilter          Map that indicates for each degree of severity whether to include or exclude
-     *                                reports of this severity.
-     * @return The list of reports that match the search criteria.
-     * @throws NotFoundException The topic could not be found.
-     */
-    List<Report> getFulltextResults(String query, Selection selection, OffsetDateTime latestOpeningDateTime,
-                                    OffsetDateTime earliestClosingDateTime, boolean showOpenReports,
-                                    boolean showClosedReports, boolean showDuplicates, String topic,
-                                    Map<Report.Type, Boolean> reportTypeFilter,
-                                    Map<Report.Severity, Boolean> severityFilter) throws NotFoundException;
 
     /**
      * Searches for users by their username, filters the results according to given selection criteria, and returns the
@@ -181,6 +156,7 @@ public interface SearchGateway {
      * @param showOpenReports         Whether to include open reports.
      * @param showClosedReports       Whether to include closed reports.
      * @param showDuplicates          Whether to include reports that were marked as a duplicate of another report.
+     * @param fulltext                Whether or not to enable fulltext search in postings.
      * @param topic                   The topic the search results have to belong to. Can be {@code null} to search in
      *                                all topics.
      * @param reportTypeFilter        Map that indicates for each report type whether to include or exclude reports of
@@ -192,34 +168,8 @@ public interface SearchGateway {
      */
     int getNumberOfReportResults(String query, OffsetDateTime latestOpeningDateTime,
                                  OffsetDateTime earliestClosingDateTime, boolean showOpenReports,
-                                 boolean showClosedReports,
-                                 boolean showDuplicates, String topic,
+                                 boolean showClosedReports, boolean showDuplicates, boolean fulltext, String topic,
                                  Map<Report.Type, Boolean> reportTypeFilter,
                                  Map<Report.Severity, Boolean> severityFilter) throws NotFoundException;
-
-    /**
-     * Searches for reports by the contents of their posts, filters the results according to given selection criteria
-     * and returns the number of results.
-     *
-     * @param query                   The search string to use.
-     * @param latestOpeningDateTime   The date and time before which the search results must have been opened.
-     * @param earliestClosingDateTime The date and time after which closed search results must have been closed.
-     * @param showOpenReports         Whether to include open reports.
-     * @param showClosedReports       Whether to include closed reports.
-     * @param showDuplicates          Whether to include reports that were marked as a duplicate of another report.
-     * @param topic                   The topic the search results have to belong to. Can be {@code null} to search in
-     *                                all topics.
-     * @param reportTypeFilter        Map that indicates for each report type whether to include or exclude reports of
-     *                                this type.
-     * @param severityFilter          Map that indicates for each degree of severity whether to include or exclude
-     *                                reports of this severity.
-     * @return The number of reports that match the search criteria.
-     * @throws NotFoundException The topic could not be found.
-     */
-    int getNumberOfFulltextResults(String query, OffsetDateTime latestOpeningDateTime,
-                                   OffsetDateTime earliestClosingDateTime, boolean showOpenReports,
-                                   boolean showClosedReports,
-                                   boolean showDuplicates, String topic, Map<Report.Type, Boolean> reportTypeFilter,
-                                   Map<Report.Severity, Boolean> severityFilter) throws NotFoundException;
 
 }

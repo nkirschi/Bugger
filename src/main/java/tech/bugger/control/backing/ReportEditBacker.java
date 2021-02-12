@@ -1,25 +1,5 @@
 package tech.bugger.control.backing;
 
-import javax.enterprise.event.Event;
-import tech.bugger.business.exception.DataAccessException;
-import tech.bugger.business.internal.ApplicationSettings;
-import tech.bugger.business.internal.UserSession;
-import tech.bugger.business.service.ReportService;
-import tech.bugger.business.service.TopicService;
-import tech.bugger.business.util.Feedback;
-import tech.bugger.business.util.Registry;
-import tech.bugger.control.exception.Error404Exception;
-import tech.bugger.global.transfer.Report;
-import tech.bugger.global.transfer.Topic;
-import tech.bugger.global.transfer.User;
-
-import javax.annotation.PostConstruct;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
@@ -28,6 +8,22 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import tech.bugger.business.internal.ApplicationSettings;
+import tech.bugger.business.internal.UserSession;
+import tech.bugger.business.service.ReportService;
+import tech.bugger.business.service.TopicService;
+import tech.bugger.business.util.Registry;
+import tech.bugger.control.exception.Error404Exception;
+import tech.bugger.global.transfer.Report;
+import tech.bugger.global.transfer.Topic;
+import tech.bugger.global.transfer.User;
 
 /**
  * Backing Bean for the report edit page.
@@ -85,11 +81,6 @@ public class ReportEditBacker implements Serializable {
     private final Registry registry;
 
     /**
-     * Feedback Event for user feedback.
-     */
-    private final Event<Feedback> feedbackEvent;
-
-    /**
      * The ID of the report to edit.
      */
     private int reportID;
@@ -132,7 +123,6 @@ public class ReportEditBacker implements Serializable {
      * @param reportService       The report service to use.
      * @param session             The current user session.
      * @param registry            The dependency registry to use.
-     * @param feedbackEvent       The feedback event to use for user feedback.
      * @param fctx                The current {@link FacesContext} of the application.
      * @param ectx                The current {@link ExternalContext} of the application.
      */
@@ -142,7 +132,6 @@ public class ReportEditBacker implements Serializable {
                             final ReportService reportService,
                             final UserSession session,
                             final Registry registry,
-                            final Event<Feedback> feedbackEvent,
                             final FacesContext fctx,
                             final ExternalContext ectx) {
         this.applicationSettings = applicationSettings;
@@ -150,7 +139,6 @@ public class ReportEditBacker implements Serializable {
         this.reportService = reportService;
         this.session = session;
         this.registry = registry;
-        this.feedbackEvent = feedbackEvent;
         this.fctx = fctx;
         this.ectx = ectx;
     }
@@ -171,11 +159,8 @@ public class ReportEditBacker implements Serializable {
         }
 
         User user = session.getUser();
-        try {
-            report = reportService.getReportByID(reportID);
-        } catch (DataAccessException e) {
-            feedbackEvent.fire(new Feedback(messagesBundle.getString("lookup_failure"), Feedback.Type.ERROR));
-        }
+
+        report = reportService.getReportByID(reportID);
         if (report == null) {
             throw new Error404Exception();
         } else {

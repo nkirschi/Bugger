@@ -36,17 +36,17 @@ public class HasherTest {
     }
 
     @Test
-    void testHashWhenSaltUnevenLength() {
+    public void testHashWhenSaltUnevenLength() {
         assertThrows(IllegalArgumentException.class, () -> Hasher.hash(INPUT, "a0f", ALGO));
     }
 
     @Test
-    void testHashWhenSaltInvalidHexString() {
+    public void testHashWhenSaltInvalidHexString() {
         assertThrows(IllegalArgumentException.class, () -> Hasher.hash(INPUT, "0x123ö", ALGO));
     }
 
     @Test
-    void testHashWhenSaltAnotherInvalidHexString() {
+    public void testHashWhenSaltAnotherInvalidHexString() {
         assertThrows(IllegalArgumentException.class, () -> Hasher.hash(INPUT, "äü", ALGO));
     }
 

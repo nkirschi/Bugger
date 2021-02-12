@@ -47,7 +47,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(LogExtension.class)
-class TopicServiceTest {
+public class TopicServiceTest {
 
     private TopicService topicService;
 

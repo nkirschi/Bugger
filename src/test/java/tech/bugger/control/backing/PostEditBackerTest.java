@@ -1,6 +1,13 @@
 package tech.bugger.control.backing;
 
-import javax.enterprise.event.Event;
+import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import javax.faces.context.ExternalContext;
+import javax.servlet.http.Part;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,8 +18,6 @@ import tech.bugger.business.internal.ApplicationSettings;
 import tech.bugger.business.internal.UserSession;
 import tech.bugger.business.service.PostService;
 import tech.bugger.business.service.ReportService;
-import tech.bugger.business.util.Feedback;
-import tech.bugger.business.util.Registry;
 import tech.bugger.control.exception.Error404Exception;
 import tech.bugger.global.transfer.Attachment;
 import tech.bugger.global.transfer.Authorship;
@@ -21,24 +26,9 @@ import tech.bugger.global.transfer.Post;
 import tech.bugger.global.transfer.Report;
 import tech.bugger.global.transfer.User;
 
-import javax.faces.context.ExternalContext;
-import javax.servlet.http.Part;
-import java.io.IOException;
-import java.time.OffsetDateTime;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(LogExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -67,12 +57,6 @@ public class PostEditBackerTest {
     @Mock
     private Configuration configuration;
 
-    @Mock
-    private Event<Feedback> feedbackEvent;
-
-    @Mock
-    private Registry registry;
-
     private Post post;
 
     private Report report;
@@ -81,8 +65,7 @@ public class PostEditBackerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        postEditBacker = new PostEditBacker(applicationSettings, reportService, postService, session,
-                feedbackEvent, registry, ectx);
+        postEditBacker = new PostEditBacker(applicationSettings, reportService, postService, session, ectx);
 
         List<Attachment> attachments = List.of(new Attachment(), new Attachment(), new Attachment());
         report = new Report(1234, "Some title", Report.Type.BUG, Report.Severity.RELEVANT, "",
