@@ -31,7 +31,11 @@
             <h:outputText value="Exception message"/>
             <h:outputText value="#{requestScope['javax.servlet.error.exception'].message}"/>
             <h:outputText value="Stack trace"/>
-            <pre id="ot-stack-trace">#{errorBacker.stackTrace(requestScope['javax.servlet.error.exception'])}</pre>
+            <pre id="ot-stack-trace">
+                <code>
+                #{errorBacker.stackTrace(requestScope['javax.servlet.error.exception'])}
+                </code>
+            </pre>
         </h:panelGrid>
 
     </ui:define>
