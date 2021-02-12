@@ -15,7 +15,7 @@ import tech.bugger.persistence.gateway.UserGateway;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.time.OffsetDateTime;
@@ -26,7 +26,7 @@ import java.util.ResourceBundle;
 /**
  * Service providing methods related to topics. A {@link Feedback} event is fired, if unexpected circumstances occur.
  */
-@ApplicationScoped
+@RequestScoped
 public class TopicService {
 
     /**

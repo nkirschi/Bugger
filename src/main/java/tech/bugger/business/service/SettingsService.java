@@ -8,7 +8,7 @@ import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 /**
  * Service for application settings.
  */
-@ApplicationScoped
+@RequestScoped
 public class SettingsService {
 
     /**

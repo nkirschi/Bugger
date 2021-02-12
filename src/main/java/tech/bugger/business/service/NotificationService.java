@@ -21,7 +21,7 @@ import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -36,7 +36,7 @@ import java.util.Set;
 /**
  * Service providing methods related to notifications.
  */
-@ApplicationScoped
+@RequestScoped
 public class NotificationService {
 
     /**

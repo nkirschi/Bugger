@@ -1,10 +1,5 @@
 package tech.bugger.business.service;
 
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Hasher;
 import tech.bugger.business.util.PriorityTask;
@@ -19,10 +14,16 @@ import tech.bugger.persistence.util.PropertiesReader;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
+
 /**
  * Service for user authentication. A {@link Feedback} {@link Event} is fired, if unexpected circumstances occur.
  */
-@ApplicationScoped
+@RequestScoped
 public class AuthenticationService {
 
     /**

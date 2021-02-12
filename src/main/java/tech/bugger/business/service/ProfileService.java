@@ -1,12 +1,5 @@
 package tech.bugger.business.service;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.ResourceBundle;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.servlet.http.Part;
 import tech.bugger.business.exception.CorruptImageException;
 import tech.bugger.business.util.Feedback;
 import tech.bugger.business.util.Hasher;
@@ -24,11 +17,19 @@ import tech.bugger.persistence.exception.TransactionException;
 import tech.bugger.persistence.util.Transaction;
 import tech.bugger.persistence.util.TransactionManager;
 
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.servlet.http.Part;
+import java.io.IOException;
+import java.util.List;
+import java.util.ResourceBundle;
+
 /**
  * Service providing methods related to users and user profiles. A {@link Feedback} event is fired, if unexpected
  * circumstances occur.
  */
-@ApplicationScoped
+@RequestScoped
 public class ProfileService {
 
     /**
