@@ -94,7 +94,7 @@ public class ModeratorTest {
         driver.findElement(By.id("f-vote:cb-overwrite-relevance")).click();
         stopTime(testID, "T240 report");
 
-        assertEquals(String.valueOf(OVERWRITING_RELEVANCE), driver.findElement(By.id("ot-relevance")).getText());
+        assertEquals(String.valueOf(OVERWRITING_RELEVANCE), driver.findElement(By.id("f-vote:ot-relevance")).getText());
     }
 
     @Test
@@ -103,7 +103,7 @@ public class ModeratorTest {
         driver.findElement(By.id("f-vote:cb-upvote")).click();
         stopTime(testID, "T250 report");
 
-        assertEquals(String.valueOf(OVERWRITING_RELEVANCE), driver.findElement(By.id("ot-relevance")).getText());
+        assertEquals(String.valueOf(OVERWRITING_RELEVANCE), driver.findElement(By.id("f-vote:ot-relevance")).getText());
     }
 
     @Test
@@ -113,7 +113,7 @@ public class ModeratorTest {
         driver.findElement(By.name("f-vote:cb-overwrite-relevance")).click();
         stopTime(testID, "T260 report");
 
-        assertEquals(String.valueOf(CALCULATED_RELEVANCE), driver.findElement(By.id("ot-relevance")).getText());
+        assertEquals(String.valueOf(CALCULATED_RELEVANCE), driver.findElement(By.id("f-vote:ot-relevance")).getText());
     }
 
     @Test
@@ -176,7 +176,7 @@ public class ModeratorTest {
         stopTime(testID, "T290 report3");
 
         assertAll(
-                () -> assertEquals(CLOSED_AT, driver.findElement(By.id("ot-status1")).getText()),
+                () -> assertEquals(CLOSED_AT, driver.findElement(By.id("ot-status")).getText()),
                 () -> assertEquals(driver.findElement(By.id("l-duplicate")).getText(), "#" + originalID)
         );
     }

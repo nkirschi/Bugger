@@ -329,8 +329,8 @@ public class NotificationService {
         priorityExecutor.enqueue(new PriorityTask(priority, () -> {
             int tries = 1;
             log.debug("Sending e-mail " + mail + ".");
-            while (tries++ <= maxEmailTries && !mailer.send(mail)) {
-                log.warning("Trying to send e-mail again. Try #" + tries + '.');
+            while (tries <= maxEmailTries && !mailer.send(mail)) {
+                log.warning("Trying to send e-mail again. Try #" + tries++ + '.');
             }
             if (tries > maxEmailTries) {
                 log.error("Couldn't send e-mail for more than " + maxEmailTries + " times! Please investigate!");
@@ -344,7 +344,7 @@ public class NotificationService {
             int tries = 1;
             log.debug("Sending e-mail " + mail + ".");
             while (tries++ <= maxEmailTries && !mailer.send(mail)) {
-                log.warning("Trying to send e-mail again. Try #" + tries + '.');
+                log.warning("Trying to send e-mail again. Try #" + tries++ + '.');
             }
             if (tries > maxEmailTries) {
                 log.error("Couldn't send e-mail for more than " + maxEmailTries + " times! Please investigate!");

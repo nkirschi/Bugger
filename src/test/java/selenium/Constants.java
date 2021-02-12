@@ -52,7 +52,7 @@ public class Constants {
 
     // Admin
     public static final String ADMIN_USERNAME = "admin";
-    public static final String ADMIN_PASSWORD = "BuggerFahrenMachtSpass42";
+    public static final String ADMIN_PASSWORD = "BuggerFahrenMachtSpass42!";
 
     // Alf
     public static final String ALF_USERNAME = "AlfDerBenutzer";
@@ -82,7 +82,7 @@ public class Constants {
 
     public static final String REPORT_SEARCH_QUERY = "Button";
     public static final String USERNAME_PREFIX = "@";
-    public static final String CLOSED_AT = "closed at";
+    public static final String CLOSED_AT = "closed";
     public static final String NEW_POST_NOTIFICATION_BUTTON = "New post";
     public static final String NEW_REPORT_NOTIFICATION_BUTTON = "New report";
 
